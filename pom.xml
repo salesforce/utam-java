@@ -10,8 +10,8 @@
     <version>1.0-alpha-1-SNAPSHOT</version>
 
     <modules>
-        <module>utam-framework</module>
-        <module>utam-generator</module>
+        <module>utam-core</module>
+        <module>utam-compiler</module>
     </modules>
 
     <properties>
