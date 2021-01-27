@@ -1,15 +1,15 @@
 package utam.compiler.translator;
 
-import declarative.translator.TranslatorSourceConfig;
-import framework.UtamLogger;
-import framework.consumer.UtamError;
+import utam.core.declarative.translator.TranslatorSourceConfig;
+import utam.core.framework.UtamLogger;
+import utam.core.framework.consumer.UtamError;
 
 import java.io.*;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.regex.Pattern;
 
-import static framework.UtamLogger.info;
+import static utam.core.framework.UtamLogger.info;
 
 /**
  * @author elizaveta.ivanova

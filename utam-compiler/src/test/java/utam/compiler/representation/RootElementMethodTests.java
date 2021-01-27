@@ -1,12 +1,12 @@
 package utam.compiler.representation;
 
-import declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import org.testng.annotations.Test;
-import selenium.element.Actionable;
-import selenium.element.Clickable;
-import selenium.element.Editable;
+import utam.core.selenium.element.Actionable;
+import utam.core.selenium.element.Clickable;
+import utam.core.selenium.element.Editable;
 
 /**
  * Provides tests for the ElementMethod class

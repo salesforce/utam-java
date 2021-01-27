@@ -1,10 +1,10 @@
 package utam.compiler.grammar;
 
 import utam.compiler.helpers.TranslationContext;
-import declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
 import java.util.List;

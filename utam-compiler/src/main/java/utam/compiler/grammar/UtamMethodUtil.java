@@ -3,10 +3,10 @@ package utam.compiler.grammar;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import utam.compiler.helpers.TranslationContext;
-import declarative.representation.PageClassField;
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.PageClassField;
+import utam.core.declarative.representation.TypeProvider;
 import utam.compiler.representation.UtilityMethod;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 
 import java.util.regex.Pattern;
 

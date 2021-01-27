@@ -1,6 +1,6 @@
 package utam.compiler.translator;
 
-import declarative.translator.UnitTestRunner;
+import utam.core.declarative.translator.UnitTestRunner;
 import utam.compiler.grammar.DeserializerUtilities;
 import org.testng.annotations.Test;
 

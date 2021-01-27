@@ -6,12 +6,14 @@ import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
-import declarative.representation.*;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import utam.compiler.representation.ChainMethod;
 import utam.compiler.representation.ComposeMethod;
 import utam.compiler.representation.InterfaceMethod;
 import utam.compiler.representation.UtilityMethod;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 
 import java.util.ArrayList;
 import java.util.HashSet;

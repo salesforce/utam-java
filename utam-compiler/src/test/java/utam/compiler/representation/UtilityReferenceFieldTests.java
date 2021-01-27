@@ -1,7 +1,7 @@
 package utam.compiler.representation;
 
-import declarative.representation.PageClassField;
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.PageClassField;
+import utam.core.declarative.representation.TypeProvider;
 import utam.compiler.helpers.AnnotationUtils;
 import org.testng.annotations.Test;
 

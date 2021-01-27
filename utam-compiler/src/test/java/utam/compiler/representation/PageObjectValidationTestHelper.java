@@ -1,6 +1,6 @@
 package utam.compiler.representation;
 
-import declarative.representation.*;
+import utam.core.declarative.representation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;

@@ -1,23 +1,23 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-<suite name="Generator tests">
+<suite name="Compiler tests">
     <test name="grammar">
         <packages>
-            <package name="utam.core.declarative.grammar"/>
+            <package name="utam.compiler.grammar"/>
         </packages>
     </test>
     <test name="helpers">
         <packages>
-            <package name="utam.core.declarative.helpers"/>
+            <package name="utam.compiler.helpers"/>
         </packages>
     </test>
     <test name="representation">
         <packages>
-            <package name="utam.core.declarative.representation"/>
+            <package name="utam.compiler.representation"/>
         </packages>
     </test>
     <test name="translator">
         <packages>
-            <package name="utam.core.declarative.translator"/>
+            <package name="utam.compiler.translator"/>
         </packages>
     </test>
 </suite>

@@ -1,15 +1,15 @@
 package utam.compiler.helpers;
 
-import declarative.representation.MethodParameter;
-import declarative.representation.TypeProvider;
-import framework.base.BasePageObject;
-import framework.base.PageObject;
-import framework.base.RootPageObject;
-import framework.consumer.ContainerElement;
-import selenium.element.Actionable;
-import selenium.element.Clickable;
-import selenium.element.Editable;
-import selenium.element.Touchable;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.base.BasePageObject;
+import utam.core.framework.base.PageObject;
+import utam.core.framework.base.RootPageObject;
+import utam.core.framework.consumer.ContainerElement;
+import utam.core.selenium.element.Actionable;
+import utam.core.selenium.element.Clickable;
+import utam.core.selenium.element.Editable;
+import utam.core.selenium.element.Touchable;
 
 import java.util.List;
 import java.util.Objects;

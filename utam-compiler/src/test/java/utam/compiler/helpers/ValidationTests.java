@@ -1,10 +1,9 @@
 package utam.compiler.helpers;
 
-import utam.compiler.helpers.Validation;
-import declarative.representation.TypeProvider;
-import framework.consumer.UtamError;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
-import selenium.element.Selector;
+import utam.core.selenium.element.Selector;
 
 import java.util.*;
 

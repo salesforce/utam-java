@@ -2,7 +2,7 @@ package utam.compiler.grammar;
 
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.PageObjectValidationTestHelper;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
 import static utam.compiler.grammar.UtamMethod.ERR_METHOD_SHOULD_BE_ABSTRACT;

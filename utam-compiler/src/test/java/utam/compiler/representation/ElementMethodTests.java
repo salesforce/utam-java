@@ -1,7 +1,7 @@
 package utam.compiler.representation;
 
-import declarative.representation.PageObjectMethod;
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ParameterUtils;
 import utam.compiler.helpers.PrimitiveType;

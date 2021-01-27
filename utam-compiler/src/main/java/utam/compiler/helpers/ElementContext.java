@@ -1,11 +1,11 @@
 package utam.compiler.helpers;
 
-import declarative.representation.MethodParameter;
-import declarative.representation.PageClassField;
-import declarative.representation.PageObjectMethod;
-import declarative.representation.TypeProvider;
-import selenium.element.Selector;
-import selenium.element.Web;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageClassField;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.selenium.element.Selector;
+import utam.core.selenium.element.Web;
 
 import java.util.ArrayList;
 import java.util.List;

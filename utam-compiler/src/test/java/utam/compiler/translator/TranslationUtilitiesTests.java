@@ -4,10 +4,10 @@ import utam.compiler.grammar.TestUtilities;
 import utam.compiler.helpers.ParameterUtils;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TypeUtilities;
-import declarative.representation.*;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 import utam.compiler.representation.MethodDeclarationImplTests;
+import utam.core.declarative.representation.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -150,8 +150,8 @@ public class TranslationUtilitiesTests {
             + "}";
     String code = getInterfaceCode(json);
     assertThat(code, containsString("package utam.test.pageobjects.test;"));
-    assertThat(code, containsString("import framework.base.PageObject;"));
-    assertThat(code, containsString("import selenium.element.Clickable;"));
+    assertThat(code, containsString("import utam.core.framework.base.PageObject;"));
+    assertThat(code, containsString("import utam.core.selenium.element.Clickable;"));
     assertThat(code, containsString("public interface Test extends PageObject"));
     assertThat(code, containsString("void clickTestElement();"));
     assertThat(code, containsString("Clickable getTestElement();"));

@@ -1,0 +1,32 @@
+package utam.core.declarative.translator;
+
+import java.io.IOException;
+
+/**
+ * translation runner
+ *
+ * @author elizaveta.ivanova
+ * @since 226
+ */
+public interface TranslatorRunner {
+
+  /**
+   * first scan all contexts and create generation order based on dependencies <br>
+   * generation order is list of Page Object names<br>
+   * then for each PO from list de-serialize and create representation of interface and class <br>
+   */
+  void run() throws IOException;
+
+  /**
+   * can only be executed after run method to write objects to files <br>
+   * for each representation created after "run" write files with interface and class <br>
+   */
+  void write() throws IOException;
+
+  /**
+   * after translator generated code, dependencies that do not follow default injection algorithm
+   * <br>
+   * will be written into configuration files later used by Page Objects Provider
+   */
+  void writeDependenciesConfigs();
+}

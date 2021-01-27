@@ -1,8 +1,8 @@
 package utam.compiler.representation;
 
-import declarative.representation.AnnotationProvider;
-import declarative.representation.PageClassField;
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.AnnotationProvider;
+import utam.core.declarative.representation.PageClassField;
+import utam.core.declarative.representation.TypeProvider;
 
 import java.util.List;
 

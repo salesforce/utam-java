@@ -1,14 +1,15 @@
 package utam.compiler.helpers;
 
-import declarative.representation.TypeProvider;
-import selenium.element.Clickable;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.selenium.element.Clickable;
+import utam.core.selenium.expectations.ExpectationsUtil;
 
 import java.util.List;
 
 /**
  * this enum links element actions with translator code <br>
  *
- * @see selenium.expectations.ExpectationsUtil every static method should be registered as enum here
+ * @see ExpectationsUtil every static method should be registered as enum here
  *     to use in JSON as applicable action <br>
  * @see Clickable as of 228 every method has enum here to use in translator
  * @author elizaveta.ivanova

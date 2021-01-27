@@ -4,12 +4,12 @@ import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.ContainerMethodTests;
-import declarative.representation.PageClassField;
-import declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.PageClassField;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.compiler.representation.PageObjectValidationTestHelper;
-import framework.base.ContainerElementPageObject;
-import framework.consumer.ContainerElement;
-import framework.consumer.UtamError;
+import utam.core.framework.base.ContainerElementPageObject;
+import utam.core.framework.consumer.ContainerElement;
+import utam.core.framework.consumer.UtamError;
 import org.hamcrest.Matchers;
 import org.testng.annotations.Test;
 

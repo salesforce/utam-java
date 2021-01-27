@@ -1,13 +1,13 @@
 package utam.compiler.translator;
 
 import com.google.common.io.Files;
-import declarative.representation.TypeProvider;
-import declarative.translator.TranslatorTargetConfig;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.translator.TranslatorTargetConfig;
 
 import java.io.*;
 import java.util.regex.Pattern;
 
-import static framework.UtamLogger.info;
+import static utam.core.framework.UtamLogger.info;
 
 /**
  * @author elizaveta.ivanova

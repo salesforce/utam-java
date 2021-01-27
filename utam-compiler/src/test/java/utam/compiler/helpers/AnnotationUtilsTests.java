@@ -1,13 +1,13 @@
 package utam.compiler.helpers;
 
-import appium.element.Mobile;
-import declarative.representation.AnnotationProvider;
-import declarative.representation.TypeProvider;
-import framework.base.PageMarker;
-import framework.context.PlatformType;
+import utam.core.appium.element.Mobile;
+import utam.core.declarative.representation.AnnotationProvider;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.base.PageMarker;
+import utam.core.framework.context.PlatformType;
 import org.testng.annotations.Test;
-import selenium.element.ElementMarker;
-import selenium.element.Selector;
+import utam.core.selenium.element.ElementMarker;
+import utam.core.selenium.element.Selector;
 
 import java.util.Set;
 import java.util.stream.Collectors;

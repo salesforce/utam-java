@@ -1,9 +1,12 @@
 package utam.compiler.translator;
 
-import declarative.representation.TypeProvider;
-import declarative.translator.*;
-import framework.consumer.UtamError;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
+import utam.core.declarative.translator.TranslatorConfig;
+import utam.core.declarative.translator.TranslatorRunner;
+import utam.core.declarative.translator.TranslatorTargetConfig;
+import utam.core.declarative.translator.UnitTestRunner;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

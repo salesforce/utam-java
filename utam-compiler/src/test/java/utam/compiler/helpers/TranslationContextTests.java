@@ -1,14 +1,14 @@
 package utam.compiler.helpers;
 
-import declarative.representation.*;
 import utam.compiler.representation.ElementField;
 import utam.compiler.representation.ElementMethod;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.FieldInfo;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
-import declarative.translator.TranslationTypesConfig;
+import utam.core.declarative.representation.*;
+import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.compiler.translator.TranslationTypesConfigJava;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;

@@ -1,15 +1,15 @@
 package utam.compiler.representation;
 
-import declarative.representation.MethodParameter;
+import utam.core.declarative.representation.MethodParameter;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ParameterUtils;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
-import framework.base.ContainerElementPageObject;
-import framework.base.PageObject;
+import utam.core.framework.base.ContainerElementPageObject;
+import utam.core.framework.base.PageObject;
 import org.testng.annotations.Test;
-import selenium.element.Selector;
+import utam.core.selenium.element.Selector;
 
 import java.util.List;
 import java.util.stream.Collectors;

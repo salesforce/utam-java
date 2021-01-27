@@ -5,10 +5,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.expectThrows;
 
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
-import utam.compiler.grammar.UtamElement;
-import utam.compiler.grammar.UtamShadowElement;
 
 /**
  * Provides tests for the UtamShadowElement class

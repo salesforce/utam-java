@@ -2,9 +2,9 @@ package utam.compiler.grammar;
 
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TypeUtilities;
-import declarative.representation.MethodParameter;
-import declarative.representation.TypeProvider;
-import framework.consumer.UtamError;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;

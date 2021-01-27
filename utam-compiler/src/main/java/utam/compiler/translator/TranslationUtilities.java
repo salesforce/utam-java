@@ -3,9 +3,12 @@ package utam.compiler.translator;
 import com.google.googlejavaformat.java.Formatter;
 import com.google.googlejavaformat.java.FormatterException;
 import utam.compiler.helpers.PrimitiveType;
-import declarative.representation.*;
-import framework.consumer.UtamError;
-import selenium.element.Selector;
+import utam.core.framework.consumer.UtamError;
+import utam.core.selenium.element.Selector;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -14,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static selenium.element.LocatorUtilities.QUERY_SELECTOR;
+import static utam.core.selenium.element.LocatorUtilities.QUERY_SELECTOR;
 
 /**
  * utilities for java code generation

@@ -5,11 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
-import declarative.representation.*;
-import framework.consumer.UtamError;
-import framework.context.Profile;
-import selenium.element.Selector;
+import utam.core.framework.consumer.UtamError;
+import utam.core.framework.context.Profile;
+import utam.core.selenium.element.Selector;
 import utam.compiler.representation.RootElementMethod;
+import utam.core.declarative.representation.AnnotationProvider;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 
 import java.util.ArrayList;
 import java.util.List;

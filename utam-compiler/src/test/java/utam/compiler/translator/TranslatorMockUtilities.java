@@ -1,8 +1,8 @@
 package utam.compiler.translator;
 
-import declarative.translator.TranslationTypesConfig;
-import declarative.translator.TranslatorSourceConfig;
-import declarative.translator.TranslatorTargetConfig;
+import utam.core.declarative.translator.TranslationTypesConfig;
+import utam.core.declarative.translator.TranslatorSourceConfig;
+import utam.core.declarative.translator.TranslatorTargetConfig;
 
 public abstract class TranslatorMockUtilities {
 

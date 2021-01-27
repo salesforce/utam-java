@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.MatcherType;
-import declarative.representation.MethodParameter;
-import declarative.representation.TypeProvider;
-import framework.consumer.UtamError;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
 
 import java.util.List;
 

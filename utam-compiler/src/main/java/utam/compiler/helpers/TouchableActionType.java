@@ -1,8 +1,8 @@
 package utam.compiler.helpers;
 
-import appium.element.GestureDirection;
-import declarative.representation.TypeProvider;
-import selenium.element.Touchable;
+import utam.core.appium.element.GestureDirection;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.selenium.element.Touchable;
 
 import java.util.ArrayList;
 import java.util.List;

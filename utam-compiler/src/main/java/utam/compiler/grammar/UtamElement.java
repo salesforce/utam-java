@@ -6,13 +6,16 @@ import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementUnitTestHelper;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
-import declarative.representation.*;
 import utam.compiler.translator.TranslationTypesConfigJava;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import utam.compiler.representation.ContainerMethod;
 import utam.compiler.representation.CustomElementMethod;
 import utam.compiler.representation.ElementField;
 import utam.compiler.representation.ElementMethod;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageClassField;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 
 import java.util.ArrayList;
 import java.util.Collections;

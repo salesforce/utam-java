@@ -1,11 +1,11 @@
 package utam.compiler.grammar;
 
 import utam.compiler.helpers.TranslationContext;
-import declarative.translator.ProfileConfiguration;
+import utam.core.declarative.translator.ProfileConfiguration;
 import utam.compiler.translator.StringValueProfileConfig;
-import declarative.translator.TranslatorConfig;
-import framework.context.Profile;
-import framework.context.StringValueProfile;
+import utam.core.declarative.translator.TranslatorConfig;
+import utam.core.framework.context.Profile;
+import utam.core.framework.context.StringValueProfile;
 import org.hamcrest.Matchers;
 import org.testng.annotations.Test;
 

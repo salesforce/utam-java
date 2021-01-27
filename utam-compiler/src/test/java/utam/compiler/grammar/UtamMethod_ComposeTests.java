@@ -3,10 +3,10 @@ package utam.compiler.grammar;
 import utam.compiler.helpers.ClickableActionType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethod;
-import declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
 import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;

@@ -5,13 +5,13 @@ import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.TypeProvider;
 import utam.compiler.helpers.ParameterUtils;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import org.testng.annotations.Test;
-import selenium.element.Actionable;
+import utam.core.selenium.element.Actionable;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

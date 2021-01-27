@@ -1,8 +1,8 @@
 package utam.compiler.translator;
 
-import declarative.translator.*;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
+import utam.core.declarative.translator.*;
 
 import static utam.compiler.translator.AbstractTranslatorConfiguration.getHomeDirectory;
 import static utam.compiler.translator.DefaultTranslatorRunner.ERR_JSON_SOURCES_NOT_CONFIGURED;

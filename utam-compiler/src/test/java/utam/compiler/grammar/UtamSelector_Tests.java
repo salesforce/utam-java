@@ -1,12 +1,12 @@
 package utam.compiler.grammar;
 
-import appium.element.UIAutomator;
+import utam.core.appium.element.UIAutomator;
 import utam.compiler.helpers.PrimitiveType;
-import declarative.representation.MethodParameter;
-import declarative.representation.TypeProvider;
-import framework.consumer.UtamError;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
-import selenium.element.Selector;
+import utam.core.selenium.element.Selector;
 
 import java.util.List;
 import java.util.function.Supplier;

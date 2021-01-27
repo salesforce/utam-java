@@ -1,12 +1,14 @@
 package utam.compiler.grammar;
 
 import utam.compiler.helpers.TranslationContext;
-import declarative.representation.*;
 import utam.compiler.representation.ComposeMethod;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.declarative.representation.PageObjectMethod;
 
 import java.util.Collection;
 

@@ -1,19 +1,22 @@
 package utam.compiler.translator;
 
-import declarative.translator.*;
 import utam.compiler.grammar.TestUtilities;
 import utam.compiler.grammar.JsonDeserializer;
-import framework.consumer.UtamError;
-import framework.context.StringValueProfile;
+import utam.core.framework.consumer.UtamError;
+import utam.core.framework.context.StringValueProfile;
 import org.hamcrest.CoreMatchers;
 import org.testng.annotations.Test;
+import utam.core.declarative.translator.ProfileConfiguration;
+import utam.core.declarative.translator.TranslatorConfig;
+import utam.core.declarative.translator.TranslatorRunner;
+import utam.core.declarative.translator.UnitTestRunner;
 
 import java.io.IOException;
 import java.util.Properties;
 
 import static utam.compiler.translator.AbstractTranslatorConfiguration.ERR_PROFILE_NOT_CONFIGURED;
 import static utam.compiler.translator.TranslatorMockUtilities.*;
-import static framework.context.StringValueProfile.DEFAULT_IMPL;
+import static utam.core.framework.context.StringValueProfile.DEFAULT_IMPL;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -221,7 +224,8 @@ public class DefaultTranslatorRunnerTests {
         new DefaultSourceConfigurationTests.Mock();
     sourceConfig.setJSONSource(TEST_URI, JSON_WITH_DRIVER_PROFILE);
     AbstractTranslatorConfiguration translatorConfig = sourceConfig.getConfig();
-    final ProfileConfiguration DRIVER_PROFILE_CONFIG = new StringValueProfileConfig("driver", "chrome");
+    final ProfileConfiguration
+        DRIVER_PROFILE_CONFIG = new StringValueProfileConfig("driver", "chrome");
     translatorConfig.setConfiguredProfile(DRIVER_PROFILE_CONFIG);
     DefaultTranslatorRunner translator = new DefaultTranslatorRunnerTests.Mock(translatorConfig);
     translator.run();

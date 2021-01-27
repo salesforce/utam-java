@@ -1,16 +1,16 @@
 package utam.compiler.translator;
 
-import declarative.translator.UnitTestRunner;
+import utam.core.declarative.translator.UnitTestRunner;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
-import declarative.representation.MethodParameter;
-import declarative.representation.PageObjectClass;
-import declarative.representation.PageObjectMethod;
-import declarative.representation.TypeProvider;
-import selenium.element.Selector;
-import selenium.element.Web;
-import selenium.utilities.WebDriverSimulator;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectClass;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.selenium.element.Selector;
+import utam.core.selenium.element.Web;
+import utam.core.selenium.utilities.WebDriverSimulator;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,8 +1,8 @@
 package utam.compiler.translator;
 
-import declarative.translator.ProfileConfiguration;
-import framework.consumer.UtamError;
-import framework.context.Profile;
+import utam.core.declarative.translator.ProfileConfiguration;
+import utam.core.framework.consumer.UtamError;
+import utam.core.framework.context.Profile;
 import org.testng.annotations.Test;
 
 import static utam.compiler.translator.StringValueProfileConfig.*;

@@ -1,9 +1,9 @@
 package utam.compiler.grammar;
 
 import utam.compiler.helpers.TranslationContext;
-import declarative.representation.PageObjectDeclaration;
-import declarative.translator.TranslatorConfig;
-import framework.consumer.UtamError;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.declarative.translator.TranslatorConfig;
+import utam.core.framework.consumer.UtamError;
 
 import java.io.BufferedReader;
 import java.io.IOException;

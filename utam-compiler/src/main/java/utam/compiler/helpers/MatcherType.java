@@ -1,8 +1,8 @@
 package utam.compiler.helpers;
 
-import declarative.representation.MethodParameter;
-import declarative.representation.TypeProvider;
-import framework.consumer.UtamError;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
 
 import java.util.Collections;
 import java.util.List;

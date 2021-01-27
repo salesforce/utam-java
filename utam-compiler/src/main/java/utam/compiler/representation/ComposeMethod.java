@@ -1,9 +1,9 @@
 package utam.compiler.representation;
 
-import declarative.representation.MethodParameter;
-import declarative.representation.PageObjectMethod;
-import declarative.representation.TypeProvider;
-import framework.consumer.UtamError;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.PrimitiveType;

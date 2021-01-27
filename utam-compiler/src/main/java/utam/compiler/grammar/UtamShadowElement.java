@@ -2,7 +2,7 @@ package utam.compiler.grammar;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * @author elizaveta.ivanova

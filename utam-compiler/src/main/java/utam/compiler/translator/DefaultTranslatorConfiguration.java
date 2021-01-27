@@ -1,7 +1,7 @@
 package utam.compiler.translator;
 
-import declarative.translator.ProfileConfiguration;
-import declarative.translator.UnitTestRunner;
+import utam.core.declarative.translator.ProfileConfiguration;
+import utam.core.declarative.translator.UnitTestRunner;
 
 import java.io.File;
 import java.io.FileInputStream;

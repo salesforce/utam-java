@@ -1,7 +1,7 @@
 package utam.compiler.grammar;
 
 import utam.compiler.helpers.PrimitiveType;
-import declarative.representation.MethodParameter;
+import utam.core.declarative.representation.MethodParameter;
 import org.testng.annotations.Test;
 
 import java.util.List;

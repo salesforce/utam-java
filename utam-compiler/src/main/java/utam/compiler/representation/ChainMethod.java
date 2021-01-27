@@ -1,10 +1,10 @@
 package utam.compiler.representation;
 
-import declarative.representation.PageObjectMethod;
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TypeUtilities;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 
 import java.util.ArrayList;
 import java.util.List;

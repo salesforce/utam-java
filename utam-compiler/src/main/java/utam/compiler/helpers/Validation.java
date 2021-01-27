@@ -1,7 +1,7 @@
 package utam.compiler.helpers;
 
-import framework.consumer.UtamError;
-import selenium.element.Selector;
+import utam.core.framework.consumer.UtamError;
+import utam.core.selenium.element.Selector;
 
 import java.util.*;
 

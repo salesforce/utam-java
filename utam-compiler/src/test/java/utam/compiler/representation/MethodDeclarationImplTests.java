@@ -1,7 +1,7 @@
 package utam.compiler.representation;
 
-import declarative.representation.MethodParameter;
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TypeUtilities;
 import org.testng.annotations.Test;

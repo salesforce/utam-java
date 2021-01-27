@@ -1,8 +1,8 @@
 package utam.compiler.helpers;
 
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.TypeProvider;
 import org.testng.annotations.Test;
-import selenium.element.Touchable;
+import utam.core.selenium.element.Touchable;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static framework.UtamLogger.info;
+import static utam.core.framework.UtamLogger.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 

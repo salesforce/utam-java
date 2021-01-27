@@ -1,8 +1,9 @@
 package utam.compiler.helpers;
 
-import declarative.representation.TypeProvider;
-import framework.consumer.UtamError;
-import selenium.element.Actionable;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
+import utam.core.selenium.element.Actionable;
+import utam.core.selenium.expectations.ExpectationsUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,7 +12,7 @@ import java.util.stream.Stream;
 /**
  * this enum links element actions with translator code <br>
  *
- * @see selenium.expectations.ExpectationsUtil every static method should be registered as enum here
+ * @see ExpectationsUtil every static method should be registered as enum here
  *     to use in JSON as applicable action <br>
  * @see Actionable as of 228 every method has enum here to use in translator
  * @author elizaveta.ivanova

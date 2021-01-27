@@ -1,7 +1,7 @@
 package utam.compiler.helpers;
 
-import declarative.representation.TypeProvider;
-import selenium.element.Editable;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.selenium.element.Editable;
 
 import java.util.List;
 import java.util.stream.Collectors;

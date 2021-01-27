@@ -1,7 +1,7 @@
 package utam.compiler.translator;
 
-import declarative.translator.*;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
+import utam.core.declarative.translator.*;
 
 import java.util.ArrayList;
 import java.util.Collection;

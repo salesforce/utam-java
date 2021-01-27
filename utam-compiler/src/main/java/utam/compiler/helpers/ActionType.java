@@ -1,6 +1,6 @@
 package utam.compiler.helpers;
 
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.TypeProvider;
 
 import java.util.List;
 

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import utam.compiler.helpers.TranslationContext;
-import framework.context.Profile;
+import utam.core.framework.context.Profile;
 
 import java.io.IOException;
 

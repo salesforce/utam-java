@@ -1,6 +1,6 @@
 package utam.compiler.grammar;
 
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
 import static utam.compiler.grammar.TestUtilities.getDeserializedObject;

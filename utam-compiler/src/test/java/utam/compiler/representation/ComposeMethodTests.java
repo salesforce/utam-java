@@ -1,16 +1,16 @@
 package utam.compiler.representation;
 
-import declarative.representation.MethodParameter;
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
 import utam.compiler.grammar.UtamElement;
 import utam.compiler.grammar.UtamSelector;
 import utam.compiler.helpers.ActionableActionType;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
-import selenium.element.Actionable;
+import utam.core.selenium.element.Actionable;
 
 import java.util.Collections;
 

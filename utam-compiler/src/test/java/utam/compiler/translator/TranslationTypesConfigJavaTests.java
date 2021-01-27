@@ -1,8 +1,8 @@
 package utam.compiler.translator;
 
-import declarative.translator.TranslationTypesConfig;
+import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.compiler.helpers.TranslationContext;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
 import static utam.compiler.translator.TranslationTypesConfigJava.Mask.pageObjects;

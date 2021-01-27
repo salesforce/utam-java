@@ -2,47 +2,48 @@
 <suite name="API interface default checks">
     <test name="logger tests">
         <classes>
-            <class name="framework.UtamLoggerTests"/>
+            <class name="utam.core.framework.UtamLoggerTests"/>
         </classes>
     </test>
     <test name="framework base classes">
         <packages>
-            <package name="framework.base"/>
-            <package name="framework.consumer"/>
-            <package name="framework.context"/>
+            <package name="utam.core.framework.base"/>
+            <package name="utam.core.framework.consumer"/>
+            <package name="utam.core.framework.context"/>
         </packages>
     </test>
     <test name="selenium expectations tests">
         <packages>
-            <package name="selenium.expectations"/>
+            <package name="utam.core.selenium.expectations"/>
         </packages>
     </test>
     <test name="selenium factory tests">
          <packages>
-            <package name="selenium.factory"/>
+            <package name="utam.core.selenium.factory"/>
         </packages>
     </test>
-    <test name="simulator tests">
-        <classes>
-            <class name="selenium.utilities.WebDriverSimulatorTests"/>
-        </classes>
+    <test name="utilities tests">
+        <packages>
+            <package name="utam.core.selenium.utilities"/>
+        </packages>
     </test>
     <test name="element tests">
         <packages>
-            <package name="appium.element"/>
-            <package name="selenium.element"/>
+            <package name="utam.core.appium.element"/>
+            <package name="utam.core.selenium.element"/>
         </packages>
     </test>
     <test name="context tests">
         <packages>
-            <package name="appium.context"/>
-            <package name="selenium.context"/>
-            <package name="framework.context"/>
+            <package name="utam.core.appium.context"/>
+            <package name="utam.core.selenium.context"/>
+            <package name="utam.core.framework.context"/>
         </packages>
     </test>
     <test name="interfaces">
         <packages>
-            <package name="declarative.representation"/>
+            <package name="utam.core.declarative.representation"/>
+            <package name="utam.core.declarative.translator"/>
         </packages>
     </test>
 </suite>

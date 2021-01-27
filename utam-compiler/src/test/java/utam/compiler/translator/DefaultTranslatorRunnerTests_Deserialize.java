@@ -1,8 +1,8 @@
 package utam.compiler.translator;
 
 import utam.compiler.grammar.TestUtilities;
-import declarative.representation.PageObjectDeclaration;
-import framework.consumer.UtamError;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
 import java.util.stream.Collectors;

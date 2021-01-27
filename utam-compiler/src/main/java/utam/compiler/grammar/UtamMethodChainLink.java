@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ChainMethod;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * chain method statement

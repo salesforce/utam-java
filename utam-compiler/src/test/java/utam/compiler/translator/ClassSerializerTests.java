@@ -1,9 +1,9 @@
 package utam.compiler.translator;
 
 import utam.compiler.helpers.PrimitiveType;
-import declarative.representation.MethodDeclaration;
-import declarative.representation.PageObjectClass;
-import declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.PageObjectClass;
+import utam.core.declarative.representation.PageObjectMethod;
 import org.testng.annotations.Test;
 
 import java.util.stream.Collectors;
@@ -78,11 +78,11 @@ public class ClassSerializerTests {
             + "}";
     String code = getImplementationCode(json);
     assertThat(code, containsString("package utam.test.pageobjects.test.impl;"));
-    assertThat(code, containsString("import framework.base.BasePageObject;"));
-    assertThat(code, containsString("import selenium.element.Clickable;"));
-    assertThat(code, containsString("import selenium.element.Editable;"));
-    assertThat(code, containsString("import selenium.element.Touchable;"));
-    assertThat(code, containsString("import selenium.element.ElementMarker;"));
+    assertThat(code, containsString("import utam.core.framework.base.BasePageObject;"));
+    assertThat(code, containsString("import utam.core.selenium.element.Clickable;"));
+    assertThat(code, containsString("import utam.core.selenium.element.Editable;"));
+    assertThat(code, containsString("import utam.core.selenium.element.Touchable;"));
+    assertThat(code, containsString("import utam.core.selenium.element.ElementMarker;"));
     assertThat(code, containsString("import utam.test.pageobjects.test.Test;"));
     assertThat(
         code, containsString("public final class TestImpl extends BasePageObject implements Test"));

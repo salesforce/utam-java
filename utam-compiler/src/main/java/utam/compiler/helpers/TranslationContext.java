@@ -1,11 +1,14 @@
 package utam.compiler.helpers;
 
-import declarative.representation.*;
-import declarative.translator.ProfileConfiguration;
-import declarative.translator.TranslationTypesConfig;
-import declarative.translator.TranslatorConfig;
-import framework.consumer.UtamError;
-import framework.context.Profile;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageClassField;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.translator.ProfileConfiguration;
+import utam.core.declarative.translator.TranslationTypesConfig;
+import utam.core.declarative.translator.TranslatorConfig;
+import utam.core.framework.consumer.UtamError;
+import utam.core.framework.context.Profile;
 import utam.compiler.representation.UtilityReferenceField;
 
 import java.util.*;

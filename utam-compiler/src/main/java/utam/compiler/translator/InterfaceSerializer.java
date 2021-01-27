@@ -1,8 +1,8 @@
 package utam.compiler.translator;
 
-import declarative.representation.MethodDeclaration;
-import declarative.representation.PageObjectInterface;
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.PageObjectInterface;
+import utam.core.declarative.representation.TypeProvider;
 
 import java.util.*;
 

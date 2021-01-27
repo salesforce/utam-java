@@ -1,12 +1,12 @@
 package utam.compiler.representation;
 
 import utam.compiler.representation.CustomElementMethod.*;
-import declarative.representation.MethodDeclaration;
-import declarative.representation.PageObjectMethod;
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import org.testng.annotations.Test;
-import selenium.element.Selector;
+import utam.core.selenium.element.Selector;
 import utam.compiler.helpers.*;
 
 import java.util.Collections;

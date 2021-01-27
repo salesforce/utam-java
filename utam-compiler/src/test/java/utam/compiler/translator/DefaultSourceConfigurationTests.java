@@ -1,8 +1,9 @@
 package utam.compiler.translator;
 
-import declarative.translator.*;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
+import utam.core.declarative.translator.TranslatorConfig;
+import utam.core.declarative.translator.TranslatorSourceConfig;
 
 import java.io.File;
 import java.io.IOException;

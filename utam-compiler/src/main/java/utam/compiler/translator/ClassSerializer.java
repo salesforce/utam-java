@@ -1,7 +1,7 @@
 package utam.compiler.translator;
 
 import utam.compiler.helpers.TranslationContext;
-import declarative.representation.*;
+import utam.core.declarative.representation.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;

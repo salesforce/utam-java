@@ -3,7 +3,7 @@ package utam.compiler.grammar;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import utam.compiler.representation.ComposeMethod;
-import declarative.representation.MethodParameter;
+import utam.core.declarative.representation.MethodParameter;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.PrimitiveType;

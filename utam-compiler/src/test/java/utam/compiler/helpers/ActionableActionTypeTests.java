@@ -1,11 +1,11 @@
 package utam.compiler.helpers;
 
-import declarative.representation.TypeProvider;
-import framework.consumer.ContainerElement;
-import framework.consumer.UtamError;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.ContainerElement;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
-import selenium.element.Actionable;
-import selenium.expectations.DriverExpectationsUtil;
+import utam.core.selenium.element.Actionable;
+import utam.core.selenium.expectations.DriverExpectationsUtil;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.ActionableActionType.ERR_NOT_HTML_ELEMENT;
 import static utam.compiler.helpers.ActionableActionType.ERR_UNKNOWN_ACTION;
-import static framework.UtamLogger.info;
+import static utam.core.framework.UtamLogger.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.expectThrows;

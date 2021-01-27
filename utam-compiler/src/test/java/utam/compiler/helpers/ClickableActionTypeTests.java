@@ -1,9 +1,9 @@
 package utam.compiler.helpers;
 
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.TypeProvider;
 import org.testng.annotations.Test;
-import selenium.element.Clickable;
-import selenium.expectations.DriverExpectationsUtil;
+import utam.core.selenium.element.Clickable;
+import utam.core.selenium.expectations.DriverExpectationsUtil;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static framework.UtamLogger.info;
+import static utam.core.framework.UtamLogger.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 

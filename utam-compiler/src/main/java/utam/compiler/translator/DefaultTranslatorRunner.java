@@ -1,14 +1,14 @@
 package utam.compiler.translator;
 
-import declarative.translator.*;
 import utam.compiler.grammar.JsonDeserializer;
-import declarative.representation.PageObjectClass;
-import declarative.representation.PageObjectDeclaration;
-import declarative.representation.PageObjectInterface;
-import declarative.representation.TypeProvider;
-import framework.consumer.UtamError;
-import framework.context.DefaultProfileContext;
-import framework.context.Profile;
+import utam.core.declarative.representation.PageObjectClass;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.declarative.representation.PageObjectInterface;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
+import utam.core.framework.context.DefaultProfileContext;
+import utam.core.framework.context.Profile;
+import utam.core.declarative.translator.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import static framework.UtamLogger.info;
-import static framework.context.StringValueProfile.DEFAULT_IMPL;
+import static utam.core.framework.UtamLogger.info;
+import static utam.core.framework.context.StringValueProfile.DEFAULT_IMPL;
 
 /**
  * abstract runner

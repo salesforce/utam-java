@@ -1,12 +1,13 @@
 package utam.compiler.helpers;
 
-import declarative.representation.MethodParameter;
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
 import org.hamcrest.MatcherAssert;
 import org.testng.annotations.Test;
-import selenium.element.Actionable;
-import selenium.element.Clickable;
-import selenium.element.ElementMarker;
+import utam.core.selenium.element.Actionable;
+import utam.core.selenium.element.Clickable;
+import utam.core.selenium.element.ElementMarker;
+import utam.core.selenium.element.Editable;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,7 +47,7 @@ public class TypeUtilitiesTests {
   public void testGetTypeMethod() {
     assertThat(
         TypeUtilities.Element.actionable.getType().getFullName(),
-        is(equalTo("selenium.element.Actionable")));
+        is(equalTo("utam.core.selenium.element.Actionable")));
   }
 
   /** FromString returns a valid TypeProvider */
@@ -178,7 +179,7 @@ public class TypeUtilitiesTests {
    */
   @Test
   public void testListOfEqualsWithListsOfDifferentPackages() {
-    TypeProvider type = new TypeUtilities.FromClass(selenium.element.Editable.class);
+    TypeProvider type = new TypeUtilities.FromClass(Editable.class);
     TypeProvider otherType = new TypeUtilities.FromString("Editable", "selenium.mismatch.Editable");
     TypeProvider listType = new TypeUtilities.ListOf(type);
 
@@ -199,8 +200,8 @@ public class TypeUtilitiesTests {
   public void testFromClass() {
     TypeProvider type = new TypeUtilities.FromClass(Actionable.class);
 
-    assertThat(type.getFullName(), is(equalTo("selenium.element.Actionable")));
-    assertThat(type.getPackageName(), is(equalTo("selenium.element")));
+    assertThat(type.getFullName(), is(equalTo("utam.core.selenium.element.Actionable")));
+    assertThat(type.getPackageName(), is(equalTo("utam.core.selenium.element")));
     assertThat(type.getSimpleName(), is(equalTo("Actionable")));
   }
 
@@ -210,7 +211,7 @@ public class TypeUtilitiesTests {
     TypeProvider type = new TypeUtilities.FromClass(ElementMarker.Find.class);
 
     assertThat(type.getFullName(), is(equalTo(AnnotationUtilsTests.ELEMENT_MARKER_ANNOTATION_CLASS)));
-    assertThat(type.getPackageName(), is(equalTo("selenium.element")));
+    assertThat(type.getPackageName(), is(equalTo("utam.core.selenium.element")));
     assertThat(type.getSimpleName(), is(equalTo("Find")));
   }
 
@@ -243,7 +244,7 @@ public class TypeUtilitiesTests {
    */
   @Test
   public void testFromClassEqualsWithDifferentPackages() {
-    TypeProvider type = new TypeUtilities.FromClass(selenium.element.Editable.class);
+    TypeProvider type = new TypeUtilities.FromClass(Editable.class);
     TypeProvider otherType = new TypeUtilities.FromString("Editable", "selenium.mismatch.Editable");
 
     assertThat(type, is(not(equalTo(otherType))));
@@ -362,18 +363,18 @@ public class TypeUtilitiesTests {
   /** The BASE_PAGE_OBJECT constant should return the proper value */
   @Test
   public void testBasePageObjectConstant() {
-    assertThat(BASE_PAGE_OBJECT.getFullName(), is(equalTo("framework.base.BasePageObject")));
+    assertThat(BASE_PAGE_OBJECT.getFullName(), is(equalTo("utam.core.framework.base.BasePageObject")));
   }
 
   /** The ROOT_PAGE_OBJECT constant should return the proper value */
   @Test
   public void testRootPageObjectConstant() {
-    assertThat(ROOT_PAGE_OBJECT.getFullName(), is(equalTo("framework.base.RootPageObject")));
+    assertThat(ROOT_PAGE_OBJECT.getFullName(), is(equalTo("utam.core.framework.base.RootPageObject")));
   }
 
   /** The PAGE_OBJECT constant should return the proper value */
   @Test
   public void testPageObjectConstant() {
-    assertThat(PAGE_OBJECT.getFullName(), is(equalTo("framework.base.PageObject")));
+    assertThat(PAGE_OBJECT.getFullName(), is(equalTo("utam.core.framework.base.PageObject")));
   }
 }

@@ -1,9 +1,9 @@
 package utam.compiler.grammar;
 
 import utam.compiler.helpers.TranslationContext;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
-import selenium.element.Selector;
+import utam.core.selenium.element.Selector;
 
 import static utam.compiler.grammar.TestUtilities.*;
 import static utam.compiler.grammar.UtamPageObject.*;

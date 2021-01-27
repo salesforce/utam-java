@@ -1,8 +1,8 @@
 package utam.compiler.representation;
 
-import declarative.representation.MethodDeclaration;
-import declarative.representation.MethodParameter;
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
 
 import java.util.List;
 import java.util.stream.Collectors;

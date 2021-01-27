@@ -1,13 +1,13 @@
 package utam.compiler.translator;
 
-import declarative.translator.TranslationTypesConfig;
+import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.compiler.helpers.TypeUtilities;
-import declarative.representation.TypeProvider;
-import framework.consumer.UtamError;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
 
 import java.util.regex.Pattern;
 
-import static framework.consumer.PageObjectContextImpl.getDefaultImplType;
+import static utam.core.framework.consumer.PageObjectContextImpl.getDefaultImplType;
 
 /**
  * @author elizaveta.ivanova

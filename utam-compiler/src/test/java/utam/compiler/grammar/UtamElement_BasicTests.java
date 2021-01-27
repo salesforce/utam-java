@@ -3,15 +3,15 @@ package utam.compiler.grammar;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
-import declarative.representation.PageClassField;
-import declarative.representation.PageObjectDeclaration;
-import declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.PageClassField;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.FieldInfo;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
-import selenium.element.Actionable;
+import utam.core.selenium.element.Actionable;
 
 import java.util.List;
 import java.util.Objects;
@@ -115,7 +115,7 @@ public class UtamElement_BasicTests {
             .testRootTraverse(getTestTranslationContext())
             .getType()
             .getFullName(),
-        is(equalTo("selenium.element.Actionable")));
+        is(equalTo("utam.core.selenium.element.Actionable")));
   }
 
   /** The getSimpleType method should return valid values for a valid element type */
@@ -128,7 +128,7 @@ public class UtamElement_BasicTests {
             .testRootTraverse(getTestTranslationContext())
             .getType()
             .getFullName(),
-        is(equalTo("selenium.element.Clickable")));
+        is(equalTo("utam.core.selenium.element.Clickable")));
   }
 
   /** The getAsSimpleElement method should return the proper value */

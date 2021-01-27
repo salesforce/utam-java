@@ -5,10 +5,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import declarative.translator.ProfileConfiguration;
-import framework.consumer.UtamError;
-import framework.context.Profile;
-import framework.context.StringValueProfile;
+import utam.core.declarative.translator.ProfileConfiguration;
+import utam.core.framework.consumer.UtamError;
+import utam.core.framework.context.Profile;
+import utam.core.framework.context.StringValueProfile;
 
 public class StringValueProfileConfig implements ProfileConfiguration {
 

@@ -1,9 +1,8 @@
 package utam.compiler.helpers;
 
-import utam.compiler.helpers.Validation;
 import utam.compiler.helpers.Validation.ErrorType;
-import declarative.representation.MethodParameter;
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;

@@ -1,7 +1,7 @@
 package utam.compiler.helpers;
 
-import declarative.representation.MethodParameter;
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;

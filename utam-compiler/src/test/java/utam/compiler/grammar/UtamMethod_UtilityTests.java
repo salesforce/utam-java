@@ -1,7 +1,7 @@
 package utam.compiler.grammar;
 
 import utam.compiler.helpers.TranslationContext;
-import declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.UtilityMethod;
 import org.testng.annotations.Test;

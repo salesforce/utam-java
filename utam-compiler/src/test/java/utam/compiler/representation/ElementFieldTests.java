@@ -1,6 +1,6 @@
 package utam.compiler.representation;
 
-import declarative.representation.AnnotationProvider;
+import utam.core.declarative.representation.AnnotationProvider;
 import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.PageObjectValidationTestHelper.FieldInfo;
 import org.testng.annotations.Test;

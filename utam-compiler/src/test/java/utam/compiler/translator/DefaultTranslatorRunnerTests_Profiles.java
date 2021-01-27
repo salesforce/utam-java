@@ -1,11 +1,11 @@
 package utam.compiler.translator;
 
-import declarative.translator.ProfileConfiguration;
-import declarative.translator.TranslatorConfig;
+import utam.core.declarative.translator.ProfileConfiguration;
+import utam.core.declarative.translator.TranslatorConfig;
 import utam.compiler.grammar.TestUtilities;
-import declarative.representation.PageObjectDeclaration;
-import framework.consumer.UtamError;
-import framework.context.Profile;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.framework.consumer.UtamError;
+import utam.core.framework.context.Profile;
 import org.testng.annotations.Test;
 
 import java.util.Collections;
@@ -16,7 +16,7 @@ import java.util.Properties;
 
 import static utam.compiler.translator.DefaultTranslatorRunner.*;
 import static utam.compiler.translator.DefaultTranslatorRunnerTests.Mock.getConfig;
-import static framework.context.StringValueProfile.DEFAULT_IMPL;
+import static utam.core.framework.context.StringValueProfile.DEFAULT_IMPL;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;

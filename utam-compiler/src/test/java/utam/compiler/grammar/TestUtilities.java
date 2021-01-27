@@ -1,14 +1,14 @@
 package utam.compiler.grammar;
 
 import utam.compiler.helpers.TranslationContext;
-import declarative.representation.PageObjectDeclaration;
-import declarative.representation.TypeProvider;
-import declarative.translator.TranslationTypesConfig;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.compiler.translator.TranslationTypesConfigJava;
-import declarative.translator.TranslatorConfig;
-import framework.consumer.UtamError;
-import selenium.element.Selector;
-import selenium.element.Web;
+import utam.core.declarative.translator.TranslatorConfig;
+import utam.core.framework.consumer.UtamError;
+import utam.core.selenium.element.Selector;
+import utam.core.selenium.element.Web;
 
 import java.io.IOException;
 

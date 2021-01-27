@@ -1,16 +1,16 @@
 package utam.compiler.grammar;
 
-import appium.element.ClassChain;
-import appium.element.Mobile;
-import appium.element.UIAutomator;
+import utam.core.appium.element.ClassChain;
+import utam.core.appium.element.Mobile;
+import utam.core.appium.element.UIAutomator;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import utam.compiler.helpers.PrimitiveType;
-import declarative.representation.MethodParameter;
-import declarative.representation.TypeProvider;
-import framework.consumer.UtamError;
-import selenium.element.Selector;
-import selenium.element.Web;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
+import utam.core.selenium.element.Selector;
+import utam.core.selenium.element.Web;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static selenium.element.LocatorParameters.SELECTOR_INTEGER_PARAMETER;
-import static selenium.element.LocatorParameters.SELECTOR_STRING_PARAMETER;
+import static utam.core.selenium.element.LocatorParameters.SELECTOR_INTEGER_PARAMETER;
+import static utam.core.selenium.element.LocatorParameters.SELECTOR_STRING_PARAMETER;
 
 /**
  * selector object mapping

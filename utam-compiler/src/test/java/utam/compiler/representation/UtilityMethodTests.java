@@ -1,12 +1,12 @@
 package utam.compiler.representation;
 
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.TypeProvider;
 import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
-import declarative.translator.TranslationTypesConfig;
+import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.compiler.translator.TranslationTypesConfigJava;
 import org.testng.annotations.Test;
-import selenium.element.Actionable;
+import utam.core.selenium.element.Actionable;
 
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 

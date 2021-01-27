@@ -2,13 +2,18 @@ package utam.compiler.grammar;
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import utam.compiler.helpers.TypeUtilities;
-import declarative.representation.*;
-import declarative.translator.*;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
-import selenium.element.Clickable;
+import utam.core.selenium.element.Clickable;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.translator.DefaultSourceConfigurationTests;
+import utam.core.declarative.representation.PageObjectClass;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.declarative.representation.PageObjectInterface;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.translator.TranslationTypesConfig;
+import utam.core.declarative.translator.TranslatorSourceConfig;
+import utam.core.declarative.translator.UnitTestRunner;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -299,9 +304,9 @@ public class JsonDeserializerTests {
 
     PageObjectClass node = createRootNode(json).getImplementation();
     TypeProvider provider = node.getBaseClassType();
-    assertThat(provider.getPackageName(), is(equalTo("framework.base")));
+    assertThat(provider.getPackageName(), is(equalTo("utam.core.framework.base")));
     assertThat(provider.getSimpleName(), is(equalTo("BasePageObject")));
-    assertThat(provider.getFullName(), is(equalTo("framework.base.BasePageObject")));
+    assertThat(provider.getFullName(), is(equalTo("utam.core.framework.base.BasePageObject")));
   }
 
   /**
@@ -315,7 +320,7 @@ public class JsonDeserializerTests {
     PageObjectClass node = createRootNode(json).getImplementation();
     String implCode = node.getImplCode();
     assertThat(implCode, containsString("package " + IMPL_PACKAGE_NAME));
-    assertThat(implCode, containsString("import framework.base.BasePageObject"));
+    assertThat(implCode, containsString("import utam.core.framework.base.BasePageObject"));
     assertThat(implCode, containsString("import " + INTERFACE_FULL_NAME));
     assertThat(
         implCode,
@@ -464,7 +469,7 @@ public class JsonDeserializerTests {
     PageObjectInterface node = createRootNode(json).getInterface();
     String apiCode = node.getApiCode();
     assertThat(apiCode, containsString("package " + INTERFACE_PACKAGE_NAME));
-    assertThat(apiCode, containsString("import framework.base.PageObject"));
+    assertThat(apiCode, containsString("import utam.core.framework.base.PageObject"));
     assertThat(
         apiCode,
         containsString("public interface " + INTERFACE_SIMPLE_NAME + " extends PageObject {}"));

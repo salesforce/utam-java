@@ -1,10 +1,10 @@
 package utam.compiler.representation;
 
-import declarative.representation.TypeProvider;
+import utam.core.declarative.representation.TypeProvider;
 import utam.compiler.grammar.UtamElement;
 import utam.compiler.grammar.UtamSelector;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
-import framework.consumer.UtamError;
+import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 import utam.compiler.helpers.*;
 
