@@ -61,6 +61,7 @@ public class ComposeMethodTests {
     assertThat(method.getClassImports(), hasSize(0));
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testComposeMethodWithVoidRootStatement() {
     PageObjectValidationTestHelper.MethodInfo info =
@@ -68,7 +69,6 @@ public class ComposeMethodTests {
     info.addCodeLine("this.getRoot().focus()");
 
     TypeProvider elementType = new TypeUtilities.FromClass(Actionable.class);
-    TranslationContext context = getTestTranslationContext();
     ElementContext element = new ElementContext.Root(elementType, actionable.getType(), null);
     element.setElementMethod(new RootElementMethod.Public(actionable.getType()));
     ComposeMethod.ElementAction action =
@@ -81,6 +81,7 @@ public class ComposeMethodTests {
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testComposeMethodWithVoidListStatement() {
     PageObjectValidationTestHelper.MethodInfo info =
@@ -96,6 +97,7 @@ public class ComposeMethodTests {
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testComposeMethodWithSimpleListStatement() {
     PageObjectValidationTestHelper.MethodInfo info =
@@ -110,6 +112,7 @@ public class ComposeMethodTests {
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testComposeMethodWithListStatement() {
     PageObjectValidationTestHelper.MethodInfo info =
@@ -130,6 +133,7 @@ public class ComposeMethodTests {
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testComposeMethodWithElementStatement() {
     PageObjectValidationTestHelper.MethodInfo info =
@@ -148,6 +152,7 @@ public class ComposeMethodTests {
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testComposeMethodWithElementStatementWithParameters() {
     PageObjectValidationTestHelper.MethodInfo info =
@@ -177,6 +182,7 @@ public class ComposeMethodTests {
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testComposeMethodWithListStatementWithParametersThrows() {
     TranslationContext context = getTestTranslationContext();

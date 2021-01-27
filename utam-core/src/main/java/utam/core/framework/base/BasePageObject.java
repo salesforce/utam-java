@@ -146,6 +146,7 @@ public abstract class BasePageObject implements RootPageObject {
     return getRootElement().isPresent();
   }
 
+  @SuppressWarnings("unused")
   // used by generator - scope inside element of the page object
   protected final PageObjectBuilder inScope(
       BaseElement scopeElement, Locator selector, boolean isNullable) {
@@ -153,6 +154,7 @@ public abstract class BasePageObject implements RootPageObject {
         getFactory(), getElementLocator(scopeElement), isNullable, selector);
   }
 
+  @SuppressWarnings("unused")
   // used by generator for external page objects only (result is never nullable)
   protected final PageObjectBuilder inScope(BaseElement scopeElement, Locator selector) {
     return new PageObjectBuilderImpl.ExternalChild(
@@ -163,6 +165,7 @@ public abstract class BasePageObject implements RootPageObject {
     return new PageObjectElementBuilderImpl(getFactory(), pageObjectElement);
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   // used by generator - return imperative utility
   protected <T extends ImperativeProvider> T getUtility(Class<T> type) {
     T utility = ImperativeProvider.build(type);

@@ -10,7 +10,6 @@ import org.openqa.selenium.WebDriver;
 import org.testng.annotations.Test;
 import utam.core.selenium.context.SeleniumContext;
 import utam.core.selenium.context.SeleniumContextProvider;
-import utam.core.selenium.element.*;
 
 import java.util.List;
 

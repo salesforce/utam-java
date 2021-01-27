@@ -35,10 +35,12 @@ public class PageObjectContextImpl implements PageObjectContext {
     return new String[] {typeName, String.format("%s.impl.%s", packageName, typeName)};
   }
 
+  @SuppressWarnings("rawtypes")
   public static Class getClassFromName(String className) throws ClassNotFoundException {
     return Class.forName(className);
   }
 
+  @SuppressWarnings("rawtypes")
   private static String getBeanErr(Class type) {
     return String.format("bean for type '%s' is not configured", type.getName());
   }
@@ -57,11 +59,13 @@ public class PageObjectContextImpl implements PageObjectContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public <T extends PageObject> T getExternalBean(Class<T> type, Object[] parameters) {
     return (T) externalBuilder.apply(type, parameters);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public <T extends PageObject> T getBean(Class<T> type) {
     if (beansOverrideMock.containsKey(type)) {

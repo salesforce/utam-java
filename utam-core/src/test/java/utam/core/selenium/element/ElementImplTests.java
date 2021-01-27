@@ -374,6 +374,7 @@ public class ElementImplTests {
     private final BiFunction<WebDriverUtilities, WebElement, T> apply;
     private final T returnIfNotFound;
 
+    @SuppressWarnings("unchecked")
     MockExpectations(Function<WebElement, T> apply) {
       this.logMessage = "test";
       this.apply = (wu, we) -> apply.apply(we);

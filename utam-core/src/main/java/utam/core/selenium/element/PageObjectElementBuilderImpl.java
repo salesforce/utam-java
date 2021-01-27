@@ -33,6 +33,7 @@ public class PageObjectElementBuilderImpl implements PageObjectElementBuilder {
     this.self = element;
   }
 
+  @SuppressWarnings("unused")
   // constructor for container element
   public PageObjectElementBuilderImpl(PageObjectsFactory pageObjectsFactory) {
     this(pageObjectsFactory, null);
@@ -80,6 +81,7 @@ public class PageObjectElementBuilderImpl implements PageObjectElementBuilder {
         locator.setParameters(parameters), element.isExpandScopeShadow(), factory);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public <T extends Actionable> T build(Class<T> type, Object... values) {
     if (isParametersEmpty(values)) {
@@ -104,6 +106,7 @@ public class PageObjectElementBuilderImpl implements PageObjectElementBuilder {
     throw new UtamError("can't find matching element");
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public <T extends Actionable> List<T> buildList(Class<T> type, Object... values) {
     Locator locatorWithoutParameters = LocatorUtilities.getElementLocator(this.self);
