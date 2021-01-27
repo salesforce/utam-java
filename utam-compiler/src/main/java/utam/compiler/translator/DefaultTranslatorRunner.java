@@ -1,0 +1,286 @@
+package utam.compiler.translator;
+
+import declarative.translator.*;
+import utam.compiler.grammar.JsonDeserializer;
+import declarative.representation.PageObjectClass;
+import declarative.representation.PageObjectDeclaration;
+import declarative.representation.PageObjectInterface;
+import declarative.representation.TypeProvider;
+import framework.consumer.UtamError;
+import framework.context.DefaultProfileContext;
+import framework.context.Profile;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import static framework.UtamLogger.info;
+import static framework.context.StringValueProfile.DEFAULT_IMPL;
+
+/**
+ * abstract runner
+ *
+ * @author elizaveta.ivanova
+ * @since 226
+ */
+public class DefaultTranslatorRunner implements TranslatorRunner {
+
+  static final String ERR_PROFILE_PATH_DOES_NOT_EXIST =
+      "can't write profiles output, profile path '%s' does not exist";
+  static final String ERR_PROFILE_PATH_NOT_CONFIGURED = "profile config path is null or empty";
+  static final String ERR_JSON_SOURCES_NOT_CONFIGURED =
+      "source configurations with JSON files are not set";
+  static final String DUPLICATE_PAGE_OBJECT_NAME = "declaration '%s' already generated";
+  static final String DUPLICATE_IMPL_ERR =
+      "default implementation for type '%s' is already set as '%s'";
+  static final String DUPLICATE_IMPL_WITH_PROFILE_ERR =
+      "default implementation for type '%s' is already set as '%s' for profile '%s'";
+  static final String PROFILE_NOT_CONFIGURED_ERR = "profile '%s' is not configured";
+  private final TranslatorConfig translatorConfig;
+  private final Map<String, PageObjectDeclaration> generated = new HashMap<>();
+  private final Map<Profile, Map<String, String>> profilesMapping = new HashMap<>();
+  private Profile defaultProfile;
+  // max number of POs to generate for generator performance measurements
+  private int maxPageObjectsCounter  = Integer.MAX_VALUE;
+
+  public DefaultTranslatorRunner(TranslatorConfig translatorConfig) {
+    this.translatorConfig = translatorConfig;
+    for (ProfileConfiguration configuration : translatorConfig.getConfiguredProfiles()) {
+      for (String value : configuration.getSupportedValues()) {
+        Profile profile = configuration.getFromString(value);
+        if (profile.isDefault()) {
+          this.defaultProfile = profile;
+        }
+        profilesMapping.put(profile, new HashMap<>());
+      }
+    }
+    if (defaultProfile == null) {
+      defaultProfile = DEFAULT_IMPL;
+      profilesMapping.put(defaultProfile, new HashMap<>());
+    }
+  }
+
+  private static boolean isRunnerSet(TranslatorConfig translatorConfig) {
+    return translatorConfig.getUnitTestRunnerType() != null
+        && translatorConfig.getUnitTestRunnerType() != UnitTestRunner.NONE;
+  }
+
+  protected final Collection<Profile> getAllProfiles() {
+    return profilesMapping.keySet();
+  }
+
+  private void writeProfileConfig(Profile profile, Properties properties, String profilesRoot) {
+    if (properties.isEmpty()) {
+      return;
+    }
+    try {
+      Writer writer = new DefaultProfileContext(profile).getInjectionConfigWriter(profilesRoot);
+      properties.store(writer, "profile override");
+    } catch (IOException e) {
+      throw new UtamError(
+          String.format("can't write profile '%s' override properties", profile.getName()), e);
+    }
+  }
+
+  PageObjectDeclaration getGeneratedObject(String name) {
+    // As written, pageObjectURI *must* be in generated, because getObject
+    // is only ever called by iterating over the keyset of generated. If
+    // that ever changes, a guard will need to be placed here.
+    return generated.get(name);
+  }
+
+  Collection<String> getGeneratedPageObjectsNames() {
+    return generated.keySet();
+  }
+
+  @Override
+  public void write() throws IOException {
+    int counter = 0;
+    int filesCounter = 0;
+    long timer = System.currentTimeMillis();
+    for (String name : getGeneratedPageObjectsNames()) {
+      if (counter >= maxPageObjectsCounter) {
+        break;
+      }
+      PageObjectDeclaration object = getGeneratedObject(name);
+      PageObjectInterface pageObjectInterface = object.getInterface();
+      if (object.isClassWithInterface()) {
+        info(
+            String.format(
+                "write interface %s", pageObjectInterface.getInterfaceType().getFullName()));
+        write(pageObjectInterface.getInterfaceType(), pageObjectInterface.getApiCode());
+        filesCounter ++;
+      } else {
+        info(
+            String.format(
+                "interface %s already exists",
+                pageObjectInterface.getInterfaceType().getFullName()));
+      }
+      if (!object.isInterfaceOnly()) {
+        info(
+            String.format(
+                "write class %s", object.getImplementation().getClassType().getFullName()));
+        write(object.getImplementation().getClassType(), object.getImplementation().getImplCode());
+        filesCounter ++;
+        if(writeUnitTest(object.getImplementation())){
+         filesCounter ++;
+        }
+      }
+      counter ++;
+    }
+    info(String.format("wrote %d files for %d page objects, took %d msec", filesCounter, counter, System.currentTimeMillis() - timer));
+  }
+
+  // set max number of POs to generate for generator performance measurements
+  protected void setMaxToGenerate(int number) {
+    this.maxPageObjectsCounter = number;
+  }
+
+  // returns true if new file was written
+  private boolean writeUnitTest(PageObjectClass impl) throws IOException {
+    if (!isRunnerSet(translatorConfig)) {
+      return false;
+    }
+    TypeProvider typeProvider = impl.getClassType();
+    Writer writer = getTargetConfig().getUnitTestWriter(typeProvider);
+    // Legitimate case for writer == null is that the runner configuration
+    // wants to write unit tests, but skip files that already exist.
+    if (writer != null) {
+      try {
+        info(String.format("generating unit test for %s", typeProvider.getFullName()));
+        writer.write(impl.getGeneratedUnitTestCode(translatorConfig.getUnitTestRunnerType()));
+        writer.flush();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return true;
+  }
+
+  private void write(TypeProvider typeProvider, String code) throws IOException {
+    Writer writer = getTargetConfig().getClassWriter(typeProvider);
+    try {
+      writer.write(code);
+      writer.flush();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private TranslatorTargetConfig getTargetConfig() {
+    return translatorConfig.getConfiguredTarget();
+  }
+
+  @Override
+  public void run() {
+    int counter = 0;
+    long timer = System.currentTimeMillis();
+    if (translatorConfig.getConfiguredSources().isEmpty()) {
+      throw new UtamError(ERR_JSON_SOURCES_NOT_CONFIGURED);
+    }
+    for (TranslatorSourceConfig sourceConfig : translatorConfig.getConfiguredSources()) {
+      for (String pageObjectURI : sourceConfig.getPageObjects()) {
+        if (counter >= maxPageObjectsCounter) {
+          break;
+        }
+        info(String.format("de-serialize Page Object %s", pageObjectURI));
+        PageObjectDeclaration object =
+              new JsonDeserializer(translatorConfig, sourceConfig, pageObjectURI).getObject();
+        setPageObject(pageObjectURI, object);
+        counter ++;
+      }
+    }
+    info(String.format("generated %d page objects, took %d msec", counter, System.currentTimeMillis() - timer));
+  }
+
+  private String getResourcesRoot() {
+    String profilesRoot = getTargetConfig().getInjectionConfigRootFilePath();
+    if (profilesRoot == null || profilesRoot.isEmpty()) {
+      throw new UtamError(ERR_PROFILE_PATH_NOT_CONFIGURED);
+    }
+    if (!new File(profilesRoot).exists()) {
+      throw new UtamError(String.format(ERR_PROFILE_PATH_DOES_NOT_EXIST, profilesRoot));
+    }
+    return profilesRoot;
+  }
+
+  @Override
+  public void writeDependenciesConfigs() {
+    String profilesRoot = getResourcesRoot();
+    for (Profile profile : getAllProfiles()) {
+      writeProfileConfig(profile, getProfileMapping(profile), profilesRoot);
+    }
+  }
+
+  final Properties getProfileMapping(Profile profile) {
+    if (!profilesMapping.containsKey(profile)) {
+      throw new UtamError(String.format(PROFILE_NOT_CONFIGURED_ERR, profile.toString()));
+    }
+    Properties properties = new Properties();
+    profilesMapping.get(profile).forEach(properties::setProperty);
+    return properties;
+  }
+
+  void setPageObject(String name, PageObjectDeclaration object) {
+    if (generated.containsKey(name)) {
+      throw new UtamError(String.format(DUPLICATE_PAGE_OBJECT_NAME, name));
+    }
+    generated.put(name, object);
+    String typeName = object.getInterface().getInterfaceType().getFullName();
+    // interface only
+    if (object.isInterfaceOnly()) {
+      setInterfaceOnly(typeName);
+      return;
+    }
+    String classTypeName = object.getImplementation().getClassType().getFullName();
+    // default case - same file has both api and impl
+    if (object.isClassWithInterface()) {
+      // no profiles are set, it's default case, no need to do anything
+      return;
+    }
+    // class implements other interface and does not have profiles
+    if (!object.isClassWithProfiles()) {
+      setImplOnly(typeName, classTypeName);
+      return;
+    }
+    // class that implements other interface and has profiles
+    for (Profile profile : object.getImplementation().getProfiles()) {
+      setImplOnlyForProfile(profile, typeName, classTypeName);
+    }
+  }
+
+  private void setInterfaceOnly(String typeName) {
+    Map<String, String> implMapping = profilesMapping.get(defaultProfile);
+    if (implMapping.containsKey(typeName)) {
+      throw new UtamError(String.format(DUPLICATE_PAGE_OBJECT_NAME, typeName));
+    }
+    implMapping.put(typeName, "");
+  }
+
+  private void setImplOnly(String typeName, String classTypeName) {
+    Map<String, String> implMapping = profilesMapping.get(defaultProfile);
+    if (implMapping.containsKey(typeName) && !implMapping.get(typeName).isEmpty()) {
+      throw new UtamError(String.format(DUPLICATE_IMPL_ERR, typeName, implMapping.get(typeName)));
+    }
+    implMapping.put(typeName, classTypeName);
+  }
+
+  void setImplOnlyForProfile(Profile profile, String typeName, String classTypeName) {
+    if (!profilesMapping.containsKey(profile)) {
+      throw new UtamError(String.format(PROFILE_NOT_CONFIGURED_ERR, profile.toString()));
+    }
+    if (profilesMapping.get(profile).containsKey(typeName)) {
+      throw new UtamError(
+          String.format(
+              DUPLICATE_IMPL_WITH_PROFILE_ERR,
+              typeName,
+              profilesMapping.get(profile).get(typeName),
+              profile.toString()));
+    }
+    profilesMapping.get(profile).put(typeName, classTypeName);
+  }
+}

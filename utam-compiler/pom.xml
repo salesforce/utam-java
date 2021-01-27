@@ -83,7 +83,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>utam.generator.Main</mainClass>
+                            <mainClass>utam.compiler.CommandLineEntryPoint</mainClass>
                         </manifest>
                     </archive>
                     <descriptors>
