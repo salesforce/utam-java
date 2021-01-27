@@ -1,0 +1,32 @@
+{
+  "shadow" : {
+    "elements" : [
+      {
+        "name" : "scope",
+        "selector" : {
+          "css" : ".scope %s",
+          "args": [
+            {
+              "name" : "scopeArg",
+              "type" : "string"
+            }
+          ]
+        },
+        "shadow" : {
+          "elements" : [
+            {
+              "name" : "nestedContainer",
+              "type" : "container",
+              "public": true
+            }
+          ]
+        }
+      },
+      {
+        "name" : "containerInsideRoot",
+        "type" : "container",
+        "public": true
+      }
+    ]
+  }
+}

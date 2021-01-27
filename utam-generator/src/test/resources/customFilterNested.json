@@ -1,0 +1,42 @@
+{
+  "name" : "element",
+  "selector" : {
+    "css" : "selector1 %s",
+    "args" : [
+      {
+        "name" : "arg1",
+        "type" : "string"
+      }
+    ]
+  },
+  "elements" : [
+    {
+      "name" : "nested",
+      "public" : true,
+      "type" : "utam-test/pageObjects/test/test",
+      "selector" : {
+        "css" : "selector2 %s",
+        "returnAll" : true,
+        "args" : [
+          {
+            "name" : "arg2",
+            "type" : "string"
+          }
+        ]
+      },
+      "filter" : {
+        "apply" : "customMethod",
+        "args" : [
+          {
+            "name" : "arg3",
+            "type" : "string"
+          }
+        ],
+        "matcher" : {
+          "type": "isTrue"
+        },
+        "findFirst" : true
+      }
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "elements" : [
+    {
+      "name" : "one",
+      "selector" : {
+        "css" : ".one"
+      },
+      "elements" : [
+        {
+          "name" : "nestedCustom",
+          "selector" : {
+            "css" : ".nestedCustom"
+          },
+          "type" : "utam-test/pageObjects/test/componentType",
+          "public" : true
+        }
+      ],
+      "shadow" : {
+        "elements" : [
+          {
+            "name" : "nestedInsideShadow",
+            "selector" : {
+              "css" : ".css"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

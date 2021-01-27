@@ -1,0 +1,17 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/${mdoVersion}"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/${mdoVersion} http://maven.apache.org/xsd/assembly-${mdoVersion}.xsd">
+    <id>standalone</id>
+    <formats>
+        <format>jar</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>/</outputDirectory>
+            <useProjectArtifact>true</useProjectArtifact>
+            <unpack>true</unpack>
+            <scope>runtime</scope>
+        </dependencySet>
+    </dependencySets>
+</assembly>

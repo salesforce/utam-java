@@ -1,0 +1,22 @@
+{
+  "shadow" : {
+    "elements": [
+      {
+        "name": "custom",
+        "type": "utam-test/pageObjects/test/test",
+        "public": true,
+        "selector": {
+          "css": "selector3",
+          "returnAll": true
+        },
+        "nullable": true,
+        "filter": {
+          "apply": "isVisible",
+          "matcher": {
+            "type": "isTrue"
+          }
+        }
+      }
+    ]
+  }
+}

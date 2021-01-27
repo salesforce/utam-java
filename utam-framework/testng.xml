@@ -1,0 +1,48 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="API interface default checks">
+    <test name="logger tests">
+        <classes>
+            <class name="framework.UtamLoggerTests"/>
+        </classes>
+    </test>
+    <test name="framework base classes">
+        <packages>
+            <package name="framework.base"/>
+            <package name="framework.consumer"/>
+            <package name="framework.context"/>
+        </packages>
+    </test>
+    <test name="selenium expectations tests">
+        <packages>
+            <package name="selenium.expectations"/>
+        </packages>
+    </test>
+    <test name="selenium factory tests">
+         <packages>
+            <package name="selenium.factory"/>
+        </packages>
+    </test>
+    <test name="simulator tests">
+        <classes>
+            <class name="selenium.utilities.WebDriverSimulatorTests"/>
+        </classes>
+    </test>
+    <test name="element tests">
+        <packages>
+            <package name="appium.element"/>
+            <package name="selenium.element"/>
+        </packages>
+    </test>
+    <test name="context tests">
+        <packages>
+            <package name="appium.context"/>
+            <package name="selenium.context"/>
+            <package name="framework.context"/>
+        </packages>
+    </test>
+    <test name="interfaces">
+        <packages>
+            <package name="declarative.representation"/>
+        </packages>
+    </test>
+</suite>
