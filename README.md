@@ -2,7 +2,7 @@
 
 |       | Repo   | Access |
 | ----- | ------ | ---- |
-| Mirror | [`git.soma.salesforce.com/LPOP/lightning-global/tree/master/`](https://git.soma.salesforce.com/LPOP/utam-java-global/tree/main/) | Readonly Mirror |
+| Mirror | [`git.soma.salesforce.com/LPOP/utam-java/tree/master/`](https://git.soma.salesforce.com/LPOP/utam-java/tree/main/) | Readonly Mirror |
 | Main | [`github.com/salesforce/utam-java/`](https://github.com/salesforce/utam-java/) | Limited |
 
 ## Intro
