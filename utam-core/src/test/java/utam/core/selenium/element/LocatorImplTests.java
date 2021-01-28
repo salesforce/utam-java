@@ -8,6 +8,7 @@ import org.testng.annotations.Test;
 import utam.core.selenium.context.SeleniumContextProvider;
 
 import java.util.List;
+import java.util.Objects;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -167,6 +168,12 @@ public class LocatorImplTests {
   @Test
   public void testEquals() {
     assertThat(getParentLocator().equals(getParentLocator().getCopy()), is(true));
+  }
+
+  /** The hashCode method should return the same hash as the selector string */
+  @Test
+  public void testHashCode() {
+    assertThat(getParentLocator().hashCode(), is(equalTo(Objects.hash(SELECTOR_STRING))));
   }
 
   /** The equals method should return true for the same AbstractLocator */

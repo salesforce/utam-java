@@ -189,6 +189,7 @@ public class UtamElementFilter_Tests {
     }
     methodInfo.addCodeLines(
         "element(this.element).buildList(Actionable.class, elm -> elm.getAttribute(arg2).contains(arg3), arg1)");
+    methodInfo.setIsPublic(false);
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 

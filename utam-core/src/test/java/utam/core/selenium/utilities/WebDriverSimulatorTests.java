@@ -150,7 +150,16 @@ public class WebDriverSimulatorTests {
     WebElement element = driver.findElements(By.cssSelector(".fakeSelector")).get(0);
     assertThat(element.getText(), is(equalTo("testText")));
   }
-  
+
+  @Test
+  public void testWithVisibility() {
+    WebDriverSimulator simulator = new WebDriverSimulator(TestObjectFactory.class);
+    simulator.registerElement("testElement", ".fakeSelector").withVisibility(true);
+    WebDriver driver = simulator.getDriver();
+    WebElement element = driver.findElements(By.cssSelector(".fakeSelector")).get(0);
+    assertThat(element.isDisplayed(), is(equalTo(true)));
+  }
+
   @Test
   public void testNoPublicConstructorThrows() {
     assertThat(PrivateConstructorFactory.getFactory(), is(not(nullValue())));

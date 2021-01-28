@@ -69,7 +69,7 @@ public class UtamMethodChainLink_Tests {
   }
 
   @Test
-  public void testThrowsIncorrectCardinality() {
+  public void testThrowsIncorrectCardinalityExpectingReturnList() {
     final String ELEMENT_NAME = "elementName";
     UtamPageObject object = new UtamPageObject();
     TranslationContext context = getTestTranslationContext();
@@ -85,5 +85,24 @@ public class UtamMethodChainLink_Tests {
     assertThat(
         e.getMessage(),
         is(equalTo(String.format(ERR_WRONG_CARDINALITY_FOR_FIRST_LINK, ELEMENT_NAME, "not "))));
+  }
+
+  @Test
+  public void testThrowsIncorrectCardinalityExpectingReturnSingleElement() {
+    final String ELEMENT_NAME = "elementName";
+    UtamPageObject object = new UtamPageObject();
+    TranslationContext context = getTestTranslationContext();
+    object.elements =
+        new UtamElement[] {new UtamElement(ELEMENT_NAME, TEST_URI, new UtamSelector("selector", true))};
+    object.compile(context);
+    UtamError e =
+        expectThrows(
+            UtamError.class,
+            () ->
+                new UtamMethodChainLink(ELEMENT_NAME, false, TEST_URI)
+                    .getChainStatement(context, context.getElement(ELEMENT_NAME)));
+    assertThat(
+        e.getMessage(),
+        is(equalTo(String.format(ERR_WRONG_CARDINALITY_FOR_FIRST_LINK, ELEMENT_NAME, ""))));
   }
 }

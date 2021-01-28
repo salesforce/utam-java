@@ -40,6 +40,7 @@ public class ElementImplTests {
 
   private static final String LOCATOR_WITHOUT_PARAM = "locator";
   private static final String NAME_ATTRIBUTE = "mockName";
+  private static final String SAMPLE_CLASS_ATTRIBUTE = "mock-class";
   private static final String SAMPLE_TEXT = "sample text used to test input elements";
   private static final String SAMPLE_ELEMENT_TITLE = " element title";
   private static final String SAMPLE_ELEMENT_VALUE = "element value";
@@ -217,6 +218,15 @@ public class ElementImplTests {
     assertThat(element.getTitle(), is(SAMPLE_ELEMENT_TITLE));
   }
 
+  /** The getClassAttribute() method should return the value of 'class' attribute for a given WebElement */
+  @Test
+  public void testGetClassAttribute() {
+    ActionsMock mock = new ActionsMock();
+    when(mock.webElement.getAttribute("class")).thenReturn(SAMPLE_CLASS_ATTRIBUTE);
+    ElementImpl element = mock.getElementImpl();
+    assertThat(element.getClassAttribute(), is(SAMPLE_CLASS_ATTRIBUTE));
+  }
+
   /**
    * The getValue() method should return the value of the 'value' attribute for a given WebElement
    */
@@ -291,6 +301,15 @@ public class ElementImplTests {
   }
 
   /** The scrollTo() method should scroll window into view for a given WebElement */
+  @Test
+  public void testScrollTo() {
+    MockHelper mock = new MockHelper();
+    mock.getCustomElement().scrollTo();
+    verify(mock.utilities, times(2))
+        .executeJavaScript(SCROLL_INTO_VIEW_ALIGN_TO_TOP_JS, mock.webElement);
+  }
+
+  /** The scrollToTop() method should scroll window into view for a given WebElement */
   @Test
   public void testScrollToTop() {
     MockHelper mock = new MockHelper();

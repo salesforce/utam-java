@@ -363,13 +363,13 @@ public class UtamPageObject_Tests {
     MethodInfo info = new MethodInfo("getRoot", Clickable.class.getSimpleName());
     info.addCodeLine("(Clickable) this.getRootElement()");
     info.addImportedTypes(Clickable.class.getName());
+    info.setIsPublic(false);
     UtamPageObject utamPageObject = new UtamPageObject();
     utamPageObject.rootElementType = "clickable";
     TranslationContext context = getTestTranslationContext();
     utamPageObject.compile(context);
     PageObjectMethod rootElementMethod = context.getRootElement().getElementMethod();
     PageObjectValidationTestHelper.validateMethod(rootElementMethod, info);
-    assertThat(rootElementMethod.isPublic(), is(false));
   }
 
   @Test
@@ -377,13 +377,13 @@ public class UtamPageObject_Tests {
     MethodInfo info = new MethodInfo("getRootElement", Actionable.class.getSimpleName());
     info.addCodeLine("this.getRootElement()");
     info.addImportedTypes(Actionable.class.getName());
+    info.setIsPublic(false);
     UtamPageObject utamPageObject = new UtamPageObject();
     utamPageObject.rootElementType = "actionable";
     TranslationContext context = getTestTranslationContext();
     utamPageObject.compile(context);
     PageObjectMethod rootElementMethod = context.getRootElement().getElementMethod();
     PageObjectValidationTestHelper.validateMethod(rootElementMethod, info);
-    assertThat(rootElementMethod.isPublic(), is(false));
   }
 
   @Test

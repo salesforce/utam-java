@@ -4,7 +4,6 @@ import org.openqa.selenium.*;
 import org.testng.annotations.Test;
 import utam.core.selenium.context.SeleniumContextProvider;
 import utam.core.selenium.context.WebDriverUtilities;
-import utam.core.selenium.expectations.*;
 import utam.core.selenium.expectations.ElementWait.Match;
 
 import java.util.ArrayList;
@@ -176,6 +175,43 @@ public class ExpectationsUtilTests {
 
     assertThat(expectation.getLogMessage(), is(equalTo("click")));
     assertThat(expectation.returnIfNothingFound(), is(nullValue()));
+  }
+
+  /**
+   * Tests that the click method can be called and a JavaScript click will be attempted if an
+   * expected exception is thrown
+   */
+  @Test
+  void testClickRetry() {
+    SeleniumContextProvider provider = new SeleniumContextProvider(mockDriver);
+    WebElement mockElement = mock(WebElement.class);
+    doThrow(new JavascriptException("javascript error: Cannot read property 'defaultView' of undefined"))
+        .when(mockElement).click();
+    ElementExpectations<SearchContext> expectation = ExpectationsUtil.click();
+
+    SearchContext result = expectation.apply(provider.getWebDriverUtils()).apply(mockElement);
+    assertThat(result, is(equalTo(mockElement)));
+
+    assertThat(expectation.getLogMessage(), is(equalTo("click")));
+    assertThat(expectation.returnIfNothingFound(), is(nullValue()));
+  }
+
+  /**
+   * Tests that the click method can be called if an unknown JavaScript exception is thrown,
+   * it is thrown by the expectation
+   */
+  @Test
+  void testClickUnknownExceptionThrows() {
+    SeleniumContextProvider provider = new SeleniumContextProvider(mockDriver);
+    WebElement mockElement = mock(WebElement.class);
+    doThrow(new JavascriptException("javascript error: unknown JS error")).when(mockElement).click();
+    ElementExpectations<SearchContext> expectation = ExpectationsUtil.click();
+    JavascriptException e = expectThrows(
+        JavascriptException.class,
+        () -> expectation.apply(provider.getWebDriverUtils()).apply(mockElement)
+    );
+
+    assertThat(e.getMessage(), containsString("javascript error: unknown JS error"));
   }
 
   /**

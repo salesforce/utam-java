@@ -177,11 +177,13 @@ public class JsonDeserializerTests {
     PageObjectValidationTestHelper.MethodInfo rootElementMethod =
             new PageObjectValidationTestHelper.MethodInfo("getRoot", Clickable.class.getSimpleName());
     rootElementMethod.addCodeLine("(Clickable) this.getRootElement()");
+    rootElementMethod.setIsPublic(false);
 
     PageObjectValidationTestHelper.MethodInfo childElementGetter =
         new PageObjectValidationTestHelper.MethodInfo(
             getElementPrivateMethod("childElement"), "Clickable");
     childElementGetter.addCodeLine("this.childElement");
+    childElementGetter.setIsPublic(false);
 
     PageObjectValidationTestHelper.MethodInfo composeMethod =
         new PageObjectValidationTestHelper.MethodInfo("clickElement", "void");

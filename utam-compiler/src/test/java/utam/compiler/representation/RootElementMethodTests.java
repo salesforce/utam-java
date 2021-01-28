@@ -31,6 +31,7 @@ public class RootElementMethodTests {
     MethodInfo info = new MethodInfo("getRootElement", Actionable.class.getSimpleName());
     info.addCodeLine("this.getRootElement()");
     info.addImportedTypes(Actionable.class.getName());
+    info.setIsPublic(false);
     PageObjectMethod method = new RootElementMethod.Protected();
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
@@ -40,6 +41,7 @@ public class RootElementMethodTests {
     MethodInfo info = new MethodInfo("getRoot", Editable.class.getSimpleName());
     info.addCodeLine("(Editable) this.getRootElement()");
     info.addImportedTypes(Editable.class.getName());
+    info.setIsPublic(false);
     PageObjectMethod method =
         new RootElementMethod.Private(TypeUtilities.Element.editable.getType());
     PageObjectValidationTestHelper.validateMethod(method, info);

@@ -70,8 +70,8 @@ class UtamMethod {
   }
 
   // used in tests - shortcut for utils
-  UtamMethod(String name, String returns, UtamMethodUtil externalUtility) {
-    this(name, null, null, externalUtility, null, returns, null);
+  UtamMethod(String name, String returns, UtamMethodUtil externalUtility, Boolean returnAll) {
+    this(name, null, null, externalUtility, null, returns, returnAll);
   }
 
   // used in tests - shortcut for compose
@@ -118,9 +118,7 @@ class UtamMethod {
       return getChainMethod(context);
     }
     if (externalUtility != null) {
-      if(compose != null || chain != null) {
-        throw new UtamError(String.format(ERR_METHOD_REDUNDANT_TYPE, name));
-      }
+      // We already know chain and compose are null if we've gotten here
       return getUtilityMethod(context);
     }
     throw new UtamError(String.format(ERR_METHOD_UNKNOWN_TYPE, name));

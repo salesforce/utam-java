@@ -189,6 +189,19 @@ public class LocatorUtilitiesTests {
   }
 
   /**
+   * The getElementLocator method should return a valid locator when passed a field in a page object
+   * class
+   */
+  @Test
+  public void testGetElementLocatorWithEmptySelector() throws NoSuchFieldException {
+    BasePageObject page = new MockPageObject();
+    Field field = page.getClass().getDeclaredField("emptySelectorElement");
+    LocatorUtilities.Builder builder = getLocatorBuilder(new HashMap<>());
+    assertThat(builder.getLocator(field).getSelectorString(), is(equalTo(SCOPE_SELECTOR )));
+    assertThat(builder.getContainerLocator(field).getSelectorString(), is(equalTo(SCOPE_SELECTOR)));
+  }
+
+  /**
    * The getElementLocator method should return a valid locator when passed a field with a declared
    * scope in a page object class
    */
@@ -284,6 +297,16 @@ public class LocatorUtilitiesTests {
   }
 
   @Test
+  public void testGetElementSelectorFromAnnotationNull() {
+    ElementMarker.Find annotation = mock(ElementMarker.Find.class);
+    when(annotation.accessid()).thenReturn("");
+    when(annotation.classchain()).thenReturn("");
+    when(annotation.uiautomator()).thenReturn("");
+    when(annotation.css()).thenReturn("");
+    assertThat(getElementSelectorFromAnnotation(annotation), is(nullValue()));
+  }
+
+  @Test
   public void testGetPageSelectorFromAnnotationMobile() {
     PageMarker.Find annotation = mock(PageMarker.Find.class);
     when(annotation.accessid()).thenReturn("test");
@@ -309,6 +332,28 @@ public class LocatorUtilitiesTests {
     assertThat(locatorNode.getSelector().getValue(), is(equalTo("selector")));
   }
 
+  @Test
+  public void testGetContextTransformer() {
+    assertThat(LocatorUtilities.getContextTransformer(true), is(not(nullValue())));
+  }
+
+  @Test
+  public void testGetSelector() {
+    Selector selector = LocatorUtilities.getSelector("selector", Selector.Type.CSS);
+    assertThat(selector.getValue(), is(equalTo("selector")));
+    assertThat(selector.getType(), is(equalTo(Selector.Type.CSS)));
+  }
+
+  @Test
+  public void testQueryTypeGetElement() {
+    String transformString = QueryType.ELEMENT.getElement(
+        "selector", LocatorUtilities.getContextTransformer(true));
+    assertThat(transformString, is(equalTo(".shadowRoot.querySelector(\"selector\")")));
+    transformString = QueryType.ELEMENT.getElement(
+        "selector", LocatorUtilities.getContextTransformer(false));
+    assertThat(transformString, is(equalTo(".querySelector(\"selector\")")));
+  }
+
   @SuppressWarnings("unused")
   static class MockPageObject extends BasePageObject {
 
@@ -326,5 +371,8 @@ public class LocatorUtilitiesTests {
 
     @ElementMarker.Find(css = ".fakeCssFilterSelector")
     Actionable cssFilterElement;
+
+    @ElementMarker.Find(css = "")
+    Actionable emptySelectorElement;
   }
 }

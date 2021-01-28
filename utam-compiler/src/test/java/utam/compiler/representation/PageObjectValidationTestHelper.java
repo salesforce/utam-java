@@ -116,6 +116,7 @@ public class PageObjectValidationTestHelper {
    */
   public static void validateMethod(PageObjectMethod method, MethodInfo info) {
     validateDeclaration(method.getDeclaration(), info);
+    assertThat(method.isPublic(), is(equalTo(info.getIsPublic())));
     assertThat(
         "method " + info.name + " code lines", method.getCodeLines(), is(equalTo(info.codeLines)));
     if (info.importedTypes.size() > 0 || info.impliedImportedTypes.size() > 0) {
@@ -218,6 +219,7 @@ public class PageObjectValidationTestHelper {
     private final List<String> codeLines = new ArrayList<>();
     private final List<String> importedTypes = new ArrayList<>();
     private final List<String> impliedImportedTypes = new ArrayList<>();
+    private boolean isPublic = true;
 
     /**
      * Initializes a new instance of the MethodInfo class
@@ -296,6 +298,14 @@ public class PageObjectValidationTestHelper {
       allImports.addAll(importedTypes);
       allImports.addAll(impliedImportedTypes);
       return allImports;
+    }
+
+    public boolean getIsPublic() {
+      return isPublic;
+    }
+
+    public void setIsPublic(boolean isPublic) {
+      this.isPublic = isPublic;
     }
 
     public void test(PageObjectMethod method) {

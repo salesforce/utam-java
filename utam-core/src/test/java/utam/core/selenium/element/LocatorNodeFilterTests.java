@@ -2,9 +2,9 @@ package utam.core.selenium.element;
 
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
-import utam.core.selenium.element.LocatorNodeFilter;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -121,5 +121,61 @@ public class LocatorNodeFilterTests {
     assertThat(filter.filter(new ArrayList<>()).size(), is(equalTo(0)));
     assertThat(filter.getCopy(), is(equalTo(filter)));
     assertThat(filter.getCopy(), is(equalTo(EMPTY_FILTER)));
+  }
+
+  @Test
+  public void testFilterMap() {
+    LocatorNodeFilter filter = LocatorNodeFilter.Empty.INSTANCE;
+    List<Map.Entry<Integer, WebElement>> map = filter.map(getTestInnerTextElementList());
+    assertThat(map, hasSize(2));
+  }
+
+  @Test
+  public void testCustomFilter() {
+    LocatorNodeFilter filter = new LocatorNodeFilterText(SECOND_TEST_ELEMENT);
+    assertThat(filter.isEmpty(), is(equalTo(false)));
+    assertThat(filter.getFilterString(), is(equalTo("['" + SECOND_TEST_ELEMENT + "']")));
+    List<WebElement> filtered = filter.filter(getTestInnerTextElementList());
+    assertThat(filtered, hasSize(1));
+    assertThat(filtered.get(0).getText(), is(equalTo(SECOND_TEST_ELEMENT)));
+    List<Map.Entry<Integer, WebElement>> map = filter.map(getTestInnerTextElementList());
+    assertThat(map, hasSize(1));
+    assertThat(map.get(0).getKey(), is(equalTo(1)));
+    assertThat(map.get(0).getValue().getText(), is(equalTo(SECOND_TEST_ELEMENT)));
+  }
+
+  @Test
+  public void testHashCode() {
+    LocatorNodeFilter filter = new LocatorNodeFilterText(SECOND_TEST_ELEMENT);
+    assertThat(filter.hashCode(), is(equalTo(Objects.hash("['" + SECOND_TEST_ELEMENT + "']"))));
+  }
+
+  private static class LocatorNodeFilterText extends LocatorNodeFilter {
+
+    private final String filterText;
+
+    public LocatorNodeFilterText(String filterText) {
+      this.filterText = filterText;
+    }
+
+    @Override
+    public String getFilterString() {
+      return String.format("['%s']", filterText);
+    }
+
+    @Override
+    public boolean isEmpty() {
+      return false;
+    }
+
+    @Override
+    Predicate<WebElement> getCondition() {
+      return element -> element.getText().equals(filterText);
+    }
+
+    @Override
+    LocatorNode.Filter getCopy() {
+      return new LocatorNodeFilterText(filterText);
+    }
   }
 }

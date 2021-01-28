@@ -3,6 +3,7 @@ package utam.compiler.representation;
 import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.TypeProvider;
 import utam.compiler.helpers.AnnotationUtils;
+import utam.compiler.translator.TranslationUtilities;
 import org.testng.annotations.Test;
 
 import static utam.compiler.representation.UtilityMethodTests.getUtilityType;
@@ -25,5 +26,6 @@ public class UtilityReferenceFieldTests {
         field.getDeclaration(),
         is(equalTo("private final UtilityClass utilUtilityClass = getUtility(UtilityClass.class)")));
     assertThat(field.getAnnotations(), is(equalTo(AnnotationUtils.EMPTY_ANNOTATIONS)));
+    assertThat(field.getComments(), is(equalTo(TranslationUtilities.EMPTY_COMMENTS)));
   }
 }

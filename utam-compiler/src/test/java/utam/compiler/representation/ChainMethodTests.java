@@ -39,6 +39,7 @@ public class ChainMethodTests {
   public void testFirstSingle() {
     ChainMethod.Link first = new ChainMethod.Link(FIRST, "first", false);
     ChainMethod method = new ChainMethod(METHOD_NAME, Collections.singletonList(first));
+    assertThat(method.isPublic(), is(equalTo(true)));
     MethodInfo expected = new MethodInfo(METHOD_NAME, "First");
     expected.addCodeLine("getFirst()");
     expected.addImportedTypes(FIRST.getFullName());
