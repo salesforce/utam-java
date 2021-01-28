@@ -17,7 +17,7 @@ executePipeline(envDef) {
     }
 
     stage('Build') {
-        if(buildUtils.isReleaseBuild(env)) {
+        if(BuildUtils.isReleaseBuild(env)) {
             print('Skipping the build as it will be run during the release prepare')
         } else {
             mavenBuild()
