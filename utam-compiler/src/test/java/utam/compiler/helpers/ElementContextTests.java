@@ -1,7 +1,9 @@
 package utam.compiler.helpers;
 
 import utam.compiler.helpers.Validation.ErrorType;
+import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import org.testng.annotations.Test;
 
@@ -14,6 +16,7 @@ import static utam.compiler.helpers.ElementContext.EMPTY_SCOPE_ELEMENT_NAME;
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
+import static utam.compiler.helpers.TypeUtilities.Element.editable;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.assertThrows;
@@ -101,6 +104,18 @@ public class ElementContextTests {
         is(equalTo(Validation.ErrorType.COMPONENT_AND_ELEMENT_DUPLICATE_SELECTOR)));
   }
 
+  @Test
+  public void testSingleElementWithHardCodedLabelSelectorThrows() {
+    TypeProvider elementType =
+        new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
+    ElementContext element = new ElementContext.Basic(
+        ELEMENT_NAME, elementType, getCssSelector(SELECTOR_VALUE + "[title='fakeTitle']"));
+
+    assertThat(
+        element.validate(element),
+        is(equalTo(Validation.ErrorType.LABEL_HARDCODED)));
+  }
+
   /** An Element object representing a container should be able to be created */
   @Test
   public void testContainerElement() {
@@ -144,6 +159,22 @@ public class ElementContextTests {
     ElementContext element = ElementContext.ROOT_SCOPE;
     validateElement(element, expected);
     expectThrows(IllegalStateException.class, () -> element.validate(null));
+  }
+
+  @Test
+  public void testRootElementWithHardCodedLabelSelectorThrows() {
+    TypeProvider validationElementType =
+        new TypeUtilities.FromString("FakeValidationElementType", "test.FakeValidationElementType");
+    ElementContext validationElement = new ElementContext.Basic(
+        ELEMENT_NAME, validationElementType, getCssSelector(SELECTOR_VALUE));
+    TypeProvider type = new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
+    TypeProvider elementType = actionable.getType();
+    ElementContext element = new ElementContext.Root(
+        type, elementType, getCssSelector(SELECTOR_VALUE + "[title='fakeTitle']"));
+
+    assertThat(
+        element.validate(validationElement),
+        is(equalTo(Validation.ErrorType.LABEL_HARDCODED)));
   }
 
   /** Sn Element object representing a component should be able to be created */
@@ -326,6 +357,22 @@ public class ElementContextTests {
     validateElement(element, expected);
   }
 
+  @Test
+  public void testComponentElementWithHardCodedLabelSelectorThrows() {
+    TypeProvider validationElementType =
+        new TypeUtilities.FromString("FakeValidationElementType", "test.FakeValidationElementType");
+    ElementContext validationElement = new ElementContext.Root(
+        editable.getType(), validationElementType, getCssSelector(SELECTOR_VALUE));
+    TypeProvider type = new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
+    TypeProvider elementType = actionable.getType();
+    ElementContext element = new ElementContext.Custom(
+        ELEMENT_NAME, elementType, getCssSelector(SELECTOR_VALUE + "[title='fakeTitle']"));
+
+    assertThat(
+        element.validate(validationElement),
+        is(equalTo(Validation.ErrorType.LABEL_HARDCODED)));
+  }
+
   /** An Element object representing an element list should be able to be created */
   @Test
   public void testElementList() {
@@ -445,6 +492,30 @@ public class ElementContextTests {
   public void basicElementWithoutGetterThrows() {
     ElementContext elementContext = getSingleElementContext(actionable.getType());
     assertThrows(NullPointerException.class, () -> elementContext.getElementMethod());
+  }
+
+  @Test
+  public void basicElementSettingMethodWithoutGetterThrows() {
+    PageObjectMethod method = new PageObjectMethod() {
+      @Override public MethodDeclaration getDeclaration() {
+        return null;
+      }
+
+      @Override public List<String> getCodeLines() {
+        return null;
+      }
+
+      @Override public List<TypeProvider> getClassImports() {
+        return null;
+      }
+
+      @Override public boolean isPublic() {
+        return false;
+      }
+    };
+    ElementContext elementContext = getSingleElementContext(actionable.getType());
+    elementContext.setElementMethod(method);
+    assertThrows(NullPointerException.class, () -> elementContext.setElementMethod(method));
   }
 
   private static class FakeElement extends ElementContext {

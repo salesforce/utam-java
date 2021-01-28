@@ -86,6 +86,16 @@ public class ParameterUtilsTests {
     assertThat(EMPTY_PARAMETERS, is(equalTo(new ArrayList<MethodParameter>())));
   }
 
+  @Test
+  public void testEquals() {
+    ParameterUtils.Regular param = new ParameterUtils.Primitive("paramName", PrimitiveType.STRING);
+    ParameterUtils.Regular equalParam = new ParameterUtils.Primitive("paramName", PrimitiveType.STRING);
+    ParameterUtils.Regular otherParam = new ParameterUtils.Primitive("otherParamName", PrimitiveType.NUMBER);
+    assertThat(param.equals(equalParam), is(equalTo(true)));
+    assertThat(param.equals(otherParam), is(equalTo(false)));
+    assertThat(param.equals("notEqual"), is(equalTo(false)));
+  }
+
   private static TypeProvider getTypeProvider() {
     String packageName = "utam.fake.package";
     String simpleName = "FakeType";

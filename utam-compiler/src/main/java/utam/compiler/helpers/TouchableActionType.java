@@ -38,11 +38,7 @@ public enum TouchableActionType implements ActionType {
   private final PrimitiveType returnType;
 
   TouchableActionType(PrimitiveType returnType, PrimitiveType... parameters) {
-    if (parameters.length == 0) {
-      this.actionParameters = PrimitiveType.EMPTY_ARRAY;
-    } else {
-      this.actionParameters = parameters;
-    }
+    this.actionParameters = parameters;
     this.returnType = returnType;
   }
 

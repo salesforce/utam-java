@@ -130,6 +130,12 @@ public class TypeUtilitiesTests {
     assertThat(type.equals("InvalidString"), is(equalTo(false)));
   }
 
+  @Test
+  public void testFromStringHashCode() {
+    TypeProvider type = new TypeUtilities.FromString("FakeType", "test.FakeType");
+    assertThat(type.hashCode(), is(equalTo(Objects.hash(type.getSimpleName(), type.getFullName()))));
+  }
+
   /** ListOf should create a valid TypeProvider */
   @Test
   public void testListOf() {
@@ -195,6 +201,13 @@ public class TypeUtilitiesTests {
     assertThat(type.equals("InvalidString"), is(equalTo(false)));
   }
 
+  @Test
+  public void testListOfHashCode() {
+    TypeProvider baseType = new TypeUtilities.FromClass(Actionable.class);
+    TypeProvider type = new TypeUtilities.ListOf(baseType);
+    assertThat(type.hashCode(), is(equalTo(Objects.hash(baseType))));
+  }
+
   /** FromClass should create a valid TypeProvider */
   @Test
   public void testFromClass() {
@@ -257,6 +270,12 @@ public class TypeUtilitiesTests {
     TypeProvider type = new TypeUtilities.FromClass(Actionable.class);
 
     assertThat(type.equals("InvalidString"), is(equalTo(false)));
+  }
+
+  @Test
+  public void testFromClassHashCode() {
+    TypeProvider type = new TypeUtilities.FromClass(Actionable.class);
+    assertThat(type.hashCode(), is(equalTo(Objects.hash(type.getSimpleName(), type.getFullName()))));
   }
 
   /** The getElementType static method should return proper values */

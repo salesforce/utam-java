@@ -56,6 +56,11 @@ public class ActionableActionTypeTests {
         ELEMENT_NAME, TypeUtilities.Element.editable.getType(), getCssSelector("selector"));
   }
 
+  private static ElementContext.Basic getTouchableElementContext() {
+    return new ElementContext.Basic(
+        ELEMENT_NAME, TypeUtilities.Element.touchable.getType(), getCssSelector("selector"));
+  }
+
   private static void validateAction(ActionType action, String returnType, boolean isListAction) {
     assertThat(action.getParametersTypes(), is(empty()));
     assertThat(action.getReturnType().getSimpleName(), is(equalTo(returnType)));
@@ -287,6 +292,16 @@ public class ActionableActionTypeTests {
   }
 
   @Test
+  public void testGetActionFromStringForTouchable() {
+    final ActionType ACTION = TouchableActionType.flick;
+    ElementContext elementContext = getTouchableElementContext();
+    assertThat(
+        ActionableActionType.getActionType(
+            ACTION.getApplyString(), elementContext.getType(), elementContext.getName()),
+        is(equalTo(ACTION)));
+  }
+
+  @Test
   public void testActionFromStringWrongTypeError() {
     ElementContext elementContext = new ElementContext.Container(ELEMENT_NAME);
     UtamError e =
@@ -320,6 +335,26 @@ public class ActionableActionTypeTests {
                 ERR_UNKNOWN_ACTION,
                 ACTION_NAME,
                 TypeUtilities.Element.actionable.name(),
+                ELEMENT_NAME)));
+  }
+
+  @Test
+  public void testActionFromStringForTouchableWrongActionNameError() {
+    final String ACTION_NAME = "error";
+    ElementContext elementContext = getElementContext(TypeUtilities.Element.touchable);
+    UtamError e =
+        expectThrows(
+            UtamError.class,
+            () ->
+                ActionableActionType.getActionType(
+                    ACTION_NAME, elementContext.getType(), elementContext.getName()));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            String.format(
+                ERR_UNKNOWN_ACTION,
+                ACTION_NAME,
+                TypeUtilities.Element.touchable.name(),
                 ELEMENT_NAME)));
   }
 
