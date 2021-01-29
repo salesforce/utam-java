@@ -27,10 +27,11 @@ executePipeline(envDef) {
     if (BuildUtils.isReleaseBuild(env)) {
         stage('Prepare release') {
             mavenVersionsSet([managed: true])
-            mavenStageArtifacts()
+            mavenBuild()
         }
 
         stage('Release') {
+            mavenStageArtifacts()
             mavenPromoteArtifacts()
         }
     }
