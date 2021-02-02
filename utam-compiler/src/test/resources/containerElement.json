@@ -20,7 +20,24 @@
               "public": true
             }
           ]
-        }
+        },
+        "elements" : [
+          {
+            "name" : "containerWithSelector",
+            "type" : "container",
+            "public": true,
+            "selector" : {
+              "css" : ".css%s",
+              "args": [
+                {
+                  "name" : "selectorArg",
+                  "type" : "string"
+                }
+              ],
+              "returnAll" : true
+            }
+          }
+        ]
       },
       {
         "name" : "containerInsideRoot",

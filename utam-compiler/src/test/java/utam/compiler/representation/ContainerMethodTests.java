@@ -1,12 +1,13 @@
 package utam.compiler.representation;
 
+import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ParameterUtils;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
-import utam.core.framework.base.ContainerElementPageObject;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.framework.base.PageObject;
 import org.testng.annotations.Test;
 import utam.core.selenium.element.Selector;
@@ -15,8 +16,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
-import static utam.compiler.helpers.ElementContext.ROOT_SCOPE;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
 import static utam.compiler.representation.ContainerMethod.*;
 
@@ -28,74 +30,49 @@ import static utam.compiler.representation.ContainerMethod.*;
  */
 public class ContainerMethodTests {
 
-  public static final String RETURN_TYPE = RETURN_TYPE_STRING;
+  public static final String RETURN_TYPE = RETURNS.getSimpleName();;
   public static final String EXPECTED_CODE_LOAD = "load(pageObjectType, injectedSelector)";
   public static final MethodParameterInfo FIRST_CONTAINER_PARAMETER =
       new PageObjectValidationTestHelper.MethodParameterInfo(
-          PAGE_OBJECT_TYPE_PARAMETER_NAME, PAGE_OBJECT_TYPE_PARAMETER_TYPE.getSimpleName());
+          PAGE_OBJECT_PARAMETER.getValue(), PAGE_OBJECT_PARAMETER.getType().getSimpleName());
   public static final MethodParameterInfo SECOND_CONTAINER_PARAMETER =
       new PageObjectValidationTestHelper.MethodParameterInfo(
-          INJECTED_SELECTOR_PARAMETER_NAME, INJECTED_SELECTOR_PARAMETER_TYPE.getSimpleName());
+          SELECTOR_PARAMETER.getValue(), SELECTOR_PARAMETER.getType().getSimpleName());
   private static final String METHOD_NAME = "getContainer";
   private static final String ELEMENT_NAME = "container";
 
+  private static ElementContext getScope() {
+    final ElementContext scope =
+        new ElementContext.Basic("scope", actionable.getType(), getCssSelector("css"));
+    MethodDeclaration declaration = mock(MethodDeclaration.class);
+    PageObjectMethod mock = mock(PageObjectMethod.class);
+    when(declaration.getName()).thenReturn("getScope");
+    when(mock.getDeclaration()).thenReturn(declaration);
+    scope.setElementMethod(mock);
+    return scope;
+  }
+
   @Test
-  public void testContainerMethodWithoutParameters() {
+  public void testContainerMethodReturnsSingle() {
     MethodInfo info = new MethodInfo(METHOD_NAME, RETURN_TYPE);
     info.addCodeLine(
-        String.format(
-            "if (pageObjectType.equals(%s.class)) {",
-            CONTAINER_ELEMENT_PAGE_OBJECT_TYPE.getSimpleName()));
-    info.addCodeLine(
-        String.format(
-            "return (T)(new %s(this.%s))",
-            CONTAINER_ELEMENT_PAGE_OBJECT_TYPE.getSimpleName(), ELEMENT_NAME));
-    info.addCodeLine("}");
-    info.addCodeLine(String.format("this.%s.%s", ELEMENT_NAME, EXPECTED_CODE_LOAD));
-    info.addImportedTypes(
-        PageObject.class.getName(),
-        Selector.class.getName());
-    info.addImpliedImportedTypes(
-            PageObject.class.getName(),
-            Selector.class.getName(),
-            ContainerElementPageObject.class.getName());
+        "this.inContainer(this.getScope(), false).load(pageObjectType, injectedSelector)");
+    info.addImportedTypes(PageObject.class.getName(), Selector.class.getName());
+    info.addImpliedImportedTypes(PageObject.class.getName(), Selector.class.getName());
     info.addParameter(FIRST_CONTAINER_PARAMETER);
     info.addParameter(SECOND_CONTAINER_PARAMETER);
-    ElementContext element = new ElementContext.Container(ELEMENT_NAME);
-    ContainerMethod method = new ContainerMethod(element);
+    ContainerMethod method = new ContainerMethod.ReturnsSingle(getScope(), false, ELEMENT_NAME);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
   @Test
-  public void testContainerMethodWithParameters() {
-    MethodInfo info = new MethodInfo(METHOD_NAME, RETURN_TYPE);
-    info.addCodeLine(
-        String.format(
-            "if (pageObjectType.equals(%s.class)) {",
-            CONTAINER_ELEMENT_PAGE_OBJECT_TYPE.getSimpleName()));
-    info.addCodeLine(
-        String.format(
-            "return (T)(new %s(this.%s))",
-            CONTAINER_ELEMENT_PAGE_OBJECT_TYPE.getSimpleName(), ELEMENT_NAME));
-    info.addCodeLine("}");
-    info.addCodeLine(
-        String.format("setParameters(this.%s, parameter).%s", ELEMENT_NAME, EXPECTED_CODE_LOAD));
+  public void testContainerMethodReturnsList() {
+    MethodInfo info = new MethodInfo(METHOD_NAME, RETURNS_LIST.getSimpleName());
+    info.addCodeLines(
+        "this.inContainer(this.getScope(), true).loadList(pageObjectType, injectedSelector)");
     info.addParameter(FIRST_CONTAINER_PARAMETER);
     info.addParameter(SECOND_CONTAINER_PARAMETER);
-    info.addParameter(new MethodParameterInfo("parameter", "String"));
-    List<MethodParameter> parameters =
-        Stream.of(new ParameterUtils.Primitive("parameter", PrimitiveType.STRING))
-            .collect(Collectors.toList());
-    ElementContext scope =
-        new ElementContext.Basic(
-            ROOT_SCOPE,
-            "scope",
-            actionable.getType(),
-            getCssSelector("css"),
-            false,
-            parameters);
-    ElementContext element = new ElementContext.Container(scope, ELEMENT_NAME);
-    ContainerMethod method = new ContainerMethod(element);
+    ContainerMethod method = new ContainerMethod.ReturnsList(getScope(), true, ELEMENT_NAME);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 }

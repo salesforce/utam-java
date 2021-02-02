@@ -3,6 +3,8 @@ package utam.core.framework.consumer;
 import utam.core.framework.base.PageObject;
 import utam.core.selenium.element.Selector;
 
+import java.util.List;
+
 /**
  * page object element that can be used as scope
  *
@@ -37,6 +39,15 @@ public interface ContainerElement {
    * @return UTAM Page Object instance
    */
   <T extends PageObject> T load(Class<T> utamType, Selector injectSelector);
+
+  /**
+   * load UTAM Page objects using current element as scope
+   *
+   * @param utamType type to load
+   * @param injectSelector inject root, use Web.byCss or Mobile.by
+   * @return UTAM Page Object instance
+   */
+  <T extends PageObject> List<T> loadList(Class<T> utamType, Selector injectSelector);
 
   /**
    * returns true if loaded PO will be expanding its parent shadow
