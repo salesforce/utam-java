@@ -2,21 +2,15 @@ package utam.compiler.grammar;
 
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.helpers.TypeUtilities;
-import utam.compiler.representation.ContainerMethodTests;
-import utam.core.declarative.representation.PageClassField;
-import utam.core.declarative.representation.PageObjectMethod;
+import utam.compiler.representation.ContainerMethod;
 import utam.compiler.representation.PageObjectValidationTestHelper;
-import utam.core.framework.base.ContainerElementPageObject;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.framework.consumer.ContainerElement;
 import utam.core.framework.consumer.UtamError;
-import org.hamcrest.Matchers;
 import org.testng.annotations.Test;
 
-import java.util.Objects;
-
-import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
+import static utam.compiler.grammar.UtamElement.ERR_CONTAINER_SHOULD_BE_PUBLIC;
 import static utam.compiler.grammar.UtamElement.Type;
 import static utam.compiler.grammar.UtamSelector_Tests.getUtamCssSelector;
 import static utam.compiler.representation.ContainerMethodTests.FIRST_CONTAINER_PARAMETER;
@@ -62,39 +56,13 @@ public class UtamElement_ContainerTests {
   }
 
   @Test
-  public void testValid() {
-    UtamElement.Traversal element = getElementAbstraction();
-    TranslationContext context = getTestTranslationContext();
-    ElementContext self = element.testRootTraverseComponentOrContainer(context);
-    PageObjectMethod method = self.getElementMethod();
-    PageClassField field = self.getElementField();
-    assertThat(field, Matchers.is(notNullValue()));
-    assertThat(method, Matchers.is(notNullValue()));
-    PageObjectValidationTestHelper.MethodInfo expectedMethod =
-        new PageObjectValidationTestHelper.MethodInfo(
-            METHOD_NAME, ContainerMethodTests.RETURN_TYPE);
-    expectedMethod.addCodeLine(
-        String.format(
-            "if (pageObjectType.equals(%s.class)) {",
-            ContainerElementPageObject.class.getSimpleName()));
-    expectedMethod.addCodeLine(
-        String.format(
-            "return (T)(new %s(this.%s))",
-            ContainerElementPageObject.class.getSimpleName(), ELEMENT_NAME));
-    expectedMethod.addCodeLine("}");
-    expectedMethod.addCodeLine(
-        "this." + field.getName() + "." + ContainerMethodTests.EXPECTED_CODE_LOAD);
-    expectedMethod.addParameter(FIRST_CONTAINER_PARAMETER);
-    expectedMethod.addParameter(SECOND_CONTAINER_PARAMETER);
-    PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
-  }
-
-  @Test
-  public void testNotAllowedSelector() {
+  public void testPrivateContainer() {
     UtamElement element = getPublicContainerElement();
     element.selector = getUtamCssSelector();
+    element.isPublic = false;
     UtamError e = expectThrows(UtamError.class, () -> getElementAbstraction(element));
-    assertThat(e.getMessage(), is(equalTo(element.getSupportedPropertiesErr(Type.CONTAINER))));
+    assertThat(
+        e.getMessage(), is(equalTo(String.format(ERR_CONTAINER_SHOULD_BE_PUBLIC, ELEMENT_NAME))));
   }
 
   @Test
@@ -137,38 +105,6 @@ public class UtamElement_ContainerTests {
     assertThat(e.getMessage(), is(equalTo(element.getSupportedPropertiesErr(Type.CONTAINER))));
   }
 
-  @Test
-  public void testGetAnnotationsWithRootScope() {
-    UtamElement element = getPublicContainerElement();
-    UtamElement.Traversal abstraction = getElementAbstraction(element);
-    TranslationContext context = getTestTranslationContext();
-    abstraction.testRootTraverse(context);
-    assertThat(context.getFields(), hasSize(1));
-    PageObjectValidationTestHelper.FieldInfo createdFieldInfo =
-        new PageObjectValidationTestHelper.FieldInfo(
-            ELEMENT_NAME, UtamElement_ContainerTests.CONTAINER_TYPE_NAME);
-    createdFieldInfo.addAnnotationText("@ElementMarker.Find(css = \"\")");
-    createdFieldInfo.validateField(context.getFields().get(0));
-  }
-
-  @Test
-  public void testGetAnnotations() {
-    UtamElement element = getPublicContainerElement();
-    TranslationContext context = getTestTranslationContext();
-    ElementContext scopeElement =
-        new ElementContext.Basic(
-            "ScopeElement",
-            new TypeUtilities.FromString("actionable"),
-            getCssSelector(".fakeSelector"));
-    UtamElement.Traversal abstraction = getElementAbstraction(element);
-    abstraction.traverse(context, scopeElement, false);
-    assertThat(context.getFields(), hasSize(1));
-    PageObjectValidationTestHelper.FieldInfo createdFieldInfo =
-        new PageObjectValidationTestHelper.FieldInfo(ELEMENT_NAME, CONTAINER_TYPE_NAME);
-    createdFieldInfo.addAnnotationText("@ElementMarker.Find(css = \"\", scope = \"ScopeElement\")");
-    createdFieldInfo.validateField(context.getFields().get(0));
-  }
-
   /** The getDeclaredMethod method should return null for a non-public container */
   @Test
   public void testGetDeclaredMethodWithNonPublicComponent() {
@@ -179,29 +115,6 @@ public class UtamElement_ContainerTests {
 
   /** The getDeclaredMethods method should return the proper value for a container */
   @Test
-  public void testGetDeclaredMethodsWithComponent() {
-    UtamElement element = getPublicContainerElement();
-    PageObjectValidationTestHelper.MethodInfo expectedMethod =
-        new PageObjectValidationTestHelper.MethodInfo(
-            METHOD_NAME, ContainerMethodTests.RETURN_TYPE);
-    expectedMethod.addCodeLine(
-        String.format(
-            "if (pageObjectType.equals(%s.class)) {",
-            ContainerElementPageObject.class.getSimpleName()));
-    expectedMethod.addCodeLine(
-        String.format(
-            "return (T)(new %s(this.%s))",
-            ContainerElementPageObject.class.getSimpleName(), ELEMENT_NAME));
-    expectedMethod.addCodeLine("}");
-    expectedMethod.addCodeLine("this.test." + ContainerMethodTests.EXPECTED_CODE_LOAD);
-    expectedMethod.addParameter(FIRST_CONTAINER_PARAMETER);
-    expectedMethod.addParameter(SECOND_CONTAINER_PARAMETER);
-
-    PageObjectValidationTestHelper.validateMethod(
-        Objects.requireNonNull(getElementMethod(element)), expectedMethod);
-  }
-
-  @Test
   public void testNestedContainerElement() {
     TranslationContext context = new DeserializerUtilities().getContext("containerElement");
     ElementContext element = context.getElement("nestedContainer");
@@ -211,15 +124,33 @@ public class UtamElement_ContainerTests {
     PageObjectValidationTestHelper.MethodInfo expectedMethod =
         new PageObjectValidationTestHelper.MethodInfo(
             "getNestedContainer", "<T extends PageObject> T");
-    expectedMethod.addParameter(FIRST_CONTAINER_PARAMETER);
-    expectedMethod.addParameter(SECOND_CONTAINER_PARAMETER);
     expectedMethod.addParameter(
         new PageObjectValidationTestHelper.MethodParameterInfo("scopeArg", "String"));
+    expectedMethod.addParameter(FIRST_CONTAINER_PARAMETER);
+    expectedMethod.addParameter(SECOND_CONTAINER_PARAMETER);
+
     expectedMethod.addCodeLines(
-        "if (pageObjectType.equals(ContainerElementPageObject.class)) {",
-        "return (T)(new ContainerElementPageObject(this.nestedContainer))",
-        "}",
-        "setParameters(this.nestedContainer, scopeArg).load(pageObjectType, injectedSelector)");
+        "this.inContainer(this.getScopeElement(scopeArg), true).load(pageObjectType, injectedSelector)");
+    PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
+  }
+
+  @Test
+  public void testContainerWithSelector() {
+    TranslationContext context = new DeserializerUtilities().getContext("containerElement");
+    ElementContext element = context.getElement("containerWithSelector");
+    PageObjectMethod method = element.getElementMethod();
+    assertThat(element.getType().getSimpleName(), is(equalTo("ContainerElement")));
+    PageObjectValidationTestHelper.MethodInfo expectedMethod =
+        new PageObjectValidationTestHelper.MethodInfo(
+            "getContainerWithSelector", ContainerMethod.RETURNS_LIST.getSimpleName());
+    expectedMethod.addParameter(
+        new PageObjectValidationTestHelper.MethodParameterInfo("scopeArg", "String"));
+    expectedMethod.addParameter(
+        new PageObjectValidationTestHelper.MethodParameterInfo("selectorArg", "String"));
+    expectedMethod.addParameter(FIRST_CONTAINER_PARAMETER);
+    expectedMethod.addCodeLines(
+        "this.inContainer(this.getScopeElement(scopeArg), false)"
+            + ".loadList(pageObjectType, by(String.format(\".css%s\", selectorArg), Selector.Type.CSS))");
     PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
   }
 }

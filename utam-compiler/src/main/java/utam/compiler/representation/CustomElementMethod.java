@@ -65,12 +65,24 @@ public abstract class CustomElementMethod implements PageObjectMethod {
   static String getFilteredBuilderSuffix(
       TypeProvider returnType, String predicateCode, boolean isList) {
     if (isList) {
-      return String.format(
-          "%s(%s.class, %s)", LIST_BUILDER_METHOD, returnType.getSimpleName(), predicateCode);
+      return String.format("%s(%s.class, %s)", LIST_BUILDER_METHOD, returnType.getSimpleName(),
+          predicateCode);
     } else {
-      return String.format(
-          "%s(%s.class, %s)", BUILDER_METHOD, returnType.getSimpleName(), predicateCode);
+      return String.format("%s(%s.class, %s)", BUILDER_METHOD, returnType.getSimpleName(), predicateCode);
     }
+  }
+
+  static String buildSelectorString(Selector selector, List<MethodParameter> selectorParameters) {
+    if (selectorParameters.isEmpty()) {
+      return String.format("\"%s\"", escapeDoubleQuotes(selector.getValue()));
+    }
+    return String.format(
+        "String.format(\"%s\", %s)",
+        escapeDoubleQuotes(selector.getValue()), getParametersValuesString(selectorParameters));
+  }
+
+  private static String escapeDoubleQuotes(String selectorString) {
+    return selectorString.replaceAll("\"", Matcher.quoteReplacement("\\\""));
   }
 
   public static final class Single implements PageObjectMethod {
@@ -264,19 +276,10 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
     public Root(
         Selector selector, boolean isExpandScope, List<MethodParameter> selectorParameters) {
-      String selectorString;
-      if (selectorParameters.isEmpty()) {
-        selectorString = String.format("\"%s\"", escapeDoubleQuotes(selector.getValue()));
-      } else {
-        selectorString =
-            String.format(
-                "String.format(\"%s\", %s)",
-                escapeDoubleQuotes(selector.getValue()),
-                getParametersValuesString(selectorParameters));
-      }
       this.selectorCodeString =
           String.format(
-              "by(%s, Selector.Type.%s, %s)", selectorString, selector.getType(), isExpandScope);
+              "by(%s, Selector.Type.%s, %s)",
+              buildSelectorString(selector, selectorParameters), selector.getType(), isExpandScope);
       this.selectorParameters.addAll(selectorParameters);
     }
 

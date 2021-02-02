@@ -7,6 +7,7 @@
 
 package utam.core.framework.base;
 
+import utam.core.framework.consumer.Container;
 import utam.core.framework.consumer.ContainerElement;
 import utam.core.framework.consumer.LocationPolicy;
 import utam.core.framework.consumer.UtamError;
@@ -165,6 +166,10 @@ public abstract class BasePageObject implements RootPageObject {
     return new PageObjectElementBuilderImpl(getFactory(), pageObjectElement);
   }
 
+  protected final ContainerElement inContainer(BaseElement scopeElement, boolean isExpandShadow) {
+    return getContainer(getElementLocator(scopeElement), isExpandShadow, getFactory());
+  }
+
   @SuppressWarnings({"unchecked", "rawtypes"})
   // used by generator - return imperative utility
   protected <T extends ImperativeProvider> T getUtility(Class<T> type) {
@@ -188,5 +193,10 @@ public abstract class BasePageObject implements RootPageObject {
             LocatorUtilities.getContextTransformer(isExpandScopeShadowRoot),
             policy);
     return LocatorUtilities.getSingleNodeLocator(element, policy);
+  }
+
+  // used by generator - injects selector when building container
+  protected Selector by(String selectorString, Selector.Type type) {
+    return LocatorUtilities.getSelector(selectorString, type);
   }
 }
