@@ -3,11 +3,29 @@ version: 2.1
 orbs:
   maven: circleci/maven@1.1.0
 
+jobs:
+  build-and-test:
+    docker:
+      - image: cimg/openjdk:11.0
+    steps:
+      - checkout
+      - run:
+          name: Build
+          command: mvn -B -DskipTests clean package
+      - run:
+          name: Test
+          command: mvn test
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/test-results/junit/
+            find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/test-results/junit/ \;
+          when: always
+      - store_test_results:
+          path: ~/test-results
+
 workflows:
   maven_test:
     jobs:
-      - maven/test: # checkout, build, test, and upload test results
-          executor:
-            name: maven/default
-            tag: "11.0"
+      - build-and-test
 
