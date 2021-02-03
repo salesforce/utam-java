@@ -16,6 +16,7 @@ import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.selenium.element.Selector;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,6 +46,8 @@ public final class UtamElement {
   static final String ERR_ELEMENT_NESTED_ELEMENTS = "element '%s' can't have nested elements";
   static final String ERR_ELEMENT_EXTERNAL_NOT_ALLOWED =
       "element '%s': external flag is not supported";
+  static final String ERR_CONTAINER_SHOULD_BE_PUBLIC =
+      "element '%s': private container is redundant, please mark element public";
   private static final String[] SUPPORTED_BASIC_ELEMENT_PROPERTIES = {
     "name", "public", "selector", "filter", "nullable", "shadow", "elements"
   };
@@ -52,16 +55,17 @@ public final class UtamElement {
   private static final String[] SUPPORTED_CUSTOM_ELEMENT_PROPERTIES = {
     "name", "public", "selector", "filter", "nullable", "external"
   };
+  final String name;
   UtamSelector selector;
   UtamShadowElement shadow;
   String type;
   Boolean isPublic; // should be nullable as it's redundant for root
-  final String name;
   UtamElement[] elements;
   UtamElementFilter filter;
   Boolean isNullable;
   Boolean isExternal;
   Traversal traversalAbstraction;
+
   // used in tests
   UtamElement(String name) {
     this(null, name, false, null, null, null, null, null, null);
@@ -105,8 +109,7 @@ public final class UtamElement {
     } else if (elementType == Type.CUSTOM) {
       SUPPORTED = String.join(",", SUPPORTED_CUSTOM_ELEMENT_PROPERTIES);
     } else {
-      SUPPORTED =
-              String.join(",", SUPPORTED_CONTAINER_ELEMENT_PROPERTIES);
+      SUPPORTED = String.join(",", SUPPORTED_CONTAINER_ELEMENT_PROPERTIES);
     }
     return String.format(
         ERR_ELEMENT_REDUNDANT_PROPERTIES, elementType.name().toLowerCase(), name, SUPPORTED);
@@ -253,7 +256,9 @@ public final class UtamElement {
       // register usage of scope getter
       String methodName = scopeElement.getElementMethod().getDeclaration().getName();
       translatorContext.setPrivateMethodUsage(methodName);
-      translatorContext.setTestableElement(name, new ElementUnitTestHelper(
+      translatorContext.setTestableElement(
+          name,
+          new ElementUnitTestHelper(
               selector.getSelector().getValue(),
               scopeElement.getName(),
               isExpandScopeShadowRoot,
@@ -339,40 +344,49 @@ public final class UtamElement {
   class Container extends Traversal {
 
     private Container() {
-      if (selector != null
-          || filter != null
+      if (filter != null
           || isNullable != null
           || isExternal != null
           || elements != null
           || shadow != null) {
         throw new UtamError(getSupportedPropertiesErr(Type.CONTAINER));
       }
+      if (!isPublic()) {
+        throw new UtamError(String.format(ERR_CONTAINER_SHOULD_BE_PUBLIC, name));
+      }
     }
 
     @Override
     ElementContext[] traverse(
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
-      TypeProvider elementType = TypeUtilities.CONTAINER_ELEMENT;
-      PageClassField field =
-          new ElementField(
-              name,
-              elementType,
-              Collections.singletonList(
-                  getFindAnnotation(EMPTY_SELECTOR, scopeElement, isExpandScopeShadowRoot)),
-              "");
+      Selector injectSelector = selector == null ? null : selector.getSelector();
+      List<MethodParameter> selectorParameters = new ArrayList<>();
+      if (selector != null) {
+        selectorParameters.addAll(selector.getParameters(name));
+      }
       ElementContext elementContext = new ElementContext.Container(scopeElement, name);
+      PageObjectMethod method;
+      if (selector != null && selector.isReturnAll) {
+        method = new ContainerMethod.WithSelectorReturnsList(
+            scopeElement, isExpandScopeShadowRoot, name, injectSelector, selectorParameters);
+      } else if (selector != null) {
+        method = new ContainerMethod.WithSelector(
+            scopeElement, isExpandScopeShadowRoot, name, injectSelector, selectorParameters);
+      } else {
+        method = new ContainerMethod.ReturnsSingle(scopeElement, isExpandScopeShadowRoot, name);
+      }
       if (!isPublic()) {
         throw new UtamError(
             String.format(
                 "Private container is redundant, please mark element '%s' as public",
                 elementContext.getName()));
       }
-      PageObjectMethod method = new ContainerMethod(scopeElement, elementContext, isPublic());
-      elementContext.setElementField(field);
+
+      // we used scope method in container code, register
+      context.setPrivateMethodUsage(scopeElement.getElementMethod().getDeclaration().getName());
       elementContext.setElementMethod(method);
       context.setElement(elementContext);
       context.setMethod(method);
-      context.setClassField(field);
       return new ElementContext[] {null, elementContext};
     }
   }
