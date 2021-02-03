@@ -64,15 +64,4 @@ public class ContainerMethodTests {
     ContainerMethod method = new ContainerMethod.ReturnsSingle(getScope(), false, ELEMENT_NAME);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
-
-  @Test
-  public void testContainerMethodReturnsList() {
-    MethodInfo info = new MethodInfo(METHOD_NAME, RETURNS_LIST.getSimpleName());
-    info.addCodeLines(
-        "this.inContainer(this.getScope(), true).loadList(pageObjectType, injectedSelector)");
-    info.addParameter(FIRST_CONTAINER_PARAMETER);
-    info.addParameter(SECOND_CONTAINER_PARAMETER);
-    ContainerMethod method = new ContainerMethod.ReturnsList(getScope(), true, ELEMENT_NAME);
-    PageObjectValidationTestHelper.validateMethod(method, info);
-  }
 }

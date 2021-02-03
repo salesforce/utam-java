@@ -134,20 +134,4 @@ public abstract class ContainerMethod implements PageObjectMethod {
                     INJECTED_SELECTOR_PARAMETER_NAME));
         }
     }
-
-    // todo - add property returnAll for element
-    public static class ReturnsList extends ContainerMethod {
-        public ReturnsList(ElementContext scopeElement, boolean isExpandScope, String elementName) {
-            super(scopeElement, isExpandScope, elementName, RETURNS_LIST);
-            interfaceImports.add(PAGE_OBJECT);
-            interfaceImports.add(LIST_IMPORT);
-            interfaceImports.add(SELECTOR_IMPORT);
-            classImports.addAll(interfaceImports);
-            methodParameters.add(PAGE_OBJECT_PARAMETER);
-            methodParameters.add(SELECTOR_PARAMETER);
-            implCodeLines.add(String
-                .format("%s.loadList(%s, %s)", containerElement, PAGE_OBJECT_TYPE_PARAMETER_NAME,
-                    INJECTED_SELECTOR_PARAMETER_NAME));
-        }
-    }
 }
