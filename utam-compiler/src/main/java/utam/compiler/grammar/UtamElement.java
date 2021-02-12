@@ -13,7 +13,6 @@ import utam.compiler.representation.CustomElementMethod;
 import utam.compiler.representation.ElementField;
 import utam.compiler.representation.ElementMethod;
 import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.selenium.element.Selector;
@@ -23,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static utam.compiler.helpers.AnnotationUtils.getFindAnnotation;
-import static utam.compiler.helpers.ElementContext.EMPTY_SELECTOR;
 import static utam.compiler.helpers.ElementContext.ROOT_SCOPE;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
 import static utam.compiler.translator.TranslationUtilities.setHtmlElementComments;
@@ -175,10 +173,6 @@ public final class UtamElement {
 
     ElementContext testRootTraverse(TranslationContext context) {
       return traverse(context, ROOT_SCOPE, false)[0];
-    }
-
-    ElementContext testRootTraverseComponentOrContainer(TranslationContext context) {
-      return traverse(context, ROOT_SCOPE, false)[1];
     }
   }
 
@@ -343,6 +337,8 @@ public final class UtamElement {
 
   class Container extends Traversal {
 
+    static final String DEFAULT_CONTAINER_SELECTOR_CSS = ":scope > *:first-child";
+
     private Container() {
       if (filter != null
           || isNullable != null
@@ -354,26 +350,30 @@ public final class UtamElement {
       if (!isPublic()) {
         throw new UtamError(String.format(ERR_CONTAINER_SHOULD_BE_PUBLIC, name));
       }
+      if (selector == null) {
+        selector = new UtamSelector(
+            DEFAULT_CONTAINER_SELECTOR_CSS,
+            null,
+            null,
+            null,
+            false,
+            new UtamArgument[] {});
+      }
     }
 
     @Override
     ElementContext[] traverse(
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
-      Selector injectSelector = selector == null ? null : selector.getSelector();
-      List<MethodParameter> selectorParameters = new ArrayList<>();
-      if (selector != null) {
-        selectorParameters.addAll(selector.getParameters(name));
-      }
+      Selector injectSelector = selector.getSelector();
+      List<MethodParameter> selectorParameters = new ArrayList<>(selector.getParameters(name));
       ElementContext elementContext = new ElementContext.Container(scopeElement, name);
       PageObjectMethod method;
-      if (selector != null && selector.isReturnAll) {
+      if (selector.isReturnAll) {
         method = new ContainerMethod.WithSelectorReturnsList(
             scopeElement, isExpandScopeShadowRoot, name, injectSelector, selectorParameters);
-      } else if (selector != null) {
+      } else {
         method = new ContainerMethod.WithSelector(
             scopeElement, isExpandScopeShadowRoot, name, injectSelector, selectorParameters);
-      } else {
-        method = new ContainerMethod.ReturnsSingle(scopeElement, isExpandScopeShadowRoot, name);
       }
       if (!isPublic()) {
         throw new UtamError(
