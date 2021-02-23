@@ -30,7 +30,7 @@ import static org.testng.Assert.expectThrows;
 public class UtamElementFilter_Tests {
 
   private static final String ELEMENT_NAME = "test";
-  private static final TypeProvider ACTIONABLE_TYPE = actionable.getType();
+  private static final TypeProvider ACTIONABLE_TYPE = actionable;
   private static final UtamArgument[] ONE_STRING_ARGS =
       new UtamArgument[] {new UtamArgument("text", "string")};
   private static final UtamArgument[] ONE_BOOLEAN_ARGS =
@@ -201,7 +201,7 @@ public class UtamElementFilter_Tests {
     assertThat(elementContext.isList(), is(equalTo(false)));
     PageObjectValidationTestHelper.MethodInfo methodInfo =
         new PageObjectValidationTestHelper.MethodInfo(
-            "getElement", editable.getType().getSimpleName());
+            "getElement", editable.getSimpleName());
     methodInfo.addParameter(
         new PageObjectValidationTestHelper.MethodParameterInfo("arg1", "String"));
     methodInfo.addParameter(

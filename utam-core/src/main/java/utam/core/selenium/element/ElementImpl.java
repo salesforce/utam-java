@@ -1,8 +1,10 @@
 package utam.core.selenium.element;
 
+import java.util.function.Supplier;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import utam.core.appium.element.GestureDirection;
 import utam.core.appium.expectations.MobileExpectationsUtil;
 import utam.core.framework.UtamLogger;
@@ -219,18 +221,19 @@ class ElementImpl implements BaseElement, Actionable, Clickable, Editable, Touch
   }
 
   @Override
-  public <T> T waitFor(Function<Object[], T> condition, Object...args) {
-    Object[] argsArray = args == null? new Object[0] : args;
-    log("wait for condition");
-    ElementExpectations<T> expectation = ExpectationsUtil.waitFor(condition, argsArray);
+  public <T> T waitFor(Supplier<T> condition) {
+    ElementExpectations<T> expectation = ExpectationsUtil.waitFor(condition);
+    log(expectation.getLogMessage());
     return new ElementWaitImpl(expectation.getLogMessage(), elementLocator, context).wait(expectation);
   }
 
   @Override
   public boolean containsElement(Selector selector, boolean isExpandShadow) {
     // try to find how many elements are there, if 0 - nothing found
+    ElementExpectations<Integer> expectation = ExpectationsUtil.findElements(selector, isExpandShadow);
+    log(expectation.getLogMessage());
     return new ElementWaitImpl("check for element containing", elementLocator, context)
-            .wait(ExpectationsUtil.findElements(selector, isExpandShadow)) > 0;
+            .wait(expectation) > 0;
   }
 
   @Override
@@ -241,7 +244,9 @@ class ElementImpl implements BaseElement, Actionable, Clickable, Editable, Touch
   @Override
   public void press(CharSequence key) {
     Keys keyToPress = Keys.valueOf(key.toString().toUpperCase());
-    setText(keyToPress.toString());
+    ElementExpectations<SearchContext> expectation = ExpectationsUtil.setText(keyToPress.toString());
+    log(String.format("press keyboard key '%s'", keyToPress.name()));
+    new ElementWaitImpl(expectation.getLogMessage(), elementLocator, context).wait(expectation);
   }
 
   private void validateDriverForTouchAction() {

@@ -330,7 +330,7 @@ public class UtamElement_BasicTests {
     DeserializerUtilities.Result res = new DeserializerUtilities().getResultFromFile("nestedElements");
     TranslationContext context = res.getContext();
     ElementContext one = context.getElement("one");
-    assertThat(one.getType(), is(equalTo(TypeUtilities.Element.actionable.getType())));
+    assertThat(one.getType(), is(equalTo(TypeUtilities.Element.actionable)));
     ElementContext nested = context.getElement("nestedCustom");
     assertThat(nested.getType().getSimpleName(), is(equalTo("ComponentType")));
     ElementContext nestedInShadow = context.getElement("nestedInsideShadow");
@@ -408,7 +408,7 @@ public class UtamElement_BasicTests {
         elementContext.getElementMethod().getDeclaration().getName(),
         is(equalTo("getSimpleElement")));
     assertThat(elementContext.getElementMethod().isPublic(), is(true));
-    assertThat(elementContext.getType(), is(equalTo(clickable.getType())));
+    assertThat(elementContext.getType(), is(equalTo(clickable)));
   }
 
   @Test
@@ -427,6 +427,6 @@ public class UtamElement_BasicTests {
         elementContext.getElementMethod().getDeclaration().getName(),
         is(equalTo("getTestElement")));
     assertThat(elementContext.getElementMethod().isPublic(), is(false));
-    assertThat(elementContext.getType(), is(equalTo(actionable.getType())));
+    assertThat(elementContext.getType(), is(equalTo(actionable)));
   }
 }

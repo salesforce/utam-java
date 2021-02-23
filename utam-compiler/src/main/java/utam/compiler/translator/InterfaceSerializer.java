@@ -55,7 +55,7 @@ public final class InterfaceSerializer {
   }
 
   private String getImportStatement(TypeProvider type) {
-    return getImportString(source.getInterfaceType(), type);
+    return getImportString(type, source.getInterfaceType().getPackageName());
   }
 
   private Set<String> getImports(Collection<MethodDeclaration> declaredApi) {

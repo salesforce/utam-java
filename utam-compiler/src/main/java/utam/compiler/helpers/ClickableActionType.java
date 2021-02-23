@@ -1,5 +1,7 @@
 package utam.compiler.helpers;
 
+import static utam.compiler.helpers.TypeUtilities.VOID;
+
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.selenium.element.Clickable;
 import utam.core.selenium.expectations.ExpectationsUtil;
@@ -39,8 +41,8 @@ public enum ClickableActionType implements ActionType {
   }
 
   @Override
-  public PrimitiveType getReturnType() {
-    return PrimitiveType.VOID;
+  public TypeProvider getReturnType() {
+    return VOID;
   }
 
   @Override

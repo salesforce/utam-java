@@ -148,7 +148,7 @@ public abstract class ElementContext {
 
     // used in tests
     public Basic(String name) {
-      this(name, actionable.getType(), EMPTY_SELECTOR);
+      this(name, actionable, EMPTY_SELECTOR);
     }
 
     @Override
@@ -178,7 +178,7 @@ public abstract class ElementContext {
           EMPTY_PARAMETERS);
     }
 
-    public Container(String name) {
+    Container(String name) {
       this(ROOT_SCOPE, name);
     }
 
@@ -200,7 +200,7 @@ public abstract class ElementContext {
 
     // used in tests
     public Root(TypeProvider enclosingPageObjectType) {
-      this(enclosingPageObjectType, actionable.getType(), EMPTY_SELECTOR);
+      this(enclosingPageObjectType, actionable, EMPTY_SELECTOR);
     }
 
     boolean isSameEnclosingType(ElementContext element) {

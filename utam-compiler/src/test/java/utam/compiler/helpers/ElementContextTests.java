@@ -144,7 +144,7 @@ public class ElementContextTests {
   @Test
   public void testRootElementWithSelectorType() {
     TypeProvider type = new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
-    TypeProvider elementType = actionable.getType();
+    TypeProvider elementType = actionable;
     ElementInfo expected = new ElementInfo("root", elementType.getFullName());
     expected.isRoot = true;
     ElementContext element = new ElementContext.Root(type, elementType, getCssSelector(SELECTOR_VALUE));
@@ -168,7 +168,7 @@ public class ElementContextTests {
     ElementContext validationElement = new ElementContext.Basic(
         ELEMENT_NAME, validationElementType, getCssSelector(SELECTOR_VALUE));
     TypeProvider type = new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
-    TypeProvider elementType = actionable.getType();
+    TypeProvider elementType = actionable;
     ElementContext element = new ElementContext.Root(
         type, elementType, getCssSelector(SELECTOR_VALUE + "[title='fakeTitle']"));
 
@@ -362,9 +362,9 @@ public class ElementContextTests {
     TypeProvider validationElementType =
         new TypeUtilities.FromString("FakeValidationElementType", "test.FakeValidationElementType");
     ElementContext validationElement = new ElementContext.Root(
-        editable.getType(), validationElementType, getCssSelector(SELECTOR_VALUE));
+        editable, validationElementType, getCssSelector(SELECTOR_VALUE));
     TypeProvider type = new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
-    TypeProvider elementType = actionable.getType();
+    TypeProvider elementType = actionable;
     ElementContext element = new ElementContext.Custom(
         ELEMENT_NAME, elementType, getCssSelector(SELECTOR_VALUE + "[title='fakeTitle']"));
 
@@ -484,13 +484,13 @@ public class ElementContextTests {
   public void testElementListWithRootElementHavingSameSelector() {
     TypeProvider type = new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
     ElementContext element = new ElementContext.Basic("fakeElementName", type, getCssSelector(SELECTOR_VALUE), true);
-    ElementContext otherElement = new ElementContext.Root(type, actionable.getType(), getCssSelector(SELECTOR_VALUE));
+    ElementContext otherElement = new ElementContext.Root(type, actionable, getCssSelector(SELECTOR_VALUE));
     assertThat(element.validate(otherElement), is(equalTo(ErrorType.DUPLICATE_WITH_ROOT_SELECTOR)));
   }
 
   @Test
   public void basicElementWithoutGetterThrows() {
-    ElementContext elementContext = getSingleElementContext(actionable.getType());
+    ElementContext elementContext = getSingleElementContext(actionable);
     assertThrows(NullPointerException.class, () -> elementContext.getElementMethod());
   }
 
@@ -513,7 +513,7 @@ public class ElementContextTests {
         return false;
       }
     };
-    ElementContext elementContext = getSingleElementContext(actionable.getType());
+    ElementContext elementContext = getSingleElementContext(actionable);
     elementContext.setElementMethod(method);
     assertThrows(NullPointerException.class, () -> elementContext.setElementMethod(method));
   }

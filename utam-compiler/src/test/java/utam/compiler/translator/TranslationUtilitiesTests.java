@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.compiler.translator.TranslationUtilities.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -85,41 +86,35 @@ public class TranslationUtilitiesTests {
   public void testGetImportString() {
     TypeProvider classProvider =
         new TypeUtilities.FromString("testPageObject", "test.testPageObject");
-    TypeProvider importedProvider = new TypeUtilities.FromString("testOther", "other.package");
-    assertThat(getImportString(classProvider, importedProvider),
-        is(equalTo("import other.package;")));
-  }
-
-  @Test
-  public void testGetImportStringWithNullImportedType() {
-    TypeProvider classProvider =
-        new TypeUtilities.FromString("testPageObject", "test.testPageObject");
-    assertThat(getImportString(classProvider, null), is(emptyString()));
+    assertThat(getImportString(classProvider, "current.package"),
+        is(equalTo("import test.testPageObject;")));
   }
 
   @Test
   public void testGetImportStringWithEmptyFullName() {
     TypeProvider classProvider =
-        new TypeUtilities.FromString("testPageObject", "test.testPageObject");
-    TypeProvider importedProvider = new TypeUtilities.FromString("testOther", "");
-    assertThat(getImportString(classProvider, importedProvider), is(emptyString()));
+        new TypeUtilities.FromString("testPageObject", "");
+    assertThat(getImportString(classProvider, "current.package"), is(emptyString()));
+  }
+
+  @Test
+  public void testGetImportStringWithEmptyPackage() {
+    TypeProvider classProvider =
+        new TypeUtilities.FromString("TestPageObject", "TestPageObject");
+    assertThat(getImportString(classProvider, "current.package"), is(emptyString()));
   }
 
   @Test
   public void testGetImportStringWithJavaPackage() {
-    TypeProvider classProvider =
-        new TypeUtilities.FromString("testPageObject", "test.testPageObject");
     TypeProvider importedProvider = new TypeUtilities.FromString("String", "java.lang.String");
-    assertThat(getImportString(classProvider, importedProvider), is(emptyString()));
+    assertThat(getImportString(importedProvider, "current.package"), is(emptyString()));
   }
 
   @Test
   public void testGetImportStringWithSamePackage() {
     TypeProvider classProvider =
         new TypeUtilities.FromString("testPageObject", "test.testPageObject");
-    TypeProvider importedProvider =
-        new TypeUtilities.FromString("testOtherObject", "test.testOtherObject");
-    assertThat(getImportString(classProvider, importedProvider), is(emptyString()));
+    assertThat(getImportString(classProvider, "test"), is(emptyString()));
   }
 
   @Test
@@ -208,7 +203,7 @@ public class TranslationUtilitiesTests {
     List<MethodParameter> parameters = new ArrayList<>();
     parameters.add(new ParameterUtils.Regular("param1", PrimitiveType.STRING));
     parameters.add(new ParameterUtils.Regular("param2", PrimitiveType.NUMBER));
-    MethodDeclaration declaration = new MethodDeclarationImplTests.TestHelper("name", parameters, PrimitiveType.VOID);
+    MethodDeclaration declaration = new MethodDeclarationImplTests.TestHelper("name", parameters, VOID);
     List<String> comments = getMethodJavadoc(declaration);
     assertThat(comments, containsInRelativeOrder(
             "method name",
@@ -254,7 +249,7 @@ public class TranslationUtilitiesTests {
     when(mock.getCodeLines()).thenReturn(Collections.emptyList());
     assertThrows(UtamError.class, () -> getLastStatement(mock));
     when(mock.getCodeLines()).thenReturn(Collections.singletonList("last statement"));
-    when(declarationMock.getReturnType()).thenReturn(PrimitiveType.VOID);
+    when(declarationMock.getReturnType()).thenReturn(VOID);
     assertThat(getLastStatement(mock), is(equalTo("last statement;")));
     when(declarationMock.getReturnType()).thenReturn(PrimitiveType.STRING);
     assertThat(getLastStatement(mock), is(equalTo("return last statement;")));

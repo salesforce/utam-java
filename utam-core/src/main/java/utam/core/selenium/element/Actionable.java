@@ -1,6 +1,6 @@
 package utam.core.selenium.element;
 
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * interaction methods for UI element
@@ -154,7 +154,7 @@ public interface Actionable extends BaseElement {
    * @param <T> return type
    * @return method can only return not null or true
    */
-  <T> T waitFor(Function<Object[],T> condition, Object...args);
+  <T> T waitFor(Supplier<T> condition);
 
   /**
    * check if current element contains another element with the given selector
@@ -170,11 +170,4 @@ public interface Actionable extends BaseElement {
    * @return true if element found
    */
   boolean containsElement(Selector selector);
-
-  /**
-   * press one key on the keyboard
-   * @see org.openqa.selenium.Keys for possible string values
-   * @param key string representing a key like "Enter" or "Space"
-   */
-  void press(CharSequence key);
 }

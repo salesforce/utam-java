@@ -43,7 +43,7 @@ public class TranslationContextTests {
 
   private static ElementContext getElementContext(String elementName, String selector) {
     return new ElementContext.Basic(
-        elementName, TypeUtilities.Element.clickable.getType(), getCssSelector(selector));
+        elementName, TypeUtilities.Element.clickable, getCssSelector(selector));
   }
 
   private static TranslationContext getContainerContext() {
@@ -53,7 +53,7 @@ public class TranslationContextTests {
     context.setClassField(
         new ElementField(
             "testField",
-            TypeUtilities.Element.clickable.getType(),
+            TypeUtilities.Element.clickable,
             Collections.emptyList(),
             EMPTY_COMMENTS));
     context.setMethod(new ElementMethod.Single(elementContext, true));
@@ -186,7 +186,7 @@ public class TranslationContextTests {
         new ElementContext.Basic(
             ROOT_SCOPE,
             "parameterElement",
-            TypeUtilities.Element.clickable.getType(),
+            TypeUtilities.Element.clickable,
             getCssSelector("a[title=*'%s']"),
             false,
             Collections.singletonList(getStringParameter()));
@@ -203,7 +203,7 @@ public class TranslationContextTests {
         new ElementContext.Basic(
             ROOT_SCOPE,
             "parameterElement",
-            TypeUtilities.Element.clickable.getType(),
+            TypeUtilities.Element.clickable,
             getCssSelector("a[title=*'%s'][alt=*'%s]"),
             false,
             Arrays.asList(
@@ -221,7 +221,7 @@ public class TranslationContextTests {
         new ElementContext.Basic(
             ROOT_SCOPE,
             "parameterElement",
-            TypeUtilities.Element.clickable.getType(),
+            TypeUtilities.Element.clickable,
             getCssSelector("a[title=*'%s']"),
             false,
             Arrays.asList(getStringParameter(), getStringParameter()));
@@ -291,7 +291,7 @@ public class TranslationContextTests {
   @Test
   public void testGetRootElement() {
     TranslationContext context = getTestTranslationContext();
-    ElementContext defaultRoot = new ElementContext.Root(editable.getType());
+    ElementContext defaultRoot = new ElementContext.Root(editable);
     context.setElement(defaultRoot);
     assertThat(context.getRootElement().getName(), is(equalTo(ElementContext.ROOT_ELEMENT_NAME)));
   }

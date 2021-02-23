@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
 import static utam.compiler.helpers.TypeUtilities.COLLECTOR_IMPORT;
 import static utam.compiler.helpers.TypeUtilities.LIST_IMPORT;
+import static utam.compiler.helpers.TypeUtilities.VOID;
 
 /**
  * business method is a sequence of internal method calls
@@ -88,7 +89,7 @@ public class ComposeMethod implements PageObjectMethod {
 
     @Override
     public TypeProvider getReturnType() {
-      return PrimitiveType.VOID;
+      return VOID;
     }
 
     @Override

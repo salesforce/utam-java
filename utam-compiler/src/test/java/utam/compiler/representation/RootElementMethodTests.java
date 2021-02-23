@@ -43,7 +43,7 @@ public class RootElementMethodTests {
     info.addImportedTypes(Editable.class.getName());
     info.setIsPublic(false);
     PageObjectMethod method =
-        new RootElementMethod.Private(TypeUtilities.Element.editable.getType());
+        new RootElementMethod.Private(TypeUtilities.Element.editable);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 }

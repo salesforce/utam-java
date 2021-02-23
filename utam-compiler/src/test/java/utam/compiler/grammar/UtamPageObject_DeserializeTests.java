@@ -54,7 +54,7 @@ public class UtamPageObject_DeserializeTests {
     assertThat(root.getBaseType().getFullName(), containsString(PAGE_OBJECT.getFullName()));
     TranslationContext context = getTestTranslationContext();
     root.compile(context);
-    assertThat(context.getRootElement().getType(), is(equalTo(actionable.getType())));
+    assertThat(context.getRootElement().getType(), is(equalTo(actionable)));
   }
 
   /** A root node with a selector property should be valid */
@@ -119,7 +119,7 @@ public class UtamPageObject_DeserializeTests {
     assertThat(root.elements.length, is(equalTo(1)));
     assertThat(
         context.getRootElement().getType().getSimpleName(),
-        is(equalTo(clickable.getType().getSimpleName())));
+        is(equalTo(clickable.getSimpleName())));
   }
 
   /** Tests that a root element with a platform using invalid value throws the proper exception */

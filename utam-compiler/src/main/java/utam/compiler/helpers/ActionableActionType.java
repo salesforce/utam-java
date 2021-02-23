@@ -1,5 +1,7 @@
 package utam.compiler.helpers;
 
+import static utam.compiler.helpers.TypeUtilities.VOID;
+
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.Actionable;
@@ -20,15 +22,22 @@ import java.util.stream.Stream;
  */
 public enum ActionableActionType implements ActionType {
   /**
-   * wait for element absence <br>
-   * throws exception if fails
+   * blur the element <br>
+   * executes javascript `return arguments[0].blur();` <br>
+   * Throws exception if element not found within timeout
    */
-  waitForAbsence(PrimitiveType.VOID),
+  blur(null),
+  /**
+   * blur the element <br>
+   * executes javascript `return arguments[0].blur();` <br>
+   * Throws exception if element not found within timeout
+   */
+  containsElement(PrimitiveType.BOOLEAN, PrimitiveType.LOCATOR),
   /**
    * focus on the value <br>
    * throws exception if fails
    */
-  focus(PrimitiveType.VOID),
+  focus(null),
   /**
    * focus on the element <br>
    * executes javascript `arguments[0].focus();` <br>
@@ -59,11 +68,6 @@ public enum ActionableActionType implements ActionType {
    */
   getValue(PrimitiveType.STRING),
   /**
-   * wait for element absence <br>
-   * throws TimeoutException if fails
-   */
-  waitForInvisible(PrimitiveType.VOID),
-  /**
    * check if element is displayed <br>
    * same as "displayed" but does not throw exception if false returned
    */
@@ -86,19 +90,19 @@ public enum ActionableActionType implements ActionType {
    * which "Moves the mouse to the middle of the element. The element is scrolled into view". <br>
    * Throws exception if element not found within timeout or element could not be moved to
    */
-  moveTo(PrimitiveType.VOID),
+  moveTo(null),
   /**
    * scroll to the element <br>
    * executes javascript `return arguments[0].scrollIntoView(true);` <br>
    * Throws exception if element not found within timeout
    */
-  scrollToTop(PrimitiveType.VOID),
+  scrollToTop(null),
   /**
    * scrolls current element to the center of the screen <br>
    * executes javascript `arguments[0].scrollIntoView({block:'center'})` <br>
    * Throws exception if element not found within timeout or element could not be scrolled to center
    */
-  scrollToCenter(PrimitiveType.VOID),
+  scrollToCenter(null),
   /**
    * Only applicable to the element marked as a list <br>
    * Throws exception if element not found within timeout
@@ -107,45 +111,55 @@ public enum ActionableActionType implements ActionType {
    */
   size(PrimitiveType.NUMBER),
   /**
+   * wait for element absence <br>
+   * throws exception if fails
+   */
+  waitFor(TypeUtilities.GENERIC_TYPE, PrimitiveType.PREDICATE),
+  /**
+   * wait for element absence <br>
+   * throws exception if fails
+   */
+  waitForAbsence(null),
+  /**
+   * wait for element absence <br>
+   * throws TimeoutException if fails
+   */
+  waitForInvisible(null),
+  /**
    * wait for element visibility <br>
    * throws TimeoutException if fails
    */
-  waitForVisible(PrimitiveType.VOID),
-  /**
-   * blur the element <br>
-   * executes javascript `return arguments[0].blur();` <br>
-   * Throws exception if element not found within timeout
-   */
-  blur(PrimitiveType.VOID);
+  waitForVisible(null);
 
   static final String ERR_NOT_HTML_ELEMENT = "element '%s' is not HTML element, its type is '%s'";
   static final String ERR_UNKNOWN_ACTION = "unknown action '%s' for %s element '%s'";
   // return type of the action
-  private final PrimitiveType returnType;
+  private final TypeProvider returnType;
   // parameters accepted by the action
-  private final PrimitiveType[] actionParameters;
+  private final TypeProvider[] actionParameters;
 
-  ActionableActionType(PrimitiveType returnType, PrimitiveType... parameters) {
+  ActionableActionType(TypeProvider returnType, TypeProvider... parameters) {
     if (parameters.length == 0) {
       this.actionParameters = PrimitiveType.EMPTY_ARRAY;
     } else {
       this.actionParameters = parameters;
     }
-    this.returnType = returnType;
+    if(returnType == null) {
+      this.returnType = VOID;
+    } else {
+      this.returnType = returnType;
+    }
   }
 
   public static ActionType getActionType(String apply, TypeProvider elementType, String elementName) {
-    TypeUtilities.Element actionableType =
-        Stream.of(TypeUtilities.Element.values())
-            .filter(element -> element.getType().equals(elementType))
-            .findFirst()
-            .orElseThrow(
-                () ->
-                    new UtamError(
-                        String.format(
-                            ERR_NOT_HTML_ELEMENT,
-                            elementName,
-                            elementType.getFullName())));
+    if(!TypeUtilities.Element.isBasicType(elementType)) {
+      throw new UtamError(
+          String.format(
+              ERR_NOT_HTML_ELEMENT,
+              elementName,
+              elementType.getFullName()));
+    }
+    TypeUtilities.Element actionableType = TypeUtilities.Element.asBasicType(elementType);
     if (actionableType == TypeUtilities.Element.editable) {
       for (EditableActionType action : EditableActionType.values()) {
         if (action.getApplyString().equals(apply)) {
@@ -178,7 +192,7 @@ public enum ActionableActionType implements ActionType {
 
   // used in unit tests
   Class[] getParameterClasses() {
-    return Stream.of(actionParameters).map(PrimitiveType::getClassType).toArray(Class[]::new);
+    return Stream.of(actionParameters).map(TypeProvider::getClassType).toArray(Class[]::new);
   }
 
   // used in unit tests
@@ -187,7 +201,7 @@ public enum ActionableActionType implements ActionType {
   }
 
   @Override
-  public PrimitiveType getReturnType() {
+  public TypeProvider getReturnType() {
     return returnType;
   }
 
@@ -221,10 +235,10 @@ public enum ActionableActionType implements ActionType {
 
   /**
    * most action types have corresponding method for UI element, which we test in unit tests
-   * except for size
+   * except for size or containsElement that has overloaded method and can't be found
    * @return false if there is no method to check for presence in unit tests
    */
   boolean hasMethodToTest() {
-    return this != size;
+    return this != size && this != containsElement;
   }
 }

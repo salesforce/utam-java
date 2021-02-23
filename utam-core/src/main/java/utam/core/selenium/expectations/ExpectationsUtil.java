@@ -5,6 +5,7 @@ import static utam.core.selenium.expectations.SalesforceWebDriverUtils.SCROLL_IN
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.SearchContext;
@@ -12,7 +13,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import utam.core.framework.UtamLogger;
 import utam.core.selenium.context.WebDriverUtilities;
-import utam.core.selenium.element.LocatorUtilities;
 import utam.core.selenium.element.Selector;
 import utam.core.selenium.element.ShadowRootWebElement;
 
@@ -233,18 +233,18 @@ public class ExpectationsUtil {
             (utilities, element) -> utilities.executeJavaScript(BLUR_JS, element));
   }
 
-  public static <T> ElementExpectations<T> waitFor(Function<Object[], T> condition, Object[] args) {
-    BiFunction<WebDriverUtilities, SearchContext, T> apply = (utilities, element) -> condition.apply(args);
+  public static <T> ElementExpectations<T> waitFor(Supplier<T> condition) {
+    BiFunction<WebDriverUtilities, SearchContext, T> apply = (utilities, element) -> condition.get();
     return new AbstractElementExpectation.Returns<>(WAIT_FOR_MSG, apply);
   }
 
-  public static ElementExpectations<Integer> findElements(Selector selector,
-      boolean isExpandShadowRoot) {
+  public static ElementExpectations<Integer> findElements(Selector selector, boolean isExpandShadow) {
     By by = selector.by();
+    Function<WebElement, WebElement> transformer = we -> isExpandShadow? new ShadowRootWebElement(we) : we;
     return new AbstractElementExpectation.Returns<>(
-        String.format(FIND_ELEMENTS_MSG, by.toString(), isExpandShadowRoot? "'s shadow root" : ""),
+        String.format(FIND_ELEMENTS_MSG, by.toString(), isExpandShadow? "'s shadow root" : ""),
         (utilities, context) -> {
-          WebElement current = isExpandShadowRoot? new ShadowRootWebElement((WebElement) context) : (WebElement) context;
+          WebElement current = transformer.apply((WebElement) context);
           List<WebElement> found = current.findElements(by);
           if(found == null || found.isEmpty()) {
             return 0;

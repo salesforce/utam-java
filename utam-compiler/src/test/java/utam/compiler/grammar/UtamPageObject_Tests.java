@@ -408,7 +408,7 @@ public class UtamPageObject_Tests {
     utamPageObject.compile(context);
     ElementContext notRootWithRootName =
             new ElementContext.Basic(
-                    "root", TypeUtilities.Element.clickable.getType(), getCssSelector("css"));
+                    "root", TypeUtilities.Element.clickable, getCssSelector("css"));
     expectThrows(UtamError.class, () -> context.setElement(notRootWithRootName));
   }
 }

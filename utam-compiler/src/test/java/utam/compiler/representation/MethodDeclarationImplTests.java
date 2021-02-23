@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
+import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -109,11 +110,11 @@ public class MethodDeclarationImplTests {
     }
 
     public TestHelper(String methodName) {
-      super(methodName, EMPTY_PARAMETERS, PrimitiveType.VOID, new ArrayList<>(), "");
+      super(methodName, EMPTY_PARAMETERS, VOID, new ArrayList<>(), "");
     }
 
     public TestHelper(String methodName, String comments) {
-      super(methodName, EMPTY_PARAMETERS, PrimitiveType.VOID, new ArrayList<>(), comments);
+      super(methodName, EMPTY_PARAMETERS, VOID, new ArrayList<>(), comments);
     }
   }
 }

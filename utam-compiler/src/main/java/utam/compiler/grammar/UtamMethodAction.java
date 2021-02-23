@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 import static utam.compiler.helpers.ActionableActionType.getActionType;
+import static utam.compiler.helpers.TypeUtilities.VOID;
 
 /**
  * compose statement mapping
@@ -41,7 +42,7 @@ class UtamMethodAction {
     List<MethodParameter> parameters = UtamArgument.literalParameters(args, action.getParametersTypes(), methodName).getOrdered();
     boolean isListAction = element.isList();
     ComposeMethod.ElementAction res;
-    if (isListAction && action.getReturnType() == PrimitiveType.VOID) {
+    if (isListAction && action.getReturnType().isSameType(VOID)) {
       res = new ComposeMethod.VoidListAction(elementNames, element, action, parameters);
     } else if (action.isListAction()) { // should be BEFORE next condition check
       res = new ComposeMethod.SimpleListAction(elementNames, element, action, parameters);

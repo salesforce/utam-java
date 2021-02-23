@@ -103,7 +103,7 @@ public final class ClassSerializer {
   }
 
   private String getImportStatement(TypeProvider type) {
-    return getImportString(source.getClassType(), type);
+    return getImportString(type, this.source.getClassType().getPackageName());
   }
 
   private Set<String> getImports(List<AnnotationProvider> annotations) {

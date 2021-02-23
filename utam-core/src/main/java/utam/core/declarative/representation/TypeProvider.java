@@ -34,6 +34,14 @@ public interface TypeProvider {
    */
   String getPackageName();
 
-  @Override
-  boolean equals(Object type);
+  /**
+   * returns Class of the type if possible
+   * @return class
+   */
+  Class getClassType();
+
+  default boolean isSameType(TypeProvider anotherType) {
+    return this.getFullName().equals(anotherType.getFullName())
+        && (this.getSimpleName().equals(anotherType.getSimpleName()));
+  }
 }

@@ -126,15 +126,13 @@ class UtamMethod {
 
   private TypeProvider getReturnType(TranslationContext context) {
     if (returnStr == null) {
-      return PrimitiveType.VOID;
+      return TypeUtilities.VOID;
     }
-    TypeProvider returns = PrimitiveType.fromString(returnStr);
-    if (returns != null) {
-      return returns;
+    if (PrimitiveType.isPrimitiveType(returnStr)) {
+      return PrimitiveType.fromString(returnStr);
     }
-    returns = TypeUtilities.getElementType(returnStr, null);
-    if (returns != null) {
-      return returns;
+    if(TypeUtilities.Element.isBasicType(returnStr)) {
+      return TypeUtilities.Element.asBasicType(returnStr);
     }
     return context.getType(returnStr);
   }

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.core.selenium.element.LocatorUtilities.QUERY_SELECTOR;
 
 /**
@@ -95,7 +96,7 @@ public class TranslationUtilities {
     } else {
       methodComments.add(declaration.getComments());
     }
-    if (!declaration.getReturnType().equals(PrimitiveType.VOID)) {
+    if (!declaration.getReturnType().isSameType(VOID)) {
       methodComments.add(
           String.format(METHOD_JAVADOC_RETURNS_LINE, declaration.getReturnType().getSimpleName()));
     }
@@ -125,14 +126,14 @@ public class TranslationUtilities {
     return classJavadoc;
   }
 
-  static String getImportString(TypeProvider classType, TypeProvider importedType) {
-    if (importedType == null
-        || importedType.getFullName().isEmpty()
-        || importedType.getFullName().startsWith("java.lang.")
-        || classType.getPackageName().equals(importedType.getPackageName())) {
+  static String getImportString(TypeProvider type, String currentPackage) {
+    if (type.getFullName().isEmpty()
+        || type.getPackageName().isEmpty()
+        || type.getFullName().startsWith("java.lang")
+        || type.getPackageName().equals(currentPackage)) {
       return "";
     }
-    return getStatement(String.format("import %s", importedType.getFullName()));
+    return getStatement(String.format("import %s", type.getFullName()));
   }
 
   static String getStatement(String string) {
@@ -168,7 +169,7 @@ public class TranslationUtilities {
       throw new UtamError(ERR_METHOD_IS_EMPTY);
     }
     String string = m.getCodeLines().get(m.getCodeLines().size() - 1);
-    if (!m.getDeclaration().getReturnType().equals(PrimitiveType.VOID)) {
+    if (!m.getDeclaration().getReturnType().isSameType(VOID)) {
       return getStatement(String.format("return %s", string));
     }
     return getStatement(string);

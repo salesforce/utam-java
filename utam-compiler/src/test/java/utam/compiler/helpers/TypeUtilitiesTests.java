@@ -38,15 +38,15 @@ public class TypeUtilitiesTests {
   /** Static isElementType method should return proper values */
   @Test
   public void testIsElementType() {
-    MatcherAssert.assertThat(TypeUtilities.isElementType("actionable"), is(equalTo(true)));
-    assertThat(TypeUtilities.isElementType(null), is(equalTo(true)));
-    assertThat(TypeUtilities.isElementType("invalid"), is(equalTo(false)));
+    MatcherAssert.assertThat(Element.isBasicType("actionable"), is(equalTo(true)));
+    assertThat(Element.isBasicType((String) null), is(equalTo(false)));
+    assertThat(Element.isBasicType("invalid"), is(equalTo(false)));
   }
 
   @Test
   public void testGetTypeMethod() {
     assertThat(
-        TypeUtilities.Element.actionable.getType().getFullName(),
+        TypeUtilities.Element.actionable.getFullName(),
         is(equalTo("utam.core.selenium.element.Actionable")));
   }
 
@@ -95,7 +95,7 @@ public class TypeUtilitiesTests {
     TypeProvider type = new TypeUtilities.FromString("FakeType", "test.FakeType");
     TypeProvider otherType = new TypeUtilities.FromString("FakeType", "test.FakeType");
 
-    assertThat(type.equals(otherType), is(equalTo(true)));
+    assertThat(type.isSameType(otherType), is(equalTo(true)));
   }
 
   /**
@@ -107,7 +107,7 @@ public class TypeUtilitiesTests {
     TypeProvider type = new TypeUtilities.FromString("FakeType", "test.FakeType");
     TypeProvider otherType = new TypeUtilities.FromString("FakeType", "testOther.FakeType");
 
-    assertThat(type.equals(otherType), is(equalTo(false)));
+    assertThat(type.isSameType(otherType), is(equalTo(false)));
   }
 
   /**
@@ -119,7 +119,7 @@ public class TypeUtilitiesTests {
     TypeProvider type = new TypeUtilities.FromString("FakeType", "test.FakeType");
     TypeProvider otherType = new TypeUtilities.FromString("OtherFakeType", "test.FakeType");
 
-    assertThat(type.equals(otherType), is(equalTo(false)));
+    assertThat(type.isSameType(otherType), is(equalTo(false)));
   }
 
   /** The FromString.equals method should return false with an object that is not a TypeProvider */
@@ -127,7 +127,7 @@ public class TypeUtilitiesTests {
   public void testFromStringEqualsWithDifferentObjectTypes() {
     TypeProvider type = new TypeUtilities.FromString("FakeType", "test.FakeType");
 
-    assertThat(type.equals("InvalidString"), is(equalTo(false)));
+    assertThat(type.isSameType(new TypeUtilities.FromClass(Class.class)), is(equalTo(false)));
   }
 
   @Test
@@ -155,7 +155,7 @@ public class TypeUtilitiesTests {
   public void testListOfEquals() {
     TypeProvider baseType = new TypeUtilities.FromString("FakeType", "test.FakeType");
     TypeProvider type = new TypeUtilities.ListOf(baseType);
-    assertThat(type, is(equalTo(new TypeUtilities.ListOf(baseType))));
+    assertThat(type.isSameType(new TypeUtilities.ListOf(baseType)), is(true));
   }
 
   /** The ListOf.equals method should return false with a TypeProvider that is not a list */
@@ -163,7 +163,7 @@ public class TypeUtilitiesTests {
   public void testListOfEqualsWithNonListType() {
     TypeProvider baseType = new TypeUtilities.FromString("FakeType", "test.FakeType");
     TypeProvider type = new TypeUtilities.ListOf(baseType);
-    assertThat(type, is(not(equalTo(baseType))));
+    assertThat(type.isSameType(baseType), is(false));
   }
 
   /**
@@ -198,7 +198,7 @@ public class TypeUtilitiesTests {
   public void testListOfEqualsWithDifferentObjectTypes() {
     TypeProvider type = new TypeUtilities.ListOf(new TypeUtilities.FromClass(Actionable.class));
 
-    assertThat(type.equals("InvalidString"), is(equalTo(false)));
+    assertThat(type.isSameType(new TypeUtilities.FromClass(String.class)), is(equalTo(false)));
   }
 
   @Test
@@ -237,7 +237,7 @@ public class TypeUtilitiesTests {
     TypeProvider type = new TypeUtilities.FromClass(Actionable.class);
     TypeProvider otherType = new TypeUtilities.FromClass(Actionable.class);
 
-    assertThat(type.equals(otherType), is(equalTo(true)));
+    assertThat(type.isSameType(otherType), is(equalTo(true)));
   }
 
   /**
@@ -248,7 +248,7 @@ public class TypeUtilitiesTests {
     TypeProvider type = new TypeUtilities.FromClass(Actionable.class);
     TypeProvider otherType = new TypeUtilities.FromClass(Clickable.class);
 
-    assertThat(type.equals(otherType), is(equalTo(false)));
+    assertThat(type.isSameType(otherType), is(equalTo(false)));
   }
 
   /**
@@ -282,19 +282,15 @@ public class TypeUtilitiesTests {
   @Test
   public void testGetElementType() {
     assertThat(
-        Objects.requireNonNull(getElementType("actionable", null)).getSimpleName(),
+        Objects.requireNonNull(Element.asBasicType("actionable")).getSimpleName(),
         is(equalTo("Actionable")));
     assertThat(
-        Objects.requireNonNull(getElementType("clickable", null)).getSimpleName(),
+        Objects.requireNonNull(Element.asBasicType("clickable")).getSimpleName(),
         is(equalTo("Clickable")));
     assertThat(
-        Objects.requireNonNull(getElementType("editable", null)).getSimpleName(),
+        Objects.requireNonNull(Element.asBasicType("editable")).getSimpleName(),
         is(equalTo("Editable")));
-    assertThat(TypeUtilities.getElementType("unknown", null), is(nullValue()));
-    assertThat(TypeUtilities.getElementType(null, null), is(nullValue()));
-    assertThat(
-        Objects.requireNonNull(getElementType(null, TypeUtilities.Element.editable)).getSimpleName(),
-        is(equalTo("Editable")));
+    assertThat(Element.asBasicType("unknown"), is(nullValue()));
   }
 
   /** The isTypesMatch static method should return true for matching lists of types */
@@ -395,5 +391,55 @@ public class TypeUtilitiesTests {
   @Test
   public void testPageObjectConstant() {
     assertThat(PAGE_OBJECT.getFullName(), is(equalTo("utam.core.framework.base.PageObject")));
+  }
+
+  @Test
+  public void testVoidType() {
+    TypeProvider typeProvider = VOID;
+    assertThat(typeProvider.getFullName(), is(emptyString()));
+    assertThat(typeProvider.getPackageName(), is(emptyString()));
+    assertThat(typeProvider.getClassType(), is(nullValue()));
+    assertThat(typeProvider.getSimpleName(), is(equalTo("void")));
+    assertThat(typeProvider.isSameType(VOID), is(true));
+  }
+
+  @Test
+  public void testBoundedClassType() {
+    TypeProvider typeProvider = BOUNDED_CLASS;
+    assertThat(typeProvider.getFullName(), is(emptyString()));
+    assertThat(typeProvider.getPackageName(), is(emptyString()));
+    assertThat(typeProvider.getClassType(), is(nullValue()));
+    assertThat(typeProvider.getSimpleName(), is(equalTo("Class<T>")));
+    assertThat(typeProvider.isSameType(BOUNDED_CLASS), is(true));
+  }
+
+  @Test
+  public void testGenericType() {
+    TypeProvider typeProvider = GENERIC_TYPE;
+    assertThat(typeProvider.getFullName(), is(emptyString()));
+    assertThat(typeProvider.getPackageName(), is(emptyString()));
+    assertThat(typeProvider.getClassType(), is(nullValue()));
+    assertThat(typeProvider.getSimpleName(), is(equalTo("<T> T")));
+    assertThat(typeProvider.isSameType(GENERIC_TYPE), is(true));
+  }
+
+  @Test
+  public void testContainerListType() {
+    TypeProvider typeProvider = CONTAINER_LIST_RETURN_TYPE;
+    assertThat(typeProvider.getFullName(), is(emptyString()));
+    assertThat(typeProvider.getPackageName(), is(emptyString()));
+    assertThat(typeProvider.getClassType(), is(nullValue()));
+    assertThat(typeProvider.getSimpleName(), is(equalTo("<T extends PageObject> List<T>")));
+    assertThat(typeProvider.isSameType(CONTAINER_LIST_RETURN_TYPE), is(true));
+  }
+
+  @Test
+  public void testContainerReturnType() {
+    TypeProvider typeProvider = CONTAINER_RETURN_TYPE;
+    assertThat(typeProvider.getFullName(), is(emptyString()));
+    assertThat(typeProvider.getPackageName(), is(emptyString()));
+    assertThat(typeProvider.getClassType(), is(nullValue()));
+    assertThat(typeProvider.getSimpleName(), is(equalTo("<T extends PageObject> T")));
+    assertThat(typeProvider.isSameType(CONTAINER_RETURN_TYPE), is(true));
   }
 }

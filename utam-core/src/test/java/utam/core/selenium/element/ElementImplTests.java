@@ -1,14 +1,18 @@
 package utam.core.selenium.element;
 
+import java.util.function.Supplier;
 import org.hamcrest.Matchers;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.testng.annotations.Test;
+import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.context.SeleniumContext;
 import utam.core.selenium.context.WebDriverUtilities;
 import utam.core.selenium.expectations.ElementExpectations;
@@ -27,7 +31,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertThrows;
 import static utam.core.selenium.element.LocatorUtilities.waitForPresence;
+import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR_ALL;
 import static utam.core.selenium.expectations.ExpectationsUtil.*;
 import static utam.core.selenium.expectations.SalesforceWebDriverUtils.SCROLL_INTO_VIEW_ALIGN_TO_TOP_JS;
 
@@ -345,29 +351,52 @@ public class ElementImplTests {
 
   @Test
   public void testContainsElement() {
+    String SELECTOR_STR = ".found";
     ActionsMock mock = new ActionsMock();
     ElementImpl element = mock.getElementImpl();
-    assertThat(element.containsElement(Web.byCss("notfound")), is(false));
-  }
-
-  /*
-  @Test
-  public void testFind() {
-    ActionsMock mock = new ActionsMock();
-    ElementImpl element = mock.getElementImpl();
-    assertThat(element.find(false), is(sameInstance(mock.webElement)));
+    when(mock.webElement.findElements(By.cssSelector(SELECTOR_STR))).thenReturn(Collections.singletonList(mock.webElement));
+    assertThat(element.containsElement(Web.byCss(SELECTOR_STR)), is(true));
+    assertThat(element.containsElement(Web.byCss("not found"), false), is(false));
   }
 
   @Test
-  public void testFindShadowRoot() {
+  public void testContainsElementInShadow() {
+    String SELECTOR_STR = ".found";
+    ActionsMock mock = new ActionsMock();
+    JavascriptExecutor mockExecutor = (JavascriptExecutor) mock.webDriver;
+    when(mockExecutor.executeScript(String.format(GET_SHADOW_ROOT_QUERY_SELECTOR_ALL, SELECTOR_STR), mock.webElement))
+        .thenReturn(Collections.singletonList(mock.webElement));
+    ElementImpl element = mock.getElementImpl();
+    assertThat(element.containsElement(Web.byCss(SELECTOR_STR), true), is(true));
+    assertThat(element.containsElement(Web.byCss("not found"), true), is(false));
+  }
+
+  @Test
+  public void testWaitForObject() {
     ActionsMock mock = new ActionsMock();
     ElementImpl element = mock.getElementImpl();
-    when(mock.utilities.expandShadowRoot(mock.webElement))
-        .thenReturn(mock.webElement);
-    assertThat(element.find(true), is(sameInstance(mock.webElement)));
+    Supplier<Object> apply = () -> { element.setText("text"); return element; };
+    element.waitFor(apply);
   }
-   */
-  
+
+  @Test
+  public void testWaitForIsDisplayedTrue() {
+    ActionsMock mock = new ActionsMock();
+    when(mock.webElement.isDisplayed()).thenReturn(true);
+    ElementImpl element = mock.getElementImpl();
+    Supplier<Boolean> apply = () -> element.isVisible();
+    assertThat(element.waitFor(apply), is(equalTo(true)));
+  }
+
+  @Test
+  public void testWaitForIsDisplayedFalseThrows() {
+    ActionsMock mock = new ActionsMock();
+    when(mock.webElement.isDisplayed()).thenReturn(false);
+    ElementImpl element = mock.getElementImpl();
+    Supplier<Boolean> apply = () -> element.isVisible();
+    assertThrows(() -> element.waitFor(apply));
+  }
+
   public static class Mock {
 
     public final SeleniumContext context;
@@ -376,10 +405,11 @@ public class ElementImplTests {
     final WebDriver webDriver;
 
     Mock() {
-      webDriver = mock(WebDriver.class, withSettings().extraInterfaces(Interactive.class));
+      webDriver = mock(WebDriver.class, withSettings().extraInterfaces(Interactive.class, JavascriptExecutor.class));
       context = mock(SeleniumContext.class);
       utilities = mock(WebDriverUtilities.class);
-      webElement = mock(WebElement.class, withSettings().name("elementName"));
+      webElement = mock(WebElement.class, withSettings().name("elementName").extraInterfaces(WrapsDriver.class));
+      when(((WrapsDriver)webElement).getWrappedDriver()).thenReturn(webDriver);
       when(webElement.getAttribute("name")).thenReturn(NAME_ATTRIBUTE);
       when(context.getWebDriverUtils()).thenReturn(utilities);
       when(utilities.getWebDriver()).thenReturn(webDriver);

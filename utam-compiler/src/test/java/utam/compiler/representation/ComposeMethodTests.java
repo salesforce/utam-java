@@ -69,8 +69,8 @@ public class ComposeMethodTests {
     info.addCodeLine("this.getRoot().focus()");
 
     TypeProvider elementType = new TypeUtilities.FromClass(Actionable.class);
-    ElementContext element = new ElementContext.Root(elementType, actionable.getType(), null);
-    element.setElementMethod(new RootElementMethod.Public(actionable.getType()));
+    ElementContext element = new ElementContext.Root(elementType, actionable, null);
+    element.setElementMethod(new RootElementMethod.Public(actionable));
     ComposeMethod.ElementAction action =
         new ComposeMethod.ElementAction(
             Collections.EMPTY_SET,

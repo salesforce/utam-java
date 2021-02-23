@@ -19,6 +19,8 @@ import java.util.stream.Stream;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.ActionableActionType.ERR_NOT_HTML_ELEMENT;
 import static utam.compiler.helpers.ActionableActionType.ERR_UNKNOWN_ACTION;
+import static utam.compiler.helpers.TypeUtilities.GENERIC_TYPE;
+import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.core.framework.UtamLogger.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -48,17 +50,17 @@ public class ActionableActionTypeTests {
   }
 
   private static ElementContext.Basic getElementContext(TypeUtilities.Element type) {
-    return new ElementContext.Basic(ELEMENT_NAME, type.getType(), getCssSelector("selector"));
+    return new ElementContext.Basic(ELEMENT_NAME, type, getCssSelector("selector"));
   }
 
   private static ElementContext.Basic getEditableElementContext() {
     return new ElementContext.Basic(
-        ELEMENT_NAME, TypeUtilities.Element.editable.getType(), getCssSelector("selector"));
+        ELEMENT_NAME, TypeUtilities.Element.editable, getCssSelector("selector"));
   }
 
   private static ElementContext.Basic getTouchableElementContext() {
     return new ElementContext.Basic(
-        ELEMENT_NAME, TypeUtilities.Element.touchable.getType(), getCssSelector("selector"));
+        ELEMENT_NAME, TypeUtilities.Element.touchable, getCssSelector("selector"));
   }
 
   private static void validateAction(ActionType action, String returnType, boolean isListAction) {
@@ -230,8 +232,8 @@ public class ActionableActionTypeTests {
               assertThat(
                   String.format(
                       "action '%s' returns '%s', method returns '%s'",
-                      action, action.getReturnType().name(), method.getReturnType().getName()),
-                  action.getReturnType().equals(method.getReturnType()),
+                      action, action.getReturnType().getSimpleName(), method.getReturnType().getName()),
+                  sameType(action.getReturnType(), method.getReturnType()),
                   is(true));
               Class[] params = action.getParameterClasses();
               assertThat(
@@ -242,6 +244,25 @@ public class ActionableActionTypeTests {
                 assertThat(params[i], is(equalTo(method.getParameterTypes()[i])));
               }
             });
+  }
+
+  static boolean sameType(TypeProvider actual, Class expected) {
+    if(actual.isSameType(VOID)) {
+      return expected.getName().toLowerCase().contains("void");
+    }
+    if(actual.isSameType(GENERIC_TYPE)) {
+      return expected.equals(Object.class);
+    }
+    if(expected.equals(actual.getClassType())) {
+      return true;
+    }
+    if(actual == PrimitiveType.NUMBER) {
+      return expected.getName().toLowerCase().startsWith("int");
+    }
+    if(actual == PrimitiveType.BOOLEAN) {
+      return expected.getName().equalsIgnoreCase(actual.getSimpleName());
+    }
+    return false;
   }
 
   @Test

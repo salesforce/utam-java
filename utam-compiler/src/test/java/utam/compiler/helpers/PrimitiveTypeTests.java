@@ -1,6 +1,8 @@
 package utam.compiler.helpers;
 
+import java.util.function.Supplier;
 import org.testng.annotations.Test;
+import utam.core.selenium.element.Selector;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -17,22 +19,19 @@ public class PrimitiveTypeTests {
   public void testStringEnumMember() {
     PrimitiveType provider = PrimitiveType.STRING;
     assertThat(provider.getSimpleName(), is(equalTo("String")));
-    assertThat(provider.getFullName(), is(emptyString()));
-    assertThat(provider.getPackageName(), is(emptyString()));
+    assertThat(provider.getFullName(), is(equalTo(String.class.getName())));
+    assertThat(provider.getPackageName(), is(equalTo(String.class.getPackageName())));
     assertThat(provider.getClassType(), is(equalTo(String.class)));
-    assertThat(provider.equals(String.class), is(equalTo(true)));
   }
 
   /** Test that INTEGER member of the PrimitiveType enumerated type returns the expected values */
   @Test
   public void testIntegerEnumMember() {
     PrimitiveType provider = PrimitiveType.NUMBER;
-    assertThat(provider.getSimpleName(), is(equalTo("Integer")));
-    assertThat(provider.getFullName(), is(emptyString()));
-    assertThat(provider.getPackageName(), is(emptyString()));
+    assertThat(provider.getSimpleName(), is(equalTo(Integer.class.getSimpleName())));
+    assertThat(provider.getFullName(), is(equalTo(Integer.class.getName())));
+    assertThat(provider.getPackageName(), is(equalTo(Integer.class.getPackageName())));
     assertThat(provider.getClassType(), is(equalTo(Integer.class)));
-    assertThat(provider.equals(Integer.class), is(equalTo(true)));   
-    assertThat(provider.equals(int.class), is(equalTo(true)));
   }
 
   /** Test that BOOLEAN member of the PrimitiveType enumerated type returns the expected values */
@@ -40,33 +39,9 @@ public class PrimitiveTypeTests {
   public void testBooleanEnumMember() {
     PrimitiveType provider = PrimitiveType.BOOLEAN;
     assertThat(provider.getSimpleName(), is(equalTo("Boolean")));
-    assertThat(provider.getFullName(), is(emptyString()));
-    assertThat(provider.getPackageName(), is(emptyString()));
+    assertThat(provider.getFullName(), is(equalTo(Boolean.class.getName())));
+    assertThat(provider.getPackageName(), is(equalTo(Boolean.class.getPackageName())));
     assertThat(provider.getClassType(), is(equalTo(Boolean.class)));
-    assertThat(provider.equals(Boolean.class), is(equalTo(true)));
-    assertThat(provider.equals(boolean.class), is(equalTo(true)));
-  }
-
-  /** Test that VOID member of the PrimitiveType enumerated type returns the expected values */
-  @Test
-  public void testVoidEnumMember() {
-    PrimitiveType provider = PrimitiveType.VOID;
-    assertThat(provider.getSimpleName(), is(equalTo("void")));
-    assertThat(provider.getFullName(), is(emptyString()));
-    assertThat(provider.getPackageName(), is(emptyString()));
-    assertThat(provider.getClassType(), is(equalTo(Void.class)));
-    assertThat(provider.equals(Void.class), is(equalTo(true)));
-  }
-
-  /** Test that CLASS member of the PrimitiveType enumerated type returns the expected values */
-  @Test
-  public void testClassEnumMember() {
-    PrimitiveType provider = PrimitiveType.CLASS;
-    assertThat(provider.getSimpleName(), is(equalTo("Class<T>")));
-    assertThat(provider.getFullName(), is(emptyString()));
-    assertThat(provider.getPackageName(), is(emptyString()));
-    assertThat(provider.getClassType(), is(equalTo(Class.class)));
-    assertThat(provider.equals(Class.class), is(equalTo(true)));
   }
 
   /**
@@ -77,21 +52,38 @@ public class PrimitiveTypeTests {
     assertThat(PrimitiveType.EMPTY_ARRAY, is(equalTo(PrimitiveType.EMPTY_ARRAY)));
   }
   
-  /** Test that CLASS member of the PrimitiveType enumerated is not equal to a random class */
-  @Test
-  public void testInvalidClassTypeIsNotEqual() {
-    PrimitiveType provider = PrimitiveType.CLASS;
-    assertThat(provider.equals(Object.class), is(equalTo(false)));
-  }
-  
   @Test
   public void testFromString() {
     assertThat(PrimitiveType.fromString("string"), is(equalTo(PrimitiveType.STRING)));
     assertThat(PrimitiveType.fromString("number"), is(equalTo(PrimitiveType.NUMBER)));
     assertThat(PrimitiveType.fromString("boolean"), is(equalTo(PrimitiveType.BOOLEAN)));
-    assertThat(PrimitiveType.fromString("void"), is(equalTo(PrimitiveType.VOID)));
-    assertThat(PrimitiveType.fromString("class"), is(equalTo(PrimitiveType.CLASS)));
+    assertThat(PrimitiveType.fromString("predicate"), is(equalTo(PrimitiveType.PREDICATE)));
+    assertThat(PrimitiveType.fromString("locator"), is(equalTo(PrimitiveType.LOCATOR)));
+    assertThat(PrimitiveType.fromString(null), is(nullValue()));
     assertThat(PrimitiveType.fromString("invalid"), is(nullValue()));
-    assertThat(PrimitiveType.fromString("int") == null, is(equalTo(true)));
+  }
+
+  @Test
+  public void testIsPrimitive() {
+    assertThat(PrimitiveType.isPrimitiveType("string"), is(true));
+    assertThat(PrimitiveType.isPrimitiveType("number75"), is(false));
+  }
+
+  @Test
+  public void testPredicateEnumMember() {
+    PrimitiveType provider = PrimitiveType.PREDICATE;
+    assertThat(provider.getSimpleName(), is(equalTo("Supplier<T>")));
+    assertThat(provider.getFullName(), is(equalTo(Supplier.class.getName())));
+    assertThat(provider.getPackageName(), is(equalTo(Supplier.class.getPackageName())));
+    assertThat(provider.getClassType(), is(equalTo(Supplier.class)));
+  }
+
+  @Test
+  public void testSelectorEnumMember() {
+    PrimitiveType provider = PrimitiveType.LOCATOR;
+    assertThat(provider.getSimpleName(), is(equalTo("Selector")));
+    assertThat(provider.getFullName(), is(equalTo(Selector.class.getName())));
+    assertThat(provider.getPackageName(), is(equalTo(Selector.class.getPackageName())));
+    assertThat(provider.getClassType(), is(equalTo(Selector.class)));
   }
 }

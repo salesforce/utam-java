@@ -1,26 +1,71 @@
 package utam.core.selenium.expectations;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
+import static org.testng.Assert.assertThrows;
+import static org.testng.Assert.expectThrows;
+import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR_ALL;
+import static utam.core.selenium.expectations.ExpectationsUtil.ABSENCE_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.BLUR_JS;
+import static utam.core.selenium.expectations.ExpectationsUtil.CLEAR_AND_TYPE_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.CLEAR_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.CLICK_JS;
+import static utam.core.selenium.expectations.ExpectationsUtil.ENABLED_CHECK_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.FIND_ELEMENTS_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.FIND_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.FOCUS_JS;
+import static utam.core.selenium.expectations.ExpectationsUtil.GET_ATTRIBUTE_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.GET_TEXT_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.HAS_FOCUS_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.INVISIBILITY_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.IS_VISIBLE_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.JAVASCRIPT_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.MOVE_TO_ELEMENT_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.PRESENCE_CHECK_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.PRESENCE_WAIT_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.SCROLL_TO_CENTER_JS;
+import static utam.core.selenium.expectations.ExpectationsUtil.SET_TEXT_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.VISIBILITY_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.WAIT_FOR_MSG;
+import static utam.core.selenium.expectations.ExpectationsUtil.blur;
+import static utam.core.selenium.expectations.ExpectationsUtil.focus;
+import static utam.core.selenium.expectations.ExpectationsUtil.hasFocus;
+import static utam.core.selenium.expectations.ExpectationsUtil.scrollTo;
+import static utam.core.selenium.expectations.ExpectationsUtil.scrollToCenter;
+import static utam.core.selenium.expectations.SalesforceWebDriverUtils.SCROLL_INTO_VIEW_ALIGN_TO_TOP_JS;
+import static utam.core.selenium.expectations.SalesforceWebDriverUtils.SCROLL_INTO_VIEW_ERR;
+import static utam.core.selenium.expectations.SalesforceWebDriverUtils.SCROLL_INTO_VIEW_MSG;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
-import org.openqa.selenium.*;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.openqa.selenium.By;
+import org.openqa.selenium.ElementNotVisibleException;
+import org.openqa.selenium.InvalidElementStateException;
+import org.openqa.selenium.JavascriptException;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.WrapsDriver;
 import org.testng.annotations.Test;
 import utam.core.selenium.context.SeleniumContextProvider;
 import utam.core.selenium.context.WebDriverUtilities;
 import utam.core.selenium.element.Selector;
+import utam.core.selenium.element.ShadowRootWebElement;
 import utam.core.selenium.element.Web;
 import utam.core.selenium.expectations.ElementWait.Match;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertThrows;
-import static org.testng.Assert.expectThrows;
-import static utam.core.selenium.expectations.ExpectationsUtil.*;
-import static utam.core.selenium.expectations.SalesforceWebDriverUtils.*;
 
 /**
  * Tests the ExpectationsUtil class
@@ -538,6 +583,22 @@ public class ExpectationsUtilTests {
   }
 
   @Test
+  void testFindElementsInShadow() {
+    String SELECTOR_STR = ".found";
+    SeleniumContextProvider provider = new SeleniumContextProvider(mockDriver);
+    WebElement mockElement = mock(WebElement.class, withSettings().extraInterfaces(WrapsDriver.class));
+    when(((WrapsDriver)mockElement).getWrappedDriver()).thenReturn(mockDriver);
+    JavascriptExecutor mockExecutor = (JavascriptExecutor) mockDriver;
+    when(mockExecutor.executeScript(String.format(GET_SHADOW_ROOT_QUERY_SELECTOR_ALL, SELECTOR_STR), mockElement))
+        .thenReturn(getPopulatedList(mockElement));
+    Selector selector = Web.byCss(SELECTOR_STR);
+    ElementExpectations<Integer> expectation = ExpectationsUtil.findElements(selector, true);
+    Integer result =
+        expectation.apply(provider.getWebDriverUtils()).apply(mockElement);
+    assertThat(result, is(equalTo(1)));
+  }
+
+  @Test
   void testFindElementsWithEmptyList() {
     SeleniumContextProvider provider = new SeleniumContextProvider(mockDriver);
     WebElement mockElement = mock(WebElement.class);
@@ -700,8 +761,8 @@ public class ExpectationsUtilTests {
     SeleniumContextProvider provider = new SeleniumContextProvider(mockDriver);
     WebElement mockElement = mock(WebElement.class);
     when(mockElement.getText()).thenReturn(elementText);
-    Function<Object[],String> condition = array -> mockElement.getText();
-    ElementExpectations<String> expectation = ExpectationsUtil.waitFor(condition, new Object[0]);
+    Supplier<String> condition = () -> mockElement.getText();
+    ElementExpectations<String> expectation = ExpectationsUtil.waitFor(condition);
     String result = expectation.apply(provider.getWebDriverUtils()).apply(mockElement);
     assertThat(result, is(equalTo(elementText)));
 

@@ -41,9 +41,8 @@ public class ShadowRootWebElement implements WebElement, WrapsElement, WrapsDriv
   final JavascriptExecutor executor;
 
   public ShadowRootWebElement(WebElement we) {
-    rootElement = we;
-    WrapsDriver parentDriver = (WrapsDriver) rootElement;
-    executor = (JavascriptExecutor) parentDriver.getWrappedDriver();
+    this.rootElement = we;
+    this.executor = (JavascriptExecutor) ((WrapsDriver) we).getWrappedDriver();
   }
 
   private static String escapeForQuery(String queryString) {

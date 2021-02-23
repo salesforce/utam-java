@@ -16,6 +16,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
+import static utam.compiler.helpers.TypeUtilities.CONTAINER_LIST_RETURN_TYPE;
+import static utam.compiler.helpers.TypeUtilities.CONTAINER_RETURN_TYPE;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
 import static utam.compiler.representation.ContainerMethod.*;
 
@@ -27,8 +29,8 @@ import static utam.compiler.representation.ContainerMethod.*;
  */
 public class ContainerMethodTests {
 
-  public static final String RETURN_TYPE = RETURNS.getSimpleName();
-  public static final String LIST_RETURN_TYPE = RETURNS_LIST.getSimpleName();
+  static final String RETURN_TYPE = CONTAINER_RETURN_TYPE.getSimpleName();
+  static final String LIST_RETURN_TYPE = CONTAINER_LIST_RETURN_TYPE.getSimpleName();
   public static final String EXPECTED_CODE_LOAD = "load(pageObjectType, injectedSelector)";
   public static final MethodParameterInfo FIRST_CONTAINER_PARAMETER =
       new PageObjectValidationTestHelper.MethodParameterInfo(
@@ -38,7 +40,7 @@ public class ContainerMethodTests {
 
   private static ElementContext getScope() {
     final ElementContext scope =
-        new ElementContext.Basic("scope", actionable.getType(), getCssSelector("css"));
+        new ElementContext.Basic("scope", actionable, getCssSelector("css"));
     MethodDeclaration declaration = mock(MethodDeclaration.class);
     PageObjectMethod mock = mock(PageObjectMethod.class);
     when(declaration.getName()).thenReturn("getScope");
