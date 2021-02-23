@@ -1,5 +1,7 @@
 package utam.core.selenium.element;
 
+import java.util.function.Function;
+
 /**
  * interaction methods for UI element
  *
@@ -145,4 +147,34 @@ public interface Actionable extends BaseElement {
    * Throws exception if element not found within timeout or element could not be scrolled to center
    */
   void blur();
+
+  /**
+   * wait for condition to return true or not null before the timeout
+   * @param condition
+   * @param <T> return type
+   * @return method can only return not null or true
+   */
+  <T> T waitFor(Function<Object[],T> condition, Object...args);
+
+  /**
+   * check if current element contains another element with the given selector
+   * @param selector value of the selector
+   * @param isExpandShadow if set to true, search inside shadow root
+   * @return true if element found
+   */
+  boolean containsElement(Selector selector, boolean isExpandShadow);
+
+  /**
+   * same as containsElement(Selector selector, boolean isExpandShadow); with isExpandShadow set to  false
+   * @param selector
+   * @return true if element found
+   */
+  boolean containsElement(Selector selector);
+
+  /**
+   * press one key on the keyboard
+   * @see org.openqa.selenium.Keys for possible string values
+   * @param key string representing a key like "Enter" or "Space"
+   */
+  void press(CharSequence key);
 }

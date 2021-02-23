@@ -2,6 +2,7 @@ package utam.core.selenium.element;
 
 import org.hamcrest.Matchers;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -209,6 +210,15 @@ public class ElementImplTests {
     verify(mock.webElement, times(1)).sendKeys(SAMPLE_TEXT);
   }
 
+  @Test
+  public void testPress() {
+    ActionsMock mock = new ActionsMock();
+    ElementImpl element = mock.getElementImpl();
+    final String KEY = "Enter";
+    element.press(KEY);
+    verify(mock.webElement, times(1)).sendKeys(Keys.ENTER.toString());
+  }
+
   /** The getTitle() method should return the value of 'title' attribute for a given WebElement */
   @Test
   public void testGetTitle() {
@@ -333,28 +343,39 @@ public class ElementImplTests {
     verify(mock.utilities, times(1)).executeJavaScript(BLUR_JS, mock.webElement);
   }
 
-  public static BaseElement getCssElement(String css, SeleniumContext context) {
-    return new ElementImpl(new LocatorImpl(new LocatorNodeImpl.Css(css)), context);
+  @Test
+  public void testContainsElement() {
+    ActionsMock mock = new ActionsMock();
+    ElementImpl element = mock.getElementImpl();
+    assertThat(element.containsElement(Web.byCss("notfound")), is(false));
   }
 
-  public static BaseElement getJavascriptElement(String selector, SeleniumContext context) {
-    return new ElementImpl(
-            new LocatorImpl.Javascript(new LocatorNodeImpl.Javascript(selector)),
-            context);
+  /*
+  @Test
+  public void testFind() {
+    ActionsMock mock = new ActionsMock();
+    ElementImpl element = mock.getElementImpl();
+    assertThat(element.find(false), is(sameInstance(mock.webElement)));
   }
 
-  public static Function<Integer, LocatorNode.Filter> getFilter(List<Clickable> list) {
-    return index -> LocatorUtilities.getElementLocator(list.get(index)).getRoot().getFilter();
+  @Test
+  public void testFindShadowRoot() {
+    ActionsMock mock = new ActionsMock();
+    ElementImpl element = mock.getElementImpl();
+    when(mock.utilities.expandShadowRoot(mock.webElement))
+        .thenReturn(mock.webElement);
+    assertThat(element.find(true), is(sameInstance(mock.webElement)));
   }
+   */
   
   public static class Mock {
 
     public final SeleniumContext context;
-    public final WebElement webElement;
+    final WebElement webElement;
     public final WebDriverUtilities utilities;
     final WebDriver webDriver;
 
-    public Mock() {
+    Mock() {
       webDriver = mock(WebDriver.class, withSettings().extraInterfaces(Interactive.class));
       context = mock(SeleniumContext.class);
       utilities = mock(WebDriverUtilities.class);
@@ -376,7 +397,7 @@ public class ElementImplTests {
       when(context.getPollingInterval()).thenReturn(Duration.ofMillis(10));
     }
 
-    public ElementImpl getElementImpl() {
+    ElementImpl getElementImpl() {
       return new ElementImpl(
           new LocatorImpl(new LocatorNodeImpl.Css(LOCATOR_WITHOUT_PARAM)), context);
     }
@@ -423,7 +444,7 @@ public class ElementImplTests {
     private final WebDriverUtilities utilities;
     private final WebDriver webDriver;
 
-    public MockHelper() {
+    MockHelper() {
       webDriver = mock(WebDriver.class, withSettings().extraInterfaces(Interactive.class));
       context = mock(SeleniumContext.class);
       utilities = mock(WebDriverUtilities.class);
@@ -460,7 +481,7 @@ public class ElementImplTests {
     }
   }
 
-  public static class ActionsMock extends ElementImplTests.Mock {
+  static class ActionsMock extends ElementImplTests.Mock {
 
     ElementImpl getNonExistentElement() {
       return new ElementImpl(

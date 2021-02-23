@@ -1,8 +1,8 @@
 package utam.core.selenium.element;
 
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
-
 import utam.core.appium.element.GestureDirection;
 import utam.core.appium.expectations.MobileExpectationsUtil;
 import utam.core.framework.UtamLogger;
@@ -13,6 +13,11 @@ import utam.core.selenium.expectations.ElementExpectations;
 import utam.core.selenium.expectations.ElementListExpectations;
 import utam.core.selenium.expectations.ElementWait;
 import utam.core.selenium.expectations.ExpectationsUtil;
+
+import java.util.function.Function;
+
+import static utam.core.selenium.element.LocatorUtilities.EMPTY_FILTER;
+import static utam.core.selenium.element.LocatorUtilities.getLocatorNode;
 
 class ElementImpl implements BaseElement, Actionable, Clickable, Editable, Touchable {
 
@@ -213,10 +218,32 @@ class ElementImpl implements BaseElement, Actionable, Clickable, Editable, Touch
     new ElementWaitImpl(expectation.getLogMessage(), elementLocator, context).wait(expectation);
   }
 
-  final String getSelectorString() {
-    return elementLocator.getSelectorString();
+  @Override
+  public <T> T waitFor(Function<Object[], T> condition, Object...args) {
+    Object[] argsArray = args == null? new Object[0] : args;
+    log("wait for condition");
+    ElementExpectations<T> expectation = ExpectationsUtil.waitFor(condition, argsArray);
+    return new ElementWaitImpl(expectation.getLogMessage(), elementLocator, context).wait(expectation);
   }
-  
+
+  @Override
+  public boolean containsElement(Selector selector, boolean isExpandShadow) {
+    // try to find how many elements are there, if 0 - nothing found
+    return new ElementWaitImpl("check for element containing", elementLocator, context)
+            .wait(ExpectationsUtil.findElements(selector, isExpandShadow)) > 0;
+  }
+
+  @Override
+  public boolean containsElement(Selector selector) {
+    return containsElement(selector, false);
+  }
+
+  @Override
+  public void press(CharSequence key) {
+    Keys keyToPress = Keys.valueOf(key.toString().toUpperCase());
+    setText(keyToPress.toString());
+  }
+
   private void validateDriverForTouchAction() {
     WebDriver driver = context.getWebDriverUtils().getWebDriver();
     if (!Driver.isMobileDriver(driver)) {

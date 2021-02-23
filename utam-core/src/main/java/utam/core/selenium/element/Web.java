@@ -1,6 +1,13 @@
 package utam.core.selenium.element;
 
+import static utam.core.selenium.element.Selector.Type.ACCESSID;
+import static utam.core.selenium.element.Selector.Type.CLASSCHAIN;
+import static utam.core.selenium.element.Selector.Type.CSS;
+import static utam.core.selenium.element.Selector.Type.UIAUTOMATOR;
+
+import io.appium.java_client.MobileBy;
 import java.util.Objects;
+import org.openqa.selenium.By;
 
 /**
  * @author elizaveta.ivanova
@@ -30,6 +37,23 @@ public abstract class Web {
       @Override
       public Type getType() {
         return type;
+      }
+
+      @Override
+      public By by() {
+        if (type == CSS) {
+          return By.cssSelector(stringValue);
+        }
+        if (type == ACCESSID) {
+          return MobileBy.AccessibilityId(stringValue);
+        }
+        if (type == CLASSCHAIN) {
+          return MobileBy.iOSClassChain(stringValue);
+        }
+        if (type == UIAUTOMATOR) {
+          return MobileBy.AndroidUIAutomator(stringValue);
+        }
+        throw new IllegalArgumentException("unsupported selector type " + type);
       }
 
       @Override

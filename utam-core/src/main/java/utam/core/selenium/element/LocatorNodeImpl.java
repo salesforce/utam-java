@@ -79,7 +79,7 @@ public abstract class LocatorNodeImpl implements LocatorNode {
 
   // public for tests to access
   public final By by() {
-    return LocatorUtilities.by(getSelector().getType(), getSelectorString());
+    return getSelector().by();
   }
 
   // public for tests to access

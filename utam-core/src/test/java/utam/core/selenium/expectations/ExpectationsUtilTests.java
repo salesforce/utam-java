@@ -1,9 +1,12 @@
 package utam.core.selenium.expectations;
 
+import java.util.function.Function;
 import org.openqa.selenium.*;
 import org.testng.annotations.Test;
 import utam.core.selenium.context.SeleniumContextProvider;
 import utam.core.selenium.context.WebDriverUtilities;
+import utam.core.selenium.element.Selector;
+import utam.core.selenium.element.Web;
 import utam.core.selenium.expectations.ElementWait.Match;
 
 import java.util.ArrayList;
@@ -518,38 +521,41 @@ public class ExpectationsUtilTests {
     assertThat(result, is(equalTo(Boolean.FALSE)));
   }
 
-  /** Tests that the size method returns the number of elements in the list */
   @Test
-  void testSize() {
+  void testFindElements() {
     SeleniumContextProvider provider = new SeleniumContextProvider(mockDriver);
     WebElement mockElement = mock(WebElement.class);
-    ElementListExpectations<Integer> expectation = ExpectationsUtil.size();
+    when(mockElement.findElements(By.cssSelector(".found"))).thenReturn(getPopulatedList(mockElement));
+    Selector selector = Web.byCss(".found");
+    ElementExpectations<Integer> expectation = ExpectationsUtil.findElements(selector, false);
 
     Integer result =
-        expectation.apply(provider.getWebDriverUtils()).apply(getPopulatedList(mockElement));
+        expectation.apply(provider.getWebDriverUtils()).apply(mockElement);
     assertThat(result, is(equalTo(1)));
 
-    assertThat(expectation.getLogMessage(), is(equalTo(GET_SIZE_MSG)));
-    assertThat(expectation.returnIfNothingFound(), is(nullValue()));
+    assertThat(expectation.getLogMessage(), is(equalTo(String.format(FIND_ELEMENTS_MSG, "By.cssSelector: .found", ""))));
+    assertThat(expectation.returnIfNothingFound(), is(0));
   }
 
-  /** Tests that the size method returns zero if the element list is empty */
   @Test
-  void testSizeWithEmptyList() {
+  void testFindElementsWithEmptyList() {
     SeleniumContextProvider provider = new SeleniumContextProvider(mockDriver);
-    ElementListExpectations<Integer> expectation = ExpectationsUtil.size();
-
-    Integer result = expectation.apply(provider.getWebDriverUtils()).apply(getEmptyList());
+    WebElement mockElement = mock(WebElement.class);
+    when(mockElement.findElements(By.cssSelector(".found"))).thenReturn(getEmptyList());
+    Selector selector = Web.byCss(".found");
+    ElementExpectations<Integer> expectation = ExpectationsUtil.findElements(selector, false);
+    Integer result = expectation.apply(provider.getWebDriverUtils()).apply(mockElement);
     assertThat(result, is(equalTo(0)));
   }
 
-  /** Tests that the size method returns zero if the element list is null */
   @Test
-  void testSizeWithNullList() {
+  void testFindElementsWithNullList() {
     SeleniumContextProvider provider = new SeleniumContextProvider(mockDriver);
-    ElementListExpectations<Integer> expectation = ExpectationsUtil.size();
-
-    Integer result = expectation.apply(provider.getWebDriverUtils()).apply(null);
+    WebElement mockElement = mock(WebElement.class);
+    when(mockElement.findElements(By.cssSelector(".found"))).thenReturn(null);
+    Selector selector = Web.byCss(".found");
+    ElementExpectations<Integer> expectation = ExpectationsUtil.findElements(selector, false);
+    Integer result = expectation.apply(provider.getWebDriverUtils()).apply(mockElement);
     assertThat(result, is(equalTo(0)));
   }
 
@@ -685,6 +691,21 @@ public class ExpectationsUtilTests {
     assertThat(result, is(equalTo(mock.element)));
 
     assertThat(expectation.getLogMessage(), is(equalTo(String.format(JAVASCRIPT_MSG, BLUR_JS))));
+    assertThat(expectation.returnIfNothingFound(), is(nullValue()));
+  }
+
+  @Test
+  public void testWaitFor() {
+    final String elementText = "textValue";
+    SeleniumContextProvider provider = new SeleniumContextProvider(mockDriver);
+    WebElement mockElement = mock(WebElement.class);
+    when(mockElement.getText()).thenReturn(elementText);
+    Function<Object[],String> condition = array -> mockElement.getText();
+    ElementExpectations<String> expectation = ExpectationsUtil.waitFor(condition, new Object[0]);
+    String result = expectation.apply(provider.getWebDriverUtils()).apply(mockElement);
+    assertThat(result, is(equalTo(elementText)));
+
+    assertThat(expectation.getLogMessage(), is(equalTo(WAIT_FOR_MSG)));
     assertThat(expectation.returnIfNothingFound(), is(nullValue()));
   }
 
