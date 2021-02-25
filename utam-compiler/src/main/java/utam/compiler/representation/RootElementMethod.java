@@ -26,7 +26,7 @@ public class RootElementMethod {
    * @return string code of the method
    */
   private static String buildRootMethodCode(TypeProvider rootElementType) {
-    if (rootElementType.equals(actionable.getType())) {
+    if (rootElementType.isSameType(actionable)) {
       return "this.getRootElement()";
     }
     return String.format("(%s) this.getRootElement()", rootElementType.getSimpleName());
@@ -35,7 +35,7 @@ public class RootElementMethod {
   public static class Protected extends Public {
 
     public Protected() {
-      super(actionable.getType());
+      super(actionable);
     }
 
     @Override

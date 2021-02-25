@@ -81,4 +81,15 @@ public abstract class AbstractElementExpectation<T> implements ElementExpectatio
       super(log, ((utilities, searchContext) -> ElementWait.Match.from(apply.test(utilities, searchContext))), ElementWait.Match.FALSE);
     }
   }
+
+  static class Returns<T> extends AbstractElementExpectation<T> {
+
+    Returns(String log, BiFunction<WebDriverUtilities, SearchContext, T> apply) {
+      super(log, apply);
+    }
+
+    Returns(String log, BiFunction<WebDriverUtilities, SearchContext, T> apply, T defaultReturns) {
+      super(log, apply, defaultReturns);
+    }
+  }
 }

@@ -26,6 +26,10 @@ public enum EditableActionType implements ActionType {
    */
   clearAndType(PrimitiveType.STRING),
   /**
+   * press keyboard key
+   */
+  press(PrimitiveType.STRING),
+  /**
    * Apply WebElement.sendKeys from Selenium - "simulate typing into an element, which may set its *
    * value". <br>
    * Method is wrapped in fluent wait to find the element. Throws exception if nothing found within
@@ -53,8 +57,8 @@ public enum EditableActionType implements ActionType {
   }
 
   @Override
-  public PrimitiveType getReturnType() {
-    return PrimitiveType.VOID;
+  public TypeProvider getReturnType() {
+    return TypeUtilities.VOID;
   }
 
   @Override

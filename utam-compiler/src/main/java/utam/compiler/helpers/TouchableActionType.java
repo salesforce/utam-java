@@ -22,7 +22,7 @@ public enum TouchableActionType implements ActionType {
    * from the element.<br>
    * throws exception if fails
    */
-  flick(PrimitiveType.VOID, PrimitiveType.NUMBER, PrimitiveType.NUMBER),
+  flick(TypeUtilities.VOID, PrimitiveType.NUMBER, PrimitiveType.NUMBER),
   /**
    * Flicks a list of web elements in the desired direction.<br>
    * Compares the original element's text and position to the updated element after the flick.<br>
@@ -35,15 +35,15 @@ public enum TouchableActionType implements ActionType {
   // parameters accepted by the action
   private final PrimitiveType[] actionParameters;
   // return type of the action
-  private final PrimitiveType returnType;
+  private final TypeProvider returnType;
 
-  TouchableActionType(PrimitiveType returnType, PrimitiveType... parameters) {
+  TouchableActionType(TypeProvider returnType, PrimitiveType... parameters) {
     this.actionParameters = parameters;
     this.returnType = returnType;
   }
 
   @Override
-  public PrimitiveType getReturnType() {
+  public TypeProvider getReturnType() {
     return returnType;
   }
 

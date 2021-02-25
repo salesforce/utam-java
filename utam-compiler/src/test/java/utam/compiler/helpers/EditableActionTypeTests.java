@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static utam.compiler.helpers.ActionableActionTypeTests.sameType;
 import static utam.core.framework.UtamLogger.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -114,6 +115,8 @@ public class EditableActionTypeTests {
   @Test
   public void testStandardActionsMethods() {
     Stream.of(EditableActionType.values())
+        // method "press" has different parameter types and can't be found
+        .filter(type -> type != EditableActionType.press)
         .forEach(
             action -> {
               info(String.format("test element action '%s'", action));
@@ -123,9 +126,9 @@ public class EditableActionTypeTests {
                   String.format(
                       "action '%s' returns '%s', method returns '%s'",
                       action.name(),
-                      action.getReturnType().name(),
+                      action.getReturnType().getSimpleName(),
                       method.getReturnType().getName()),
-                  action.getReturnType().equals(method.getReturnType()),
+                  sameType(action.getReturnType(), method.getReturnType()),
                   is(true));
               Class[] params = action.getParameterClasses();
               assertThat(

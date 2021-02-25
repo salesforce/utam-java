@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 import static utam.compiler.grammar.UtamElement.ERR_CONTAINER_SHOULD_BE_PUBLIC;
 import static utam.compiler.grammar.UtamElement.Type;
 import static utam.compiler.grammar.UtamSelector_Tests.getUtamCssSelector;
+import static utam.compiler.helpers.TypeUtilities.CONTAINER_LIST_RETURN_TYPE;
 import static utam.compiler.representation.ContainerMethodTests.FIRST_CONTAINER_PARAMETER;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -138,7 +139,7 @@ public class UtamElement_ContainerTests {
     assertThat(element.getType().getSimpleName(), is(equalTo("ContainerElement")));
     PageObjectValidationTestHelper.MethodInfo expectedMethod =
         new PageObjectValidationTestHelper.MethodInfo(
-            "getContainerWithSelector", ContainerMethod.RETURNS_LIST.getSimpleName());
+            "getContainerWithSelector", CONTAINER_LIST_RETURN_TYPE.getSimpleName());
     expectedMethod.addParameter(
         new PageObjectValidationTestHelper.MethodParameterInfo("scopeArg", "String"));
     expectedMethod.addParameter(

@@ -39,7 +39,7 @@ public class CustomElementMethodTests {
 
   private static ElementContext getBasicScope() {
     final ElementContext scope =
-        new ElementContext.Basic(ELEMENT_NAME, actionable.getType(), getCssSelector("css"));
+        new ElementContext.Basic(ELEMENT_NAME, actionable, getCssSelector("css"));
     MethodDeclaration declaration = mock(MethodDeclaration.class);
     PageObjectMethod mock = mock(PageObjectMethod.class);
     when(declaration.getName()).thenReturn(ELEMENT_METHOD_NAME);

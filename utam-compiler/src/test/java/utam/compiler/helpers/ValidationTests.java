@@ -44,7 +44,7 @@ public class ValidationTests {
     return new ElementContext.Basic(
         ElementContext.ROOT_SCOPE,
         name,
-        actionable.getType(),
+        actionable,
         selector,
         false,
         EMPTY_PARAMETERS);
@@ -154,7 +154,7 @@ public class ValidationTests {
   @Test
   public void testErr_COMPONENT_AND_ELEMENT_DUPLICATE_SELECTOR() {
     Selector selector = getCssSelector(ELEMENT_SELECTOR);
-    ElementContext.Basic first = new ElementContext.Basic("first", actionable.getType(), selector);
+    ElementContext.Basic first = new ElementContext.Basic("first", actionable, selector);
     ElementContext.Custom second =
         new ElementContext.Custom(
             "second", new TypeUtilities.FromString("test.Second"), selector);
@@ -176,9 +176,9 @@ public class ValidationTests {
   @Test
   public void testErr_DUPLICATE_WITH_ROOT_SELECTOR() {
     Selector selector = getCssSelector(ELEMENT_SELECTOR);
-    ElementContext.Basic first = new ElementContext.Basic("first", actionable.getType(), selector);
+    ElementContext.Basic first = new ElementContext.Basic("first", actionable, selector);
     ElementContext.Root second =
-        new ElementContext.Root(new TypeUtilities.FromString("test.Second"), actionable.getType(), selector);
+        new ElementContext.Root(new TypeUtilities.FromString("test.Second"), actionable, selector);
     Map<String, ElementContext> map = Collections.singletonMap("first", first);
     UtamError e =
         expectThrows(UtamError.class, () -> getValidation(map).testLocalDuplicates(second));
@@ -210,7 +210,7 @@ public class ValidationTests {
   @Test
   public void validateRootWithNonEmptySelector() {
     Selector selector = getCssSelector(ELEMENT_SELECTOR);
-    TypeProvider elementType = actionable.getType();
+    TypeProvider elementType = actionable;
     ElementContext.Root root =
         new ElementContext.Root(new TypeUtilities.FromString("test.Type"), elementType, selector);
     assertThat(
@@ -237,7 +237,7 @@ public class ValidationTests {
   @Test
   public void validateComponentElement() {
     Selector selector = getCssSelector(ELEMENT_SELECTOR);
-    TypeProvider elementType = actionable.getType();
+    TypeProvider elementType = actionable;
     ElementContext.Custom self =
         new ElementContext.Custom("name", new TypeUtilities.FromString("test.Type"), selector);
     assertThat(
@@ -272,7 +272,7 @@ public class ValidationTests {
     Selector selector = getCssSelector(ELEMENT_SELECTOR);
     ElementContext self = getBasicElement("name", selector);
     assertThat(
-        self.validate(new ElementContext.Root(new TypeUtilities.FromString("test.Type"), actionable.getType(), selector)),
+        self.validate(new ElementContext.Root(new TypeUtilities.FromString("test.Type"), actionable, selector)),
         is(Validation.ErrorType.DUPLICATE_WITH_ROOT_SELECTOR));
     assertThat(
         self.validate(

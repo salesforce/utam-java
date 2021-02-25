@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 import static utam.compiler.grammar.TestUtilities.getJsonStringDeserializer;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
+import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.compiler.translator.TranslationUtilities.getLastStatement;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -99,7 +100,7 @@ public class ClassSerializerTests {
     when(method.getCodeLines()).thenReturn(Stream.of("returnValue").collect(Collectors.toList()));
     MethodDeclaration methodDeclaration = mock(MethodDeclaration.class);
     when(method.getDeclaration()).thenReturn(methodDeclaration);
-    when(methodDeclaration.getReturnType()).thenReturn(PrimitiveType.VOID);
+    when(methodDeclaration.getReturnType()).thenReturn(VOID);
     assertThat(getLastStatement(method), is(equalTo("returnValue;")));
   }
 }

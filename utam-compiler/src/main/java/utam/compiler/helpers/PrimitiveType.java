@@ -1,53 +1,68 @@
 package utam.compiler.helpers;
 
+import java.util.function.Function;
+import java.util.function.Supplier;
 import utam.core.declarative.representation.TypeProvider;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import utam.core.selenium.element.Selector;
 
 /**
- * primitive types supported for element actions
+ * primitive types supported as either return type or parameter in JSON
  *
  * @author elizaveta.ivanova
  * @since 226
  */
 @SuppressWarnings("rawtypes")
 public enum PrimitiveType implements TypeProvider {
-  STRING(String.class, "String"),
-  NUMBER(Integer.class, "Integer"),
-  BOOLEAN(Boolean.class, "Boolean"),
-  CLASS(Class.class, "Class<T>"),
-  VOID(Void.class, "void");
+  STRING(String.class, "String", "string"),
+  NUMBER(Integer.class, "Integer", "number"),
+  BOOLEAN(Boolean.class, "Boolean", "boolean"),
+  PREDICATE(Supplier.class, "Supplier<T>", "predicate"),
+  LOCATOR(Selector.class, "Selector", "locator");
 
   public static final PrimitiveType[] EMPTY_ARRAY = new PrimitiveType[0];
   public static final String SUPPORTED_TYPES =
-      Stream.of(STRING, NUMBER, BOOLEAN)
-          .map(value -> value.name().toLowerCase())
+      Stream.of(PrimitiveType.values())
+          .map(value -> value.typeFromJson)
           .collect(Collectors.joining(","));
   private final Class type; // used in tests
   private final String typeName;
+  private final String typeFromJson;
 
-  PrimitiveType(Class type, String typeName) {
+  PrimitiveType(Class type, String typeName, String typeFromJson) {
     this.type = type;
     this.typeName = typeName;
+    this.typeFromJson = typeFromJson;
   }
 
-  public static PrimitiveType fromString(String type) {
+  public static PrimitiveType fromString(String typeString) {
     for (PrimitiveType primitive : PrimitiveType.values()) {
-      if (primitive.is(type)) {
+      if (primitive.typeFromJson.equals(typeString)) {
         return primitive;
       }
     }
     return null;
   }
 
+  public static boolean isPrimitiveType(String jsonString) {
+    for (PrimitiveType primitive : PrimitiveType.values()) {
+      if (jsonString.equals(primitive.typeFromJson)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
   public Class getClassType() {
     return type;
   }
 
   @Override
   public String getFullName() {
-    return "";
+    return getClassType().getName();
   }
 
   @Override
@@ -57,27 +72,7 @@ public enum PrimitiveType implements TypeProvider {
 
   @Override
   public String getPackageName() {
-    return "";
+    return getClassType().getPackageName();
   }
 
-  private boolean is(String typeString) {
-    return this.name().toLowerCase().equals(typeString);
-  }
-
-  //used in test to check action return types and parameters
-  public boolean equals(Class clazz) {
-    if(this == VOID) {
-      return clazz.getName().toLowerCase().contains("void");
-    }
-    if(clazz.equals(type)) {
-      return true;
-    }
-    if(this == NUMBER) {
-      return clazz.getName().toLowerCase().startsWith("int");
-    }
-    if(this == BOOLEAN) {
-      return clazz.getName().toLowerCase().equals(typeName.toLowerCase());
-    }
-    return false;
-  }
 }

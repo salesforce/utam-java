@@ -1,5 +1,6 @@
 package utam.compiler.representation;
 
+import utam.compiler.helpers.PrimitiveType;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -12,6 +13,8 @@ import utam.core.selenium.element.Selector;
 import java.util.ArrayList;
 import java.util.List;
 
+import static utam.compiler.helpers.TypeUtilities.CONTAINER_LIST_RETURN_TYPE;
+import static utam.compiler.helpers.TypeUtilities.CONTAINER_RETURN_TYPE;
 import static utam.compiler.helpers.TypeUtilities.LIST_IMPORT;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.representation.ComposeMethod.getElementGetterString;
@@ -26,15 +29,10 @@ import static utam.compiler.translator.TranslationUtilities.getElementGetterMeth
  */
 public abstract class ContainerMethod implements PageObjectMethod {
 
-  public static final TypeProvider RETURNS_LIST = new TypeUtilities.FromString(
-      String.format("<T extends %s> List<T>", PAGE_OBJECT.getSimpleName()));
   static final String PAGE_OBJECT_TYPE_PARAMETER_NAME = "pageObjectType";
-  static final TypeProvider RETURNS =
-      new TypeUtilities.FromString(String.format("<T extends %s> T", PAGE_OBJECT.getSimpleName()));
   static final MethodParameter PAGE_OBJECT_PARAMETER =
       new ParameterUtils.Regular(PAGE_OBJECT_TYPE_PARAMETER_NAME,
-          new TypeUtilities.FromString("Class<T>"));
-  private static final TypeProvider SELECTOR_IMPORT = new TypeUtilities.FromClass(Selector.class);
+          TypeUtilities.BOUNDED_CLASS);
   final List<TypeProvider> classImports = new ArrayList<>();
   final List<TypeProvider> interfaceImports = new ArrayList<>();
   final List<String> implCodeLines = new ArrayList<>();
@@ -72,12 +70,12 @@ public abstract class ContainerMethod implements PageObjectMethod {
 
     public WithSelectorReturnsList(ElementContext scopeElement, boolean isExpandScope,
         String elementName, Selector injectSelector, List<MethodParameter> selectorParameters) {
-      super(scopeElement, isExpandScope, elementName, RETURNS_LIST);
+      super(scopeElement, isExpandScope, elementName, CONTAINER_LIST_RETURN_TYPE);
       interfaceImports.add(PAGE_OBJECT);
       interfaceImports.add(LIST_IMPORT);
       classImports.addAll(interfaceImports);
       // because method that build selector uses Selector.Type
-      classImports.add(SELECTOR_IMPORT);
+      classImports.add(PrimitiveType.LOCATOR);
       methodParameters.addAll(selectorParameters);
       methodParameters.add(PAGE_OBJECT_PARAMETER);
       String selectorValue = buildSelectorString(injectSelector, selectorParameters);
@@ -91,11 +89,11 @@ public abstract class ContainerMethod implements PageObjectMethod {
 
     public WithSelector(ElementContext scopeElement, boolean isExpandScope, String elementName,
         Selector injectSelector, List<MethodParameter> selectorParameters) {
-      super(scopeElement, isExpandScope, elementName, RETURNS);
+      super(scopeElement, isExpandScope, elementName, CONTAINER_RETURN_TYPE);
       interfaceImports.add(PAGE_OBJECT);
       classImports.addAll(interfaceImports);
       // because method that build selector uses Selector.Type
-      classImports.add(SELECTOR_IMPORT);
+      classImports.add(PrimitiveType.LOCATOR);
       String selectorValue = buildSelectorString(injectSelector, selectorParameters);
       implCodeLines.add(String.format("%s.load(%s, by(%s, Selector.Type.%s))", containerElement,
           PAGE_OBJECT_TYPE_PARAMETER_NAME, selectorValue, injectSelector.getType()));

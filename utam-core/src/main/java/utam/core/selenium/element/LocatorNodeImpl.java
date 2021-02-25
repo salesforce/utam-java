@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import utam.core.selenium.element.Web.SelectorImpl;
 
 import static utam.core.selenium.element.LocatorUtilities.EMPTY_FILTER;
 import static utam.core.selenium.element.LocatorUtilities.QUERY_FILTER_WRAPPER;
@@ -79,7 +80,7 @@ public abstract class LocatorNodeImpl implements LocatorNode {
 
   // public for tests to access
   public final By by() {
-    return LocatorUtilities.by(getSelector().getType(), getSelectorString());
+    return new SelectorImpl(getSelector().getType(), getSelectorString()).by();
   }
 
   // public for tests to access

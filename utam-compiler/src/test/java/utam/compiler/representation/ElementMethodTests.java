@@ -26,8 +26,8 @@ public class ElementMethodTests {
 
   private static final String ELEMENT_NAME = "test";
   private static final String ELEMENT_METHOD_NAME = "getTest";
-  private static final TypeProvider ACTIONABLE_TYPE = actionable.getType();
-  private static final TypeProvider CLICKABLE_TYPE = clickable.getType();
+  private static final TypeProvider ACTIONABLE_TYPE = actionable;
+  private static final TypeProvider CLICKABLE_TYPE = clickable;
 
   @Test
   public void testSingleElementGetterMethodCreated() {

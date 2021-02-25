@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface ActionType {
 
-    PrimitiveType getReturnType();
+    TypeProvider getReturnType();
 
     List<TypeProvider> getParametersTypes();
 

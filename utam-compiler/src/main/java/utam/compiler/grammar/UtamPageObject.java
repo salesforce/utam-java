@@ -116,7 +116,7 @@ final class UtamPageObject {
       throw new UtamError(ERR_ROOT_PROFILE_HAS_NO_INTERFACE);
     }
     // check that root element type is one of actionables
-    if(TypeUtilities.getElementType(rootElementType, actionable) == null) {
+    if(rootElementType != null && !TypeUtilities.Element.isBasicType(rootElementType)) {
       throw new UtamError(String.format(ERR_UNSUPPORTED_ROOT_ELEMENT_TYPE, rootElementType));
     }
   }
@@ -157,7 +157,7 @@ final class UtamPageObject {
   final ElementContext setRootElementMethod(TranslationContext context) {
     TypeProvider interfaceType = context.getInterfaceType(implementsType);
     Selector rootSelector = selector != null ? selector.getSelector() : EMPTY_SELECTOR;
-    TypeProvider elementType = TypeUtilities.getElementType(rootElementType, actionable);
+    TypeProvider elementType = TypeUtilities.Element.asBasicType(rootElementType);
     ElementContext rootElement = new ElementContext.Root(interfaceType, elementType, rootSelector);
     // register root element and its method in context
     context.setElement(rootElement);

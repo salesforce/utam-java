@@ -166,22 +166,6 @@ public class LocatorUtilities {
     return new Web.SelectorImpl(type, selectorString);
   }
 
-  static By by(Selector.Type type, String value) {
-    if (type == CSS) {
-      return By.cssSelector(value);
-    }
-    if (type == ACCESSID) {
-      return MobileBy.AccessibilityId(value);
-    }
-    if (type == CLASSCHAIN) {
-      return MobileBy.iOSClassChain(value);
-    }
-    if (type == UIAUTOMATOR) {
-      return MobileBy.AndroidUIAutomator(value);
-    }
-    throw new IllegalArgumentException("unsupported selector type " + type);
-  }
-
   /**
    * find an element inside polling wait AKA waiting for presence
    * @param element actionable element

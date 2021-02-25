@@ -1,5 +1,8 @@
 package utam.compiler.helpers;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.base.BasePageObject;
@@ -10,10 +13,6 @@ import utam.core.selenium.element.Actionable;
 import utam.core.selenium.element.Clickable;
 import utam.core.selenium.element.Editable;
 import utam.core.selenium.element.Touchable;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * implementation of type provider based on existing class
@@ -31,24 +30,19 @@ public final class TypeUtilities {
       new TypeUtilities.FromClass(BasePageObject.class);
   public static final TypeProvider ROOT_PAGE_OBJECT =
       new TypeUtilities.FromClass(RootPageObject.class);
-  public static final TypeProvider CONTAINER_ELEMENT =
+  public static final TypeProvider VOID = new UnimportableType("void");
+  public static final TypeProvider BOUNDED_CLASS = new UnimportableType("Class<T>");
+  static final TypeProvider GENERIC_TYPE = new UnimportableType("<T> T");
+  static final TypeProvider CONTAINER_ELEMENT =
       new TypeUtilities.FromClass(ContainerElement.class);
-  public static final String ERR_PARAMETERS_TYPES_MISMATCH =
+  static final String ERR_PARAMETERS_TYPES_MISMATCH =
       "expected %d parameters with type {%s}, provided were {%s}";
+  public static final TypeProvider CONTAINER_RETURN_TYPE =
+      new TypeUtilities.UnimportableType(String.format("<T extends %s> T", PAGE_OBJECT.getSimpleName()));
+  public static final TypeProvider CONTAINER_LIST_RETURN_TYPE = new TypeUtilities.UnimportableType(
+      String.format("<T extends %s> List<T>", PAGE_OBJECT.getSimpleName()));
 
-  public static boolean isElementType(String typeStr) {
-    if(typeStr == null) {
-      return true;
-    }
-    for (TypeUtilities.Element type : TypeUtilities.Element.values()) {
-      if (typeStr.equals(type.name())) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public static String getUnmatchedParametersErr(
+  static String getUnmatchedParametersErr(
       List<TypeProvider> expectedTypes, List<MethodParameter> providedParameters) {
     return String.format(
         ERR_PARAMETERS_TYPES_MISMATCH,
@@ -59,7 +53,8 @@ public final class TypeUtilities {
             .collect(Collectors.joining(",")));
   }
 
-  public static boolean isParametersTypesMatch(List<TypeProvider> expectedTypes, List<MethodParameter> actualTypes) {
+  static boolean isParametersTypesMatch(List<TypeProvider> expectedTypes,
+      List<MethodParameter> actualTypes) {
     if (expectedTypes == null) {
       return true;
     }
@@ -67,31 +62,14 @@ public final class TypeUtilities {
       return false;
     }
     for (int i = 0; i < expectedTypes.size(); i++) {
-      if (!expectedTypes.get(i).equals(actualTypes.get(i).getType())) {
+      if (!expectedTypes.get(i).isSameType(actualTypes.get(i).getType())) {
         return false;
       }
     }
     return true;
   }
 
-  public static TypeProvider getElementType(String string, TypeUtilities.Element defaultType) {
-    Element res = null;
-    if (string == null) {
-      return defaultType == null ? null : defaultType.getType();
-    }
-    for (TypeUtilities.Element type : TypeUtilities.Element.values()) {
-      if (string.equals(type.name())) {
-        res = type;
-        break;
-      }
-    }
-    if (res != null) {
-      return res.getType();
-    }
-    return null;
-  }
-
-  public enum Element {
+  public enum Element implements TypeProvider {
     actionable(Actionable.class),
     clickable(Clickable.class),
     editable(Editable.class),
@@ -103,8 +81,63 @@ public final class TypeUtilities {
       this.type = type;
     }
 
-    public TypeProvider getType() {
-      return new FromClass(type);
+    public static boolean isBasicType(String jsonString) {
+      for (TypeUtilities.Element type : TypeUtilities.Element.values()) {
+        if (type.name().equals(jsonString)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    public static Element asBasicType(String jsonString) {
+      if (jsonString == null) {
+        return actionable;
+      }
+      for (TypeUtilities.Element type : TypeUtilities.Element.values()) {
+        if (jsonString.equals(type.name())) {
+          return type;
+        }
+      }
+      return null;
+    }
+
+    public static boolean isBasicType(TypeProvider type) {
+      for (TypeUtilities.Element basicType : TypeUtilities.Element.values()) {
+        if (basicType.isSameType(type)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    public static TypeUtilities.Element asBasicType(TypeProvider type) {
+      for (TypeUtilities.Element basicType : TypeUtilities.Element.values()) {
+        if (basicType.isSameType(type)) {
+          return basicType;
+        }
+      }
+      return null;
+    }
+
+    @Override
+    public String getFullName() {
+      return type.getName();
+    }
+
+    @Override
+    public String getSimpleName() {
+      return type.getSimpleName();
+    }
+
+    @Override
+    public String getPackageName() {
+      return type.getPackageName();
+    }
+
+    @Override
+    public Class getClassType() {
+      return type;
     }
   }
 
@@ -150,6 +183,11 @@ public final class TypeUtilities {
     @Override
     public int hashCode() {
       return Objects.hash(getSimpleName(), getFullName());
+    }
+
+    @Override
+    public Class getClassType() {
+      return clazz;
     }
   }
 
@@ -215,6 +253,11 @@ public final class TypeUtilities {
     public int hashCode() {
       return Objects.hash(getSimpleName(), getFullName());
     }
+
+    @Override
+    public Class getClassType() {
+      return null;
+    }
   }
 
   public static final class ListOf implements TypeProvider {
@@ -241,21 +284,57 @@ public final class TypeUtilities {
     }
 
     @Override
-    public boolean equals(Object type) {
-      if (!(type instanceof TypeProvider)) {
+    public boolean isSameType(TypeProvider anotherType) {
+      if (!(anotherType instanceof ListOf)) {
         return false;
       }
-
-      if (!(type instanceof ListOf)) {
-        return false;
-      }
-
-      return elementType.equals(((ListOf) type).elementType);
+      return this.getSimpleName().equals(anotherType.getSimpleName());
     }
 
     @Override
     public int hashCode() {
       return Objects.hash(elementType);
     }
+
+    @Override
+    public Class getClassType() {
+      return List.class;
+    }
   }
+
+  static class UnimportableType implements TypeProvider {
+
+    private final String name;
+
+    UnimportableType(String name) {
+      this.name = name;
+    }
+
+    @Override
+    public String getFullName() {
+      return "";
+    }
+
+    @Override
+    public String getSimpleName() {
+      return name;
+    }
+
+    @Override
+    public String getPackageName() {
+      return "";
+    }
+
+    @Override
+    public Class getClassType() {
+      return null;
+    }
+
+    @Override
+    public boolean isSameType(TypeProvider anotherType) {
+      return this.getSimpleName().equals(anotherType.getSimpleName());
+    }
+  }
+
+  ;
 }

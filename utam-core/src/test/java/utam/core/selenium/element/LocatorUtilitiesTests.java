@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import utam.core.selenium.element.Web.SelectorImpl;
 
 import static utam.core.framework.consumer.LocationPolicyType.CHAIN;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -260,12 +261,6 @@ public class LocatorUtilitiesTests {
                     UtamError.class,
                     () -> builder.getContainerLocator(f));
     assertThat(e.getMessage(), is(equalTo(String.format(NON_EXISTING_FIELD_ERROR, "missingScope"))));
-  }
-
-  @Test
-  public void testByMethod() {
-    assertThrows(IllegalArgumentException.class, () -> LocatorUtilities.by(null, "value"));
-    assertThat(LocatorUtilities.by(Selector.Type.UIAUTOMATOR, "test"), is(equalTo(MobileBy.AndroidUIAutomator("test"))));
   }
 
   @Test

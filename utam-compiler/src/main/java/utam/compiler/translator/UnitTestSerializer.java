@@ -1,5 +1,6 @@
 package utam.compiler.translator;
 
+import utam.compiler.helpers.TypeUtilities.ListOf;
 import utam.core.declarative.translator.UnitTestRunner;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.compiler.translator.TranslationUtilities.*;
 
 /**
@@ -121,14 +123,14 @@ public final class UnitTestSerializer {
     methodContent.add(String.format("public void test%s() {", fixedMethodName));
     methodContent.add("//TODO: implement test (sample below):");
 
-    if (returnType.equals(PrimitiveType.VOID)) {
+    if (returnType.isSameType(VOID)) {
       methodContent.add("// Simply calling the method is enough. We are simply asserting");
       methodContent.add("// that the method does not throw.");
     }
 
     methodContent.add(testStatement);
 
-    if (returnType.equals(new TypeUtilities.ListOf(PrimitiveType.STRING))) {
+    if (returnType.isSameType(new TypeUtilities.ListOf(PrimitiveType.STRING))) {
       methodContent.add(String.format(STRING_LIST_ASSERT_TEMPLATE, methodName, methodArgs));
     }
 
@@ -155,48 +157,43 @@ public final class UnitTestSerializer {
   }
 
   private static String getTestDescription(TypeProvider pageObjectMethodReturnType) {
-    if (pageObjectMethodReturnType.equals(PrimitiveType.VOID)) {
+    if (pageObjectMethodReturnType.isSameType(VOID)) {
       return "execute successfully";
     }
     return "return a valid value";
   }
 
   private static String getTestAssertionStatementPrefix(TypeProvider returnType) {
-    if (returnType.equals(PrimitiveType.VOID)) {
+    if (returnType.isSameType(VOID)) {
       return "";
     }
     return "assertThat(";
   }
 
   private static String getTestAssertionStatementSuffix(TypeProvider returnType) {
-    if (returnType.equals(PrimitiveType.VOID)) {
+    if (returnType.isSameType(VOID)) {
       return "";
     }
     return ")";
   }
 
   private static String getTestAssertionArguments(TypeProvider returnType) {
-    if (returnType.equals(PrimitiveType.VOID)) {
+    if (returnType.isSameType(VOID)) {
       return "";
     }
-    if (returnType.equals(PrimitiveType.STRING)) {
+    if (returnType.isSameType(PrimitiveType.STRING)) {
       return ", is(equalTo(\"replaceWithValidExpectedValue\"))";
     }
-    if (returnType.equals(PrimitiveType.NUMBER)) {
+    if (returnType.isSameType(PrimitiveType.NUMBER)) {
       return ", is(equalTo(-1))";
     }
-    if (returnType.equals(PrimitiveType.BOOLEAN)) {
+    if (returnType.isSameType(PrimitiveType.BOOLEAN)) {
       return ", is(equalTo(false))";
     }
-    if (returnType.equals(TypeUtilities.Element.actionable.getType())
-        || returnType.equals(TypeUtilities.Element.clickable.getType())
-        || returnType.equals(TypeUtilities.Element.editable.getType())
-        || returnType.equals(TypeUtilities.Element.touchable.getType())) {
+    if(TypeUtilities.Element.isBasicType(returnType)) {
       return ".isPresent(), is(equalTo(true))";
     }
-    if (returnType
-        .getFullName()
-        .equals(new TypeUtilities.ListOf(PrimitiveType.CLASS).getFullName())) {
+    if (returnType instanceof ListOf) {
       return ", hasSize(-1)";
     }
     return ", is(not(nullValue()))";

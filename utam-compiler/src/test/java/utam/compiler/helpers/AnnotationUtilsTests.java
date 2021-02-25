@@ -35,7 +35,7 @@ public class AnnotationUtilsTests {
     return new ElementContext.Basic(
         ElementContext.ROOT_SCOPE,
         value,
-        actionable.getType(),
+        actionable,
         EMPTY_SELECTOR,
         false,
         EMPTY_PARAMETERS);

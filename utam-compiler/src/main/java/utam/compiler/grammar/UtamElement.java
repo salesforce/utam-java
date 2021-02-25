@@ -119,7 +119,7 @@ public final class UtamElement {
     }
     if ("container".equals(type)) {
       traversalAbstraction = new Container();
-    } else if (TypeUtilities.isElementType(type)) {
+    } else if (type == null || TypeUtilities.Element.isBasicType(type)) {
       traversalAbstraction = new Basic();
     } else if (TranslationTypesConfigJava.isPageObjectType(type)) {
       traversalAbstraction = new Custom();
@@ -281,7 +281,7 @@ public final class UtamElement {
     @Override
     final ElementContext[] traverse(
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
-      TypeProvider elementType = TypeUtilities.getElementType(type, actionable);
+      TypeProvider elementType = TypeUtilities.Element.asBasicType(type);
       ElementField field =
           new ElementField(
               name,

@@ -50,6 +50,20 @@ public class PageObjectElementBuilderImplTests {
     return new PageObjectElementBuilderImpl(factory, element);
   }
 
+  static BaseElement getCssElement(String css, SeleniumContext context) {
+    return new ElementImpl(new LocatorImpl(new LocatorNodeImpl.Css(css)), context);
+  }
+
+  static BaseElement getJavascriptElement(String selector, SeleniumContext context) {
+    return new ElementImpl(
+        new LocatorImpl.Javascript(new LocatorNodeImpl.Javascript(selector)),
+        context);
+  }
+
+  static Function<Integer, LocatorNode.Filter> getFilter(List<Clickable> list) {
+    return index -> LocatorUtilities.getElementLocator(list.get(index)).getRoot().getFilter();
+  }
+
   /**
    * Tests that the count method returns the count of elements in the list when the nullable
    * argument is false <br>
@@ -89,7 +103,7 @@ public class PageObjectElementBuilderImplTests {
   @Test
   public void testSetParameters() {
     SeleniumContext seleniumContext = new ElementImplTests.MockHelper().context;
-    BaseElement baseElement = ElementImplTests.getCssElement(LOCATOR_WITH_PARAM, seleniumContext);
+    BaseElement baseElement = getCssElement(LOCATOR_WITH_PARAM, seleniumContext);
     Actionable test =
         getElementBuilder(seleniumContext, baseElement).build(Actionable.class, "param");
     assertThat(
@@ -130,10 +144,10 @@ public class PageObjectElementBuilderImplTests {
         .thenReturn(
             Stream.of(mock(WebElement.class), mock(WebElement.class)).collect(Collectors.toList()));
     SeleniumContext context = new SeleniumContextProvider(driver);
-    BaseElement element = ElementImplTests.getJavascriptElement(selector, context);
+    BaseElement element = getJavascriptElement(selector, context);
     List<Clickable> list = getElementBuilder(context, element).buildList(Clickable.class);
     assertThat(list.size(), is(equalTo(2)));
-    Function<Integer, LocatorNode.Filter> filter = ElementImplTests.getFilter(list);
+    Function<Integer, LocatorNode.Filter> filter = getFilter(list);
     assertThat(filter.apply(0).getFilterString(), is(emptyString()));
     assertThat(filter.apply(1).getFilterString(), is("[1]"));
   }

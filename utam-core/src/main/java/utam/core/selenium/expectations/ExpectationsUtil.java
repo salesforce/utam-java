@@ -3,13 +3,18 @@ package utam.core.selenium.expectations;
 import static utam.core.selenium.expectations.SalesforceWebDriverUtils.SCROLL_INTO_VIEW_ALIGN_TO_TOP_JS;
 
 import java.util.List;
-
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-
 import utam.core.framework.UtamLogger;
+import utam.core.selenium.context.WebDriverUtilities;
+import utam.core.selenium.element.Selector;
+import utam.core.selenium.element.ShadowRootWebElement;
 
 /**
  * helper class for different types of element expectations <br>
@@ -24,11 +29,9 @@ public class ExpectationsUtil {
   public static final String SCROLL_TO_CENTER_JS = "arguments[0].scrollIntoView({block:'center'});";
   public static final String BLUR_JS = "arguments[0].blur();";
   static final String ABSENCE_MSG = "wait for absence";
-  static final String IS_ABSENT_MSG = "check for element absence";
   static final String VISIBILITY_MSG = "wait for visibility";
   static final String IS_VISIBLE_MSG = "check for element visibility";
   static final String INVISIBILITY_MSG = "wait for invisibility";
-  static final String IS_INVISIBLE_MSG = "check for element invisibility";
   static final String CLEAR_AND_TYPE_MSG = "clear and type '%s'";
   static final String GET_ATTRIBUTE_MSG = "get attribute '%s'";
   static final String GET_TEXT_MSG = "get element text";
@@ -37,12 +40,13 @@ public class ExpectationsUtil {
   static final String CLEAR_MSG = "clear content of the element";
   static final String JAVASCRIPT_MSG = "execute javascript '%s'";
   static final String CLICK_JS = "arguments[0].click();";
-  static final String GET_SIZE_MSG = "get number of found elements size";
   static final String MOVE_TO_ELEMENT_MSG = "move to element";
   static final String PRESENCE_WAIT_MSG = "wait for element presence";
   static final String PRESENCE_CHECK_MSG = "check for element presence";
   static final String ENABLED_CHECK_MSG = "check if element is enabled";
   static final String HAS_FOCUS_MSG = "check if current element has focus";
+  static final String WAIT_FOR_MSG = "wait for condition";
+  static final String FIND_ELEMENTS_MSG = "find elements with selector { %s } inside current element%s";
 
   private static boolean isNothingPresent(List<WebElement> list) {
     return list == null || list.isEmpty();
@@ -156,17 +160,6 @@ public class ExpectationsUtil {
         (utilities, element) -> utilities.executeJavaScript(CLICK_JS, element));
   }
 
-  public static ElementListExpectations<Integer> size() {
-    return new AbstractListExpectation<>(
-        GET_SIZE_MSG,
-        list -> {
-          if (list != null) {
-            return list.size();
-          }
-          return 0;
-        });
-  }
-
   public static ElementExpectations<SearchContext> setText(String str) {
     return new AbstractElementExpectation.ConsumesElement(
         String.format(SET_TEXT_MSG, str), element -> element.sendKeys(str));
@@ -238,5 +231,25 @@ public class ExpectationsUtil {
     return new AbstractElementExpectation.ConsumesUtilsElement(
             String.format(JAVASCRIPT_MSG, BLUR_JS),
             (utilities, element) -> utilities.executeJavaScript(BLUR_JS, element));
+  }
+
+  public static <T> ElementExpectations<T> waitFor(Supplier<T> condition) {
+    BiFunction<WebDriverUtilities, SearchContext, T> apply = (utilities, element) -> condition.get();
+    return new AbstractElementExpectation.Returns<>(WAIT_FOR_MSG, apply);
+  }
+
+  public static ElementExpectations<Integer> findElements(Selector selector, boolean isExpandShadow) {
+    By by = selector.by();
+    Function<WebElement, WebElement> transformer = we -> isExpandShadow? new ShadowRootWebElement(we) : we;
+    return new AbstractElementExpectation.Returns<>(
+        String.format(FIND_ELEMENTS_MSG, by.toString(), isExpandShadow? "'s shadow root" : ""),
+        (utilities, context) -> {
+          WebElement current = transformer.apply((WebElement) context);
+          List<WebElement> found = current.findElements(by);
+          if(found == null || found.isEmpty()) {
+            return 0;
+          }
+          return found.size();
+        }, 0);
   }
 }
