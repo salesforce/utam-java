@@ -18,21 +18,21 @@ class ValidationExclusions {
 
   static {
     // COMPONENTS_WITH_SAME_SELECTOR_BUT_DIFFERENT_TYPES
-    DIFFERENT_COMPONENT_TYPES.put("utam-lists/pageObjects/lst/relatedPreviewCard", "rowLevelActions");
+    DIFFERENT_COMPONENT_TYPES.put("utam-lists/pageObjects/relatedPreviewCard", "rowLevelActions");
 
     // COMPONENT_AND_ELEMENT_DUPLICATE_SELECTOR
-    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/lightning/groupedCombobox", "label");
-    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/lightning/timepicker", "label");
-    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/lightning/combobox", "labelText");
-    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/lightning/input", "label");
-    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/lightning/textarea", "label");
-    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/lightning/quill", "label");
-    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/lightning/select", "label");
-    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/lightning/datetimepicker", "label");
-    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/lightning/datepicker", "label");
-    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/lightning/primitiveCellFactory", "listViewRowLevelAction");
-    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/ui/virtualDataTable", "primitiveCellCheckbox");
-    ELEMENT_AND_COMPONENT.put("utam-force/pageObjects/force/modalContainer", "modalFooter");
+    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/groupedCombobox", "label");
+    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/timepicker", "label");
+    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/combobox", "labelText");
+    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/input", "label");
+    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/textarea", "label");
+    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/quill", "label");
+    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/select", "label");
+    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/datetimepicker", "label");
+    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/datepicker", "label");
+    ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/primitiveCellFactory", "listViewRowLevelAction");
+    ELEMENT_AND_COMPONENT.put("utam-aura/pageObjects/virtualDataTable", "primitiveCellCheckbox");
+    ELEMENT_AND_COMPONENT.put("utam-force/pageObjects/modalContainer", "modalFooter");
   }
 
   static synchronized boolean isExceptionAllowed(String pageObject, String elementName, Validation.ErrorType error) {

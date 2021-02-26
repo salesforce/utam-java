@@ -105,7 +105,7 @@ public class DefaultTranslatorConfiguration extends AbstractTranslatorConfigurat
       String testRunner,
       Map<String, String> packageMap,
       String profileConfigDirectory,
-      Map<String, List<String>> profileDefinitions) {
+      Map<String, List<String>> profileDefinitions) throws IOException {
     super(new DefaultTargetConfiguration(
         outputDirectory,
         profileConfigDirectory,
