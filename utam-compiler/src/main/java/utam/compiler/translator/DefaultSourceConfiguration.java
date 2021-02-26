@@ -49,7 +49,7 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
     List<PageObjectInfo> pageObjectInfoList = new ArrayList<>();
     for(Map.Entry<String, String> entry : packagesMapping.entrySet()) {
       final String namespace = entry.getKey();
-      final String fileMatchRegex = entry.getValue() + "/" + JSON_FILE_MASK_REGEX;
+      final String fileMatchRegex = entry.getValue() + File.separator + JSON_FILE_MASK_REGEX;
       final Pattern relativePattern = Pattern.compile(fileMatchRegex);
       final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("regex:" + fileMatchRegex);
       Files.walkFileTree(Paths.get(sourcePath), new SimpleFileVisitor<>() {
@@ -70,7 +70,7 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
     List<PageObjectInfo> pageObjectInfoList = new ArrayList<>();
     for(Map.Entry<String, String> entry : packagesMapping.entrySet()) {
       final String namespace = entry.getKey();
-      final String fileMatchRegex = entry.getValue() + "/" + JSON_FILE_MASK_REGEX;
+      final String fileMatchRegex = entry.getValue() + File.separator + JSON_FILE_MASK_REGEX;
       final Pattern relativePattern = Pattern.compile(fileMatchRegex);
       pageObjectInfoList.addAll(fileList.stream()
           .filter(file -> relativePattern.matcher(file.toString()).matches())
