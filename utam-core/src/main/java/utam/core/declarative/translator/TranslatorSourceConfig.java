@@ -27,14 +27,4 @@ public interface TranslatorSourceConfig {
    * @return collection with unique Page Objects URIs
    */
   Collection<String> getPageObjects();
-
-  /**
-   * mapping between folder where JSON is located and Page Object type name, ex. "force" maps to
-   * "utam-force" <br>
-   * mapping is typically stored in properties file
-   *
-   * @param folder folder where JSON file was found
-   * @return mapping to the package
-   */
-  String getPackageMapping(String folder);
 }

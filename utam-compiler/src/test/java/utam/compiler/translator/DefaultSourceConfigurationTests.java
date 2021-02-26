@@ -8,6 +8,7 @@ import utam.core.declarative.translator.TranslatorSourceConfig;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static utam.compiler.translator.DefaultSourceConfiguration.*;
@@ -77,49 +78,22 @@ public class DefaultSourceConfigurationTests {
   }
 
   @Test
-  public void testMissingPackageMappingThrows() {
-    final DefaultSourceConfiguration sourceConfiguration = new DefaultSourceConfiguration() {};
-    UtamError e = expectThrows(UtamError.class, () -> sourceConfiguration.getPackageMapping(null));
-    assertThat(e.getMessage(), containsString(String.format(ERR_MISSING_PACKAGE_MAPPING, "null")));
-    e = expectThrows(UtamError.class, () -> sourceConfiguration.getPackageMapping("error"));
-    assertThat(e.getMessage(), containsString(String.format(ERR_MISSING_PACKAGE_MAPPING, "error")));
-  }
-
-  @Test
-  public void testRecursiveScanThrows() {
-    final String PATH = "path";
-    UtamError e = expectThrows(UtamError.class, () -> recursiveScan(null, new File(PATH)));
-    assertThat(e.getMessage(), containsString(String.format(ERR_SOURCE_FILES_NULL, PATH)));
-  }
-
-  @Test
   public void testRecursiveScan() {
     final DefaultSourceConfiguration sourceConfiguration =
-        new DefaultSourceConfiguration() {
-          @Override
-          public String getPackageMapping(String folder) {
-            return folder;
-          }
-        };
+        new DefaultSourceConfiguration();
     sourceConfiguration.preProcess(null);
-    sourceConfiguration.preProcess(new File[0]);
-    sourceConfiguration.preProcess(new File[] {new File("folder"), new File("test")});
-    sourceConfiguration.preProcess(new File[] {new File("folder"), new File("file")});
-    sourceConfiguration.preProcess(new File[] {new File("folder"), new File("file.json")});
+    sourceConfiguration.preProcess(new PageObjectInfo("utam-error", Paths.get("folder/test"), "test"));
+    sourceConfiguration.preProcess(new PageObjectInfo("utam-error", Paths.get("folder/file"), "file"));
+    sourceConfiguration.preProcess(new PageObjectInfo("utam-error", Paths.get("folder/file.json"), "file.json"));
   }
 
   @Test
-  public void testRecursiveScanDuplicateThrows() {
-    final DefaultSourceConfiguration sourceConfiguration = new DefaultSourceConfiguration() {
-      @Override
-      public String getPackageMapping(String folder) {
-        return folder;
-      }
-    };
-    sourceConfiguration.preProcess(new File[] { new File("folder"), new File("file.utam.json")});
+  public void testScanWithDuplicateThrows() {
+    final DefaultSourceConfiguration sourceConfiguration = new DefaultSourceConfiguration();
+    sourceConfiguration.preProcess(new PageObjectInfo("utam-error", Paths.get("folder/file.utam.json"), "file"));
     UtamError e = expectThrows(UtamError.class,
-            () -> sourceConfiguration.preProcess(new File[] { new File("folder"), new File("file.utam.json")}));
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_DUPLICATE_PAGE_OBJECT, "folder/pageObjects/folder/file"))));
+            () -> sourceConfiguration.preProcess(new PageObjectInfo("utam-error", Paths.get("folder/file.utam.json"), "file")));
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_DUPLICATE_PAGE_OBJECT, "utam-error/pageObjects/file"))));
   }
 
   static class Mock implements TranslatorSourceConfig {
@@ -134,11 +108,6 @@ public class DefaultSourceConfigurationTests {
       DefaultTargetConfigurationTests.Mock configuration =
           new DefaultTargetConfigurationTests.Mock();
       return new AbstractTranslatorConfigurationTests.Mock(configuration, this);
-    }
-
-    @Override
-    public String getPackageMapping(String folder) {
-      throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
