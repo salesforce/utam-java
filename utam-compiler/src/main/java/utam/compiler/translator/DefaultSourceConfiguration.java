@@ -140,7 +140,7 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
     private final Path filePath;
     private final String relativePath;
 
-    public PageObjectInfo(String namespace, Path filePath, String relativePath) {
+    PageObjectInfo(String namespace, Path filePath, String relativePath) {
       this.namespace = namespace;
       this.filePath = filePath;
       this.relativePath = relativePath;
