@@ -29,6 +29,9 @@ public class TranslationTypesConfigJavaTests {
     assertThat(
         TYPES.getInterfaceType("utam-test/pageObjects/test/testObject").getFullName(),
         is(equalTo("utam.test.pageobjects.test.TestObject")));
+    assertThat(
+        TYPES.getInterfaceType("utam-test/pageObjects/test/object/testObject").getFullName(),
+        is(equalTo("utam.test.pageobjects.test.object.TestObject")));
   }
   /** The getInterfaceType method should return a valid interface type with an abbreviated prefix */
   @Test
@@ -47,8 +50,6 @@ public class TranslationTypesConfigJavaTests {
     final String longPageObjectUri = "utam-test/pageObjects/test/another/testObject";
     UtamError e = expectThrows(UtamError.class, () -> TYPES.getInterfaceType(shortPageObjectUri));
     assertThat(e.getMessage(), containsString(getWrongTypeError(shortPageObjectUri, pageObjects)));
-    e = expectThrows(UtamError.class, () -> TYPES.getInterfaceType(longPageObjectUri));
-    assertThat(e.getMessage(), containsString(getWrongTypeError(longPageObjectUri, pageObjects)));
   }
 
   /**

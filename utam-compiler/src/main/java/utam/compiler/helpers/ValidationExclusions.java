@@ -2,8 +2,7 @@ package utam.compiler.helpers;
 
 import java.util.*;
 
-import static utam.compiler.helpers.Validation.ErrorType.COMPONENTS_WITH_SAME_SELECTOR_BUT_DIFFERENT_TYPES;
-import static utam.compiler.helpers.Validation.ErrorType.COMPONENT_AND_ELEMENT_DUPLICATE_SELECTOR;
+import static utam.compiler.helpers.Validation.ErrorType.*;
 
 /**
  * static guardrails exclusions
@@ -15,10 +14,21 @@ class ValidationExclusions {
 
   private static final Map<String, String> DIFFERENT_COMPONENT_TYPES = Collections.synchronizedMap(new HashMap<>());
   private static final Map<String, String> ELEMENT_AND_COMPONENT = Collections.synchronizedMap(new HashMap<>());
+  private static final Map<String, String> ELEMENT_AND_ROOT = Collections.synchronizedMap(new HashMap<>());
 
   static {
     // COMPONENTS_WITH_SAME_SELECTOR_BUT_DIFFERENT_TYPES
     DIFFERENT_COMPONENT_TYPES.put("utam-lists/pageObjects/relatedPreviewCard", "rowLevelActions");
+
+    // DUPLICATE_WITH_ROOT_SELECTOR
+    ELEMENT_AND_ROOT.put("utam-flexipage/pageObjects/component2", "relatedListQuickLinksContainer");
+    ELEMENT_AND_ROOT.put("utam-flexipage/pageObjects/component2", "secondDegreeRelatedListSingleContainer");
+    ELEMENT_AND_ROOT.put("utam-force/pageObjects/listViewManager", "root");
+    ELEMENT_AND_ROOT.put("utam-global/pageObjects/appNav", "appNavBar");
+    ELEMENT_AND_ROOT.put("utam-lists/pageObjects/relatedListContainer", "root");
+    ELEMENT_AND_ROOT.put("utam-lists/pageObjects/relatedListSingleContainer", "root");
+    ELEMENT_AND_ROOT.put("utam-lists/pageObjects/relatedListQuickLinksContainer", "root");
+    ELEMENT_AND_ROOT.put("utam-lists/pageObjects/secondDegreeRelatedListSingleContainer", "root");
 
     // COMPONENT_AND_ELEMENT_DUPLICATE_SELECTOR
     ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/groupedCombobox", "label");
@@ -43,6 +53,10 @@ class ValidationExclusions {
     if(error == COMPONENTS_WITH_SAME_SELECTOR_BUT_DIFFERENT_TYPES) {
       return DIFFERENT_COMPONENT_TYPES.containsKey(pageObject)
               && DIFFERENT_COMPONENT_TYPES.get(pageObject).equals(elementName);
+    }
+    if (error == DUPLICATE_WITH_ROOT_SELECTOR) {
+      return ELEMENT_AND_ROOT.containsKey(pageObject)
+          && ELEMENT_AND_ROOT.get(pageObject).equals(elementName);
     }
     return false;
   }

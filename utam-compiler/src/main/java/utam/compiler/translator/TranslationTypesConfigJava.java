@@ -5,6 +5,7 @@ import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
 
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import static utam.core.framework.consumer.PageObjectContextImpl.getDefaultImplType;
@@ -26,7 +27,7 @@ public class TranslationTypesConfigJava implements TranslationTypesConfig {
   static TypeProvider getJavaType(String pageObjectURI, Mask maskValue) {
     String[] str = pageObjectURI.split(Pattern.quote("/"));
     String mask = maskValue.name();
-    if (str.length < 3 || str.length > 4) {
+    if (str.length < 3) {
       throw new UtamError(getWrongTypeError(pageObjectURI, maskValue));
     }
     String[] prefix = str[0].split("-");
@@ -37,12 +38,19 @@ public class TranslationTypesConfigJava implements TranslationTypesConfig {
     if (!mask.equals(str[1])) {
       throw new UtamError(getWrongTypeError(pageObjectURI, maskValue));
     }
-    final String relativeTypeName = str.length == 4
-        ? String.format("%s.%s", str[2].toLowerCase(), capitalizeFirstLetter(str[3]))
-        : capitalizeFirstLetter(str[2]);
+    String[] relativePath = Arrays.copyOfRange(str, 2, str.length);
+    for(int i = 0; i < relativePath.length; i++) {
+      if (i == relativePath.length - 1) {
+        relativePath[i] = capitalizeFirstLetter(relativePath[i]);
+      } else {
+        relativePath[i] = relativePath[i].toLowerCase();
+      }
+    }
+    final String relativeTypeName = String.join(".", relativePath);
     return new TypeUtilities.FromString(
         String.format("%s.%s.%s", packageName, maskValue.name().toLowerCase(), relativeTypeName));
   }
+
   private static String capitalizeFirstLetter(String fileName) {
     return fileName.substring(0, 1).toUpperCase() + fileName.substring(1);
   }
