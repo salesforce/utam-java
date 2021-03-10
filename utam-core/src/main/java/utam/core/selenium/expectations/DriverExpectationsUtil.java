@@ -6,7 +6,9 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import utam.core.appium.context.AppiumContextProvider;
+import utam.core.framework.context.PlatformType;
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.android.AndroidDriver;
 
 import java.util.Set;
 
@@ -73,6 +75,22 @@ public class DriverExpectationsUtil {
                 return newDriver;
               }
             }
+          }
+          // For the Appium chromedriver limitation to handle multiple WebViews,
+          // If switch to context fail to find the target WebView, then switch to 
+          // use window
+          String platformName = ((AppiumDriver)driver).getPlatformName();
+          if (platformName.equalsIgnoreCase(PlatformType.PLATFORM_ANDROID.getValue())) {
+              Set<String> windowHandles = driver.getWindowHandles();
+              if (windowHandles.size() > 1) {
+                  for (String windowHandle : windowHandles) {
+                      AppiumDriver newDriver = (AppiumDriver)appiumDriver.switchTo().window(windowHandle);
+                      String currentTitle = newDriver.getTitle();
+                      if (!currentTitle.isEmpty() && currentTitle.equalsIgnoreCase(title)) {
+                          return newDriver;
+                      }
+                  }
+              }
           }
           return null;
         };

@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 
 import utam.core.appium.context.AppiumContextProvider;
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.android.AndroidDriver;
 import utam.core.selenium.context.SeleniumContextProvider;
 
 import java.time.Duration;
@@ -172,9 +173,8 @@ public class DriverExpectationsUtilTests {
   /** positive case */
   @Test
   public void testSwitchToWebView() {
-    ContextTracker tracker = new ContextTracker(
-    );
-    
+    ContextTracker tracker = new ContextTracker();
+
     AppiumDriver  mockAppiumDriver = mock(AppiumDriver.class);
     AppiumContextProvider provider = new AppiumContextProvider(
         mockAppiumDriver, 
@@ -264,12 +264,116 @@ public class DriverExpectationsUtilTests {
     assertThat(e.getMessage(), containsString("Expected condition failed"));
   }
 
-  private static class ContextTracker {
-    private String currentContext;
+  /* Tests that the expectation to switch to one of WebView contexts 
+   * when there multiple WebViews on iOS platform*/
+  /** positive case */
+  @Test
+  public void testSwitchToWebViewWithMultipleWebViewsiOS() {
+    ContextTracker tracker = new ContextTracker();
 
-    ContextTracker() {
-      currentContext = AppiumContextProvider.NATIVE_CONTEXT_HANDLE;
-    }
+    AppiumDriver  mockAppiumDriver = mock(AppiumDriver.class);
+    AppiumContextProvider provider = new AppiumContextProvider(
+        mockAppiumDriver, 
+        "Salesforce");
+
+    String testWebViewHandle = 
+        AppiumContextProvider.WEBVIEW_CONTEXT_HANDLE_PREFIX + "_1";
+    String testWebViewHandle2 = 
+            AppiumContextProvider.WEBVIEW_CONTEXT_HANDLE_PREFIX + "_2";
+
+    Set<String> contextHandles = new HashSet<>(Arrays.asList(AppiumContextProvider.NATIVE_CONTEXT_HANDLE,
+            testWebViewHandle, testWebViewHandle2));
+
+    String testWebViewTitle =  "Test Application";
+    when(mockAppiumDriver.getPlatformName())
+    .thenReturn("ios");
+    when(mockAppiumDriver.getContextHandles())
+        .thenReturn(contextHandles);
+    when(mockAppiumDriver.context(anyString())).then((arg) -> {
+        tracker.currentContext = arg.getArgument(0);
+        return mockAppiumDriver;
+    });
+    when(mockAppiumDriver.getTitle())
+        .thenReturn("")
+        .thenReturn(testWebViewTitle);
+    when(mockAppiumDriver.getContext())
+        .thenReturn(tracker.currentContext);
+
+    DriverWait wait = provider.getDriverWait();
+    assertThat(
+        wait.get(DriverExpectationsUtil.switchToWebView(testWebViewTitle)), 
+        is(sameInstance(mockAppiumDriver)));
+    assertThat(
+        tracker.currentContext, 
+        is(equalTo(testWebViewHandle)));
+  }
+
+  /* Tests that the expectation to switch to one of WebView windows 
+   * when there multiple WebViews on Android platform*/
+  /** positive case */
+  @Test
+  public void testSwitchToWebViewWithMultipleWebViewsAndroid() {
+    ContextTracker contextTracker = new ContextTracker();
+    WindowHandleTracker windowHandleTracker = new WindowHandleTracker();
+
+    AppiumDriver  mockAppiumDriver = mock(AppiumDriver.class);
+    TargetLocator mockLocator = mock(TargetLocator.class);
+    AppiumContextProvider provider = new AppiumContextProvider(
+        mockAppiumDriver, 
+        "Salesforce");
+
+    String testWebViewHandle = 
+        AppiumContextProvider.WEBVIEW_CONTEXT_HANDLE_PREFIX + "_1";
+    String testWindowHandle = 
+            AppiumContextProvider.WEBVIEW_CONTEXT_HANDLE_PREFIX + "_2";
+    String testWindowHandle2 = 
+            AppiumContextProvider.WEBVIEW_CONTEXT_HANDLE_PREFIX + "_3";
+
+    Set<String> contextHandles = new HashSet<>(Arrays.asList(AppiumContextProvider.NATIVE_CONTEXT_HANDLE,
+            testWebViewHandle));
+    Set<String> windowHandles = new HashSet<>(Arrays.asList(AppiumContextProvider.NATIVE_CONTEXT_HANDLE,
+            testWindowHandle, testWindowHandle2));
+
+    String testWebViewTitle =  "Test Application";
+    when(mockAppiumDriver.getPlatformName())
+    .thenReturn("android");
+    when(mockAppiumDriver.getContextHandles())
+        .thenReturn(contextHandles);
+    when(mockAppiumDriver.context(anyString())).then((arg) -> {
+        contextTracker.currentContext = arg.getArgument(0);
+        return mockAppiumDriver;
+    });
+    when(mockAppiumDriver.context(anyString())).then((arg) -> {
+        contextTracker.currentContext = arg.getArgument(0);
+        return mockAppiumDriver;
+    });
+    when(mockAppiumDriver.switchTo()).thenReturn(mockLocator);
+    when(mockLocator.window(anyString())).then((arg) -> {
+        windowHandleTracker.currentHandle = arg.getArgument(0);
+        return mockAppiumDriver;
+    });
+    when(mockAppiumDriver.getWindowHandles())
+    .thenReturn(windowHandles);
+    when(mockAppiumDriver.getTitle())
+        .thenReturn("")
+        .thenReturn(testWebViewTitle);
+    when(mockAppiumDriver.getContext())
+        .thenReturn(contextTracker.currentContext);
+
+    DriverWait wait = provider.getDriverWait();
+    assertThat(
+        wait.get(DriverExpectationsUtil.switchToWebView(testWebViewTitle)), 
+        is(sameInstance(mockAppiumDriver)));
+    assertThat(
+        windowHandleTracker.currentHandle,
+        is(equalTo(testWindowHandle)));
+  }
+
+  private static class ContextTracker {
+      private String currentContext;
+      ContextTracker() {
+          currentContext = AppiumContextProvider.NATIVE_CONTEXT_HANDLE;
+        }
   }
 
   private static class WindowHandleTracker {
