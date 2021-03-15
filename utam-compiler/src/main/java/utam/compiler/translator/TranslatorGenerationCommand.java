@@ -23,17 +23,21 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
   private static final String INVALID_UNIT_TEST_CONFIG =
       "You cannot specify a unit test runner without a destination directory for unit tests";
 
-  @Option(names = {"-d", "-destinationDirectory", "--destinationDirectory"}, required = true,
-          description = "Destination directory to which generated Page Object files will be written.")
-  private File destinationDirectory;
+  @Option(names = {"-o", "-outputDirectory", "--outputDirectory"}, required = true,
+          description = "Output directory to which generated Page Object files will be written.")
+  private File outputDirectory;
+
+  @Option(names = {"-p", "-profileDirectory", "--profileDirectory"}, required = true,
+      description = "Destination directory to which profile information will be written.")
+  private File profileDirectory;
 
   @Option(names = {"-m", "-packageMappingFile", "--packageMappingFile"}, required = true,
           description = "File containing mapping between directories and package names.")
   private File packageMappingFile;
 
-  @Option(names = {"-p", "-profileDirectory", "--profileDirectory"}, required = true,
-          description = "Destination directory to which profile information will be written.")
-  private File profileDirectory;
+  @Option(names = {"-d", "-profileDefinitionsFile", "--profileDefinitionsFile"},
+          description = "File containing definitions of profile names and their valid values.")
+  private File profileDefinitionsFile;
 
   @Option(names = {"-r", "-unitTestRunner", "--unitTestRunner"}, defaultValue = "NONE",
           description = "Unit test runner to use for generated unit tests for Page Objects. Valid values: ${COMPLETION-CANDIDATES} (default: ${DEFAULT-VALUE})")
@@ -44,10 +48,10 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
   private File unitTestDirectory;
 
   @Option(names = {"-i", "-inputDirectory", "--inputDirectory"},
-          description = "Input directory to be recursively scanned for utam.core.declarative Page Object description files. Cannot be used with an explicit file list.")
+          description = "Input directory to be recursively scanned for UTAM declarative Page Object description files. Cannot be used with an explicit file list.")
   private File inputDirectory;
 
-  @Parameters(description = "Explicit list of utam.core.declarative Page Object description files to generate. Cannot be used with the --inputDirectory option.")
+  @Parameters(description = "Explicit list of UTAM declarative Page Object description files to generate. Cannot be used with the --inputDirectory option.")
   private List<File> inputFiles;
 
   private Exception thrownError;
@@ -82,27 +86,32 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
         unitTestDirectoryPath = unitTestDirectory.toString();
       }
 
+      String profileDefinitionsFilePath = "";
+      if (profileDefinitionsFile != null) {
+        profileDefinitionsFilePath = profileDefinitionsFile.toString();
+      }
+
       TranslatorRunner translator;
       if (inputFiles != null && inputFiles.size() > 0) {
         translator = new DefaultTranslatorRunner(
             new DefaultTranslatorConfiguration(
                 inputFiles,
-                destinationDirectory.toString(),
+                outputDirectory.toString(),
                 unitTestDirectoryPath,
                 testRunner.toString(),
-                packageMappingFile.toString(),
+                DefaultTranslatorConfiguration.createPackageMap(packageMappingFile.toString()),
                 profileDirectory.toString(),
-                new HashMap<>()));
+                DefaultTranslatorConfiguration.createProfileMap(profileDefinitionsFilePath)));
       } else {
         translator = new DefaultTranslatorRunner(
             new DefaultTranslatorConfiguration(
                 inputDirectory.toString(),
-                destinationDirectory.toString(),
+                outputDirectory.toString(),
                 unitTestDirectoryPath,
                 testRunner.toString(),
-                packageMappingFile.toString(),
+                DefaultTranslatorConfiguration.createPackageMap(packageMappingFile.toString()),
                 profileDirectory.toString(),
-                new HashMap<>()));
+                DefaultTranslatorConfiguration.createProfileMap(profileDefinitionsFilePath)));
       }
       translator.run();
       translator.write();

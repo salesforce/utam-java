@@ -6,6 +6,7 @@ import utam.core.declarative.translator.UnitTestRunner;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,74 +30,10 @@ public class DefaultTranslatorConfiguration extends AbstractTranslatorConfigurat
    * @param unitTestDirectory the root output directory where generated unit tests for generated
    *                          Page Objects will be written
    * @param testRunner the test runner to use when generating unit tests
-   * @param packageMapFile the file describing the package mapping between directories containing
-   *                       the description files and directories containing the generated source
-   *                       files
-   * @param profileConfigDirectory the output directory in which to write profile information
-   * @throws IOException thrown when a file cannot be properly read or written
-   */
-  public DefaultTranslatorConfiguration(
-      String inputDirectory,
-      String outputDirectory,
-      String unitTestDirectory,
-      String testRunner,
-      String packageMapFile,
-      String profileConfigDirectory) throws IOException {
-    this(
-        inputDirectory,
-        outputDirectory,
-        unitTestDirectory,
-        testRunner,
-        packageMapFile,
-        profileConfigDirectory,
-        new HashMap<>());
-  }
-
-  /**
-   * Initializes a new instance of the translator configuration class
-   * @param inputDirectory the root input directory to be recursively searched for the *.utam.json
-   *                       Page Object description files
-   * @param outputDirectory the root output directory where the generated Page Object source files
-   *                        will be written
-   * @param unitTestDirectory the root output directory where generated unit tests for generated
-   *                          Page Objects will be written
-   * @param testRunner the test runner to use when generating unit tests
-   * @param packageMapFile the file describing the package mapping between directories containing
-   *                       the description files and directories containing the generated source
-   *                       files
-   * @param profileConfigDirectory the output directory in which to write profile information
-   * @throws IOException thrown when a file cannot be properly read or written
-   */
-  public DefaultTranslatorConfiguration(
-      String inputDirectory,
-      String outputDirectory,
-      String unitTestDirectory,
-      String testRunner,
-      String packageMapFile,
-      String profileConfigDirectory,
-      Map<String, List<String>> profileDefinitions) throws IOException {
-    this(
-        inputDirectory,
-        outputDirectory,
-        unitTestDirectory,
-        testRunner,
-        createPackageMap(packageMapFile),
-        profileConfigDirectory,
-        profileDefinitions);
-  }
-
-  /**
-   * Initializes a new instance of the translator configuration class
-   * @param inputDirectory the root input directory to be recursively searched for the *.utam.json
-   *                       Page Object description files
-   * @param outputDirectory the root output directory where the generated Page Object source files
-   *                        will be written
-   * @param unitTestDirectory the root output directory where generated unit tests for generated
-   *                          Page Objects will be written
-   * @param testRunner the test runner to use when generating unit tests
    * @param packageMap the mapping between directories containing the description files and
    *                   directories containing the generated source files
    * @param profileConfigDirectory the output directory in which to write profile information
+   * @param profileDefinitions the map defining the list of known profiles and their values
    */
   public DefaultTranslatorConfiguration(
       String inputDirectory,
@@ -126,17 +63,17 @@ public class DefaultTranslatorConfiguration extends AbstractTranslatorConfigurat
    * @param unitTestDirectory the root output directory where generated unit tests for generated
    *                          Page Objects will be written
    * @param testRunner the test runner to use when generating unit tests
-   * @param packageMapFile the file describing the package mapping between directories containing
-   *                       the description files and directories containing the generated source
-   *                       files
+   * @param packageMap the mapping between directories containing the description files and
+   *                   directories containing the generated source files
    * @param profileConfigDirectory the output directory in which to write profile information
+   * @param profileDefinitions the map defining the list of known profiles and their values
    */
   public DefaultTranslatorConfiguration(
       List<File> inputFiles,
       String outputDirectory,
       String unitTestDirectory,
       String testRunner,
-      String packageMapFile,
+      Map<String, String> packageMap,
       String profileConfigDirectory,
       Map<String, List<String>> profileDefinitions) throws IOException {
     super(new DefaultTargetConfiguration(
@@ -144,11 +81,39 @@ public class DefaultTranslatorConfiguration extends AbstractTranslatorConfigurat
         profileConfigDirectory,
         validateUnitTestDirectory(testRunner, unitTestDirectory)));
     setUnitTestRunner(UnitTestRunner.fromString(testRunner));
-    setSourceConfig(new DefaultSourceConfiguration(inputFiles, createPackageMap(packageMapFile)));
+    setSourceConfig(new DefaultSourceConfiguration(inputFiles, packageMap));
     for (Map.Entry<String, List<String>> profileDefinition : profileDefinitions.entrySet()) {
       setConfiguredProfile(
           createProfileConfiguration(profileDefinition.getKey(), profileDefinition.getValue()));
     }
+  }
+
+  public static Map<String, String> createPackageMap(String packageMapFile) throws IOException {
+    // Read the package mapping file, and translate the properties therein
+    // into an in-memory map
+    FileInputStream packageInput = new FileInputStream(packageMapFile);
+    Properties packageProperties = new Properties();
+    packageProperties.load(packageInput);
+    return packageProperties.entrySet().stream()
+        .collect(Collectors.toMap(
+            entry -> entry.getKey().toString(),
+            entry -> entry.getValue().toString()));
+  }
+
+  public static Map<String, List<String>> createProfileMap(String profileMapFile) throws IOException {
+    if (profileMapFile == null || profileMapFile.isEmpty()) {
+      return new HashMap<>();
+    }
+
+    // Read the profile mapping file, and translate the properties therein
+    // into an in-memory map
+    FileInputStream packageInput = new FileInputStream(profileMapFile);
+    Properties packageProperties = new Properties();
+    packageProperties.load(packageInput);
+    return packageProperties.entrySet().stream()
+        .collect(Collectors.toMap(
+            entry -> entry.getKey().toString(),
+            entry -> Arrays.stream(entry.getValue().toString().split(",")).collect(Collectors.toList())));
   }
 
   private static ProfileConfiguration createProfileConfiguration(String key, List<String> value) {
@@ -161,17 +126,5 @@ public class DefaultTranslatorConfiguration extends AbstractTranslatorConfigurat
       return "";
     }
     return unitTestDirectory;
-  }
-
-  private static Map<String, String> createPackageMap(String packageMapFile) throws IOException {
-    // Read the package mapping file, and translate the properties therein
-    // into an in-memory map
-    FileInputStream packageInput = new FileInputStream(packageMapFile);
-    Properties packageProperties = new Properties();
-    packageProperties.load(packageInput);
-    return packageProperties.entrySet().stream()
-        .collect(Collectors.toMap(
-            entry -> entry.getKey().toString(),
-            entry -> entry.getValue().toString()));
   }
 }
