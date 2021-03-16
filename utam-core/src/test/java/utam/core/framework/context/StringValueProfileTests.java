@@ -15,7 +15,6 @@ public class StringValueProfileTests {
     StringValueProfile profile = new StringValueProfile("testName", "testValue");
     assertThat(profile.getName(), is(equalTo("testName")));
     assertThat(profile.getValue(), is(equalTo("testValue")));
-    assertThat(profile.isDefault(), is(equalTo(false)));
     assertThat(profile.toString(), is(equalTo("testName = testValue")));
     assertThat(profile.hashCode(), is(equalTo("testName = testValue".hashCode())));
   }

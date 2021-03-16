@@ -38,7 +38,7 @@ public class UtamLoaderTests {
 
   static UtamLoaderImpl getLoader() {
     UtamLoaderConfigImpl config = getConfig();
-    return new UtamLoaderImpl(config, mock(WebDriver.class));
+    return new UtamLoaderImpl(config);
   }
 
   @Test
@@ -69,11 +69,8 @@ public class UtamLoaderTests {
   public void testProfileBasedDependency() {
     UtamLoaderConfig config = getConfig();
     Profile profile = new StringValueProfile("profile", "name");
-    ProfileContext profileContext = new DefaultProfileContext(profile);
-    profileContext.setBean(PageObjectMock.class, PageObjectMockForProfile.class.getName());
-    config.setActiveProfile(profile);
-    config.setProfileContext(profileContext);
-    UtamLoader loader = new UtamLoaderImpl(config, mock(WebDriver.class));
+    config.setProfileOverride(profile, PageObjectMock.class, PageObjectMockForProfile.class);
+    UtamLoader loader = new UtamLoaderImpl(config);
     RootPageObject rootPageObject = loader.load(PageObjectMock.class);
     assertThat(rootPageObject, is(instanceOf(PageObjectMockForProfile.class)));
   }

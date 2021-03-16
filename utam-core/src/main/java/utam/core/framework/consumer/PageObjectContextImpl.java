@@ -1,5 +1,6 @@
 package utam.core.framework.consumer;
 
+import java.util.Collections;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageObject;
 
@@ -27,6 +28,10 @@ public class PageObjectContextImpl implements PageObjectContext {
       Map<Class<? extends PageObject>, PageObject> beansOverrideMock) {
     this.beansOverride = overrides;
     this.beansOverrideMock = beansOverrideMock;
+  }
+
+  PageObjectContextImpl(Map<Class<? extends PageObject>, Class<? extends PageObject>> overrides) {
+    this(overrides, Collections.emptyMap());
   }
 
   public static String[] getDefaultImplType(String fullInterfaceName) {

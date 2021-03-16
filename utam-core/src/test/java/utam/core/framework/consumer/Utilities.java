@@ -1,11 +1,9 @@
 package utam.core.framework.consumer;
 
-import utam.core.framework.consumer.PageObjectContext;
-import utam.core.framework.consumer.PageObjectContextImpl;
-
 import java.util.Collections;
 
 /**
+ * utilities to make package private methods available
  * @author elizaveta.ivanova
  * @since 228
  */

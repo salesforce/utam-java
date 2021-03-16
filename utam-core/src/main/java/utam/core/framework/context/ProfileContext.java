@@ -2,7 +2,6 @@ package utam.core.framework.context;
 
 import utam.core.framework.base.PageObject;
 
-import java.io.Writer;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -15,16 +14,10 @@ import java.util.Properties;
 public interface ProfileContext {
 
   /**
-   * get profile for which context is set
-   * @return instance of the profile
-   */
-  Profile getProfile();
-
-  /**
    * get class name override for the given PO class
    * @param pageObjectType PO type
    * @param <T> type bound for a page object
-   * @return string with class name
+   * @return string with class name or null if class is default
    */
   <T extends PageObject> String getBeanName(Class<T> pageObjectType);
 
@@ -48,13 +41,4 @@ public interface ProfileContext {
    * @return all beans types in random order
    */
   Collection<Class<? extends PageObject>> getConfiguredBeans();
-
-  /**
-   * nullable writer for file with profile override <br>
-   * if writer returns null, nothing is written <br>
-   * used by compiler to create properties file with overrides during generation
-   *
-   * @return nullable writer
-   */
-  Writer getInjectionConfigWriter(String profilesRootPath);
 }

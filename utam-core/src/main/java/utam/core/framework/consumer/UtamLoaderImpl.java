@@ -10,7 +10,7 @@ import utam.core.framework.base.RootPageObject;
 import java.time.Duration;
 
 /**
- * default implementation of utam loader
+ * implementation of UtamLoader
  *
  * @author elizaveta.ivanova
  * @since 230
@@ -19,7 +19,7 @@ public class UtamLoaderImpl implements UtamLoader {
 
   final UtamLoaderConfigImpl utamConfig;
 
-  public UtamLoaderImpl(UtamLoaderConfig utamLoaderConfig, WebDriver driver) {
+  public UtamLoaderImpl(UtamLoaderConfig utamLoaderConfig) {
     if (!(utamLoaderConfig instanceof UtamLoaderConfigImpl)) {
       throw new UtamError(
           String.format(
@@ -27,7 +27,6 @@ public class UtamLoaderImpl implements UtamLoader {
               UtamLoaderConfigImpl.class.getSimpleName()));
     }
     this.utamConfig = (UtamLoaderConfigImpl) utamLoaderConfig;
-    this.utamConfig.setDriver(driver);
   }
 
   /**
@@ -35,7 +34,7 @@ public class UtamLoaderImpl implements UtamLoader {
    * @param driver driver instance
    */
   public UtamLoaderImpl(WebDriver driver) {
-    this(new UtamLoaderConfigImpl(), driver);
+    this(new UtamLoaderConfigImpl(driver));
   }
 
   /**
@@ -44,9 +43,9 @@ public class UtamLoaderImpl implements UtamLoader {
    * @return loader instance
    */
   public static UtamLoader getSimulatorLoader(WebDriver driver) {
-    UtamLoaderConfig config = new UtamLoaderConfigImpl();
+    UtamLoaderConfig config = new UtamLoaderConfigImpl(driver);
     config.setTimeout(Duration.ofSeconds(1));
-    return new UtamLoaderImpl(config, driver);
+    return new UtamLoaderImpl(config);
   }
 
   protected PageObjectsFactory getFactory() {

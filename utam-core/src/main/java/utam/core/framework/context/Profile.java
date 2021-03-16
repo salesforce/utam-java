@@ -10,5 +10,7 @@ public interface Profile {
 
   String getValue();
 
-  boolean isDefault();
+  String asKey();
+
+  String getConfigFileName();
 }

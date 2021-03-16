@@ -1,5 +1,6 @@
 package utam.compiler.translator;
 
+import java.io.FileWriter;
 import utam.compiler.grammar.JsonDeserializer;
 import utam.core.declarative.representation.PageObjectClass;
 import utam.core.declarative.representation.PageObjectDeclaration;
@@ -52,16 +53,11 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     for (ProfileConfiguration configuration : translatorConfig.getConfiguredProfiles()) {
       for (String value : configuration.getSupportedValues()) {
         Profile profile = configuration.getFromString(value);
-        if (profile.isDefault()) {
-          this.defaultProfile = profile;
-        }
         profilesMapping.put(profile, new HashMap<>());
       }
     }
-    if (defaultProfile == null) {
-      defaultProfile = DEFAULT_IMPL;
-      profilesMapping.put(defaultProfile, new HashMap<>());
-    }
+    defaultProfile = DEFAULT_IMPL;
+    profilesMapping.put(defaultProfile, new HashMap<>());
   }
 
   private static boolean isRunnerSet(TranslatorConfig translatorConfig) {
@@ -71,19 +67,6 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
 
   protected final Collection<Profile> getAllProfiles() {
     return profilesMapping.keySet();
-  }
-
-  private void writeProfileConfig(Profile profile, Properties properties, String profilesRoot) {
-    if (properties.isEmpty()) {
-      return;
-    }
-    try {
-      Writer writer = new DefaultProfileContext(profile).getInjectionConfigWriter(profilesRoot);
-      properties.store(writer, "profile override");
-    } catch (IOException e) {
-      throw new UtamError(
-          String.format("can't write profile '%s' override properties", profile.getName()), e);
-    }
   }
 
   PageObjectDeclaration getGeneratedObject(String name) {
@@ -212,7 +195,17 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
   public void writeDependenciesConfigs() {
     String profilesRoot = getResourcesRoot();
     for (Profile profile : getAllProfiles()) {
-      writeProfileConfig(profile, getProfileMapping(profile), profilesRoot);
+      Properties configToWrite = getProfileMapping(profile);
+      if(!configToWrite.isEmpty()) {
+        String profileConfigPath = String.format("%s/%s", profilesRoot, profile.getConfigFileName());
+        try {
+          Writer writer = new FileWriter(profileConfigPath);
+          configToWrite.store(writer, "profile override");
+        } catch (IOException e) {
+          throw new UtamError(
+              String.format("can't write profile '%s' override properties", profile.getName()), e);
+        }
+      }
     }
   }
 

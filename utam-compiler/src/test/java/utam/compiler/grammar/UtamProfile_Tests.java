@@ -56,7 +56,6 @@ public class UtamProfile_Tests {
   @Test
   public void testGetDefaultProfile() {
     Profile mockProfile = mock(Profile.class);
-    when(mockProfile.isDefault()).thenReturn(true);
     ProfileConfiguration profileConfiguration = mock(ProfileConfiguration.class);
     when(profileConfiguration.getPropertyKey()).thenReturn(PROFILE_KEY);
     when(profileConfiguration.getFromString(PROFILE_VALUE)).thenReturn(mockProfile);

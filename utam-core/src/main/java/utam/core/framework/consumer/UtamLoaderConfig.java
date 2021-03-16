@@ -1,9 +1,10 @@
 package utam.core.framework.consumer;
 
+import utam.core.framework.base.PageObject;
 import utam.core.framework.context.Profile;
-import utam.core.framework.context.ProfileContext;
 
 import java.time.Duration;
+import utam.core.framework.context.ProfileContext;
 
 /**
  * configuration of the UTAM integration
@@ -27,12 +28,7 @@ public interface UtamLoaderConfig {
    */
   void setActiveProfile(Profile profile);
 
-  /**
-   * set profile context, profile context sets dependencies overrides per profile
-   *
-   * @param profileContext context used for profile
-   */
-  void setProfileContext(ProfileContext profileContext);
+  <T extends PageObject> void setProfileOverride(Profile profile, Class<T> poInterface, Class<? extends T> poClass);
 
   /**
    * only supported for utam java: sets location policy at the test level
