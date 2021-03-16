@@ -35,8 +35,6 @@ final class UtamPageObject {
       "root page object requires default selector property";
   static final String ERR_ROOT_REDUNDANT_SELECTOR = "non root page object can't have selector";
   static final String ERR_ROOT_ABSTRACT = "interface declaration can only have 'methods' property";
-  static final String ERR_ROOT_CANT_USE_DEFAULT_PROFILE =
-      "page object can't use default profile";
   static final String ERR_UNSUPPORTED_ROOT_ELEMENT_TYPE = "type '%s' is not supported for root element";
   boolean isAbstract;
   boolean isRootPageObject;
@@ -145,12 +143,6 @@ final class UtamPageObject {
     }
     return Stream.of(profiles)
         .map(profile -> profile.getProfile(context))
-        .peek(
-            profile -> {
-              if (profile.isDefault()) {
-                throw new UtamError(ERR_ROOT_CANT_USE_DEFAULT_PROFILE);
-              }
-            })
         .toArray(Profile[]::new);
   }
 

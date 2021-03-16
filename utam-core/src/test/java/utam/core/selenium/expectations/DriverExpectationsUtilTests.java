@@ -10,7 +10,6 @@ import org.testng.annotations.Test;
 
 import utam.core.appium.context.AppiumContextProvider;
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.android.AndroidDriver;
 import utam.core.selenium.context.SeleniumContextProvider;
 
 import java.time.Duration;

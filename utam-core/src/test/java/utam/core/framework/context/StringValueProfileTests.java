@@ -2,7 +2,6 @@ package utam.core.framework.context;
 
 import org.testng.annotations.Test;
 import utam.core.framework.consumer.UtamError;
-import utam.core.framework.context.StringValueProfile;
 
 import static org.testng.Assert.expectThrows;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -15,9 +14,8 @@ public class StringValueProfileTests {
     StringValueProfile profile = new StringValueProfile("testName", "testValue");
     assertThat(profile.getName(), is(equalTo("testName")));
     assertThat(profile.getValue(), is(equalTo("testValue")));
-    assertThat(profile.isDefault(), is(equalTo(false)));
-    assertThat(profile.toString(), is(equalTo("testName = testValue")));
-    assertThat(profile.hashCode(), is(equalTo("testName = testValue".hashCode())));
+    assertThat(profile.getConfigName(), is(equalTo("testName_testValue_config")));
+    assertThat(profile.hashCode(), is(equalTo("testName_testValue_config".hashCode())));
   }
   
   @Test

@@ -18,15 +18,11 @@ import java.util.function.Function;
 public class PageObjectContextImpl implements PageObjectContext {
 
   private final Map<Class<? extends PageObject>, Class<? extends PageObject>> beansOverride;
-  private final Map<Class<? extends PageObject>, PageObject> beansOverrideMock;
   private final BiFunction<Class<? extends PageObject>, Object[], PageObject> externalBuilder =
       (type, params) -> getBean(type);
 
-  PageObjectContextImpl(
-      Map<Class<? extends PageObject>, Class<? extends PageObject>> overrides,
-      Map<Class<? extends PageObject>, PageObject> beansOverrideMock) {
+  PageObjectContextImpl(Map<Class<? extends PageObject>, Class<? extends PageObject>> overrides) {
     this.beansOverride = overrides;
-    this.beansOverrideMock = beansOverrideMock;
   }
 
   public static String[] getDefaultImplType(String fullInterfaceName) {
@@ -68,9 +64,6 @@ public class PageObjectContextImpl implements PageObjectContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T extends PageObject> T getBean(Class<T> type) {
-    if (beansOverrideMock.containsKey(type)) {
-      return (T) beansOverrideMock.get(type);
-    }
     Function<Class<T>, Class<? extends T>> getter =
         ctype -> {
           try {

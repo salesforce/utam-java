@@ -7,7 +7,6 @@
 
 package utam.core.framework.base;
 
-import utam.core.framework.consumer.Container;
 import utam.core.framework.consumer.ContainerElement;
 import utam.core.framework.consumer.LocationPolicy;
 import utam.core.framework.consumer.UtamError;

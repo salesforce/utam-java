@@ -4,7 +4,6 @@ import java.util.function.Supplier;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import utam.core.appium.element.GestureDirection;
 import utam.core.appium.expectations.MobileExpectationsUtil;
 import utam.core.framework.UtamLogger;
@@ -15,11 +14,6 @@ import utam.core.selenium.expectations.ElementExpectations;
 import utam.core.selenium.expectations.ElementListExpectations;
 import utam.core.selenium.expectations.ElementWait;
 import utam.core.selenium.expectations.ExpectationsUtil;
-
-import java.util.function.Function;
-
-import static utam.core.selenium.element.LocatorUtilities.EMPTY_FILTER;
-import static utam.core.selenium.element.LocatorUtilities.getLocatorNode;
 
 class ElementImpl implements BaseElement, Actionable, Clickable, Editable, Touchable {
 

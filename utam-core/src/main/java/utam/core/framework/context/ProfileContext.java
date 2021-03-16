@@ -2,34 +2,32 @@ package utam.core.framework.context;
 
 import utam.core.framework.base.PageObject;
 
-import java.io.Writer;
 import java.util.Collection;
-import java.util.Properties;
 
 /**
- * context of the configured profile </br>
- * defines beans overrides per profile
+ * Profile Context is used to configure dependency injection for a certain profile </br>
+ * It can provide information about implementing class when a certain profile is active </br>
+ * Profile Context has 1:1 relations with a Profile
+ * @see Profile
+ *
  * @author elizaveta.ivanova
  * @since 226
  */
 public interface ProfileContext {
 
   /**
-   * get profile for which context is set
-   * @return instance of the profile
-   */
-  Profile getProfile();
-
-  /**
-   * get class name override for the given PO class
+   * get class name override for the given PO class <br/>
+   * if null returned, then default definition will be used by a provider
+   *
    * @param pageObjectType PO type
    * @param <T> type bound for a page object
-   * @return string with class name
+   * @return string with class name or null if bean is not defined
    */
   <T extends PageObject> String getBeanName(Class<T> pageObjectType);
 
   /**
    * set custom bean definition
+   *
    * @param pageObjectType PO type
    * @param implClassName class name to inject instance in runtime
    * @param <T> type bound for a page object
@@ -37,24 +35,9 @@ public interface ProfileContext {
   <T extends PageObject> void setBean(Class<? extends T> pageObjectType, String implClassName);
 
   /**
-   * read bean definitions from properties
-   * format: key - full PO type name, value - full class name to inject
-   * @param properties configuration as key values pairs
-   */
-  void setBeans(Properties properties);
-
-  /**
-   * get all configured beans
+   * Get all configured types
+   *
    * @return all beans types in random order
    */
   Collection<Class<? extends PageObject>> getConfiguredBeans();
-
-  /**
-   * nullable writer for file with profile override <br>
-   * if writer returns null, nothing is written <br>
-   * used by compiler to create properties file with overrides during generation
-   *
-   * @return nullable writer
-   */
-  Writer getInjectionConfigWriter(String profilesRootPath);
 }

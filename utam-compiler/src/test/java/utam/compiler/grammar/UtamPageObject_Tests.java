@@ -8,9 +8,6 @@ import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.declarative.translator.ProfileConfiguration;
-import utam.compiler.translator.StringValueProfileConfig;
-import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.PlatformType;
 import utam.core.framework.context.Profile;
@@ -235,27 +232,6 @@ public class UtamPageObject_Tests {
     assertThat(profiles.length, is(equalTo(1)));
     assertThat(profiles[0].getName(), is(equalTo(PROFILE_KEY)));
     assertThat(profiles[0].getValue(), is(equalTo(PROFILE_VALUE)));
-  }
-
-  @Test
-  public void testDefaultProfileThrows() {
-    UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.profiles = new UtamProfile[] {new UtamProfile("key", "value")};
-    utamPageObject.implementsType = TEST_URI;
-    TranslatorConfig translatorConfig = getDefaultConfig();
-    ProfileConfiguration DEFAULT =
-        new StringValueProfileConfig("key", new String[] {"value"}) {
-          @Override
-          public Profile getFromString(String value) {
-            return DEFAULT_IMPL;
-          }
-        };
-    DEFAULT.getSupportedValues(); // for coverage. no idea why
-    translatorConfig.setConfiguredProfile(DEFAULT);
-    TranslationContext translationContext = new TranslationContext(TEST_URI, translatorConfig);
-    UtamError e =
-        expectThrows(UtamError.class, () -> utamPageObject.getProfiles(translationContext));
-    assertThat(e.getMessage(), containsString(ERR_ROOT_CANT_USE_DEFAULT_PROFILE));
   }
 
   @Test
