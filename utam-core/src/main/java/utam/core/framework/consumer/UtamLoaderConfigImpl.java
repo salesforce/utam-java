@@ -1,7 +1,7 @@
 package utam.core.framework.consumer;
 
 import static utam.core.framework.consumer.PageObjectContextImpl.getClassFromName;
-import static utam.core.framework.context.StringValueProfile.DEFAULT_IMPL;
+import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
 
 import io.appium.java_client.AppiumDriver;
 import java.time.Duration;
@@ -17,30 +17,32 @@ import utam.core.framework.base.PageObjectsFactoryImpl;
 import utam.core.framework.context.Driver;
 import utam.core.framework.context.Profile;
 import utam.core.framework.context.ProfileContext;
-import utam.core.framework.context.ProfileContextEmpty;
+import utam.core.framework.context.DefaultProfileContext;
 import utam.core.selenium.context.SeleniumContext;
 import utam.core.selenium.context.SeleniumContextProvider;
 
 /**
- * implementation of a loader config
+ * This config can be used if consumer has a single POs dependency <br/> In this case we do not need
+ * multiple class loaders because there is only one set of property files <br/> Config will be using
+ * System Class Loader
  *
  * @author elizaveta.ivanova
- * @since 230
+ * @since 232
  */
-abstract class AbstractUtamLoaderConfig implements UtamLoaderConfig {
+public class UtamLoaderConfigImpl implements UtamLoaderConfig {
 
   // dependencies
-  final List<String> activeProfiles = new ArrayList<>();
-  final Map<String, ProfileContext> activeProfilesContext = new HashMap<>();
+  private final List<String> activeProfiles = new ArrayList<>();
+  private final Map<String, ProfileContext> activeProfilesContext = new HashMap<>();
   final List<String> overrideProfiles = new ArrayList<>();
   final Map<String, ProfileContext> overrideProfilesContext = new HashMap<>();
+  final DriverSettings driverSettings;
   // driver
   private final WebDriver webDriver;
   PageObjectsFactory pageObjectsFactory;
-  final DriverSettings driverSettings;
   SeleniumContext seleniumContext;
 
-  AbstractUtamLoaderConfig(WebDriver driver) {
+  public UtamLoaderConfigImpl(WebDriver driver) {
     this.webDriver = driver;
     this.driverSettings = new DriverSettings();
   }
@@ -60,8 +62,22 @@ abstract class AbstractUtamLoaderConfig implements UtamLoaderConfig {
             });
   }
 
+  @Override
+  public void setProfile(Profile profile) {
+    String key = profile.getConfigName();
+    if (activeProfilesContext.containsKey(key)) {
+      throw new UtamError(
+          String
+              .format("duplicate profile '%s'", profile.getConfigName()));
+    }
+    // add to list to maintain order of overrides
+    activeProfiles.add(key);
+    activeProfilesContext.put(key, new DefaultProfileContext(profile));
+    resetFactory();
+  }
+
   final void setDefaultProfile() {
-    setProfile(DEFAULT_IMPL);
+    setProfile(DEFAULT_PROFILE);
   }
 
   /**
@@ -85,7 +101,7 @@ abstract class AbstractUtamLoaderConfig implements UtamLoaderConfig {
     return new PageObjectContextImpl(overrides);
   }
 
-  void resetNotNullSeleniumContext() {
+  void resetSeleniumContext() {
     if (this.seleniumContext != null) {
       this.seleniumContext = this.driverSettings.getSeleniumContext(this.webDriver);
     }
@@ -98,14 +114,14 @@ abstract class AbstractUtamLoaderConfig implements UtamLoaderConfig {
     return seleniumContext;
   }
 
-  void resetNotNullFactory() {
+  void resetFactory() {
     if (pageObjectsFactory != null) {
       this.pageObjectsFactory = new PageObjectsFactoryImpl(setPageObjectsContext(),
           this.seleniumContext);
     }
   }
 
-  final PageObjectsFactory getFactory() {
+  PageObjectsFactory getFactory() {
     if (pageObjectsFactory == null) {
       PageObjectContext context = setPageObjectsContext();
       this.pageObjectsFactory = new PageObjectsFactoryImpl(context, getSeleniumContext());
@@ -116,40 +132,38 @@ abstract class AbstractUtamLoaderConfig implements UtamLoaderConfig {
   @Override
   public void setBridgeAppTitle(String title) {
     this.driverSettings.bridgeAppTitle = title;
-    resetNotNullSeleniumContext();
-    resetNotNullFactory();
+    resetSeleniumContext();
+    resetFactory();
   }
-
-  @Override
-  public abstract void setProfile(Profile profile);
 
   @Override
   public <T extends PageObject> void setProfileOverride(Profile profile, Class<T> poInterface,
       Class<? extends T> poClass) {
-    String key = profile == null ? DEFAULT_IMPL.getConfigName() : profile.getConfigName();
+    Profile notNullProfile = profile == null? DEFAULT_PROFILE : profile;
+    String key = notNullProfile.getConfigName();
     ProfileContext context =
         overrideProfilesContext.containsKey(key) ? overrideProfilesContext.get(key)
-            : new ProfileContextEmpty();
+            : new DefaultProfileContext(notNullProfile);
     context.setBean(poInterface, poClass.getName());
-    if(!overrideProfiles.contains(key)) {
+    if (!overrideProfiles.contains(key)) {
       overrideProfiles.add(key);
     }
     overrideProfilesContext.put(key, context);
-    resetNotNullFactory();
+    resetFactory();
   }
 
   @Override
   public void setLocationPolicy(LocationPolicy policy) {
     this.driverSettings.locationPolicy = policy;
-    resetNotNullSeleniumContext();
-    resetNotNullFactory();
+    resetSeleniumContext();
+    resetFactory();
   }
 
   @Override
   public void setTimeout(Duration timeout) {
     this.driverSettings.customTimeout = timeout;
-    resetNotNullSeleniumContext();
-    resetNotNullFactory();
+    resetSeleniumContext();
+    resetFactory();
   }
 
   /**

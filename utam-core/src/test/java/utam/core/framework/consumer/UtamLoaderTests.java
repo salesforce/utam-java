@@ -2,9 +2,7 @@ package utam.core.framework.consumer;
 
 import utam.core.framework.base.PageMarker;
 import utam.core.framework.base.RootPageObject;
-import utam.core.framework.consumer.impl.PageObjectMockImpl;
-import utam.core.framework.context.Profile;
-import utam.core.framework.context.StringValueProfile;
+import utam.core.framework.consumer.impl.TestLoaderConfigPageObjectImpl;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -33,43 +31,32 @@ import static utam.core.selenium.element.LocatorUtilities.getElementLocator;
  */
 public class UtamLoaderTests {
 
-  private static UtamLoaderImpl getLoader() {
-    AbstractUtamLoaderConfig config = new UtamLoaderEmptyConfig(mock(WebDriver.class));
-    return new UtamLoaderImpl(config);
+  private static UtamLoader getDefaultLoader() {
+    return new UtamLoaderImpl(new UtamLoaderConfigImpl(mock(WebDriver.class)));
   }
 
   @Test
   public void testRootPageObjectCreation() {
-    UtamLoader loader = getLoader();
-    RootPageObject rootPageObject = loader.create(PageObjectMock.class);
-    assertThat(rootPageObject, is(instanceOf(PageObjectMock.class)));
+    UtamLoader loader = getDefaultLoader();
+    RootPageObject rootPageObject = loader.create(TestLoaderConfigPageObject.class);
+    assertThat(rootPageObject, is(instanceOf(TestLoaderConfigPageObjectImpl.class)));
   }
 
   @Test
   public void testPageObjectLoad() {
-    UtamLoaderImpl loader = getLoader();
-    RootPageObject rootPageObject = loader.load(PageObjectMock.class);
-    assertThat(rootPageObject, is(instanceOf(PageObjectMock.class)));
+    UtamLoader loader = getDefaultLoader();
+    RootPageObject rootPageObject = loader.load(TestLoaderConfigPageObject.class);
+    assertThat(rootPageObject, is(instanceOf(TestLoaderConfigPageObjectImpl.class)));
   }
 
   @Test
   public void testCreateUtamFromContainer() {
-    UtamLoader loader = getLoader();
+    UtamLoader loader = getDefaultLoader();
     ContainerMock containerMock = new ContainerMock();
-    PageObjectMock pageObjectMock =
-        loader.create(containerMock, PageObjectMock.class, Web.byCss("root"));
+    TestLoaderConfigPageObject pageObjectMock =
+        loader.create(containerMock, TestLoaderConfigPageObject.class, Web.byCss("root"));
     List<LocatorNode> chain = getAllNodes(getElementLocator(pageObjectMock.getRoot()));
     assertThat(chain.get(1).getSelector().getValue(), is(equalTo("root")));
-  }
-
-  @Test
-  public void testProfileBasedDependency() {
-    UtamLoaderConfig config = new UtamLoaderEmptyConfig(mock(WebDriver.class));
-    Profile profile = new StringValueProfile("profile", "name");
-    config.setProfileOverride(profile, PageObjectMock.class, PageObjectMockForProfile.class);
-    UtamLoader loader = new UtamLoaderImpl(config);
-    RootPageObject rootPageObject = loader.load(PageObjectMock.class);
-    assertThat(rootPageObject, is(instanceOf(PageObjectMockForProfile.class)));
   }
 
   @Test
@@ -100,5 +87,5 @@ public class UtamLoaderTests {
 
   @PageMarker.Find(css = "root")
   // has to be public for reflections to work
-  public static class PageObjectMockForProfile extends PageObjectMockImpl {}
+  public static class TestLoaderConfigPageObjectOverride extends TestLoaderConfigPageObjectImpl {}
 }

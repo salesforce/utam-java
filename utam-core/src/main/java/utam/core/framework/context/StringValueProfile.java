@@ -11,7 +11,7 @@ public class StringValueProfile implements Profile {
   private static final String PROFILE_CONFIG_PATTERN = "%s_%s_config";
 
   // profile with default implementations for interfaces
-  public static final Profile DEFAULT_IMPL = new StringValueProfile("default", "impl");
+  public static final Profile DEFAULT_PROFILE = new StringValueProfile("default", "impl");
 
   private final String name;
   private final String value;

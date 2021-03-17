@@ -3,7 +3,8 @@ package utam.core.framework.consumer;
 import java.util.Collections;
 
 /**
- * utilities to make package private methods available
+ * utilities to make package private methods of PageObjectContext
+ *
  * @author elizaveta.ivanova
  * @since 228
  */

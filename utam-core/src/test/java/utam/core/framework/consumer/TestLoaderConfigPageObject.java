@@ -9,6 +9,6 @@ import utam.core.selenium.element.Actionable;
  * @author elizaveta.ivanova
  * @since 230
  */
-public interface PageObjectMock extends RootPageObject {
+public interface TestLoaderConfigPageObject extends RootPageObject {
   Actionable getRoot();
 }

@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import static utam.core.framework.UtamLogger.info;
-import static utam.core.framework.context.StringValueProfile.DEFAULT_IMPL;
+import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
 
 /**
  * abstract runner
@@ -55,7 +55,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
         profilesMapping.put(profile, new HashMap<>());
       }
     }
-    defaultProfile = DEFAULT_IMPL;
+    defaultProfile = DEFAULT_PROFILE;
     profilesMapping.put(defaultProfile, new HashMap<>());
   }
 

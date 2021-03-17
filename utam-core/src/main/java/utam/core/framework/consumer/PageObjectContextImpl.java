@@ -61,7 +61,6 @@ public class PageObjectContextImpl implements PageObjectContext {
     return (T) externalBuilder.apply(type, parameters);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T extends PageObject> T getBean(Class<T> type) {
     Function<Class<T>, Class<? extends T>> getter =
