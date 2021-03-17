@@ -275,7 +275,7 @@ public abstract class LocatorNodeImpl implements LocatorNode {
 
     Web(Supplier<SearchContext> self) {
       super(MOCK_SELECTOR, "WebElement", ShadowBoundary.NONE, EMPTY_FILTER);
-      this.self = () -> self.get();
+      this.self = self::get;
     }
 
     @Override

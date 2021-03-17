@@ -9,8 +9,6 @@ import utam.core.framework.consumer.ContainerElement;
 import utam.core.framework.consumer.LocationPolicy;
 import utam.core.framework.consumer.LocationPolicyType;
 import utam.core.framework.consumer.UtamError;
-import io.appium.java_client.MobileBy;
-import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import utam.core.selenium.context.SeleniumContext;
 import utam.core.selenium.expectations.ElementListExpectations;

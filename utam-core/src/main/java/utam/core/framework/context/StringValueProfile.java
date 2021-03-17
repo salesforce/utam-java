@@ -8,9 +8,9 @@ public class StringValueProfile implements Profile {
       "profile name must not be null or the empty string";
   private static final String ERR_VALUES_REQUIRED = 
       "profile value must not be null or the empty string";
-  private static final String PROFILE_CONFIG_PATTERN = "%s_%s_config.properties";
+  private static final String PROFILE_CONFIG_PATTERN = "%s_%s_config";
 
-  // default implementations for interfaces
+  // profile with default implementations for interfaces
   public static final Profile DEFAULT_IMPL = new StringValueProfile("default", "impl");
 
   private final String name;
@@ -40,25 +40,20 @@ public class StringValueProfile implements Profile {
   }
 
   @Override
-  public String asKey() {
-    return String.format("%s = %s", getName(), getValue());
-  }
-
-  @Override
   public int hashCode() {
-    return asKey().hashCode();
+    return getConfigName().hashCode();
   }
 
   @Override //without this can't use Profile as a key in map inside Runner
   public boolean equals(Object obj) {
     if(obj instanceof StringValueProfile) {
-      return ((StringValueProfile) obj).asKey().equals(this.asKey());
+      return ((StringValueProfile) obj).getConfigName().equals(this.getConfigName());
     }
     return false;
   }
 
   @Override
-  public String getConfigFileName() {
+  public String getConfigName() {
     return String.format(PROFILE_CONFIG_PATTERN, getName(), getValue());
   }
 }

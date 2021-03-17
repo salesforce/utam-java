@@ -17,24 +17,24 @@ import java.time.Duration;
  */
 public class UtamLoaderImpl implements UtamLoader {
 
-  final UtamLoaderConfigImpl utamConfig;
+  final AbstractUtamLoaderConfig utamConfig;
 
   public UtamLoaderImpl(UtamLoaderConfig utamLoaderConfig) {
-    if (!(utamLoaderConfig instanceof UtamLoaderConfigImpl)) {
+    if (!(utamLoaderConfig instanceof AbstractUtamLoaderConfig)) {
       throw new UtamError(
           String.format(
               "Unsupported configuration class - instance of %s is expected to be passed to loader",
-              UtamLoaderConfigImpl.class.getSimpleName()));
+              AbstractUtamLoaderConfig.class.getSimpleName()));
     }
-    this.utamConfig = (UtamLoaderConfigImpl) utamLoaderConfig;
+    this.utamConfig = (AbstractUtamLoaderConfig) utamLoaderConfig;
   }
 
   /**
-   * creates instance of loader with default config settings
+   * creates instance of loader that does not accept dependency injection
    * @param driver driver instance
    */
   public UtamLoaderImpl(WebDriver driver) {
-    this(new UtamLoaderConfigImpl(driver));
+    this(new UtamLoaderEmptyConfig(driver));
   }
 
   /**
@@ -43,12 +43,12 @@ public class UtamLoaderImpl implements UtamLoader {
    * @return loader instance
    */
   public static UtamLoader getSimulatorLoader(WebDriver driver) {
-    UtamLoaderConfig config = new UtamLoaderConfigImpl(driver);
+    UtamLoaderConfig config = new UtamLoaderEmptyConfig(driver);
     config.setTimeout(Duration.ofSeconds(1));
     return new UtamLoaderImpl(config);
   }
 
-  protected PageObjectsFactory getFactory() {
+  PageObjectsFactory getFactory() {
     return utamConfig.getFactory();
   }
 

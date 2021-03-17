@@ -7,7 +7,6 @@ import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.PageObjectInterface;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
-import utam.core.framework.context.DefaultProfileContext;
 import utam.core.framework.context.Profile;
 import utam.core.declarative.translator.*;
 
@@ -197,7 +196,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     for (Profile profile : getAllProfiles()) {
       Properties configToWrite = getProfileMapping(profile);
       if(!configToWrite.isEmpty()) {
-        String profileConfigPath = String.format("%s/%s", profilesRoot, profile.getConfigFileName());
+        String profileConfigPath = String.format("%s/%s.properties", profilesRoot, profile.getConfigName());
         try {
           Writer writer = new FileWriter(profileConfigPath);
           configToWrite.store(writer, "profile override");

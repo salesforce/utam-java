@@ -9,17 +9,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 import org.openqa.selenium.WebDriver;
 import utam.core.appium.context.AppiumContextProvider;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.PageObjectsFactoryImpl;
-import utam.core.framework.context.DefaultProfileContext;
 import utam.core.framework.context.Driver;
-import utam.core.framework.context.PlatformType;
 import utam.core.framework.context.Profile;
 import utam.core.framework.context.ProfileContext;
+import utam.core.framework.context.ProfileContextEmpty;
 import utam.core.selenium.context.SeleniumContext;
 import utam.core.selenium.context.SeleniumContextProvider;
 
@@ -29,38 +27,22 @@ import utam.core.selenium.context.SeleniumContextProvider;
  * @author elizaveta.ivanova
  * @since 230
  */
-public final class UtamLoaderConfigImpl implements UtamLoaderConfig {
-
-  private static final String OVERRIDE_BEAN_KEY = "OVERRIDE_BEAN_KEY";
+abstract class AbstractUtamLoaderConfig implements UtamLoaderConfig {
 
   // dependencies
   final List<String> activeProfiles = new ArrayList<>();
-  private final Class[] configLoaders;
-  private final Map<String, ProfileContext> profileContextMap = new HashMap<>();
-  private final Map<String, ProfileContext> overridesContextMap = new HashMap<>();
+  final Map<String, ProfileContext> activeProfilesContext = new HashMap<>();
+  final List<String> overrideProfiles = new ArrayList<>();
+  final Map<String, ProfileContext> overrideProfilesContext = new HashMap<>();
   // driver
   private final WebDriver webDriver;
   PageObjectsFactory pageObjectsFactory;
-  DriverSettings driverSettings;
+  final DriverSettings driverSettings;
   SeleniumContext seleniumContext;
 
-  /**
-   * each module with page objects has config with same names like platform_ios_config <br/> unless
-   * classLoader is specified, cannot read config from multiple jars
-   *
-   * @param pageObjectLoaders ClassLoader from each jar with page objects
-   */
-  public UtamLoaderConfigImpl(WebDriver driver, Class... pageObjectLoaders) {
+  AbstractUtamLoaderConfig(WebDriver driver) {
     this.webDriver = driver;
     this.driverSettings = new DriverSettings();
-    if (pageObjectLoaders == null || pageObjectLoaders.length == 0) {
-      this.configLoaders = new Class[0];
-    } else {
-      this.configLoaders = Stream.of(pageObjectLoaders).toArray(Class[]::new);
-    }
-    // by default set default profile and platform profile
-    setActiveProfile(DEFAULT_IMPL);
-    setActiveProfile(PlatformType.getActivePlatformProfile(driver));
   }
 
   private static void setBean(ProfileContext profileContext,
@@ -78,21 +60,28 @@ public final class UtamLoaderConfigImpl implements UtamLoaderConfig {
             });
   }
 
+  final void setDefaultProfile() {
+    setProfile(DEFAULT_IMPL);
+  }
+
   /**
    * create page objects context for dependency injection <br/> for each Jar and each profile,
    * search for override config and remember in context
    *
-   * @return
+   * @return page objects context for factory
    */
   PageObjectContext setPageObjectsContext() {
     Map<Class<? extends PageObject>, Class<? extends PageObject>> overrides = new HashMap<>();
     activeProfiles
         .forEach(
             profileKey -> {
-              ProfileContext profileContext = profileContextMap.get(profileKey);
+              ProfileContext profileContext = activeProfilesContext.get(profileKey);
               setBean(profileContext, overrides);
             });
-    overridesContextMap.values().forEach(override -> setBean(override, overrides));
+    overrideProfiles.forEach(profileKey -> {
+      ProfileContext profileContext = overrideProfilesContext.get(profileKey);
+      setBean(profileContext, overrides);
+    });
     return new PageObjectContextImpl(overrides);
   }
 
@@ -119,7 +108,7 @@ public final class UtamLoaderConfigImpl implements UtamLoaderConfig {
   final PageObjectsFactory getFactory() {
     if (pageObjectsFactory == null) {
       PageObjectContext context = setPageObjectsContext();
-      this.pageObjectsFactory = new PageObjectsFactoryImpl(context, this.seleniumContext);
+      this.pageObjectsFactory = new PageObjectsFactoryImpl(context, getSeleniumContext());
     }
     return pageObjectsFactory;
   }
@@ -132,28 +121,20 @@ public final class UtamLoaderConfigImpl implements UtamLoaderConfig {
   }
 
   @Override
-  public void setActiveProfile(Profile profile) {
-    for (Class jarLoader : this.configLoaders) {
-      String key = String.format("%s_%s", jarLoader.getName(), profile.asKey());
-      if (profileContextMap.containsKey(key)) {
-        throw new UtamError(String.format("duplicate profile '%s' for loader '%s'", profile.asKey(),
-            jarLoader.getName()));
-      }
-      // add to list to maintain order of overrides
-      activeProfiles.add(key);
-      profileContextMap.put(key, new DefaultProfileContext(profile, jarLoader));
-    }
-    resetNotNullFactory();
-  }
+  public abstract void setProfile(Profile profile);
 
   @Override
   public <T extends PageObject> void setProfileOverride(Profile profile, Class<T> poInterface,
       Class<? extends T> poClass) {
-    String key = profile == null? DEFAULT_IMPL.asKey() : profile.asKey();
-    ProfileContext context = overridesContextMap.containsKey(key) ? overridesContextMap.get(key)
-        : new DefaultProfileContext();
+    String key = profile == null ? DEFAULT_IMPL.getConfigName() : profile.getConfigName();
+    ProfileContext context =
+        overrideProfilesContext.containsKey(key) ? overrideProfilesContext.get(key)
+            : new ProfileContextEmpty();
     context.setBean(poInterface, poClass.getName());
-    overridesContextMap.put(key, context);
+    if(!overrideProfiles.contains(key)) {
+      overrideProfiles.add(key);
+    }
+    overrideProfilesContext.put(key, context);
     resetNotNullFactory();
   }
 

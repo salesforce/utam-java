@@ -12,7 +12,6 @@ import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.testng.annotations.Test;
-import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.context.SeleniumContext;
 import utam.core.selenium.context.WebDriverUtilities;
 import utam.core.selenium.expectations.ElementExpectations;
@@ -22,7 +21,6 @@ import utam.core.selenium.expectations.ExpectationsUtil;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -384,7 +382,7 @@ public class ElementImplTests {
     ActionsMock mock = new ActionsMock();
     when(mock.webElement.isDisplayed()).thenReturn(true);
     ElementImpl element = mock.getElementImpl();
-    Supplier<Boolean> apply = () -> element.isVisible();
+    Supplier<Boolean> apply = element::isVisible;
     assertThat(element.waitFor(apply), is(equalTo(true)));
   }
 
@@ -393,7 +391,7 @@ public class ElementImplTests {
     ActionsMock mock = new ActionsMock();
     when(mock.webElement.isDisplayed()).thenReturn(false);
     ElementImpl element = mock.getElementImpl();
-    Supplier<Boolean> apply = () -> element.isVisible();
+    Supplier<Boolean> apply = element::isVisible;
     assertThrows(() -> element.waitFor(apply));
   }
 

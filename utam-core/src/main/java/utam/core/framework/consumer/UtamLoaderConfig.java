@@ -4,10 +4,10 @@ import utam.core.framework.base.PageObject;
 import utam.core.framework.context.Profile;
 
 import java.time.Duration;
-import utam.core.framework.context.ProfileContext;
 
 /**
- * configuration of the UTAM integration
+ * configuration of the UTAM integration by consumer </br>
+ * configuration should be created every time Driver is created
  *
  * @author elizaveta.ivanova
  * @since 230
@@ -22,12 +22,21 @@ public interface UtamLoaderConfig {
   void setBridgeAppTitle(String title);
 
   /**
-   * set active profile with intention to correctly pick implementing class if there are overrides
+   * set active profile with intention to correctly pick implementing class if there are overrides <br/>
+   * for each jar with dependencies it will try to find dependencies config and add overrides injected class
    *
    * @param profile active profile
    */
-  void setActiveProfile(Profile profile);
+  void setProfile(Profile profile);
 
+  /**
+   * allows consumer to override a bean definition for profile from a test
+   *
+   * @param profile profile for which we override, if null use default profile
+   * @param poInterface page object interface
+   * @param poClass page object implementing class to inject in tunrime
+   * @param <T> bounding type for page objects
+   */
   <T extends PageObject> void setProfileOverride(Profile profile, Class<T> poInterface, Class<? extends T> poClass);
 
   /**
