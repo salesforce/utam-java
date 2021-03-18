@@ -1,16 +1,15 @@
 package utam.core.framework.consumer;
 
+import java.time.Duration;
 import org.openqa.selenium.WebDriver;
-import utam.core.selenium.element.Selector;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.PageObjectBuilderImpl;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.RootPageObject;
-
-import java.time.Duration;
+import utam.core.selenium.element.Selector;
 
 /**
- * default implementation of utam loader
+ * implementation of UtamLoader
  *
  * @author elizaveta.ivanova
  * @since 230
@@ -19,7 +18,7 @@ public class UtamLoaderImpl implements UtamLoader {
 
   final UtamLoaderConfigImpl utamConfig;
 
-  public UtamLoaderImpl(UtamLoaderConfig utamLoaderConfig, WebDriver driver) {
+  public UtamLoaderImpl(UtamLoaderConfig utamLoaderConfig) {
     if (!(utamLoaderConfig instanceof UtamLoaderConfigImpl)) {
       throw new UtamError(
           String.format(
@@ -27,28 +26,35 @@ public class UtamLoaderImpl implements UtamLoader {
               UtamLoaderConfigImpl.class.getSimpleName()));
     }
     this.utamConfig = (UtamLoaderConfigImpl) utamLoaderConfig;
-    this.utamConfig.setDriver(driver);
+    this.utamConfig.setDefaultProfile();
   }
 
   /**
-   * creates instance of loader with default config settings
+   * creates instance of loader that does not accept dependency injection
+   *
    * @param driver driver instance
    */
   public UtamLoaderImpl(WebDriver driver) {
-    this(new UtamLoaderConfigImpl(), driver);
+    this(new UtamLoaderConfigImpl(driver));
   }
 
   /**
    * create instance of loader for unit tests with minimum possible timeout
+   *
    * @param driver simulator driver
    * @return loader instance
    */
   public static UtamLoader getSimulatorLoader(WebDriver driver) {
-    UtamLoaderConfig config = new UtamLoaderConfigImpl();
+    UtamLoaderConfig config = new UtamLoaderConfigImpl(driver);
     config.setTimeout(Duration.ofSeconds(1));
-    return new UtamLoaderImpl(config, driver);
+    return new UtamLoaderImpl(config);
   }
 
+  /**
+   * protected access because it might need override in a child class for test context
+   *
+   * @return factory instance to create a page object
+   */
   protected PageObjectsFactory getFactory() {
     return utamConfig.getFactory();
   }
@@ -67,13 +73,13 @@ public class UtamLoaderImpl implements UtamLoader {
 
   @Override
   public <T extends PageObject> T create(
-          Container parent, Class<T> type, Selector injectedSelector) {
+      Container parent, Class<T> type, Selector injectedSelector) {
     if (parent == null) {
       throw new UtamError(
-              String.format("can't build %s, container page object is null", type.getName()));
+          String.format("can't build %s, container page object is null", type.getName()));
     }
     PageObjectBuilderImpl builder =
-            new PageObjectBuilderImpl.UtamChild(getFactory(), parent, injectedSelector);
+        new PageObjectBuilderImpl.UtamChild(getFactory(), parent, injectedSelector);
     return builder.build(type);
   }
 }

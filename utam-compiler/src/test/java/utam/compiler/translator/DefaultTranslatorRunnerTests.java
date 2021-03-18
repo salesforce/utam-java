@@ -16,7 +16,7 @@ import java.util.Properties;
 
 import static utam.compiler.translator.AbstractTranslatorConfiguration.ERR_PROFILE_NOT_CONFIGURED;
 import static utam.compiler.translator.TranslatorMockUtilities.*;
-import static utam.core.framework.context.StringValueProfile.DEFAULT_IMPL;
+import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -206,7 +206,7 @@ public class DefaultTranslatorRunnerTests {
     sourceConfig.setSources();
     DefaultTranslatorRunner runner = sourceConfig.getRunner();
     runner.run();
-    Properties properties = runner.getProfileMapping(DEFAULT_IMPL);
+    Properties properties = runner.getProfileMapping(DEFAULT_PROFILE);
     assertThat(
         properties.containsKey(
             TranslationTypesConfigJava.getJavaType(
@@ -239,7 +239,7 @@ public class DefaultTranslatorRunnerTests {
   public void testDefaultProfiles() {
     DefaultTranslatorRunner runner = new Mock();
     assertThat(runner.getAllProfiles().size(), is(equalTo(1)));
-    assertThat(runner.getAllProfiles().iterator().next(), is(equalTo(DEFAULT_IMPL)));
+    assertThat(runner.getAllProfiles().iterator().next(), is(equalTo(DEFAULT_PROFILE)));
   }
 
 

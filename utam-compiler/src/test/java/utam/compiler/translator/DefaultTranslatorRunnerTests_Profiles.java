@@ -16,7 +16,7 @@ import java.util.Properties;
 
 import static utam.compiler.translator.DefaultTranslatorRunner.*;
 import static utam.compiler.translator.DefaultTranslatorRunnerTests.Mock.getConfig;
-import static utam.core.framework.context.StringValueProfile.DEFAULT_IMPL;
+import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
@@ -237,7 +237,7 @@ public class DefaultTranslatorRunnerTests_Profiles {
   @Test
   public void testSetImplForProfile() {
     DefaultTranslatorRunner translatorRunner = new DefaultTranslatorRunner(getConfig()) {};
-    translatorRunner.setImplOnlyForProfile(DEFAULT_IMPL, "typename", "classtypename");
+    translatorRunner.setImplOnlyForProfile(DEFAULT_PROFILE, "typename", "classtypename");
     assertThrows(
         UtamError.class,
         () ->

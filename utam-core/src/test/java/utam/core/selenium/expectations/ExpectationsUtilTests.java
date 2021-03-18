@@ -46,7 +46,6 @@ import static utam.core.selenium.expectations.SalesforceWebDriverUtils.SCROLL_IN
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -63,7 +62,6 @@ import org.testng.annotations.Test;
 import utam.core.selenium.context.SeleniumContextProvider;
 import utam.core.selenium.context.WebDriverUtilities;
 import utam.core.selenium.element.Selector;
-import utam.core.selenium.element.ShadowRootWebElement;
 import utam.core.selenium.element.Web;
 import utam.core.selenium.expectations.ElementWait.Match;
 
@@ -761,7 +759,7 @@ public class ExpectationsUtilTests {
     SeleniumContextProvider provider = new SeleniumContextProvider(mockDriver);
     WebElement mockElement = mock(WebElement.class);
     when(mockElement.getText()).thenReturn(elementText);
-    Supplier<String> condition = () -> mockElement.getText();
+    Supplier<String> condition = mockElement::getText;
     ElementExpectations<String> expectation = ExpectationsUtil.waitFor(condition);
     String result = expectation.apply(provider.getWebDriverUtils()).apply(mockElement);
     assertThat(result, is(equalTo(elementText)));

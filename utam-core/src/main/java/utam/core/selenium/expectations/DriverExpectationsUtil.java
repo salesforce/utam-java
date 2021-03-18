@@ -8,7 +8,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import utam.core.appium.context.AppiumContextProvider;
 import utam.core.framework.context.PlatformType;
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.android.AndroidDriver;
 
 import java.util.Set;
 

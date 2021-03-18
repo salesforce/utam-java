@@ -8,9 +8,6 @@ import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.declarative.translator.ProfileConfiguration;
-import utam.compiler.translator.StringValueProfileConfig;
-import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.PlatformType;
 import utam.core.framework.context.Profile;
@@ -32,7 +29,6 @@ import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 import static utam.compiler.translator.TranslatorMockUtilities.getDefaultConfig;
-import static utam.core.framework.context.StringValueProfile.DEFAULT_IMPL;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -235,27 +231,6 @@ public class UtamPageObject_Tests {
     assertThat(profiles.length, is(equalTo(1)));
     assertThat(profiles[0].getName(), is(equalTo(PROFILE_KEY)));
     assertThat(profiles[0].getValue(), is(equalTo(PROFILE_VALUE)));
-  }
-
-  @Test
-  public void testDefaultProfileThrows() {
-    UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.profiles = new UtamProfile[] {new UtamProfile("key", "value")};
-    utamPageObject.implementsType = TEST_URI;
-    TranslatorConfig translatorConfig = getDefaultConfig();
-    ProfileConfiguration DEFAULT =
-        new StringValueProfileConfig("key", new String[] {"value"}) {
-          @Override
-          public Profile getFromString(String value) {
-            return DEFAULT_IMPL;
-          }
-        };
-    DEFAULT.getSupportedValues(); // for coverage. no idea why
-    translatorConfig.setConfiguredProfile(DEFAULT);
-    TranslationContext translationContext = new TranslationContext(TEST_URI, translatorConfig);
-    UtamError e =
-        expectThrows(UtamError.class, () -> utamPageObject.getProfiles(translationContext));
-    assertThat(e.getMessage(), containsString(ERR_ROOT_CANT_USE_DEFAULT_PROFILE));
   }
 
   @Test
