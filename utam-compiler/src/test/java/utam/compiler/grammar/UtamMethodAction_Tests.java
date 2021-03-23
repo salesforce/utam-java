@@ -1,37 +1,75 @@
 package utam.compiler.grammar;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.testng.Assert.assertThrows;
+import static utam.compiler.grammar.TestUtilities.TEST_PAGE_OBJECT;
+import static utam.compiler.grammar.TestUtilities.TEST_URI;
+import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
+import static utam.compiler.helpers.TypeUtilities.VOID;
+
+import org.testng.annotations.Test;
 import utam.compiler.helpers.ActionableActionType;
 import utam.compiler.helpers.ClickableActionType;
+import utam.compiler.helpers.ElementContext.Root;
+import utam.compiler.helpers.MethodContext;
+import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.representation.ComposeMethod;
-import org.testng.annotations.Test;
-
-import java.util.HashSet;
-import java.util.Set;
-
-import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import utam.compiler.representation.ComposeMethodStatement;
+import utam.compiler.representation.ComposeMethodStatement.Single;
+import utam.compiler.representation.RootElementMethod;
+import utam.core.declarative.representation.TypeProvider;
 
 public class UtamMethodAction_Tests {
 
   private static final String ELEMENT_NAME = "testElement";
 
-  /** The getComposeAction method should return the proper value */
+  private static MethodContext getMethodContext(TypeProvider returns) {
+    return new MethodContext("testMethod", returns);
+  }
+
+  private static MethodContext getVoidMethodContext() {
+    return getMethodContext(VOID);
+  }
+
+  private static UtamSelector getSelector() {
+    return new UtamSelector(".css");
+  }
+
+  private static UtamSelector getListSelector() {
+    return new UtamSelector(".css", true);
+  }
+
+  private static void setupRoot(TranslationContext context, UtamElement customElement) {
+    context.setElement(new Root(TEST_PAGE_OBJECT));
+    context.getRootElement().setElementMethod(new RootElementMethod.Protected());
+    customElement.traverse(context, context.getRootElement(), false);
+  }
+
+  private static String getSingleCodeLine(ComposeMethodStatement statement) {
+    assertThat(statement.getCodeLines(), is(hasSize(1)));
+    return statement.getCodeLines().get(0);
+  }
+
+  /**
+   * The getComposeAction method should return the proper value
+   */
   @Test
   public void testGetComposeAction() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, "clickable", new UtamSelector("selector")).testTraverse(context);
+    new UtamElement(ELEMENT_NAME, "clickable", getSelector()).testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
-            ELEMENT_NAME, ClickableActionType.click.toString(), new UtamArgument[] {});
-    Set<String> elementNames = new HashSet<>();
-    ComposeMethod.ElementAction actionObject =
-        action.getComposeAction(elementNames, context, "testMethod");
-    assertThat(actionObject, is(instanceOf(ComposeMethod.ElementAction.class)));
-    assertThat(actionObject.getReturnType().getSimpleName(), is(equalTo("void")));
+            ELEMENT_NAME, ClickableActionType.click.toString());
+    ComposeMethodStatement actionObject =
+        action.getComposeAction(context, getVoidMethodContext());
+    assertThat(actionObject, is(instanceOf(Single.class)));
+    assertThat(actionObject.getReturnType(VOID).isSameType(VOID), is(true));
     assertThat(
-        actionObject.getCodeLine(),
+        getSingleCodeLine(actionObject),
         is(equalTo(getElementPrivateMethodCalled(ELEMENT_NAME) + "().click()")));
   }
 
@@ -42,20 +80,21 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeActionWithListElementAndVoidListAction() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, "clickable", new UtamSelector("fakeSelector", true))
+    new UtamElement(ELEMENT_NAME, "clickable", getListSelector())
         .testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
-            ELEMENT_NAME, ClickableActionType.click.toString(), new UtamArgument[] {});
-    ComposeMethod.ElementAction actionObject =
-        action.getComposeAction(new HashSet<>(), context, "testMethod");
-    assertThat(actionObject, is(instanceOf(ComposeMethod.VoidListAction.class)));
-    assertThat(actionObject.getReturnType().getSimpleName(), is(equalTo("void")));
+            ELEMENT_NAME, ClickableActionType.click.toString());
+    ComposeMethodStatement actionObject =
+        action.getComposeAction(context, getVoidMethodContext());
+    assertThat(actionObject, is(instanceOf(ComposeMethodStatement.VoidList.class)));
+    assertThat(actionObject.getReturnType(VOID).isSameType(VOID), is(true));
     assertThat(
-        actionObject.getCodeLine(),
+        getSingleCodeLine(actionObject),
         is(
             equalTo(
-                getElementPrivateMethodCalled(ELEMENT_NAME) + "().forEach(element -> element.click())")));
+                getElementPrivateMethodCalled(ELEMENT_NAME)
+                    + "().forEach(element -> element.click())")));
   }
 
   /**
@@ -65,43 +104,66 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeActionWithListElementAndListAction() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, "clickable", new UtamSelector("fakeSelector", true))
+    new UtamElement(ELEMENT_NAME, "clickable", getListSelector())
         .testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
-            ELEMENT_NAME, ActionableActionType.getText.toString(), new UtamArgument[] {});
-    Set<String> elementNames = new HashSet<>();
-    ComposeMethod.ElementAction actionObject =
-        action.getComposeAction(elementNames, context, "testMethod");
-    assertThat(actionObject, is(instanceOf(ComposeMethod.ElementAction.class)));
-    assertThat(actionObject.getReturnType().getSimpleName(), is(equalTo("List<String>")));
+            ELEMENT_NAME, ActionableActionType.getText.toString());
+    ComposeMethodStatement actionObject =
+        action.getComposeAction(context, getMethodContext(PrimitiveType.STRING));
+    assertThat(actionObject, is(instanceOf(ComposeMethodStatement.ReturnsList.class)));
+    assertThat(actionObject.getReturnType(VOID).getSimpleName(), is(equalTo("List<String>")));
     assertThat(
-        actionObject.getCodeLine(),
+        getSingleCodeLine(actionObject),
         is(
             equalTo(
                 getElementPrivateMethodCalled(ELEMENT_NAME)
                     + "().stream().map(element -> element.getText()).collect(Collectors.toList())")));
   }
 
-  /**
-   * The getComposeAction method should return the proper value with a list element and an applied
-   * list action that applies to the list as a whole
-   */
   @Test
-  public void testGetComposeActionWithListElementAndWholeListAction() {
+  public void testGetComposeActionWithListElementThrows() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, "clickable", new UtamSelector("fakeSelector"))
+    new UtamElement(ELEMENT_NAME, "clickable", getListSelector())
         .testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
-            ELEMENT_NAME, ActionableActionType.size.toString(), new UtamArgument[] {});
-    Set<String> elementNames = new HashSet<>();
-    ComposeMethod.ElementAction actionObject =
-        action.getComposeAction(elementNames, context, "testMethod");
-    assertThat(actionObject, is(instanceOf(ComposeMethod.ElementAction.class)));
-    assertThat(actionObject.getReturnType().getSimpleName(), is(equalTo("Integer")));
+            ELEMENT_NAME, ActionableActionType.size.toString());
+    assertThrows(() -> action.getComposeAction(context, getVoidMethodContext()));
+  }
+
+  @Test
+  public void testGetComposeActionCustomElement() {
+    TranslationContext context = TestUtilities.getTestTranslationContext();
+    UtamElement utamElement = new UtamElement(ELEMENT_NAME, TEST_URI, getSelector());
+    setupRoot(context, utamElement);
+    UtamMethodAction action = new UtamMethodAction(ELEMENT_NAME, "myMethod");
+    ComposeMethodStatement actionObject =
+        action.getComposeAction(context, getVoidMethodContext());
+    assertThat(actionObject, is(instanceOf(ComposeMethodStatement.Single.class)));
+    assertThat(actionObject.getReturnType(VOID).isSameType(VOID), is(true));
     assertThat(
-        actionObject.getCodeLine(),
-        is(equalTo(getElementPrivateMethodCalled(ELEMENT_NAME) + "().size()")));
+        getSingleCodeLine(actionObject),
+        is(equalTo(getElementPrivateMethodCalled(ELEMENT_NAME) + "().myMethod()")));
+  }
+
+  @Test
+  public void testGetComposeActionCustomElementListWithParameters() {
+    TranslationContext context = TestUtilities.getTestTranslationContext();
+    UtamElement utamElement = new UtamElement(ELEMENT_NAME, TEST_URI, getListSelector());
+    setupRoot(context, utamElement);
+    UtamMethodAction action = new UtamMethodAction(ELEMENT_NAME, "myMethod");
+    action.args = new UtamArgument[]{
+        new UtamArgument("strParameter", "string")
+    };
+    MethodContext methodContext = getMethodContext(PrimitiveType.STRING);
+    ComposeMethodStatement actionObject =
+        action.getComposeAction(context, methodContext);
+    assertThat(actionObject, is(instanceOf(ComposeMethodStatement.ReturnsList.class)));
+    assertThat(actionObject.getReturnType(VOID).getSimpleName(), is(equalTo("List<String>")));
+    assertThat(
+        getSingleCodeLine(actionObject),
+        is(equalTo(getElementPrivateMethodCalled(ELEMENT_NAME)
+            + "().stream().map(element -> element.myMethod(strParameter)).collect(Collectors.toList())")));
   }
 }

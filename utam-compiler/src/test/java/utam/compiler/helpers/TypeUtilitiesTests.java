@@ -1,5 +1,6 @@
 package utam.compiler.helpers;
 
+import java.util.function.Supplier;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import org.hamcrest.MatcherAssert;
@@ -13,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import utam.core.selenium.element.Selector;
 
 import static utam.compiler.helpers.TypeUtilities.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -441,5 +443,23 @@ public class TypeUtilitiesTests {
     assertThat(typeProvider.getClassType(), is(nullValue()));
     assertThat(typeProvider.getSimpleName(), is(equalTo("<T extends PageObject> T")));
     assertThat(typeProvider.isSameType(CONTAINER_RETURN_TYPE), is(true));
+  }
+
+  @Test
+  public void testFunctionType() {
+    TypeProvider selectorType = FUNCTION;
+    assertThat(selectorType.getSimpleName(), is(equalTo("Supplier<T>")));
+    assertThat(selectorType.getFullName(), is(equalTo(Supplier.class.getName())));
+    assertThat(selectorType.getPackageName(), is(equalTo(Supplier.class.getPackageName())));
+    assertThat(selectorType.getClassType(), is(equalTo(Supplier.class)));
+  }
+
+  @Test
+  public void testSelectorType() {
+    TypeProvider predicateType = SELECTOR;
+    assertThat(predicateType.getSimpleName(), is(equalTo("Selector")));
+    assertThat(predicateType.getFullName(), is(equalTo(Selector.class.getName())));
+    assertThat(predicateType.getPackageName(), is(equalTo(Selector.class.getPackageName())));
+    assertThat(predicateType.getClassType(), is(equalTo(Selector.class)));
   }
 }

@@ -1,6 +1,5 @@
 package utam.compiler.translator;
 
-import utam.compiler.helpers.PrimitiveType;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.PageObjectClass;
 import utam.core.declarative.representation.PageObjectMethod;

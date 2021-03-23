@@ -23,7 +23,6 @@ public class TestUtilities {
   static final String JACKSON_MISSING_REQUIRED_PROPERTY_ERROR = "Missing required creator property";
   static final String JACKSON_WRONG_PROPERTY_TYPE =
       "Cannot deserialize value of type `%s` from String \"%s\"";
-  static final String JACKSON_CONSTRUCTOR_ERROR = "Cannot construct instance of `%s`";
   private static final TranslationTypesConfig TYPES_CONFIG = new TranslationTypesConfigJava();
   public static final TypeProvider TEST_PAGE_OBJECT = TYPES_CONFIG.getInterfaceType(TEST_URI);
 

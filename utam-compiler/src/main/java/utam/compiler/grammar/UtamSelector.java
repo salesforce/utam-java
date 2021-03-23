@@ -1,6 +1,8 @@
 package utam.compiler.grammar;
 
 import utam.core.appium.element.ClassChain;
+import utam.core.appium.element.ClassChain.Operator;
+import utam.core.appium.element.ClassChain.Quote;
 import utam.core.appium.element.Mobile;
 import utam.core.appium.element.UIAutomator;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static utam.compiler.grammar.UtamArgument.getArgsProcessor;
 import static utam.core.selenium.element.LocatorParameters.SELECTOR_INTEGER_PARAMETER;
 import static utam.core.selenium.element.LocatorParameters.SELECTOR_STRING_PARAMETER;
 
@@ -44,11 +47,11 @@ public class UtamSelector {
           .collect(Collectors.joining(","));
   private static final String SUPPORTED_CLASSCHAIN_QUOTES = 
       Stream.of(ClassChain.Quote.values())
-          .map(quote -> quote.toString())
+          .map(Quote::toString)
           .collect(Collectors.joining(","));
   private static final String SUPPORTED_CLASSCHAIN_OPERATORS = 
       Stream.of(ClassChain.Operator.values())
-          .map(operator -> operator.toString())
+          .map(Operator::toString)
           .collect(Collectors.joining(","));
   private static final String UIAUTOMATOR_SELECTOR_PREFIX = "new UiSelector()";
   static final String ERR_SELECTOR_MISSING =
@@ -78,6 +81,7 @@ public class UtamSelector {
       @JsonProperty(value = "args") UtamArgument[] args) {
     this.isReturnAll = isReturnAll;
     this.args = args;
+
     Selector selector;
     if (css != null) {
       selector = Web.byCss(css);
@@ -112,8 +116,8 @@ public class UtamSelector {
   }
 
   // used in tests
-  UtamSelector(String cssSelector, boolean isList, UtamArgument[] args) {
-    this(cssSelector, null, null, null, isList, args);
+  UtamSelector(String cssSelector, UtamArgument[] args) {
+    this(cssSelector, null, null, null, false, args);
   }
 
   private static void checkRedundantValue(String... values) {
@@ -140,7 +144,7 @@ public class UtamSelector {
 
   void validateClassChainSelector(String classchain) {
     Stream.of(classchain.split("/"))
-       .forEach(subStr -> validateSubClassChainSelector(subStr));
+       .forEach(this::validateSubClassChainSelector);
   }
 
   void validateSubClassChainSelector(String classchain) {
@@ -186,8 +190,8 @@ public class UtamSelector {
   }
 
   void validateMethod(String uiautomator) {
-    if (!Stream.of(UIAutomator.Method.values())
-             .anyMatch(method -> method.toString().equals(uiautomator.subSequence(0, uiautomator.indexOf("("))))){
+    if (Stream.of(UIAutomator.Method.values())
+             .noneMatch(method -> method.toString().equals(uiautomator.subSequence(0, uiautomator.indexOf("("))))){
       throw new UtamError(ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD);
     }
   }
@@ -217,6 +221,6 @@ public class UtamSelector {
   }
 
   List<MethodParameter> getParameters(String elementName) {
-    return UtamArgument.nonLiteralParameters(args, getParametersTypes(), elementName).getOrdered();
+    return getArgsProcessor(args, getParametersTypes(), elementName).getOrdered();
   }
 }

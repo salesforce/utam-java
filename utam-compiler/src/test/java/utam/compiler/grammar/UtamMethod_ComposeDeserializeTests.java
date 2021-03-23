@@ -12,6 +12,7 @@ import utam.core.declarative.representation.PageObjectMethod;
 
 import java.util.Collection;
 
+import static org.testng.Assert.assertThrows;
 import static utam.compiler.grammar.TestUtilities.*;
 import static utam.compiler.grammar.UtamMethod.ERR_METHOD_EMPTY_STATEMENTS;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -174,12 +175,8 @@ public class UtamMethod_ComposeDeserializeTests {
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 
-  /**
-   * Tests that a ComposeMethodNode with a list statement that applies to a list as a whole can be
-   * created
-   */
   @Test
-  public void testListComposeMethodNodeWithActionApplyingToListOfElements() {
+  public void testComposeMethodWrongCardinality() {
     String json =
         "{"
             + "  \"name\": \"composeMethod\","
@@ -202,10 +199,7 @@ public class UtamMethod_ComposeDeserializeTests {
             + "    }"
             + "  ]"
             + "}";
-    MethodInfo methodInfo = new MethodInfo("composeMethod", "Integer");
-    methodInfo.addCodeLine(getElementPrivateMethodCalled("element1") + "().size()");
-    PageObjectMethod method = getMethodObject(json, rootNodeJson);
-    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+    assertThrows(() -> getMethodObject(json, rootNodeJson));
   }
 
   @Test
@@ -311,5 +305,39 @@ public class UtamMethod_ComposeDeserializeTests {
     methodInfo.addCodeLine("this.getRootElement().getClassAttribute()");
     TranslationContext context = new DeserializerUtilities().getContext("composeMethod");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
+  }
+
+  @Test
+  public void testComposeWaitForBasicActionThatReturnsString() {
+    MethodInfo methodInfo = new MethodInfo("testCompose", "String");
+    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> { \n"
+        + "return this.getRootElement().getText(); \n"
+        + "}");
+    TranslationContext context = new DeserializerUtilities().getContext("composeWaitFor1");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
+  }
+
+  @Test
+  public void testComposeWaitForBasicVoidAction() {
+    MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
+    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> { \n"
+        + "this.getRootElement().focus(); \n"
+        + "return true; \n"
+        + "}");
+    TranslationContext context = new DeserializerUtilities().getContext("composeWaitFor2");
+    PageObjectMethod method = context.getMethod("testCompose");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
+  public void testComposeWaitForContainsElementAction() {
+    MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
+    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> { \n"
+        + "this.getRootElement().getText(); \n"
+        + "return Boolean.FALSE.equals(this.getRootElement().containsElement(Selector.byCss(\".css\"))); \n"
+        + "}");
+    TranslationContext context = new DeserializerUtilities().getContext("composeWaitForSelector");
+    PageObjectMethod method = context.getMethod("testCompose");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 }

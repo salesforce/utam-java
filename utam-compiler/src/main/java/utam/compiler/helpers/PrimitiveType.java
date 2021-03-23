@@ -1,12 +1,6 @@
 package utam.compiler.helpers;
 
-import java.util.function.Function;
-import java.util.function.Supplier;
 import utam.core.declarative.representation.TypeProvider;
-
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import utam.core.selenium.element.Selector;
 
 /**
  * primitive types supported as either return type or parameter in JSON
@@ -18,15 +12,9 @@ import utam.core.selenium.element.Selector;
 public enum PrimitiveType implements TypeProvider {
   STRING(String.class, "String", "string"),
   NUMBER(Integer.class, "Integer", "number"),
-  BOOLEAN(Boolean.class, "Boolean", "boolean"),
-  PREDICATE(Supplier.class, "Supplier<T>", "predicate"),
-  LOCATOR(Selector.class, "Selector", "locator");
+  BOOLEAN(Boolean.class, "Boolean", "boolean");
 
   public static final PrimitiveType[] EMPTY_ARRAY = new PrimitiveType[0];
-  public static final String SUPPORTED_TYPES =
-      Stream.of(PrimitiveType.values())
-          .map(value -> value.typeFromJson)
-          .collect(Collectors.joining(","));
   private final Class type; // used in tests
   private final String typeName;
   private final String typeFromJson;
@@ -53,6 +41,10 @@ public enum PrimitiveType implements TypeProvider {
       }
     }
     return false;
+  }
+
+  public String getJsonTypeName() {
+    return typeFromJson;
   }
 
   @Override

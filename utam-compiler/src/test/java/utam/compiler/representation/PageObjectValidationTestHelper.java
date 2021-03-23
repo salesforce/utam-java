@@ -157,7 +157,7 @@ public class PageObjectValidationTestHelper {
         is(equalTo(expected.returnType)));
 
     assertThat(
-        "method " + expected.name + ": parameter size",
+        "method " + expected.name + ": parameters count",
         actualParameters,
         hasSize(expected.parameterInfo.size()));
     for (int i = 0; i < actualParameters.size(); i++) {

@@ -1,5 +1,6 @@
 package utam.core.declarative.representation;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -20,9 +21,9 @@ public interface AnnotationProvider {
   /**
    * annotation classes to import, can be empty
    *
-   * @return type
+   * @return by default empty list
    */
   default List<TypeProvider> getImportTypes() {
-    return TypeProvider.EMPTY_LIST;
+    return Collections.EMPTY_LIST;
   }
 }

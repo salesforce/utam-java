@@ -2,6 +2,7 @@ package utam.compiler.helpers;
 
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
+import java.util.Collections;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.selenium.element.Clickable;
 import utam.core.selenium.expectations.ExpectationsUtil;
@@ -47,21 +48,11 @@ public enum ClickableActionType implements ActionType {
 
   @Override
   public List<TypeProvider> getParametersTypes() {
-    return TypeProvider.EMPTY_LIST;
-  }
-
-  @Override
-  public boolean isListAction() {
-    return false;
+    return Collections.EMPTY_LIST;
   }
 
   @Override
   public String getApplyString() {
-    return this.name();
-  }
-
-  @Override
-  public String getInvokeMethodName() {
     return this.name();
   }
 }

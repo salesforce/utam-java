@@ -2,7 +2,6 @@ package utam.compiler.grammar;
 
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.representation.ContainerMethod;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.framework.consumer.UtamError;

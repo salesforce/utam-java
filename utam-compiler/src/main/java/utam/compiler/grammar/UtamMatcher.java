@@ -8,7 +8,7 @@ import utam.core.declarative.representation.TypeProvider;
 
 import java.util.List;
 
-import static utam.compiler.grammar.UtamArgument.literalParameters;
+import static utam.compiler.grammar.UtamArgument.getArgsProcessor;
 
 /**
  * matcher used in compose statements or in element filter
@@ -29,10 +29,10 @@ class UtamMatcher {
     this.matcherType = matcherType;
   }
 
-  List<MethodParameter> getParameters(String elementName) {
-    return literalParameters(
+  List<MethodParameter> getParameters(String matcherContext) {
+    return getArgsProcessor(
             args, this.matcherType.getExpectedParametersTypes(),
-            String.format("element '%s' matcher '%s'", elementName, matcherType))
+            String.format("%s: matcher '%s'", matcherContext, matcherType))
         .getOrdered();
   }
 

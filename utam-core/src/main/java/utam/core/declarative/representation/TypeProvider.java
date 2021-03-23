@@ -1,8 +1,5 @@
 package utam.core.declarative.representation;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * type of utam objects for imports and declarations
  *
@@ -10,8 +7,6 @@ import java.util.List;
  * @since 226
  */
 public interface TypeProvider {
-
-  List<TypeProvider> EMPTY_LIST = new ArrayList<>();
 
   /**
    * full class name to be used in imports statement
@@ -36,6 +31,7 @@ public interface TypeProvider {
 
   /**
    * returns Class of the type if possible
+   *
    * @return class
    */
   Class getClassType();

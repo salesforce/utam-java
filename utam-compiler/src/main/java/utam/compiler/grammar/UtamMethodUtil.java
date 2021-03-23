@@ -38,7 +38,7 @@ class UtamMethodUtil {
     TypeProvider utilityType = getExtensionType(methodName, context);
     PageClassField field = context.setUtilityField(utilityType);
     return new UtilityMethod.Utility(
-        apply, UtamArgument.unknownTypesParameters(args, methodName).getOrdered(), field);
+        apply, UtamArgument.getArgsProcessor(args, methodName).getOrdered(), field);
   }
 
   private TypeProvider getExtensionType(String methodName, TranslationContext context) {

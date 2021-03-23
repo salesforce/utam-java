@@ -9,6 +9,7 @@ import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertThrows;
 import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
 import static utam.compiler.grammar.UtamMethod.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -42,7 +43,7 @@ public class UtamMethod_ComposeTests {
     UtamMethod method =
         new UtamMethod(
             METHOD_NAME,
-            new UtamMethodAction[] {new UtamMethodAction(ELEMENT_NAME, "click", null)});
+            new UtamMethodAction[] {new UtamMethodAction(ELEMENT_NAME, "click")});
     MethodInfo methodInfo = new MethodInfo(METHOD_NAME, "void");
     methodInfo.addCodeLine(getElementPrivateMethodCalled(ELEMENT_NAME) + "().click()");
     PageObjectValidationTestHelper.validateMethod(method.getComposeMethod(context), methodInfo);
@@ -50,17 +51,15 @@ public class UtamMethod_ComposeTests {
 
   /** The getComposeMethod method should throw the proper exception if a return type is specified */
   @Test
-  public void testGetComposeMethodWithReturnTypeThrows() {
+  public void testGetComposeMethodWithIncorrectReturnTypeThrows() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     setClickableElementContext(context); // creates element in context
     UtamMethod method =
         new UtamMethod(
             "testMethod",
-            new UtamMethodAction[] {new UtamMethodAction("testElement", "click", null)});
-    method.returnStr = "redundant";
-
-    UtamError e = expectThrows(UtamError.class, () -> method.getComposeMethod(context));
-    assertThat(e.getMessage(), containsString(getErr(ERR_METHOD_RETURN_TYPE_REDUNDANT)));
+            new UtamMethodAction[] {new UtamMethodAction("testElement", "click")});
+    method.returnStr = "unsupported type";
+    assertThrows(UtamError.class, () -> method.getComposeMethod(context));
   }
 
   /** The getComposeMethod method should throw the proper exception if arguments specified */
@@ -82,7 +81,7 @@ public class UtamMethod_ComposeTests {
     UtamMethod method =
         new UtamMethod(
             "testMethod",
-            new UtamMethodAction[] {new UtamMethodAction(ELEMENT_NAME, "click", null)});
+            new UtamMethodAction[] {new UtamMethodAction(ELEMENT_NAME, "click")});
     MethodInfo methodInfo = new MethodInfo("testMethod", "void");
     methodInfo.addCodeLine(getElementPrivateMethodCalled(ELEMENT_NAME) + "().click()");
 
@@ -91,12 +90,8 @@ public class UtamMethod_ComposeTests {
     PageObjectValidationTestHelper.validateMethod(methodObject, methodInfo);
   }
 
-  /**
-   * if same parameterized element used twice in compose statements, we should not count its
-   * parameters twice
-   */
   @Test
-  public void testSameElementWithParameterUsedTwice() {
+  public void testElementWithSelectorParameter() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     UtamElement scopeElement =
         new UtamElement(
@@ -104,12 +99,12 @@ public class UtamMethod_ComposeTests {
             "clickable",
             new UtamSelector(
                 ".fakeSelector[%s]",
-                false, new UtamArgument[] {new UtamArgument("selectorParameter", "string")}));
+                new UtamArgument[] {new UtamArgument("selectorParameter", "string")}));
     scopeElement.testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
-            ELEMENT_NAME, ClickableActionType.click.toString(), new UtamArgument[] {});
-    UtamMethod method = new UtamMethod(METHOD_NAME, new UtamMethodAction[] {action, action});
+            ELEMENT_NAME, ClickableActionType.click.toString());
+    UtamMethod method = new UtamMethod(METHOD_NAME, new UtamMethodAction[] { action, action });
     MethodInfo methodInfo = new MethodInfo(METHOD_NAME, "void");
     methodInfo.addParameter(
         new PageObjectValidationTestHelper.MethodParameterInfo("selectorParameter", "String"));

@@ -283,10 +283,6 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       this.selectorParameters.addAll(selectorParameters);
     }
 
-    private static String escapeDoubleQuotes(String selectorString) {
-      return selectorString.replaceAll("\"", Matcher.quoteReplacement("\\\""));
-    }
-
     String getCodeString() {
       return selectorCodeString;
     }

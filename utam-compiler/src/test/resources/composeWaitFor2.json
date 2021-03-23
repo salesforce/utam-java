@@ -1,0 +1,24 @@
+{
+  "methods": [
+    {
+      "name": "testCompose",
+      "compose": [
+        {
+          "element": "root",
+          "apply": "waitFor",
+          "args": [
+            {
+              "type" : "function",
+              "predicate": [
+                {
+                  "element" : "root",
+                  "apply" : "focus"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

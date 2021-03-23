@@ -10,7 +10,7 @@ import utam.core.framework.consumer.UtamError;
 
 import java.util.List;
 
-import static utam.compiler.grammar.UtamArgument.literalParameters;
+import static utam.compiler.grammar.UtamArgument.getArgsProcessor;
 import static utam.compiler.helpers.ActionableActionType.getActionType;
 
 /**
@@ -58,7 +58,7 @@ final class UtamElementFilter {
       expectedParameters = null;
     }
     this.applyMethodParameters =
-        literalParameters(
+        getArgsProcessor(
                 applyArgs, expectedParameters, String.format("element '%s' filter", elementName))
             .getOrdered();
     this.matcherParameters = this.matcher.getParameters(elementName);

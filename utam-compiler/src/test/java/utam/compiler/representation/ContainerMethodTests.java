@@ -31,7 +31,6 @@ public class ContainerMethodTests {
 
   static final String RETURN_TYPE = CONTAINER_RETURN_TYPE.getSimpleName();
   static final String LIST_RETURN_TYPE = CONTAINER_LIST_RETURN_TYPE.getSimpleName();
-  public static final String EXPECTED_CODE_LOAD = "load(pageObjectType, injectedSelector)";
   public static final MethodParameterInfo FIRST_CONTAINER_PARAMETER =
       new PageObjectValidationTestHelper.MethodParameterInfo(
           PAGE_OBJECT_PARAMETER.getValue(), PAGE_OBJECT_PARAMETER.getType().getSimpleName());
