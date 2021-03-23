@@ -1,23 +1,30 @@
 package utam.compiler.grammar;
 
-import utam.compiler.helpers.PrimitiveType;
-import utam.compiler.helpers.TypeUtilities;
-import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.UtamError;
-import org.testng.annotations.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.testng.Assert.assertThrows;
+import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.TestUtilities.JACKSON_CONSTRUCTOR_ERROR;
+import static utam.compiler.grammar.TestUtilities.getDeserializedObject;
+import static utam.compiler.grammar.UtamArgument.ERR_ARGS_TYPE_NOT_SUPPORTED;
+import static utam.compiler.grammar.UtamArgument.ERR_ARGS_WRONG_TYPE;
+import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_DUPLICATE_NAMES;
+import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_WRONG_COUNT;
+import static utam.compiler.grammar.UtamArgument.getArgsProcessor;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import static utam.compiler.grammar.UtamArgument.*;
-import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_DUPLICATE_NAMES;
-import static utam.compiler.grammar.TestUtilities.JACKSON_CONSTRUCTOR_ERROR;
-import static utam.compiler.grammar.TestUtilities.getDeserializedObject;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.testng.Assert.expectThrows;
+import org.testng.annotations.Test;
+import utam.compiler.helpers.PrimitiveType;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * Provides deserialization tests for the UtamArgument class
@@ -28,12 +35,12 @@ public class UtamArgument_DeserializeTests {
 
   private static List<MethodParameter> getParameters(String json) {
     UtamMethod utamMethod = getDeserializedObject(json, UtamMethod.class);
-    return UtamArgument.unknownTypesParameters(utamMethod.args, utamMethod.name).getOrdered();
+    return getArgsProcessor(utamMethod.args, utamMethod.name).getOrdered();
   }
 
   private static List<MethodParameter> getParameters(String json, List<TypeProvider> expected) {
     UtamMethod utamMethod = getDeserializedObject(json, UtamMethod.class);
-    return UtamArgument.nonLiteralParameters(utamMethod.args, expected, utamMethod.name)
+    return getArgsProcessor(utamMethod.args, expected, utamMethod.name)
         .getOrdered();
   }
 
@@ -48,7 +55,9 @@ public class UtamArgument_DeserializeTests {
     assertThat(argument, is(not(nullValue())));
   }
 
-  /** A valid UtamArgument object should be able to be created */
+  /**
+   * A valid UtamArgument object should be able to be created
+   */
   @Test
   public void testCreation() {
     String json =
@@ -80,7 +89,9 @@ public class UtamArgument_DeserializeTests {
     assertThat(parameters.get(1).getType().getSimpleName(), is(equalTo("String")));
   }
 
-  /** Creating a UtamArgument object with duplicate parameter names throws the proper exception */
+  /**
+   * Creating a UtamArgument object with duplicate parameter names throws the proper exception
+   */
   @Test
   public void testCreationWithDuplicateNamesThrows() {
     String json =
@@ -117,7 +128,9 @@ public class UtamArgument_DeserializeTests {
         containsString(String.format(ERR_ARGS_DUPLICATE_NAMES, "testParameterMethod", "attrName")));
   }
 
-  /** Creating a UtamArgument object with an invalid parameter type throws the proper exception */
+  /**
+   * Creating a UtamArgument object with an invalid parameter type throws the proper exception
+   */
   @Test
   public void testCreationWithInvalidParameterTypeThrows() {
     String json =
@@ -142,13 +155,17 @@ public class UtamArgument_DeserializeTests {
         e.getMessage(), containsString(String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, "test", "int")));
   }
 
-  /** The isPrimitiveType static method should return true for a primitive type */
+  /**
+   * The isPrimitiveType static method should return true for a primitive type
+   */
   @Test
   public void testIsPrimitiveType() {
     assertThat(PrimitiveType.fromString("string"), is(equalTo(PrimitiveType.STRING)));
   }
 
-  /** The isPrimitiveType static method should return false for an unrecognized type */
+  /**
+   * The isPrimitiveType static method should return false for an unrecognized type
+   */
   @Test
   public void testIsPrimitiveTypeWithInvalidValue() {
     assertThat(PrimitiveType.fromString("int") == null, is(equalTo(true)));
@@ -162,34 +179,7 @@ public class UtamArgument_DeserializeTests {
             UtamError.class,
             () -> getParameters(json, Collections.singletonList(PrimitiveType.NUMBER)));
     assertThat(
-        e.getMessage(), containsString(String.format(ERR_ARGS_NUMBER_MISMATCH, "test", 1, 0)));
-  }
-
-  /** A valid UtamArgument object should be able to be created with custom parameter types */
-  @Test
-  public void testCreationWithCustomType() {
-    String json =
-        "{"
-            + "  \"name\" : \"testParameterMethod\",\n"
-            + "  \"args\" : [\n"
-            + "    {\n"
-            + "      \"name\" :  \"attrName\",\n"
-            + "      \"type\" : \"CustomType\"\n"
-            + "    }\n"
-            + "  ],\n"
-            + "  \"compose\" : [\n"
-            + "    {\n"
-            + "      \"apply\": \"getAttribute\",\n"
-            + "      \"element\": \"rootElement\"\n"
-            + "    }\n"
-            + "  ]\n"
-            + "}\n";
-
-    List<MethodParameter> parameters =
-        getParameters(
-            json, Collections.singletonList(new TypeUtilities.FromString("CustomType", "")));
-    assertThat(parameters, hasSize(1));
-    assertThat(parameters.get(0).getType().getSimpleName(), is(equalTo("CustomType")));
+        e.getMessage(), containsString(String.format(ERR_ARGS_WRONG_COUNT, "test", 1, 0)));
   }
 
   /**
@@ -221,10 +211,13 @@ public class UtamArgument_DeserializeTests {
             () -> getParameters(json, Collections.singletonList(PrimitiveType.NUMBER)));
     assertThat(
         e.getMessage(),
-        containsString(String.format(ERR_ARGS_WRONG_TYPE, "test", "attrName", "Integer", "String")));
+        containsString(
+            String.format(ERR_ARGS_WRONG_TYPE, "test", "attrName", "Integer", "String")));
   }
 
-  /** A valid UtamArgument object with literal values should be able to be created */
+  /**
+   * A valid UtamArgument object with literal values should be able to be created
+   */
   @Test
   public void testCreationWithLiterals() {
     String json =
@@ -250,10 +243,10 @@ public class UtamArgument_DeserializeTests {
             + "}\n";
 
     List<MethodParameter> parameters =
-        UtamArgument.literalParameters(
-                getDeserializedObject(json, UtamMethod.class).args,
-                Arrays.asList(PrimitiveType.STRING, PrimitiveType.NUMBER, PrimitiveType.BOOLEAN),
-                "test")
+        UtamArgument.getArgsProcessor(
+            getDeserializedObject(json, UtamMethod.class).args,
+            Arrays.asList(PrimitiveType.STRING, PrimitiveType.NUMBER, PrimitiveType.BOOLEAN),
+            "test")
             .getOrdered();
     assertThat(parameters, hasSize(3));
     assertThat(parameters.get(0).getValue(), is(equalTo("nameValue")));
@@ -264,7 +257,9 @@ public class UtamArgument_DeserializeTests {
     assertThat(parameters.get(2).getType().getSimpleName(), is(equalTo("Boolean")));
   }
 
-  /** A valid UtamArgument object with literal values should be able to be created */
+  /**
+   * A valid UtamArgument object with literal values should be able to be created
+   */
   @Test
   public void testCreationWithLiteralsWithoutValue() {
     String json =
@@ -317,14 +312,15 @@ public class UtamArgument_DeserializeTests {
         expectThrows(
             UtamError.class,
             () ->
-                UtamArgument.literalParameters(
-                        getDeserializedObject(json, UtamMethod.class).args,
-                        Collections.singletonList(PrimitiveType.NUMBER),
-                        "test")
+                UtamArgument.getArgsProcessor(
+                    getDeserializedObject(json, UtamMethod.class).args,
+                    Collections.singletonList(PrimitiveType.NUMBER),
+                    "test")
                     .getOrdered());
     assertThat(
         e.getMessage(),
-        containsString(String.format(ERR_ARGS_WRONG_TYPE, "test", "invalid string value", "Integer", "String")));
+        containsString(String
+            .format(ERR_ARGS_WRONG_TYPE, "test", "invalid string value", "Integer", "String")));
   }
 
   /**
@@ -338,9 +334,7 @@ public class UtamArgument_DeserializeTests {
             + "  \"name\" : \"test\",\n"
             + "  \"args\" : [\n"
             + "    {\n"
-            + "      \"name\" :  \"attrValue\",\n"
-            + "      \"type\" : \"number\",\n"
-            + "      \"value\" : true\n"
+            + "      \"value\" : true"
             + "    }\n"
             + "  ],\n"
             + "  \"compose\" : [\n"
@@ -351,14 +345,12 @@ public class UtamArgument_DeserializeTests {
             + "  ]\n"
             + "}\n";
 
-    UtamError e =
-        expectThrows(
-            UtamError.class,
-            () -> getParameters(json, Collections.singletonList(PrimitiveType.NUMBER)));
-    assertThat(e.getMessage(), containsString(String.format(ERR_LITERAL_NOT_SUPPORTED, "test")));
+    assertThrows(() -> getParameters(json, Collections.singletonList(PrimitiveType.STRING)));
   }
 
-  /** Creating a UtamArgument object with non-primitive types should be able to be created */
+  /**
+   * Creating a UtamArgument object with non-primitive types should be able to be created
+   */
   @Test
   public void testCreationWithLiteralsNonPrimitiveTypeThrows() {
     String json =
@@ -384,7 +376,9 @@ public class UtamArgument_DeserializeTests {
         containsString(String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, "test", "Object")));
   }
 
-  /** A valid UtamArgument object should be able to be created */
+  /**
+   * A valid UtamArgument object should be able to be created
+   */
   @Test
   public void testCreationAbstract() {
     String json =
@@ -411,7 +405,8 @@ public class UtamArgument_DeserializeTests {
   }
 
   /**
-   * A UtamArgument object should throw the appropriate exception when the argument is not an object
+   * A UtamArgument object should throw the appropriate exception when the argument is not an
+   * object
    */
   @Test
   public void testCreationAbstractWithNonObjectArgumentThrows() {
@@ -430,6 +425,7 @@ public class UtamArgument_DeserializeTests {
             + "}\n";
 
     UtamError e = expectThrows(UtamError.class, () -> getParameters(json));
-    assertThat(e.getCause().getMessage(), containsString(String.format(JACKSON_CONSTRUCTOR_ERROR, UtamArgument.class.getName())));
+    assertThat(e.getCause().getMessage(),
+        containsString(String.format(JACKSON_CONSTRUCTOR_ERROR, UtamArgument.class.getName())));
   }
 }

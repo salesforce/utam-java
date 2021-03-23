@@ -1,6 +1,5 @@
 package utam.compiler.representation;
 
-import utam.compiler.representation.CustomElementMethod.*;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;

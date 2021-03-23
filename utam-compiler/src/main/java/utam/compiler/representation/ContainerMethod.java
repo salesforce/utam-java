@@ -1,6 +1,5 @@
 package utam.compiler.representation;
 
-import utam.compiler.helpers.PrimitiveType;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -17,6 +16,7 @@ import static utam.compiler.helpers.TypeUtilities.CONTAINER_LIST_RETURN_TYPE;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_RETURN_TYPE;
 import static utam.compiler.helpers.TypeUtilities.LIST_IMPORT;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
+import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.representation.ComposeMethod.getElementGetterString;
 import static utam.compiler.representation.CustomElementMethod.buildSelectorString;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
@@ -75,7 +75,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
       interfaceImports.add(LIST_IMPORT);
       classImports.addAll(interfaceImports);
       // because method that build selector uses Selector.Type
-      classImports.add(PrimitiveType.LOCATOR);
+      classImports.add(SELECTOR);
       methodParameters.addAll(selectorParameters);
       methodParameters.add(PAGE_OBJECT_PARAMETER);
       String selectorValue = buildSelectorString(injectSelector, selectorParameters);
@@ -93,7 +93,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
       interfaceImports.add(PAGE_OBJECT);
       classImports.addAll(interfaceImports);
       // because method that build selector uses Selector.Type
-      classImports.add(PrimitiveType.LOCATOR);
+      classImports.add(SELECTOR);
       String selectorValue = buildSelectorString(injectSelector, selectorParameters);
       implCodeLines.add(String.format("%s.load(%s, by(%s, Selector.Type.%s))", containerElement,
           PAGE_OBJECT_TYPE_PARAMETER_NAME, selectorValue, injectSelector.getType()));

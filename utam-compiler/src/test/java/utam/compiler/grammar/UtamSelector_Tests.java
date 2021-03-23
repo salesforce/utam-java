@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static utam.compiler.grammar.UtamArgument.ERR_ARGS_WRONG_TYPE;
-import static utam.compiler.grammar.UtamArgument.ERR_LITERAL_NOT_SUPPORTED;
 import static utam.compiler.grammar.UtamSelector.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -161,10 +160,8 @@ public class UtamSelector_Tests {
   @Test
   public void testLiteralParameter() {
     UtamSelector selector = new UtamSelector("selector[%s]");
-    selector.args = new UtamArgument[] {new UtamArgument("\"literal\"", null, null)};
-    UtamError e = expectThrows(UtamError.class, () -> selector.getParameters(ELEMENT_NAME));
-    assertThat(
-        e.getMessage(), containsString(String.format(ERR_LITERAL_NOT_SUPPORTED, ELEMENT_NAME)));
+    selector.args = new UtamArgument[] {new UtamArgument("\"literal\"")};
+    assertThat(selector.getParameters(ELEMENT_NAME).get(0).getValue(), is(equalTo("\"literal\"")));
   }
 
   /**

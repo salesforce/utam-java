@@ -2,7 +2,6 @@ package utam.compiler.translator;
 
 import com.google.googlejavaformat.java.Formatter;
 import com.google.googlejavaformat.java.FormatterException;
-import utam.compiler.helpers.PrimitiveType;
 import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.Selector;
 import utam.core.declarative.representation.MethodDeclaration;

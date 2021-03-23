@@ -45,7 +45,10 @@ public class ActionableActionTypeTests {
       return clazz.getDeclaredMethod(methodName, parameters);
     } catch (Exception e) {
       throw new AssertionError(
-          String.format("method '%s' not found in class %s", methodName, clazz.getName()), e);
+          String.format("method '%s' with parameters {%s} not found in class %s",
+              methodName,
+              Stream.of(parameters).filter(p -> p != null).map(p -> p.getSimpleName()).collect(Collectors.joining(",")),
+              clazz.getName()), e);
     }
   }
 
@@ -66,7 +69,7 @@ public class ActionableActionTypeTests {
   private static void validateAction(ActionType action, String returnType, boolean isListAction) {
     assertThat(action.getParametersTypes(), is(empty()));
     assertThat(action.getReturnType().getSimpleName(), is(equalTo(returnType)));
-    assertThat(action.isListAction(), is(equalTo(isListAction)));
+    assertThat(action.isSingleCardinality(), is(equalTo(isListAction)));
   }
 
   private static void validateParameterizedAction(
@@ -80,7 +83,7 @@ public class ActionableActionTypeTests {
     assertThat(parameterTypeStrings, containsInAnyOrder(parameterTypes.toArray()));
     assertThat(parameterTypeStrings, hasSize(parameterTypes.size()));
     assertThat(action.getReturnType().getSimpleName(), is(equalTo(returnType)));
-    assertThat(action.isListAction(), is(equalTo(false)));
+    assertThat(action.isSingleCardinality(), is(equalTo(false)));
   }
 
   @Test

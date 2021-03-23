@@ -1,6 +1,8 @@
 package utam.compiler.helpers;
 
+import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
+import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
@@ -32,7 +34,7 @@ public enum ActionableActionType implements ActionType {
    * executes javascript `return arguments[0].blur();` <br>
    * Throws exception if element not found within timeout
    */
-  containsElement(PrimitiveType.BOOLEAN, PrimitiveType.LOCATOR),
+  containsElement(PrimitiveType.BOOLEAN, SELECTOR),
   /**
    * focus on the value <br>
    * throws exception if fails
@@ -114,7 +116,7 @@ public enum ActionableActionType implements ActionType {
    * wait for element absence <br>
    * throws exception if fails
    */
-  waitFor(TypeUtilities.GENERIC_TYPE, PrimitiveType.PREDICATE),
+  waitFor(TypeUtilities.GENERIC_TYPE, FUNCTION),
   /**
    * wait for element absence <br>
    * throws exception if fails
@@ -211,7 +213,7 @@ public enum ActionableActionType implements ActionType {
   }
 
   @Override
-  public boolean isListAction() {
+  public boolean isSingleCardinality() {
     return this == waitForAbsence
         || this == waitForVisible
         || this == waitForInvisible

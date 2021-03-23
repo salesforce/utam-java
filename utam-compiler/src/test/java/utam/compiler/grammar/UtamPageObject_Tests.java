@@ -28,7 +28,6 @@ import static utam.compiler.grammar.UtamSelector_Tests.SELECTOR_STRING;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
-import static utam.compiler.translator.TranslatorMockUtilities.getDefaultConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;

@@ -2,6 +2,7 @@ package utam.compiler.helpers;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
@@ -12,6 +13,7 @@ import utam.core.framework.consumer.ContainerElement;
 import utam.core.selenium.element.Actionable;
 import utam.core.selenium.element.Clickable;
 import utam.core.selenium.element.Editable;
+import utam.core.selenium.element.Selector;
 import utam.core.selenium.element.Touchable;
 
 /**
@@ -41,6 +43,13 @@ public final class TypeUtilities {
       new TypeUtilities.UnimportableType(String.format("<T extends %s> T", PAGE_OBJECT.getSimpleName()));
   public static final TypeProvider CONTAINER_LIST_RETURN_TYPE = new TypeUtilities.UnimportableType(
       String.format("<T extends %s> List<T>", PAGE_OBJECT.getSimpleName()));
+  public static final TypeProvider SELECTOR = new FromClass(Selector.class);
+  static final TypeProvider FUNCTION = new FromClass(Supplier.class) {
+    @Override
+    public String getSimpleName() {
+      return "Supplier<T>";
+    }
+  };
 
   static String getUnmatchedParametersErr(
       List<TypeProvider> expectedTypes, List<MethodParameter> providedParameters) {
@@ -141,9 +150,9 @@ public final class TypeUtilities {
     }
   }
 
-  public static final class FromClass implements TypeProvider {
+  public static class FromClass implements TypeProvider {
 
-    private final Class clazz;
+    final Class clazz;
 
     public FromClass(Class type) {
       this.clazz = type;
@@ -302,39 +311,10 @@ public final class TypeUtilities {
     }
   }
 
-  static class UnimportableType implements TypeProvider {
-
-    private final String name;
+  static class UnimportableType extends FromString {
 
     UnimportableType(String name) {
-      this.name = name;
-    }
-
-    @Override
-    public String getFullName() {
-      return "";
-    }
-
-    @Override
-    public String getSimpleName() {
-      return name;
-    }
-
-    @Override
-    public String getPackageName() {
-      return "";
-    }
-
-    @Override
-    public Class getClassType() {
-      return null;
-    }
-
-    @Override
-    public boolean isSameType(TypeProvider anotherType) {
-      return this.getSimpleName().equals(anotherType.getSimpleName());
+      super(name, "");
     }
   }
-
-  ;
 }

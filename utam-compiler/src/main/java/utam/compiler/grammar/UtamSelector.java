@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static utam.compiler.grammar.UtamArgument.getArgsProcessor;
 import static utam.core.selenium.element.LocatorParameters.SELECTOR_INTEGER_PARAMETER;
 import static utam.core.selenium.element.LocatorParameters.SELECTOR_STRING_PARAMETER;
 
@@ -217,6 +218,6 @@ public class UtamSelector {
   }
 
   List<MethodParameter> getParameters(String elementName) {
-    return UtamArgument.nonLiteralParameters(args, getParametersTypes(), elementName).getOrdered();
+    return getArgsProcessor(args, getParametersTypes(), elementName).getOrdered();
   }
 }

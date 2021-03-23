@@ -12,6 +12,7 @@ import utam.core.declarative.representation.PageObjectMethod;
 
 import java.util.Collection;
 
+import static org.testng.Assert.assertThrows;
 import static utam.compiler.grammar.TestUtilities.*;
 import static utam.compiler.grammar.UtamMethod.ERR_METHOD_EMPTY_STATEMENTS;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -174,12 +175,8 @@ public class UtamMethod_ComposeDeserializeTests {
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 
-  /**
-   * Tests that a ComposeMethodNode with a list statement that applies to a list as a whole can be
-   * created
-   */
   @Test
-  public void testListComposeMethodNodeWithActionApplyingToListOfElements() {
+  public void testComposeMethodWrongCardinality() {
     String json =
         "{"
             + "  \"name\": \"composeMethod\","
@@ -202,10 +199,7 @@ public class UtamMethod_ComposeDeserializeTests {
             + "    }"
             + "  ]"
             + "}";
-    MethodInfo methodInfo = new MethodInfo("composeMethod", "Integer");
-    methodInfo.addCodeLine(getElementPrivateMethodCalled("element1") + "().size()");
-    PageObjectMethod method = getMethodObject(json, rootNodeJson);
-    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+    assertThrows(() -> getMethodObject(json, rootNodeJson));
   }
 
   @Test

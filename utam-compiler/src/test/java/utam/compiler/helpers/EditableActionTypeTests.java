@@ -90,7 +90,7 @@ public class EditableActionTypeTests {
     assertThat(parameterTypeStrings, containsInAnyOrder(parameterTypes.toArray()));
     assertThat(parameterTypeStrings, hasSize(parameterTypes.size()));
     assertThat(action.getReturnType().getSimpleName(), is(equalTo(EditableActionTypeTests.VOID_TYPE_NAME)));
-    assertThat(action.isListAction(), is(equalTo(false)));
+    assertThat(action.isSingleCardinality(), is(equalTo(false)));
   }
 
   @SuppressWarnings("rawtypes")

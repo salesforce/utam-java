@@ -67,7 +67,7 @@ public class ParameterUtils {
 
   public static class Literal extends Regular {
 
-    public Literal(Object value, PrimitiveType type) {
+    public Literal(Object value, TypeProvider type) {
       super(value.toString(), type);
     }
 

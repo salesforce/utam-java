@@ -1,7 +1,6 @@
 package utam.compiler.helpers;
 
 import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.selenium.element.Selector;
@@ -46,7 +45,6 @@ public abstract class ElementContext {
   private final TypeProvider type;
   private final boolean isListElement;
   private PageObjectMethod elementGetter;
-  private PageClassField elementField;
 
   ElementContext(
       ElementContext scopeContext,
@@ -92,7 +90,7 @@ public abstract class ElementContext {
     return false;
   }
 
-  boolean isCustom() {
+  public boolean isCustom() {
     return false;
   }
 
@@ -114,14 +112,6 @@ public abstract class ElementContext {
           String.format("element getter already exists for an element '%s'", getName()));
     }
     this.elementGetter = method;
-  }
-
-  public PageClassField getElementField() {
-    return elementField;
-  }
-
-  public void setElementField(PageClassField elementField) {
-    this.elementField = elementField;
   }
 
   public static class Basic extends ElementContext {
@@ -287,7 +277,8 @@ public abstract class ElementContext {
       return Validation.ErrorType.NONE;
     }
 
-    boolean isCustom() {
+    @Override
+    public boolean isCustom() {
       return true;
     }
   }

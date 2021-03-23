@@ -1,8 +1,6 @@
 package utam.compiler.helpers;
 
-import java.util.function.Supplier;
 import org.testng.annotations.Test;
-import utam.core.selenium.element.Selector;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -57,8 +55,6 @@ public class PrimitiveTypeTests {
     assertThat(PrimitiveType.fromString("string"), is(equalTo(PrimitiveType.STRING)));
     assertThat(PrimitiveType.fromString("number"), is(equalTo(PrimitiveType.NUMBER)));
     assertThat(PrimitiveType.fromString("boolean"), is(equalTo(PrimitiveType.BOOLEAN)));
-    assertThat(PrimitiveType.fromString("predicate"), is(equalTo(PrimitiveType.PREDICATE)));
-    assertThat(PrimitiveType.fromString("locator"), is(equalTo(PrimitiveType.LOCATOR)));
     assertThat(PrimitiveType.fromString(null), is(nullValue()));
     assertThat(PrimitiveType.fromString("invalid"), is(nullValue()));
   }
@@ -66,24 +62,10 @@ public class PrimitiveTypeTests {
   @Test
   public void testIsPrimitive() {
     assertThat(PrimitiveType.isPrimitiveType("string"), is(true));
-    assertThat(PrimitiveType.isPrimitiveType("number75"), is(false));
-  }
-
-  @Test
-  public void testPredicateEnumMember() {
-    PrimitiveType provider = PrimitiveType.PREDICATE;
-    assertThat(provider.getSimpleName(), is(equalTo("Supplier<T>")));
-    assertThat(provider.getFullName(), is(equalTo(Supplier.class.getName())));
-    assertThat(provider.getPackageName(), is(equalTo(Supplier.class.getPackageName())));
-    assertThat(provider.getClassType(), is(equalTo(Supplier.class)));
-  }
-
-  @Test
-  public void testSelectorEnumMember() {
-    PrimitiveType provider = PrimitiveType.LOCATOR;
-    assertThat(provider.getSimpleName(), is(equalTo("Selector")));
-    assertThat(provider.getFullName(), is(equalTo(Selector.class.getName())));
-    assertThat(provider.getPackageName(), is(equalTo(Selector.class.getPackageName())));
-    assertThat(provider.getClassType(), is(equalTo(Selector.class)));
+    assertThat(PrimitiveType.isPrimitiveType("boolean"), is(true));
+    assertThat(PrimitiveType.isPrimitiveType("number"), is(true));
+    assertThat(PrimitiveType.isPrimitiveType("selector"), is(false));
+    assertThat(PrimitiveType.isPrimitiveType("invalid"), is(false));
+    assertThat(PrimitiveType.isPrimitiveType("function"), is(false));
   }
 }

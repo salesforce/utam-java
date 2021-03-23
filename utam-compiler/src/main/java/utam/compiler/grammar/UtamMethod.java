@@ -1,11 +1,15 @@
 package utam.compiler.grammar;
 
+import static utam.compiler.helpers.TypeUtilities.VOID;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import utam.compiler.grammar.UtamMethodAction.MethodContext;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
+import utam.compiler.representation.ComposeMethodStatement;
 import utam.core.framework.consumer.UtamError;
 import utam.compiler.representation.ChainMethod;
 import utam.compiler.representation.ComposeMethod;
@@ -16,11 +20,8 @@ import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * public method declared at PO level
@@ -97,7 +98,7 @@ class UtamMethod {
         name,
         getReturnType(context),
         Boolean.TRUE.equals(isReturnList),
-        UtamArgument.unknownTypesParameters(args, name).getOrdered(),
+        UtamArgument.getArgsProcessor(args, name).getOrdered(),
         comments);
   }
 
@@ -126,7 +127,7 @@ class UtamMethod {
 
   private TypeProvider getReturnType(TranslationContext context) {
     if (returnStr == null) {
-      return TypeUtilities.VOID;
+      return VOID;
     }
     if (PrimitiveType.isPrimitiveType(returnStr)) {
       return PrimitiveType.fromString(returnStr);
@@ -169,29 +170,30 @@ class UtamMethod {
   }
 
   PageObjectMethod getComposeMethod(TranslationContext context) {
-    if (returnStr != null) {
-      throw new UtamError(String.format(ERR_METHOD_RETURN_TYPE_REDUNDANT, name));
-    }
-    if (isReturnList != null) {
-      throw new UtamError(String.format(ERR_METHOD_RETURN_ALL_REDUNDANT, name));
-    }
     if (args != null) {
       throw new UtamError(String.format(ERR_ARGS_NOT_ALLOWED, name));
+    }
+    // List<Void> should throw error
+    if (returnStr == null && isReturnList != null) {
+      throw new UtamError(String.format(ERR_METHOD_RETURN_ALL_REDUNDANT, name));
     }
     if (compose.length == 0) {
       throw new UtamError(String.format(ERR_METHOD_EMPTY_STATEMENTS, name));
     }
-    List<MethodParameter> statementParameters = new ArrayList<>();
-    Set<String> elementNames = new HashSet<>();
-    List<ComposeMethod.ElementAction> statements =
-        Stream.of(compose)
-            .map(action -> action.getComposeAction(elementNames, context, name))
-            .peek(action -> statementParameters.addAll(action.getParameters()))
-            .collect(Collectors.toList());
+    TypeProvider returnType = getReturnType(context);
+    List<ComposeMethodStatement> statements = new ArrayList<>();
+    List<MethodParameter> methodParameters = new ArrayList<>();
+    UtamMethodAction.MethodContext methodContext = new MethodContext(name, returnType);
+    for (int i = 0; i < compose.length; i ++) {
+      ComposeMethodStatement statement = compose[i].getComposeAction(context, methodContext, i == compose.length -1);
+      statements.add(statement);
+      methodParameters.addAll(statement.getParameters());
+    }
+    methodParameters.removeIf(p -> p.isLiteral());
     return new ComposeMethod(
         name,
         statements,
-        statementParameters.stream()
+        methodParameters.stream()
             .filter(methodParameter -> !methodParameter.isLiteral())
             .collect(Collectors.toList()),
         comments);

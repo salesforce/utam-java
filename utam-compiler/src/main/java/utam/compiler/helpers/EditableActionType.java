@@ -67,17 +67,7 @@ public enum EditableActionType implements ActionType {
   }
 
   @Override
-  public boolean isListAction() {
-    return false;
-  }
-
-  @Override
   public String getApplyString() {
-    return this.name();
-  }
-
-  @Override
-  public String getInvokeMethodName() {
     return this.name();
   }
 }
