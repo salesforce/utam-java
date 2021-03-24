@@ -8,42 +8,37 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
 /**
- * single statement in a compose method,
- * all statements are
+ * single statement in a compose method, all statements are
  *
  * @author elizaveta.ivanova
  * @since 232
  */
 public abstract class ComposeMethodStatement {
 
-  private final TypeProvider returns;
   final List<TypeProvider> classImports = new ArrayList<>();
   final List<TypeProvider> imports = new ArrayList<>();
+  final List<String> codeLines = new ArrayList<>();
+  private final TypeProvider returns;
   private final List<MethodParameter> parameters = new ArrayList<>();
-  final Operand operand;
-  final Operation operation;
 
   ComposeMethodStatement(Operand operand, Operation operation, TypeProvider returnType) {
     this.returns = returnType;
-    this.operand = operand;
-    this.operation = operation;
-    if (!operand.isAlreadyUsed) {
-      parameters.addAll(operand.elementContext.getParameters());
-    }
-    parameters.addAll(operation.actionParameters);
-    parameters.removeIf(MethodParameter::isLiteral);
+    operand.setParameters(this.parameters);
+    operation.setParameters(this.parameters);
+    operation.setImports(this.imports);
+    operation.setClassImports(this.classImports);
+    parameters.removeIf(p -> p == null || p.isLiteral());
+    codeLines
+        .addAll(operation.getCodeLines(getMethodCallString(), operand.getElementGetterString()));
   }
-
-  abstract String getMethodCallString();
 
   public List<MethodParameter> getParameters() {
     return parameters;
@@ -53,10 +48,15 @@ public abstract class ComposeMethodStatement {
     return returns;
   }
 
+  public TypeProvider getReturnType(TypeProvider defaultReturn) {
+    if(returns == null) {
+      return defaultReturn;
+    }
+    return returns;
+  }
+
   public List<String> getCodeLines() {
-    String invokeAction = String
-        .format(getMethodCallString(), operand.getElementGetterString(), operation.getCallString());
-    return Collections.singletonList(invokeAction);
+    return codeLines;
   }
 
   List<TypeProvider> getImports() {
@@ -67,16 +67,21 @@ public abstract class ComposeMethodStatement {
     return classImports;
   }
 
+  abstract String getMethodCallString();
+
   /**
    * invokes method on a single element
    */
   public static class Single extends ComposeMethodStatement {
 
-    public Single(Operand operand, Operation operation) {
-      super(operand, operation, operation.action.getReturnType());
+    Single(Operand operand, Operation operation, TypeProvider returnType) {
+      super(operand, operation, returnType);
     }
 
-    @Override
+    public Single(Operand operand, Operation operation) {
+      this(operand, operation, operation.getReturnType());
+    }
+
     String getMethodCallString() {
       return "%s.%s";
     }
@@ -103,7 +108,7 @@ public abstract class ComposeMethodStatement {
   public static final class ReturnsList extends ComposeMethodStatement {
 
     public ReturnsList(Operand operand, Operation operation) {
-      super(operand, operation, new TypeUtilities.ListOf(operation.action.getReturnType()));
+      super(operand, operation, new TypeUtilities.ListOf(operation.getReturnType()));
       imports.add(LIST_IMPORT);
       imports.add(operation.action.getReturnType());
       classImports.addAll(imports);
@@ -121,23 +126,22 @@ public abstract class ComposeMethodStatement {
    */
   public static class Operand {
 
-    final ElementContext elementContext;
+    private final ElementContext elementContext;
     //this means that scope parameters were already added, same element can be used twice
-    final boolean isAlreadyUsed;
+    private final MethodContext methodContext;
 
     /**
      * @param elementContext element action is applied to
-     * @param isAlreadyUsed  true is it's not first statement with the element, to not reuse
-     *                       parameters
+     * @param methodContext  methodContext to track elements
      */
-    public Operand(ElementContext elementContext, boolean isAlreadyUsed) {
+    public Operand(ElementContext elementContext, MethodContext methodContext) {
       this.elementContext = elementContext;
-      this.isAlreadyUsed = isAlreadyUsed;
+      this.methodContext = methodContext;
     }
 
     // used in tests
     Operand(ElementContext elementContext) {
-      this(elementContext, false);
+      this(elementContext, new MethodContext());
     }
 
     String getElementGetterString() {
@@ -146,6 +150,13 @@ public abstract class ComposeMethodStatement {
       String parameters = getParametersValuesString(allParameters);
       return "this." + String.format("%s(%s)", methodName, parameters);
     }
+
+    void setParameters(List<MethodParameter> parameters) {
+      if (methodContext.hasElement(elementContext.getName())) {
+        return;
+      }
+      parameters.addAll(elementContext.getParameters());
+    }
   }
 
   /**
@@ -153,16 +164,23 @@ public abstract class ComposeMethodStatement {
    */
   public static class Operation {
 
-    final ActionType action;
     final List<MethodParameter> actionParameters;
+    private final ActionType action;
+    private final TypeProvider returnType;
 
     /**
      * @param action           method to invoke
+     * @param returnType       returnType from action, for waitFor it's last predicate
      * @param actionParameters parameters for method invocation
      */
-    public Operation(ActionType action, List<MethodParameter> actionParameters) {
+    Operation(ActionType action, TypeProvider returnType, List<MethodParameter> actionParameters) {
       this.action = action;
       this.actionParameters = actionParameters;
+      this.returnType = returnType == null? action.getReturnType() : returnType;
+    }
+
+    public Operation(ActionType action, List<MethodParameter> actionParameters) {
+      this(action, null, actionParameters);
     }
 
     // used in tests
@@ -170,9 +188,70 @@ public abstract class ComposeMethodStatement {
       this(action, Collections.EMPTY_LIST);
     }
 
-    String getCallString() {
-      return String.format("%s(%s)", action.getInvokeMethodName(),
+    void setParameters(List<MethodParameter> parameters) {
+      parameters.addAll(actionParameters);
+    }
+
+    List<String> getCodeLines(String invocationPattern, String elementGetter) {
+      String methodInvocation = String.format("%s(%s)", action.getInvokeMethodName(),
           getParametersValuesString(actionParameters));
+      String code = String.format(invocationPattern, elementGetter, methodInvocation);
+      return Collections.singletonList(code);
+    }
+
+    void setImports(List<TypeProvider> imports) {
+    }
+
+    void setClassImports(List<TypeProvider> imports) {
+    }
+
+    public boolean isReturnsVoid() {
+      return getReturnType().isSameType(VOID);
+    }
+
+    public TypeProvider getReturnType() {
+      return returnType;
+    }
+  }
+
+  /**
+   * information about applied action with a predicate
+   */
+  public static class OperationWithPredicate extends Operation {
+
+    final List<String> predicateCode = new ArrayList<>();
+    final List<TypeProvider> classImports = new ArrayList<>();
+    final List<TypeProvider> imports = new ArrayList<>();
+
+    public OperationWithPredicate(ActionType action, TypeProvider returnType, List<ComposeMethodStatement> predicate) {
+      super(action, returnType, Collections.EMPTY_LIST);
+      for (int i = 0; i < predicate.size(); i++) {
+        ComposeMethodStatement statement = predicate.get(i);
+        predicateCode.addAll(statement.getCodeLines());
+        imports.addAll(statement.getImports());
+        classImports.addAll(statement.getClassImports());
+        actionParameters.addAll(statement.getParameters());
+      }
+      int lastStatement = predicateCode.size() -1;
+      predicateCode.set(lastStatement, String.format("return %s;", predicateCode.get(lastStatement)));
+    }
+
+    @Override
+    List<String> getCodeLines(String invocationPattern, String elementGetter) {
+      String methodInvocation = String
+          .format("waitFor(() -> { \n%s \n}", String.join("; \n", predicateCode));
+      String code = String.format(invocationPattern, elementGetter, methodInvocation);
+      return Collections.singletonList(code);
+    }
+
+    @Override
+    void setImports(List<TypeProvider> imports) {
+      imports.addAll(this.imports);
+    }
+
+    @Override
+    void setClassImports(List<TypeProvider> imports) {
+      imports.addAll(this.classImports);
     }
   }
 }

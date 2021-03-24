@@ -11,10 +11,10 @@ import static utam.compiler.grammar.TestUtilities.TEST_URI;
 import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
 
 import org.testng.annotations.Test;
-import utam.compiler.grammar.UtamMethodAction.MethodContext;
 import utam.compiler.helpers.ActionableActionType;
 import utam.compiler.helpers.ClickableActionType;
 import utam.compiler.helpers.ElementContext.Root;
+import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
@@ -65,7 +65,7 @@ public class UtamMethodAction_Tests {
         new UtamMethodAction(
             ELEMENT_NAME, ClickableActionType.click.toString(), new UtamArgument[]{});
     ComposeMethodStatement actionObject =
-        action.getComposeAction(context, getVoidMethodContext(), true);
+        action.getComposeAction(context, getVoidMethodContext());
     assertThat(actionObject, is(instanceOf(Single.class)));
     assertThat(actionObject.getReturnType().getSimpleName(), is(equalTo("void")));
     assertThat(
@@ -86,7 +86,7 @@ public class UtamMethodAction_Tests {
         new UtamMethodAction(
             ELEMENT_NAME, ClickableActionType.click.toString(), new UtamArgument[]{});
     ComposeMethodStatement actionObject =
-        action.getComposeAction(context, getVoidMethodContext(), true);
+        action.getComposeAction(context, getVoidMethodContext());
     assertThat(actionObject, is(instanceOf(ComposeMethodStatement.VoidList.class)));
     assertThat(actionObject.getReturnType().getSimpleName(), is(equalTo("void")));
     assertThat(
@@ -110,7 +110,7 @@ public class UtamMethodAction_Tests {
         new UtamMethodAction(
             ELEMENT_NAME, ActionableActionType.getText.toString(), new UtamArgument[]{});
     ComposeMethodStatement actionObject =
-        action.getComposeAction(context, getMethodContext(PrimitiveType.STRING), false);
+        action.getComposeAction(context, getMethodContext(PrimitiveType.STRING));
     assertThat(actionObject, is(instanceOf(ComposeMethodStatement.ReturnsList.class)));
     assertThat(actionObject.getReturnType().getSimpleName(), is(equalTo("List<String>")));
     assertThat(
@@ -129,7 +129,7 @@ public class UtamMethodAction_Tests {
     UtamMethodAction action =
         new UtamMethodAction(
             ELEMENT_NAME, ActionableActionType.size.toString(), new UtamArgument[]{});
-    assertThrows(() -> action.getComposeAction(context, getVoidMethodContext(), true));
+    assertThrows(() -> action.getComposeAction(context, getVoidMethodContext()));
   }
 
   @Test
@@ -139,7 +139,7 @@ public class UtamMethodAction_Tests {
     setupRoot(context, utamElement);
     UtamMethodAction action = new UtamMethodAction(ELEMENT_NAME, "myMethod", new UtamArgument[]{});
     ComposeMethodStatement actionObject =
-        action.getComposeAction(context, getVoidMethodContext(), true);
+        action.getComposeAction(context, getVoidMethodContext());
     assertThat(actionObject, is(instanceOf(ComposeMethodStatement.Single.class)));
     assertThat(actionObject.getReturnType().getSimpleName(), is(equalTo("void")));
     assertThat(
@@ -155,8 +155,9 @@ public class UtamMethodAction_Tests {
     UtamMethodAction action = new UtamMethodAction(ELEMENT_NAME, "myMethod", new UtamArgument[]{
         new UtamArgument("strParameter", "string")
     });
+    MethodContext methodContext = getMethodContext(PrimitiveType.STRING);
     ComposeMethodStatement actionObject =
-        action.getComposeAction(context, getMethodContext(PrimitiveType.STRING), true);
+        action.getComposeAction(context, methodContext);
     assertThat(actionObject, is(instanceOf(ComposeMethodStatement.ReturnsList.class)));
     assertThat(actionObject.getReturnType().getSimpleName(), is(equalTo("List<String>")));
     assertThat(

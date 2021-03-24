@@ -8,18 +8,19 @@ import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import utam.compiler.grammar.UtamMethodAction.MethodContext;
+import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParameterUtils.Literal;
 import utam.compiler.helpers.ParameterUtils.Regular;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.representation.PredicateStatements;
+import utam.compiler.representation.ComposeMethodStatement;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
@@ -28,6 +29,7 @@ import utam.core.framework.consumer.UtamError;
  * @author elizaveta.ivanova
  * @since 228
  */
+@JsonDeserialize(using = UtamArgumentDeserializer.class)
 class UtamArgument {
 
   static final String FUNCTION_TYPE_PROPERTY = "function";
@@ -53,9 +55,9 @@ class UtamArgument {
   static final String ERR_PREDICATE_REDUNDANT =
       "%s: property 'predicate' is redundant";
 
-  private final String name;
-  private final String type;
-  private final Object value;
+  String name;
+  String type;
+  Object value;
   UtamMethodAction[] conditions;
 
   @JsonCreator
@@ -91,7 +93,7 @@ class UtamArgument {
 
   MethodParameter getParameterOrValue(String argsContext, TypeProvider expectedType) {
     if (FUNCTION_TYPE_PROPERTY.equals(type)) {
-      if(value != null) {
+      if (value != null) {
         throw new UtamError(String.format(ERR_VALUE_REDUNDANT, argsContext));
       }
       // predicate is not a parameter
@@ -148,23 +150,17 @@ class UtamArgument {
     throw new UtamError(String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, argsContext, type));
   }
 
-  PredicateStatements getPredicate(TranslationContext context, MethodContext methodContext) {
-    String argsContext = String.format("method '%s' args", methodContext.methodName);
-    if (name != null || type != null) {
-      throw new UtamError(String.format(ERR_NAME_TYPE_REDUNDANT, argsContext));
-    }
+  List<ComposeMethodStatement> getPredicate(TranslationContext context,
+      MethodContext methodContext) {
+    String argsContext = String.format("method '%s' args", methodContext.getName());
     if (value != null) {
       throw new UtamError(String.format(ERR_VALUE_REDUNDANT, argsContext));
     }
-    if (this.conditions == null || this.conditions.length == 0) {
+    if (conditions == null || conditions.length == 0) {
       throw new UtamError(String.format(ERR_FUNCTION_NEEDS_PREDICATE, argsContext));
     }
-    PredicateStatements predicate = new PredicateStatements();
-    for (int i = 0; i < conditions.length; i++) {
-      predicate.addStatement(
-          conditions[i].getComposeAction(context, methodContext, i == conditions.length - 1));
-    }
-    return predicate;
+    return Stream.of(conditions).map(c -> c.getComposeAction(context, methodContext))
+        .collect(Collectors.toList());
   }
 
 

@@ -153,6 +153,10 @@ public enum ActionableActionType implements ActionType {
     }
   }
 
+  public static boolean isWaitFor(String apply) {
+    return ActionableActionType.waitFor.getApplyString().equals(apply);
+  }
+
   public static ActionType getActionType(String apply, TypeProvider elementType, String elementName) {
     if(!TypeUtilities.Element.isBasicType(elementType)) {
       throw new UtamError(

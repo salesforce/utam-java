@@ -306,4 +306,14 @@ public class UtamMethod_ComposeDeserializeTests {
     TranslationContext context = new DeserializerUtilities().getContext("composeMethod");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
   }
+
+  @Test
+  public void testComposeWaitForBasic() {
+    MethodInfo methodInfo = new MethodInfo("testCompose", "String");
+    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> { \n"
+        + "return this.getRootElement().getText(); \n"
+        + "}");
+    TranslationContext context = new DeserializerUtilities().getContext("composeWaitFor");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
+  }
 }

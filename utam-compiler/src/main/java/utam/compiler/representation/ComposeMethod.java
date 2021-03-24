@@ -1,10 +1,12 @@
 package utam.compiler.representation;
 
 import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
+import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import java.util.ArrayList;
 import java.util.List;
 import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.MethodContext;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
@@ -25,16 +27,17 @@ public class ComposeMethod implements PageObjectMethod {
   private final String comments;
   private TypeProvider returns;
 
-  public ComposeMethod(String name, List<ComposeMethodStatement> statements,
+  public ComposeMethod(MethodContext methodContext, List<ComposeMethodStatement> statements,
       List<MethodParameter> parameters, String comments) {
-    this.name = name;
+    this.name = methodContext.getName();
+    //if return type not set in JSON, get one from last statement
+    this.returns = methodContext.getReturnType(statements, VOID);
     this.parameters = new ArrayList<>(parameters);
     statements.forEach(
         statement -> {
           code.addAll(statement.getCodeLines());
           imports.addAll(statement.getImports());
           classImports.addAll(statement.getClassImports());
-          returns = statement.getReturnType(); // set to return from last action
         });
     this.comments = comments;
   }

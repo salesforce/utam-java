@@ -91,7 +91,7 @@ public class UtamMethod_ComposeTests {
   }
 
   @Test
-  public void testElementWithSelectorParameterReused() {
+  public void testElementWithSelectorParameter() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     UtamElement scopeElement =
         new UtamElement(

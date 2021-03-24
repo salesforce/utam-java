@@ -4,12 +4,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.TestUtilities.JACKSON_CONSTRUCTOR_ERROR;
 import static utam.compiler.grammar.TestUtilities.getDeserializedObject;
 import static utam.compiler.grammar.UtamArgument.ERR_ARGS_TYPE_NOT_SUPPORTED;
 import static utam.compiler.grammar.UtamArgument.ERR_ARGS_WRONG_TYPE;
@@ -17,6 +17,7 @@ import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_DUPLICATE_NA
 import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_WRONG_COUNT;
 import static utam.compiler.grammar.UtamArgument.getArgsProcessor;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +26,7 @@ import utam.compiler.helpers.PrimitiveType;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
+import utam.core.selenium.element.Selector;
 
 /**
  * Provides deserialization tests for the UtamArgument class
@@ -423,9 +425,32 @@ public class UtamArgument_DeserializeTests {
             + "    }\n"
             + "  ]\n"
             + "}\n";
-
     UtamError e = expectThrows(UtamError.class, () -> getParameters(json));
-    assertThat(e.getCause().getMessage(),
-        containsString(String.format(JACKSON_CONSTRUCTOR_ERROR, UtamArgument.class.getName())));
+    assertThat(e.getCause(), is(instanceOf(JsonMappingException.class)));
+  }
+
+
+  @Test
+  public void testSelectorParameterByNameTypeOrValue() {
+    String json = "{"
+        + "  \"name\" : \"test\",\n"
+        + "  \"args\" : [\n"
+        + "    {\n"
+        + "      \"name\" :  \"attrName\",\n"
+        + "      \"type\" : \"locator\""
+        + "    },\n"
+        + "    {\n"
+        + "      \"value\" : { \"css\" : \".css\" }"
+        + "    }\n"
+        + "  ],\n"
+        + "  \"compose\" : [\n"
+        + "    {\n"
+        + "      \"apply\": \"getAttribute\",\n"
+        + "      \"element\": \"test\"\n"
+        + "    }\n"
+        + "  ]\n"
+        + "}\n";
+    List<MethodParameter> parameters = getParameters(json);
+    assertThat(parameters.get(0).getType().getClassType(), is(equalTo(Selector.class)));
   }
 }

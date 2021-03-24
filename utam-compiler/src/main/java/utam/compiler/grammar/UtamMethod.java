@@ -4,8 +4,8 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import utam.compiler.grammar.UtamMethodAction.MethodContext;
 import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
@@ -96,7 +96,7 @@ class UtamMethod {
     }
     return new InterfaceMethod(
         name,
-        getReturnType(context),
+        getReturnType(context, VOID),
         Boolean.TRUE.equals(isReturnList),
         UtamArgument.getArgsProcessor(args, name).getOrdered(),
         comments);
@@ -125,9 +125,9 @@ class UtamMethod {
     throw new UtamError(String.format(ERR_METHOD_UNKNOWN_TYPE, name));
   }
 
-  private TypeProvider getReturnType(TranslationContext context) {
+  private TypeProvider getReturnType(TranslationContext context, TypeProvider defaultReturn) {
     if (returnStr == null) {
-      return VOID;
+      return defaultReturn;
     }
     if (PrimitiveType.isPrimitiveType(returnStr)) {
       return PrimitiveType.fromString(returnStr);
@@ -141,7 +141,7 @@ class UtamMethod {
   private PageObjectMethod getUtilityMethod(TranslationContext context) {
     return new UtilityMethod(
         name,
-        getReturnType(context),
+        getReturnType(context, VOID),
         isReturnList == null ? false : isReturnList,
         externalUtility.getMethodReference(name, context),
         comments);
@@ -180,22 +180,20 @@ class UtamMethod {
     if (compose.length == 0) {
       throw new UtamError(String.format(ERR_METHOD_EMPTY_STATEMENTS, name));
     }
-    TypeProvider returnType = getReturnType(context);
     List<ComposeMethodStatement> statements = new ArrayList<>();
     List<MethodParameter> methodParameters = new ArrayList<>();
-    UtamMethodAction.MethodContext methodContext = new MethodContext(name, returnType);
+    MethodContext methodContext = new MethodContext(name, getReturnType(context, null));
     for (int i = 0; i < compose.length; i ++) {
-      ComposeMethodStatement statement = compose[i].getComposeAction(context, methodContext, i == compose.length -1);
+      ComposeMethodStatement statement = compose[i].getComposeAction(context, methodContext);
       statements.add(statement);
       methodParameters.addAll(statement.getParameters());
     }
-    methodParameters.removeIf(p -> p.isLiteral());
+    methodParameters.removeIf(p -> p.isLiteral() || p == null);
     return new ComposeMethod(
-        name,
+        methodContext,
         statements,
-        methodParameters.stream()
-            .filter(methodParameter -> !methodParameter.isLiteral())
-            .collect(Collectors.toList()),
+        methodParameters,
         comments);
   }
+
 }

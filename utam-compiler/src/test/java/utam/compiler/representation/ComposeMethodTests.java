@@ -16,6 +16,7 @@ import utam.compiler.grammar.UtamElement;
 import utam.compiler.grammar.UtamSelector;
 import utam.compiler.helpers.ActionableActionType;
 import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParameterUtils.Primitive;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
@@ -35,13 +36,13 @@ import utam.core.selenium.element.Actionable;
  */
 public class ComposeMethodTests {
 
-  private static final String METHOD_NAME = "fakeMethodName";
+  private static final String METHOD_NAME = "test";
   private static final String ELEMENT_NAME = "fakeElementName";
 
   private static ComposeMethod getComposeMethod(ComposeMethodStatement statement) {
     // used in tests
     return new ComposeMethod(
-        METHOD_NAME, Collections.singletonList(statement), EMPTY_PARAMETERS, EMPTY_COMMENTS);
+        new MethodContext(), Collections.singletonList(statement), EMPTY_PARAMETERS, EMPTY_COMMENTS);
   }
 
   @Test
@@ -162,7 +163,7 @@ public class ComposeMethodTests {
                 Collections.singletonList(parameter)));
     ComposeMethod method =
         new ComposeMethod(
-            METHOD_NAME, Collections.singletonList(action), action.getParameters(), EMPTY_COMMENTS);
+            new MethodContext(), Collections.singletonList(action), action.getParameters(), EMPTY_COMMENTS);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
@@ -185,7 +186,7 @@ public class ComposeMethodTests {
         new Operation(ActionableActionType.getText, Collections.singletonList(parameter)));
     ComposeMethod method =
         new ComposeMethod(
-            METHOD_NAME, Collections.singletonList(action), action.getParameters(), EMPTY_COMMENTS);
+            new MethodContext(), Collections.singletonList(action), action.getParameters(), EMPTY_COMMENTS);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 }

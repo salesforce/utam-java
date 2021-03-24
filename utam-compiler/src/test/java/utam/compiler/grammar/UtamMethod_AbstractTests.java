@@ -42,7 +42,7 @@ public class UtamMethod_AbstractTests {
   @Test
   public void testGetAbstractMethodWithNullReturnType() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, (String) null, (UtamArgument[]) null);
+    UtamMethod method = new UtamMethod(METHOD_NAME, null, (UtamArgument[]) null);
     PageObjectValidationTestHelper.MethodInfo info =
         new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "void");
     PageObjectValidationTestHelper.validateMethod(method.getAbstractMethod(context), info);
