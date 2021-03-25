@@ -7,7 +7,11 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.grammar.UtamArgument.ERR_ARGS_NAME_TYPE_MANDATORY;
 import static utam.compiler.grammar.UtamArgument.ERR_ARGS_TYPE_NOT_SUPPORTED;
 import static utam.compiler.grammar.UtamArgument.ERR_ARGS_WRONG_TYPE;
@@ -16,6 +20,9 @@ import static utam.compiler.grammar.UtamArgument.ERR_PREDICATE_REDUNDANT;
 import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_DUPLICATE_NAMES;
 import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_WRONG_COUNT;
 import static utam.compiler.grammar.UtamArgument.getArgsProcessor;
+import static utam.compiler.grammar.UtamArgument.getSelectorValuePattern;
+import static utam.compiler.grammar.UtamSelector_Tests.buildUIAutomatorLocator;
+import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 
 import java.util.Arrays;
@@ -24,7 +31,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.testng.annotations.Test;
+import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.PrimitiveType;
+import utam.compiler.helpers.TranslationContext;
+import utam.compiler.representation.ComposeMethodStatement;
+import utam.core.appium.element.UIAutomator.Method;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
@@ -153,24 +164,19 @@ public class UtamArgument_Tests {
     List<MethodParameter> parameters =
         getArgsProcessor(
             new UtamArgument[]{
-                new UtamArgument(true),
-                new UtamArgument(true),
-                new UtamArgument("true"),
-                new UtamArgument("true")
+                new UtamArgument("str"),
+                new UtamArgument("str")
             },
             Stream.of(
-                PrimitiveType.BOOLEAN,
-                PrimitiveType.BOOLEAN,
                 PrimitiveType.STRING,
                 PrimitiveType.STRING)
                 .collect(Collectors.toList()),
             ARGS_CONTEXT).getOrdered();
-    assertThat(parameters, hasSize(4));
-    assertThat(parameters.get(0).isLiteral(), is(true));
-    assertThat(parameters.get(0).getValue(), is(equalTo("true")));
-    assertThat(parameters.get(0).getType(), is(equalTo(PrimitiveType.BOOLEAN)));
-    assertThat(parameters.get(3).getValue(), is(equalTo("true")));
-    assertThat(parameters.get(3).getType(), is(equalTo(PrimitiveType.STRING)));
+    assertThat(parameters, hasSize(2));
+    assertThat(parameters.get(0).getValue(), is(equalTo("\"str\"")));
+    assertThat(parameters.get(0).getType(), is(equalTo(PrimitiveType.STRING)));
+    assertThat(parameters.get(1).getValue(), is(equalTo("\"str\"")));
+    assertThat(parameters.get(1).getType(), is(equalTo(PrimitiveType.STRING)));
   }
 
   /**
@@ -241,7 +247,7 @@ public class UtamArgument_Tests {
             "foo")
             .getOrdered();
     assertThat(parameters, hasSize(3));
-    assertThat(parameters.get(0).getValue(), is(equalTo("nameValue")));
+    assertThat(parameters.get(0).getValue(), is(equalTo("\"nameValue\"")));
     assertThat(parameters.get(0).getType().getSimpleName(), is(equalTo("String")));
     assertThat(parameters.get(1).getValue(), is(equalTo("1")));
     assertThat(parameters.get(1).getType().getSimpleName(), is(equalTo("Integer")));
@@ -364,11 +370,67 @@ public class UtamArgument_Tests {
   }
 
   @Test
-  public void testSelectorTypeByValue() {
-    UtamArgument utamArgument = new UtamArgument(new UtamSelector(".css"));
+  public void testSelectorByValue() {
+    UtamArgument utamArgument = new UtamArgument(new UtamSelector("\".css\""));
     MethodParameter parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, null);
     assertThat(parameter.getType().getClassType(), is(equalTo(Selector.class)));
     parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, SELECTOR);
     assertThat(parameter.getType().getClassType(), is(equalTo(Selector.class)));
+    assertThat(parameter.getValue(), is(equalTo("Selector.byCss(\".css\")")));
+  }
+
+  @Test
+  public void testAllSelectorTypesByValue() {
+    final String str = "selector";
+    UtamSelector selector = new UtamSelector(null, str, null, null);
+    UtamArgument utamArgument = new UtamArgument(selector);
+    MethodParameter parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, SELECTOR);
+    assertThat(parameter.getValue(), is(equalTo("Selector.byAccessibilityId(\"selector\")")));
+
+    selector = new UtamSelector(null, null, str, null);
+    utamArgument = new UtamArgument(selector);
+    parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, SELECTOR);
+    assertThat(parameter.getValue(), is(equalTo("Selector.byClassChain(\"selector\")")));
+
+    selector = new UtamSelector(null, null, null,
+        buildUIAutomatorLocator(Method.CHECKABLE));
+    utamArgument = new UtamArgument(selector);
+    parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, SELECTOR);
+    assertThat(parameter.getValue(),
+        is(equalTo("Selector.byUiAutomator(\"new UiSelector().checkable()\")")));
+
+    assertThrows(() -> getSelectorValuePattern(null));
+  }
+
+  @Test
+  public void testFunctionArgType() {
+    UtamArgument utamArgument = new UtamArgument("name", "function");
+    MethodParameter parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, FUNCTION);
+    assertThat(parameter, is(nullValue()));
+  }
+
+  @Test
+  public void testGetPredicateMethod() {
+    TranslationContext context = getTestTranslationContext();
+    MethodContext methodContext = new MethodContext("method", null, false);
+    UtamArgument utamArgument = new UtamArgument("name", "function");
+    UtamMethodAction conditionMock = mock(UtamMethodAction.class);
+    when(conditionMock.getComposeAction(context, methodContext, false))
+        .thenReturn(mock(ComposeMethodStatement.class));
+    utamArgument.conditions = new UtamMethodAction[]{conditionMock};
+    List<ComposeMethodStatement> predicate = utamArgument.getPredicate(context, methodContext);
+    assertThat(predicate, is(hasSize(1)));
+  }
+
+  @Test
+  public void testGetPredicateMethodWithValueThrows() {
+    TranslationContext context = getTestTranslationContext();
+    MethodContext methodContext = new MethodContext("method", null, false);
+    UtamArgument utamArgument = new UtamArgument("name", "function");
+    utamArgument.value = true;
+    assertThrows(() -> utamArgument.getPredicate(context, methodContext));
+    utamArgument.value = null;
+    utamArgument.conditions = new UtamMethodAction[0];
+    assertThrows(() -> utamArgument.getPredicate(context, methodContext));
   }
 }

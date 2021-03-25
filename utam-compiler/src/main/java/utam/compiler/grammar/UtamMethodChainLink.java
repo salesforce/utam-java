@@ -37,7 +37,7 @@ class UtamMethodChainLink {
 
   ChainMethod.Link getChainStatement(TranslationContext context, ElementContext firstElement) {
     if (firstElement != null) {
-      if (!context.getType(type).equals(firstElement.getType())) {
+      if (!context.getType(type).isSameType(firstElement.getType())) {
         throw new UtamError(
             String.format(
                 ERR_WRONG_RETURN_TYPE_FOR_FIRST_LINK,

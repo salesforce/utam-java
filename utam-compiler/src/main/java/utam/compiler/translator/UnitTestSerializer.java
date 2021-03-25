@@ -10,7 +10,6 @@ import utam.core.declarative.representation.PageObjectClass;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.selenium.element.Selector;
-import utam.core.selenium.element.Web;
 import utam.core.selenium.utilities.WebDriverSimulator;
 
 import java.util.ArrayList;
@@ -245,7 +244,6 @@ public final class UnitTestSerializer {
     imports.add(NEW_LINE);
     imports.add("import " + WebDriverSimulator.class.getName() + ";");
     imports.add("import " + Selector.class.getName() + ";");
-    imports.add("import " + Web.class.getName() + ";");
     imports.add(NEW_LINE);
     imports.add("import utam.consumer.SalesforceSimulatorObjectFactory;");
     imports.add("import utam.consumer.UtamLoaderTestingContext;");
@@ -269,7 +267,7 @@ public final class UnitTestSerializer {
   private List<String> getTestClassFields() {
     List<String> fields = new ArrayList<>();
     fields.add("//TODO: add root selector");
-    fields.add("private static final Selector ROOT_SELECTOR = Web.byCss(\"\");");
+    fields.add("private static final Selector ROOT_SELECTOR = Selector.byCss(\"\");");
     fields.add(NEW_LINE);
     fields.add("private WebDriverSimulator simulator;");
     fields.add(

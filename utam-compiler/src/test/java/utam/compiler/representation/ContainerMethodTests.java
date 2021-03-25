@@ -8,7 +8,6 @@ import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.framework.base.PageObject;
 import org.testng.annotations.Test;
 import utam.core.selenium.element.Selector;
-import utam.core.selenium.element.Web;
 
 import java.util.List;
 
@@ -57,7 +56,7 @@ public class ContainerMethodTests {
     info.addImpliedImportedTypes(PageObject.class.getName(), Selector.class.getName());
     info.addParameter(FIRST_CONTAINER_PARAMETER);
     ContainerMethod method = new ContainerMethod.WithSelector(
-        getScope(), false, ELEMENT_NAME, Web.byCss(".fakeSelector"), EMPTY_PARAMETERS);
+        getScope(), false, ELEMENT_NAME, getCssSelector(".fakeSelector"), EMPTY_PARAMETERS);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
@@ -70,7 +69,7 @@ public class ContainerMethodTests {
     info.addImpliedImportedTypes(PageObject.class.getName(), Selector.class.getName());
     info.addParameter(FIRST_CONTAINER_PARAMETER);
     ContainerMethod method = new ContainerMethod.WithSelectorReturnsList(
-        getScope(), false, ELEMENT_NAME, Web.byCss(".fakeSelector"), EMPTY_PARAMETERS);
+        getScope(), false, ELEMENT_NAME, getCssSelector(".fakeSelector"), EMPTY_PARAMETERS);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 }

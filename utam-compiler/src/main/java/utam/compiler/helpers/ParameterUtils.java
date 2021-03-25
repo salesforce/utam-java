@@ -1,5 +1,7 @@
 package utam.compiler.helpers;
 
+import static utam.compiler.helpers.AnnotationUtils.getWrappedString;
+
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
@@ -21,8 +23,8 @@ public class ParameterUtils {
 
   public static class Regular implements MethodParameter {
 
-    private final String valueAsString;
-    private final TypeProvider type;
+    final String valueAsString;
+    final TypeProvider type;
 
     public Regular(String valueAsString, TypeProvider type) {
       this.valueAsString = valueAsString;
@@ -69,6 +71,14 @@ public class ParameterUtils {
 
     public Literal(Object value, TypeProvider type) {
       super(value.toString(), type);
+    }
+
+    @Override
+    public String getValue() {
+      if(type.isSameType(PrimitiveType.STRING)) {
+        return getWrappedString(valueAsString);
+      }
+      return super.getValue();
     }
 
     @Override

@@ -62,13 +62,19 @@ public class UtamArgument_DeserializeTests {
 
   @Test
   public void testUnsupportedValueThrows() {
-    String json = "{ \"value\" : 'c' }";
+    String json = "{ \"value\": 1.024 }";
     assertThrows(() -> getDeserializedObject(json, UtamArgument.class));
   }
 
   @Test
   public void testRedundantValueWithTypeThrows() {
     String json = "{ \"value\" : true, \"type\" : \"string\" }";
+    assertThrows(() -> getDeserializedObject(json, UtamArgument.class));
+  }
+
+  @Test
+  public void testRedundantValueWithNameThrows() {
+    String json = "{ \"value\" : true, \"name\" : \"name\" }";
     assertThrows(() -> getDeserializedObject(json, UtamArgument.class));
   }
 
@@ -155,7 +161,7 @@ public class UtamArgument_DeserializeTests {
             "test")
             .getOrdered();
     assertThat(parameters, hasSize(3));
-    assertThat(parameters.get(0).getValue(), is(equalTo("nameValue")));
+    assertThat(parameters.get(0).getValue(), is(equalTo("\"nameValue\"")));
     assertThat(parameters.get(0).getType().getSimpleName(), is(equalTo("String")));
     assertThat(parameters.get(1).getValue(), is(equalTo("1")));
     assertThat(parameters.get(1).getType().getSimpleName(), is(equalTo("Integer")));

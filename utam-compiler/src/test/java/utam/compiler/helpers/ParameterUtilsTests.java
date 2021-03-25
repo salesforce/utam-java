@@ -44,11 +44,11 @@ public class ParameterUtilsTests {
   /** A Parameter.Literal object should be able to be created */
   @Test
   public void testPrimitiveLiteral() {
-    ParameterUtils.Regular param = new ParameterUtils.Literal("paramName", PrimitiveType.STRING);
+    ParameterUtils.Regular param = new ParameterUtils.Literal("\"paramName\"", PrimitiveType.STRING);
     assertThat(param.getDeclaration(), is(emptyString()));
     assertThat(param.isLiteral(), is(equalTo(true)));
     assertThat(param.getType().getSimpleName(), is(equalTo("String")));
-    assertThat(param.getValue(), is(equalTo("paramName")));
+    assertThat(param.getValue(), is(equalTo("\"paramName\"")));
   }
 
   /**

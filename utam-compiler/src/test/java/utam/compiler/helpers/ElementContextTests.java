@@ -168,9 +168,8 @@ public class ElementContextTests {
     ElementContext validationElement = new ElementContext.Basic(
         ELEMENT_NAME, validationElementType, getCssSelector(SELECTOR_VALUE));
     TypeProvider type = new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
-    TypeProvider elementType = actionable;
     ElementContext element = new ElementContext.Root(
-        type, elementType, getCssSelector(SELECTOR_VALUE + "[title='fakeTitle']"));
+        type, actionable, getCssSelector(SELECTOR_VALUE + "[title='fakeTitle']"));
 
     assertThat(
         element.validate(validationElement),
@@ -363,9 +362,8 @@ public class ElementContextTests {
         new TypeUtilities.FromString("FakeValidationElementType", "test.FakeValidationElementType");
     ElementContext validationElement = new ElementContext.Root(
         editable, validationElementType, getCssSelector(SELECTOR_VALUE));
-    TypeProvider elementType = actionable;
     ElementContext element = new ElementContext.Custom(
-        ELEMENT_NAME, elementType, getCssSelector(SELECTOR_VALUE + "[title='fakeTitle']"));
+        ELEMENT_NAME, actionable, getCssSelector(SELECTOR_VALUE + "[title='fakeTitle']"));
 
     assertThat(
         element.validate(validationElement),

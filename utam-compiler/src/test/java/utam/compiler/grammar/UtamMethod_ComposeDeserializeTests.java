@@ -4,6 +4,7 @@ import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethod;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 import utam.core.declarative.representation.MethodDeclaration;
@@ -310,21 +311,31 @@ public class UtamMethod_ComposeDeserializeTests {
   @Test
   public void testComposeWaitForBasicActionThatReturnsString() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "String");
-    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> { \n"
-        + "return this.getRootElement().getText(); \n"
+    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> {\n"
+        + "return this.getRootElement().getText();\n"
         + "}");
     TranslationContext context = new DeserializerUtilities().getContext("composeWaitFor1");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
   }
 
   @Test
+  public void testComposeWithCustomElementReturnsList() {
+    MethodInfo methodInfo = new MethodInfo("testCompose", "List<String>");
+    methodInfo.addParameter(new MethodParameterInfo("strArg", "String"));
+    methodInfo.addCodeLine("this.getCustomElement().someMethod(strArg,true)");
+    TranslationContext context = new DeserializerUtilities().getContext("composeCustom");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
+  }
+
+  @Test
   public void testComposeWaitForBasicVoidAction() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
-    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> { \n"
-        + "this.getRootElement().focus(); \n"
-        + "return true; \n"
+    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> {\n"
+        + "this.getRootElement().getText().contains(\"subString\");\n"
+        + "this.getRootElement().focus();\n"
+        + "return true;\n"
         + "}");
-    TranslationContext context = new DeserializerUtilities().getContext("composeWaitFor2");
+    TranslationContext context = new DeserializerUtilities().getContext("composeWaitVoidAction");
     PageObjectMethod method = context.getMethod("testCompose");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
@@ -332,11 +343,24 @@ public class UtamMethod_ComposeDeserializeTests {
   @Test
   public void testComposeWaitForContainsElementAction() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
-    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> { \n"
-        + "this.getRootElement().getText(); \n"
-        + "return Boolean.FALSE.equals(this.getRootElement().containsElement(Selector.byCss(\".css\"))); \n"
+    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> {\n"
+        + "this.getRootElement().getText();\n"
+        + "return Boolean.FALSE.equals(this.getRootElement().containsElement(Selector.byCss(\".css\")));\n"
         + "}");
     TranslationContext context = new DeserializerUtilities().getContext("composeWaitForSelector");
+    PageObjectMethod method = context.getMethod("testCompose");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
+  public void testComposeWaitForCustomElement() {
+    MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
+    methodInfo.addParameter(new MethodParameterInfo("selectorArg", "Selector"));
+    methodInfo.addParameter(new MethodParameterInfo("matcherArg", "String"));
+    methodInfo.addCodeLine("this.getCustomElement().waitFor(() -> {\n"
+        + "return this.getCustomElement().returnsString(selectorArg).contains(matcherArg);\n"
+        + "}");
+    TranslationContext context = new DeserializerUtilities().getContext("composeWaitForCustom");
     PageObjectMethod method = context.getMethod("testCompose");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }

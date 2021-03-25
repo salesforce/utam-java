@@ -1,20 +1,20 @@
 package utam.compiler.representation;
 
-import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
-import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
 
-import utam.core.declarative.representation.TypeProvider;
+import java.util.Collections;
+import org.testng.annotations.Test;
+import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParameterUtils;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
-import org.testng.annotations.Test;
+import utam.core.declarative.representation.TypeProvider;
 import utam.core.selenium.element.Actionable;
-
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * tests for the InterfaceMethod representation class
@@ -23,13 +23,19 @@ import java.util.stream.Stream;
  */
 public class InterfaceMethodTests {
 
-  /** An InterfaceMethod object should be able to be be created */
+  private static MethodContext getMethodContext(TypeProvider typeProvider, boolean isReturnList) {
+    return new MethodContext("testMethod", typeProvider, isReturnList);
+  }
+
+  /**
+   * An InterfaceMethod object should be able to be be created
+   */
   @Test
   public void testInterfaceMethodReturnsActionableElement() {
     MethodInfo info = new MethodInfo("testMethod", "Actionable");
     TypeProvider returnType = new TypeUtilities.FromClass(Actionable.class);
     InterfaceMethod method =
-        new InterfaceMethod("testMethod", returnType, false, EMPTY_PARAMETERS, EMPTY_COMMENTS);
+        new InterfaceMethod(getMethodContext(returnType, false), Collections.EMPTY_LIST, "");
     PageObjectValidationTestHelper.validateMethod(method, info);
     assertThat(method.getClassImports(), hasSize(1));
   }
@@ -37,20 +43,23 @@ public class InterfaceMethodTests {
   @Test
   public void testInterfaceMethodReturnsList() {
     TypeProvider returnType = new TypeUtilities.FromString("SomeReturnType");
-    InterfaceMethod method = new InterfaceMethod("testMethod", returnType, true, EMPTY_PARAMETERS, EMPTY_COMMENTS);
+    InterfaceMethod method = new InterfaceMethod(getMethodContext(returnType, true),
+        Collections.EMPTY_LIST, "");
     assertThat(method.getCodeLines().isEmpty(), is(true));
     assertThat(method.getClassImports(), hasSize(2));
     assertThat(method.getClassImports().get(0).getSimpleName(), is(equalTo("List")));
     assertThat(method.getClassImports().get(1).getSimpleName(), is(equalTo("SomeReturnType")));
-    assertThat(method.getDeclaration().getCodeLine(), is(equalTo("List<SomeReturnType> testMethod()")));
+    assertThat(method.getDeclaration().getCodeLine(),
+        is(equalTo("List<SomeReturnType> testMethod()")));
   }
 
   @Test
   public void testInterfaceMethodWithParameters() {
     TypeProvider returnType = PrimitiveType.STRING;
-    InterfaceMethod method = new InterfaceMethod("testMethod", returnType, false,
-            Stream.of(new ParameterUtils.Regular("name", new TypeUtilities.FromString("Type"))).collect(Collectors.toList()),
-            EMPTY_COMMENTS);
+    InterfaceMethod method = new InterfaceMethod(getMethodContext(returnType, false),
+        Collections.singletonList(
+            new ParameterUtils.Regular("name", new TypeUtilities.FromString("Type"))),
+        EMPTY_COMMENTS);
     assertThat(method.getCodeLines().isEmpty(), is(true));
     assertThat(method.getClassImports(), hasSize(2));
     assertThat(method.getClassImports().get(0).getSimpleName(), is(equalTo("Type")));

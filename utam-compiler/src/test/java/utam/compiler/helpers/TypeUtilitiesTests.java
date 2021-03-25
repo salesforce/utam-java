@@ -21,6 +21,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static utam.compiler.helpers.TypeUtilities.Element.actionable;
+import static utam.compiler.helpers.TypeUtilities.Element.asBasicType;
 
 /**
  * Provides tests for the TypeUtilities class
@@ -46,10 +48,10 @@ public class TypeUtilitiesTests {
   }
 
   @Test
-  public void testGetTypeMethod() {
-    assertThat(
-        TypeUtilities.Element.actionable.getFullName(),
-        is(equalTo("utam.core.selenium.element.Actionable")));
+  public void testActionableGetTypeMethod() {
+    TypeProvider type = TypeUtilities.Element.actionable;
+    assertThat(type.getClassType(), is(equalTo(Actionable.class)));
+    assertThat(type.getFullName(), is(equalTo(type.getClassType().getName())));
   }
 
   /** FromString returns a valid TypeProvider */
@@ -147,6 +149,7 @@ public class TypeUtilitiesTests {
     assertThat(type.getFullName(), is(equalTo("java.util.List")));
     assertThat(type.getPackageName(), is(equalTo("java.util")));
     assertThat(type.getSimpleName(), is(equalTo("List<FakeType>")));
+    assertThat(type.getClassType(), is(equalTo(List.class)));
   }
 
   /**
@@ -284,15 +287,15 @@ public class TypeUtilitiesTests {
   @Test
   public void testGetElementType() {
     assertThat(
-        Objects.requireNonNull(Element.asBasicType("actionable")).getSimpleName(),
+        Objects.requireNonNull(asBasicType("actionable")).getSimpleName(),
         is(equalTo("Actionable")));
     assertThat(
-        Objects.requireNonNull(Element.asBasicType("clickable")).getSimpleName(),
+        Objects.requireNonNull(asBasicType("clickable")).getSimpleName(),
         is(equalTo("Clickable")));
     assertThat(
-        Objects.requireNonNull(Element.asBasicType("editable")).getSimpleName(),
+        Objects.requireNonNull(asBasicType("editable")).getSimpleName(),
         is(equalTo("Editable")));
-    assertThat(Element.asBasicType("unknown"), is(nullValue()));
+    assertThat(asBasicType("unknown"), is(nullValue()));
   }
 
   /** The isTypesMatch static method should return true for matching lists of types */
@@ -461,5 +464,11 @@ public class TypeUtilitiesTests {
     assertThat(predicateType.getFullName(), is(equalTo(Selector.class.getName())));
     assertThat(predicateType.getPackageName(), is(equalTo(Selector.class.getPackageName())));
     assertThat(predicateType.getClassType(), is(equalTo(Selector.class)));
+  }
+
+  @Test
+  public void testGetBasicType() {
+    assertThat(Element.getBasicElementType(actionable), is(actionable));
+    assertThat(Element.getBasicElementType(SELECTOR), is(nullValue()));
   }
 }

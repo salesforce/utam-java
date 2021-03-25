@@ -162,7 +162,7 @@ public enum ActionableActionType implements ActionType {
               elementName,
               elementType.getFullName()));
     }
-    TypeUtilities.Element actionableType = TypeUtilities.Element.asBasicType(elementType);
+    TypeUtilities.Element actionableType = TypeUtilities.Element.getBasicElementType(elementType);
     if (actionableType == TypeUtilities.Element.editable) {
       for (EditableActionType action : EditableActionType.values()) {
         if (action.getApplyString().equals(apply)) {

@@ -3,7 +3,6 @@ package utam.compiler.grammar;
 import utam.core.appium.element.ClassChain;
 import utam.core.appium.element.ClassChain.Operator;
 import utam.core.appium.element.ClassChain.Quote;
-import utam.core.appium.element.Mobile;
 import utam.core.appium.element.UIAutomator;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,7 +11,6 @@ import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.Selector;
-import utam.core.selenium.element.Web;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -84,15 +82,15 @@ public class UtamSelector {
 
     Selector selector;
     if (css != null) {
-      selector = Web.byCss(css);
+      selector = Selector.byCss(css);
     } else if (accessid != null) {
-      selector = Mobile.byAccessibilityId(accessid);
+      selector = Selector.byAccessibilityId(accessid);
     } else if (classchain != null) {
       validateClassChainSelector(classchain);
-      selector = Mobile.byClassChain(classchain);
+      selector = Selector.byClassChain(classchain);
     } else if (uiautomator != null) {
       validateUIAutomatorSelector(uiautomator);
-      selector = Mobile.byUiAutomator(UIAutomator.UI_AUTOMATOR_SELECTOR_PREFIX + uiautomator);
+      selector = Selector.byUiAutomator(UIAutomator.UI_AUTOMATOR_SELECTOR_PREFIX + uiautomator);
     } else {
       throw new UtamError(ERR_SELECTOR_MISSING);
     }
@@ -190,8 +188,12 @@ public class UtamSelector {
   }
 
   void validateMethod(String uiautomator) {
+    if(!uiautomator.contains("(")) {
+      throw new UtamError(String.format("Invalid UIAutomator selector: '%s'", uiautomator));
+    }
+    String match = uiautomator.subSequence(0, uiautomator.indexOf("(")).toString();
     if (Stream.of(UIAutomator.Method.values())
-             .noneMatch(method -> method.toString().equals(uiautomator.subSequence(0, uiautomator.indexOf("("))))){
+             .noneMatch(method -> method.toString().equals(match))){
       throw new UtamError(ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD);
     }
   }

@@ -6,6 +6,7 @@ import static utam.compiler.grammar.UtamArgument.FUNCTION_TYPE_PROPERTY;
 import static utam.compiler.grammar.UtamArgument.SELECTOR_TYPE_PROPERTY;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,10 +27,15 @@ class UtamArgumentDeserializer extends
 
   @Override
   public UtamArgument deserialize(JsonParser parser, DeserializationContext ctxt)
-      throws IOException {
+      throws IOException, JsonProcessingException {
     UtamArgument res = new UtamArgument(null);
     ObjectMapper mapper = (ObjectMapper) parser.getCodec();
     ObjectNode root = mapper.readTree(parser);
+    /*try {
+      root = mapper.readTree(parser);
+    } catch (JsonProcessingException e) {
+      throw new UtamError("?", e);
+    }*/
     JsonNode valueNode = root.get("value");
     final String validationContext = "args";
     if (valueNode != null) {
@@ -39,7 +45,7 @@ class UtamArgumentDeserializer extends
         res.value = valueNode.asText();
       } else if (valueNode.isBoolean()) {
         res.value = valueNode.asBoolean();
-      } else if (valueNode.isNumber()) {
+      } else if (valueNode.isInt()) {
         res.value = valueNode.asInt();
       } else {
         throw new UtamError(
@@ -64,7 +70,8 @@ class UtamArgumentDeserializer extends
           .filter(s -> res.type.equals(s))
           .findAny()
           .orElseThrow(
-              () -> new UtamError(String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, validationContext, res.type)));
+              () -> new UtamError(
+                  String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, validationContext, res.type)));
     }
     JsonNode predicateArrayNode = root.get("predicate");
     if (predicateArrayNode != null) {

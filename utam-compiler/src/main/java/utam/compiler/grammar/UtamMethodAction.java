@@ -16,6 +16,7 @@ import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethodStatement;
+import utam.compiler.representation.ComposeMethodStatement.BasicElementOperation;
 import utam.compiler.representation.ComposeMethodStatement.Operand;
 import utam.compiler.representation.ComposeMethodStatement.Operation;
 import utam.compiler.representation.ComposeMethodStatement.OperationWithPredicate;
@@ -65,7 +66,7 @@ class UtamMethodAction {
     List<MethodParameter> parameters = UtamArgument
         .getArgsProcessor(args, expectedParameters, methodContext.getName()).getOrdered();
     // return type is irrelevant at statement level as we don't assign except for last statement
-    ActionType action = new Custom(apply, methodContext.getReturnType(isWaitFor ? null : VOID),
+    ActionType action = new Custom(apply, methodContext.getReturnType(VOID),
         parameters);
     if (isWaitFor) {
       List<ComposeMethodStatement> predicate = args[0].getPredicate(context, methodContext);
@@ -77,7 +78,7 @@ class UtamMethodAction {
   }
 
   private Operation getBasicOperation(TranslationContext context, ElementContext element,
-      MethodContext methodContext) {
+      MethodContext methodContext, boolean isLastPredicateStatement) {
     ActionType action = getActionType(apply, element.getType(), element.getName());
     List<MethodParameter> parameters = UtamArgument
         .getArgsProcessor(args, action.getParametersTypes(), methodContext.getName())
@@ -92,10 +93,10 @@ class UtamMethodAction {
       return new OperationWithPredicate(action, methodContext.getReturnType(predicate, null),
           predicate);
     }
-    return new Operation(action, parameters);
+    return new BasicElementOperation(action, parameters, isLastPredicateStatement);
   }
 
-  ComposeMethodStatement getComposeAction(TranslationContext context, MethodContext methodContext) {
+  ComposeMethodStatement getComposeAction(TranslationContext context, MethodContext methodContext, boolean isLastPredicateStatement) {
     ElementContext element = context.getElement(elementName);
     // register usage of getter from compose statement
     context.setPrivateMethodUsage(element.getElementMethod().getDeclaration().getName());
@@ -103,7 +104,7 @@ class UtamMethodAction {
     ComposeMethodStatement.Operand operand = new Operand(element, methodContext);
     ComposeMethodStatement.Operation operation =
         element.isCustom() ? getCustomOperation(context, methodContext) :
-            getBasicOperation(context, element, methodContext);
+            getBasicOperation(context, element, methodContext, isLastPredicateStatement);
     ComposeMethodStatement statement;
     if (element.isList()) {
       statement =

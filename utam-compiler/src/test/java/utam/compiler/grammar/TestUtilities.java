@@ -8,7 +8,6 @@ import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.Selector;
-import utam.core.selenium.element.Web;
 
 import java.io.IOException;
 
@@ -39,7 +38,7 @@ public class TestUtilities {
   }
 
   public static Selector getCssSelector(String value) {
-    return Web.byCss(value);
+    return Selector.byCss(value);
   }
 
   public static JsonDeserializer getJsonStringDeserializer(String json) {

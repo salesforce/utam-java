@@ -1,5 +1,6 @@
 package utam.compiler.grammar;
 
+import static utam.compiler.helpers.AnnotationUtils.getWrappedString;
 import static utam.compiler.helpers.PrimitiveType.BOOLEAN;
 import static utam.compiler.helpers.PrimitiveType.NUMBER;
 import static utam.compiler.helpers.PrimitiveType.STRING;
@@ -37,23 +38,20 @@ class UtamArgument {
 
   static final String FUNCTION_TYPE_PROPERTY = "function";
   static final String SELECTOR_TYPE_PROPERTY = "locator";
-
+  static final String ERR_ARGS_NAME_TYPE_MANDATORY =
+      "%s: argument name and type are required";
+  static final String ERR_ARGS_WRONG_TYPE = "%s: expected type is '%s', actual was '%s'";
+  static final String ERR_NAME_TYPE_REDUNDANT = "%s: properties 'name' or 'type' are redundant";
+  static final String ERR_PREDICATE_REDUNDANT = "%s: property 'predicate' is only supported for 'function' type";
   private static final String SUPPORTED_ARGS_TYPES =
       Stream.concat(Stream.of(FUNCTION_TYPE_PROPERTY, SELECTOR_TYPE_PROPERTY),
           Stream.of(PrimitiveType.values())
               .map(PrimitiveType::getJsonTypeName))
           .collect(Collectors.joining(","));
-
-  static final String ERR_ARGS_NAME_TYPE_MANDATORY =
-      "%s: argument name and type are required";
   static final String ERR_ARGS_TYPE_NOT_SUPPORTED =
       "%s: args type '%s' is not supported, supported are { " + SUPPORTED_ARGS_TYPES + " }";
-  static final String ERR_ARGS_WRONG_TYPE = "%s: expected type is '%s', actual was '%s'";
   private static final String ERR_VALUE_REDUNDANT = "%s: property 'value' is redundant";
-  static final String ERR_NAME_TYPE_REDUNDANT = "%s: properties 'name' or 'type' are redundant";
   private static final String ERR_FUNCTION_NEEDS_PREDICATE = "%s: type function needs a non-empty predicate";
-  static final String ERR_PREDICATE_REDUNDANT = "%s: property 'predicate' is only supported for 'function' type";
-
   String name;
   String type;
   Object value;
@@ -90,13 +88,17 @@ class UtamArgument {
     return getArgsProcessor(args, null, argsContext);
   }
 
-  private static String getSelectorValuePattern(Selector.Type type) {
+  static String getSelectorValuePattern(Selector.Type type) {
     if (type == Type.CSS) {
-      return "%s.byCss(\"%s\")";
+      return "%s.byCss(%s)";
     } else if (type == Type.ACCESSID) {
-      return "%s.byAccessibilityId(\"%s\")";
+      return "%s.byAccessibilityId(%s)";
+    } else if (type == Type.CLASSCHAIN) {
+      return "%s.byClassChain(%s)";
+    } else if (type == Type.UIAUTOMATOR) {
+      return "%s.byUiAutomator(%s)";
     }
-    throw new UnsupportedOperationException("add implementation for other types");
+    throw new UtamError(String.format("Unknown selector type '%s'", type));
   }
 
   private void checkExpectedType(String argsContext, TypeProvider expectedType,
@@ -137,7 +139,7 @@ class UtamArgument {
       Selector selector = ((UtamSelector) value).getSelector();
       strValue = String
           .format(getSelectorValuePattern(selector.getType()), SELECTOR.getSimpleName(),
-              selector.getValue());
+              getWrappedString(selector.getValue()));
     } else if (value instanceof Boolean) {
       type = BOOLEAN;
     } else if (value instanceof Number) {
@@ -160,8 +162,6 @@ class UtamArgument {
       return new Regular(name, PrimitiveType.fromString(type));
     } else if (SELECTOR_TYPE_PROPERTY.equals(type)) {
       return new Regular(name, SELECTOR);
-    } else if (FUNCTION_TYPE_PROPERTY.equals(type)) {
-      return null;
     }
     throw new UtamError(String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, argsContext, type));
   }
@@ -175,8 +175,13 @@ class UtamArgument {
     if (conditions == null || conditions.length == 0) {
       throw new UtamError(String.format(ERR_FUNCTION_NEEDS_PREDICATE, argsContext));
     }
-    return Stream.of(conditions).map(c -> c.getComposeAction(context, methodContext))
-        .collect(Collectors.toList());
+    List<ComposeMethodStatement> predicateStatements = new ArrayList<>();
+    for (int i = 0; i < conditions.length; i++) {
+      boolean isLastPredicateStatement = i == conditions.length - 1;
+      predicateStatements
+          .add(conditions[i].getComposeAction(context, methodContext, isLastPredicateStatement));
+    }
+    return predicateStatements;
   }
 
 
@@ -187,8 +192,8 @@ class UtamArgument {
 
     final UtamArgument[] args;
     final String argsContext;
-    private final List<TypeProvider> expectedTypes;
     final List<MethodParameter> orderedParameters = new ArrayList<>();
+    private final List<TypeProvider> expectedTypes;
 
     Processor(String argsContext, UtamArgument[] args, List<TypeProvider> expectedTypes) {
       this.args = args;

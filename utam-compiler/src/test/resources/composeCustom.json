@@ -1,0 +1,33 @@
+{
+  "elements": [
+    {
+      "name": "custom",
+      "type": "utam-test/pageObjects/custom",
+      "selector": {
+        "css": ".css"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "testCompose",
+      "return" : "string",
+      "returnAll" : true,
+      "compose": [
+        {
+          "element": "custom",
+          "apply": "someMethod",
+          "args": [
+            {
+              "name": "strArg",
+              "type": "string"
+            },
+            {
+              "value": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

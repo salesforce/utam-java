@@ -1,18 +1,17 @@
 package utam.compiler.representation;
 
-import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.declarative.representation.TypeProvider;
-import utam.compiler.helpers.TypeUtilities;
+import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static utam.compiler.helpers.TypeUtilities.LIST_IMPORT;
+import utam.compiler.helpers.MethodContext;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 
 /**
  * method declared inside interface
+ *
  * @author elizaveta.ivanova
  * @since 226
  */
@@ -20,21 +19,14 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
 
   private static final List<String> EMPTY_CODE = new ArrayList<>();
 
-  public InterfaceMethod(String name, TypeProvider returnType, boolean isReturnList, List<MethodParameter> methodParameters, String comments) {
+  public InterfaceMethod(MethodContext methodContext, List<MethodParameter> methodParameters,
+      String comments) {
     super(
-        name,
+        methodContext.getName(),
         methodParameters,
-        isReturnList? new TypeUtilities.ListOf(returnType) : returnType,
-        getImports(methodParameters, returnType, isReturnList), comments);
-  }
-
-  private static List<TypeProvider> getImports(List<MethodParameter> methodParameters, TypeProvider returnType, boolean isReturnList) {
-    List<TypeProvider> imports = methodParameters.stream().map(MethodParameter::getType).collect(Collectors.toList());
-    if(isReturnList) {
-      imports.add(LIST_IMPORT);
-    }
-    imports.add(returnType);
-    return imports;
+        methodContext.getReturnType(VOID),
+        methodContext.getReturnTypeImports(methodParameters),
+        comments);
   }
 
   @Override

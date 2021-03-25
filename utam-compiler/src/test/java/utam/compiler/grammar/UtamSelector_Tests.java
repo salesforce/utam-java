@@ -11,6 +11,7 @@ import utam.core.selenium.element.Selector;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static org.testng.Assert.assertThrows;
 import static utam.compiler.grammar.UtamArgument.ERR_ARGS_WRONG_TYPE;
 import static utam.compiler.grammar.UtamSelector.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -421,6 +422,7 @@ public class UtamSelector_Tests {
   public void testValidateUIAutomatorSelectorUnsupportMethod() {
     UtamError e = expectThrows(UtamError.class, () -> new UtamSelector(null, null, null, "unsupported()"));
     assertThat(e.getMessage(), is(equalTo(ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD)));
+    assertThrows(() -> new UtamSelector(null, null, null, "nomethod"));
   }
 
   @Test
@@ -455,7 +457,7 @@ public class UtamSelector_Tests {
     assertThat(e.getMessage(), is(equalTo(ERR_SELECTOR_CLASSCHAIN_UNSUPPORTED_OPERATOR)));
   }
 
-  private String buildUIAutomatorLocator(UIAutomator.Method method) {
+  static String buildUIAutomatorLocator(UIAutomator.Method method) {
       return method.toString() + "()";
   }
 }

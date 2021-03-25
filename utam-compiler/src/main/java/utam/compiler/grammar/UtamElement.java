@@ -373,13 +373,6 @@ public final class UtamElement {
         method = new ContainerMethod.WithSelector(
             scopeElement, isExpandScopeShadowRoot, name, injectSelector, selectorParameters);
       }
-      if (!isPublic()) {
-        throw new UtamError(
-            String.format(
-                "Private container is redundant, please mark element '%s' as public",
-                elementContext.getName()));
-      }
-
       // we used scope method in container code, register
       context.setPrivateMethodUsage(scopeElement.getElementMethod().getDeclaration().getName());
       elementContext.setElementMethod(method);

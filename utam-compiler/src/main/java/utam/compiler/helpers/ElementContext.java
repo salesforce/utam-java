@@ -4,7 +4,6 @@ import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.selenium.element.Selector;
-import utam.core.selenium.element.Web;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,7 @@ import static utam.compiler.helpers.Validation.isSameSelector;
 public abstract class ElementContext {
 
   public static final String ROOT_ELEMENT_NAME = "root";
-  public static final Selector EMPTY_SELECTOR = Web.byCss("");
+  public static final Selector EMPTY_SELECTOR = Selector.byCss("");
   static final String EMPTY_SCOPE_ELEMENT_NAME = "empty";
   public static final ElementContext ROOT_SCOPE =
       new ElementContext(
@@ -194,11 +193,11 @@ public abstract class ElementContext {
     }
 
     boolean isSameEnclosingType(ElementContext element) {
-      if (element.isCustom() && element.getType().equals(this.enclosingPageObjectType)) {
+      if (element.isCustom() && element.getType().isSameType(this.enclosingPageObjectType)) {
         return true;
       }
       if (element.isRootElement()) {
-        return this.enclosingPageObjectType.equals(((Root) element).enclosingPageObjectType);
+        return this.enclosingPageObjectType.isSameType(((Root) element).enclosingPageObjectType);
       }
       return false;
     }
@@ -254,7 +253,7 @@ public abstract class ElementContext {
     final Validation.ErrorType validate(ElementContext element) {
       // this statement should be before next because declared root element is also HTML element
       if (element.isRootElement()) {
-        if (getType().equals(((Root) element).enclosingPageObjectType)) {
+        if (getType().isSameType(((Root) element).enclosingPageObjectType)) {
           return Validation.ErrorType.NONE;
         }
         if (isLabelHardcoded(getSelector())) {
@@ -270,7 +269,7 @@ public abstract class ElementContext {
       }
       // if selector same but type is different - it's error
       if (element.isCustom()
-          && !getType().equals(element.getType())
+          && !getType().isSameType(element.getType())
           && isSameSelector(getSelector(), element.getSelector())) {
         return Validation.ErrorType.COMPONENTS_WITH_SAME_SELECTOR_BUT_DIFFERENT_TYPES;
       }

@@ -120,7 +120,7 @@ public final class TypeUtilities {
       return false;
     }
 
-    public static TypeUtilities.Element asBasicType(TypeProvider type) {
+    public static TypeUtilities.Element getBasicElementType(TypeProvider type) {
       for (TypeUtilities.Element basicType : TypeUtilities.Element.values()) {
         if (basicType.isSameType(type)) {
           return basicType;
@@ -181,15 +181,6 @@ public final class TypeUtilities {
     }
 
     @Override
-    public boolean equals(Object type) {
-      if (!(type instanceof TypeProvider)) {
-        return false;
-      }
-      return getSimpleName().equals(((TypeProvider) type).getSimpleName())
-          && getFullName().equals(((TypeProvider) type).getFullName());
-    }
-
-    @Override
     public int hashCode() {
       return Objects.hash(getSimpleName(), getFullName());
     }
@@ -247,15 +238,6 @@ public final class TypeUtilities {
     @Override
     public String getPackageName() {
       return packageName;
-    }
-
-    @Override
-    public boolean equals(Object type) {
-      if (!(type instanceof TypeProvider)) {
-        return false;
-      }
-      return getSimpleName().equals(((TypeProvider) type).getSimpleName())
-          && getFullName().equals(((TypeProvider) type).getFullName());
     }
 
     @Override

@@ -26,15 +26,19 @@ import utam.core.declarative.representation.TypeProvider;
  */
 public abstract class ComposeMethodStatement {
 
+  private static final String PREDICATE_RETURN_TRUE = "return true;";
   final List<TypeProvider> classImports = new ArrayList<>();
   final List<TypeProvider> imports = new ArrayList<>();
   private final List<String> codeLines = new ArrayList<>();
   private final List<MethodParameter> parameters = new ArrayList<>();
   private final TypeProvider returns;
 
-  ComposeMethodStatement(Operand operand, Operation operation, TypeProvider returnType,
-      MatcherType matcher, List<MethodParameter> matcherParameters) {
-    this.returns = returnType;
+  ComposeMethodStatement(Operand operand,
+      Operation operation,
+      TypeProvider returnType,
+      MatcherType matcher,
+      List<MethodParameter> matcherParameters) {
+    this.returns = setReturnType(operation, returnType, matcher);
     operand.setParameters(this.parameters);
     operation.setParameters(this.parameters);
     operation.setImports(this.imports);
@@ -45,22 +49,34 @@ public abstract class ComposeMethodStatement {
     parameters.removeIf(p -> p == null || p.isLiteral());
     String invocationStr = operation
         .getCode(getMethodCallString(), operand.getElementGetterString());
-    codeLines
-        .add(matcher != null ? matcher.getCode(matcherParameters, invocationStr) : invocationStr);
+    if (matcher != null) {
+      codeLines.add(matcher.getCode(matcherParameters, invocationStr));
+    } else {
+      codeLines.add(invocationStr);
+    }
   }
 
   ComposeMethodStatement(Operand operand, Operation operation, TypeProvider returnType) {
     this(operand, operation, returnType, null, null);
   }
 
+  private static TypeProvider setReturnType(Operation operation,
+      TypeProvider returnType,
+      MatcherType matcher) {
+    if (matcher != null) {
+      return PrimitiveType.BOOLEAN;
+    }
+    if (operation instanceof OperationWithPredicate && MethodContext.isNullOrVoid(returnType)) {
+      return PrimitiveType.BOOLEAN;
+    }
+    return returnType;
+  }
+
   public List<MethodParameter> getParameters() {
     return parameters;
   }
 
-  public TypeProvider getReturnType(TypeProvider defaultReturn) {
-    if (returns == null) {
-      return defaultReturn;
-    }
+  public TypeProvider getReturnType() {
     return returns;
   }
 
@@ -152,7 +168,7 @@ public abstract class ComposeMethodStatement {
 
     // used in tests
     Operand(ElementContext elementContext) {
-      this(elementContext, new MethodContext("test", null));
+      this(elementContext, new MethodContext("test", null, false));
     }
 
     String getElementGetterString() {
@@ -175,7 +191,7 @@ public abstract class ComposeMethodStatement {
    */
   public static class Operation {
 
-    final List<MethodParameter> actionParameters;
+    final List<MethodParameter> actionParameters = new ArrayList<>();
     private final ActionType action;
     private final TypeProvider returnType;
 
@@ -187,17 +203,8 @@ public abstract class ComposeMethodStatement {
     public Operation(ActionType action, TypeProvider returnType,
         List<MethodParameter> actionParameters) {
       this.action = action;
-      this.actionParameters = actionParameters;
-      this.returnType = returnType == null ? action.getReturnType() : returnType;
-    }
-
-    public Operation(ActionType action, List<MethodParameter> actionParameters) {
-      this(action, action.getReturnType(), actionParameters);
-    }
-
-    // used in tests
-    Operation(ActionType action) {
-      this(action, Collections.EMPTY_LIST);
+      this.actionParameters.addAll(actionParameters);
+      this.returnType = returnType;
     }
 
     void setParameters(List<MethodParameter> parameters) {
@@ -241,6 +248,31 @@ public abstract class ComposeMethodStatement {
     }
   }
 
+  public static class BasicElementOperation extends Operation {
+
+    private final boolean isLastPredicateStatement;
+
+    public BasicElementOperation(ActionType action,
+        List<MethodParameter> actionParameters, boolean isLastPredicateStatement) {
+      super(action,
+          isLastPredicateStatement && MethodContext.isNullOrVoid(action.getReturnType()) ? PrimitiveType.BOOLEAN
+              : action.getReturnType(),
+          actionParameters);
+      this.isLastPredicateStatement =
+          isLastPredicateStatement && MethodContext.isNullOrVoid(action.getReturnType());
+    }
+
+    @Override
+    String getCode(String invocationPattern, String elementGetter) {
+      String code = super.getCode(invocationPattern, elementGetter);
+      if (isLastPredicateStatement) {
+        // add last statement of predicate can't return null, has to return boolean or original type
+        return String.format("%s;\n%s", code, PREDICATE_RETURN_TRUE);
+      }
+      return code;
+    }
+  }
+
   /**
    * information about applied action with a predicate
    */
@@ -252,32 +284,26 @@ public abstract class ComposeMethodStatement {
 
     public OperationWithPredicate(ActionType action, TypeProvider returnType,
         List<ComposeMethodStatement> predicate) {
-      super(action, isReturnTypeNotSet(returnType) ? PrimitiveType.BOOLEAN : returnType,
-          Collections.EMPTY_LIST);
+      super(action, returnType, Collections.EMPTY_LIST);
       for (ComposeMethodStatement statement : predicate) {
         predicateCode.addAll(statement.getCodeLines());
         imports.addAll(statement.getImports());
         classImports.addAll(statement.getClassImports());
         actionParameters.addAll(statement.getParameters());
       }
-      int lastStatement = predicateCode.size() - 1;
-      if (isReturnTypeNotSet(returnType)) {
-        // add last statement that returns true if no exceptions were thrown
-        predicateCode.add("return true;");
-      } else {
+      int lastStatementIndex = predicateCode.size() - 1;
+      if (!predicateCode.get(lastStatementIndex).endsWith(PREDICATE_RETURN_TRUE)) {
+        // last statement should be return, unless it's void action and 'return true' was already added
         predicateCode
-            .set(lastStatement, String.format("return %s;", predicateCode.get(lastStatement)));
+            .set(lastStatementIndex,
+                String.format("return %s;", predicateCode.get(lastStatementIndex)));
       }
-    }
-
-    private static boolean isReturnTypeNotSet(TypeProvider returnType) {
-      return returnType == null || returnType.isSameType(VOID);
     }
 
     @Override
     String getCode(String invocationPattern, String elementGetter) {
       String methodInvocation = String
-          .format("waitFor(() -> { \n%s \n}", String.join("; \n", predicateCode));
+          .format("waitFor(() -> {\n%s\n}", String.join(";\n", predicateCode));
       return String.format(invocationPattern, elementGetter, methodInvocation);
     }
 
