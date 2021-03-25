@@ -21,7 +21,7 @@ public class UIAutomator extends LocatorNodeImpl {
     this(selector, selector, EMPTY_FILTER);
   }
 
-  static String getSelectorWithPrefix(String selectorString) {
+  public static String getSelectorWithPrefix(String selectorString) {
     if(selectorString.startsWith(UI_AUTOMATOR_SELECTOR_PREFIX)) {
       return selectorString;
     }

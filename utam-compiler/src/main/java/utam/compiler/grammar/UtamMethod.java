@@ -21,7 +21,6 @@ import utam.core.declarative.representation.TypeProvider;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * public method declared at PO level
@@ -183,8 +182,8 @@ class UtamMethod {
     List<ComposeMethodStatement> statements = new ArrayList<>();
     List<MethodParameter> methodParameters = new ArrayList<>();
     MethodContext methodContext = new MethodContext(name, getReturnType(context, null));
-    for (int i = 0; i < compose.length; i ++) {
-      ComposeMethodStatement statement = compose[i].getComposeAction(context, methodContext);
+    for (UtamMethodAction utamMethodAction : compose) {
+      ComposeMethodStatement statement = utamMethodAction.getComposeAction(context, methodContext);
       statements.add(statement);
       methodParameters.addAll(statement.getParameters());
     }

@@ -8,6 +8,7 @@ import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
+import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
 
 import java.util.Collections;
@@ -42,7 +43,7 @@ public class ComposeMethodTests {
   private static ComposeMethod getComposeMethod(ComposeMethodStatement statement) {
     // used in tests
     return new ComposeMethod(
-        new MethodContext(), Collections.singletonList(statement), EMPTY_PARAMETERS, EMPTY_COMMENTS);
+        new MethodContext("test", null), Collections.singletonList(statement), EMPTY_PARAMETERS, EMPTY_COMMENTS);
   }
 
   @Test
@@ -55,7 +56,7 @@ public class ComposeMethodTests {
         new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
     ComposeMethodStatement methodAction = mock(ComposeMethodStatement.class);
     when(methodAction.getCodeLines()).thenReturn(Collections.singletonList("return this.fakeElement"));
-    when(methodAction.getReturnType()).thenReturn(fakeReturnType);
+    when(methodAction.getReturnType(VOID)).thenReturn(fakeReturnType);
     when(methodAction.getImports()).thenReturn(Collections.singletonList(fakeReturnType));
 
     ComposeMethod method = getComposeMethod(methodAction);
@@ -163,7 +164,7 @@ public class ComposeMethodTests {
                 Collections.singletonList(parameter)));
     ComposeMethod method =
         new ComposeMethod(
-            new MethodContext(), Collections.singletonList(action), action.getParameters(), EMPTY_COMMENTS);
+            new MethodContext("test", null), Collections.singletonList(action), action.getParameters(), EMPTY_COMMENTS);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
@@ -186,7 +187,7 @@ public class ComposeMethodTests {
         new Operation(ActionableActionType.getText, Collections.singletonList(parameter)));
     ComposeMethod method =
         new ComposeMethod(
-            new MethodContext(), Collections.singletonList(action), action.getParameters(), EMPTY_COMMENTS);
+            new MethodContext("test", null), Collections.singletonList(action), action.getParameters(), EMPTY_COMMENTS);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 }

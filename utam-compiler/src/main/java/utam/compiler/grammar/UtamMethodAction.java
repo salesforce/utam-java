@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.ActionableActionType;
 import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
@@ -37,35 +38,45 @@ class UtamMethodAction {
 
   final String elementName;
   final String apply;
-  final UtamArgument[] args;
+  UtamArgument[] args;
+  private final UtamMatcher matcher;
 
   @JsonCreator
   UtamMethodAction(
       @JsonProperty(value = "element", required = true) String elementName,
       @JsonProperty(value = "apply", required = true) String apply,
+      @JsonProperty(value = "matcher") UtamMatcher matcher,
       @JsonProperty(value = "args") UtamArgument[] args) {
     this.elementName = elementName;
     this.apply = apply;
     this.args = args;
+    this.matcher = matcher;
   }
 
-  Operation getCustomOperation(TranslationContext context, MethodContext methodContext) {
+  // used in tests
+  UtamMethodAction(String elementName, String apply) {
+    this(elementName, apply, null, null);
+  }
+
+  private Operation getCustomOperation(TranslationContext context, MethodContext methodContext) {
     boolean isWaitFor = isWaitFor(apply);
     List<TypeProvider> expectedParameters =
         isWaitFor ? ActionableActionType.waitFor.getParametersTypes() : null;
     List<MethodParameter> parameters = UtamArgument
         .getArgsProcessor(args, expectedParameters, methodContext.getName()).getOrdered();
     // return type is irrelevant at statement level as we don't assign except for last statement
-    ActionType action = new Custom(apply, methodContext.getReturnType(VOID), parameters);
+    ActionType action = new Custom(apply, methodContext.getReturnType(isWaitFor ? null : VOID),
+        parameters);
     if (isWaitFor) {
       List<ComposeMethodStatement> predicate = args[0].getPredicate(context, methodContext);
       return new OperationWithPredicate(action, methodContext.getReturnType(predicate,
           PrimitiveType.BOOLEAN), predicate);
     }
-    return new Operation(action, parameters);
+    TypeProvider returnType = matcher == null? action.getReturnType() : PrimitiveType.BOOLEAN;
+    return new Operation(action, returnType, parameters);
   }
 
-  Operation getBasicOperation(TranslationContext context, ElementContext element,
+  private Operation getBasicOperation(TranslationContext context, ElementContext element,
       MethodContext methodContext) {
     ActionType action = getActionType(apply, element.getType(), element.getName());
     List<MethodParameter> parameters = UtamArgument
@@ -78,7 +89,8 @@ class UtamMethodAction {
     }
     if (isWaitFor(apply)) {
       List<ComposeMethodStatement> predicate = args[0].getPredicate(context, methodContext);
-      return new OperationWithPredicate(action, methodContext.getReturnType(predicate, PrimitiveType.BOOLEAN), predicate);
+      return new OperationWithPredicate(action, methodContext.getReturnType(predicate, null),
+          predicate);
     }
     return new Operation(action, parameters);
   }
@@ -98,11 +110,25 @@ class UtamMethodAction {
           operation.isReturnsVoid() ? new ComposeMethodStatement.VoidList(operand, operation)
               : new ComposeMethodStatement.ReturnsList(operand, operation);
     } else {
-      statement = new Single(operand, operation);
+      statement = new Single(operand, operation, getMatcherType(), getMatcherParameters(methodContext));
     }
     // remember that element is used to not propagate its parameters to method for second time
     methodContext.setElementUsage(element);
     return statement;
+  }
+
+  private List<MethodParameter> getMatcherParameters(MethodContext methodContext) {
+    if (matcher == null) {
+      return null;
+    }
+    return matcher.getParameters(String.format("method '%s'", methodContext.getName()));
+  }
+
+  private MatcherType getMatcherType() {
+    if (matcher == null) {
+      return null;
+    }
+    return this.matcher.matcherType;
   }
 
   /**
@@ -118,7 +144,7 @@ class UtamMethodAction {
 
     Custom(String methodName, TypeProvider returnType, List<MethodParameter> parameters) {
       this.methodName = methodName;
-      this.parametersTypes = parameters.stream().map(p -> p.getType()).collect(Collectors.toList());
+      this.parametersTypes = parameters.stream().map(MethodParameter::getType).collect(Collectors.toList());
       this.returnType = returnType;
     }
 

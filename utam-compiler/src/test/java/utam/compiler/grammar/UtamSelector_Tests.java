@@ -20,8 +20,8 @@ import static org.testng.Assert.expectThrows;
 public class UtamSelector_Tests {
 
   static final String SELECTOR_STRING = "selector";
-  static final String CLASSCHAIN_SELECTOR_STRING = "**/XCUIElementTypeStaticText[`label == 'something'`]";
-  static final String UIAUTOMATOR_SELECTOR_STRING = "checked()";
+  private static final String CLASSCHAIN_SELECTOR_STRING = "**/XCUIElementTypeStaticText[`label == 'something'`]";
+  private static final String UIAUTOMATOR_SELECTOR_STRING = "checked()";
   private static final String ELEMENT_NAME = "test";
 
   static UtamSelector getUtamCssSelector() {
@@ -190,7 +190,7 @@ public class UtamSelector_Tests {
     UtamError e = expectThrows(UtamError.class, () -> selector.getParameters(ELEMENT_NAME));
     assertThat(
         e.getMessage(),
-        is(equalTo(String.format(ERR_ARGS_WRONG_TYPE, ELEMENT_NAME, "name", "Integer", "String"))));
+        is(equalTo(String.format(ERR_ARGS_WRONG_TYPE, ELEMENT_NAME, "Integer", "String"))));
   }
 
   /**

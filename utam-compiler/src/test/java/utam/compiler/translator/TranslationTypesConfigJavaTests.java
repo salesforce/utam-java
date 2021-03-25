@@ -47,7 +47,6 @@ public class TranslationTypesConfigJavaTests {
   @Test
   public void testGetInterfaceTypeWithInvalidTypeThrows() {
     final String shortPageObjectUri = "utam-test/pageObjects";
-    final String longPageObjectUri = "utam-test/pageObjects/test/another/testObject";
     UtamError e = expectThrows(UtamError.class, () -> TYPES.getInterfaceType(shortPageObjectUri));
     assertThat(e.getMessage(), containsString(getWrongTypeError(shortPageObjectUri, pageObjects)));
   }

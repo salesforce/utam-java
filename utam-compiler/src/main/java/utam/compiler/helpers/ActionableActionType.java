@@ -4,6 +4,7 @@ import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 
+import java.util.Objects;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.Actionable;
@@ -146,11 +147,7 @@ public enum ActionableActionType implements ActionType {
     } else {
       this.actionParameters = parameters;
     }
-    if(returnType == null) {
-      this.returnType = VOID;
-    } else {
-      this.returnType = returnType;
-    }
+    this.returnType = Objects.requireNonNullElse(returnType, VOID);
   }
 
   public static boolean isWaitFor(String apply) {

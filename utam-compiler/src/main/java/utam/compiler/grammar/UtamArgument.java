@@ -4,6 +4,7 @@ import static utam.compiler.helpers.PrimitiveType.BOOLEAN;
 import static utam.compiler.helpers.PrimitiveType.NUMBER;
 import static utam.compiler.helpers.PrimitiveType.STRING;
 import static utam.compiler.helpers.PrimitiveType.isPrimitiveType;
+import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,6 +25,8 @@ import utam.compiler.representation.ComposeMethodStatement;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
+import utam.core.selenium.element.Selector;
+import utam.core.selenium.element.Selector.Type;
 
 /**
  * @author elizaveta.ivanova
@@ -35,25 +38,21 @@ class UtamArgument {
   static final String FUNCTION_TYPE_PROPERTY = "function";
   static final String SELECTOR_TYPE_PROPERTY = "locator";
 
-  static final String SUPPORTED_ARGS_TYPES =
+  private static final String SUPPORTED_ARGS_TYPES =
       Stream.concat(Stream.of(FUNCTION_TYPE_PROPERTY, SELECTOR_TYPE_PROPERTY),
           Stream.of(PrimitiveType.values())
-              .map(value -> value.getJsonTypeName()))
+              .map(PrimitiveType::getJsonTypeName))
           .collect(Collectors.joining(","));
 
   static final String ERR_ARGS_NAME_TYPE_MANDATORY =
       "%s: argument name and type are required";
   static final String ERR_ARGS_TYPE_NOT_SUPPORTED =
       "%s: args type '%s' is not supported, supported are { " + SUPPORTED_ARGS_TYPES + " }";
-  static final String ERR_ARGS_WRONG_TYPE =
-      "%s: for parameter '%s' expected type is '%s', actual was '%s'";
-  static final String ERR_VALUE_REDUNDANT =
-      "%s: property 'value' is redundant";
-  static final String ERR_NAME_TYPE_REDUNDANT =
-      "%s: argument already has value, properties 'name' and 'type' are redundant";
-  static final String ERR_FUNCTION_NEEDS_PREDICATE = "%s: type function needs a non-empty predicate";
-  static final String ERR_PREDICATE_REDUNDANT =
-      "%s: property 'predicate' is redundant";
+  static final String ERR_ARGS_WRONG_TYPE = "%s: expected type is '%s', actual was '%s'";
+  private static final String ERR_VALUE_REDUNDANT = "%s: property 'value' is redundant";
+  static final String ERR_NAME_TYPE_REDUNDANT = "%s: properties 'name' or 'type' are redundant";
+  private static final String ERR_FUNCTION_NEEDS_PREDICATE = "%s: type function needs a non-empty predicate";
+  static final String ERR_PREDICATE_REDUNDANT = "%s: property 'predicate' is only supported for 'function' type";
 
   String name;
   String type;
@@ -91,11 +90,30 @@ class UtamArgument {
     return getArgsProcessor(args, null, argsContext);
   }
 
+  private static String getSelectorValuePattern(Selector.Type type) {
+    if (type == Type.CSS) {
+      return "%s.byCss(\"%s\")";
+    } else if (type == Type.ACCESSID) {
+      return "%s.byAccessibilityId(\"%s\")";
+    }
+    throw new UnsupportedOperationException("add implementation for other types");
+  }
+
+  private void checkExpectedType(String argsContext, TypeProvider expectedType,
+      TypeProvider actualType) {
+    if (expectedType != null && !actualType.isSameType(expectedType)) {
+      throw new UtamError(
+          String.format(
+              ERR_ARGS_WRONG_TYPE,
+              argsContext,
+              expectedType.getSimpleName(),
+              actualType.getSimpleName()));
+    }
+  }
+
   MethodParameter getParameterOrValue(String argsContext, TypeProvider expectedType) {
     if (FUNCTION_TYPE_PROPERTY.equals(type)) {
-      if (value != null) {
-        throw new UtamError(String.format(ERR_VALUE_REDUNDANT, argsContext));
-      }
+      checkExpectedType(argsContext, expectedType, FUNCTION);
       // predicate is not a parameter
       return null;
     }
@@ -104,16 +122,7 @@ class UtamArgument {
     }
     MethodParameter parameter =
         value != null ? getArgByValue(argsContext) : getArgByNameType(argsContext);
-    TypeProvider actualType = parameter.getType();
-    if (expectedType != null && !actualType.isSameType(expectedType)) {
-      throw new UtamError(
-          String.format(
-              ERR_ARGS_WRONG_TYPE,
-              argsContext,
-              parameter.getValue(),
-              expectedType.getSimpleName(),
-              actualType.getSimpleName()));
-    }
+    checkExpectedType(argsContext, expectedType, parameter.getType());
     return parameter;
   }
 
@@ -122,8 +131,13 @@ class UtamArgument {
       throw new UtamError(String.format(ERR_NAME_TYPE_REDUNDANT, argsContext));
     }
     TypeProvider type;
+    String strValue = value.toString();
     if (value instanceof UtamSelector) {
       type = SELECTOR;
+      Selector selector = ((UtamSelector) value).getSelector();
+      strValue = String
+          .format(getSelectorValuePattern(selector.getType()), SELECTOR.getSimpleName(),
+              selector.getValue());
     } else if (value instanceof Boolean) {
       type = BOOLEAN;
     } else if (value instanceof Number) {
@@ -134,7 +148,7 @@ class UtamArgument {
       throw new UtamError(
           String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, argsContext, value.getClass().getName()));
     }
-    return new Literal(value, type);
+    return new Literal(strValue, type);
   }
 
   private MethodParameter getArgByNameType(String argsContext) {
@@ -146,6 +160,8 @@ class UtamArgument {
       return new Regular(name, PrimitiveType.fromString(type));
     } else if (SELECTOR_TYPE_PROPERTY.equals(type)) {
       return new Regular(name, SELECTOR);
+    } else if (FUNCTION_TYPE_PROPERTY.equals(type)) {
+      return null;
     }
     throw new UtamError(String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, argsContext, type));
   }
@@ -172,7 +188,7 @@ class UtamArgument {
     final UtamArgument[] args;
     final String argsContext;
     private final List<TypeProvider> expectedTypes;
-    List<MethodParameter> orderedParameters = new ArrayList<>();
+    final List<MethodParameter> orderedParameters = new ArrayList<>();
 
     Processor(String argsContext, UtamArgument[] args, List<TypeProvider> expectedTypes) {
       this.args = args;

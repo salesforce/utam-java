@@ -44,7 +44,7 @@ public final class TypeUtilities {
   public static final TypeProvider CONTAINER_LIST_RETURN_TYPE = new TypeUtilities.UnimportableType(
       String.format("<T extends %s> List<T>", PAGE_OBJECT.getSimpleName()));
   public static final TypeProvider SELECTOR = new FromClass(Selector.class);
-  static final TypeProvider FUNCTION = new FromClass(Supplier.class) {
+  public static final TypeProvider FUNCTION = new FromClass(Supplier.class) {
     @Override
     public String getSimpleName() {
       return "Supplier<T>";

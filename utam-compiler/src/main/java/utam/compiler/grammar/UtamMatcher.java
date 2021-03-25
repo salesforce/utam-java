@@ -29,10 +29,10 @@ class UtamMatcher {
     this.matcherType = matcherType;
   }
 
-  List<MethodParameter> getParameters(String elementName) {
+  List<MethodParameter> getParameters(String matcherContext) {
     return getArgsProcessor(
             args, this.matcherType.getExpectedParametersTypes(),
-            String.format("element '%s' matcher '%s'", elementName, matcherType))
+            String.format("%s: matcher '%s'", matcherContext, matcherType))
         .getOrdered();
   }
 

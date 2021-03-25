@@ -13,7 +13,6 @@ import static utam.compiler.grammar.UtamArgument.ERR_ARGS_TYPE_NOT_SUPPORTED;
 import static utam.compiler.grammar.UtamArgument.ERR_ARGS_WRONG_TYPE;
 import static utam.compiler.grammar.UtamArgument.ERR_NAME_TYPE_REDUNDANT;
 import static utam.compiler.grammar.UtamArgument.ERR_PREDICATE_REDUNDANT;
-import static utam.compiler.grammar.UtamArgument.ERR_VALUE_REDUNDANT;
 import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_DUPLICATE_NAMES;
 import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_WRONG_COUNT;
 import static utam.compiler.grammar.UtamArgument.getArgsProcessor;
@@ -226,7 +225,7 @@ public class UtamArgument_Tests {
     assertThat(
         e.getMessage(),
         containsString(
-            String.format(ERR_ARGS_WRONG_TYPE, ARGS_CONTEXT, "attrName", "Integer", "String")));
+            String.format(ERR_ARGS_WRONG_TYPE, ARGS_CONTEXT, "Integer", "String")));
   }
 
   @Test
@@ -267,7 +266,7 @@ public class UtamArgument_Tests {
     assertThat(
         e.getMessage(),
         containsString(
-            String.format(ERR_ARGS_WRONG_TYPE, "test", "nameValue", "Integer", "String")));
+            String.format(ERR_ARGS_WRONG_TYPE, "test", "Integer", "String")));
   }
 
   /**
@@ -347,17 +346,6 @@ public class UtamArgument_Tests {
             () -> getArgsProcessor(new UtamArgument[]{new UtamArgument(null)}, ARGS_CONTEXT));
     assertThat(
         e.getMessage(), containsString(String.format(ERR_ARGS_NAME_TYPE_MANDATORY, ARGS_CONTEXT)));
-  }
-
-  @Test
-  public void testFunctionTypeWithValueThrows() {
-    UtamError e =
-        expectThrows(
-            UtamError.class,
-            () -> getArgsProcessor(new UtamArgument[]{
-        new UtamArgument(true, "name", "function", null)
-    }, ARGS_CONTEXT));
-    assertThat(e.getMessage(), containsString(String.format(ERR_VALUE_REDUNDANT, ARGS_CONTEXT)));
   }
 
   @Test

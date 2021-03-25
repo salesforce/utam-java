@@ -9,8 +9,6 @@ import utam.core.selenium.expectations.DriverExpectationsUtil;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -72,20 +70,6 @@ public class ActionableActionTypeTests {
     assertThat(action.isSingleCardinality(), is(equalTo(isListAction)));
   }
 
-  private static void validateParameterizedAction(
-      ActionType action, String returnType, List<String> parameterTypes) {
-    Set<String> parameterTypeStrings =
-        action.getParametersTypes().stream()
-            .filter((type) -> !type.getSimpleName().isEmpty())
-            .map(TypeProvider::getSimpleName)
-            .collect(Collectors.toSet());
-
-    assertThat(parameterTypeStrings, containsInAnyOrder(parameterTypes.toArray()));
-    assertThat(parameterTypeStrings, hasSize(parameterTypes.size()));
-    assertThat(action.getReturnType().getSimpleName(), is(equalTo(returnType)));
-    assertThat(action.isSingleCardinality(), is(equalTo(false)));
-  }
-
   @Test
   public void checkSupportedActions() {
     for (Method method : Actionable.class.getDeclaredMethods()) {
@@ -135,10 +119,17 @@ public class ActionableActionTypeTests {
   /** The getAttribute member should return the proper value */
   @Test
   public void testGetAttribute() {
-    validateParameterizedAction(
-        ActionableActionType.getAttribute,
-        STRING_TYPE_NAME,
-        Collections.singletonList(STRING_TYPE_NAME));
+    ActionType action = ActionableActionType.getAttribute;
+    Set<String> parameterTypeStrings =
+        action.getParametersTypes().stream()
+            .filter((type) -> !type.getSimpleName().isEmpty())
+            .map(TypeProvider::getSimpleName)
+            .collect(Collectors.toSet());
+
+    assertThat(parameterTypeStrings, hasSize(1));
+    assertThat(parameterTypeStrings.iterator().next(), is(equalTo(STRING_TYPE_NAME)));
+    assertThat(action.getReturnType().getSimpleName(), is(equalTo(STRING_TYPE_NAME)));
+    assertThat(action.isSingleCardinality(), is(equalTo(false)));
   }
 
   /** The getText member should return the proper value */

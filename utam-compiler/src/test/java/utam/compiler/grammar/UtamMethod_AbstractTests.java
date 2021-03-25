@@ -87,7 +87,7 @@ public class UtamMethod_AbstractTests {
   @Test
   public void testGetAbstractMethodWithChainThrows() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, (String) null, (UtamArgument[]) null);
+    UtamMethod method = new UtamMethod(METHOD_NAME, null, (UtamArgument[]) null);
     method.chain = new UtamMethodChainLink[]{};
     UtamError e = expectThrows(UtamError.class, () -> method.getAbstractMethod(context));
     assertThat(

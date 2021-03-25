@@ -308,12 +308,36 @@ public class UtamMethod_ComposeDeserializeTests {
   }
 
   @Test
-  public void testComposeWaitForBasic() {
+  public void testComposeWaitForBasicActionThatReturnsString() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "String");
     methodInfo.addCodeLine("this.getRootElement().waitFor(() -> { \n"
         + "return this.getRootElement().getText(); \n"
         + "}");
-    TranslationContext context = new DeserializerUtilities().getContext("composeWaitFor");
+    TranslationContext context = new DeserializerUtilities().getContext("composeWaitFor1");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
+  }
+
+  @Test
+  public void testComposeWaitForBasicVoidAction() {
+    MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
+    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> { \n"
+        + "this.getRootElement().focus(); \n"
+        + "return true; \n"
+        + "}");
+    TranslationContext context = new DeserializerUtilities().getContext("composeWaitFor2");
+    PageObjectMethod method = context.getMethod("testCompose");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
+  public void testComposeWaitForContainsElementAction() {
+    MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
+    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> { \n"
+        + "this.getRootElement().getText(); \n"
+        + "return Boolean.FALSE.equals(this.getRootElement().containsElement(Selector.byCss(\".css\"))); \n"
+        + "}");
+    TranslationContext context = new DeserializerUtilities().getContext("composeWaitForSelector");
+    PageObjectMethod method = context.getMethod("testCompose");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 }

@@ -43,7 +43,7 @@ public class UtamMethod_ComposeTests {
     UtamMethod method =
         new UtamMethod(
             METHOD_NAME,
-            new UtamMethodAction[] {new UtamMethodAction(ELEMENT_NAME, "click", null)});
+            new UtamMethodAction[] {new UtamMethodAction(ELEMENT_NAME, "click")});
     MethodInfo methodInfo = new MethodInfo(METHOD_NAME, "void");
     methodInfo.addCodeLine(getElementPrivateMethodCalled(ELEMENT_NAME) + "().click()");
     PageObjectValidationTestHelper.validateMethod(method.getComposeMethod(context), methodInfo);
@@ -57,7 +57,7 @@ public class UtamMethod_ComposeTests {
     UtamMethod method =
         new UtamMethod(
             "testMethod",
-            new UtamMethodAction[] {new UtamMethodAction("testElement", "click", null)});
+            new UtamMethodAction[] {new UtamMethodAction("testElement", "click")});
     method.returnStr = "unsupported type";
     assertThrows(UtamError.class, () -> method.getComposeMethod(context));
   }
@@ -81,7 +81,7 @@ public class UtamMethod_ComposeTests {
     UtamMethod method =
         new UtamMethod(
             "testMethod",
-            new UtamMethodAction[] {new UtamMethodAction(ELEMENT_NAME, "click", null)});
+            new UtamMethodAction[] {new UtamMethodAction(ELEMENT_NAME, "click")});
     MethodInfo methodInfo = new MethodInfo("testMethod", "void");
     methodInfo.addCodeLine(getElementPrivateMethodCalled(ELEMENT_NAME) + "().click()");
 
@@ -99,11 +99,11 @@ public class UtamMethod_ComposeTests {
             "clickable",
             new UtamSelector(
                 ".fakeSelector[%s]",
-                false, new UtamArgument[] {new UtamArgument("selectorParameter", "string")}));
+                new UtamArgument[] {new UtamArgument("selectorParameter", "string")}));
     scopeElement.testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
-            ELEMENT_NAME, ClickableActionType.click.toString(), new UtamArgument[] {});
+            ELEMENT_NAME, ClickableActionType.click.toString());
     UtamMethod method = new UtamMethod(METHOD_NAME, new UtamMethodAction[] { action, action });
     MethodInfo methodInfo = new MethodInfo(METHOD_NAME, "void");
     methodInfo.addParameter(

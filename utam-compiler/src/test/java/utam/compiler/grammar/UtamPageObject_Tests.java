@@ -185,7 +185,7 @@ public class UtamPageObject_Tests {
     UtamPageObject pageObject = new UtamPageObject();
     pageObject.isAbstract = true;
     pageObject.methods =
-        new UtamMethod[] {new UtamMethod("testMethod", (String) null, (UtamArgument[]) null)};
+        new UtamMethod[] {new UtamMethod("testMethod", null, (UtamArgument[]) null)};
     MethodInfo methodInfo = new MethodInfo("testMethod", "void");
 
     pageObject.compile(context);

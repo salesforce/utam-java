@@ -3,6 +3,7 @@ package utam.compiler.representation;
 import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
 import static utam.compiler.helpers.TypeUtilities.COLLECTOR_IMPORT;
 import static utam.compiler.helpers.TypeUtilities.LIST_IMPORT;
+import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import java.util.ArrayList;
@@ -10,7 +11,9 @@ import java.util.Collections;
 import java.util.List;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.MethodContext;
+import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
@@ -25,31 +28,37 @@ public abstract class ComposeMethodStatement {
 
   final List<TypeProvider> classImports = new ArrayList<>();
   final List<TypeProvider> imports = new ArrayList<>();
-  final List<String> codeLines = new ArrayList<>();
-  private final TypeProvider returns;
+  private final List<String> codeLines = new ArrayList<>();
   private final List<MethodParameter> parameters = new ArrayList<>();
+  private final TypeProvider returns;
 
-  ComposeMethodStatement(Operand operand, Operation operation, TypeProvider returnType) {
+  ComposeMethodStatement(Operand operand, Operation operation, TypeProvider returnType,
+      MatcherType matcher, List<MethodParameter> matcherParameters) {
     this.returns = returnType;
     operand.setParameters(this.parameters);
     operation.setParameters(this.parameters);
     operation.setImports(this.imports);
     operation.setClassImports(this.classImports);
+    if (matcherParameters != null) {
+      this.parameters.addAll(matcherParameters);
+    }
     parameters.removeIf(p -> p == null || p.isLiteral());
+    String invocationStr = operation
+        .getCode(getMethodCallString(), operand.getElementGetterString());
     codeLines
-        .addAll(operation.getCodeLines(getMethodCallString(), operand.getElementGetterString()));
+        .add(matcher != null ? matcher.getCode(matcherParameters, invocationStr) : invocationStr);
+  }
+
+  ComposeMethodStatement(Operand operand, Operation operation, TypeProvider returnType) {
+    this(operand, operation, returnType, null, null);
   }
 
   public List<MethodParameter> getParameters() {
     return parameters;
   }
 
-  public TypeProvider getReturnType() {
-    return returns;
-  }
-
   public TypeProvider getReturnType(TypeProvider defaultReturn) {
-    if(returns == null) {
+    if (returns == null) {
       return defaultReturn;
     }
     return returns;
@@ -74,12 +83,14 @@ public abstract class ComposeMethodStatement {
    */
   public static class Single extends ComposeMethodStatement {
 
-    Single(Operand operand, Operation operation, TypeProvider returnType) {
-      super(operand, operation, returnType);
+    public Single(Operand operand, Operation operation, MatcherType matcher,
+        List<MethodParameter> matcherParameters) {
+      super(operand, operation, matcher == null ? operation.getReturnType() : PrimitiveType.BOOLEAN,
+          matcher, matcherParameters);
     }
 
-    public Single(Operand operand, Operation operation) {
-      this(operand, operation, operation.getReturnType());
+    Single(Operand operand, Operation operation) {
+      this(operand, operation, null, null);
     }
 
     String getMethodCallString() {
@@ -141,14 +152,14 @@ public abstract class ComposeMethodStatement {
 
     // used in tests
     Operand(ElementContext elementContext) {
-      this(elementContext, new MethodContext());
+      this(elementContext, new MethodContext("test", null));
     }
 
     String getElementGetterString() {
       List<MethodParameter> allParameters = elementContext.getParameters();
       String methodName = elementContext.getElementMethod().getDeclaration().getName();
       String parameters = getParametersValuesString(allParameters);
-      return "this." + String.format("%s(%s)", methodName, parameters);
+      return String.format("this.%s(%s)", methodName, parameters);
     }
 
     void setParameters(List<MethodParameter> parameters) {
@@ -173,14 +184,15 @@ public abstract class ComposeMethodStatement {
      * @param returnType       returnType from action, for waitFor it's last predicate
      * @param actionParameters parameters for method invocation
      */
-    Operation(ActionType action, TypeProvider returnType, List<MethodParameter> actionParameters) {
+    public Operation(ActionType action, TypeProvider returnType,
+        List<MethodParameter> actionParameters) {
       this.action = action;
       this.actionParameters = actionParameters;
-      this.returnType = returnType == null? action.getReturnType() : returnType;
+      this.returnType = returnType == null ? action.getReturnType() : returnType;
     }
 
     public Operation(ActionType action, List<MethodParameter> actionParameters) {
-      this(action, null, actionParameters);
+      this(action, action.getReturnType(), actionParameters);
     }
 
     // used in tests
@@ -192,24 +204,39 @@ public abstract class ComposeMethodStatement {
       parameters.addAll(actionParameters);
     }
 
-    List<String> getCodeLines(String invocationPattern, String elementGetter) {
-      String methodInvocation = String.format("%s(%s)", action.getInvokeMethodName(),
+    String getCode(String invocationPattern, String elementGetter) {
+      String methodInvocation = String.format("%s(%s)",
+          action.getInvokeMethodName(),
           getParametersValuesString(actionParameters));
-      String code = String.format(invocationPattern, elementGetter, methodInvocation);
-      return Collections.singletonList(code);
+      return String.format(invocationPattern, elementGetter, methodInvocation);
     }
 
     void setImports(List<TypeProvider> imports) {
+      // parameters can be non primitive like Selector
+      actionParameters
+          .stream()
+          .filter(p -> p != null && !p.isLiteral())
+          .forEach(p -> imports.add(p.getType()));
     }
 
     void setClassImports(List<TypeProvider> imports) {
+      // parameters can be non primitive like Selector
+      setImports(imports);
+      actionParameters
+          .stream()
+          .filter(p -> p != null && p.isLiteral())
+          .forEach(p -> {
+            if (SELECTOR.isSameType(p.getType())) {
+              imports.add(p.getType());
+            }
+          });
     }
 
     public boolean isReturnsVoid() {
       return getReturnType().isSameType(VOID);
     }
 
-    public TypeProvider getReturnType() {
+    TypeProvider getReturnType() {
       return returnType;
     }
   }
@@ -223,34 +250,46 @@ public abstract class ComposeMethodStatement {
     final List<TypeProvider> classImports = new ArrayList<>();
     final List<TypeProvider> imports = new ArrayList<>();
 
-    public OperationWithPredicate(ActionType action, TypeProvider returnType, List<ComposeMethodStatement> predicate) {
-      super(action, returnType, Collections.EMPTY_LIST);
-      for (int i = 0; i < predicate.size(); i++) {
-        ComposeMethodStatement statement = predicate.get(i);
+    public OperationWithPredicate(ActionType action, TypeProvider returnType,
+        List<ComposeMethodStatement> predicate) {
+      super(action, isReturnTypeNotSet(returnType) ? PrimitiveType.BOOLEAN : returnType,
+          Collections.EMPTY_LIST);
+      for (ComposeMethodStatement statement : predicate) {
         predicateCode.addAll(statement.getCodeLines());
         imports.addAll(statement.getImports());
         classImports.addAll(statement.getClassImports());
         actionParameters.addAll(statement.getParameters());
       }
-      int lastStatement = predicateCode.size() -1;
-      predicateCode.set(lastStatement, String.format("return %s;", predicateCode.get(lastStatement)));
+      int lastStatement = predicateCode.size() - 1;
+      if (isReturnTypeNotSet(returnType)) {
+        // add last statement that returns true if no exceptions were thrown
+        predicateCode.add("return true;");
+      } else {
+        predicateCode
+            .set(lastStatement, String.format("return %s;", predicateCode.get(lastStatement)));
+      }
+    }
+
+    private static boolean isReturnTypeNotSet(TypeProvider returnType) {
+      return returnType == null || returnType.isSameType(VOID);
     }
 
     @Override
-    List<String> getCodeLines(String invocationPattern, String elementGetter) {
+    String getCode(String invocationPattern, String elementGetter) {
       String methodInvocation = String
           .format("waitFor(() -> { \n%s \n}", String.join("; \n", predicateCode));
-      String code = String.format(invocationPattern, elementGetter, methodInvocation);
-      return Collections.singletonList(code);
+      return String.format(invocationPattern, elementGetter, methodInvocation);
     }
 
     @Override
     void setImports(List<TypeProvider> imports) {
+      super.setImports(imports);
       imports.addAll(this.imports);
     }
 
     @Override
     void setClassImports(List<TypeProvider> imports) {
+      super.setClassImports(imports);
       imports.addAll(this.classImports);
     }
   }
