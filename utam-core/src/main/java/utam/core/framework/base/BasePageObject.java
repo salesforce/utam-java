@@ -161,8 +161,8 @@ public abstract class BasePageObject implements RootPageObject {
         getFactory(), getElementLocator(scopeElement), selector);
   }
 
-  protected final PageObjectElementBuilder element(BaseElement pageObjectElement) {
-    return new PageObjectElementBuilderImpl(getFactory(), pageObjectElement);
+  protected final PageObjectElementBuilder element(BaseElement pageObjectElement, boolean isNullable) {
+    return new PageObjectElementBuilderImpl(getFactory(), pageObjectElement, isNullable);
   }
 
   protected final ContainerElement inContainer(BaseElement scopeElement, boolean isExpandShadow) {

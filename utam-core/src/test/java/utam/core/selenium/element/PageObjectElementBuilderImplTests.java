@@ -47,7 +47,7 @@ public class PageObjectElementBuilderImplTests {
       SeleniumContext seleniumContext, BaseElement element) {
     PageObjectsFactory factory = mock(PageObjectsFactory.class);
     when(factory.getSeleniumContext()).thenReturn(seleniumContext);
-    return new PageObjectElementBuilderImpl(factory, element);
+    return new PageObjectElementBuilderImpl(factory, element, false);
   }
 
   static BaseElement getCssElement(String css, SeleniumContext context) {

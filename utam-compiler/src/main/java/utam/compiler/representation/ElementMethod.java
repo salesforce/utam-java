@@ -29,12 +29,12 @@ public abstract class ElementMethod implements PageObjectMethod {
   static final String BUILDER_METHOD = "build";
   static final String LIST_BUILDER_METHOD = "buildList";
 
-  static String getSingleElementMethodCode(ElementContext element) {
+  static String getSingleElementMethodCode(ElementContext element, boolean isNullable) {
     if (!element.getParameters().isEmpty()) {
       return String.format(
           "%s(%s).%s(%s.class, %s)",
           BASE_PAGE_OBJECT_METHOD,
-          String.format("this.%s", element.getName()),
+          String.format("this.%s, %s", element.getName(), isNullable),
           BUILDER_METHOD,
           element.getType().getSimpleName(),
           getParametersValuesString(element.getParameters()));
@@ -43,7 +43,7 @@ public abstract class ElementMethod implements PageObjectMethod {
     }
   }
 
-  static String getElementListMethodCode(ElementContext element) {
+  static String getElementListMethodCode(ElementContext element, boolean isNullable) {
     String selectorParametersStr;
     if (!element.getParameters().isEmpty()) {
       selectorParametersStr = ", " + getParametersValuesString(element.getParameters());
@@ -53,7 +53,7 @@ public abstract class ElementMethod implements PageObjectMethod {
     return String.format(
         "%s(%s).%s(%s.class%s)",
         BASE_PAGE_OBJECT_METHOD,
-        String.format("this.%s", element.getName()),
+        String.format("this.%s, %s", element.getName(), isNullable),
         LIST_BUILDER_METHOD,
         element.getType().getSimpleName(),
         selectorParametersStr);
@@ -64,14 +64,15 @@ public abstract class ElementMethod implements PageObjectMethod {
       TypeProvider elementType,
       List<MethodParameter> elementParameters,
       String predicateCode,
-      boolean isReturnFirstMatch) {
+      boolean isReturnFirstMatch,
+      boolean isNullable) {
     String selectorParametersStr;
     if (!elementParameters.isEmpty()) {
       selectorParametersStr = ", " + getParametersValuesString(elementParameters);
     } else {
       selectorParametersStr = "";
     }
-    String elementInstance = String.format("this.%s", elementName);
+    String elementInstance = String.format("this.%s, %s", elementName, isNullable);
     String builderMethod = isReturnFirstMatch ? BUILDER_METHOD : LIST_BUILDER_METHOD;
     return String.format(
         "%s(%s).%s(%s.class, %s%s)",
@@ -102,8 +103,8 @@ public abstract class ElementMethod implements PageObjectMethod {
     private final String methodName;
     private final boolean isPublic;
 
-    public Single(ElementContext element, boolean isPublic) {
-      this.methodCode = getSingleElementMethodCode(element);
+    public Single(ElementContext element, boolean isPublic, boolean isNullable) {
+      this.methodCode = getSingleElementMethodCode(element, isNullable);
       this.parameters = element.getParameters();
       this.methodName = getElementGetterMethodName(element.getName(), isPublic);
       this.returnType = element.getType();
@@ -140,8 +141,8 @@ public abstract class ElementMethod implements PageObjectMethod {
     private final String methodName;
     private final boolean isPublic;
 
-    public Multiple(ElementContext element, boolean isPublic) {
-      this.methodCode = ElementMethod.getElementListMethodCode(element);
+    public Multiple(ElementContext element, boolean isPublic, boolean isNullable) {
+      this.methodCode = ElementMethod.getElementListMethodCode(element, isNullable);
       this.parameters = element.getParameters();
       this.methodName = getElementGetterMethodName(element.getName(), isPublic);
       this.returnType = element.getType();
@@ -192,7 +193,8 @@ public abstract class ElementMethod implements PageObjectMethod {
         List<MethodParameter> applyParameters,
         MatcherType matcherType,
         List<MethodParameter> matcherParameters,
-        boolean isFindFirstMatch) {
+        boolean isFindFirstMatch,
+        boolean isNullable) {
       this.isPublic = isPublic;
       this.methodName = getElementGetterMethodName(elementName, isPublic);
       this.returnType = elementType;
@@ -210,7 +212,7 @@ public abstract class ElementMethod implements PageObjectMethod {
               elementType,
               elementParameters,
               getPredicateCode(applyMethod, applyParameters, matcherType, matcherParameters),
-              isFindFirstMatch));
+              isFindFirstMatch, isNullable));
     }
 
     @Override

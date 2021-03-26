@@ -314,11 +314,11 @@ public final class UtamElement {
                 filter.getApplyMethodParameters(),
                 filter.getMatcherType(),
                 filter.getMatcherParameters(),
-                filter.getFindFirst());
+                filter.getFindFirst(), isNullable());
       } else if (isList) {
-        method = new ElementMethod.Multiple(elementContext, isPublic());
+        method = new ElementMethod.Multiple(elementContext, isPublic(), isNullable());
       } else {
-        method = new ElementMethod.Single(elementContext, isPublic());
+        method = new ElementMethod.Single(elementContext, isPublic(), isNullable());
       }
       context.setClassField(field);
       context.setElement(elementContext);

@@ -300,7 +300,7 @@ public class UtamElement_BasicTests {
   public void testGetDeclaredMethodsWithList() {
     UtamElement element = getPublicHtmlElement(getListCssSelector(), null);
     MethodInfo info = new MethodInfo(METHOD_NAME, String.format("List<%s>", ACTIONABLE_TYPE_NAME));
-    info.addCodeLine("element(this.test).buildList(Actionable.class)");
+    info.addCodeLine("element(this.test, false).buildList(Actionable.class)");
     PageObjectValidationTestHelper.validateMethod(
         Objects.requireNonNull(getElementMethod(element)), info);
   }

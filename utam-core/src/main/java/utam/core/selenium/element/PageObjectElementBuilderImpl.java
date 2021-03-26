@@ -27,16 +27,18 @@ public class PageObjectElementBuilderImpl implements PageObjectElementBuilder {
   private final SeleniumContext seleniumContext;
   // can be null if used to build Container element
   private final BaseElement self;
+  private final boolean isNullable;
 
-  public PageObjectElementBuilderImpl(PageObjectsFactory pageObjectsFactory, BaseElement element) {
+  public PageObjectElementBuilderImpl(PageObjectsFactory pageObjectsFactory, BaseElement element, boolean isNullable) {
     this.seleniumContext = pageObjectsFactory.getSeleniumContext();
     this.self = element;
+    this.isNullable = isNullable;
   }
 
   @SuppressWarnings("unused")
   // constructor for container element
   public PageObjectElementBuilderImpl(PageObjectsFactory pageObjectsFactory) {
-    this(pageObjectsFactory, null);
+    this(pageObjectsFactory, null, false);
   }
 
   static ElementListExpectations<Integer> countElements(boolean isNullable) {
@@ -96,6 +98,9 @@ public class PageObjectElementBuilderImpl implements PageObjectElementBuilder {
   public <T extends Actionable> T build(Class<T> type, Predicate<T> filter, Object... values) {
     List<T> list = buildList(type, values);
     if (list.isEmpty()) {
+      if (isNullable) {
+        return null;
+      }
       throw new UtamError("can't find matching element");
     }
     for (T t : list) {
@@ -117,7 +122,7 @@ public class PageObjectElementBuilderImpl implements PageObjectElementBuilder {
       Locator.Parameters parameters = new LocatorParameters(values);
       locator = locatorWithoutParameters.setParameters(parameters);
     }
-    int count = count(false, locator);
+    int count = count(isNullable, locator);
     return IntStream.range(0, count)
         .mapToObj(
             index -> (T) LocatorUtilities.getElement(locator.setIndex(index), seleniumContext))
@@ -129,6 +134,9 @@ public class PageObjectElementBuilderImpl implements PageObjectElementBuilder {
       Class<T> type, Predicate<T> filter, Object... values) {
     List<T> list = buildList(type, values);
     if (list.isEmpty()) {
+      if (isNullable) {
+        return null;
+      }
       throw new UtamError("can't find matching element");
     }
     return list.stream().filter(filter).collect(Collectors.toList());
