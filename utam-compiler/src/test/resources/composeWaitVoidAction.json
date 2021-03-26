@@ -1,0 +1,37 @@
+{
+  "methods": [
+    {
+      "name": "testCompose",
+      "return" : "boolean",
+      "compose": [
+        {
+          "element": "root",
+          "apply": "waitFor",
+          "args": [
+            {
+              "type" : "function",
+              "predicate": [
+                {
+                  "element" : "root",
+                  "apply" : "getText",
+                  "matcher" : {
+                    "type" : "stringContains",
+                    "args" : [
+                      {
+                        "value" : "subString"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "element" : "root",
+                  "apply" : "focus"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

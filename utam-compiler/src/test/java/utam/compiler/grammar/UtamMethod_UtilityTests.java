@@ -114,7 +114,6 @@ public class UtamMethod_UtilityTests {
     final String METHOD_NAME = "testMethod";
     final String APPLY_METHOD_NAME = "utilityMethod";
     final String UTILITY_TYPE = "utam-test/utils/test/utilityMethodClass";
-    final String ELEMENT_NAME = "testElement";
     TranslationContext context = TestUtilities.getTestTranslationContext();
     UtamMethod utamMethod =
         new UtamMethod(

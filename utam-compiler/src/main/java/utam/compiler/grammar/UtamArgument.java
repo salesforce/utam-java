@@ -1,191 +1,238 @@
 package utam.compiler.grammar;
 
+import static utam.compiler.helpers.AnnotationUtils.getWrappedString;
+import static utam.compiler.helpers.PrimitiveType.BOOLEAN;
+import static utam.compiler.helpers.PrimitiveType.NUMBER;
+import static utam.compiler.helpers.PrimitiveType.STRING;
+import static utam.compiler.helpers.PrimitiveType.isPrimitiveType;
+import static utam.compiler.helpers.TypeUtilities.FUNCTION;
+import static utam.compiler.helpers.TypeUtilities.SELECTOR;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import utam.compiler.helpers.ParameterUtils;
-import utam.compiler.helpers.PrimitiveType;
-import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.UtamError;
-
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static utam.compiler.helpers.PrimitiveType.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import utam.compiler.helpers.MethodContext;
+import utam.compiler.helpers.ParameterUtils.Literal;
+import utam.compiler.helpers.ParameterUtils.Regular;
+import utam.compiler.helpers.PrimitiveType;
+import utam.compiler.helpers.TranslationContext;
+import utam.compiler.representation.ComposeMethodStatement;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
+import utam.core.selenium.element.Selector;
+import utam.core.selenium.element.Selector.Type;
 
 /**
  * @author elizaveta.ivanova
  * @since 228
  */
+@JsonDeserialize(using = UtamArgumentDeserializer.class)
 class UtamArgument {
 
+  static final String FUNCTION_TYPE_PROPERTY = "function";
+  static final String SELECTOR_TYPE_PROPERTY = "locator";
   static final String ERR_ARGS_NAME_TYPE_MANDATORY =
       "%s: argument name and type are required";
+  static final String ERR_ARGS_WRONG_TYPE = "%s: expected type is '%s', actual was '%s'";
+  static final String ERR_NAME_TYPE_REDUNDANT = "%s: properties 'name' or 'type' are redundant";
+  static final String ERR_PREDICATE_REDUNDANT = "%s: property 'predicate' is only supported for 'function' type";
+  private static final String SUPPORTED_ARGS_TYPES =
+      Stream.concat(Stream.of(FUNCTION_TYPE_PROPERTY, SELECTOR_TYPE_PROPERTY),
+          Stream.of(PrimitiveType.values())
+              .map(PrimitiveType::getJsonTypeName))
+          .collect(Collectors.joining(","));
   static final String ERR_ARGS_TYPE_NOT_SUPPORTED =
-      "%s: type '%s' is not supported, supported are primitive types " + SUPPORTED_TYPES;
-  static final String ERR_ARGS_WRONG_TYPE =
-      "%s: for parameter '%s' expected type is '%s', actual was '%s'";
-  static final String ERR_ARGS_NUMBER_MISMATCH = "%s: expected %d parameters, provided %d";
-  static final String ERR_LITERAL_NOT_SUPPORTED = "%s: literal argument is not supported";
-  static final String ERR_LITERAL_REDUNDANT =
-      "%s: argument already has literal value, name and type are redundant";
-
-  private final String name;
-  private final String type;
-  private final Object value;
+      "%s: args type '%s' is not supported, supported are { " + SUPPORTED_ARGS_TYPES + " }";
+  private static final String ERR_VALUE_REDUNDANT = "%s: property 'value' is redundant";
+  private static final String ERR_FUNCTION_NEEDS_PREDICATE = "%s: type function needs a non-empty predicate";
+  String name;
+  String type;
+  Object value;
+  UtamMethodAction[] conditions;
 
   @JsonCreator
   UtamArgument(
       @JsonProperty(value = "value") Object value,
       @JsonProperty(value = "name") String name,
-      @JsonProperty(value = "type") String type) {
+      @JsonProperty(value = "type") String type,
+      @JsonProperty(value = "predicate") UtamMethodAction[] conditions) {
     this.name = name;
     this.type = type;
     this.value = value;
+    this.conditions = conditions;
   }
 
   // used in tests
   UtamArgument(String name, String type) {
-    this(null, name, type);
+    this(null, name, type, null);
   }
 
   // used in tests
   UtamArgument(Object value) {
-    this(value, null, null);
+    this(value, null, null, null);
   }
 
-  static Processor nonLiteralParameters(
-      UtamArgument[] args, List<TypeProvider> expectedTypes, String elementName) {
-    return new Processor(args, expectedTypes, elementName);
+  static Processor getArgsProcessor(
+      UtamArgument[] args, List<TypeProvider> expectedTypes, String argsContext) {
+    return new Processor(argsContext, args, expectedTypes);
   }
 
-  static Processor literalParameters(
-      UtamArgument[] args, List<TypeProvider> expectedTypes, String elementName) {
-    return new ProcessorSupportsLiteral(args, expectedTypes, elementName);
+  static Processor getArgsProcessor(UtamArgument[] args, String argsContext) {
+    return getArgsProcessor(args, null, argsContext);
   }
 
-  static Processor unknownTypesParameters(UtamArgument[] args, String elementName) {
-    return new Processor(args, null, elementName);
-  }
-
-  private MethodParameter getNamedParameter(String elementName, TypeProvider expectedType) {
-    if (name == null || type == null) {
-      throw new UtamError(String.format(ERR_ARGS_NAME_TYPE_MANDATORY, elementName));
+  static String getSelectorValuePattern(Selector.Type type) {
+    if (type == Type.CSS) {
+      return "%s.byCss(%s)";
+    } else if (type == Type.ACCESSID) {
+      return "%s.byAccessibilityId(%s)";
+    } else if (type == Type.CLASSCHAIN) {
+      return "%s.byClassChain(%s)";
+    } else if (type == Type.UIAUTOMATOR) {
+      return "%s.byUiAutomator(%s)";
     }
-    if (expectedType != null && expectedType.getSimpleName().equals(type)) {
-      return new ParameterUtils.Regular(name, expectedType);
-    }
-    PrimitiveType primitiveType = PrimitiveType.fromString(type);
-    if (primitiveType == null) {
-      throw new UtamError(String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, elementName, type));
-    }
-    if (expectedType != null && !primitiveType.equals(expectedType)) {
+    throw new UtamError(String.format("Unknown selector type '%s'", type));
+  }
+
+  private void checkExpectedType(String argsContext, TypeProvider expectedType,
+      TypeProvider actualType) {
+    if (expectedType != null && !actualType.isSameType(expectedType)) {
       throw new UtamError(
           String.format(
               ERR_ARGS_WRONG_TYPE,
-              elementName,
-              name,
-              expectedType.getSimpleName(),
-              primitiveType.getSimpleName()));
-    }
-    return new ParameterUtils.Regular(name, primitiveType);
-  }
-
-  private MethodParameter getLiteralParameter(String elementName, TypeProvider expectedType) {
-    if (name != null || type != null) {
-      throw new UtamError(String.format(ERR_LITERAL_REDUNDANT, elementName));
-    }
-    PrimitiveType actualType = getValuePrimitiveType(elementName);
-    if (expectedType != null && !actualType.equals(expectedType)) {
-      throw new UtamError(
-          String.format(
-              ERR_ARGS_WRONG_TYPE,
-              elementName,
-              value,
+              argsContext,
               expectedType.getSimpleName(),
               actualType.getSimpleName()));
     }
-    return new ParameterUtils.Literal(value, actualType);
   }
 
-  private PrimitiveType getValuePrimitiveType(String nodeName) {
-    if (value instanceof Boolean) {
-      return BOOLEAN;
+  MethodParameter getParameterOrValue(String argsContext, TypeProvider expectedType) {
+    if (FUNCTION_TYPE_PROPERTY.equals(type)) {
+      checkExpectedType(argsContext, expectedType, FUNCTION);
+      // predicate is not a parameter
+      return null;
+    }
+    if (conditions != null) {
+      throw new UtamError(String.format(ERR_PREDICATE_REDUNDANT, argsContext));
+    }
+    MethodParameter parameter =
+        value != null ? getArgByValue(argsContext) : getArgByNameType(argsContext);
+    checkExpectedType(argsContext, expectedType, parameter.getType());
+    return parameter;
+  }
+
+  private MethodParameter getArgByValue(String argsContext) {
+    if (name != null || type != null) {
+      throw new UtamError(String.format(ERR_NAME_TYPE_REDUNDANT, argsContext));
+    }
+    TypeProvider type;
+    String strValue = value.toString();
+    if (value instanceof UtamSelector) {
+      type = SELECTOR;
+      Selector selector = ((UtamSelector) value).getSelector();
+      strValue = String
+          .format(getSelectorValuePattern(selector.getType()), SELECTOR.getSimpleName(),
+              getWrappedString(selector.getValue()));
+    } else if (value instanceof Boolean) {
+      type = BOOLEAN;
     } else if (value instanceof Number) {
-      return NUMBER;
+      type = NUMBER;
     } else if (value instanceof String) {
-      return STRING;
+      type = STRING;
+    } else {
+      throw new UtamError(
+          String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, argsContext, value.getClass().getName()));
     }
-    throw new UtamError(
-        String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, nodeName, value.getClass().getName()));
+    return new Literal(strValue, type);
   }
 
-  static class ProcessorSupportsLiteral extends Processor {
-
-    ProcessorSupportsLiteral(
-        UtamArgument[] args, List<TypeProvider> expectedTypes, String elementName) {
-      super(args, expectedTypes, elementName);
+  private MethodParameter getArgByNameType(String argsContext) {
+    // we already excluded case of value not being null
+    if (name == null || type == null) {
+      throw new UtamError(String.format(ERR_ARGS_NAME_TYPE_MANDATORY, argsContext));
     }
-
-    @Override
-    MethodParameter getParameter(int index, Set<String> uniqueNames) {
-      if (args[index].value != null) {
-        return args[index].getLiteralParameter(structureWithArgs, getExpectedType(index));
-      }
-      return super.getParameter(index, uniqueNames);
+    if (isPrimitiveType(type)) {
+      return new Regular(name, PrimitiveType.fromString(type));
+    } else if (SELECTOR_TYPE_PROPERTY.equals(type)) {
+      return new Regular(name, SELECTOR);
     }
+    throw new UtamError(String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, argsContext, type));
   }
+
+  List<ComposeMethodStatement> getPredicate(TranslationContext context,
+      MethodContext methodContext) {
+    String argsContext = String.format("method '%s' args", methodContext.getName());
+    if (value != null) {
+      throw new UtamError(String.format(ERR_VALUE_REDUNDANT, argsContext));
+    }
+    if (conditions == null || conditions.length == 0) {
+      throw new UtamError(String.format(ERR_FUNCTION_NEEDS_PREDICATE, argsContext));
+    }
+    List<ComposeMethodStatement> predicateStatements = new ArrayList<>();
+    for (int i = 0; i < conditions.length; i++) {
+      boolean isLastPredicateStatement = i == conditions.length - 1;
+      predicateStatements
+          .add(conditions[i].getComposeAction(context, methodContext, isLastPredicateStatement));
+    }
+    return predicateStatements;
+  }
+
 
   static class Processor {
 
-    static final String ERR_ARGS_DUPLICATE_NAMES = "'%s': duplicate arguments names '%s'";
+    static final String ERR_ARGS_DUPLICATE_NAMES = "%s: duplicate arguments names '%s'";
+    static final String ERR_ARGS_WRONG_COUNT = "%s: expected %d parameters, provided %d";
+
     final UtamArgument[] args;
-    final String structureWithArgs;
+    final String argsContext;
+    final List<MethodParameter> orderedParameters = new ArrayList<>();
     private final List<TypeProvider> expectedTypes;
 
-    Processor(UtamArgument[] args, List<TypeProvider> expectedTypes, String structureWithArgs) {
+    Processor(String argsContext, UtamArgument[] args, List<TypeProvider> expectedTypes) {
       this.args = args;
       this.expectedTypes = expectedTypes;
-      this.structureWithArgs = structureWithArgs;
+      this.argsContext = argsContext;
       int actualCnt = args == null ? 0 : args.length;
       if (expectedTypes != null && expectedTypes.size() != actualCnt) {
         throw new UtamError(
-            String.format(ERR_ARGS_NUMBER_MISMATCH, structureWithArgs, expectedTypes.size(), actualCnt));
+            String.format(ERR_ARGS_WRONG_COUNT, argsContext, expectedTypes.size(),
+                actualCnt));
+      }
+      if (args != null) {
+        Set<String> uniqueNamesTracker = new HashSet<>();
+        for (int i = 0; i < args.length; i++) {
+          setParameter(i, uniqueNamesTracker);
+        }
       }
     }
 
-    final TypeProvider getExpectedType(int i) {
-      return expectedTypes == null ? null : expectedTypes.get(i);
-    }
-
-    // override when supporting literals
-    MethodParameter getParameter(int index, Set<String> uniqueNames) {
-      if (args[index].value != null) {
-        throw new UtamError(String.format(ERR_LITERAL_NOT_SUPPORTED, structureWithArgs));
-      }
+    private void setParameter(int index, Set<String> uniqueNames) {
       MethodParameter parameter =
-          args[index].getNamedParameter(structureWithArgs, getExpectedType(index));
-      // check unique name
-      if (uniqueNames.contains(parameter.getValue())) {
-        throw new UtamError(
-            String.format(ERR_ARGS_DUPLICATE_NAMES, structureWithArgs, parameter.getValue()));
+          args[index].getParameterOrValue(argsContext,
+              expectedTypes == null ? null : expectedTypes.get(index));
+      if (parameter != null) {
+        // check unique name
+        if (uniqueNames.contains(parameter.getValue())) {
+          throw new UtamError(
+              String.format(ERR_ARGS_DUPLICATE_NAMES, argsContext, parameter.getValue()));
+        }
+        String name = args[index].name;
+        if (name != null) {
+          uniqueNames.add(name);
+        }
+        orderedParameters.add(parameter);
       }
-      uniqueNames.add(parameter.getValue());
-      return parameter;
     }
 
     final List<MethodParameter> getOrdered() {
-      List<MethodParameter> res = new ArrayList<>();
-      if (args == null) {
-        return res;
-      }
-      Set<String> uniqueNames = new HashSet<>();
-      for (int i = 0; i < args.length; i++) {
-        res.add(getParameter(i, uniqueNames));
-      }
-      return res;
+      return orderedParameters;
     }
   }
 }

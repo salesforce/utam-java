@@ -23,7 +23,6 @@ import java.util.List;
 
 import static utam.compiler.helpers.AnnotationUtils.getFindAnnotation;
 import static utam.compiler.helpers.ElementContext.ROOT_SCOPE;
-import static utam.compiler.helpers.TypeUtilities.Element.actionable;
 import static utam.compiler.translator.TranslationUtilities.setHtmlElementComments;
 
 /**
@@ -323,7 +322,6 @@ public final class UtamElement {
       context.setClassField(field);
       context.setElement(elementContext);
       context.setMethod(method);
-      elementContext.setElementField(field);
       elementContext.setElementMethod(method);
       context.setTestableElement(name, new ElementUnitTestHelper(
               selector.getSelector().getValue(),
@@ -375,13 +373,6 @@ public final class UtamElement {
         method = new ContainerMethod.WithSelector(
             scopeElement, isExpandScopeShadowRoot, name, injectSelector, selectorParameters);
       }
-      if (!isPublic()) {
-        throw new UtamError(
-            String.format(
-                "Private container is redundant, please mark element '%s' as public",
-                elementContext.getName()));
-      }
-
       // we used scope method in container code, register
       context.setPrivateMethodUsage(scopeElement.getElementMethod().getDeclaration().getName());
       elementContext.setElementMethod(method);

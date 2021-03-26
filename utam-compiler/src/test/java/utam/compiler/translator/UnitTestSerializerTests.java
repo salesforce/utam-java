@@ -352,7 +352,6 @@ public class UnitTestSerializerTests {
             + "    {"
             + "      \"name\": \"testElement\","
             + "      \"selector\": {"
-            + "        \"returnAll\": true,"
             + "        \"css\": \".fakeSelector\""
             + "      }"
             + "    }"

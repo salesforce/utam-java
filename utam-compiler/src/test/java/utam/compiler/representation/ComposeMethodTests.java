@@ -1,31 +1,35 @@
 package utam.compiler.representation;
 
-import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.TypeProvider;
-import utam.compiler.grammar.UtamElement;
-import utam.compiler.grammar.UtamSelector;
-import utam.compiler.helpers.ActionableActionType;
-import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.TranslationContext;
-import utam.compiler.helpers.TypeUtilities;
-import utam.core.framework.consumer.UtamError;
-import org.testng.annotations.Test;
-import utam.core.selenium.element.Actionable;
-
-import java.util.Collections;
-
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
 import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.expectThrows;
+
+import java.util.Collections;
+import org.testng.annotations.Test;
+import utam.compiler.grammar.UtamElement;
+import utam.compiler.grammar.UtamSelector;
+import utam.compiler.helpers.ActionType;
+import utam.compiler.helpers.ActionableActionType;
+import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.MethodContext;
+import utam.compiler.helpers.ParameterUtils.Primitive;
+import utam.compiler.helpers.PrimitiveType;
+import utam.compiler.helpers.TranslationContext;
+import utam.compiler.helpers.TypeUtilities;
+import utam.compiler.representation.ComposeMethodStatement.BasicElementOperation;
+import utam.compiler.representation.ComposeMethodStatement.Operand;
+import utam.compiler.representation.ComposeMethodStatement.Operation;
+import utam.compiler.representation.ComposeMethodStatement.ReturnsList;
+import utam.compiler.representation.ComposeMethodStatement.Single;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.selenium.element.Actionable;
 
 /**
  * Provides tests for the ComposeMethod class
@@ -34,13 +38,29 @@ import static org.testng.Assert.expectThrows;
  */
 public class ComposeMethodTests {
 
-  private static final String METHOD_NAME = "fakeMethodName";
+  private static final String METHOD_NAME = "test";
   private static final String ELEMENT_NAME = "fakeElementName";
 
-  private static ComposeMethod getComposeMethod(ComposeMethod.ElementAction statement) {
+  private static MethodContext getMethodContext() {
+    return new MethodContext(METHOD_NAME, null, false);
+  }
+
+  private static ComposeMethod getComposeMethod(ComposeMethodStatement statement) {
     // used in tests
     return new ComposeMethod(
-        METHOD_NAME, Collections.singletonList(statement), EMPTY_PARAMETERS, EMPTY_COMMENTS);
+        getMethodContext(),
+        Collections.singletonList(statement),
+        EMPTY_PARAMETERS,
+        EMPTY_COMMENTS);
+  }
+
+  private static Operation getBasicElementOperation(ActionType actionType) {
+    return new BasicElementOperation(actionType, Collections.EMPTY_LIST, false);
+  }
+
+  private static Operation getBasicElementOperation(ActionType actionType,
+      MethodParameter parameter) {
+    return new BasicElementOperation(actionType, Collections.singletonList(parameter), false);
   }
 
   @Test
@@ -51,8 +71,9 @@ public class ComposeMethodTests {
 
     TypeProvider fakeReturnType =
         new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
-    ComposeMethod.ElementAction methodAction = mock(ComposeMethod.ElementAction.class);
-    when(methodAction.getCodeLine()).thenReturn("return this.fakeElement");
+    ComposeMethodStatement methodAction = mock(ComposeMethodStatement.class);
+    when(methodAction.getCodeLines())
+        .thenReturn(Collections.singletonList("return this.fakeElement"));
     when(methodAction.getReturnType()).thenReturn(fakeReturnType);
     when(methodAction.getImports()).thenReturn(Collections.singletonList(fakeReturnType));
 
@@ -61,7 +82,6 @@ public class ComposeMethodTests {
     assertThat(method.getClassImports(), hasSize(0));
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testComposeMethodWithVoidRootStatement() {
     PageObjectValidationTestHelper.MethodInfo info =
@@ -71,17 +91,13 @@ public class ComposeMethodTests {
     TypeProvider elementType = new TypeUtilities.FromClass(Actionable.class);
     ElementContext element = new ElementContext.Root(elementType, actionable, null);
     element.setElementMethod(new RootElementMethod.Public(actionable));
-    ComposeMethod.ElementAction action =
-        new ComposeMethod.ElementAction(
-            Collections.EMPTY_SET,
-            element,
-            ActionableActionType.focus,
-            EMPTY_PARAMETERS);
+    ComposeMethodStatement action =
+        new Single(new Operand(element),
+            getBasicElementOperation(ActionableActionType.focus));
     ComposeMethod method = getComposeMethod(action);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testComposeMethodWithVoidListStatement() {
     PageObjectValidationTestHelper.MethodInfo info =
@@ -91,13 +107,13 @@ public class ComposeMethodTests {
     TranslationContext context = getTestTranslationContext();
     new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
-    ComposeMethod.ElementAction action =
-        new ComposeMethod.VoidListAction(Collections.EMPTY_SET, element, ActionableActionType.focus, EMPTY_PARAMETERS);
+    ComposeMethodStatement action =
+        new ComposeMethodStatement.VoidList(new Operand(element),
+            getBasicElementOperation(ActionableActionType.focus));
     ComposeMethod method = getComposeMethod(action);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testComposeMethodWithSimpleListStatement() {
     PageObjectValidationTestHelper.MethodInfo info =
@@ -106,13 +122,13 @@ public class ComposeMethodTests {
     TranslationContext context = getTestTranslationContext();
     new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
-    ComposeMethod.ElementAction action =
-        new ComposeMethod.SimpleListAction(Collections.EMPTY_SET, element, ActionableActionType.size, EMPTY_PARAMETERS);
+    ComposeMethodStatement action =
+        new Single(new Operand(element),
+            getBasicElementOperation(ActionableActionType.size));
     ComposeMethod method = getComposeMethod(action);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testComposeMethodWithListStatement() {
     PageObjectValidationTestHelper.MethodInfo info =
@@ -123,17 +139,14 @@ public class ComposeMethodTests {
     TranslationContext context = getTestTranslationContext();
     new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
-    ComposeMethod.ElementAction action =
-        new ComposeMethod.ListAction(
-            Collections.EMPTY_SET,
-            element,
-            ActionableActionType.getText,
-            EMPTY_PARAMETERS);
+    ComposeMethodStatement action =
+        new ReturnsList(
+            new Operand(element),
+            getBasicElementOperation(ActionableActionType.getText));
     ComposeMethod method = getComposeMethod(action);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testComposeMethodWithElementStatement() {
     PageObjectValidationTestHelper.MethodInfo info =
@@ -142,17 +155,12 @@ public class ComposeMethodTests {
     TranslationContext context = getTestTranslationContext();
     new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
-    ComposeMethod.ElementAction action =
-        new ComposeMethod.ElementAction(
-            Collections.EMPTY_SET,
-            element,
-            ActionableActionType.getText,
-            EMPTY_PARAMETERS);
+    ComposeMethodStatement action = new Single(new Operand(element),
+        getBasicElementOperation(ActionableActionType.getText));
     ComposeMethod method = getComposeMethod(action);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testComposeMethodWithElementStatementWithParameters() {
     PageObjectValidationTestHelper.MethodInfo info =
@@ -161,44 +169,44 @@ public class ComposeMethodTests {
     info.addParameter(
         new PageObjectValidationTestHelper.MethodParameterInfo("paramName", "String"));
 
-    TypeProvider paramType = new TypeUtilities.FromString("String", "String");
-    MethodParameter parameter = mock(MethodParameter.class);
-    when(parameter.getValue()).thenReturn("paramName");
-    when(parameter.getType()).thenReturn(paramType);
+    MethodParameter parameter = new Primitive("paramName", PrimitiveType.STRING);
 
     TranslationContext context = getTestTranslationContext();
     new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
 
-    ComposeMethod.ElementAction action =
-        new ComposeMethod.ElementAction(
-            Collections.EMPTY_SET,
-            element,
-            ActionableActionType.getText,
-            Collections.singletonList(parameter));
+    ComposeMethodStatement action =
+        new Single(
+            new Operand(element),
+            getBasicElementOperation(ActionableActionType.getText, parameter));
     ComposeMethod method =
         new ComposeMethod(
-            METHOD_NAME, Collections.singletonList(action), action.getParameters(), EMPTY_COMMENTS);
+            getMethodContext(), Collections.singletonList(action),
+            action.getParameters(), EMPTY_COMMENTS);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
-  @SuppressWarnings("unchecked")
   @Test
-  public void testComposeMethodWithListStatementWithParametersThrows() {
+  public void testComposeMethodWithListAndParameter() {
     TranslationContext context = getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
+    UtamElement utamElement = new UtamElement(ELEMENT_NAME, new UtamSelector("css", true));
+    utamElement.testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
+    PageObjectValidationTestHelper.MethodInfo info =
+        new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "List<String>");
+    info.addCodeLine(getElementPrivateMethodCalled(ELEMENT_NAME)
+        + "().stream().map(element -> element.getText(paramName)).collect(Collectors.toList())");
+    info.addParameter(
+        new PageObjectValidationTestHelper.MethodParameterInfo("paramName", "String"));
 
-    MethodParameter parameter = mock(MethodParameter.class);
-    UtamError e =
-        expectThrows(
-            UtamError.class,
-            () ->
-                new ComposeMethod.SimpleListAction(
-                    Collections.EMPTY_SET,
-                    element,
-                    ActionableActionType.size,
-                    Collections.singletonList(parameter)));
-    assertThat(e.getMessage(), is(equalTo("parameters are not supported for list action")));
+    MethodParameter parameter = new Primitive("paramName", PrimitiveType.STRING);
+    ComposeMethodStatement action = new ComposeMethodStatement.ReturnsList(
+        new Operand(element),
+        getBasicElementOperation(ActionableActionType.getText, parameter));
+    ComposeMethod method =
+        new ComposeMethod(
+            getMethodContext(), Collections.singletonList(action),
+            action.getParameters(), EMPTY_COMMENTS);
+    PageObjectValidationTestHelper.validateMethod(method, info);
   }
 }

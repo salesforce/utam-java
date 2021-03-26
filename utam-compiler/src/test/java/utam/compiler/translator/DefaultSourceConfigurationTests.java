@@ -5,7 +5,6 @@ import org.testng.annotations.Test;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorSourceConfig;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Paths;

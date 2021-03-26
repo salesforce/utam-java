@@ -8,7 +8,6 @@ import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.framework.base.PageObject;
 import org.testng.annotations.Test;
 import utam.core.selenium.element.Selector;
-import utam.core.selenium.element.Web;
 
 import java.util.List;
 
@@ -31,7 +30,6 @@ public class ContainerMethodTests {
 
   static final String RETURN_TYPE = CONTAINER_RETURN_TYPE.getSimpleName();
   static final String LIST_RETURN_TYPE = CONTAINER_LIST_RETURN_TYPE.getSimpleName();
-  public static final String EXPECTED_CODE_LOAD = "load(pageObjectType, injectedSelector)";
   public static final MethodParameterInfo FIRST_CONTAINER_PARAMETER =
       new PageObjectValidationTestHelper.MethodParameterInfo(
           PAGE_OBJECT_PARAMETER.getValue(), PAGE_OBJECT_PARAMETER.getType().getSimpleName());
@@ -58,7 +56,7 @@ public class ContainerMethodTests {
     info.addImpliedImportedTypes(PageObject.class.getName(), Selector.class.getName());
     info.addParameter(FIRST_CONTAINER_PARAMETER);
     ContainerMethod method = new ContainerMethod.WithSelector(
-        getScope(), false, ELEMENT_NAME, Web.byCss(".fakeSelector"), EMPTY_PARAMETERS);
+        getScope(), false, ELEMENT_NAME, getCssSelector(".fakeSelector"), EMPTY_PARAMETERS);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
@@ -71,7 +69,7 @@ public class ContainerMethodTests {
     info.addImpliedImportedTypes(PageObject.class.getName(), Selector.class.getName());
     info.addParameter(FIRST_CONTAINER_PARAMETER);
     ContainerMethod method = new ContainerMethod.WithSelectorReturnsList(
-        getScope(), false, ELEMENT_NAME, Web.byCss(".fakeSelector"), EMPTY_PARAMETERS);
+        getScope(), false, ELEMENT_NAME, getCssSelector(".fakeSelector"), EMPTY_PARAMETERS);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 }

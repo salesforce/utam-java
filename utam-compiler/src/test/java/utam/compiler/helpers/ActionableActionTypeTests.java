@@ -1,5 +1,6 @@
 package utam.compiler.helpers;
 
+import java.util.Objects;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.ContainerElement;
 import utam.core.framework.consumer.UtamError;
@@ -9,8 +10,6 @@ import utam.core.selenium.expectations.DriverExpectationsUtil;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -45,7 +44,10 @@ public class ActionableActionTypeTests {
       return clazz.getDeclaredMethod(methodName, parameters);
     } catch (Exception e) {
       throw new AssertionError(
-          String.format("method '%s' not found in class %s", methodName, clazz.getName()), e);
+          String.format("method '%s' with parameters {%s} not found in class %s",
+              methodName,
+              Stream.of(parameters).filter(Objects::nonNull).map(Class::getSimpleName).collect(Collectors.joining(",")),
+              clazz.getName()), e);
     }
   }
 
@@ -63,24 +65,9 @@ public class ActionableActionTypeTests {
         ELEMENT_NAME, TypeUtilities.Element.touchable, getCssSelector("selector"));
   }
 
-  private static void validateAction(ActionType action, String returnType, boolean isListAction) {
+  private static void validateAction(ActionType action, String returnType) {
     assertThat(action.getParametersTypes(), is(empty()));
     assertThat(action.getReturnType().getSimpleName(), is(equalTo(returnType)));
-    assertThat(action.isListAction(), is(equalTo(isListAction)));
-  }
-
-  private static void validateParameterizedAction(
-      ActionType action, String returnType, List<String> parameterTypes) {
-    Set<String> parameterTypeStrings =
-        action.getParametersTypes().stream()
-            .filter((type) -> !type.getSimpleName().isEmpty())
-            .map(TypeProvider::getSimpleName)
-            .collect(Collectors.toSet());
-
-    assertThat(parameterTypeStrings, containsInAnyOrder(parameterTypes.toArray()));
-    assertThat(parameterTypeStrings, hasSize(parameterTypes.size()));
-    assertThat(action.getReturnType().getSimpleName(), is(equalTo(returnType)));
-    assertThat(action.isListAction(), is(equalTo(false)));
   }
 
   @Test
@@ -103,98 +90,104 @@ public class ActionableActionTypeTests {
 
   @Test
   public void testScrollToCenter() {
-    validateAction(ActionableActionType.scrollToCenter, VOID_TYPE_NAME, false);
+    validateAction(ActionableActionType.scrollToCenter, VOID_TYPE_NAME);
   }
 
   @Test
   public void testHasFocus() {
-    validateAction(ActionableActionType.isFocused, BOOLEAN_TYPE_NAME, false);
+    validateAction(ActionableActionType.isFocused, BOOLEAN_TYPE_NAME);
   }
 
   /** The absence member should return the proper value */
   @Test
   public void testAbsence() {
-    validateAction(ActionableActionType.waitForAbsence, VOID_TYPE_NAME, true);
+    validateAction(ActionableActionType.waitForAbsence, VOID_TYPE_NAME);
   }
 
   /** The visibility member should return the proper value */
   @Test
   public void testVisibility() {
-    validateAction(ActionableActionType.waitForVisible, VOID_TYPE_NAME, true);
+    validateAction(ActionableActionType.waitForVisible, VOID_TYPE_NAME);
   }
 
   /** The focus member should return the proper value */
   @Test
   public void testFocus() {
-    validateAction(ActionableActionType.focus, VOID_TYPE_NAME, false);
+    validateAction(ActionableActionType.focus, VOID_TYPE_NAME);
   }
 
   /** The getAttribute member should return the proper value */
   @Test
   public void testGetAttribute() {
-    validateParameterizedAction(
-        ActionableActionType.getAttribute,
-        STRING_TYPE_NAME,
-        Collections.singletonList(STRING_TYPE_NAME));
+    ActionType action = ActionableActionType.getAttribute;
+    Set<String> parameterTypeStrings =
+        action.getParametersTypes().stream()
+            .filter((type) -> !type.getSimpleName().isEmpty())
+            .map(TypeProvider::getSimpleName)
+            .collect(Collectors.toSet());
+
+    assertThat(parameterTypeStrings, hasSize(1));
+    assertThat(parameterTypeStrings.iterator().next(), is(equalTo(STRING_TYPE_NAME)));
+    assertThat(action.getReturnType().getSimpleName(), is(equalTo(STRING_TYPE_NAME)));
   }
 
   /** The getText member should return the proper value */
   @Test
   public void testGetText() {
-    validateAction(ActionableActionType.getText, STRING_TYPE_NAME, false);
+    validateAction(ActionableActionType.getText, STRING_TYPE_NAME);
   }
 
   /** The getTitle member should return the proper value */
   @Test
   public void testGetTitle() {
-    validateAction(ActionableActionType.getTitle, STRING_TYPE_NAME, false);
+    validateAction(ActionableActionType.getTitle, STRING_TYPE_NAME);
   }
 
   /** The invisibility member should return the proper value */
   @Test
   public void testInvisibility() {
-    validateAction(ActionableActionType.waitForInvisible, VOID_TYPE_NAME, true);
+    validateAction(ActionableActionType.waitForInvisible, VOID_TYPE_NAME);
   }
 
   /** The isDisplayed member should return the proper value */
   @Test
   public void testIsDisplayed() {
-    validateAction(ActionableActionType.isVisible, BOOLEAN_TYPE_NAME, true);
+    validateAction(ActionableActionType.isVisible, BOOLEAN_TYPE_NAME);
   }
 
   /** The isPresent member should return the proper value */
   @Test
   public void testIsPresent() {
-    validateAction(ActionableActionType.isPresent, BOOLEAN_TYPE_NAME, true);
+    validateAction(ActionableActionType.isPresent, BOOLEAN_TYPE_NAME);
   }
 
   /** The moveTo member should return the proper value */
   @Test
   public void testMoveTo() {
-    validateAction(ActionableActionType.moveTo, VOID_TYPE_NAME, false);
+    validateAction(ActionableActionType.moveTo, VOID_TYPE_NAME);
   }
 
   /** The scrollTo member should return the proper value */
   @Test
   public void testScrollTo() {
-    validateAction(ActionableActionType.scrollToTop, VOID_TYPE_NAME, false);
+    validateAction(ActionableActionType.scrollToTop, VOID_TYPE_NAME);
   }
 
   /** The blur member should return the proper value */
   @Test
   public void testBlur() {
-    validateAction(ActionableActionType.blur, VOID_TYPE_NAME, false);
+    validateAction(ActionableActionType.blur, VOID_TYPE_NAME);
   }
 
   /** The size member should return the proper value */
   @Test
   public void testSize() {
-    validateAction(ActionableActionType.size, NUMBER_TYPE_NAME, true);
+    validateAction(ActionableActionType.size, NUMBER_TYPE_NAME);
   }
 
   @Test
   public void testGetClass() {
-    validateAction(ActionableActionType.getClass, STRING_TYPE_NAME, false);
+    validateAction(ActionableActionType.getClass, STRING_TYPE_NAME);
   }
 
   @SuppressWarnings("rawtypes")

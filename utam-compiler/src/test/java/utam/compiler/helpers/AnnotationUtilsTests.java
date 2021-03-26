@@ -1,6 +1,5 @@
 package utam.compiler.helpers;
 
-import utam.core.appium.element.Mobile;
 import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.base.PageMarker;
@@ -108,7 +107,7 @@ public class AnnotationUtilsTests {
   /** The getFindAnnotation method should return the proper value: Accessibility ID selector */
   @Test
   public void testGetFindAnnotationAccessId() {
-    Selector selector = Mobile.byAccessibilityId("fakeSelector");
+    Selector selector = Selector.byAccessibilityId("fakeSelector");
     AnnotationProvider provider =
         AnnotationUtils.getFindAnnotation(selector, getBasicElement("fakeElement"), true);
     assertThat(
@@ -122,7 +121,7 @@ public class AnnotationUtilsTests {
   /** The getFindAnnotation method should return the proper value: iOS Class Chain selector */
   @Test
   public void testGetFindAnnotationClassChain() {
-    Selector selector = Mobile.byClassChain("fakeSelector");
+    Selector selector = Selector.byClassChain("fakeSelector");
     AnnotationProvider provider =
         AnnotationUtils.getFindAnnotation(selector, getBasicElement("fakeElement"), true);
     assertThat(
@@ -136,7 +135,7 @@ public class AnnotationUtilsTests {
   /** The getFindAnnotation method should return the proper value: Android UIAutomator selector */
   @Test
   public void testGetFindAnnotationUIAutomator() {
-    Selector selector = Mobile.byUiAutomator("new UiSelector().fakeSelector");
+    Selector selector = Selector.byUiAutomator("new UiSelector().fakeSelector");
     AnnotationProvider provider =
         AnnotationUtils.getFindAnnotation(selector, getBasicElement("fakeElement"), true);
     assertThat(

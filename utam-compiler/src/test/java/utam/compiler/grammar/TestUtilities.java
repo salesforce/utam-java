@@ -8,7 +8,6 @@ import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.Selector;
-import utam.core.selenium.element.Web;
 
 import java.io.IOException;
 
@@ -23,7 +22,6 @@ public class TestUtilities {
   static final String JACKSON_MISSING_REQUIRED_PROPERTY_ERROR = "Missing required creator property";
   static final String JACKSON_WRONG_PROPERTY_TYPE =
       "Cannot deserialize value of type `%s` from String \"%s\"";
-  static final String JACKSON_CONSTRUCTOR_ERROR = "Cannot construct instance of `%s`";
   private static final TranslationTypesConfig TYPES_CONFIG = new TranslationTypesConfigJava();
   public static final TypeProvider TEST_PAGE_OBJECT = TYPES_CONFIG.getInterfaceType(TEST_URI);
 
@@ -40,7 +38,7 @@ public class TestUtilities {
   }
 
   public static Selector getCssSelector(String value) {
-    return Web.byCss(value);
+    return Selector.byCss(value);
   }
 
   public static JsonDeserializer getJsonStringDeserializer(String json) {

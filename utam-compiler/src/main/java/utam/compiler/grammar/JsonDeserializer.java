@@ -74,6 +74,7 @@ public final class JsonDeserializer {
     mapper.enable(ALLOW_COMMENTS);
     SimpleModule module = new SimpleModule();
     module.addDeserializer(UtamProfile.class, new UtamProfile.Deserializer());
+    module.addDeserializer(UtamArgument.class, new UtamArgumentDeserializer());
     mapper.registerModule(module);
     return mapper;
   }

@@ -15,7 +15,6 @@ import static utam.compiler.grammar.UtamMethod.ERR_METHOD_EMPTY_STATEMENTS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.*;
-import static org.testng.Assert.assertEquals;
 
 /**
  * Provides deserialization tests for the UtamMethod class with abstract methods

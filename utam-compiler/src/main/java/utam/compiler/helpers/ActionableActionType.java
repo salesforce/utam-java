@@ -1,7 +1,10 @@
 package utam.compiler.helpers;
 
+import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
+import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 
+import java.util.Objects;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.Actionable;
@@ -32,7 +35,7 @@ public enum ActionableActionType implements ActionType {
    * executes javascript `return arguments[0].blur();` <br>
    * Throws exception if element not found within timeout
    */
-  containsElement(PrimitiveType.BOOLEAN, PrimitiveType.LOCATOR),
+  containsElement(PrimitiveType.BOOLEAN, SELECTOR),
   /**
    * focus on the value <br>
    * throws exception if fails
@@ -114,7 +117,7 @@ public enum ActionableActionType implements ActionType {
    * wait for element absence <br>
    * throws exception if fails
    */
-  waitFor(TypeUtilities.GENERIC_TYPE, PrimitiveType.PREDICATE),
+  waitFor(TypeUtilities.GENERIC_TYPE, FUNCTION),
   /**
    * wait for element absence <br>
    * throws exception if fails
@@ -144,11 +147,11 @@ public enum ActionableActionType implements ActionType {
     } else {
       this.actionParameters = parameters;
     }
-    if(returnType == null) {
-      this.returnType = VOID;
-    } else {
-      this.returnType = returnType;
-    }
+    this.returnType = Objects.requireNonNullElse(returnType, VOID);
+  }
+
+  public static boolean isWaitFor(String apply) {
+    return ActionableActionType.waitFor.getApplyString().equals(apply);
   }
 
   public static ActionType getActionType(String apply, TypeProvider elementType, String elementName) {
@@ -159,7 +162,7 @@ public enum ActionableActionType implements ActionType {
               elementName,
               elementType.getFullName()));
     }
-    TypeUtilities.Element actionableType = TypeUtilities.Element.asBasicType(elementType);
+    TypeUtilities.Element actionableType = TypeUtilities.Element.getBasicElementType(elementType);
     if (actionableType == TypeUtilities.Element.editable) {
       for (EditableActionType action : EditableActionType.values()) {
         if (action.getApplyString().equals(apply)) {
@@ -208,16 +211,6 @@ public enum ActionableActionType implements ActionType {
   @Override
   public List<TypeProvider> getParametersTypes() {
     return Stream.of(actionParameters).collect(Collectors.toList());
-  }
-
-  @Override
-  public boolean isListAction() {
-    return this == waitForAbsence
-        || this == waitForVisible
-        || this == waitForInvisible
-        || this == isVisible
-        || this == isPresent
-        || this == size;
   }
 
   @Override

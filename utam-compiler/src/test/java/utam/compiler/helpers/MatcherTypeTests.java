@@ -1,12 +1,12 @@
 package utam.compiler.helpers;
 
-import com.fasterxml.jackson.databind.deser.impl.CreatorCandidate;
+import java.util.Collections;
 import org.testng.annotations.Test;
+import utam.compiler.helpers.ParameterUtils.Regular;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -17,8 +17,8 @@ public class MatcherTypeTests {
 
   @Test
   public void testGetCode() {
-    List<MethodParameter> paramTypes = Arrays.asList(
-        new ParameterUtils.Regular("text", PrimitiveType.STRING));
+    List<MethodParameter> paramTypes = Collections.singletonList(
+        new Regular("text", PrimitiveType.STRING));
     assertThat(
         MatcherType.stringContains.getCode(paramTypes, "test"),
         is(equalTo("test.contains(text)")));

@@ -10,9 +10,12 @@ import java.util.Objects;
 import org.openqa.selenium.By;
 
 /**
+ * @deprecated functionality moved to Selector interface
+ *
  * @author elizaveta.ivanova
  * @since 230
  */
+@Deprecated
 public abstract class Web {
 
     public static Selector byCss(String value) {

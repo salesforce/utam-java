@@ -92,7 +92,7 @@ public final class AnnotationUtils {
             .collect(Collectors.toList()));
   }
 
-  private static String getWrappedString(String string) {
+  public static String getWrappedString(String string) {
     if (string.startsWith("\"")) {
       return string;
     }

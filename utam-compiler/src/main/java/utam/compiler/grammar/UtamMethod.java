@@ -1,26 +1,25 @@
 package utam.compiler.grammar;
 
+import static utam.compiler.helpers.TypeUtilities.VOID;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
+import java.util.List;
 import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
-import utam.core.framework.consumer.UtamError;
 import utam.compiler.representation.ChainMethod;
 import utam.compiler.representation.ComposeMethod;
+import utam.compiler.representation.ComposeMethodStatement;
 import utam.compiler.representation.InterfaceMethod;
 import utam.compiler.representation.UtilityMethod;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * public method declared at PO level
@@ -43,8 +42,8 @@ class UtamMethod {
   static final String ERR_METHOD_REDUNDANT_TYPE =
       "method '%s': only one of " + SUPPORTED_METHOD_TYPES + " can be set";
   final String name;
-  UtamMethodAction[] compose;
   private final String comments = "";
+  UtamMethodAction[] compose;
   UtamArgument[] args;
   String returnStr;
   Boolean isReturnList;
@@ -93,26 +92,25 @@ class UtamMethod {
     if (compose != null || chain != null || externalUtility != null) {
       throw new UtamError(String.format(ERR_METHOD_SHOULD_BE_ABSTRACT, name));
     }
+    MethodContext methodContext = new MethodContext(name, getReturnType(context, VOID), isReturnsList());
     return new InterfaceMethod(
-        name,
-        getReturnType(context),
-        Boolean.TRUE.equals(isReturnList),
-        UtamArgument.unknownTypesParameters(args, name).getOrdered(),
+        methodContext,
+        UtamArgument.getArgsProcessor(args, name).getOrdered(),
         comments);
   }
 
   PageObjectMethod getMethod(TranslationContext context) {
-    if(context.isAbstractPageObject()) {
+    if (context.isAbstractPageObject()) {
       return getAbstractMethod(context);
     }
     if (compose != null) {
-      if(chain != null || externalUtility != null) {
+      if (chain != null || externalUtility != null) {
         throw new UtamError(String.format(ERR_METHOD_REDUNDANT_TYPE, name));
       }
       return getComposeMethod(context);
     }
     if (chain != null) {
-      if(compose != null || externalUtility != null) {
+      if (compose != null || externalUtility != null) {
         throw new UtamError(String.format(ERR_METHOD_REDUNDANT_TYPE, name));
       }
       return getChainMethod(context);
@@ -124,24 +122,25 @@ class UtamMethod {
     throw new UtamError(String.format(ERR_METHOD_UNKNOWN_TYPE, name));
   }
 
-  private TypeProvider getReturnType(TranslationContext context) {
+  private TypeProvider getReturnType(TranslationContext context, TypeProvider defaultReturn) {
+    TypeProvider type;
     if (returnStr == null) {
-      return TypeUtilities.VOID;
+      type = defaultReturn;
+    } else if (PrimitiveType.isPrimitiveType(returnStr)) {
+      type = PrimitiveType.fromString(returnStr);
+    } else if (TypeUtilities.Element.isBasicType(returnStr)) {
+      type = TypeUtilities.Element.asBasicType(returnStr);
+    } else {
+      type = context.getType(returnStr);
     }
-    if (PrimitiveType.isPrimitiveType(returnStr)) {
-      return PrimitiveType.fromString(returnStr);
-    }
-    if(TypeUtilities.Element.isBasicType(returnStr)) {
-      return TypeUtilities.Element.asBasicType(returnStr);
-    }
-    return context.getType(returnStr);
+    return type;
   }
 
   private PageObjectMethod getUtilityMethod(TranslationContext context) {
     return new UtilityMethod(
         name,
-        getReturnType(context),
-        isReturnList == null ? false : isReturnList,
+        getReturnType(context, VOID),
+        isReturnsList(),
         externalUtility.getMethodReference(name, context),
         comments);
   }
@@ -168,32 +167,36 @@ class UtamMethod {
     return new ChainMethod(name, statements, comments);
   }
 
+  private boolean isReturnsList() {
+    return Boolean.TRUE.equals(isReturnList);
+  }
+
   PageObjectMethod getComposeMethod(TranslationContext context) {
-    if (returnStr != null) {
-      throw new UtamError(String.format(ERR_METHOD_RETURN_TYPE_REDUNDANT, name));
-    }
-    if (isReturnList != null) {
-      throw new UtamError(String.format(ERR_METHOD_RETURN_ALL_REDUNDANT, name));
-    }
     if (args != null) {
       throw new UtamError(String.format(ERR_ARGS_NOT_ALLOWED, name));
+    }
+    // List<Void> should throw error
+    if (returnStr == null && isReturnList != null) {
+      throw new UtamError(String.format(ERR_METHOD_RETURN_ALL_REDUNDANT, name));
     }
     if (compose.length == 0) {
       throw new UtamError(String.format(ERR_METHOD_EMPTY_STATEMENTS, name));
     }
-    List<MethodParameter> statementParameters = new ArrayList<>();
-    Set<String> elementNames = new HashSet<>();
-    List<ComposeMethod.ElementAction> statements =
-        Stream.of(compose)
-            .map(action -> action.getComposeAction(elementNames, context, name))
-            .peek(action -> statementParameters.addAll(action.getParameters()))
-            .collect(Collectors.toList());
+    List<ComposeMethodStatement> statements = new ArrayList<>();
+    List<MethodParameter> methodParameters = new ArrayList<>();
+    MethodContext methodContext = new MethodContext(name, getReturnType(context, null), isReturnsList());
+    for (UtamMethodAction utamMethodAction : compose) {
+      ComposeMethodStatement statement = utamMethodAction
+          .getComposeAction(context, methodContext, false);
+      statements.add(statement);
+      methodParameters.addAll(statement.getParameters());
+    }
+    methodParameters.removeIf(MethodParameter::isLiteral);
     return new ComposeMethod(
-        name,
+        methodContext,
         statements,
-        statementParameters.stream()
-            .filter(methodParameter -> !methodParameter.isLiteral())
-            .collect(Collectors.toList()),
+        methodParameters,
         comments);
   }
+
 }

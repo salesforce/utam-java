@@ -1,24 +1,45 @@
 package utam.compiler.grammar;
 
-import utam.compiler.helpers.PrimitiveType;
-import utam.compiler.helpers.TypeUtilities;
-import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.UtamError;
-import org.testng.annotations.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertThrows;
+import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
+import static utam.compiler.grammar.UtamArgument.ERR_ARGS_NAME_TYPE_MANDATORY;
+import static utam.compiler.grammar.UtamArgument.ERR_ARGS_TYPE_NOT_SUPPORTED;
+import static utam.compiler.grammar.UtamArgument.ERR_ARGS_WRONG_TYPE;
+import static utam.compiler.grammar.UtamArgument.ERR_NAME_TYPE_REDUNDANT;
+import static utam.compiler.grammar.UtamArgument.ERR_PREDICATE_REDUNDANT;
+import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_DUPLICATE_NAMES;
+import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_WRONG_COUNT;
+import static utam.compiler.grammar.UtamArgument.getArgsProcessor;
+import static utam.compiler.grammar.UtamArgument.getSelectorValuePattern;
+import static utam.compiler.grammar.UtamSelector_Tests.buildUIAutomatorLocator;
+import static utam.compiler.helpers.TypeUtilities.FUNCTION;
+import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static utam.compiler.grammar.UtamArgument.*;
-import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_DUPLICATE_NAMES;
-import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.testng.Assert.expectThrows;
+import org.testng.annotations.Test;
+import utam.compiler.helpers.MethodContext;
+import utam.compiler.helpers.PrimitiveType;
+import utam.compiler.helpers.TranslationContext;
+import utam.compiler.representation.ComposeMethodStatement;
+import utam.core.appium.element.UIAutomator.Method;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
+import utam.core.selenium.element.Selector;
 
 /**
  * Provides tests for the ArgumentsProcessor type
@@ -27,47 +48,99 @@ import static org.testng.Assert.expectThrows;
  */
 public class UtamArgument_Tests {
 
-  private static final String NODE_NAME = "test";
+  private static final String ARGS_CONTEXT = "test";
 
-  private static void testRedundancy(String name, String type) {
+  @Test
+  public void testRedundantNameAndType() {
     UtamError e =
         expectThrows(
             UtamError.class,
             () ->
-                literalParameters(
-                        new UtamArgument[] {new UtamArgument("value", name, type)},
-                        Collections.singletonList(new TypeUtilities.FromString("String", "String")),
-                        NODE_NAME)
-                    .getOrdered());
-    assertThat(e.getMessage(), containsString(String.format(ERR_LITERAL_REDUNDANT, NODE_NAME)));
+                getArgsProcessor(
+                    new UtamArgument[]{new UtamArgument("value", "argName", "string", null)},
+                    ARGS_CONTEXT));
+    assertThat(e.getMessage(),
+        containsString(String.format(ERR_NAME_TYPE_REDUNDANT, ARGS_CONTEXT)));
   }
 
   @Test
-  public void testRedundancy() {
-    testRedundancy("argName", "string");
-    testRedundancy(null, "string");
-    testRedundancy("argName", null);
+  public void testRedundantPredicate() {
+    UtamArgument value = new UtamArgument("value");
+    value.conditions = new UtamMethodAction[0];
+    UtamArgument nameAndType = new UtamArgument("argName", "string");
+    nameAndType.conditions = new UtamMethodAction[0];
+    UtamError e =
+        expectThrows(
+            UtamError.class,
+            () ->
+                getArgsProcessor(
+                    new UtamArgument[]{value},
+                    ARGS_CONTEXT));
+    assertThat(e.getMessage(),
+        containsString(String.format(ERR_PREDICATE_REDUNDANT, ARGS_CONTEXT)));
+    e =
+        expectThrows(
+            UtamError.class,
+            () ->
+                getArgsProcessor(
+                    new UtamArgument[]{nameAndType},
+                    ARGS_CONTEXT));
+    assertThat(e.getMessage(),
+        containsString(String.format(ERR_PREDICATE_REDUNDANT, ARGS_CONTEXT)));
   }
 
-  /** The getParameters static method should return valid values */
   @Test
-  public void testGetParameters() {
+  public void testPrimitiveArgsWithoutExpectedTypes() {
     List<MethodParameter> parameters =
-        unknownTypesParameters(
-                new UtamArgument[] {
-                  new UtamArgument("name1", "string"), new UtamArgument("name2", "string")
-                },
-                NODE_NAME)
+        UtamArgument.getArgsProcessor(
+            new UtamArgument[]{
+                new UtamArgument("name1", "string"),
+                new UtamArgument("name2", "number"),
+                new UtamArgument("name3", "boolean"),
+                new UtamArgument("name4", "locator"),
+            }, ARGS_CONTEXT)
             .getOrdered();
-    assertThat(parameters, hasSize(2));
+    assertThat(parameters, hasSize(4));
     assertThat(parameters.get(0).getValue(), is(equalTo("name1")));
     assertThat(parameters.get(0).getType().getSimpleName(), is(equalTo("String")));
     assertThat(parameters.get(1).getValue(), is(equalTo("name2")));
-    assertThat(parameters.get(1).getType().getSimpleName(), is(equalTo("String")));
+    assertThat(parameters.get(1).getType().getSimpleName(), is(equalTo("Integer")));
+    assertThat(parameters.get(2).getValue(), is(equalTo("name3")));
+    assertThat(parameters.get(2).getType().getSimpleName(), is(equalTo("Boolean")));
+    assertThat(parameters.get(3).getValue(), is(equalTo("name4")));
+    assertThat(parameters.get(3).getType().getSimpleName(),
+        is(equalTo(Selector.class.getSimpleName())));
+  }
+
+  @Test
+  public void testPrimitiveArgsWithExpectedTypes() {
+    List<TypeProvider> expectedTypes = Stream
+        .of(PrimitiveType.STRING, PrimitiveType.NUMBER, PrimitiveType.BOOLEAN, SELECTOR)
+        .collect(Collectors.toList());
+    List<MethodParameter> parameters =
+        UtamArgument.getArgsProcessor(
+            new UtamArgument[]{
+                new UtamArgument("name1", "string"),
+                new UtamArgument("name2", "number"),
+                new UtamArgument("name3", "boolean"),
+                new UtamArgument("name4", "locator"),
+            }, expectedTypes, ARGS_CONTEXT)
+            .getOrdered();
+    assertThat(parameters, hasSize(4));
+    assertThat(parameters.get(0).getValue(), is(equalTo("name1")));
+    assertThat(parameters.get(0).getType().getSimpleName(), is(equalTo("String")));
+    assertThat(parameters.get(1).getValue(), is(equalTo("name2")));
+    assertThat(parameters.get(1).getType().getSimpleName(), is(equalTo("Integer")));
+    assertThat(parameters.get(2).getValue(), is(equalTo("name3")));
+    assertThat(parameters.get(2).getType().getSimpleName(), is(equalTo("Boolean")));
+    assertThat(parameters.get(3).getValue(), is(equalTo("name4")));
+    assertThat(parameters.get(3).getType().getSimpleName(),
+        is(equalTo(Selector.class.getSimpleName())));
   }
 
   /**
-   * The getParameters static method with duplicate argument names should throw the proper exception
+   * The getParameters static method with duplicate argument names should throw the proper
+   * exception
    */
   @Test
   public void testGetParametersWithDuplicateNamesThrows() {
@@ -76,94 +149,51 @@ public class UtamArgument_Tests {
         expectThrows(
             UtamError.class,
             () ->
-                unknownTypesParameters(
-                        new UtamArgument[] {
-                          new UtamArgument(ARG_NAME, "string"), new UtamArgument(ARG_NAME, "number")
-                        },
-                        NODE_NAME)
-                    .getOrdered());
+                UtamArgument.getArgsProcessor(
+                    new UtamArgument[]{
+                        new UtamArgument(ARG_NAME, "string"), new UtamArgument(ARG_NAME, "number")
+                    },
+                    ARGS_CONTEXT));
     assertThat(
         e.getMessage(),
-        containsString(String.format(ERR_ARGS_DUPLICATE_NAMES, NODE_NAME, ARG_NAME)));
-  }
-
-  /**
-   * The getParameters static method should throw the proper exception when the duplicate argument
-   * names are specified
-   */
-  @Test
-  public void testDuplicateNamesErr() {
-    UtamError e =
-        expectThrows(
-            UtamError.class,
-            () ->
-                nonLiteralParameters(
-                        new UtamArgument[] {
-                          new UtamArgument("name", "string"), new UtamArgument("name", "string")
-                        },
-                        Arrays.asList(PrimitiveType.STRING, PrimitiveType.STRING),
-                        NODE_NAME)
-                    .getOrdered());
-    assertThat(
-        e.getMessage(), containsString(String.format(ERR_ARGS_DUPLICATE_NAMES, NODE_NAME, "name")));
+        containsString(String.format(ERR_ARGS_DUPLICATE_NAMES, ARGS_CONTEXT, ARG_NAME)));
   }
 
   @Test
-  public void duplicateLiterals() {
+  public void duplicateLiteralsAreAllowed() {
     List<MethodParameter> parameters =
-        literalParameters(
-                new UtamArgument[] {
-                  new UtamArgument(true),
-                  new UtamArgument(true),
-                  new UtamArgument("true"),
-                  new UtamArgument("true")
-                },
-                Stream.of(
-                        PrimitiveType.BOOLEAN,
-                        PrimitiveType.BOOLEAN,
-                        PrimitiveType.STRING,
-                        PrimitiveType.STRING)
-                    .collect(Collectors.toList()),
-                NODE_NAME)
-            .getOrdered();
-    assertThat(parameters, hasSize(4));
-    assertThat(parameters.get(0).isLiteral(), is(true));
-    assertThat(parameters.get(0).getValue(), is(equalTo("true")));
-    assertThat(parameters.get(0).getType(), is(equalTo(PrimitiveType.BOOLEAN)));
-    assertThat(parameters.get(3).getValue(), is(equalTo("true")));
-    assertThat(parameters.get(3).getType(), is(equalTo(PrimitiveType.STRING)));
+        getArgsProcessor(
+            new UtamArgument[]{
+                new UtamArgument("str"),
+                new UtamArgument("str")
+            },
+            Stream.of(
+                PrimitiveType.STRING,
+                PrimitiveType.STRING)
+                .collect(Collectors.toList()),
+            ARGS_CONTEXT).getOrdered();
+    assertThat(parameters, hasSize(2));
+    assertThat(parameters.get(0).getValue(), is(equalTo("\"str\"")));
+    assertThat(parameters.get(0).getType(), is(equalTo(PrimitiveType.STRING)));
+    assertThat(parameters.get(1).getValue(), is(equalTo("\"str\"")));
+    assertThat(parameters.get(1).getType(), is(equalTo(PrimitiveType.STRING)));
   }
 
   /**
-   * The getParameters static method with an invalid argument type should throw the proper exception
+   * The getParameters static method with an invalid argument type should throw the proper
+   * exception
    */
   @Test
-  public void testGetParametersWithInvalidParameterTypeThrows() {
+  public void testInvalidParameterTypeThrows() {
     UtamError e =
         expectThrows(
             UtamError.class,
             () ->
-                unknownTypesParameters(
-                        new UtamArgument[] {new UtamArgument("name", "int")}, NODE_NAME)
-                    .getOrdered());
+                getArgsProcessor(
+                    new UtamArgument[]{new UtamArgument("name", "int")}, ARGS_CONTEXT));
     assertThat(
         e.getMessage(),
-        containsString(String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, NODE_NAME, "int")));
-  }
-
-  /** If an argument has a value of non-primitive type, the proper exception should be thrown */
-  @Test
-  public void testInvalidLiteralParameterValueTypeThrows() {
-    Object object = new Object();
-    UtamArgument arg = new UtamArgument(object, null, null);
-    UtamError e =
-        expectThrows(
-            UtamError.class,
-            () -> literalParameters(new UtamArgument[] {arg}, null, NODE_NAME).getOrdered());
-    assertThat(
-        e.getMessage(),
-        containsString(
-            String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, NODE_NAME, object.getClass().getName())));
+        containsString(String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, ARGS_CONTEXT, "int")));
   }
 
   /**
@@ -176,26 +206,12 @@ public class UtamArgument_Tests {
         expectThrows(
             UtamError.class,
             () ->
-                nonLiteralParameters(
-                        new UtamArgument[] {},
-                        Collections.singletonList(PrimitiveType.NUMBER),
-                        NODE_NAME)
-                    .getOrdered());
+                getArgsProcessor(
+                    new UtamArgument[]{},
+                    Collections.singletonList(PrimitiveType.NUMBER),
+                    ARGS_CONTEXT));
     assertThat(
-        e.getMessage(), containsString(String.format(ERR_ARGS_NUMBER_MISMATCH, NODE_NAME, 1, 0)));
-  }
-
-  /** The getParameters static method with a custom argument type should return the proper value */
-  @Test
-  public void testGetParametersWithCustomType() {
-    List<MethodParameter> parameters =
-        UtamArgument.nonLiteralParameters(
-                new UtamArgument[] {new UtamArgument("attrName", "CustomType")},
-                Collections.singletonList(new TypeUtilities.FromString("CustomType", "")),
-                NODE_NAME)
-            .getOrdered();
-    assertThat(parameters, hasSize(1));
-    assertThat(parameters.get(0).getType().getSimpleName(), is(equalTo("CustomType")));
+        e.getMessage(), containsString(String.format(ERR_ARGS_WRONG_COUNT, ARGS_CONTEXT, 1, 0)));
   }
 
   /**
@@ -203,37 +219,35 @@ public class UtamArgument_Tests {
    * exception
    */
   @Test
-  public void testCreationWithMismatchedPrimitiveTypesThrows() {
-    UtamArgument arg = new UtamArgument("attrName", "string");
+  public void testMismatchedPrimitiveTypesThrows() {
     UtamError e =
         expectThrows(
             UtamError.class,
             () ->
-                UtamArgument.nonLiteralParameters(
-                        new UtamArgument[] {arg},
-                        Collections.singletonList(PrimitiveType.NUMBER),
-                        NODE_NAME)
-                    .getOrdered());
+                getArgsProcessor(
+                    new UtamArgument[]{new UtamArgument("attrName", "string")},
+                    Collections.singletonList(PrimitiveType.NUMBER),
+                    ARGS_CONTEXT));
     assertThat(
         e.getMessage(),
         containsString(
-            String.format(ERR_ARGS_WRONG_TYPE, NODE_NAME, "attrName", "Integer", "String")));
+            String.format(ERR_ARGS_WRONG_TYPE, ARGS_CONTEXT, "Integer", "String")));
   }
 
   @Test
   public void testLiteralParameters() {
     List<MethodParameter> parameters =
-        literalParameters(
-                new UtamArgument[] {
-                  new UtamArgument("nameValue", null, null),
-                  new UtamArgument(1, null, null),
-                  new UtamArgument(true, null, null)
-                },
-                Arrays.asList(PrimitiveType.STRING, PrimitiveType.NUMBER, PrimitiveType.BOOLEAN),
-                "foo")
+        getArgsProcessor(
+            new UtamArgument[]{
+                new UtamArgument("nameValue"),
+                new UtamArgument(1),
+                new UtamArgument(true)
+            },
+            Arrays.asList(PrimitiveType.STRING, PrimitiveType.NUMBER, PrimitiveType.BOOLEAN),
+            "foo")
             .getOrdered();
     assertThat(parameters, hasSize(3));
-    assertThat(parameters.get(0).getValue(), is(equalTo("nameValue")));
+    assertThat(parameters.get(0).getValue(), is(equalTo("\"nameValue\"")));
     assertThat(parameters.get(0).getType().getSimpleName(), is(equalTo("String")));
     assertThat(parameters.get(1).getValue(), is(equalTo("1")));
     assertThat(parameters.get(1).getType().getSimpleName(), is(equalTo("Integer")));
@@ -246,21 +260,19 @@ public class UtamArgument_Tests {
    * exception
    */
   @Test
-  public void testCreationWithLiteralsWithMismatchedTypesThrows() {
-    UtamArgument stringArg = new UtamArgument("nameValue", null, null);
+  public void testLiteralsWithMismatchedTypesThrows() {
     UtamError e =
         expectThrows(
             UtamError.class,
             () ->
-                literalParameters(
-                        new UtamArgument[] {stringArg},
-                        Collections.singletonList(PrimitiveType.NUMBER),
-                        NODE_NAME)
-                    .getOrdered());
+                getArgsProcessor(
+                    new UtamArgument[]{new UtamArgument("nameValue")},
+                    Collections.singletonList(PrimitiveType.NUMBER),
+                    ARGS_CONTEXT));
     assertThat(
         e.getMessage(),
         containsString(
-            String.format(ERR_ARGS_WRONG_TYPE, "test", "nameValue", "Integer", "String")));
+            String.format(ERR_ARGS_WRONG_TYPE, "test", "Integer", "String")));
   }
 
   /**
@@ -270,9 +282,9 @@ public class UtamArgument_Tests {
   @Test
   public void testGetParametersWithNullArgumentArray() {
     assertThat(
-        nonLiteralParameters(null, TypeProvider.EMPTY_LIST, NODE_NAME).getOrdered(),
-        is(equalTo(EMPTY_PARAMETERS)));
-    assertThat(unknownTypesParameters(null, NODE_NAME).getOrdered(), is(equalTo(EMPTY_PARAMETERS)));
+        getArgsProcessor(null, Collections.EMPTY_LIST, ARGS_CONTEXT).getOrdered(),
+        is(empty()));
+    assertThat(getArgsProcessor(null, ARGS_CONTEXT).getOrdered(), is(empty()));
   }
 
   /**
@@ -280,31 +292,17 @@ public class UtamArgument_Tests {
    * should throw the proper exception
    */
   @Test
-  public void testExpectedMissmatch() {
+  public void testArgsCountError() {
     UtamError e =
         expectThrows(
             UtamError.class,
             () ->
-                UtamArgument.nonLiteralParameters(
-                        null,
-                        Collections.singletonList(new TypeUtilities.FromString("String", "String")),
-                        NODE_NAME)
-                    .getOrdered());
+                getArgsProcessor(
+                    null,
+                    Collections.singletonList(PrimitiveType.STRING),
+                    ARGS_CONTEXT));
     assertThat(
-        e.getMessage(), containsString(String.format(ERR_ARGS_NUMBER_MISMATCH, NODE_NAME, 1, 0)));
-  }
-
-  /**
-   * The getParameters static method with a null value for the expected type in the expected type
-   * list should throw the proper exception
-   */
-  @Test
-  public void testNullExpected() {
-    literalParameters(
-            new UtamArgument[] {new UtamArgument("value", null, null)},
-            Collections.singletonList(null),
-            NODE_NAME)
-        .getOrdered();
+        e.getMessage(), containsString(String.format(ERR_ARGS_WRONG_COUNT, ARGS_CONTEXT, 1, 0)));
   }
 
   /**
@@ -312,17 +310,16 @@ public class UtamArgument_Tests {
    * type for the argument value should throw the proper exception
    */
   @Test
-  public void testGetParametersAllowingValueWithInvalidValueTypeThrows() {
+  public void testInvalidValueTypeThrows() {
     UtamError e =
         expectThrows(
             UtamError.class,
             () ->
-                nonLiteralParameters(
-                        new UtamArgument[] {new UtamArgument('c', null, null)},
-                        Collections.singletonList(new TypeUtilities.FromString("String", "String")),
-                        NODE_NAME)
-                    .getOrdered());
-    assertThat(e.getMessage(), containsString(String.format(ERR_LITERAL_NOT_SUPPORTED, NODE_NAME)));
+                getArgsProcessor(
+                    new UtamArgument[]{new UtamArgument('c')},
+                    ARGS_CONTEXT));
+    assertThat(e.getMessage(), containsString(
+        String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, ARGS_CONTEXT, Character.class.getName())));
   }
 
   /**
@@ -335,23 +332,105 @@ public class UtamArgument_Tests {
         expectThrows(
             UtamError.class,
             () ->
-                nonLiteralParameters(
-                        new UtamArgument[] {new UtamArgument(null, "String")},
-                        Collections.singletonList(new TypeUtilities.FromString("String", "String")),
-                        NODE_NAME)
-                    .getOrdered());
+                getArgsProcessor(
+                    new UtamArgument[]{new UtamArgument(null, "String")},
+                    ARGS_CONTEXT));
     assertThat(
-        e.getMessage(), containsString(String.format(ERR_ARGS_NAME_TYPE_MANDATORY, NODE_NAME)));
+        e.getMessage(), containsString(String.format(ERR_ARGS_NAME_TYPE_MANDATORY, ARGS_CONTEXT)));
     e =
         expectThrows(
             UtamError.class,
             () ->
-                nonLiteralParameters(
-                        new UtamArgument[] {new UtamArgument("name", null)},
-                        Collections.singletonList(new TypeUtilities.FromString("String", "String")),
-                        NODE_NAME)
-                    .getOrdered());
+                getArgsProcessor(
+                    new UtamArgument[]{new UtamArgument("name", null)},
+                    ARGS_CONTEXT));
     assertThat(
-        e.getMessage(), containsString(String.format(ERR_ARGS_NAME_TYPE_MANDATORY, NODE_NAME)));
+        e.getMessage(), containsString(String.format(ERR_ARGS_NAME_TYPE_MANDATORY, ARGS_CONTEXT)));
+    e =
+        expectThrows(
+            UtamError.class,
+            () -> getArgsProcessor(new UtamArgument[]{new UtamArgument(null)}, ARGS_CONTEXT));
+    assertThat(
+        e.getMessage(), containsString(String.format(ERR_ARGS_NAME_TYPE_MANDATORY, ARGS_CONTEXT)));
+  }
+
+  @Test
+  public void testFunctionTypeReturnsNullParameter() {
+    UtamArgument utamArgument = new UtamArgument(null, "name", "function", null);
+    assertThat(utamArgument.getParameterOrValue(ARGS_CONTEXT, null), is(nullValue()));
+  }
+
+  @Test
+  public void testSelectorByNameType() {
+    UtamArgument utamArgument = new UtamArgument("name", "locator");
+    MethodParameter parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, null);
+    assertThat(parameter.getType().getClassType(), is(equalTo(Selector.class)));
+    parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, SELECTOR);
+    assertThat(parameter.getType().getClassType(), is(equalTo(Selector.class)));
+  }
+
+  @Test
+  public void testSelectorByValue() {
+    UtamArgument utamArgument = new UtamArgument(new UtamSelector("\".css\""));
+    MethodParameter parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, null);
+    assertThat(parameter.getType().getClassType(), is(equalTo(Selector.class)));
+    parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, SELECTOR);
+    assertThat(parameter.getType().getClassType(), is(equalTo(Selector.class)));
+    assertThat(parameter.getValue(), is(equalTo("Selector.byCss(\".css\")")));
+  }
+
+  @Test
+  public void testAllSelectorTypesByValue() {
+    final String str = "selector";
+    UtamSelector selector = new UtamSelector(null, str, null, null);
+    UtamArgument utamArgument = new UtamArgument(selector);
+    MethodParameter parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, SELECTOR);
+    assertThat(parameter.getValue(), is(equalTo("Selector.byAccessibilityId(\"selector\")")));
+
+    selector = new UtamSelector(null, null, str, null);
+    utamArgument = new UtamArgument(selector);
+    parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, SELECTOR);
+    assertThat(parameter.getValue(), is(equalTo("Selector.byClassChain(\"selector\")")));
+
+    selector = new UtamSelector(null, null, null,
+        buildUIAutomatorLocator(Method.CHECKABLE));
+    utamArgument = new UtamArgument(selector);
+    parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, SELECTOR);
+    assertThat(parameter.getValue(),
+        is(equalTo("Selector.byUiAutomator(\"new UiSelector().checkable()\")")));
+
+    assertThrows(() -> getSelectorValuePattern(null));
+  }
+
+  @Test
+  public void testFunctionArgType() {
+    UtamArgument utamArgument = new UtamArgument("name", "function");
+    MethodParameter parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, FUNCTION);
+    assertThat(parameter, is(nullValue()));
+  }
+
+  @Test
+  public void testGetPredicateMethod() {
+    TranslationContext context = getTestTranslationContext();
+    MethodContext methodContext = new MethodContext("method", null, false);
+    UtamArgument utamArgument = new UtamArgument("name", "function");
+    UtamMethodAction conditionMock = mock(UtamMethodAction.class);
+    when(conditionMock.getComposeAction(context, methodContext, false))
+        .thenReturn(mock(ComposeMethodStatement.class));
+    utamArgument.conditions = new UtamMethodAction[]{conditionMock};
+    List<ComposeMethodStatement> predicate = utamArgument.getPredicate(context, methodContext);
+    assertThat(predicate, is(hasSize(1)));
+  }
+
+  @Test
+  public void testGetPredicateMethodWithValueThrows() {
+    TranslationContext context = getTestTranslationContext();
+    MethodContext methodContext = new MethodContext("method", null, false);
+    UtamArgument utamArgument = new UtamArgument("name", "function");
+    utamArgument.value = true;
+    assertThrows(() -> utamArgument.getPredicate(context, methodContext));
+    utamArgument.value = null;
+    utamArgument.conditions = new UtamMethodAction[0];
+    assertThrows(() -> utamArgument.getPredicate(context, methodContext));
   }
 }
