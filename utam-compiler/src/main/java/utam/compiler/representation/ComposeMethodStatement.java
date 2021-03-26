@@ -297,7 +297,7 @@ public abstract class ComposeMethodStatement {
     @Override
     String getCode(String invocationPattern, String elementGetter) {
       String methodInvocation = String
-          .format("waitFor(() -> {\n%s\n}", String.join(";\n", predicateCode));
+          .format("waitFor(() -> {\n%s\n})", String.join(";\n", predicateCode));
       return String.format(invocationPattern, elementGetter, methodInvocation);
     }
 

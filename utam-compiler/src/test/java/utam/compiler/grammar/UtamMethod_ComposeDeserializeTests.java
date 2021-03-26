@@ -285,7 +285,7 @@ public class UtamMethod_ComposeDeserializeTests {
     MethodInfo methodInfo = new MethodInfo("testCompose", "String");
     methodInfo.addCodeLine("this.getRootElement().waitFor(() -> {\n"
         + "return this.getRootElement().getText();\n"
-        + "}");
+        + "})");
     TranslationContext context = new DeserializerUtilities().getContext("composeWaitFor1");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
   }
@@ -306,7 +306,7 @@ public class UtamMethod_ComposeDeserializeTests {
         + "this.getRootElement().getText().contains(\"subString\");\n"
         + "this.getRootElement().focus();\n"
         + "return true;\n"
-        + "}");
+        + "})");
     TranslationContext context = new DeserializerUtilities().getContext("composeWaitVoidAction");
     PageObjectMethod method = context.getMethod("testCompose");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
@@ -318,7 +318,7 @@ public class UtamMethod_ComposeDeserializeTests {
     methodInfo.addCodeLine("this.getRootElement().waitFor(() -> {\n"
         + "this.getRootElement().getText();\n"
         + "return Boolean.FALSE.equals(this.getRootElement().containsElement(Selector.byCss(\".css\")));\n"
-        + "}");
+        + "})");
     TranslationContext context = new DeserializerUtilities().getContext("composeWaitForSelector");
     PageObjectMethod method = context.getMethod("testCompose");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
@@ -331,7 +331,7 @@ public class UtamMethod_ComposeDeserializeTests {
     methodInfo.addParameter(new MethodParameterInfo("matcherArg", "String"));
     methodInfo.addCodeLine("this.getCustomElement().waitFor(() -> {\n"
         + "return this.getCustomElement().returnsString(selectorArg).contains(matcherArg);\n"
-        + "}");
+        + "})");
     TranslationContext context = new DeserializerUtilities().getContext("composeWaitForCustom");
     PageObjectMethod method = context.getMethod("testCompose");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
