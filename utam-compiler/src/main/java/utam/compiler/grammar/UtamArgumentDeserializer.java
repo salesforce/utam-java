@@ -6,7 +6,6 @@ import static utam.compiler.grammar.UtamArgument.FUNCTION_TYPE_PROPERTY;
 import static utam.compiler.grammar.UtamArgument.SELECTOR_TYPE_PROPERTY;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,15 +26,10 @@ class UtamArgumentDeserializer extends
 
   @Override
   public UtamArgument deserialize(JsonParser parser, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     UtamArgument res = new UtamArgument(null);
     ObjectMapper mapper = (ObjectMapper) parser.getCodec();
     ObjectNode root = mapper.readTree(parser);
-    /*try {
-      root = mapper.readTree(parser);
-    } catch (JsonProcessingException e) {
-      throw new UtamError("?", e);
-    }*/
     JsonNode valueNode = root.get("value");
     final String validationContext = "args";
     if (valueNode != null) {

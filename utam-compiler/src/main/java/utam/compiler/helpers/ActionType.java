@@ -27,15 +27,6 @@ public interface ActionType {
     List<TypeProvider> getParametersTypes();
 
     /**
-     * some actions like waitForAbsence are always applied to all found elements
-     *
-     * @return true if action needs getter to NOT return list
-     */
-    default boolean isSingleCardinality() {
-        return false;
-    }
-
-    /**
      * value of "apply" property in JSON, ex. "click"
      *
      * @return string with apply property

@@ -13,7 +13,6 @@ import utam.core.declarative.representation.PageObjectMethod;
 
 import java.util.Collection;
 
-import static org.testng.Assert.assertThrows;
 import static utam.compiler.grammar.TestUtilities.*;
 import static utam.compiler.grammar.UtamMethod.ERR_METHOD_EMPTY_STATEMENTS;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -174,33 +173,6 @@ public class UtamMethod_ComposeDeserializeTests {
 
     PageObjectMethod method = getMethodObject(json, rootNodeJson);
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
-  }
-
-  @Test
-  public void testComposeMethodWrongCardinality() {
-    String json =
-        "{"
-            + "  \"name\": \"composeMethod\","
-            + "  \"compose\": ["
-            + "    {"
-            + "      \"element\": \"element1\","
-            + "      \"apply\": \"size\""
-            + "    }"
-            + "  ]"
-            + "}";
-    String rootNodeJson =
-        "{"
-            + "  \"elements\": ["
-            + "    {"
-            + "      \"name\": \"element1\","
-            + "      \"selector\": {"
-            + "        \"css\": \".element\","
-            + "        \"returnAll\": true"
-            + "      }"
-            + "    }"
-            + "  ]"
-            + "}";
-    assertThrows(() -> getMethodObject(json, rootNodeJson));
   }
 
   @Test

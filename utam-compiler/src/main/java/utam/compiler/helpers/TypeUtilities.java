@@ -37,7 +37,7 @@ public final class TypeUtilities {
   static final TypeProvider GENERIC_TYPE = new UnimportableType("<T> T");
   static final TypeProvider CONTAINER_ELEMENT =
       new TypeUtilities.FromClass(ContainerElement.class);
-  static final String ERR_PARAMETERS_TYPES_MISMATCH =
+  private static final String ERR_PARAMETERS_TYPES_MISMATCH =
       "expected %d parameters with type {%s}, provided were {%s}";
   public static final TypeProvider CONTAINER_RETURN_TYPE =
       new TypeUtilities.UnimportableType(String.format("<T extends %s> T", PAGE_OBJECT.getSimpleName()));

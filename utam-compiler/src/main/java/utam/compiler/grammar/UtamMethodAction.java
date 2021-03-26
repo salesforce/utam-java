@@ -23,7 +23,6 @@ import utam.compiler.representation.ComposeMethodStatement.OperationWithPredicat
 import utam.compiler.representation.ComposeMethodStatement.Single;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.UtamError;
 
 /**
  * compose statement mapping
@@ -32,10 +31,6 @@ import utam.core.framework.consumer.UtamError;
  * @since 228
  */
 class UtamMethodAction {
-
-  private static final String ERR_ACTION_CARDINALITY =
-      "method '%s' can't be applied to the element '%s' "
-          + "because it needs single instance and not a list";
 
   final String elementName;
   final String apply;
@@ -83,11 +78,6 @@ class UtamMethodAction {
     List<MethodParameter> parameters = UtamArgument
         .getArgsProcessor(args, action.getParametersTypes(), methodContext.getName())
         .getOrdered();
-    // action with list cardinality can only be applied to single element
-    if (action.isSingleCardinality() && element.isList()) {
-      throw new UtamError(
-          String.format(ERR_ACTION_CARDINALITY, action.getApplyString(), elementName));
-    }
     if (isWaitFor(apply)) {
       List<ComposeMethodStatement> predicate = args[0].getPredicate(context, methodContext);
       return new OperationWithPredicate(action, methodContext.getReturnType(predicate, null),
@@ -106,7 +96,9 @@ class UtamMethodAction {
         element.isCustom() ? getCustomOperation(context, methodContext) :
             getBasicOperation(context, element, methodContext, isLastPredicateStatement);
     ComposeMethodStatement statement;
-    if (element.isList()) {
+    if (element.isList()
+        // size() can only be applied to a single element
+        && !operation.isSizeAction()) {
       statement =
           operation.isReturnsVoid() ? new ComposeMethodStatement.VoidList(operand, operation)
               : new ComposeMethodStatement.ReturnsList(operand, operation);

@@ -34,7 +34,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
   private static final String TMP_VARIABLE = "instance";
 
   // BasePageObject.builder(BaseElement scopeElement, Locator selector, boolean isNullable)
-  static String getBuilderPrefix(ElementContext scopeElement, Root root, boolean isNullable) {
+  private static String getBuilderPrefix(ElementContext scopeElement, Root root, boolean isNullable) {
     return String.format(
         "%s(%s, %s, %s)",
         BASE_PAGE_OBJECT_METHOD,
@@ -44,7 +44,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
   }
 
   // BasePageObject.builder(BaseElement scopeElement, Locator selector, boolean isNullable)
-  static String getExternalBuilderPrefix(ElementContext scopeElement, Root root) {
+  private static String getExternalBuilderPrefix(ElementContext scopeElement, Root root) {
     return String.format(
         "%s(%s, %s)",
         BASE_PAGE_OBJECT_METHOD, getElementGetterString(scopeElement), root.getCodeString());
@@ -52,7 +52,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
   // <T extends PageObject> T build(Class<T> type);
   // or <T extends PageObject> List<T> buildList(Class<T> type)
-  static String getBuilderSuffix(TypeProvider returnType, boolean isList) {
+  private static String getBuilderSuffix(TypeProvider returnType, boolean isList) {
     if (isList) {
       return String.format("%s(%s.class)", LIST_BUILDER_METHOD, returnType.getSimpleName());
     } else {
@@ -62,7 +62,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
   // <T extends PageObject> T build(Class<T> type, Predicate<T> filter);
   // or <T extends PageObject> List<T> buildList(Class<T> type, Predicate<T> filter)
-  static String getFilteredBuilderSuffix(
+  private static String getFilteredBuilderSuffix(
       TypeProvider returnType, String predicateCode, boolean isList) {
     if (isList) {
       return String.format("%s(%s.class, %s)", LIST_BUILDER_METHOD, returnType.getSimpleName(),

@@ -140,7 +140,7 @@ class UtamMethod {
     return new UtilityMethod(
         name,
         getReturnType(context, VOID),
-        isReturnList == null ? false : isReturnList,
+        isReturnsList(),
         externalUtility.getMethodReference(name, context),
         comments);
   }
@@ -167,7 +167,7 @@ class UtamMethod {
     return new ChainMethod(name, statements, comments);
   }
 
-  boolean isReturnsList() {
+  private boolean isReturnsList() {
     return Boolean.TRUE.equals(isReturnList);
   }
 

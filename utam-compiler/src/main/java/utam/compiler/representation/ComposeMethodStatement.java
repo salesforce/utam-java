@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import utam.compiler.helpers.ActionType;
+import utam.compiler.helpers.ActionableActionType;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.MethodContext;
@@ -38,7 +39,7 @@ public abstract class ComposeMethodStatement {
       TypeProvider returnType,
       MatcherType matcher,
       List<MethodParameter> matcherParameters) {
-    this.returns = setReturnType(operation, returnType, matcher);
+    this.returns = matcher != null ? PrimitiveType.BOOLEAN : returnType;
     operand.setParameters(this.parameters);
     operation.setParameters(this.parameters);
     operation.setImports(this.imports);
@@ -58,18 +59,6 @@ public abstract class ComposeMethodStatement {
 
   ComposeMethodStatement(Operand operand, Operation operation, TypeProvider returnType) {
     this(operand, operation, returnType, null, null);
-  }
-
-  private static TypeProvider setReturnType(Operation operation,
-      TypeProvider returnType,
-      MatcherType matcher) {
-    if (matcher != null) {
-      return PrimitiveType.BOOLEAN;
-    }
-    if (operation instanceof OperationWithPredicate && MethodContext.isNullOrVoid(returnType)) {
-      return PrimitiveType.BOOLEAN;
-    }
-    return returnType;
   }
 
   public List<MethodParameter> getParameters() {
@@ -239,8 +228,12 @@ public abstract class ComposeMethodStatement {
           });
     }
 
+    public boolean isSizeAction() {
+      return action.equals(ActionableActionType.size);
+    }
+
     public boolean isReturnsVoid() {
-      return getReturnType().isSameType(VOID);
+      return VOID.isSameType(getReturnType());
     }
 
     TypeProvider getReturnType() {
@@ -255,7 +248,8 @@ public abstract class ComposeMethodStatement {
     public BasicElementOperation(ActionType action,
         List<MethodParameter> actionParameters, boolean isLastPredicateStatement) {
       super(action,
-          isLastPredicateStatement && MethodContext.isNullOrVoid(action.getReturnType()) ? PrimitiveType.BOOLEAN
+          isLastPredicateStatement && MethodContext.isNullOrVoid(action.getReturnType())
+              ? PrimitiveType.BOOLEAN
               : action.getReturnType(),
           actionParameters);
       this.isLastPredicateStatement =

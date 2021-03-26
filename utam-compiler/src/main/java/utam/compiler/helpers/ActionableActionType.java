@@ -214,16 +214,6 @@ public enum ActionableActionType implements ActionType {
   }
 
   @Override
-  public boolean isSingleCardinality() {
-    return this == waitForAbsence
-        || this == waitForVisible
-        || this == waitForInvisible
-        || this == isVisible
-        || this == isPresent
-        || this == size;
-  }
-
-  @Override
   public String getApplyString() {
     return this.name();
   }

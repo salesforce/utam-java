@@ -6,10 +6,10 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.testng.Assert.assertThrows;
 import static utam.compiler.grammar.TestUtilities.TEST_PAGE_OBJECT;
 import static utam.compiler.grammar.TestUtilities.TEST_URI;
 import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
+import static utam.compiler.helpers.PrimitiveType.NUMBER;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
@@ -134,14 +134,15 @@ public class UtamMethodAction_Tests {
   }
 
   @Test
-  public void testGetComposeActionWithListElementThrows() {
+  public void testGetSizeActionWithListElement() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     new UtamElement(ELEMENT_NAME, "clickable", getListSelector())
         .testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
             ELEMENT_NAME, ActionableActionType.size.toString());
-    assertThrows(() -> getVoidStatement(action, context));
+    ComposeMethodStatement statement = action.getComposeAction(context, getMethodContext(NUMBER), false);
+    assertThat(statement, is(instanceOf(Single.class)));
   }
 
   @Test

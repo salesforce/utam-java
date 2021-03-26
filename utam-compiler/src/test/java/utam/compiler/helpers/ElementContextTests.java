@@ -488,7 +488,7 @@ public class ElementContextTests {
   @Test
   public void basicElementWithoutGetterThrows() {
     ElementContext elementContext = getSingleElementContext(actionable);
-    assertThrows(NullPointerException.class, () -> elementContext.getElementMethod());
+    assertThrows(NullPointerException.class, elementContext::getElementMethod);
   }
 
   @Test
