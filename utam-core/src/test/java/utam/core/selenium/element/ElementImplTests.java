@@ -104,7 +104,7 @@ public class ElementImplTests {
   @Test
   public void testAbsence() {
     ActionsMock mock = new ActionsMock();
-    when(mock.context.getPollingTimeout()).thenReturn(Duration.ofSeconds(1));
+    when(mock.context.getTimeouts()).thenReturn(Duration.ofSeconds(1));
     when(mock.context.getPollingInterval()).thenReturn(Duration.ofMillis(10));
     when(mock.webDriver.findElements(By.cssSelector(STATE_CHANGING_LOCATOR)))
         .thenReturn(Collections.singletonList(mock.webElement))
@@ -119,7 +119,7 @@ public class ElementImplTests {
     WebElement stateElement = mock(WebElement.class);
     when(stateElement.isDisplayed()).thenReturn(false).thenReturn(true);
     ActionsMock mock = new ActionsMock();
-    when(mock.context.getPollingTimeout()).thenReturn(Duration.ofSeconds(1));
+    when(mock.context.getTimeouts()).thenReturn(Duration.ofSeconds(1));
     when(mock.context.getPollingInterval()).thenReturn(Duration.ofMillis(10));
     when(mock.webDriver.findElements(By.cssSelector(STATE_CHANGING_LOCATOR)))
         .thenReturn(new ArrayList<>(Collections.singletonList(stateElement)))
@@ -134,7 +134,7 @@ public class ElementImplTests {
     WebElement stateElement = mock(WebElement.class);
     when(stateElement.isDisplayed()).thenReturn(true).thenReturn(false);
     ActionsMock mock = new ActionsMock();
-    when(mock.context.getPollingTimeout()).thenReturn(Duration.ofSeconds(1));
+    when(mock.context.getTimeouts()).thenReturn(Duration.ofSeconds(1));
     when(mock.context.getPollingInterval()).thenReturn(Duration.ofMillis(10));
     when(mock.webDriver.findElements(By.cssSelector(STATE_CHANGING_LOCATOR)))
         .thenReturn(new ArrayList<>(Collections.singletonList(stateElement)))
@@ -147,7 +147,7 @@ public class ElementImplTests {
   @Test
   public void testPresence() {
     ActionsMock mock = new ActionsMock();
-    when(mock.context.getPollingTimeout()).thenReturn(Duration.ofSeconds(1));
+    when(mock.context.getTimeouts()).thenReturn(Duration.ofSeconds(1));
     when(mock.context.getPollingInterval()).thenReturn(Duration.ofMillis(10));
     when(mock.webDriver.findElements(By.cssSelector(STATE_CHANGING_LOCATOR)))
         .thenReturn(Collections.emptyList())
@@ -421,7 +421,7 @@ public class ElementImplTests {
               .getWebDriver()
               .findElements(By.cssSelector(LOCATOR_WITHOUT_PARAM)))
           .thenReturn(new ArrayList<>(Collections.singletonList(webElement)));
-      when(context.getPollingTimeout()).thenReturn(Duration.ofSeconds(1));
+      when(context.getTimeouts()).thenReturn(Duration.ofSeconds(1));
       when(context.getPollingInterval()).thenReturn(Duration.ofMillis(10));
     }
 
@@ -491,7 +491,7 @@ public class ElementImplTests {
               .getWebDriver()
               .findElements(By.cssSelector(LOCATOR_WITHOUT_PARAM)))
           .thenReturn(Collections.singletonList(webElement));
-      when(context.getPollingTimeout()).thenReturn(Duration.ofSeconds(1));
+      when(context.getTimeouts()).thenReturn(Duration.ofSeconds(1));
       when(context.getPollingInterval()).thenReturn(Duration.ofMillis(10));
     }
 

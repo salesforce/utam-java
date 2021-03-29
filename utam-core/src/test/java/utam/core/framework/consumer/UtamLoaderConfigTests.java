@@ -38,7 +38,7 @@ public class UtamLoaderConfigTests {
   public void testSetTimeout() {
     UtamLoaderConfigImpl config = getDefaultConfig();
     config.setTimeout(Duration.ofSeconds(100));
-    assertThat(config.driverSettings.customTimeout, is(equalTo(Duration.ofSeconds(100))));
+    assertThat(config.driverSettings.timeouts, is(equalTo(Duration.ofSeconds(100))));
   }
 
   @Test

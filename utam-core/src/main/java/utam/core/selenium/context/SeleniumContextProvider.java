@@ -4,6 +4,8 @@ import utam.core.framework.consumer.LocationPolicy;
 import utam.core.framework.consumer.LocationPolicyType;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.FluentWait;
+import utam.core.framework.consumer.UtamTimeouts;
+import utam.core.framework.consumer.UtamTimeoutsImpl;
 import utam.core.selenium.element.ShadowRootWebElement;
 import utam.core.selenium.expectations.DriverExpectations;
 import utam.core.selenium.expectations.DriverWait;
@@ -25,9 +27,6 @@ import static utam.core.selenium.element.ShadowRootWebElement.SHADOW_ROOT_DETECT
 @SuppressWarnings({"unchecked"})
 public class SeleniumContextProvider implements SeleniumContext, WebDriverUtilities {
 
-  public static final Duration DEFAULT_POLLING_INTERVAL = Duration.ofMillis(1000);
-  public static final Duration DEFAULT_POLLING_TIMEOUT = Duration.ofSeconds(20);
-
   private static final List<Class<? extends Throwable>> IGNORE_EXCEPTIONS =
       Stream.of(
               NullPointerException.class,
@@ -38,23 +37,25 @@ public class SeleniumContextProvider implements SeleniumContext, WebDriverUtilit
           .collect(Collectors.toList());
   private final WebDriver driver;
   private final LocationPolicy locationPolicy;
-  private Duration waitTimeout;
-  private Duration pollingInterval;
+  private final UtamTimeouts timeouts;
 
   protected SeleniumContextProvider(
       WebDriver driver, LocationPolicy locationPolicy, Duration timeout) {
     this.driver = driver;
-    setPollingTimeout(timeout);
-    setPollingInterval(DEFAULT_POLLING_INTERVAL);
+    this.timeouts = new UtamTimeoutsImpl();
+    if(timeout != null) {
+      this.timeouts.setFindTimeout(timeout);
+      this.timeouts.setWaitForTimeout(timeout);
+    }
     this.locationPolicy = locationPolicy;
   }
 
   public SeleniumContextProvider(WebDriver driver, LocationPolicy locationPolicy) {
-    this(driver, locationPolicy, DEFAULT_POLLING_TIMEOUT);
+    this(driver, locationPolicy, null);
   }
 
   public SeleniumContextProvider(WebDriver driver) {
-    this(driver, LocationPolicyType.getDefault(), DEFAULT_POLLING_TIMEOUT);
+    this(driver, LocationPolicyType.getDefault(), null);
   }
 
   private static String getCheckShadowRootScript() {
@@ -105,15 +106,11 @@ public class SeleniumContextProvider implements SeleniumContext, WebDriverUtilit
 
   @Override
   public DriverWait getDriverWait() {
-    return getDriverWait(getPollingTimeout());
-  }
-
-  private DriverWait getDriverWait(Duration timeout) {
     FluentWait<WebDriver> fluentWait =
         new FluentWait(driver)
             // had to use units instead duration for compatibility with SETI
-            .withTimeout(timeout)
-            .pollingEvery(pollingInterval)
+            .withTimeout(timeouts.getWaitForTimeout())
+            .pollingEvery(timeouts.getPollingInterval())
             .ignoreAll(IGNORE_EXCEPTIONS);
     return new DriverWait() {
       @Override
@@ -124,23 +121,8 @@ public class SeleniumContextProvider implements SeleniumContext, WebDriverUtilit
   }
 
   @Override
-  public Duration getPollingTimeout() {
-    return waitTimeout;
-  }
-
-  @Override
-  public void setPollingTimeout(Duration sec) {
-    waitTimeout = sec;
-  }
-
-  @Override
-  public Duration getPollingInterval() {
-    return pollingInterval;
-  }
-
-  @Override
-  public void setPollingInterval(Duration interval) {
-    pollingInterval = interval;
+  public UtamTimeouts getTimeouts() {
+    return timeouts;
   }
 
   @Override

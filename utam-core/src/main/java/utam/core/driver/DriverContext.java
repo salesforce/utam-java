@@ -1,7 +1,8 @@
-package utam.core.selenium.context;
+package utam.core.driver;
 
 import utam.core.framework.consumer.LocationPolicy;
 import utam.core.framework.consumer.UtamTimeouts;
+import utam.core.selenium.context.WebDriverUtilities;
 import utam.core.selenium.expectations.DriverWait;
 
 
@@ -11,14 +12,7 @@ import utam.core.selenium.expectations.DriverWait;
  * @author elizaveta.ivanova
  * @since 226
  */
-public interface SeleniumContext {
-
-  /**
-   * get instance of the web driver utilities
-   *
-   * @return instance of WebDriver utilities
-   */
-  WebDriverUtilities getWebDriverUtils();
+public interface DriverContext {
 
   /**
    * get configured timeouts
@@ -40,4 +34,8 @@ public interface SeleniumContext {
    * @return instance of location policy
    */
   LocationPolicy getLocationPolicy();
+
+  void executeJavaScript(String script, Object... parameters);
+
+  Object returnJavaScript(String script, Object... parameters);
 }

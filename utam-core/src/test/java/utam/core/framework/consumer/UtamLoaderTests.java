@@ -63,7 +63,7 @@ public class UtamLoaderTests {
   public void testDefaultConstructor() {
     UtamLoaderImpl loader = new UtamLoaderImpl(mock(WebDriver.class));
     SeleniumContext seleniumContext = loader.utamConfig.getSeleniumContext();
-    assertThat(seleniumContext.getPollingTimeout(), is(equalTo(DEFAULT_POLLING_TIMEOUT)));
+    assertThat(seleniumContext.getTimeouts(), is(equalTo(DEFAULT_POLLING_TIMEOUT)));
     assertThat(seleniumContext.getPollingInterval(), is(equalTo(DEFAULT_POLLING_INTERVAL)));
   }
 
@@ -71,7 +71,7 @@ public class UtamLoaderTests {
   public void testDefaultConstructorForTests() {
     UtamLoaderImpl loader = (UtamLoaderImpl) UtamLoaderImpl.getSimulatorLoader(mock(WebDriver.class));
     SeleniumContext seleniumContext = loader.utamConfig.getSeleniumContext();
-    assertThat(seleniumContext.getPollingTimeout(), is(equalTo(Duration.ofSeconds(1))));
+    assertThat(seleniumContext.getTimeouts(), is(equalTo(Duration.ofSeconds(1))));
     assertThat(seleniumContext.getPollingInterval(), is(equalTo(DEFAULT_POLLING_INTERVAL)));
   }
 

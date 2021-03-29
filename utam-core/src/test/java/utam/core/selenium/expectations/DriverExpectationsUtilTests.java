@@ -112,7 +112,7 @@ public class DriverExpectationsUtilTests {
     when(mockDriver.getWindowHandle()).then((invocation) -> tracker.getCurrentHandle());
 
     SeleniumContextProvider provider = new SeleniumContextProvider(mockDriver);
-    provider.setPollingTimeout(Duration.ofMillis(10));
+    provider.setTimeouts(Duration.ofMillis(10));
     provider.setPollingInterval(Duration.ofMillis(1));
     DriverWait wait = provider.getDriverWait();
 

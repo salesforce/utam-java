@@ -4,7 +4,6 @@ import static utam.core.framework.consumer.PageObjectContextImpl.getClassFromNam
 import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
 
 import io.appium.java_client.AppiumDriver;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -160,8 +159,8 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
   }
 
   @Override
-  public void setTimeout(Duration timeout) {
-    this.driverSettings.customTimeout = timeout;
+  public void setTimeout(UtamTimeouts timeouts) {
+    this.driverSettings.timeouts = timeouts;
     resetSeleniumContext();
     resetFactory();
   }
@@ -172,12 +171,12 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
   static class DriverSettings {
 
     String bridgeAppTitle;
-    Duration customTimeout;
+    UtamTimeouts timeouts;
     LocationPolicy locationPolicy;
 
     DriverSettings() {
       this.bridgeAppTitle = null;
-      this.customTimeout = null;
+      this.timeouts = new UtamTimeoutsImpl();
       this.locationPolicy = LocationPolicyType.getDefault();
     }
 
@@ -185,8 +184,8 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
       SeleniumContextProvider seleniumContext = Driver.isMobileDriver(webDriver)
           ? new AppiumContextProvider((AppiumDriver) webDriver, bridgeAppTitle)
           : new SeleniumContextProvider(webDriver, locationPolicy);
-      if (customTimeout != null) {
-        seleniumContext.setPollingTimeout(customTimeout);
+      if (timeouts != null) {
+        seleniumContext.setTimeouts(timeouts);
       }
       return seleniumContext;
     }

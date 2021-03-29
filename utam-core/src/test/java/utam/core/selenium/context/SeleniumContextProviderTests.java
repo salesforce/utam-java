@@ -56,15 +56,15 @@ public class SeleniumContextProviderTests {
   @Test
   public void testDefaultTimeouts() {
     SeleniumContextProvider provider = new SeleniumContextProvider(mockDriver);
-    assertThat(provider.getPollingTimeout().getSeconds(), is(equalTo(20L)));
+    assertThat(provider.getTimeouts().getSeconds(), is(equalTo(20L)));
   }
 
   /** Tests custom timeouts for the SeleniumContextProvider */
   @Test
   public void testCustomTimeouts() {
     SeleniumContextProvider provider = new SeleniumContextProvider(mockDriver);
-    provider.setPollingTimeout(Duration.ofSeconds(60));
-    assertThat(provider.getPollingTimeout().getSeconds(), is(equalTo(60L)));
+    provider.setTimeouts(Duration.ofSeconds(60));
+    assertThat(provider.getTimeouts().getSeconds(), is(equalTo(60L)));
   }
 
   /** Tests that the method to get WebDriver utilities returns an instance of WebDriverUtilities */

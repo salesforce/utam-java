@@ -3,8 +3,6 @@ package utam.core.framework.consumer;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.context.Profile;
 
-import java.time.Duration;
-
 /**
  * configuration of the UTAM integration by consumer </br>
  * configuration should be created every time Driver is created
@@ -49,7 +47,7 @@ public interface UtamLoaderConfig {
   /**
    * set polling timeout for UI element interactions <br>
    *
-   * @param timeout timeout duration
+   * @param timeouts timeout duration
    */
-  void setTimeout(Duration timeout);
+  void setTimeout(UtamTimeouts timeouts);
 }

@@ -60,7 +60,7 @@ public class AppiumContextProviderTests {
     AppiumContextProvider provider = new AppiumContextProvider(
         getDriver(),
         DEFAULT_APP_CONTEXT_TITLE);
-    assertThat(provider.getPollingTimeout().getSeconds(), is(equalTo(20L)));
+    assertThat(provider.getTimeouts().getSeconds(), is(equalTo(20L)));
   }
 
   /** 

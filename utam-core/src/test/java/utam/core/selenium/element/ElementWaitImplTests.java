@@ -496,7 +496,7 @@ public class ElementWaitImplTests {
       mockElement = mock(WebElement.class, withSettings().name("element"));
       when(mockElement.getText()).thenReturn(SAMPLE_TEXT);
       when(context.getWebDriverUtils()).thenReturn(utilities);
-      when(context.getPollingTimeout()).thenReturn(Duration.ofMillis(10));
+      when(context.getTimeouts()).thenReturn(Duration.ofMillis(10));
       when(context.getPollingInterval()).thenReturn(Duration.ofMillis(1));
       when(utilities.getWebDriver()).thenReturn(mockDriver);
       when(context
