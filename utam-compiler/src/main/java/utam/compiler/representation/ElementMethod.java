@@ -1,21 +1,20 @@
 package utam.compiler.representation;
 
-import utam.core.declarative.representation.MethodDeclaration;
-import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.declarative.representation.TypeProvider;
-import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.MatcherType;
-import utam.compiler.helpers.TypeUtilities;
+import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
+import static utam.compiler.helpers.TypeUtilities.LIST_IMPORT;
+import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
-import static utam.compiler.helpers.TypeUtilities.LIST_IMPORT;
-import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
+import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.MatcherType;
+import utam.compiler.helpers.TypeUtilities;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 
 /**
  * generate code of getter method for basic element
@@ -26,7 +25,7 @@ import static utam.compiler.translator.TranslationUtilities.getElementGetterMeth
 public abstract class ElementMethod implements PageObjectMethod {
 
   static final String BASE_PAGE_OBJECT_METHOD = "element";
-  static final String BUILDER_METHOD = "build";
+  private static final String BUILDER_METHOD = "build";
   static final String LIST_BUILDER_METHOD = "buildList";
 
   static String getSingleElementMethodCode(ElementContext element, boolean isNullable) {
@@ -38,6 +37,13 @@ public abstract class ElementMethod implements PageObjectMethod {
           BUILDER_METHOD,
           element.getType().getSimpleName(),
           getParametersValuesString(element.getParameters()));
+    } else if (isNullable) {
+      return String.format(
+          "%s(%s).%s(%s.class)",
+          BASE_PAGE_OBJECT_METHOD,
+          String.format("this.%s, %s", element.getName(), isNullable),
+          BUILDER_METHOD,
+          element.getType().getSimpleName());
     } else {
       return String.format("this.%s", element.getName());
     }

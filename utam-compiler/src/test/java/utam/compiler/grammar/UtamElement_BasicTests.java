@@ -429,4 +429,30 @@ public class UtamElement_BasicTests {
     assertThat(elementContext.getElementMethod().isPublic(), is(false));
     assertThat(elementContext.getType(), is(equalTo(actionable)));
   }
+
+  @Test
+  public void testNullableList() {
+    MethodInfo methodInfo = new MethodInfo("getNullableList", "List<Actionable>");
+    methodInfo.addCodeLine("element(this.nullableList, true).buildList(Actionable.class)");
+    TranslationContext context = new DeserializerUtilities().getContext("basicElementNullable");
+    PageObjectMethod method = context.getMethod("getNullableList");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
+  public void testNullableListWithFilter() {
+    MethodInfo methodInfo = new MethodInfo("getNullableFilter", "Actionable");
+    methodInfo.addCodeLine("element(this.nullableFilter, false).build(Actionable.class, elm -> elm.isVisible())");
+    TranslationContext context = new DeserializerUtilities().getContext("basicElementNullable");
+    PageObjectMethod method = context.getMethod("getNullableFilter");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
+  public void testNullableSingle() {
+    MethodInfo methodInfo = new MethodInfo("getNullable", actionable.getSimpleName());
+    methodInfo.addCodeLine("element(this.nullable, true).build(Actionable.class)");
+    TranslationContext context = new DeserializerUtilities().getContext("basicElementNullable");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("getNullable"), methodInfo);
+  }
 }

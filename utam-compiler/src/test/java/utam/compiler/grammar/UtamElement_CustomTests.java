@@ -242,4 +242,19 @@ public class UtamElement_CustomTests {
             + ".buildList(Test.class)");
     PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
   }
+
+  @Test
+  public void testNullableList() {
+    throw new AssertionError("not implemented");
+  }
+
+  @Test
+  public void testNullableListWithFilter() {
+    throw new AssertionError("not implemented");
+  }
+
+  @Test
+  public void testNullableSingle() {
+    throw new AssertionError("not implemented");
+  }
 }
