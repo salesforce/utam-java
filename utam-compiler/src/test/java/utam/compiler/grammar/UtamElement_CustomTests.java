@@ -258,7 +258,7 @@ public class UtamElement_CustomTests {
   public void testCustomNullableListWithFilter() {
     MethodInfo methodInfo = new MethodInfo("getCustomNullableListFilter", "List<CustomTest>");
     methodInfo.addCodeLine(
-            "inScope(this.getRootElement(), by(\".css\", Selector.Type.CSS, false), false)" +
+            "inScope(this.getRootElement(), by(\".css\", Selector.Type.CSS, false), true)" +
                     ".buildList(CustomTest.class, elm -> elm.isVisible())");
     TranslationContext context = new DeserializerUtilities().getContext("customElementNullable");
     PageObjectMethod method = context.getMethod("getCustomNullableListFilter");

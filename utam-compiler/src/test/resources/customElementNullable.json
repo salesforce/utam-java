@@ -12,6 +12,7 @@
     {
       "name": "customNullableListFilter",
       "public": true,
+      "nullable": true,
       "type": "utam-test/pageObjects/test/customTest",
       "selector": {
         "css": ".css",
