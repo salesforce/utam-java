@@ -1,0 +1,40 @@
+{
+  "elements": [
+    {
+      "name": "customNullable",
+      "nullable": true,
+      "public": true,
+      "type": "utam-test/pageObjects/test/customTest",
+      "selector": {
+        "css": "selector1"
+      }
+    },
+    {
+      "name": "customNullableListFilter",
+      "public": true,
+      "type": "utam-test/pageObjects/test/customTest",
+      "selector": {
+        "css": ".css",
+        "returnAll": true
+      },
+      "filter": {
+        "apply": "isVisible",
+        "matcher": {
+          "type": "isTrue"
+        },
+        "findFirst": false
+      }
+    },
+    {
+      "name": "customNullableList",
+      "public": true,
+      "nullable": true,
+      "type": "utam-test/pageObjects/test/customTest",
+      "selector": {
+        "css": "selector2",
+        "returnAll": true
+      }
+    }
+  ]
+}
+

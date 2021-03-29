@@ -102,8 +102,7 @@ public class PageObjectElementBuilderImplTests {
   @Test
   public void testCountIzZeroForNullable() {
     ElementImplTests.ActionsMock mock = new ElementImplTests.ActionsMock();
-    // todo - fix mock to return nothing
-    BaseElement element = mock.getElementImpl();
+    BaseElement element = mock.getElementImplNullable();
     assertThat(
         getElementBuilder(new ElementImplTests.MockHelper().context, element, true)
             .count(true, LocatorUtilities.getElementLocator(element)),
@@ -150,8 +149,7 @@ public class PageObjectElementBuilderImplTests {
   @Test
   public void testAsListNullable() {
     ElementImplTests.Mock mock = new ElementImplTests.Mock();
-    // todo - get nullable mock
-    BaseElement element = mock.getElementImpl();
+    BaseElement element = mock.getElementImplNullable();
     List<Clickable> list = getElementBuilder(mock.context, element, true).buildList(Clickable.class);
     assertThat(list, Matchers.is(instanceOf(Iterable.class)));
     assertThat(list.size(), Matchers.is(equalTo(0)));
