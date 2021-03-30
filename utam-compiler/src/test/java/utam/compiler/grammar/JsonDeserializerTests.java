@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import utam.compiler.helpers.TypeUtilities;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
-import utam.core.selenium.element.Clickable;
+import utam.core.element.Clickable;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.translator.DefaultSourceConfigurationTests;
 import utam.core.declarative.representation.PageObjectClass;
@@ -172,17 +172,18 @@ public class JsonDeserializerTests {
             IMPL_PACKAGE_NAME, IMPL_SIMPLE_NAME, IMPL_FULL_NAME);
     PageObjectValidationTestHelper.FieldInfo fieldInfo =
         new PageObjectValidationTestHelper.FieldInfo(
-            "childElement", "Clickable", "@ElementMarker.Find(css = \".fakeSelector\")");
+            "childElement");
+    fieldInfo.addAnnotations("@ElementMarker.Find(css = \".fakeSelector\")");
 
     PageObjectValidationTestHelper.MethodInfo rootElementMethod =
             new PageObjectValidationTestHelper.MethodInfo("getRoot", Clickable.class.getSimpleName());
-    rootElementMethod.addCodeLine("(Clickable) this.getRootElement()");
+    rootElementMethod.addCodeLine("this.getRootElement()");
     rootElementMethod.setIsPublic(false);
 
     PageObjectValidationTestHelper.MethodInfo childElementGetter =
         new PageObjectValidationTestHelper.MethodInfo(
             getElementPrivateMethod("childElement"), "Clickable");
-    childElementGetter.addCodeLine("this.childElement");
+    childElementGetter.addCodeLine("element(this.childElement).build(Clickable.class)");
     childElementGetter.setIsPublic(false);
 
     PageObjectValidationTestHelper.MethodInfo composeMethod =

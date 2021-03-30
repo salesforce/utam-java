@@ -1,17 +1,17 @@
 package utam.core.framework.consumer;
 
+import java.util.function.Supplier;
 import org.openqa.selenium.SearchContext;
 
-import java.util.function.Supplier;
-
 /**
- * external PO scoped inside UTAM
+ * external PO scoped inside UTAM, only supported for Selenium!
+ *
  * @author elizaveta.ivanova
  * @since 228
  */
 public interface Contained {
 
-    void setRoot(Supplier<SearchContext> rootSupplier);
+  void setRoot(Supplier<SearchContext> rootSupplier);
 
-    void setScope(Supplier<SearchContext> scopeSupplier);
+  void setScope(Supplier<SearchContext> scopeSupplier);
 }

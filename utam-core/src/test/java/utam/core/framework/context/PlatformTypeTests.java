@@ -1,27 +1,20 @@
 package utam.core.framework.context;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
 
-import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.ios.IOSDriver;
-
-import org.openqa.selenium.Platform;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.annotations.Test;
-import utam.core.framework.context.PlatformType;
 
 /**
  * Provides tests for the PlatformType enumerated type
- * @author james.evans
  *
+ * @author james.evans
  */
 public class PlatformTypeTests {
-  
+
   /**
    * The fromString method should return valid values for known types
    */
@@ -34,8 +27,7 @@ public class PlatformTypeTests {
   }
 
   /**
-   * The fromString method should throw the appropriate exception
-   * for unknown types
+   * The fromString method should throw the appropriate exception for unknown types
    */
   @Test
   public void testFromStringWithUnknownTypeThrows() {
@@ -53,23 +45,5 @@ public class PlatformTypeTests {
     assertThat(PlatformType.NATIVE.getName(), is(equalTo("native")));
     assertThat(PlatformType.WEB.getName(), is(equalTo("web")));
     assertThat(PlatformType.NONE.getName(), is(equalTo("")));
-  }
-
-  @Test
-  public void testGetActivePlatformProfile() {
-    assertThat(PlatformType.getActivePlatformProfile(mock(WebDriver.class)), is(PlatformType.PLATFORM_WEB));
-    assertThat(PlatformType.getActivePlatformProfile(mock(AndroidDriver.class)), is(PlatformType.PLATFORM_ANDROID));
-    assertThat(PlatformType.getActivePlatformProfile(mock(IOSDriver.class)), is(PlatformType.PLATFORM_IOS));
-    AppiumDriver driver = mock(AppiumDriver.class);
-    DesiredCapabilities capabilities = new DesiredCapabilities();
-    capabilities.setPlatform(Platform.MAC);
-    when(driver.getCapabilities()).thenReturn(capabilities);
-    assertThat(PlatformType.getActivePlatformProfile(driver), is(PlatformType.PLATFORM_IOS));
-    capabilities.setPlatform(Platform.LINUX);
-    when(driver.getCapabilities()).thenReturn(capabilities);
-    assertThat(PlatformType.getActivePlatformProfile(driver), is(PlatformType.PLATFORM_ANDROID));
-    capabilities.setPlatform(Platform.WINDOWS);
-    when(driver.getCapabilities()).thenReturn(capabilities);
-    assertThat(PlatformType.getActivePlatformProfile(driver), is(PlatformType.PLATFORM_WEB));
   }
 }

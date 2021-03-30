@@ -3,7 +3,6 @@ package utam.compiler.translator;
 import com.google.googlejavaformat.java.Formatter;
 import com.google.googlejavaformat.java.FormatterException;
 import utam.core.framework.consumer.UtamError;
-import utam.core.selenium.element.Selector;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -17,7 +16,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static utam.compiler.helpers.TypeUtilities.VOID;
-import static utam.core.selenium.element.LocatorUtilities.QUERY_SELECTOR;
 
 /**
  * utilities for java code generation
@@ -58,26 +56,6 @@ public class TranslationUtilities {
   static List<String> getWrappedJavadoc(String comments) {
     return getWrappedJavadoc(
         Stream.of(comments.split(COMMENTS_SEPARATOR)).collect(Collectors.toList()));
-  }
-
-  /**
-   * todo this method is incomplete, it's supposed to get full chain for annotation
-   *
-   * @return string
-   */
-  public static String setHtmlElementComments(Selector selector, boolean isExpandScopeShadowRoot) {
-    StringBuilder builder = new StringBuilder("javascript: $(<root selector here>)");
-    appendQuery(builder, isExpandScopeShadowRoot, selector);
-
-    return builder.toString();
-  }
-
-  private static void appendQuery(
-      StringBuilder builder, boolean isExpandScopeShadowRoot, Selector selector) {
-    if (isExpandScopeShadowRoot) {
-      builder.append(".shadowRoot");
-    }
-    builder.append(String.format(QUERY_SELECTOR, handleSpecialChars(selector.getValue())));
   }
 
   static String handleSpecialChars(String selector) {

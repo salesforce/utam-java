@@ -1,13 +1,10 @@
 package utam.compiler.representation;
 
+import java.util.Collections;
+import java.util.List;
 import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.TypeProvider;
-
-import java.util.List;
-
-import static utam.compiler.helpers.AnnotationUtils.EMPTY_ANNOTATIONS;
-import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
 
 /**
  * representation of the page object element
@@ -32,7 +29,7 @@ public final class UtilityReferenceField implements PageClassField {
 
   @Override
   public List<AnnotationProvider> getAnnotations() {
-    return EMPTY_ANNOTATIONS;
+    return Collections.EMPTY_LIST;
   }
 
   @Override
@@ -43,11 +40,7 @@ public final class UtilityReferenceField implements PageClassField {
   @Override
   public String getDeclaration() {
     String typeName = getType().getSimpleName();
-    return String.format("private final %s %s = getUtility(%s.class)", typeName, getName(), typeName);
-  }
-
-  @Override
-  public String getComments() {
-    return EMPTY_COMMENTS;
+    return String
+        .format("private final %s %s = getUtility(%s.class)", typeName, getName(), typeName);
   }
 }

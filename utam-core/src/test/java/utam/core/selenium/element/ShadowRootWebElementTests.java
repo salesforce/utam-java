@@ -3,7 +3,6 @@ package utam.core.selenium.element;
 import org.openqa.selenium.*;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import utam.core.selenium.element.ShadowRootWebElement;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -238,7 +237,7 @@ public class ShadowRootWebElementTests {
   public void testFindElements() {
     when(((WrapsDriver) mockWebElement).getWrappedDriver()).thenReturn(mockDriver);
     ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
-    when(shadowRootWebElement.executor.executeScript(
+    when(shadowRootWebElement.getExecutor().executeScript(
             String.format(GET_SHADOW_ROOT_QUERY_SELECTOR_ALL, GOOD_CSS_SELECTOR), mockWebElement))
         .thenReturn(Collections.singletonList(mockWebElement));
 
@@ -253,7 +252,7 @@ public class ShadowRootWebElementTests {
   public void testFindElement() {
     when(((WrapsDriver) mockWebElement).getWrappedDriver()).thenReturn(mockDriver);
     ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
-    when(shadowRootWebElement.executor.executeScript(
+    when(shadowRootWebElement.getExecutor().executeScript(
             String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, GOOD_CSS_SELECTOR),
             mockWebElement))
         .thenReturn(mockWebElement);

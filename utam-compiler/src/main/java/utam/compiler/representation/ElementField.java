@@ -1,5 +1,8 @@
 package utam.compiler.representation;
 
+import static utam.compiler.helpers.TypeUtilities.ELEMENT_FIELD;
+
+import java.util.Collections;
 import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.TypeProvider;
@@ -16,14 +19,10 @@ public final class ElementField implements PageClassField {
 
   private final String name;
   private final List<AnnotationProvider> annotations;
-  private final TypeProvider type;
-  private final String comments;
 
-  public ElementField(String name, TypeProvider type, List<AnnotationProvider> annotations, String comments) {
+  public ElementField(String name, AnnotationProvider annotation) {
     this.name = name;
-    this.annotations = annotations;
-    this.type = type;
-    this.comments = comments;
+    this.annotations = Collections.singletonList(annotation);
   }
 
   @Override
@@ -38,16 +37,11 @@ public final class ElementField implements PageClassField {
 
   @Override
   public TypeProvider getType() {
-    return type;
+    return ELEMENT_FIELD;
   }
 
   @Override
   public String getDeclaration() {
     return String.format("private %s %s", getType().getSimpleName(), getName());
-  }
-
-  @Override
-  public String getComments() {
-    return comments;
   }
 }

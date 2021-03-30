@@ -20,8 +20,6 @@ import static utam.compiler.grammar.UtamArgument.ERR_PREDICATE_REDUNDANT;
 import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_DUPLICATE_NAMES;
 import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_WRONG_COUNT;
 import static utam.compiler.grammar.UtamArgument.getArgsProcessor;
-import static utam.compiler.grammar.UtamArgument.getSelectorValuePattern;
-import static utam.compiler.grammar.UtamSelector_Tests.buildUIAutomatorLocator;
 import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 
@@ -35,11 +33,10 @@ import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethodStatement;
-import utam.core.appium.element.UIAutomator.Method;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
-import utam.core.selenium.element.Selector;
+import utam.core.selenium.element.LocatorBy;
 
 /**
  * Provides tests for the ArgumentsProcessor type
@@ -109,7 +106,7 @@ public class UtamArgument_Tests {
     assertThat(parameters.get(2).getType().getSimpleName(), is(equalTo("Boolean")));
     assertThat(parameters.get(3).getValue(), is(equalTo("name4")));
     assertThat(parameters.get(3).getType().getSimpleName(),
-        is(equalTo(Selector.class.getSimpleName())));
+        is(equalTo(SELECTOR.getSimpleName())));
   }
 
   @Test
@@ -135,7 +132,7 @@ public class UtamArgument_Tests {
     assertThat(parameters.get(2).getType().getSimpleName(), is(equalTo("Boolean")));
     assertThat(parameters.get(3).getValue(), is(equalTo("name4")));
     assertThat(parameters.get(3).getType().getSimpleName(),
-        is(equalTo(Selector.class.getSimpleName())));
+        is(equalTo(SELECTOR.getSimpleName())));
   }
 
   /**
@@ -364,19 +361,19 @@ public class UtamArgument_Tests {
   public void testSelectorByNameType() {
     UtamArgument utamArgument = new UtamArgument("name", "locator");
     MethodParameter parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, null);
-    assertThat(parameter.getType().getClassType(), is(equalTo(Selector.class)));
+    assertThat(parameter.getType(), is(equalTo(SELECTOR)));
     parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, SELECTOR);
-    assertThat(parameter.getType().getClassType(), is(equalTo(Selector.class)));
+    assertThat(parameter.getType(), is(equalTo(SELECTOR)));
   }
 
   @Test
   public void testSelectorByValue() {
-    UtamArgument utamArgument = new UtamArgument(new UtamSelector("\".css\""));
+    UtamArgument utamArgument = new UtamArgument(new UtamSelector(".css"));
     MethodParameter parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, null);
-    assertThat(parameter.getType().getClassType(), is(equalTo(Selector.class)));
+    assertThat(parameter.getType(), is(equalTo(SELECTOR)));
     parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, SELECTOR);
-    assertThat(parameter.getType().getClassType(), is(equalTo(Selector.class)));
-    assertThat(parameter.getValue(), is(equalTo("Selector.byCss(\".css\")")));
+    assertThat(parameter.getType(), is(equalTo(SELECTOR)));
+    assertThat(parameter.getValue(), is(equalTo("LocatorBy.byCss(\".css\")")));
   }
 
   @Test
@@ -384,22 +381,22 @@ public class UtamArgument_Tests {
     final String str = "selector";
     UtamSelector selector = new UtamSelector(null, str, null, null);
     UtamArgument utamArgument = new UtamArgument(selector);
+    String prefix = LocatorBy.class.getSimpleName();
     MethodParameter parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, SELECTOR);
-    assertThat(parameter.getValue(), is(equalTo("Selector.byAccessibilityId(\"selector\")")));
+    assertThat(parameter.getValue(), is(equalTo(prefix + ".byAccessibilityId(\"selector\")")));
 
     selector = new UtamSelector(null, null, str, null);
     utamArgument = new UtamArgument(selector);
     parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, SELECTOR);
-    assertThat(parameter.getValue(), is(equalTo("Selector.byClassChain(\"selector\")")));
+    assertThat(parameter.getValue(), is(equalTo(prefix + ".byClassChain(\"selector\")")));
 
     selector = new UtamSelector(null, null, null,
-        buildUIAutomatorLocator(Method.CHECKABLE));
+        "new UiSelector().checkable()");
+
     utamArgument = new UtamArgument(selector);
     parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, SELECTOR);
     assertThat(parameter.getValue(),
-        is(equalTo("Selector.byUiAutomator(\"new UiSelector().checkable()\")")));
-
-    assertThrows(() -> getSelectorValuePattern(null));
+        is(equalTo(prefix + ".byUiAutomator(\"new UiSelector().checkable()\")")));
   }
 
   @Test

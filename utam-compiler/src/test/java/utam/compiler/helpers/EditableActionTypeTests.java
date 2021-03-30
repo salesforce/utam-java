@@ -2,11 +2,9 @@ package utam.compiler.helpers;
 
 import utam.core.declarative.representation.TypeProvider;
 import org.testng.annotations.Test;
-import utam.core.selenium.element.Editable;
-import utam.core.selenium.expectations.DriverExpectationsUtil;
+import utam.core.element.Editable;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -90,24 +88,6 @@ public class EditableActionTypeTests {
     assertThat(parameterTypeStrings, containsInAnyOrder(parameterTypes.toArray()));
     assertThat(parameterTypeStrings, hasSize(parameterTypes.size()));
     assertThat(action.getReturnType().getSimpleName(), is(equalTo(EditableActionTypeTests.VOID_TYPE_NAME)));
-  }
-
-  @SuppressWarnings("rawtypes")
-  @Test
-  public void driverActions() {
-    for (DriverExpectationsUtil.Type action : DriverExpectationsUtil.Type.values()) {
-      Method method =
-          getMethod(DriverExpectationsUtil.class, action.name(), action.getParameterTypes());
-      // method returns expectations, so we need generic type parameter
-      Class expectationReturns =
-          (Class) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
-      // check that code is set
-      // N.B., currently, all actions return a valid type; if an action is added that
-      // will return null, something similar to the following will be required:
-      // Class expected = action.getReturnType() == null ? WebElement.class : action.getReturnType();
-      Class expected = action.getReturnType();
-      assertThat(expected, is(equalTo(expectationReturns)));
-    }
   }
 
   @SuppressWarnings("rawtypes")

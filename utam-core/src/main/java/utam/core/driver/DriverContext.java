@@ -1,41 +1,43 @@
 package utam.core.driver;
 
-import utam.core.framework.consumer.LocationPolicy;
-import utam.core.framework.consumer.UtamTimeouts;
-import utam.core.selenium.context.WebDriverUtilities;
-import utam.core.selenium.expectations.DriverWait;
-
 
 /**
- * wrapper for WebDriver and its settings
+ * Driver related settings
  *
  * @author elizaveta.ivanova
  * @since 226
  */
-public interface DriverContext {
+public class DriverContext {
+
+  private final DriverTimeouts timeouts;
+  private final String bridgeAppTitle;
+
+  public DriverContext(DriverTimeouts timeouts, String bridgeAppTitle) {
+    this.timeouts = timeouts;
+    this.bridgeAppTitle = bridgeAppTitle;
+  }
+
+  public DriverContext() {
+    this(new DriverTimeouts(), "");
+  }
+
+  public static final DriverContext TEST = new DriverContext(DriverTimeouts.TEST, "");
 
   /**
    * get configured timeouts
    *
    * @return timeouts
    */
-  UtamTimeouts getTimeouts();
+  public DriverTimeouts getTimeouts() {
+    return timeouts;
+  }
 
   /**
-   * get FluentWait for webDriver
+   * get WebView page with given title
    *
-   * @return instance of FluentWait<WebDriver> for user interactions
+   * @return the title of the WebView page
    */
-  DriverWait getDriverWait();
-
-  /**
-   * get location policy type
-   *
-   * @return instance of location policy
-   */
-  LocationPolicy getLocationPolicy();
-
-  void executeJavaScript(String script, Object... parameters);
-
-  Object returnJavaScript(String script, Object... parameters);
+  public String getBridgeAppTitle() {
+    return bridgeAppTitle;
+  }
 }

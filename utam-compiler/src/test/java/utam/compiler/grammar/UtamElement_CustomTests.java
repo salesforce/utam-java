@@ -181,7 +181,7 @@ public class UtamElement_CustomTests {
     UtamElement element = getPublicComponentElement();
     MethodInfo expectedMethodInfo = new MethodInfo(METHOD_NAME, COMPONENT_TYPE_SHORT_NAME);
     expectedMethodInfo.addCodeLines(
-        "ComponentName instance = inScope(this.getScopeElement(), by(\"selector\", Selector.Type.CSS, false), false)"
+        "ComponentName instance = inScope(this.scope, LocatorBy.byCss(\"selector\"), false, false)"
             + ".build(ComponentName.class)",
         "instance.load()",
         "instance");
@@ -208,7 +208,7 @@ public class UtamElement_CustomTests {
     MethodInfo expectedMethod = new MethodInfo(METHOD_NAME, COMPONENT_TYPE_SHORT_NAME);
     expectedMethod.addCodeLines(
         "ComponentName instance = "
-            + "inScope(this.getScopeElement(), by(\"selector\", Selector.Type.CSS, false)).build(ComponentName.class)",
+            + "inScope(this.scope, LocatorBy.byCss(\"selector\"), false).build(ComponentName.class)",
         "instance");
     PageObjectMethod method = getElementMethod(element);
     PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
@@ -218,7 +218,7 @@ public class UtamElement_CustomTests {
   public void testElementWithListCantBeExternal() {
     UtamElement element = getPublicComponentElement(getListCssSelector(), null);
     element.isExternal = true;
-    UtamError e = expectThrows(UtamError.class, () -> element.getAbstraction());
+    UtamError e = expectThrows(UtamError.class, element::getAbstraction);
     assertThat(
         e.getMessage(),
         containsString(String.format(ERR_ELEMENT_EXTERNAL_NOT_ALLOWED, ELEMENT_NAME)));
@@ -238,7 +238,7 @@ public class UtamElement_CustomTests {
     expectedMethod.addParameter(
         new PageObjectValidationTestHelper.MethodParameterInfo("arg2", "String"));
     expectedMethod.addCodeLines(
-        "inScope(this.getElementElement(arg1), by(String.format(\"selector2 %s\", arg2), Selector.Type.CSS, false), false)"
+        "inScope(this.element.setParameters(arg1), LocatorBy.byCss(String.format(\"selector2 %s\", arg2)), false, false)"
             + ".buildList(Test.class)");
     PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
   }

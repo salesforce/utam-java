@@ -3,10 +3,11 @@ package utam.compiler.helpers;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.selenium.element.Selector;
+import utam.core.element.Locator;
 
 import java.util.ArrayList;
 import java.util.List;
+import utam.core.selenium.element.LocatorBy;
 
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
@@ -22,7 +23,7 @@ import static utam.compiler.helpers.Validation.isSameSelector;
 public abstract class ElementContext {
 
   public static final String ROOT_ELEMENT_NAME = "root";
-  public static final Selector EMPTY_SELECTOR = Selector.byCss("");
+  public static final Locator EMPTY_SELECTOR = LocatorBy.byCss("");
   static final String EMPTY_SCOPE_ELEMENT_NAME = "empty";
   public static final ElementContext ROOT_SCOPE =
       new ElementContext(
@@ -37,7 +38,7 @@ public abstract class ElementContext {
           return true;
         }
       };
-  private final Selector selector;
+  private final Locator selector;
   // parameters from scope + from element itself
   private final List<MethodParameter> parameters;
   private final String name;
@@ -49,7 +50,7 @@ public abstract class ElementContext {
       ElementContext scopeContext,
       String name,
       TypeProvider elementType,
-      Selector selector,
+      Locator selector,
       boolean isList, // selector can be list, but element not because of filter
       List<MethodParameter> parameters) {
     this.name = name;
@@ -93,7 +94,7 @@ public abstract class ElementContext {
     return false;
   }
 
-  final Selector getSelector() {
+  final Locator getSelector() {
     return selector;
   }
 
@@ -119,19 +120,19 @@ public abstract class ElementContext {
         ElementContext scopeContext,
         String name,
         TypeProvider elementType,
-        Selector selector,
+        Locator selector,
         boolean isList, // selector can be list, but element not because of filter
         List<MethodParameter> parameters) {
       super(scopeContext, name, elementType, selector, isList, parameters);
     }
 
     // used in tests
-    public Basic(String name, TypeProvider elementType, Selector selector) {
+    public Basic(String name, TypeProvider elementType, Locator selector) {
       super(ROOT_SCOPE, name, elementType, selector, false, EMPTY_PARAMETERS);
     }
 
     // used in tests
-    public Basic(String name, TypeProvider elementType, Selector selector, boolean isList) {
+    public Basic(String name, TypeProvider elementType, Locator selector, boolean isList) {
       super(ROOT_SCOPE, name, elementType, selector, isList, EMPTY_PARAMETERS);
     }
 
@@ -182,7 +183,7 @@ public abstract class ElementContext {
     private final TypeProvider enclosingPageObjectType;
 
     public Root(
-        TypeProvider enclosingPageObjectType, TypeProvider rootElementType, Selector selector) {
+        TypeProvider enclosingPageObjectType, TypeProvider rootElementType, Locator selector) {
       super(null, ROOT_ELEMENT_NAME, rootElementType, selector, false, EMPTY_PARAMETERS);
       this.enclosingPageObjectType = enclosingPageObjectType;
     }
@@ -233,19 +234,18 @@ public abstract class ElementContext {
         ElementContext scopeContext,
         String elementName,
         TypeProvider type,
-        Selector selector,
-        boolean isList, // selector can be list, but element not because of filter
-        List<MethodParameter> parameters) {
-      super(scopeContext, elementName, type, selector, isList, parameters);
+        Locator locator,
+        boolean isList, List<MethodParameter> parameters) {
+      super(scopeContext, elementName, type, locator, isList, parameters);
     }
 
     // used in tests
-    Custom(String elementName, TypeProvider type, Selector selector) {
+    Custom(String elementName, TypeProvider type, Locator selector) {
       super(ROOT_SCOPE, elementName, type, selector, false, EMPTY_PARAMETERS);
     }
 
     // used in tests
-    Custom(String elementName, TypeProvider type, Selector selector, boolean isList) {
+    Custom(String elementName, TypeProvider type, Locator selector, boolean isList) {
       super(ROOT_SCOPE, elementName, type, selector, isList, EMPTY_PARAMETERS);
     }
 

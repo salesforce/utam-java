@@ -3,7 +3,7 @@ package utam.compiler.grammar;
 import utam.compiler.helpers.TranslationContext;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
-import utam.core.selenium.element.Selector;
+import utam.core.selenium.element.LocatorBy;
 
 import static utam.compiler.grammar.TestUtilities.*;
 import static utam.compiler.grammar.UtamPageObject.*;
@@ -69,9 +69,8 @@ public class UtamPageObject_DeserializeTests {
             + "}";
 
     UtamPageObject rootElementNode = createRootElementNode(json);
-    assertThat(rootElementNode.isExposeRootElement, is(nullValue()));
-    assertThat(rootElementNode.selector.getSelector().getValue(), is(equalTo("rootSelector")));
-    assertThat(rootElementNode.selector.getSelector().getType(), is(equalTo(Selector.Type.CSS)));
+    assertThat(rootElementNode.isExposeRootElement, is(false));
+    assertThat(rootElementNode.rootLocator, is(equalTo(LocatorBy.byCss("rootSelector"))));
   }
 
   /** The traverse method should traverse the JSON node */

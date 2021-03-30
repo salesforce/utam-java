@@ -2,7 +2,7 @@ package utam.compiler.helpers;
 
 import utam.core.declarative.representation.TypeProvider;
 import org.testng.annotations.Test;
-import utam.core.selenium.element.Touchable;
+import utam.core.element.Touchable;
 
 import java.lang.reflect.Method;
 import java.util.*;

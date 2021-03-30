@@ -6,15 +6,16 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.element.ElementLocation;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.consumer.ContainerElement;
-import utam.core.selenium.element.Actionable;
-import utam.core.selenium.element.Clickable;
-import utam.core.selenium.element.Editable;
-import utam.core.selenium.element.Selector;
-import utam.core.selenium.element.Touchable;
+import utam.core.element.Actionable;
+import utam.core.element.Clickable;
+import utam.core.element.Editable;
+import utam.core.selenium.element.LocatorBy;
+import utam.core.element.Touchable;
 
 /**
  * implementation of type provider based on existing class
@@ -43,13 +44,14 @@ public final class TypeUtilities {
       new TypeUtilities.UnimportableType(String.format("<T extends %s> T", PAGE_OBJECT.getSimpleName()));
   public static final TypeProvider CONTAINER_LIST_RETURN_TYPE = new TypeUtilities.UnimportableType(
       String.format("<T extends %s> List<T>", PAGE_OBJECT.getSimpleName()));
-  public static final TypeProvider SELECTOR = new FromClass(Selector.class);
+  public static final TypeProvider SELECTOR = new FromClass(LocatorBy.class);
   public static final TypeProvider FUNCTION = new FromClass(Supplier.class) {
     @Override
     public String getSimpleName() {
       return "Supplier<T>";
     }
   };
+  public static final TypeProvider ELEMENT_FIELD = new FromClass(ElementLocation.class);
 
   static String getUnmatchedParametersErr(
       List<TypeProvider> expectedTypes, List<MethodParameter> providedParameters) {

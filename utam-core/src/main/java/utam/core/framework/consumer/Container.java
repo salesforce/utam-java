@@ -1,15 +1,15 @@
 package utam.core.framework.consumer;
 
+import java.util.function.Supplier;
 import org.openqa.selenium.SearchContext;
 
-import java.util.function.Supplier;
-
 /**
- * can act as UTAM PO container
+ * can act as UTAM PO container, only supported for Selenium!
+ *
  * @author elizaveta.ivanova
  * @since 228
  */
 public interface Container {
 
-    Supplier<SearchContext> getScope();
+  Supplier<SearchContext> getScope();
 }

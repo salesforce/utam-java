@@ -6,7 +6,7 @@ import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.compiler.translator.TranslationTypesConfigJava;
 import org.testng.annotations.Test;
-import utam.core.selenium.element.Actionable;
+import utam.core.element.Actionable;
 
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 

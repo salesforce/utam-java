@@ -19,13 +19,13 @@ import java.util.stream.Stream;
 
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
+import static utam.compiler.helpers.AnnotationUtils.EMPTY_ANNOTATION;
 import static utam.compiler.helpers.ElementContext.ROOT_SCOPE;
 import static utam.compiler.helpers.TranslationContext.*;
 import static utam.compiler.helpers.TypeUtilities.Element.editable;
 import static utam.compiler.helpers.ValidationTests.ELEMENT_SELECTOR;
 import static utam.compiler.helpers.ValidationTests.ELEMENT_TYPE;
 import static utam.compiler.translator.AbstractTranslatorConfiguration.ERR_PROFILE_NOT_CONFIGURED;
-import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -53,9 +53,7 @@ public class TranslationContextTests {
     context.setClassField(
         new ElementField(
             "testField",
-            TypeUtilities.Element.clickable,
-            Collections.emptyList(),
-            EMPTY_COMMENTS));
+            EMPTY_ANNOTATION));
     context.setMethod(new ElementMethod.Single(elementContext, true));
     context.setElement(new ElementContext.Container("containerObject"));
     return context;
@@ -103,7 +101,7 @@ public class TranslationContextTests {
 
   @Test
   public void testGetFields() {
-    FieldInfo fieldInfo = new FieldInfo("testField", "Clickable");
+    FieldInfo fieldInfo = new FieldInfo("testField");
     TranslationContext context = getContainerContext();
     assertThat(context.getFields(), hasSize(1));
     fieldInfo.validateField(context.getFields().get(0));
@@ -128,7 +126,7 @@ public class TranslationContextTests {
   @Test
   public void testGetMethods() {
     MethodInfo methodInfo = new MethodInfo("getTestElement", "Clickable");
-    methodInfo.addCodeLine("this.testElement");
+    methodInfo.addCodeLine("element(this.testElement).build(Clickable.class)");
 
     PageObjectValidationTestHelper.validateMethods(
         "translator context",

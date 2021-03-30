@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.*;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.annotations.Test;
-import utam.core.selenium.factory.AppiumCapabilityProvider;
 
 /**
  * Tests for AppiumCapabilityProvider
@@ -33,10 +32,9 @@ public class AppiumCapabilityProviderTests {
   public void testSetDesiredCapabilityBoolean() {
     AppiumCapabilityProvider appiumCapabilityProvider = new AppiumCapabilityProvider();
     String capabilityName = "fakeCapabilityName";
-    Boolean capabilityValue = true;
-    appiumCapabilityProvider.setDesiredCapability(capabilityName, capabilityValue);
+    appiumCapabilityProvider.setDesiredCapability(capabilityName, true);
     DesiredCapabilities desiredCapabilities = appiumCapabilityProvider.getDesiredCapabilities();
-    assertThat(desiredCapabilities.getCapability(capabilityName), is(equalTo(capabilityValue)));
+    assertThat(desiredCapabilities.getCapability(capabilityName), is(equalTo(true)));
   }
 
   /**

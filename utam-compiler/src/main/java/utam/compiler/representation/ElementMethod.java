@@ -1,21 +1,20 @@
 package utam.compiler.representation;
 
-import utam.core.declarative.representation.MethodDeclaration;
-import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.declarative.representation.TypeProvider;
-import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.MatcherType;
-import utam.compiler.helpers.TypeUtilities;
+import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
+import static utam.compiler.helpers.TypeUtilities.LIST_IMPORT;
+import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
-import static utam.compiler.helpers.TypeUtilities.LIST_IMPORT;
-import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
+import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.MatcherType;
+import utam.compiler.helpers.TypeUtilities;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 
 /**
  * generate code of getter method for basic element
@@ -25,62 +24,34 @@ import static utam.compiler.translator.TranslationUtilities.getElementGetterMeth
  */
 public abstract class ElementMethod implements PageObjectMethod {
 
-  static final String BASE_PAGE_OBJECT_METHOD = "element";
-  static final String BUILDER_METHOD = "build";
-  static final String LIST_BUILDER_METHOD = "buildList";
-
-  static String getSingleElementMethodCode(ElementContext element) {
-    if (!element.getParameters().isEmpty()) {
-      return String.format(
-          "%s(%s).%s(%s.class, %s)",
-          BASE_PAGE_OBJECT_METHOD,
-          String.format("this.%s", element.getName()),
-          BUILDER_METHOD,
-          element.getType().getSimpleName(),
-          getParametersValuesString(element.getParameters()));
-    } else {
-      return String.format("this.%s", element.getName());
+  private static String getParametersVararg(List<MethodParameter> parameters) {
+    if (!parameters.isEmpty()) {
+      return ", " + getParametersValuesString(parameters);
     }
+    return "";
   }
 
-  static String getElementListMethodCode(ElementContext element) {
-    String selectorParametersStr;
-    if (!element.getParameters().isEmpty()) {
-      selectorParametersStr = ", " + getParametersValuesString(element.getParameters());
-    } else {
-      selectorParametersStr = "";
-    }
-    return String.format(
-        "%s(%s).%s(%s.class%s)",
-        BASE_PAGE_OBJECT_METHOD,
-        String.format("this.%s", element.getName()),
-        LIST_BUILDER_METHOD,
+  private static String getElementMethodCode(ElementContext element, boolean isList) {
+    return String.format("element(this.%s).%s(%s.class%s)",
+        element.getName(),
+        isList? "buildList" : "build",
         element.getType().getSimpleName(),
-        selectorParametersStr);
+        getParametersVararg(element.getParameters()));
   }
 
-  static String getElementFilteredListMethodCode(
+  private static String getElementFilteredListMethodCode(
       String elementName,
       TypeProvider elementType,
       List<MethodParameter> elementParameters,
       String predicateCode,
       boolean isReturnFirstMatch) {
-    String selectorParametersStr;
-    if (!elementParameters.isEmpty()) {
-      selectorParametersStr = ", " + getParametersValuesString(elementParameters);
-    } else {
-      selectorParametersStr = "";
-    }
-    String elementInstance = String.format("this.%s", elementName);
-    String builderMethod = isReturnFirstMatch ? BUILDER_METHOD : LIST_BUILDER_METHOD;
     return String.format(
-        "%s(%s).%s(%s.class, %s%s)",
-        BASE_PAGE_OBJECT_METHOD,
-        elementInstance,
-        builderMethod,
+        "element(this.%s).%s(%s.class, %s%s)",
+        elementName,
+        isReturnFirstMatch ? "build" : "buildList",
         elementType.getSimpleName(),
         predicateCode,
-        selectorParametersStr);
+        getParametersVararg(elementParameters));
   }
 
   static String getPredicateCode(
@@ -103,7 +74,7 @@ public abstract class ElementMethod implements PageObjectMethod {
     private final boolean isPublic;
 
     public Single(ElementContext element, boolean isPublic) {
-      this.methodCode = getSingleElementMethodCode(element);
+      this.methodCode = getElementMethodCode(element, false);
       this.parameters = element.getParameters();
       this.methodName = getElementGetterMethodName(element.getName(), isPublic);
       this.returnType = element.getType();
@@ -141,7 +112,7 @@ public abstract class ElementMethod implements PageObjectMethod {
     private final boolean isPublic;
 
     public Multiple(ElementContext element, boolean isPublic) {
-      this.methodCode = ElementMethod.getElementListMethodCode(element);
+      this.methodCode = getElementMethodCode(element, true);
       this.parameters = element.getParameters();
       this.methodName = getElementGetterMethodName(element.getName(), isPublic);
       this.returnType = element.getType();

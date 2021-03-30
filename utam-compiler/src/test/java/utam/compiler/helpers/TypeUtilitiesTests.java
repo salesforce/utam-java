@@ -5,16 +5,16 @@ import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import org.hamcrest.MatcherAssert;
 import org.testng.annotations.Test;
-import utam.core.selenium.element.Actionable;
-import utam.core.selenium.element.Clickable;
-import utam.core.selenium.element.ElementMarker;
-import utam.core.selenium.element.Editable;
+import utam.core.element.Actionable;
+import utam.core.element.Clickable;
+import utam.core.framework.base.ElementMarker;
+import utam.core.element.Editable;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import utam.core.selenium.element.Selector;
+import utam.core.selenium.element.LocatorBy;
 
 import static utam.compiler.helpers.TypeUtilities.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -218,9 +218,9 @@ public class TypeUtilitiesTests {
   public void testFromClass() {
     TypeProvider type = new TypeUtilities.FromClass(Actionable.class);
 
-    assertThat(type.getFullName(), is(equalTo("utam.core.selenium.element.Actionable")));
-    assertThat(type.getPackageName(), is(equalTo("utam.core.selenium.element")));
-    assertThat(type.getSimpleName(), is(equalTo("Actionable")));
+    assertThat(type.getFullName(), is(equalTo(Actionable.class.getName())));
+    assertThat(type.getPackageName(), is(equalTo(Actionable.class.getPackageName())));
+    assertThat(type.getSimpleName(), is(equalTo(Actionable.class.getSimpleName())));
   }
 
   /** FromClass should create a valid TypeProvider with a nested class */
@@ -228,8 +228,8 @@ public class TypeUtilitiesTests {
   public void testFromClassWithNestedClass() {
     TypeProvider type = new TypeUtilities.FromClass(ElementMarker.Find.class);
 
-    assertThat(type.getFullName(), is(equalTo(AnnotationUtilsTests.ELEMENT_MARKER_ANNOTATION_CLASS)));
-    assertThat(type.getPackageName(), is(equalTo("utam.core.selenium.element")));
+    assertThat(type.getFullName(), is(equalTo(ElementMarker.class.getName())));
+    assertThat(type.getPackageName(), is(equalTo(ElementMarker.class.getPackageName())));
     assertThat(type.getSimpleName(), is(equalTo("Find")));
   }
 
@@ -460,10 +460,9 @@ public class TypeUtilitiesTests {
   @Test
   public void testSelectorType() {
     TypeProvider predicateType = SELECTOR;
-    assertThat(predicateType.getSimpleName(), is(equalTo("Selector")));
-    assertThat(predicateType.getFullName(), is(equalTo(Selector.class.getName())));
-    assertThat(predicateType.getPackageName(), is(equalTo(Selector.class.getPackageName())));
-    assertThat(predicateType.getClassType(), is(equalTo(Selector.class)));
+    assertThat(predicateType.getSimpleName(), is(equalTo(LocatorBy.class.getSimpleName())));
+    assertThat(predicateType.getFullName(), is(equalTo(LocatorBy.class.getName())));
+    assertThat(predicateType.getClassType(), is(equalTo(LocatorBy.class)));
   }
 
   @Test

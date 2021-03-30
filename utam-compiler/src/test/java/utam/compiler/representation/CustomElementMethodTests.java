@@ -1,23 +1,32 @@
 package utam.compiler.representation;
 
-import utam.core.declarative.representation.MethodDeclaration;
-import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.declarative.representation.TypeProvider;
-import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
-import org.testng.annotations.Test;
-import utam.core.selenium.element.Selector;
-import utam.compiler.helpers.*;
-
-import java.util.Collections;
-
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
-import static utam.compiler.representation.CustomElementMethod.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static utam.compiler.helpers.TypeUtilities.SELECTOR;
+import static utam.compiler.representation.CustomElementMethod.Filtered;
+import static utam.compiler.representation.CustomElementMethod.Multiple;
+import static utam.compiler.representation.CustomElementMethod.Root;
+import static utam.compiler.representation.CustomElementMethod.Single;
+
+import java.util.Collections;
+import org.testng.annotations.Test;
+import utam.compiler.grammar.UtamSelector;
+import utam.compiler.grammar.UtamSelector.Context;
+import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.MatcherType;
+import utam.compiler.helpers.ParameterUtils;
+import utam.compiler.helpers.PrimitiveType;
+import utam.compiler.helpers.TypeUtilities;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 
 /**
  * Provides tests for the ComponentMethod class
@@ -28,13 +37,13 @@ public class CustomElementMethodTests {
 
   private static final String ELEMENT_NAME = "test";
   private static final String ELEMENT_METHOD_NAME = "getTest";
-  private static final String IMPORT_TYPE_SELECTOR = Selector.class.getName();
+  private static final String IMPORT_TYPE_SELECTOR = SELECTOR.getFullName();
   private static final String TYPE_SHORT_NAME = "Type";
   private static final String TYPE_FULL_NAME = "my.package.Type";
   private static final TypeProvider TYPE =
       new TypeUtilities.FromString(TYPE_SHORT_NAME, TYPE_FULL_NAME);
   private static final Root INJECTED_ROOT =
-      new Root(getCssSelector("css"), false, EMPTY_PARAMETERS);
+      new Root(new Context(getCssSelector("css")));
 
   private static ElementContext getBasicScope() {
     final ElementContext scope =
@@ -52,16 +61,13 @@ public class CustomElementMethodTests {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, TYPE_SHORT_NAME);
     info.addImpliedImportedTypes(IMPORT_TYPE_SELECTOR);
     info.addCodeLines(
-        "Type instance = "
-            + BASE_PAGE_OBJECT_METHOD
-            + "(this.getTest(), by(\"css\", Selector.Type.CSS, false))."
-            + BUILDER_METHOD
-            + "(Type.class)",
+        "Type instance = inScope(this.test, LocatorBy.byCss(\"css\"), true)."
+            + "build(Type.class)",
         "instance");
     info.addImportedTypes(TYPE_FULL_NAME);
     PageObjectMethod method =
         new Single(
-            true, ELEMENT_NAME, INJECTED_ROOT, getBasicScope(), true, TYPE, true);
+            true, ELEMENT_NAME, INJECTED_ROOT, getBasicScope(), true, TYPE, true, true);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
@@ -69,11 +75,8 @@ public class CustomElementMethodTests {
   public void testComponentMethodWithParametrizedSelector() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, TYPE_SHORT_NAME);
     info.addCodeLines(
-        "Type instance = "
-            + BASE_PAGE_OBJECT_METHOD
-            + "(this.getTest(), by(String.format(\".fakeSelector[title='%s']\", name), Selector.Type.CSS, false), false)."
-            + BUILDER_METHOD
-            + "(Type.class)",
+        "Type instance = inScope(this.test, LocatorBy.byCss(String.format(\".fakeSelector[title='%s']\", name)), false, true)."
+            + "build(Type.class)",
         "instance.load()",
         "instance");
     info.addImportedTypes(TYPE_FULL_NAME);
@@ -83,33 +86,31 @@ public class CustomElementMethodTests {
         new Single(
             true,
             ELEMENT_NAME,
-            new Root(
+            new Root(new UtamSelector.Context(
                 getCssSelector(".fakeSelector[title='%s']"),
-                false,
                 Collections.singletonList(
-                    new ParameterUtils.Regular("name", PrimitiveType.STRING))),
+                    new ParameterUtils.Regular("name", PrimitiveType.STRING)))),
             getBasicScope(),
             false,
             TYPE,
-            false);
+            false, true);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
-  /** A ComponentMethod object that returns a list should be able to be created */
+  /**
+   * A ComponentMethod object that returns a list should be able to be created
+   */
   @Test
   public void testComponentMethodReturningList() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, "List<Type>");
     info.addCodeLines(
-        BASE_PAGE_OBJECT_METHOD
-            + "(this.getTest(), by(\"css\", Selector.Type.CSS, false), true)."
-            + LIST_BUILDER_METHOD
-            + "(Type.class)");
+        "inScope(this.test, LocatorBy.byCss(\"css\"), true, true).buildList(Type.class)");
     info.addImportedTypes("java.util.List");
     info.addImportedTypes(TYPE_FULL_NAME);
     info.addImpliedImportedTypes(IMPORT_TYPE_SELECTOR);
     PageObjectMethod method =
         new Multiple(
-            true, ELEMENT_NAME, INJECTED_ROOT, getBasicScope(), TYPE, true);
+            true, ELEMENT_NAME, INJECTED_ROOT, getBasicScope(), TYPE, true, true);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
@@ -117,10 +118,7 @@ public class CustomElementMethodTests {
   public void testComponentMethodWithFilterNullableFindFirst() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, TYPE_SHORT_NAME);
     info.addCodeLines(
-        BASE_PAGE_OBJECT_METHOD
-            + "(this.getTest(), by(\"css\", Selector.Type.CSS, false), false)."
-            + BUILDER_METHOD
-            + "(Type.class, elm -> elm.applyMethod())");
+        "inScope(this.test, LocatorBy.byCss(\"css\"), false, true).build(Type.class, elm -> elm.applyMethod())");
     info.addImportedTypes(TYPE_FULL_NAME);
     info.addImpliedImportedTypes(IMPORT_TYPE_SELECTOR);
     PageObjectMethod method =
@@ -130,7 +128,7 @@ public class CustomElementMethodTests {
             INJECTED_ROOT,
             getBasicScope(),
             TYPE,
-            false,
+            false, true,
             "applyMethod",
             EMPTY_PARAMETERS,
             MatcherType.isTrue,
@@ -143,10 +141,7 @@ public class CustomElementMethodTests {
   public void testComponentMethodWithFilterNotNullableFindAll() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, "List<Type>");
     info.addCodeLines(
-        BASE_PAGE_OBJECT_METHOD
-            + "(this.getTest(), by(\"css\", Selector.Type.CSS, false), true)."
-            + LIST_BUILDER_METHOD
-            + "(Type.class, elm -> elm.applyMethod())");
+        "inScope(this.test, LocatorBy.byCss(\"css\"), true, false).buildList(Type.class, elm -> elm.applyMethod())");
     info.addImportedTypes(TYPE_FULL_NAME, "java.util.List");
     info.addImpliedImportedTypes(IMPORT_TYPE_SELECTOR);
     PageObjectMethod method =
@@ -156,7 +151,7 @@ public class CustomElementMethodTests {
             INJECTED_ROOT,
             getBasicScope(),
             TYPE,
-            true,
+            true, false,
             "applyMethod",
             EMPTY_PARAMETERS,
             MatcherType.isTrue,
@@ -165,20 +160,22 @@ public class CustomElementMethodTests {
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
-  /** An InjectedSelector object returns the proper string representation */
+  /**
+   * An InjectedSelector object returns the proper string representation
+   */
   @Test
   public void testInjectedSelector() {
-    Root plain = new Root(getCssSelector("css"), false, EMPTY_PARAMETERS);
-    assertThat(plain.getCodeString(), is(equalTo("by(\"css\", Selector.Type.CSS, false)")));
+    Root plain = new Root(new UtamSelector.Context(getCssSelector("css")));
+    assertThat(plain.getCodeString(), is(equalTo("LocatorBy.byCss(\"css\")")));
     Root wParams =
         new Root(
-            getCssSelector(".fakeSelector[title='%s']"),
-            true,
-            Collections.singletonList(new ParameterUtils.Regular("name", PrimitiveType.STRING)));
+            new UtamSelector.Context(getCssSelector(".fakeSelector[title='%s']"),
+                Collections
+                    .singletonList(new ParameterUtils.Regular("name", PrimitiveType.STRING))));
     assertThat(
         wParams.getCodeString(),
         is(
             equalTo(
-                "by(String.format(\".fakeSelector[title='%s']\", name), Selector.Type.CSS, true)")));
+                "LocatorBy.byCss(String.format(\".fakeSelector[title='%s']\", name))")));
   }
 }

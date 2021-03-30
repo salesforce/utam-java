@@ -1,25 +1,20 @@
-/*
- * @Copyright, 1999-2018, salesforce.com
- *  All Rights Reserved
- *  Company Confidential
- *  Project LPOP
- */
-
 package utam.core.driver;
 
-import java.util.function.Function;
-import org.openqa.selenium.SearchContext;
-import utam.core.selenium.context.WebDriverUtilities;
-
 /**
- * element expectations
+ * expectations act as a function parameter for waits
  *
  * @author elizaveta.ivanova
  * @since 234
  */
-public interface Expectations<S, T> {
+public interface Expectations<T,R> {
 
-  T returnIfNothingFound();
+  /**
+   * if applied action returned falsy value (null or false), return this value,
+   * if not set return null which will cause exception inside wait
+   *
+   * @return non null value
+   */
+  R returnIfFalsy();
 
   /**
    * provides log message when expectations are called
@@ -29,9 +24,9 @@ public interface Expectations<S, T> {
   String getLogMessage();
 
   /**
-   * find single element and returns value
+   * apply action and return value
    *
    * @return function to apply
    */
-  Function<S, T> apply(DriverContext driverContext);
+  R apply(Driver driver, T args);
 }

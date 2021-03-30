@@ -1,6 +1,8 @@
 package utam.core.framework.consumer;
 
 /**
+ * TEMPORARY LOCATION TO BE REFACTORED
+ *
  * @author elizaveta.ivanova
  * @since 228
  */

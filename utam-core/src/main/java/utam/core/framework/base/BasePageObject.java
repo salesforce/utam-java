@@ -7,195 +7,127 @@
 
 package utam.core.framework.base;
 
-import utam.core.framework.consumer.ContainerElement;
-import utam.core.framework.consumer.LocationPolicy;
-import utam.core.framework.consumer.UtamError;
-import utam.core.framework.context.PlatformType;
-import utam.core.selenium.element.*;
-
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Stream;
-
 import static utam.core.framework.UtamLogger.info;
-import static utam.core.framework.base.PageObjectsFactoryImpl.setField;
-import static utam.core.selenium.element.LocatorUtilities.*;
-import static utam.core.selenium.element.PageObjectElementBuilderImpl.setContainerParameters;
+
+import utam.core.driver.Document;
+import utam.core.element.Element;
+import utam.core.element.ElementLocation;
+import utam.core.element.FindContext;
+import utam.core.element.Locator;
+import utam.core.framework.base.CustomElementBuilder.External;
+import utam.core.framework.consumer.ContainerElement;
+import utam.core.framework.consumer.UtamError;
+import utam.core.framework.element.BasePageElement;
+import utam.core.framework.element.DocumentObject;
 
 /**
- * base class for any utam page object
+ * base class for any UTAM page object
+ *
  * @author elizaveta.ivanova
  * @since 228
  */
 public abstract class BasePageObject implements RootPageObject {
 
-  private final Map<String, Locator> pageElements = new TreeMap<>();
-  private final PlatformType pagePlatform;
   // lazy element injected by factory
-  Locator rootLocator;
-  // lazy factory
-  PageObjectsFactory factory;
-  // lazy element created by factory
-  private Actionable root;
+  private BasePageElement rootElement;
+  protected ElementLocation root;
+  // lazy factory injected by factory
+  private PageObjectsFactory factory;
+  // lazy document injected by factory
+  private Document document;
 
   protected BasePageObject() {
-    if (getClass().isAnnotationPresent(PageMarker.Switch.class)) {
-      pagePlatform = getClass().getAnnotation(PageMarker.Switch.class).value();
-    } else {
-      pagePlatform = PlatformType.WEB;
-    }
   }
 
-  /**
-   * cast object to this base class
-   *
-   * @param component instance of the object
-   * @return instance of this class
-   */
-  static BasePageObject castToImpl(Object component) {
-    if (component == null) {
-      return null;
-    }
-    if (component instanceof BasePageObject) {
-      return (BasePageObject) component;
-    }
-    throw new UtamError(
-        String.format(
-            "to bootstrap class '%s' it should extend '%s'",
-            component.getClass(), BasePageObject.class.getName()));
+  final void setBootstrap(ElementLocation root, PageObjectsFactory factory) {
+    this.root = root;
+    this.factory = factory;
   }
 
-  private String getErrorMsg(String message) {
-    return "Page Object " + getClass().getName() + ": " + message;
+  protected final Document getDocument() {
+    if (document == null) {
+      document = new DocumentObject(getFactory());
+    }
+    return document;
   }
 
-  protected final Actionable getRootElement() {
+  protected final ElementLocation getRootLocator() {
     if (root == null) {
-      throw new NullPointerException(getErrorMsg("root element is null"));
+      throw new UtamError(getLogMessage("root element locator is null"));
     }
     return root;
   }
 
-  private PageObjectsFactory getFactory() {
-    if (factory == null) {
-      throw new NullPointerException(getErrorMsg("factory is null"));
+  protected final BasePageElement getRootElement() {
+    if (rootElement == null) {
+      Element element = getRootLocator().findElement(getFactory());
+      rootElement = element.isNull() ? null : new BasePageElement(getFactory(), element);
     }
+    return rootElement;
+  }
+
+  private PageObjectsFactory getFactory() {
     return factory;
   }
 
-  protected Locator getRootLocator() {
-    if (rootLocator == null) {
-      throw new NullPointerException(getErrorMsg("root locator is null"));
-    }
-    return rootLocator;
+  private void log(String message) {
+    info(getLogMessage(message));
   }
 
-  private void log(String message) {
-    if (!message.isEmpty()) {
-      info(String.format("Page Object '%s': %s", getClass().getSimpleName(), message));
-    }
+  private String getLogMessage(String message) {
+    return String.format("Page Object '%s': %s", getClass().getSimpleName(), message);
   }
 
   @Override
   public void load() {
-    log("wait for load");
-    waitForPresence(getRootElement());
-  }
-
-  final void bootstrapElements() {
-    LocationPolicy locationPolicy = getFactory().getSeleniumContext().getLocationPolicy();
-    LocatorUtilities.Builder builder =
-        new LocatorUtilities.Builder(locationPolicy, getRootLocator(), pageElements);
-    Stream.of(getClass().getDeclaredFields())
-        .filter(f -> BaseElement.class.isAssignableFrom(f.getType()))
-        // fields in natural order by name
-        .forEach(
-            f -> {
-              Locator locator = builder.getLocator(f);
-              setField(
-                  this, f, LocatorUtilities.getElement(locator, getFactory().getSeleniumContext()));
-              pageElements.put(f.getName(), locator);
-            });
-    root = LocatorUtilities.getElement(getRootLocator(), getFactory().getSeleniumContext());
-    Stream.of(getClass().getDeclaredFields())
-        .filter(f -> ContainerElement.class.isAssignableFrom(f.getType()))
-        // fields in natural order by name
-        .forEach(
-            f -> {
-              Locator container = builder.getContainerLocator(f);
-              setField(
-                  this,
-                  f,
-                  LocatorUtilities.getContainer(
-                      container, f.getAnnotation(ElementMarker.Find.class).expand(), getFactory()));
-              pageElements.put(f.getName(), container);
-            });
-  }
-
-  final void bootstrapPageContext() {
-    PageObjectsFactoryImpl.bootstrapPageContext(this, getFactory());
-  }
-
-  final PlatformType getPagePlatform() {
-    return pagePlatform;
+    log("find page object root element");
+    getRootElement();
+    if (rootElement == null) {
+      throw new NullPointerException(getLogMessage(String
+          .format("root element not found with locator '%s'",
+              root.getLocatorChainString())));
+    }
   }
 
   @Override
   public final boolean isPresent() {
-    log("check for immediate presence inside its scope");
-    return getRootElement().isPresent();
+    log("check for root element presence inside its scope");
+    return getRootLocator().findElements(getFactory()).size() > 0;
   }
 
   @SuppressWarnings("unused")
   // used by generator - scope inside element of the page object
-  protected final PageObjectBuilder inScope(
-      BaseElement scopeElement, Locator selector, boolean isNullable) {
-    return new PageObjectBuilderImpl(
-        getFactory(), getElementLocator(scopeElement), isNullable, selector);
+  protected final CustomElementBuilder inScope(
+      ElementLocation scopeElement, Locator selector, boolean isNullable,
+      boolean isExpandParentShadow) {
+    return new CustomElementBuilder(
+        getFactory(), scopeElement, selector,
+        FindContext.Type.build(isNullable, isExpandParentShadow));
   }
 
   @SuppressWarnings("unused")
   // used by generator for external page objects only (result is never nullable)
-  protected final PageObjectBuilder inScope(BaseElement scopeElement, Locator selector) {
-    return new PageObjectBuilderImpl.ExternalChild(
-        getFactory(), getElementLocator(scopeElement), selector);
+  protected final CustomElementBuilder inScope(ElementLocation scopeElement, Locator selector,
+      boolean isExpandParentShadowRoot) {
+    return new External(
+        getFactory(), scopeElement, selector, isExpandParentShadowRoot);
   }
 
-  protected final PageObjectElementBuilder element(BaseElement pageObjectElement) {
-    return new PageObjectElementBuilderImpl(getFactory(), pageObjectElement);
+  protected final ElementBuilder element(ElementLocation element) {
+    return new ElementBuilder(getFactory(), element);
   }
 
-  protected final ContainerElement inContainer(BaseElement scopeElement, boolean isExpandShadow) {
-    return getContainer(getElementLocator(scopeElement), isExpandShadow, getFactory());
+  protected final ContainerElement inContainer(ElementLocation element,
+      boolean isExpandShadowRoot) {
+    return new ContainerElementImpl(getFactory(), element,
+        FindContext.Type.build(false, isExpandShadowRoot));
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   // used by generator - return imperative utility
-  protected <T extends ImperativeProvider> T getUtility(Class<T> type) {
+  protected final <T extends ImperativeProvider> T getUtility(Class<T> type) {
     T utility = ImperativeProvider.build(type);
     utility.setInstance(this);
     return utility;
-  }
-
-  // used by generator - set container elements parameter
-  protected final ContainerElement setParameters(ContainerElement element, Object... values) {
-    return setContainerParameters(getFactory(), element, values);
-  }
-
-  // used by generator - injects selector when building component
-  protected Locator by(String selectorString, Selector.Type type, boolean isExpandScopeShadowRoot) {
-    LocationPolicy policy = getFactory().getSeleniumContext().getLocationPolicy();
-    LocatorNode element =
-        getLocatorNode(
-            LocatorUtilities.getSelector(selectorString, type),
-            LocatorUtilities.EMPTY_FILTER,
-            LocatorUtilities.getContextTransformer(isExpandScopeShadowRoot),
-            policy);
-    return LocatorUtilities.getSingleNodeLocator(element, policy);
-  }
-
-  // used by generator - injects selector when building container
-  protected Selector by(String selectorString, Selector.Type type) {
-    return LocatorUtilities.getSelector(selectorString, type);
   }
 }

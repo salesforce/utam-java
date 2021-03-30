@@ -1,15 +1,15 @@
 package utam.compiler.representation;
 
-import utam.core.declarative.representation.MethodDeclaration;
-import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.declarative.representation.TypeProvider;
+import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
+import static utam.compiler.helpers.TypeUtilities.Element.actionable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
-import static utam.compiler.helpers.TypeUtilities.Element.actionable;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 
 /**
  * getter for root element
@@ -18,19 +18,6 @@ import static utam.compiler.helpers.TypeUtilities.Element.actionable;
  * @since 232
  */
 public class RootElementMethod {
-
-  /**
-   * BasePageObject.getRootElement returns Actionable, need type cast for other types
-   *
-   * @param rootElementType type to return
-   * @return string code of the method
-   */
-  private static String buildRootMethodCode(TypeProvider rootElementType) {
-    if (rootElementType.isSameType(actionable)) {
-      return "this.getRootElement()";
-    }
-    return String.format("(%s) this.getRootElement()", rootElementType.getSimpleName());
-  }
 
   public static class Protected extends Public {
 
@@ -67,12 +54,12 @@ public class RootElementMethod {
 
   public static class Public implements PageObjectMethod {
 
+    private static final List<String> codeLines = Collections
+        .singletonList("this.getRootElement()");
     final TypeProvider returnType;
-    final List<String> codeLines;
 
     public Public(TypeProvider returnType) {
       this.returnType = returnType;
-      this.codeLines = Stream.of(buildRootMethodCode(returnType)).collect(Collectors.toList());
     }
 
     @Override

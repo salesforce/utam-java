@@ -2,14 +2,15 @@ package utam.compiler.helpers;
 
 import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.element.Locator;
 import utam.core.framework.base.PageMarker;
 import utam.core.framework.context.PlatformType;
 import org.testng.annotations.Test;
-import utam.core.selenium.element.ElementMarker;
-import utam.core.selenium.element.Selector;
+import utam.core.framework.base.ElementMarker;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+import utam.core.selenium.element.LocatorBy;
 
 import static utam.compiler.grammar.TestUtilities.TEST_PAGE_OBJECT;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
@@ -27,7 +28,7 @@ import static org.testng.Assert.expectThrows;
  */
 public class AnnotationUtilsTests {
 
-  static final String ELEMENT_MARKER_ANNOTATION_CLASS = ElementMarker.class.getName();
+  private static final String ELEMENT_MARKER_ANNOTATION_CLASS = ElementMarker.class.getName();
   private static final String PAGE_OBJECT_ANNOTATION_CLASS = PageMarker.class.getName();
 
   private static ElementContext getBasicElement(String value) {
@@ -107,7 +108,7 @@ public class AnnotationUtilsTests {
   /** The getFindAnnotation method should return the proper value: Accessibility ID selector */
   @Test
   public void testGetFindAnnotationAccessId() {
-    Selector selector = Selector.byAccessibilityId("fakeSelector");
+    Locator selector = LocatorBy.byAccessibilityId("fakeSelector");
     AnnotationProvider provider =
         AnnotationUtils.getFindAnnotation(selector, getBasicElement("fakeElement"), true);
     assertThat(
@@ -121,7 +122,7 @@ public class AnnotationUtilsTests {
   /** The getFindAnnotation method should return the proper value: iOS Class Chain selector */
   @Test
   public void testGetFindAnnotationClassChain() {
-    Selector selector = Selector.byClassChain("fakeSelector");
+    Locator selector = LocatorBy.byClassChain("fakeSelector");
     AnnotationProvider provider =
         AnnotationUtils.getFindAnnotation(selector, getBasicElement("fakeElement"), true);
     assertThat(
@@ -135,14 +136,14 @@ public class AnnotationUtilsTests {
   /** The getFindAnnotation method should return the proper value: Android UIAutomator selector */
   @Test
   public void testGetFindAnnotationUIAutomator() {
-    Selector selector = Selector.byUiAutomator("new UiSelector().fakeSelector");
+    Locator selector = LocatorBy.byUiAutomator("new UiSelector().checked(true)");
     AnnotationProvider provider =
         AnnotationUtils.getFindAnnotation(selector, getBasicElement("fakeElement"), true);
     assertThat(
         provider.getAnnotationText(),
         is(
             equalTo(
-                "@ElementMarker.Find(uiautomator = \"new UiSelector().fakeSelector\", scope = \"fakeElement\", expand = true)")));
+                "@ElementMarker.Find(uiautomator = \"new UiSelector().checked(true)\", scope = \"fakeElement\", expand = true)")));
     assertThat(getImportedTypes(provider), containsInAnyOrder(ELEMENT_MARKER_ANNOTATION_CLASS));
   }
 

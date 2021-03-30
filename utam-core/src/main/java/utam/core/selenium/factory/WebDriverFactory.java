@@ -7,12 +7,13 @@
 
 package utam.core.selenium.factory;
 
-import utam.core.framework.context.Driver;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.service.local.AppiumDriverLocalService;
-
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -20,10 +21,11 @@ import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import utam.core.driver.Driver;
+import utam.core.driver.DriverContext;
+import utam.core.driver.DriverType;
+import utam.core.selenium.appium.MobileDriverAdapter;
+import utam.core.selenium.element.DriverAdapter;
 
 /**
  * web driver factory
@@ -40,23 +42,28 @@ public class WebDriverFactory {
     return !Boolean.TRUE.toString().equals(System.getProperty("Jenkins"));
   }
 
-  public static WebDriver getWebDriver(Driver browserType) {
+  public static WebDriver getWebDriver(DriverType browserType) {
     return getWebDriver(browserType, null, null);
+  }
+
+  public static Driver getAdapter(WebDriver webDriver, DriverContext context) {
+    return webDriver instanceof AppiumDriver ? new MobileDriverAdapter((AppiumDriver) webDriver,
+        context) : new DriverAdapter(webDriver, context);
   }
 
   @SuppressWarnings("WeakerAccess")
   public static WebDriver getWebDriver(
-          Driver browserType, 
+          DriverType browserType,
           AppiumDriverLocalService service,
           AppiumCapabilityProvider desiredCapabilities) {
     WebDriver driver;
-    if (Driver.chrome.equals(browserType)) {
+    if (DriverType.chrome.equals(browserType)) {
       driver = chrome();
-    } else if (Driver.firefox.equals(browserType)) {
+    } else if (DriverType.firefox.equals(browserType)) {
       driver = firefox();
-    } else if (Driver.ios.equals(browserType)) {
+    } else if (DriverType.ios.equals(browserType)) {
       driver = ios(service, desiredCapabilities);
-    } else if (Driver.android.equals(browserType)) {
+    } else if (DriverType.android.equals(browserType)) {
       driver = android(service, desiredCapabilities);
     } else {
       throw new IllegalArgumentException(String.format(ERR_UNKNOWN_DRIVER_TYPE, browserType));
@@ -105,22 +112,22 @@ public class WebDriverFactory {
   private static DesiredCapabilities iOSOptions() {
     DesiredCapabilities caps = new DesiredCapabilities();
     caps.setPlatform(Platform.IOS);
-    caps.setCapability(CustomizedAppiumCapabilityType.AUTOMATION_NAME, "XCUITest");
-    caps.setCapability(CustomizedAppiumCapabilityType.NATIVE_WEB_TAP, true);
-    caps.setCapability(CustomizedAppiumCapabilityType.FULL_RESET, true);
-    caps.setCapability(CustomizedAppiumCapabilityType.DEVICE_NAME, SystemProperties.getIOSDeviceName());
-    caps.setCapability(CustomizedAppiumCapabilityType.APP, SystemProperties.getIOSAppPath());
+    caps.setCapability(AppiumCustomCapabilityType.AUTOMATION_NAME, "XCUITest");
+    caps.setCapability(AppiumCustomCapabilityType.NATIVE_WEB_TAP, true);
+    caps.setCapability(AppiumCustomCapabilityType.FULL_RESET, true);
+    caps.setCapability(AppiumCustomCapabilityType.DEVICE_NAME, SystemProperties.getIOSDeviceName());
+    caps.setCapability(AppiumCustomCapabilityType.APP, SystemProperties.getIOSAppPath());
     return caps;
   }
 
   private static DesiredCapabilities androidOptions() {
     DesiredCapabilities caps = new DesiredCapabilities();
     caps.setPlatform(Platform.ANDROID);
-    caps.setCapability(CustomizedAppiumCapabilityType.AUTOMATION_NAME, "UIAutomator2");
-    caps.setCapability(CustomizedAppiumCapabilityType.DEVICE_NAME, SystemProperties.getIOSDeviceName());
-    caps.setCapability(CustomizedAppiumCapabilityType.APP_PACKAGE, SystemProperties.getAppBundleID());
-    caps.setCapability(CustomizedAppiumCapabilityType.APP_ACTIVITY, SystemProperties.getAppActivity());
-    caps.setCapability(CustomizedAppiumCapabilityType.APP, SystemProperties.getAndroidAppPath());
+    caps.setCapability(AppiumCustomCapabilityType.AUTOMATION_NAME, "UIAutomator2");
+    caps.setCapability(AppiumCustomCapabilityType.DEVICE_NAME, SystemProperties.getIOSDeviceName());
+    caps.setCapability(AppiumCustomCapabilityType.APP_PACKAGE, SystemProperties.getAppBundleID());
+    caps.setCapability(AppiumCustomCapabilityType.APP_ACTIVITY, SystemProperties.getAppActivity());
+    caps.setCapability(AppiumCustomCapabilityType.APP, SystemProperties.getAndroidAppPath());
     return caps;
   }
 

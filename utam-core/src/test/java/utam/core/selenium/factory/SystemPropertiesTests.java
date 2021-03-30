@@ -3,7 +3,6 @@ package utam.core.selenium.factory;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import org.testng.annotations.Test;
-import utam.core.selenium.factory.SystemProperties;
 
 public class SystemPropertiesTests { 
   /**

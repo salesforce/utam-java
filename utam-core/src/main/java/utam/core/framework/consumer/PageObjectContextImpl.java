@@ -6,11 +6,10 @@ import utam.core.framework.base.PageObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * configuration based on properties
+ * context to build page object from interface class
  *
  * @author elizaveta.ivanova
  * @since 226
@@ -18,10 +17,8 @@ import java.util.function.Function;
 public class PageObjectContextImpl implements PageObjectContext {
 
   private final Map<Class<? extends PageObject>, Class<? extends PageObject>> beansOverride;
-  private final BiFunction<Class<? extends PageObject>, Object[], PageObject> externalBuilder =
-      (type, params) -> getBean(type);
 
-  PageObjectContextImpl(Map<Class<? extends PageObject>, Class<? extends PageObject>> overrides) {
+  public PageObjectContextImpl(Map<Class<? extends PageObject>, Class<? extends PageObject>> overrides) {
     this.beansOverride = overrides;
   }
 
@@ -53,12 +50,6 @@ public class PageObjectContextImpl implements PageObjectContext {
         | InvocationTargetException e) {
       throw new UtamError(String.format("can't create instance of type '%s'", type.getName()), e);
     }
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public <T extends PageObject> T getExternalBean(Class<T> type, Object[] parameters) {
-    return (T) externalBuilder.apply(type, parameters);
   }
 
   @Override

@@ -1,12 +1,12 @@
 package utam.core.framework.consumer;
 
-import utam.core.framework.base.PageObject;
-import utam.core.selenium.element.Selector;
-
 import java.util.List;
+import utam.core.element.Locator;
+import utam.core.framework.base.PageObject;
 
 /**
- * page object element that can be used as scope
+ * page object element that can be used as scope, applicable only for LPOP compatibility mode,
+ * supported only for Selenium
  *
  * @author elizaveta.ivanova
  * @since 228
@@ -23,10 +23,10 @@ public interface ContainerElement {
   /**
    * load UTAM Page object using current element as scope
    *
-   * @param utamType type to load
+   * @param utamType  type to load
    * @param injectCss inject root
-   * @return UTAM Page Object instance
-   * @deprecated use method with Selector parameter
+   * @return Page Object instance
+   * @deprecated use methods with locator as a parameter
    */
   @Deprecated
   <T extends PageObject> T load(Class<T> utamType, String injectCss);
@@ -34,24 +34,18 @@ public interface ContainerElement {
   /**
    * load UTAM Page object using current element as scope
    *
-   * @param utamType type to load
+   * @param utamType       type to load
    * @param injectSelector inject root, use Web.byCss or Mobile.by
    * @return UTAM Page Object instance
    */
-  <T extends PageObject> T load(Class<T> utamType, Selector injectSelector);
+  <T extends PageObject> T load(Class<T> utamType, Locator injectSelector);
 
   /**
    * load UTAM Page objects using current element as scope
    *
-   * @param utamType type to load
+   * @param utamType       type to load
    * @param injectSelector inject root, use Web.byCss or Mobile.by
    * @return UTAM Page Object instance
    */
-  <T extends PageObject> List<T> loadList(Class<T> utamType, Selector injectSelector);
-
-  /**
-   * returns true if loaded PO will be expanding its parent shadow
-   * @return boolean
-   */
-  boolean isExpandScopeShadow();
+  <T extends PageObject> List<T> loadList(Class<T> utamType, Locator injectSelector);
 }

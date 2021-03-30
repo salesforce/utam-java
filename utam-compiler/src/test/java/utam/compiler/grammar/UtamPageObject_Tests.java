@@ -12,8 +12,8 @@ import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.PlatformType;
 import utam.core.framework.context.Profile;
 import org.testng.annotations.Test;
-import utam.core.selenium.element.Actionable;
-import utam.core.selenium.element.Clickable;
+import utam.core.element.Actionable;
+import utam.core.element.Clickable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,24 +47,21 @@ public class UtamPageObject_Tests {
   /** The getBaseType method should return the proper value with the root property set to true */
   @Test
   public void testGetBaseTypeWithRoot() {
-    UtamPageObject pageObject = new UtamPageObject();
-    pageObject.isRootPageObject = true;
-    pageObject.selector = new UtamSelector("css");
+    UtamPageObject pageObject = new UtamPageObject(true, new UtamSelector("css"));
     assertThat(pageObject.getBaseType(), is(equalTo(ROOT_PAGE_OBJECT)));
   }
 
   /** The getBaseType method should return the proper value with the root property set to false */
   @Test
   public void testGetBaseTypeWithNonRoot() {
-    UtamPageObject pageObject = new UtamPageObject();
+    UtamPageObject pageObject = new UtamPageObject(false, null);
     assertThat(pageObject.getBaseType(), is(equalTo(PAGE_OBJECT)));
   }
 
   /** The getAnnotations method should return the proper value with a selector */
   @Test
   public void testGetAnnotationsWithSelector() {
-    UtamPageObject pageObject = new UtamPageObject();
-    pageObject.selector = UtamSelector_Tests.getUtamCssSelector();
+    UtamPageObject pageObject = new UtamPageObject(true, UtamSelector_Tests.getUtamCssSelector());
     List<String> annotations =
         pageObject.getAnnotations().stream()
             .filter((annotation) -> !annotation.getAnnotationText().isEmpty())
@@ -254,9 +251,7 @@ public class UtamPageObject_Tests {
   public void testRootWithSelector() {
     TranslationContext context = getTestTranslationContext();
     UtamSelector rootSelector = UtamSelector_Tests.getUtamCssSelector();
-    UtamPageObject pageObject = new UtamPageObject();
-    pageObject.selector = rootSelector;
-    pageObject.isRootPageObject = true;
+    UtamPageObject pageObject = new UtamPageObject(true, rootSelector);
     pageObject.compile(context);
     assertThat(context.getRootElement().getName(), is(equalTo(ROOT_ELEMENT_NAME)));
   }
@@ -264,8 +259,7 @@ public class UtamPageObject_Tests {
   @Test
   public void testRootWithAccessIDSelector() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamPageObject pageObject = new UtamPageObject();
-    pageObject.selector = UtamSelector_Tests.getAccessIdSelector();
+    UtamPageObject pageObject = new UtamPageObject(true, UtamSelector_Tests.getAccessIdSelector());
     pageObject.isRootPageObject = true;
     pageObject.platform = PlatformType.NATIVE.getName();
     pageObject.compile(context);
@@ -292,9 +286,8 @@ public class UtamPageObject_Tests {
 
   @Test
   public void testAbstractWithNonNullSelectorThrows() {
-    UtamPageObject utamPageObject = new UtamPageObject();
+    UtamPageObject utamPageObject = new UtamPageObject(true, UtamSelector_Tests.getUtamCssSelector());
     utamPageObject.isAbstract = true;
-    utamPageObject.selector = UtamSelector_Tests.getUtamCssSelector();
     UtamError e = expectThrows(UtamError.class, utamPageObject::validate);
     assertThat(e.getMessage(), containsString(ERR_ROOT_ABSTRACT));
   }
@@ -318,9 +311,7 @@ public class UtamPageObject_Tests {
 
   @Test
   public void testNonRootWithNonNullSelectorThrows() {
-    UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.selector = UtamSelector_Tests.getUtamCssSelector();
-    UtamError e = expectThrows(UtamError.class, utamPageObject::validate);
+    UtamError e = expectThrows(UtamError.class, () -> new UtamPageObject(false, UtamSelector_Tests.getUtamCssSelector()));
     assertThat(e.getMessage(), containsString(ERR_ROOT_REDUNDANT_SELECTOR));
   }
 
@@ -335,7 +326,7 @@ public class UtamPageObject_Tests {
   @Test
   public void testRootElementWithType() {
     MethodInfo info = new MethodInfo("getRoot", Clickable.class.getSimpleName());
-    info.addCodeLine("(Clickable) this.getRootElement()");
+    info.addCodeLine("this.getRootElement()");
     info.addImportedTypes(Clickable.class.getName());
     info.setIsPublic(false);
     UtamPageObject utamPageObject = new UtamPageObject();
@@ -363,7 +354,7 @@ public class UtamPageObject_Tests {
   @Test
   public void testPublicRootElementWithType() {
     MethodInfo info = new MethodInfo("getRoot", Clickable.class.getSimpleName());
-    info.addCodeLine("(Clickable) this.getRootElement()");
+    info.addCodeLine("this.getRootElement()");
     info.addImportedTypes(Clickable.class.getName());
     UtamPageObject utamPageObject = new UtamPageObject();
     utamPageObject.rootElementType = "clickable";

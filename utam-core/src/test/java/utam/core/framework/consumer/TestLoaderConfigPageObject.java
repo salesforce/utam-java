@@ -1,7 +1,7 @@
 package utam.core.framework.consumer;
 
+import utam.core.element.ElementLocation;
 import utam.core.framework.base.RootPageObject;
-import utam.core.selenium.element.Actionable;
 
 /**
  * used in tests
@@ -10,5 +10,6 @@ import utam.core.selenium.element.Actionable;
  * @since 230
  */
 public interface TestLoaderConfigPageObject extends RootPageObject {
-  Actionable getRoot();
+
+  ElementLocation getRoot();
 }

@@ -33,12 +33,12 @@ public class ShadowRootWebElement implements WebElement, WrapsElement, WrapsDriv
 
   public static final String GET_SHADOW_ROOT_QUERY_SELECTOR_ALL = "return arguments[0].shadowRoot.querySelectorAll('%s')";
   public static final String GET_SHADOW_ROOT_QUERY_SELECTOR = "return arguments[0].shadowRoot.querySelector('%s')";
-  public static final String SHADOW_ROOT_DETECTION_SCRIPT_FRAGMENT = "arguments[0].shadowRoot;";
+  public static final String SHADOW_ROOT_DETECTION_SCRIPT_FRAGMENT = "arguments[0].shadowRoot";
 
 
   // The host element of the shadowRoot. Needed to execute queries off of.
-  final WebElement rootElement;
-  final JavascriptExecutor executor;
+  private final WebElement rootElement;
+  private final JavascriptExecutor executor;
 
   public ShadowRootWebElement(WebElement we) {
     this.rootElement = we;
@@ -47,6 +47,10 @@ public class ShadowRootWebElement implements WebElement, WrapsElement, WrapsDriv
 
   private static String escapeForQuery(String queryString) {
     return queryString.replace("\\", "\\\\").replace("'", "\\'").replace("\"", "\\\"");
+  }
+
+  public JavascriptExecutor getExecutor() {
+    return executor;
   }
 
   @Override

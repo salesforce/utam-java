@@ -20,14 +20,14 @@ public class UtamSelector_DeserializeTests {
    * A UtamSelector object should be able to be created through deserialization
    */
   @Test
-  public void testDeserialization() {
-    String json = "{\n"
-        + "  \"css\": \".fakeSelector\"\n"
-        + "}\n";
-    UtamSelector selector = TestUtilities.getDeserializedObject(json, UtamSelector.class);
-    assertThat(selector.getSelector().getValue(), is(equalTo(".fakeSelector")));
-    assertThat(selector.isReturnAll, is(equalTo(false)));
-    assertThat(selector.args, is(nullValue()));
+  public void testValidSimpleSelector() {
+    String json = "{" + "  \"css\": \"simpleSelector\"" + "}";
+    UtamSelector instance = TestUtilities.getDeserializedObject(json, UtamSelector.class);
+    assertThat(instance.isReturnAll, is(equalTo(false)));
+    UtamSelector.Context context = instance.getContext();
+    assertThat(context.getLocator().getStringValue(), is(equalTo("simpleSelector")));
+    assertThat(instance.args, is(nullValue()));
+    assertThat(context.getParameters(), is(empty()));
   }
 
   @Test
@@ -42,24 +42,16 @@ public class UtamSelector_DeserializeTests {
   }
 
   @Test
-  public void testValidSimpleSelector() {
-    String json = "{" + "  \"css\": \"simpleSelector\"" + "}";
-    UtamSelector instance = TestUtilities.getDeserializedObject(json, UtamSelector.class);
-    assertThat(instance.isReturnAll, is(equalTo(false)));
-    assertThat(instance.getSelector().getValue(), is(equalTo("simpleSelector")));
-    assertThat(instance.getParameters("test"), is(empty()));
-  }
-
-  @Test
   public void testValidSimpleListSelector() {
     String json = "{"
             + "  \"css\": \"simpleListSelector\","
             + "  \"returnAll\": true"
             + "}";
     UtamSelector node = TestUtilities.getDeserializedObject(json, UtamSelector.class);
+    UtamSelector.Context context = node.getContext();
     assertThat(node.isReturnAll, is(equalTo(true)));
-    assertThat(node.getSelector().getValue(), is(equalTo("simpleListSelector")));
-    assertThat(node.getParameters("test"), is(empty()));
+    assertThat(context.getLocator().getStringValue(), is(equalTo("simpleListSelector")));
+    assertThat(context.getParameters(), is(empty()));
   }
 
   @Test
@@ -70,11 +62,11 @@ public class UtamSelector_DeserializeTests {
             + "    \"args\": [ {\"name\": \"text\", \"type\":\"string\" }]"
             + "}";
     UtamSelector node = TestUtilities.getDeserializedObject(json, UtamSelector.class);
-    List<MethodParameter> parameters = node.getParameters("test");
+    UtamSelector.Context context = node.getContext();
     assertThat(node.isReturnAll, is(equalTo(false)));
-    assertThat(node.getSelector().getValue(), is(equalTo("stringArgSelector[%s]")));
-    assertThat(parameters, hasSize(1));
-    assertThat(parameters.get(0).getType(), is(equalTo(PrimitiveType.STRING)));
+    assertThat(context.getLocator().getStringValue(), is(equalTo("stringArgSelector[%s]")));
+    assertThat(context.getParameters(), hasSize(1));
+    assertThat(context.getParameters().get(0).getType(), is(equalTo(PrimitiveType.STRING)));
   }
 
   @Test
@@ -85,9 +77,10 @@ public class UtamSelector_DeserializeTests {
             + "    \"args\": [ {\"name\": \"intArg\", \"type\":\"number\" }]"
             + "}";
     UtamSelector node = TestUtilities.getDeserializedObject(json, UtamSelector.class);
-    List<MethodParameter> parameters = node.getParameters("test");
+    UtamSelector.Context context = node.getContext();
+    List<MethodParameter> parameters = context.getParameters();
     assertThat(node.isReturnAll, is(equalTo(false)));
-    assertThat(node.getSelector().getValue(), is(equalTo("integerArgSelector[%d]")));
+    assertThat(context.getLocator().getStringValue(), is(equalTo("integerArgSelector[%d]")));
     assertThat(parameters, hasSize(1));
     assertThat(parameters.get(0).getType(), is(equalTo(PrimitiveType.NUMBER)));
   }
