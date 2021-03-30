@@ -3,6 +3,7 @@ package utam.core.selenium.element;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.PageObjectsFactoryImpl;
 import utam.core.framework.consumer.ContainerElement;
+import utam.core.framework.consumer.UtamError;
 import utam.core.framework.consumer.Utilities;
 import org.hamcrest.Matchers;
 import org.openqa.selenium.By;
@@ -25,6 +26,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.element.PageObjectElementBuilderImpl.countElements;
 import static utam.core.selenium.element.PageObjectElementBuilderImpl.setContainerParameters;
 
@@ -44,10 +46,10 @@ public class PageObjectElementBuilderImplTests {
   }
 
   private static PageObjectElementBuilderImpl getElementBuilder(
-      SeleniumContext seleniumContext, BaseElement element) {
+      SeleniumContext seleniumContext, BaseElement element, boolean isNullable) {
     PageObjectsFactory factory = mock(PageObjectsFactory.class);
     when(factory.getSeleniumContext()).thenReturn(seleniumContext);
-    return new PageObjectElementBuilderImpl(factory, element);
+    return new PageObjectElementBuilderImpl(factory, element, isNullable);
   }
 
   static BaseElement getCssElement(String css, SeleniumContext context) {
@@ -94,9 +96,19 @@ public class PageObjectElementBuilderImplTests {
     ElementImplTests.ActionsMock mock = new ElementImplTests.ActionsMock();
     BaseElement element = mock.getElementImpl();
     assertThat(
-        getElementBuilder(new ElementImplTests.MockHelper().context, element)
+        getElementBuilder(new ElementImplTests.MockHelper().context, element, false)
             .count(true, LocatorUtilities.getElementLocator(element)),
         is(equalTo(1)));
+  }
+
+  @Test
+  public void testCountIzZeroForNullable() {
+    ElementImplTests.ActionsMock mock = new ElementImplTests.ActionsMock();
+    BaseElement element = mock.getNonExistentElement();
+    assertThat(
+        getElementBuilder(new ElementImplTests.MockHelper().context, element, true)
+            .count(true, LocatorUtilities.getElementLocator(element)),
+        is(equalTo(0)));
   }
 
   /** The setParameters() method should apply parameters to locator */
@@ -105,7 +117,7 @@ public class PageObjectElementBuilderImplTests {
     SeleniumContext seleniumContext = new ElementImplTests.MockHelper().context;
     BaseElement baseElement = getCssElement(LOCATOR_WITH_PARAM, seleniumContext);
     Actionable test =
-        getElementBuilder(seleniumContext, baseElement).build(Actionable.class, "param");
+        getElementBuilder(seleniumContext, baseElement, true).build(Actionable.class, "param");
     assertThat(
         getSelectorString(test), Matchers.is(equalTo(String.format(LOCATOR_WITH_PARAM, "param"))));
   }
@@ -118,7 +130,7 @@ public class PageObjectElementBuilderImplTests {
   public void testSetParametersWithEmptyParam() {
     ElementImplTests.Mock mock = new ElementImplTests.Mock();
     BaseElement element = mock.getElementImpl();
-    Actionable test = getElementBuilder(mock.context, element).build(Actionable.class);
+    Actionable test = getElementBuilder(mock.context, element, false).build(Actionable.class);
     assertThat(test, Matchers.is(equalTo(element)));
     assertThat(getSelectorString(test), is(equalTo(LOCATOR_WITHOUT_PARAM)));
   }
@@ -131,9 +143,25 @@ public class PageObjectElementBuilderImplTests {
   public void testAsList() {
     ElementImplTests.Mock mock = new ElementImplTests.Mock();
     BaseElement element = mock.getElementImpl();
-    List<Clickable> list = getElementBuilder(mock.context, element).buildList(Clickable.class);
+    List<Clickable> list = getElementBuilder(mock.context, element, true).buildList(Clickable.class);
     assertThat(list, Matchers.is(instanceOf(Iterable.class)));
     assertThat(list.size(), Matchers.is(equalTo(1)));
+  }
+
+  @Test
+  public void testAsListNullable() {
+    ElementImplTests.ActionsMock mock = new ElementImplTests.ActionsMock();
+    BaseElement element = mock.getNonExistentElement();
+    List<Clickable> list = getElementBuilder(mock.context, element, true).buildList(Clickable.class);
+    assertThat(list.size(), Matchers.is(equalTo(0)));
+  }
+
+  @Test
+  public void testAsListNullableFalse() {
+    ElementImplTests.ActionsMock mock = new ElementImplTests.ActionsMock();
+    BaseElement element = mock.getNonExistentElement();
+    expectThrows(UtamError.class, () ->
+            getElementBuilder(mock.context, element, false).buildList(Clickable.class));
   }
 
   @Test
@@ -145,7 +173,7 @@ public class PageObjectElementBuilderImplTests {
             Stream.of(mock(WebElement.class), mock(WebElement.class)).collect(Collectors.toList()));
     SeleniumContext context = new SeleniumContextProvider(driver);
     BaseElement element = getJavascriptElement(selector, context);
-    List<Clickable> list = getElementBuilder(context, element).buildList(Clickable.class);
+    List<Clickable> list = getElementBuilder(context, element, true).buildList(Clickable.class);
     assertThat(list.size(), is(equalTo(2)));
     Function<Integer, LocatorNode.Filter> filter = getFilter(list);
     assertThat(filter.apply(0).getFilterString(), is(emptyString()));

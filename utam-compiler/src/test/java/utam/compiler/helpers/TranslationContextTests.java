@@ -56,7 +56,7 @@ public class TranslationContextTests {
             TypeUtilities.Element.clickable,
             Collections.emptyList(),
             EMPTY_COMMENTS));
-    context.setMethod(new ElementMethod.Single(elementContext, true));
+    context.setMethod(new ElementMethod.Single(elementContext, true, false));
     context.setElement(new ElementContext.Container("containerObject"));
     return context;
   }
@@ -192,7 +192,7 @@ public class TranslationContextTests {
             Collections.singletonList(getStringParameter()));
 
     int currentSize = context.getMethods().size();
-    context.setMethod(new ElementMethod.Single(elementContext, true));
+    context.setMethod(new ElementMethod.Single(elementContext, true, false));
     assertThat(context.getMethods(), hasSize(currentSize + 1));
   }
 
@@ -210,7 +210,7 @@ public class TranslationContextTests {
                 getStringParameter(), new ParameterUtils.Regular("alt", PrimitiveType.STRING)));
 
     int currentSize = context.getMethods().size();
-    context.setMethod(new ElementMethod.Single(elementContext, true));
+    context.setMethod(new ElementMethod.Single(elementContext, true, false));
     assertThat(context.getMethods(), hasSize(currentSize + 1));
   }
 
@@ -229,7 +229,7 @@ public class TranslationContextTests {
     UtamError e =
         expectThrows(
             UtamError.class,
-            () -> context.setMethod(new ElementMethod.Single(elementContext, true)));
+            () -> context.setMethod(new ElementMethod.Single(elementContext, true, false)));
     assertThat(
         e.getMessage(),
         containsString(
@@ -243,7 +243,7 @@ public class TranslationContextTests {
             UtamError.class,
             () ->
                 getContainerContext()
-                    .setMethod(new ElementMethod.Single(getElementContext(), true)));
+                    .setMethod(new ElementMethod.Single(getElementContext(), true, false)));
     assertThat(e.getMessage(), containsString("duplicate method 'getTestElement'"));
   }
 

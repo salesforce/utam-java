@@ -77,7 +77,7 @@ public class PageObjectBuilderImpl implements PageObjectBuilder, BootstrapParame
     }
     BaseElement rootElement = castToImpl(instance).getRootElement();
     int quantity =
-        new PageObjectElementBuilderImpl(factory, rootElement).buildList(Actionable.class).size();
+        new PageObjectElementBuilderImpl(factory, rootElement, isNullable).buildList(Actionable.class).size();
     for (int i = 1; i < quantity; i++) {
       T indexedObject = buildByClass(type, i);
       if (filter.test(indexedObject)) {
@@ -106,7 +106,10 @@ public class PageObjectBuilderImpl implements PageObjectBuilder, BootstrapParame
     }
     BaseElement rootElement = castToImpl(instance).getRootElement();
     int quantity =
-        new PageObjectElementBuilderImpl(factory, rootElement).buildList(Actionable.class).size();
+        new PageObjectElementBuilderImpl(factory, rootElement, isNullable).buildList(Actionable.class).size();
+    if (quantity == 0 & isNullable) {
+      return null;
+    }
     for (int i = 1; i < quantity; i++) {
       T indexedObject = buildByClass(type, i);
       if (filter == null || filter.test(indexedObject)) {
