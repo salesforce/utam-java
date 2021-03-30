@@ -3,6 +3,7 @@ package utam.core.selenium.element;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.PageObjectsFactoryImpl;
 import utam.core.framework.consumer.ContainerElement;
+import utam.core.framework.consumer.UtamError;
 import utam.core.framework.consumer.Utilities;
 import org.hamcrest.Matchers;
 import org.openqa.selenium.By;
@@ -25,6 +26,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.element.PageObjectElementBuilderImpl.countElements;
 import static utam.core.selenium.element.PageObjectElementBuilderImpl.setContainerParameters;
 
@@ -38,6 +40,8 @@ public class PageObjectElementBuilderImplTests {
 
   private static final String LOCATOR_WITH_PARAM = "locator[title='%s']";
   private static final String LOCATOR_WITHOUT_PARAM = "locator";
+  private static final String ELEMENT_WAIT_ERROR = "element selected by '%s': " +
+          "failure during '%s' (tried for %d sec with %d msec interval)";
 
   private static String getSelectorString(BaseElement element) {
     return ((ElementImpl) element).getLocator().getSelectorString();
@@ -102,7 +106,7 @@ public class PageObjectElementBuilderImplTests {
   @Test
   public void testCountIzZeroForNullable() {
     ElementImplTests.ActionsMock mock = new ElementImplTests.ActionsMock();
-    BaseElement element = mock.getElementImplNullable();
+    BaseElement element = mock.getNonExistentElement();
     assertThat(
         getElementBuilder(new ElementImplTests.MockHelper().context, element, true)
             .count(true, LocatorUtilities.getElementLocator(element)),
@@ -148,11 +152,25 @@ public class PageObjectElementBuilderImplTests {
 
   @Test
   public void testAsListNullable() {
-    ElementImplTests.Mock mock = new ElementImplTests.Mock();
-    BaseElement element = mock.getElementImplNullable();
+    ElementImplTests.ActionsMock mock = new ElementImplTests.ActionsMock();
+    BaseElement element = mock.getNonExistentElement();
     List<Clickable> list = getElementBuilder(mock.context, element, true).buildList(Clickable.class);
-    assertThat(list, Matchers.is(instanceOf(Iterable.class)));
     assertThat(list.size(), Matchers.is(equalTo(0)));
+  }
+
+  @Test
+  public void testAsListNullableFalse() {
+    ElementImplTests.ActionsMock mock = new ElementImplTests.ActionsMock();
+    BaseElement element = mock.getNonExistentElement();
+    UtamError e = expectThrows(UtamError.class, () ->
+            getElementBuilder(mock.context, element, false).buildList(Clickable.class));
+    assertThat(
+            e.getMessage(), containsString(String.format(
+                    ELEMENT_WAIT_ERROR,
+                    mock.getNonExistentElement().getLocator().getSelectorString(),
+                    PageObjectElementBuilderImpl.countElements(false).getLogMessage(),
+                    mock.context.getPollingTimeout().getSeconds(),
+                    mock.context.getPollingInterval().getSeconds())));
   }
 
   @Test
