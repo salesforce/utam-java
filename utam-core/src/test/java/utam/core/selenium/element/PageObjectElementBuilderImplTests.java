@@ -40,8 +40,6 @@ public class PageObjectElementBuilderImplTests {
 
   private static final String LOCATOR_WITH_PARAM = "locator[title='%s']";
   private static final String LOCATOR_WITHOUT_PARAM = "locator";
-  private static final String ELEMENT_WAIT_ERROR = "element selected by '%s': " +
-          "failure during '%s' (tried for %d sec with %d msec interval)";
 
   private static String getSelectorString(BaseElement element) {
     return ((ElementImpl) element).getLocator().getSelectorString();
@@ -162,15 +160,8 @@ public class PageObjectElementBuilderImplTests {
   public void testAsListNullableFalse() {
     ElementImplTests.ActionsMock mock = new ElementImplTests.ActionsMock();
     BaseElement element = mock.getNonExistentElement();
-    UtamError e = expectThrows(UtamError.class, () ->
+    expectThrows(UtamError.class, () ->
             getElementBuilder(mock.context, element, false).buildList(Clickable.class));
-    assertThat(
-            e.getMessage(), containsString(String.format(
-                    ELEMENT_WAIT_ERROR,
-                    mock.getNonExistentElement().getLocator().getSelectorString(),
-                    PageObjectElementBuilderImpl.countElements(false).getLogMessage(),
-                    mock.context.getPollingTimeout().getSeconds(),
-                    mock.context.getPollingInterval().getSeconds())));
   }
 
   @Test
