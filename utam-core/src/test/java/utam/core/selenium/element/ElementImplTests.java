@@ -430,11 +430,6 @@ public class ElementImplTests {
           new LocatorImpl(new LocatorNodeImpl.Css(LOCATOR_WITHOUT_PARAM)), context);
     }
 
-    ElementImpl getElementImplNullable() {
-      return new ElementImpl(
-              new LocatorImpl(new LocatorNodeImpl.Css(NONEXISTENT_LOCATOR)), context);
-    }
-
     ElementWaitImpl getElementWait(String message) {
       return new ElementWaitImpl(
           message, new LocatorImpl(new LocatorNodeImpl.Css(LOCATOR_WITHOUT_PARAM)), context);
