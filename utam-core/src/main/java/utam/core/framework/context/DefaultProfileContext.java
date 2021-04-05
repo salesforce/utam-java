@@ -46,7 +46,7 @@ public final class DefaultProfileContext implements ProfileContext {
   }
 
   private Properties getBeansFromResource() {
-    ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+    ClassLoader classLoader = getClass().getClassLoader();
     String configName = profile.getConfigName() + ".properties";
     Properties properties = new Properties();
     try {
