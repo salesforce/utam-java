@@ -26,9 +26,8 @@ import java.util.stream.Stream;
 
 import static utam.compiler.helpers.AnnotationUtils.*;
 import static utam.compiler.helpers.ElementContext.EMPTY_SELECTOR;
+import static utam.compiler.helpers.TypeUtilities.*;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
-import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
-import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 
 /**
  * @author elizaveta.ivanova
@@ -55,6 +54,7 @@ final class UtamPageObject {
   String rootElementType;
   Boolean isExposeRootElement; // should be nullable as it's redundant for root
   UtamElement[] elements;
+  UtamMethod beforeLoad;
 
   @JsonCreator
   UtamPageObject(
@@ -71,7 +71,8 @@ final class UtamPageObject {
       // nested nodes
       @JsonProperty("shadow") UtamShadowElement shadow,
       @JsonProperty("elements") UtamElement[] elements,
-      @JsonProperty("methods") UtamMethod[] methods) {
+      @JsonProperty("methods") UtamMethod[] methods,
+      @JsonProperty("beforeLoad") UtamMethodAction[] beforeLoad) {
     this.profiles = profiles;
     this.methods = methods;
     this.isAbstract = isAbstract;
@@ -83,6 +84,9 @@ final class UtamPageObject {
     this.shadow = shadow;
     this.elements = elements;
     this.rootElementType = type;
+    if (beforeLoad != null) {
+      this.beforeLoad = new UtamMethod("load", beforeLoad);
+    }
     validate();
   }
 
@@ -99,6 +103,7 @@ final class UtamPageObject {
     this.elements = null;
     this.isExposeRootElement = false;
     this.rootElementType = null;
+    this.beforeLoad = null;
   }
 
   void validate() {
@@ -197,6 +202,9 @@ final class UtamPageObject {
     }
     if (methods != null) {
       Stream.of(methods).forEach(method -> context.setMethod(method.getMethod(context)));
+    }
+    if (beforeLoad != null) {
+      context.setMethod(beforeLoad.getBeforeLoadMethod(context));
     }
   }
 }

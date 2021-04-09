@@ -197,7 +197,6 @@ public final class TranslationContext {
     return testableElements;
   }
 
-
   /**
    * remember element for unit test deserializer
    * @param elementName name of the element
@@ -206,5 +205,4 @@ public final class TranslationContext {
   public void setTestableElement(String elementName, ElementUnitTestHelper helper) {
     this.testableElements.put(elementName, helper);
   }
-
 }
