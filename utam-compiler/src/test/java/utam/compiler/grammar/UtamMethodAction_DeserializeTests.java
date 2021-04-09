@@ -14,31 +14,8 @@ import static org.testng.Assert.assertThrows;
  */
 public class UtamMethodAction_DeserializeTests {
 
-    // does not really need to be tested as it's part of Jackson library
-    @Test
-    public void testMandatoryFields() {
-        String json1 = "{" + "  \"apply\": \"click\"" + "}";
-        assertThrows(
-                UtamError.class,
-                () -> getDeserializedObject(json1, UtamMethodAction.class));
-        String json2 = "{" + "  \"element\": \"element\"," + "}";
-        assertThrows(
-                UtamError.class,
-                () -> getDeserializedObject(json2, UtamMethodAction.class));
-        String json3 = "{"
-                + "  \"compose\": ["
-                + "    {"
-                + "      \"element\": \"element\","
-                + "      \"apply\": \"click\""
-                + "    }"
-                + "  ]"
-                + "}";
-        assertThrows(
-                UtamError.class,
-                () -> getDeserializedObject(json3, UtamMethodAction.class));
-    }
-
     /** A UtamMethodAction object should be able to be created through deserialization */
+    /** For built-in actions on basic & custom elements */
     @Test
     public void testDeserializationDefaultValues() {
         String json = "{  \"element\": \"element\",  \"apply\": \"click\" }";
@@ -47,5 +24,26 @@ public class UtamMethodAction_DeserializeTests {
         assertThat(method.apply, is(equalTo("click")));
         assertThat(method.args, is(nullValue()));
         assertThat(method.elementName, is(equalTo("element")));
+    }
+
+    @Test
+    /** For imperative extensions */
+    public void testDeserializationDefaultValuesForUtilityStatement() {
+        String json = "{"
+                + " \"applyExternal\": {"
+                + "      \"type\": \"utam-test/utils/test/testUtilClass\","
+                + "      \"invoke\": \"testUtilityMethod\""
+                + "  }"
+                + "}";
+        UtamMethodAction method = getDeserializedObject(json, UtamMethodAction.class);
+        assertThat(method, is(not(nullValue())));
+        assertThat(method.apply, is(nullValue()));
+        assertThat(method.args, is(nullValue()));
+        assertThat(method.elementName, is(nullValue()));
+        assertThat(method.applyExternal, is(not(nullValue())));
+        UtamExternalMethodAction utility = method.applyExternal;
+        assertThat(utility.externalClassPath, is(equalTo("utam-test/utils/test/testUtilClass")));
+        assertThat(utility.methodName, is(equalTo("testUtilityMethod")));
+        assertThat(utility.args, is(nullValue()));
     }
 }

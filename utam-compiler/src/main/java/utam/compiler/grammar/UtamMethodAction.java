@@ -1,28 +1,20 @@
 package utam.compiler.grammar;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import utam.compiler.helpers.*;
+import utam.compiler.representation.ComposeMethodStatement;
+import utam.compiler.representation.ComposeMethodStatement.*;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static utam.compiler.helpers.ActionableActionType.getActionType;
 import static utam.compiler.helpers.ActionableActionType.isWaitFor;
 import static utam.compiler.helpers.TypeUtilities.VOID;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.List;
-import java.util.stream.Collectors;
-import utam.compiler.helpers.ActionType;
-import utam.compiler.helpers.ActionableActionType;
-import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.MatcherType;
-import utam.compiler.helpers.MethodContext;
-import utam.compiler.helpers.PrimitiveType;
-import utam.compiler.helpers.TranslationContext;
-import utam.compiler.representation.ComposeMethodStatement;
-import utam.compiler.representation.ComposeMethodStatement.BasicElementOperation;
-import utam.compiler.representation.ComposeMethodStatement.Operand;
-import utam.compiler.representation.ComposeMethodStatement.Operation;
-import utam.compiler.representation.ComposeMethodStatement.OperationWithPredicate;
-import utam.compiler.representation.ComposeMethodStatement.Single;
-import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.TypeProvider;
 
 /**
  * compose statement mapping
@@ -32,26 +24,32 @@ import utam.core.declarative.representation.TypeProvider;
  */
 class UtamMethodAction {
 
+  static final String ERR_COMPOSE_ACTION_REQUIRED_KEYS =
+      "Statements for compose method '%s' should either have 'element' and 'apply' or 'applyExternal' properties ";
+
   final String elementName;
   final String apply;
   UtamArgument[] args;
+  UtamUtilityMethodAction applyExternal;
   private final UtamMatcher matcher;
 
   @JsonCreator
   UtamMethodAction(
-      @JsonProperty(value = "element", required = true) String elementName,
-      @JsonProperty(value = "apply", required = true) String apply,
+      @JsonProperty(value = "element") String elementName,
+      @JsonProperty(value = "apply") String apply,
+      @JsonProperty(value = "args") UtamArgument[] args,
       @JsonProperty(value = "matcher") UtamMatcher matcher,
-      @JsonProperty(value = "args") UtamArgument[] args) {
+      @JsonProperty(value = "applyExternal") UtamUtilityMethodAction applyExternal) {
     this.elementName = elementName;
     this.apply = apply;
     this.args = args;
     this.matcher = matcher;
+    this.applyExternal = applyExternal;
   }
 
   // used in tests
   UtamMethodAction(String elementName, String apply) {
-    this(elementName, apply, null, null);
+    this(elementName, apply, null, null, null);
   }
 
   private Operation getCustomOperation(TranslationContext context, MethodContext methodContext) {
@@ -86,27 +84,79 @@ class UtamMethodAction {
     return new BasicElementOperation(action, parameters, isLastPredicateStatement);
   }
 
-  ComposeMethodStatement getComposeAction(TranslationContext context, MethodContext methodContext, boolean isLastPredicateStatement) {
-    ElementContext element = context.getElement(elementName);
-    // register usage of getter from compose statement
-    context.setPrivateMethodUsage(element.getElementMethod().getDeclaration().getName());
+  /**
+   * Create an Operation for a utility statement.
+   * For imperative extension, an operation is a custom action specified in the invoke property in the JSON file.
+   * We access the value of the invoke property through `applyExternal.getMethodName()`
+   * @param methodContext context of the current method being compiled
+   * @return an operation that represents the structure of an imperative extension statement
+   */
+  private Operation getUtilityOperation(MethodContext methodContext) {
+    List<MethodParameter> parameters = UtamArgument
+            .getArgsProcessor(applyExternal.args, null, methodContext.getName()).getOrdered();
+    ActionType action = new Custom(applyExternal.getMethodName(), methodContext.getReturnType(VOID), parameters);
+    TypeProvider returnType = action.getReturnType();
+    return new UtilityOperation(action, returnType, parameters);
+  }
 
-    ComposeMethodStatement.Operand operand = new Operand(element, methodContext);
-    ComposeMethodStatement.Operation operation =
-        element.isCustom() ? getCustomOperation(context, methodContext) :
-            getBasicOperation(context, element, methodContext, isLastPredicateStatement);
-    ComposeMethodStatement statement;
-    if (element.isList()
-        // size() can only be applied to a single element
-        && !operation.isSizeAction()) {
-      statement =
-          operation.isReturnsVoid() ? new ComposeMethodStatement.VoidList(operand, operation)
-              : new ComposeMethodStatement.ReturnsList(operand, operation);
-    } else {
-      statement = new Single(operand, operation, getMatcherType(), getMatcherParameters(methodContext));
+  /**
+   * Create a compose statement object from mapped Java entity.
+   * This method creates a structure that will be used to generate the code for a given object in the `compose` array.
+   * Each object in the `compose` array from the JSON PO will create one `ComposeMethodStatement`.
+   * @param context current PO context
+   * @param methodContext context of the current method being compiled
+   * @param isLastPredicateStatement boolean that adds extra logic if the last statement is a predicate
+   * @return
+   */
+  ComposeMethodStatement getComposeAction(TranslationContext context, MethodContext methodContext, boolean isLastPredicateStatement) {
+    if (apply == null && applyExternal == null) {
+      throw new UtamError(
+        String.format(
+            ERR_COMPOSE_ACTION_REQUIRED_KEYS,
+            methodContext.getName()
+        )
+      );
     }
-    // remember that element is used to not propagate its parameters to method for second time
-    methodContext.setElementUsage(element);
+    if (apply != null) {
+      if (elementName == null) {
+        throw new UtamError(
+            String.format(
+                    ERR_COMPOSE_ACTION_REQUIRED_KEYS,
+                    methodContext.getName()
+            )
+        );
+      }
+    }
+
+    ComposeMethodStatement.Operation operation;
+    ComposeMethodStatement statement;
+
+    if (applyExternal != null) {
+      TypeProvider type = context.getUtilityType(applyExternal.getExternalClassPath());
+      UtilityOperand utilityOperand = new UtilityOperand(methodContext, type);
+      operation = getUtilityOperation(methodContext);
+      statement = new Utility(utilityOperand, operation);
+    } else {
+      ElementContext element = context.getElement(elementName);
+      // register usage of getter from compose statement
+      context.setPrivateMethodUsage(element.getElementMethod().getDeclaration().getName());
+
+      ComposeMethodStatement.Operand operand = new Operand(element, methodContext);
+      operation =
+              element.isCustom() ? getCustomOperation(context, methodContext) :
+                      getBasicOperation(context, element, methodContext, isLastPredicateStatement);
+      if (element.isList()
+          // size() can only be applied to a single element
+          && !operation.isSizeAction()) {
+        statement =
+            operation.isReturnsVoid() ? new ComposeMethodStatement.VoidList(operand, operation)
+                : new ComposeMethodStatement.ReturnsList(operand, operation);
+      } else {
+        statement = new Single(operand, operation, getMatcherType(), getMatcherParameters(methodContext));
+      }
+      // remember that element is used to not propagate its parameters to method for second time
+      methodContext.setElementUsage(element);
+    }
     return statement;
   }
 
