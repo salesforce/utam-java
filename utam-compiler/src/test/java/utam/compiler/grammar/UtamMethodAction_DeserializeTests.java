@@ -1,6 +1,5 @@
 package utam.compiler.grammar;
 
-import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
 import static utam.compiler.grammar.TestUtilities.getDeserializedObject;
@@ -41,7 +40,7 @@ public class UtamMethodAction_DeserializeTests {
         assertThat(method.args, is(nullValue()));
         assertThat(method.elementName, is(nullValue()));
         assertThat(method.applyExternal, is(not(nullValue())));
-        UtamExternalMethodAction utility = method.applyExternal;
+        UtamUtilityMethodAction utility = method.applyExternal;
         assertThat(utility.externalClassPath, is(equalTo("utam-test/utils/test/testUtilClass")));
         assertThat(utility.methodName, is(equalTo("testUtilityMethod")));
         assertThat(utility.args, is(nullValue()));

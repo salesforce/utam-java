@@ -9,7 +9,6 @@ import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.Profile;
-import utam.compiler.representation.UtilityReferenceField;
 
 import java.util.*;
 
@@ -112,15 +111,6 @@ public final class TranslationContext {
       throw new UtamError(String.format(ERR_CONTEXT_DUPLICATE_FIELD, field.getName()));
     }
     pageObjectFields.add(field);
-  }
-
-  public PageClassField setUtilityField(TypeProvider provider) {
-    PageClassField field = new UtilityReferenceField(provider);
-    // for utilities field might have been already declared
-    if (pageObjectFields.stream().noneMatch(f -> f.getName().equals(field.getName()))) {
-      pageObjectFields.add(field);
-    }
-    return field;
   }
 
   public void setMethod(PageObjectMethod method) {

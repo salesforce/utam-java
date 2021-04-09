@@ -15,7 +15,6 @@ import utam.compiler.representation.ChainMethod;
 import utam.compiler.representation.ComposeMethod;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.compiler.representation.InterfaceMethod;
-import utam.compiler.representation.UtilityMethod;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
@@ -36,7 +35,7 @@ class UtamMethod {
       "method '%s': 'return' property is redundant";
   static final String ERR_METHOD_RETURN_ALL_REDUNDANT =
       "method '%s': 'returnAll' property is redundant";
-  private static final String SUPPORTED_METHOD_TYPES = "\"compose\", \"chain\", or \"external\"";
+  private static final String SUPPORTED_METHOD_TYPES = "\"compose\" or \"chain\"";
   static final String ERR_METHOD_UNKNOWN_TYPE =
       "method '%s': one of " + SUPPORTED_METHOD_TYPES + " should be set";
   static final String ERR_METHOD_REDUNDANT_TYPE =
@@ -48,14 +47,12 @@ class UtamMethod {
   String returnStr;
   Boolean isReturnList;
   UtamMethodChainLink[] chain;
-  UtamMethodUtil externalUtility;
 
   @JsonCreator
   UtamMethod(
       @JsonProperty(value = "name", required = true) String name,
       @JsonProperty(value = "compose") UtamMethodAction[] compose,
       @JsonProperty(value = "chain") UtamMethodChainLink[] chain,
-      @JsonProperty(value = "external") UtamMethodUtil externalUtility,
       @JsonProperty(value = "args") UtamArgument[] args,
       @JsonProperty(value = "return", defaultValue = "void") String returnStr,
       @JsonProperty(value = "returnAll") Boolean isReturnList) {
@@ -65,31 +62,30 @@ class UtamMethod {
     this.returnStr = returnStr;
     this.isReturnList = isReturnList;
     this.chain = chain;
-    this.externalUtility = externalUtility;
   }
 
   // used in tests - shortcut for utils
-  UtamMethod(String name, String returns, UtamMethodUtil externalUtility, Boolean returnAll) {
-    this(name, null, null, externalUtility, null, returns, returnAll);
+  UtamMethod(String name, String returns, Boolean returnAll) {
+    this(name, null, null, null, returns, returnAll);
   }
 
   // used in tests - shortcut for compose
   UtamMethod(String name, UtamMethodAction[] compose) {
-    this(name, compose, null, null, null, null, null);
+    this(name, compose, null, null, null, null);
   }
 
   // used in tests - shortcut for abstract
   UtamMethod(String name, String returns, UtamArgument[] args) {
-    this(name, null, null, null, args, returns, null);
+    this(name, null, null, args, returns, null);
   }
 
   // used in tests - shortcut for chain
   UtamMethod(String name, String returns, UtamMethodChainLink[] chain) {
-    this(name, null, chain, null, null, returns, null);
+    this(name, null, chain, null, returns, null);
   }
 
   PageObjectMethod getAbstractMethod(TranslationContext context) {
-    if (compose != null || chain != null || externalUtility != null) {
+    if (compose != null || chain != null) {
       throw new UtamError(String.format(ERR_METHOD_SHOULD_BE_ABSTRACT, name));
     }
     MethodContext methodContext = new MethodContext(name, getReturnType(context, VOID), isReturnsList());
@@ -104,20 +100,13 @@ class UtamMethod {
       return getAbstractMethod(context);
     }
     if (compose != null) {
-      if (chain != null || externalUtility != null) {
+      if (chain != null) {
         throw new UtamError(String.format(ERR_METHOD_REDUNDANT_TYPE, name));
       }
       return getComposeMethod(context);
     }
     if (chain != null) {
-      if (compose != null || externalUtility != null) {
-        throw new UtamError(String.format(ERR_METHOD_REDUNDANT_TYPE, name));
-      }
       return getChainMethod(context);
-    }
-    if (externalUtility != null) {
-      // We already know chain and compose are null if we've gotten here
-      return getUtilityMethod(context);
     }
     throw new UtamError(String.format(ERR_METHOD_UNKNOWN_TYPE, name));
   }
@@ -134,15 +123,6 @@ class UtamMethod {
       type = context.getType(returnStr);
     }
     return type;
-  }
-
-  private PageObjectMethod getUtilityMethod(TranslationContext context) {
-    return new UtilityMethod(
-        name,
-        getReturnType(context, VOID),
-        isReturnsList(),
-        externalUtility.getMethodReference(name, context),
-        comments);
   }
 
   PageObjectMethod getChainMethod(TranslationContext context) {
