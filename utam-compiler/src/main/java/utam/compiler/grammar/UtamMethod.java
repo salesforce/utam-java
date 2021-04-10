@@ -64,11 +64,6 @@ class UtamMethod {
     this.chain = chain;
   }
 
-  // used in tests - shortcut for utils
-  UtamMethod(String name, String returns, Boolean returnAll) {
-    this(name, null, null, null, returns, returnAll);
-  }
-
   // used in tests - shortcut for compose
   UtamMethod(String name, UtamMethodAction[] compose) {
     this(name, compose, null, null, null, null);

@@ -25,7 +25,7 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
 class UtamMethodAction {
 
   static final String ERR_COMPOSE_ACTION_REQUIRED_KEYS =
-      "Statements for compose method '%s' should either have 'element' and 'apply' or 'applyExternal' properties ";
+      "Statements for compose method '%s' should either have 'element' and 'apply' or 'applyExternal' properties";
 
   final String elementName;
   final String apply;
@@ -50,6 +50,11 @@ class UtamMethodAction {
   // used in tests
   UtamMethodAction(String elementName, String apply) {
     this(elementName, apply, null, null, null);
+  }
+
+  // used in tests
+  UtamMethodAction(UtamUtilityMethodAction applyExternal) {
+    this(null, null, null, null, applyExternal);
   }
 
   private Operation getCustomOperation(TranslationContext context, MethodContext methodContext) {
