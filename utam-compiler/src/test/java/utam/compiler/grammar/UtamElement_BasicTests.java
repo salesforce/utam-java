@@ -26,6 +26,8 @@ import java.util.Objects;
 import static utam.compiler.grammar.TestUtilities.*;
 import static utam.compiler.grammar.UtamElement.*;
 import static utam.compiler.grammar.UtamElementFilter_Tests.getInnerTextFilter;
+import static utam.compiler.grammar.UtamMethod.ERR_BEFORELOAD_NAME_NOT_ALLOWED;
+import static utam.compiler.grammar.UtamPageObject.BEFORELOAD_METHOD_MANE;
 import static utam.compiler.grammar.UtamSelector_Tests.getListCssSelector;
 import static utam.compiler.grammar.UtamSelector_Tests.getUtamCssSelector;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
@@ -461,5 +463,18 @@ public class UtamElement_BasicTests {
     methodInfo.addCodeLine("element(this.nullable, true).build(Actionable.class)");
     TranslationContext context = new DeserializerUtilities().getContext("basicElementNullable");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("getNullable"), methodInfo);
+  }
+
+  /**
+   * getMethod should throw proper UtamError id reserved beforeLoad method name is used in other utam methods.
+   */
+  @Test
+  public void testBeforeLoadMethodNameNotAllowedForOtherMethods() {
+    TranslationContext context = TestUtilities.getTestTranslationContext();
+    UtamMethod method = new UtamMethod(BEFORELOAD_METHOD_MANE, new UtamMethodAction[] {});
+
+    UtamError e = expectThrows(UtamError.class, () -> method.getMethod(context));
+    assertThat(e.getMessage(), containsString(ERR_BEFORELOAD_NAME_NOT_ALLOWED));
+
   }
 }

@@ -25,6 +25,8 @@ import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
 
+import static utam.compiler.grammar.UtamPageObject.BEFORELOAD_METHOD_MANE;
+
 /**
  * public method declared at PO level
  *
@@ -46,6 +48,8 @@ class UtamMethod {
   static final String ERR_METHOD_REDUNDANT_TYPE =
       "method '%s': only one of " + SUPPORTED_METHOD_TYPES + " can be set";
   static final String ERR_DUPLICATED_STATEMENT = "beforeLoad: duplicate declaration { element: %s, apply: %s } - already exists";
+  static final String ERR_BEFORELOAD_NAME_NOT_ALLOWED =
+          "method name \"load\" is reserved for 'beforeload' property, please use other name";
   final String name;
   private final String comments = "";
   UtamMethodAction[] compose;
@@ -105,6 +109,9 @@ class UtamMethod {
   }
 
   PageObjectMethod getMethod(TranslationContext context) {
+    if (!context.isBeforeLoad() && name.equals(BEFORELOAD_METHOD_MANE)) {
+      throw new UtamError(ERR_BEFORELOAD_NAME_NOT_ALLOWED);
+    }
     if (context.isAbstractPageObject()) {
       return getAbstractMethod(context);
     }

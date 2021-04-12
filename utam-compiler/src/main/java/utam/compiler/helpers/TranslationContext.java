@@ -52,6 +52,7 @@ public final class TranslationContext {
   private final Set<String> usedPrivateMethods = new HashSet<>();
   private boolean isAbstractPageObject = false;
   private final Map<String, ElementUnitTestHelper> testableElements = new HashMap<>();
+  private boolean isBeforeLoad;
 
   public TranslationContext(String pageObjectURI, TranslatorConfig translatorConfiguration) {
     this.pageObjectURI = pageObjectURI;
@@ -204,5 +205,22 @@ public final class TranslationContext {
    */
   public void setTestableElement(String elementName, ElementUnitTestHelper helper) {
     this.testableElements.put(elementName, helper);
+  }
+
+  /**
+   * Returns beforeLoad flag.
+   *
+   * @return boolean isBeforeLoad
+   */
+  public boolean isBeforeLoad() {
+    return isBeforeLoad;
+  }
+
+  /**
+   * Used to set beforeLoad flag.
+   * @param beforeLoad boolean beforeLoad
+   */
+  public void setBeforeLoad(boolean beforeLoad) {
+    isBeforeLoad = beforeLoad;
   }
 }
