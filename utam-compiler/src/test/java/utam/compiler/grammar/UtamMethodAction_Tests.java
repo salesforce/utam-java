@@ -232,7 +232,7 @@ public class UtamMethodAction_Tests {
     assertThat(actionObject.getReturnType().isSameType(VOID), is(true));
     assertThat(
             getSingleCodeLine(actionObject),
-            is(equalTo(type.getSimpleName() + ".testStaticMethod(this)")));
+            is(equalTo(type.getSimpleName() + ".testStaticMethod(new UtamUtilitiesContext(this))")));
   }
 
   @Test
@@ -254,7 +254,7 @@ public class UtamMethodAction_Tests {
     assertThat(actionObject.getParameters().get(0).getValue(), is(equalTo("strParameter")));
     assertThat(
             getSingleCodeLine(actionObject),
-            is(equalTo(type.getSimpleName() + ".testStaticMethod(this, strParameter)")));
+            is(equalTo(type.getSimpleName() + ".testStaticMethod(new UtamUtilitiesContext(this), strParameter)")));
   }
 
   @Test

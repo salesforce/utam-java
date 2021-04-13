@@ -123,6 +123,8 @@ public abstract class ComposeMethodStatement {
     public Utility(UtilityOperand operand, Operation operation) {
       super(operand, operation, operation.getReturnType());
       classImports.add(operand.getType());
+      TypeProvider utilitiesContextType = new TypeUtilities.FromClass(UtamUtilitiesContext.class);
+      classImports.add(utilitiesContextType);
     }
 
     /**
@@ -344,7 +346,7 @@ public abstract class ComposeMethodStatement {
     String getCode(String invocationPattern, String utilityClassName) {
       String parametersValues = getParametersValuesString(actionParameters);
       String separator = parametersValues.length() > 0  ? ", " : "";
-      String methodInvocation = String.format("%s(this%s%s)",
+      String methodInvocation = String.format("%s(new UtamUtilitiesContext(this)%s%s)",
               super.getAction().getInvokeMethodName(),
               separator,
               getParametersValuesString(actionParameters));
