@@ -69,12 +69,12 @@ public class ElementAdapter implements Element {
 
   @Override
   public Element findElement(Locator by, FindContext finderContext) {
-    return find(getElementBuilder(), webElement, by, finderContext);
+    return find(getElementBuilder(), webElement, (LocatorBy) by, finderContext);
   }
 
   @Override
   public List<Element> findElements(Locator by, FindContext finderContext) {
-    return findList(getElementBuilder(), webElement, by, finderContext);
+    return findList(getElementBuilder(), webElement, (LocatorBy) by, finderContext);
   }
 
   @Override

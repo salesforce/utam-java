@@ -201,15 +201,12 @@ public class ShadowRootWebElement implements WebElement, WrapsElement, WrapsDriv
   @Override
   public WebElement findElement(By by) {
     String selector = getSelectorString(by);
-    WebElement ret =
-        (WebElement)
-            executor.executeScript(
-                String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, selector), rootElement);
-
-    if (ret == null) {
+    Object obj = executor.executeScript(
+        String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, selector), rootElement);
+    if (obj == null) {
       throw new NoSuchElementException("Unable to locate element: " + by.toString());
     }
-    return ret;
+    return (WebElement) obj;
   }
 
   @Override

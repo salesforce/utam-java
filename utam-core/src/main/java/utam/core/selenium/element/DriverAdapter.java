@@ -10,7 +10,6 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.openqa.selenium.By;
 import org.openqa.selenium.InvalidElementStateException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.SearchContext;
@@ -69,7 +68,7 @@ public class DriverAdapter implements Driver {
 
   static Element find(Function<WebElement, Element> elementBuilder,
       SearchContext searchContext,
-      Locator by,
+      LocatorBy by,
       FindContext finderContext) {
     if (searchContext == null && !finderContext.isNullable()) {
       throw new NullPointerException(getNotFoundErr(by));
@@ -82,7 +81,7 @@ public class DriverAdapter implements Driver {
             (WebElement) searchContext)
             : searchContext;
     try {
-      WebElement found = scope.findElement(((LocatorByCss) by).getValue());
+      WebElement found = scope.findElement(by.getValue());
       if (found == null && !finderContext.isNullable()) {
         throw new org.openqa.selenium.NoSuchElementException(getNotFoundErr(by));
       }
@@ -101,7 +100,7 @@ public class DriverAdapter implements Driver {
 
   static List<Element> findList(Function<WebElement, Element> elementBuilder,
       SearchContext searchContext,
-      Locator by,
+      LocatorBy by,
       FindContext finderContext) {
     if (searchContext == null && !finderContext.isNullable()) {
       throw new NullPointerException(getNotFoundErr(by));
@@ -113,7 +112,7 @@ public class DriverAdapter implements Driver {
         finderContext.isExpandScopeShadowRoot() ? new ShadowRootWebElement(
             (WebElement) searchContext)
             : searchContext;
-    List<WebElement> founds = scope.findElements((By) by.getValue());
+    List<WebElement> founds = scope.findElements(by.getValue());
     if (founds == null || founds.isEmpty()) {
       if (finderContext.isNullable()) {
         return Collections.EMPTY_LIST;
@@ -155,12 +154,12 @@ public class DriverAdapter implements Driver {
 
   @Override
   public Element findElement(Locator by, FindContext finderContext) {
-    return find(getElementBuilder(), getSeleniumDriver(), by, finderContext);
+    return find(getElementBuilder(), getSeleniumDriver(), (LocatorBy) by, finderContext);
   }
 
   @Override
   public List<Element> findElements(Locator by, FindContext finderContext) {
-    return findList(getElementBuilder(), getSeleniumDriver(), by, finderContext);
+    return findList(getElementBuilder(), getSeleniumDriver(), (LocatorBy) by, finderContext);
   }
 
   @Override

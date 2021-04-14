@@ -150,7 +150,7 @@ public class ElementLocationChain implements ElementLocation {
       return driver.findElement(locator, findContext);
     }
 
-    Element findElementInsideElement(utam.core.element.Element element) {
+    Element findElementInsideElement(Element element) {
       return element.findElement(locator, findContext);
     }
 
@@ -158,7 +158,7 @@ public class ElementLocationChain implements ElementLocation {
       return driver.findElements(locator, findContext);
     }
 
-    List<Element> findElementsInsideElement(utam.core.element.Element element) {
+    List<Element> findElementsInsideElement(Element element) {
       return element.findElements(locator, findContext);
     }
 
