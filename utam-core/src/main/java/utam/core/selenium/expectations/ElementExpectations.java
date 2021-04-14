@@ -38,7 +38,7 @@ public interface ElementExpectations<T> {
 
   /**
    * find single element and returns value
-   *
+   * @param utilities the WebDriverUtilities instance to use in applying the expectation
    * @return function to apply
    */
   Function<SearchContext, T> apply(WebDriverUtilities utilities);

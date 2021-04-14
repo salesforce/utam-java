@@ -68,9 +68,11 @@ public class TranslationUtilities {
   }
 
   /**
-   * todo this method is incomplete, it's supposed to get full chain for annotation
-   *
-   * @return string
+   * Sets comments for an element.<br>
+   * Note:Tthis method is incomplete, it's supposed to get full chain for annotation
+   * @param selector the selector of the element
+   * @param isExpandScopeShadowRoot true if scope is in a shadow root; otherwise, false
+   * @return the element comment
    */
   public static String setHtmlElementComments(Selector selector, boolean isExpandScopeShadowRoot) {
     StringBuilder builder = new StringBuilder("javascript: $(<root selector here>)");

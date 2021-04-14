@@ -12,8 +12,8 @@ import utam.core.framework.base.PageObject;
 import java.util.Collection;
 
 /**
- * Profile Context is used to configure dependency injection for a certain profile </br>
- * It can provide information about implementing class when a certain profile is active </br>
+ * Profile Context is used to configure dependency injection for a certain profile <br>
+ * It can provide information about implementing class when a certain profile is active <br>
  * Profile Context has 1:1 relations with a Profile
  * @see Profile
  *
@@ -23,7 +23,7 @@ import java.util.Collection;
 public interface ProfileContext {
 
   /**
-   * get class name override for the given PO class <br/>
+   * get class name override for the given PO class <br>
    * if null returned, then default definition will be used by a provider
    *
    * @param pageObjectType PO type

@@ -49,7 +49,7 @@ public interface SeleniumContext {
 
   /**
    * get FluentWait for webDriver
-   * @return instance of FluentWait<WebDriver> for user interactions
+   * @return instance of {@code FluentWait<WebDriver>} for user interactions
    */
   DriverWait getDriverWait();
 

@@ -25,6 +25,7 @@ public interface TranslatorTargetConfig {
    *
    * @param typeProvider type of the PO, can be interface or class
    * @return writer for class
+   * @throws IOException if the file does not exist
    */
   Writer getClassWriter(TypeProvider typeProvider) throws IOException;
 

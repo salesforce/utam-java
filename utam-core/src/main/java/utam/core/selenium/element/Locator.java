@@ -37,7 +37,7 @@ public interface Locator {
    * if index is 0, do nothing, just return same instance
    *
    * @param index index starting from 0
-   * @return if index > 0 return clone with applied index
+   * @return if index is greater than 0 return clone with applied index
    */
   Locator setIndex(int index);
 

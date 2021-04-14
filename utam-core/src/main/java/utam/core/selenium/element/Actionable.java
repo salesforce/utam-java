@@ -104,15 +104,15 @@ public interface Actionable extends BaseElement {
   String getValue();
 
   /**
-   * performs Actions.moveToElement from Selenium, <br/>
-   * which "Moves the mouse to the middle of the element. The element is scrolled into view". <br/>
+   * performs Actions.moveToElement from Selenium, <br>
+   * which "Moves the mouse to the middle of the element. The element is scrolled into view". <br>
    * Throws exception if element not found within timeout or element could not be moved to
    */
   void moveTo();
 
   /**
-   * scrolls current element to the center of the screen <br/>
-   * executes javascript `arguments[0].scrollIntoView({block:'center'})` <br/>
+   * scrolls current element to the center of the screen <br>
+   * executes javascript `arguments[0].scrollIntoView({block:'center'})` <br>
    * Throws exception if element not found within timeout or element could not be scrolled to center
    */
   void scrollToCenter();
@@ -125,8 +125,8 @@ public interface Actionable extends BaseElement {
   void scrollToTop();
 
   /**
-   * checks if current element has focus <br/>
-   * uses Selenium WebDriver.switchTo().activeElement().equals(WebDriver) <br/>
+   * checks if current element has focus <br>
+   * uses Selenium WebDriver.switchTo().activeElement().equals(WebDriver) <br>
    * Throws exception if element not found within timeout
    * @return true if current element has focus
    */
@@ -149,15 +149,15 @@ public interface Actionable extends BaseElement {
   void scrollTo();
 
   /**
-   * blurs the current element <br/>
-   * executes javascript `arguments[0].blur()` <br/>
+   * blurs the current element <br>
+   * executes javascript `arguments[0].blur()` <br>
    * Throws exception if element not found within timeout or element could not be scrolled to center
    */
   void blur();
 
   /**
    * wait for condition to return true or not null before the timeout
-   * @param condition
+   * @param condition the condition to wait for
    * @param <T> return type
    * @return method can only return not null or true
    */
@@ -173,7 +173,7 @@ public interface Actionable extends BaseElement {
 
   /**
    * same as containsElement(Selector selector, boolean isExpandShadow); with isExpandShadow set to  false
-   * @param selector
+   * @param selector the selector of the element
    * @return true if element found
    */
   boolean containsElement(Selector selector);
