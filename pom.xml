@@ -125,6 +125,22 @@
         <url>https://github.com/salesforce/utam-java</url>
     </scm>
 
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>UTAM Developers</name>
+            <email>utam@salesforce.com</email>
+            <organization>Salesforce</organization>
+            <organizationUrl>https://www.salesforce.com</organizationUrl>
+        </developer>
+    </developers>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
