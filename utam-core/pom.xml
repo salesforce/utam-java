@@ -11,12 +11,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>utam-java</artifactId>
-        <groupId>com.salesforce</groupId>
+        <groupId>com.salesforce.utam</groupId>
         <version>1.0-alpha-1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>utam-core</artifactId>
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>The Java runtime library for UTAM Page Objects</description>
+    <url>http://github.com/salesforce/utam-java</url>
 
     <dependencies>
         <dependency>
@@ -51,13 +54,12 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
                         <goals>
-                            <goal>jar</goal>
+                            <goal>jar-no-fork</goal>
                         </goals>
                     </execution>
                 </executions>

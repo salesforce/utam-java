@@ -11,10 +11,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.salesforce</groupId>
+    <groupId>com.salesforce.utam</groupId>
     <artifactId>utam-java</artifactId>
     <packaging>pom</packaging>
     <version>1.0-alpha-1-SNAPSHOT</version>
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>Java project for generating and using UTAM Page Objects</description>
+    <url>http://github.com/salesforce/utam-java</url>
 
     <profiles>
         <profile>
@@ -34,6 +37,53 @@
                 </pluginManagement>
             </build>
         </profile>
+        <profile>
+            <id>release</id>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                </snapshotRepository>
+                <repository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+            </distributionManagement>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${maven.javadoc.plugin.version}</version>
+                        <configuration>
+                            <detectJavaApiLink>false</detectJavaApiLink>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${maven.gpg.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <modules>
@@ -46,6 +96,17 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
 
+        <maven.assembly.plugin.version>3.2.0</maven.assembly.plugin.version>
+        <maven.clean.plugin.version>3.1.0</maven.clean.plugin.version>
+        <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
+        <maven.deploy.plugin.version>3.0.0-M1</maven.deploy.plugin.version>
+        <maven.gpg.plugin.version>1.5</maven.gpg.plugin.version>
+        <maven.install.plugin.version>3.0.0-M1</maven.install.plugin.version>
+        <maven.jar.plugin.version>3.2.0</maven.jar.plugin.version>
+        <maven.javadoc.plugin.version>2.9.1</maven.javadoc.plugin.version>
+        <maven.source.plugin.version>3.2.1</maven.source.plugin.version>
+        <maven.surefire.plugin.version>3.0.0-M3</maven.surefire.plugin.version>
+
         <selenium.version>3.141.59</selenium.version>
         <appium.version>7.3.0</appium.version>
         <log4j.version>1.7.25</log4j.version>
@@ -57,6 +118,12 @@
         <mockito.version>2.21.0</mockito.version>
         <hamcrest.version>2.2</hamcrest.version>
     </properties>
+
+    <scm>
+        <connection>scm:git:https://github.com/salesforce/utam-java.git</connection>
+        <developerConnection>scm:git:https://github.com/salesforce/utam-java.git</developerConnection>
+        <url>https://github.com/salesforce/utam-java</url>
+    </scm>
 
     <dependencyManagement>
         <dependencies>
@@ -132,20 +199,8 @@
                      system. Usually, the default plugin versions of these
                      are fine. Internally, however, we have standardized on
                      specific versions of the Maven plugins. The versions
-                     standardized on for internal use are enumerated below,
-                     and the plugins explicitly used by child modules in their
-                     pom.xml files are in the uncommented section. -->
+                     standardized on for internal use are enumerated below. -->
                 <!--plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.1.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>3.1.1</version>
@@ -154,31 +209,41 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>3.0.0-M3</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-install-plugin</artifactId>
-                    <version>3.0.0-M1</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.0</version>
                 </plugin-->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>${maven.assembly.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>${maven.clean.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven.compiler.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>${maven.install.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven.jar.plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>${maven.source.plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M3</version>
+                    <version>${maven.surefire.plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
