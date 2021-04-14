@@ -313,9 +313,9 @@ public final class UtamElement {
                 filter.getMatcherParameters(),
                 filter.getFindFirst(), isNullable());
       } else if (isList) {
-        method = new ElementMethod.Multiple(elementContext, isPublic(), isNullable());
+        method = new ElementMethod.Multiple(elementContext, isPublic());
       } else {
-        method = new ElementMethod.Single(elementContext, isPublic(), isNullable());
+        method = new ElementMethod.Single(elementContext, isPublic());
       }
       context.setClassField(field);
       context.setElement(elementContext);
