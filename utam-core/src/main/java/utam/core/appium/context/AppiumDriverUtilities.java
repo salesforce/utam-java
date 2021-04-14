@@ -38,7 +38,8 @@ public interface AppiumDriverUtilities extends WebDriverUtilities {
     WebDriver setPageContextToWebView(String title);
     
     /**
-     * Returns boolean true if current context is native 
+     * Returns boolean true if current context is native
+     * @return true if current context is native
      */
     Boolean isNative();
     

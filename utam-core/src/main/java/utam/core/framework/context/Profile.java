@@ -8,7 +8,7 @@
 package utam.core.framework.context;
 
 /**
- * Profile for a Page Objects dependency injection configuration <br/>
+ * Profile for a Page Objects dependency injection configuration <br>
  * Any profile can have name and possible values, ex. profile "platform" can have values "web", "ios", "android"
  *
  * @author elizaveta.ivanova

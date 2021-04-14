@@ -23,6 +23,7 @@ public interface PageObjectContext {
    * build external instance
    * @param type type
    * @param parameters optional parameters
+   * @param <T> type of page object to return
    * @deprecated compatibility is deprecated
    * @return externally injected Page Object
    */
