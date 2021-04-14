@@ -13,8 +13,13 @@ import utam.core.framework.base.PageObject;
 import utam.core.framework.context.Profile;
 
 /**
+<<<<<<< HEAD
  * configuration of the UTAM integration by consumer </br> configuration should be created every
  * time Driver is created
+=======
+ * configuration of the UTAM integration by consumer <br>
+ * configuration should be created every time Driver is created
+>>>>>>> dev
  *
  * @author elizaveta.ivanova
  * @since 230
@@ -23,7 +28,7 @@ public interface UtamLoaderConfig {
 
   /**
    * set active profile with intention to correctly pick implementing class if there are overrides
-   * <br/> for each jar with dependencies it will try to find dependencies config and add overrides
+   * <br> for each jar with dependencies it will try to find dependencies config and add overrides
    * injected class
    *
    * @param profile active profile

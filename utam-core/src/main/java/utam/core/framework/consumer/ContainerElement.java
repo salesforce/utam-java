@@ -32,6 +32,7 @@ public interface ContainerElement {
    *
    * @param utamType  type to load
    * @param injectCss inject root
+   * @param <T> the Page Object type
    * @return Page Object instance
    * @deprecated use methods with locator as a parameter
    */
@@ -43,6 +44,7 @@ public interface ContainerElement {
    *
    * @param utamType       type to load
    * @param injectSelector inject root, use Web.byCss or Mobile.by
+   * @param <T> the Page Object type
    * @return UTAM Page Object instance
    */
   <T extends PageObject> T load(Class<T> utamType, Locator injectSelector);
@@ -52,6 +54,7 @@ public interface ContainerElement {
    *
    * @param utamType       type to load
    * @param injectSelector inject root, use Web.byCss or Mobile.by
+   * @param <T> the Page Object type
    * @return UTAM Page Object instance
    */
   <T extends PageObject> List<T> loadList(Class<T> utamType, Locator injectSelector);

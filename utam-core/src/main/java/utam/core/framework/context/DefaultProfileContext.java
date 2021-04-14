@@ -23,7 +23,7 @@ import utam.core.framework.base.PageObject;
 import utam.core.framework.consumer.UtamError;
 
 /**
- * creates empty profile context to use for custom overrides </br> does not read from configs
+ * creates empty profile context to use for custom overrides <br> does not read from configs
  *
  * @author elizaveta.ivanova
  * @since 232

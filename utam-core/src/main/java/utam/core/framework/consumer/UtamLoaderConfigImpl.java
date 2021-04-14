@@ -23,8 +23,8 @@ import utam.core.driver.DriverTimeouts;
 import utam.core.framework.base.PageObject;
 
 /**
- * This config can be used if consumer has a single POs dependency <br/> In this case we do not need
- * multiple class loaders because there is only one set of property files <br/> Config will be using
+ * This config can be used if consumer has a single POs dependency <br> In this case we do not need
+ * multiple class loaders because there is only one set of property files <br> Config will be using
  * System Class Loader
  *
  * @author elizaveta.ivanova
@@ -77,7 +77,6 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
     activeProfiles.add(key);
     activeProfilesContext.put(key, new DefaultProfileContext(profile));
   }
-
 
   @Override
   public PageObjectContext getPageContext() {

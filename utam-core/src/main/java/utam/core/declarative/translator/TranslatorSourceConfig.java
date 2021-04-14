@@ -24,6 +24,7 @@ public interface TranslatorSourceConfig {
    *
    * @param pageObjectURI name of the PO
    * @return reader for file with json declaration
+   * @throws IOException if the file does not exist
    */
   Reader getDeclarationReader(String pageObjectURI) throws IOException;
 
