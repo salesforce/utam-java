@@ -49,7 +49,7 @@ public class ElementMethodTests {
   @Test
   public void testSingleElementWithParametersGetterMethodCreated() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, CLICKABLE_TYPE.getSimpleName());
-    info.addCodeLine("element(this.test, false).build(Clickable.class, selectorArg)");
+    info.addCodeLine("element(this.test).build(Clickable.class, selectorArg)");
     info.addImportedTypes(CLICKABLE_TYPE.getFullName());
     info.addParameter(new MethodParameterInfo("selectorArg", "String"));
     ElementContext element =
