@@ -29,8 +29,8 @@ import utam.core.selenium.context.SeleniumContext;
 import utam.core.selenium.context.SeleniumContextProvider;
 
 /**
- * This config can be used if consumer has a single POs dependency <br/> In this case we do not need
- * multiple class loaders because there is only one set of property files <br/> Config will be using
+ * This config can be used if consumer has a single POs dependency <br> In this case we do not need
+ * multiple class loaders because there is only one set of property files <br> Config will be using
  * System Class Loader
  *
  * @author elizaveta.ivanova
@@ -88,7 +88,7 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
   }
 
   /**
-   * create page objects context for dependency injection <br/> for each Jar and each profile,
+   * create page objects context for dependency injection <br> for each Jar and each profile,
    * search for override config and remember in context
    *
    * @return page objects context for factory

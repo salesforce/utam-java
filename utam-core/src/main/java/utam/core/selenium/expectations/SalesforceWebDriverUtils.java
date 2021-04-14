@@ -17,7 +17,7 @@ import org.openqa.selenium.*;
 import utam.core.selenium.context.WebDriverUtilities;
 
 /**
- * this is adapted from core <br\>
+ * this is adapted from core <br>
  * core/test-shared/test/func/java/src/test/util/webdriver/BaseWebDriverUtil.java
  *
  * @author elizaveta.ivanova

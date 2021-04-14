@@ -41,6 +41,7 @@ public class DefaultTranslatorConfiguration extends AbstractTranslatorConfigurat
    *                   directories containing the generated source files
    * @param profileConfigDirectory the output directory in which to write profile information
    * @param profileDefinitions the map defining the list of known profiles and their values
+   * @throws IOException if there are any issues reading or writing files
    */
   public DefaultTranslatorConfiguration(
       String inputDirectory,

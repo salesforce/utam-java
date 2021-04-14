@@ -13,7 +13,7 @@ import utam.core.framework.context.Profile;
 import java.time.Duration;
 
 /**
- * configuration of the UTAM integration by consumer </br>
+ * configuration of the UTAM integration by consumer <br>
  * configuration should be created every time Driver is created
  *
  * @author elizaveta.ivanova
@@ -29,7 +29,7 @@ public interface UtamLoaderConfig {
   void setBridgeAppTitle(String title);
 
   /**
-   * set active profile with intention to correctly pick implementing class if there are overrides <br/>
+   * set active profile with intention to correctly pick implementing class if there are overrides <br>
    * for each jar with dependencies it will try to find dependencies config and add overrides injected class
    *
    * @param profile active profile
