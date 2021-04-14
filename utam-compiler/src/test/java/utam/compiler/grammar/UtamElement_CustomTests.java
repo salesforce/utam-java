@@ -254,7 +254,7 @@ public class UtamElement_CustomTests {
   public void testCustomNullableList() {
     MethodInfo methodInfo = new MethodInfo("getCustomNullableList", "List<CustomTest>");
     methodInfo.addCodeLine(
-            "inScope(this.getRootElement(), by(\"selector2\", Selector.Type.CSS, false), true)" +
+            "inScope(this.root, LocatorBy.byCss(\"selector2\"), true, false)" +
                     ".buildList(CustomTest.class)");
     TranslationContext context = new DeserializerUtilities().getContext("customElementNullable");
     PageObjectMethod method = context.getMethod("getCustomNullableList");
@@ -265,7 +265,7 @@ public class UtamElement_CustomTests {
   public void testCustomNullableListWithFilter() {
     MethodInfo methodInfo = new MethodInfo("getCustomNullableListFilter", "List<CustomTest>");
     methodInfo.addCodeLine(
-            "inScope(this.getRootElement(), by(\".css\", Selector.Type.CSS, false), true)" +
+            "inScope(this.root, LocatorBy.byCss(\".css\"), true, false)" +
                     ".buildList(CustomTest.class, elm -> elm.isVisible())");
     TranslationContext context = new DeserializerUtilities().getContext("customElementNullable");
     PageObjectMethod method = context.getMethod("getCustomNullableListFilter");
@@ -276,7 +276,7 @@ public class UtamElement_CustomTests {
   public void testCustomNullableSingle() {
     MethodInfo methodInfo = new MethodInfo("getCustomNullable", "CustomTest");
     methodInfo.addCodeLine(
-            "CustomTest instance = inScope(this.getRootElement(), by(\"selector1\", Selector.Type.CSS, false), true)" +
+            "CustomTest instance = inScope(this.root, LocatorBy.byCss(\"selector1\"), true, false)" +
                     ".build(CustomTest.class)");
     methodInfo.addCodeLine("instance");
     TranslationContext context = new DeserializerUtilities().getContext("customElementNullable");
