@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.compiler.grammar;
 
 import static utam.compiler.helpers.AnnotationUtils.getFindAnnotation;
@@ -304,11 +311,11 @@ public final class UtamElement {
                 filter.getApplyMethodParameters(),
                 filter.getMatcherType(),
                 filter.getMatcherParameters(),
-                filter.getFindFirst());
+                filter.getFindFirst(), isNullable());
       } else if (isList) {
-        method = new ElementMethod.Multiple(elementContext, isPublic());
+        method = new ElementMethod.Multiple(elementContext, isPublic(), isNullable());
       } else {
-        method = new ElementMethod.Single(elementContext, isPublic());
+        method = new ElementMethod.Single(elementContext, isPublic(), isNullable());
       }
       context.setClassField(field);
       context.setElement(elementContext);

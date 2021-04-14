@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.compiler.representation;
 
 import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
@@ -163,7 +170,8 @@ public abstract class ElementMethod implements PageObjectMethod {
         List<MethodParameter> applyParameters,
         MatcherType matcherType,
         List<MethodParameter> matcherParameters,
-        boolean isFindFirstMatch) {
+        boolean isFindFirstMatch,
+        boolean isNullable) {
       this.isPublic = isPublic;
       this.methodName = getElementGetterMethodName(elementName, isPublic);
       this.returnType = elementType;

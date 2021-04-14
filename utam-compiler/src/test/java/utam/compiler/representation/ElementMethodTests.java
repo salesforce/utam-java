@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.compiler.representation;
 
 import utam.compiler.helpers.*;
@@ -42,7 +49,7 @@ public class ElementMethodTests {
   @Test
   public void testSingleElementWithParametersGetterMethodCreated() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, CLICKABLE_TYPE.getSimpleName());
-    info.addCodeLine("element(this.test).build(Clickable.class, selectorArg)");
+    info.addCodeLine("element(this.test, false).build(Clickable.class, selectorArg)");
     info.addImportedTypes(CLICKABLE_TYPE.getFullName());
     info.addParameter(new MethodParameterInfo("selectorArg", "String"));
     ElementContext element =
@@ -104,7 +111,7 @@ public class ElementMethodTests {
         EMPTY_PARAMETERS,
         MatcherType.stringContains,
         Collections.singletonList(new ParameterUtils.Primitive("test", PrimitiveType.STRING)),
-        true);
+        true, false);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 }

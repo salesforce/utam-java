@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.compiler.grammar;
 
 import utam.compiler.helpers.ElementContext;
@@ -241,5 +248,38 @@ public class UtamElement_CustomTests {
         "inScope(this.element.setParameters(arg1), LocatorBy.byCss(String.format(\"selector2 %s\", arg2)), false, false)"
             + ".buildList(Test.class)");
     PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
+  }
+
+  @Test
+  public void testCustomNullableList() {
+    MethodInfo methodInfo = new MethodInfo("getCustomNullableList", "List<CustomTest>");
+    methodInfo.addCodeLine(
+            "inScope(this.getRootElement(), by(\"selector2\", Selector.Type.CSS, false), true)" +
+                    ".buildList(CustomTest.class)");
+    TranslationContext context = new DeserializerUtilities().getContext("customElementNullable");
+    PageObjectMethod method = context.getMethod("getCustomNullableList");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
+  public void testCustomNullableListWithFilter() {
+    MethodInfo methodInfo = new MethodInfo("getCustomNullableListFilter", "List<CustomTest>");
+    methodInfo.addCodeLine(
+            "inScope(this.getRootElement(), by(\".css\", Selector.Type.CSS, false), true)" +
+                    ".buildList(CustomTest.class, elm -> elm.isVisible())");
+    TranslationContext context = new DeserializerUtilities().getContext("customElementNullable");
+    PageObjectMethod method = context.getMethod("getCustomNullableListFilter");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
+  public void testCustomNullableSingle() {
+    MethodInfo methodInfo = new MethodInfo("getCustomNullable", "CustomTest");
+    methodInfo.addCodeLine(
+            "CustomTest instance = inScope(this.getRootElement(), by(\"selector1\", Selector.Type.CSS, false), true)" +
+                    ".build(CustomTest.class)");
+    methodInfo.addCodeLine("instance");
+    TranslationContext context = new DeserializerUtilities().getContext("customElementNullable");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("getCustomNullable"), methodInfo);
   }
 }

@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.core.framework.context;
 
 import static utam.core.framework.consumer.PageObjectContextImpl.getClassFromName;
@@ -46,7 +53,7 @@ public final class DefaultProfileContext implements ProfileContext {
   }
 
   private Properties getBeansFromResource() {
-    ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+    ClassLoader classLoader = getClass().getClassLoader();
     String configName = profile.getConfigName() + ".properties";
     Properties properties = new Properties();
     try {

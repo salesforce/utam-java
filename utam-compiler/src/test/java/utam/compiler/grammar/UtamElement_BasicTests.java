@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.compiler.grammar;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -322,7 +329,7 @@ public class UtamElement_BasicTests {
   public void testGetDeclaredMethodsWithList() {
     UtamElement element = getPublicHtmlElement(getListCssSelector(), null);
     MethodInfo info = new MethodInfo(METHOD_NAME, String.format("List<%s>", ACTIONABLE_TYPE_NAME));
-    info.addCodeLine("element(this.test).buildList(Actionable.class)");
+    info.addCodeLine("element(this.test, false).buildList(Actionable.class)");
     PageObjectValidationTestHelper.validateMethod(
         Objects.requireNonNull(getElementMethod(element)), info);
   }
@@ -450,5 +457,31 @@ public class UtamElement_BasicTests {
         is(equalTo("getTestElement")));
     assertThat(elementContext.getElementMethod().isPublic(), is(false));
     assertThat(elementContext.getType(), is(equalTo(actionable)));
+  }
+
+  @Test
+  public void testNullableList() {
+    MethodInfo methodInfo = new MethodInfo("getNullableList", "List<Actionable>");
+    methodInfo.addCodeLine("element(this.nullableList, true).buildList(Actionable.class)");
+    TranslationContext context = new DeserializerUtilities().getContext("basicElementNullable");
+    PageObjectMethod method = context.getMethod("getNullableList");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
+  public void testNullableListWithFilter() {
+    MethodInfo methodInfo = new MethodInfo("getNullableFilter", "Actionable");
+    methodInfo.addCodeLine("element(this.nullableFilter, false).build(Actionable.class, elm -> elm.isVisible())");
+    TranslationContext context = new DeserializerUtilities().getContext("basicElementNullable");
+    PageObjectMethod method = context.getMethod("getNullableFilter");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
+  public void testNullableSingle() {
+    MethodInfo methodInfo = new MethodInfo("getNullable", actionable.getSimpleName());
+    methodInfo.addCodeLine("element(this.nullable, true).build(Actionable.class)");
+    TranslationContext context = new DeserializerUtilities().getContext("basicElementNullable");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("getNullable"), methodInfo);
   }
 }

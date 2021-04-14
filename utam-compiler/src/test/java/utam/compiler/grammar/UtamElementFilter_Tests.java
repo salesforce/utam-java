@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.compiler.grammar;
 
 import utam.core.declarative.representation.MethodParameter;
@@ -188,7 +195,7 @@ public class UtamElementFilter_Tests {
           new PageObjectValidationTestHelper.MethodParameterInfo("arg" + i, "String"));
     }
     methodInfo.addCodeLines(
-        "element(this.element).buildList(Actionable.class, elm -> elm.getAttribute(arg2).contains(arg3), arg1)");
+        "element(this.element, false).buildList(Actionable.class, elm -> elm.getAttribute(arg2).contains(arg3), arg1)");
     methodInfo.setIsPublic(false);
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
@@ -207,7 +214,7 @@ public class UtamElementFilter_Tests {
     methodInfo.addParameter(
         new PageObjectValidationTestHelper.MethodParameterInfo("arg2", "String"));
     methodInfo.addCodeLines(
-        "element(this.element).build(Editable.class, elm -> Boolean.FALSE.equals(elm.isVisible()), arg1,arg2)");
+        "element(this.element, false).build(Editable.class, elm -> Boolean.FALSE.equals(elm.isVisible()), arg1,arg2)");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 
