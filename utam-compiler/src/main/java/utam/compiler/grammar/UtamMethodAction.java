@@ -24,7 +24,7 @@ import static utam.compiler.helpers.ActionableActionType.isWaitFor;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
 /**
- * compose statement mapping
+ * Compose statement mapping
  *
  * @author elizaveta.ivanova
  * @since 228
