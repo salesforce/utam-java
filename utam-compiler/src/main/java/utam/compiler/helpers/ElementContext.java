@@ -7,6 +7,8 @@
  */
 package utam.compiler.helpers;
 
+import java.util.Collections;
+import utam.compiler.helpers.Validation.ErrorType;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
@@ -29,22 +31,10 @@ import static utam.compiler.helpers.Validation.isSameSelector;
  */
 public abstract class ElementContext {
 
-  public static final String ROOT_ELEMENT_NAME = "root";
-  public static final Locator EMPTY_SELECTOR = LocatorBy.byCss("");
+  static final String ROOT_ELEMENT_NAME = "root";
+  static final String DOCUMENT_ELEMENT_NAME = "document";
+  static final Locator EMPTY_SELECTOR = LocatorBy.byCss("");
   static final String EMPTY_SCOPE_ELEMENT_NAME = "empty";
-  public static final ElementContext ROOT_SCOPE =
-      new ElementContext(
-          null, EMPTY_SCOPE_ELEMENT_NAME, null, EMPTY_SELECTOR, false, EMPTY_PARAMETERS) {
-        @Override
-        Validation.ErrorType validate(ElementContext element) {
-          throw new IllegalStateException();
-        }
-
-        @Override
-        public boolean isRootScope() {
-          return true;
-        }
-      };
   private final Locator selector;
   // parameters from scope + from element itself
   private final List<MethodParameter> parameters;
@@ -89,15 +79,15 @@ public abstract class ElementContext {
     return this.isListElement;
   }
 
-  public boolean isRootScope() {
-    return false;
-  }
-
   boolean isRootElement() {
     return false;
   }
 
   public boolean isCustom() {
+    return false;
+  }
+
+  public boolean isDocumentElement() {
     return false;
   }
 
@@ -135,12 +125,12 @@ public abstract class ElementContext {
 
     // used in tests
     public Basic(String name, TypeProvider elementType, Locator selector) {
-      super(ROOT_SCOPE, name, elementType, selector, false, EMPTY_PARAMETERS);
+      super(null, name, elementType, selector, false, EMPTY_PARAMETERS);
     }
 
     // used in tests
     public Basic(String name, TypeProvider elementType, Locator selector, boolean isList) {
-      super(ROOT_SCOPE, name, elementType, selector, isList, EMPTY_PARAMETERS);
+      super(null, name, elementType, selector, isList, EMPTY_PARAMETERS);
     }
 
     // used in tests
@@ -176,7 +166,7 @@ public abstract class ElementContext {
     }
 
     Container(String name) {
-      this(ROOT_SCOPE, name);
+      this(null, name);
     }
 
     @Override
@@ -225,11 +215,6 @@ public abstract class ElementContext {
     }
 
     @Override
-    public boolean isRootScope() {
-      return true;
-    }
-
-    @Override
     public boolean isRootElement() {
       return true;
     }
@@ -248,12 +233,12 @@ public abstract class ElementContext {
 
     // used in tests
     Custom(String elementName, TypeProvider type, Locator selector) {
-      super(ROOT_SCOPE, elementName, type, selector, false, EMPTY_PARAMETERS);
+      super(null, elementName, type, selector, false, EMPTY_PARAMETERS);
     }
 
     // used in tests
     Custom(String elementName, TypeProvider type, Locator selector, boolean isList) {
-      super(ROOT_SCOPE, elementName, type, selector, isList, EMPTY_PARAMETERS);
+      super(null, elementName, type, selector, isList, EMPTY_PARAMETERS);
     }
 
     @Override
@@ -285,6 +270,23 @@ public abstract class ElementContext {
 
     @Override
     public boolean isCustom() {
+      return true;
+    }
+  }
+
+  public static class Document extends ElementContext {
+
+    public Document() {
+      super(null, DOCUMENT_ELEMENT_NAME, null, EMPTY_SELECTOR, false, Collections.EMPTY_LIST);
+    }
+
+    @Override
+    ErrorType validate(ElementContext element) {
+      return ErrorType.NONE;
+    }
+
+    @Override
+    public boolean isDocumentElement() {
       return true;
     }
   }

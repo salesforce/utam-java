@@ -81,7 +81,7 @@ public final class AnnotationUtils {
                 ElementMarker.Find.class.getSimpleName(),
                 getFindAnnotationParameterName(locator),
                 getWrappedString(locator.getStringValue())));
-    if (!scopeElement.isRootScope()) {
+    if (scopeElement != null && !scopeElement.isRootElement()) {
       res.append(String.format(", scope = %s", getWrappedString(scopeElement.getName())));
     }
     if (isExpand) {
@@ -108,7 +108,7 @@ public final class AnnotationUtils {
             .collect(Collectors.toList()));
   }
 
-  public static String getWrappedString(String string) {
+  static String getWrappedString(String string) {
     if (string.startsWith("\"")) {
       return string;
     }

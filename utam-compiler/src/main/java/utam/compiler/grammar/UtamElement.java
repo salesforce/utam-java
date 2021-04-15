@@ -8,11 +8,11 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.helpers.AnnotationUtils.getFindAnnotation;
-import static utam.compiler.helpers.ElementContext.ROOT_SCOPE;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementUnitTestHelper;
@@ -156,7 +156,7 @@ public final class UtamElement {
   }
 
   public void testTraverse(TranslationContext context) {
-    traverse(context, ROOT_SCOPE, false);
+    traverse(context, null, false);
   }
 
   public enum Type {
@@ -174,7 +174,7 @@ public final class UtamElement {
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot);
 
     ElementContext testRootTraverse(TranslationContext context) {
-      return traverse(context, ROOT_SCOPE, false)[0];
+      return traverse(context, null, false)[0];
     }
   }
 
@@ -299,7 +299,7 @@ public final class UtamElement {
       final PageObjectMethod method;
       if (filter != null) {
         // element parameters do not include filter or matcher parameters
-        List<MethodParameter> elementParameters = new ArrayList<>(scopeElement.getParameters());
+        List<MethodParameter> elementParameters = new ArrayList<>(scopeElement == null? Collections.EMPTY_LIST: scopeElement.getParameters());
         elementParameters.addAll(selectorContext.getParameters());
         method =
             new ElementMethod.Filtered(
@@ -323,7 +323,7 @@ public final class UtamElement {
       elementContext.setElementMethod(method);
       context.setTestableElement(name, new ElementUnitTestHelper(
               selectorContext.getLocator().getStringValue(),
-              scopeElement.getName(),
+              scopeElement == null? null : scopeElement.getName(),
               isExpandScopeShadowRoot,
               isList
       ));

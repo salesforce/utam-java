@@ -40,7 +40,7 @@ public class AnnotationUtilsTests {
 
   private static ElementContext getBasicElement(String value) {
     return new ElementContext.Basic(
-        ElementContext.ROOT_SCOPE,
+        null,
         value,
         actionable,
         EMPTY_SELECTOR,

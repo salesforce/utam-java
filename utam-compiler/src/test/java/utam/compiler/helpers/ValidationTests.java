@@ -49,7 +49,7 @@ public class ValidationTests {
 
   private static ElementContext getBasicElement(String name, Locator selector) {
     return new ElementContext.Basic(
-        ElementContext.ROOT_SCOPE,
+        null,
         name,
         actionable,
         selector,
@@ -227,7 +227,6 @@ public class ValidationTests {
         root.validate(
             new ElementContext.Root(new TypeUtilities.FromString("test.AnotherType"), elementType, selector)),
         is(Validation.ErrorType.DUPLICATE_WITH_ROOT_SELECTOR));
-
     assertThat(
         root.validate(
             new ElementContext.Custom(

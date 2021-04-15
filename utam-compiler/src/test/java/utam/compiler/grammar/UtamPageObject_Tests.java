@@ -32,7 +32,6 @@ import static utam.compiler.grammar.UtamPageObject.*;
 import static utam.compiler.grammar.UtamProfile_Tests.PROFILE_KEY;
 import static utam.compiler.grammar.UtamProfile_Tests.PROFILE_VALUE;
 import static utam.compiler.grammar.UtamSelector_Tests.SELECTOR_STRING;
-import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -251,7 +250,6 @@ public class UtamPageObject_Tests {
     UtamPageObject pageObject = new UtamPageObject();
     pageObject.isAbstract = true;
     pageObject.compile(context);
-    assertThat(context.getRootElement().getName(), is(equalTo(ROOT_ELEMENT_NAME)));
   }
 
   @Test
@@ -260,7 +258,6 @@ public class UtamPageObject_Tests {
     UtamSelector rootSelector = UtamSelector_Tests.getUtamCssSelector();
     UtamPageObject pageObject = new UtamPageObject(true, rootSelector);
     pageObject.compile(context);
-    assertThat(context.getRootElement().getName(), is(equalTo(ROOT_ELEMENT_NAME)));
   }
 
   @Test
@@ -270,7 +267,6 @@ public class UtamPageObject_Tests {
     pageObject.isRootPageObject = true;
     pageObject.platform = PlatformType.NATIVE.getName();
     pageObject.compile(context);
-    assertThat(context.getRootElement().getName(), is(equalTo(ROOT_ELEMENT_NAME)));
   }
 
   @Test

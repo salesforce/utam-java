@@ -17,7 +17,6 @@ import org.testng.annotations.Test;
 import java.util.Collections;
 
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
-import static utam.compiler.helpers.ElementContext.ROOT_SCOPE;
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
 import static utam.compiler.helpers.TypeUtilities.Element.clickable;
@@ -54,7 +53,7 @@ public class ElementMethodTests {
     info.addParameter(new MethodParameterInfo("selectorArg", "String"));
     ElementContext element =
         new ElementContext.Basic(
-            ROOT_SCOPE,
+            null,
             ELEMENT_NAME,
             CLICKABLE_TYPE,
             getCssSelector(".css[%s]"),
@@ -85,7 +84,7 @@ public class ElementMethodTests {
     info.addParameter(new MethodParameterInfo("selectorArg", "String"));
     ElementContext element =
         new ElementContext.Basic(
-            ROOT_SCOPE,
+            null,
             ELEMENT_NAME,
             CLICKABLE_TYPE,
             getCssSelector(".css[%s]"),

@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.helpers.AnnotationUtils.EMPTY_ANNOTATION;
-import static utam.compiler.helpers.ElementContext.ROOT_SCOPE;
 import static utam.compiler.helpers.TranslationContext.*;
 import static utam.compiler.helpers.TypeUtilities.Element.editable;
 import static utam.compiler.helpers.ValidationTests.ELEMENT_SELECTOR;
@@ -189,7 +188,7 @@ public class TranslationContextTests {
     TranslationContext context = getContainerContext();
     ElementContext elementContext =
         new ElementContext.Basic(
-            ROOT_SCOPE,
+            null,
             "parameterElement",
             TypeUtilities.Element.clickable,
             getCssSelector("a[title=*'%s']"),
@@ -206,7 +205,7 @@ public class TranslationContextTests {
     TranslationContext context = getContainerContext();
     ElementContext elementContext =
         new ElementContext.Basic(
-            ROOT_SCOPE,
+            null,
             "parameterElement",
             TypeUtilities.Element.clickable,
             getCssSelector("a[title=*'%s'][alt=*'%s]"),
@@ -224,7 +223,7 @@ public class TranslationContextTests {
     TranslationContext context = getContainerContext();
     ElementContext elementContext =
         new ElementContext.Basic(
-            ROOT_SCOPE,
+            null,
             "parameterElement",
             TypeUtilities.Element.clickable,
             getCssSelector("a[title=*'%s']"),
