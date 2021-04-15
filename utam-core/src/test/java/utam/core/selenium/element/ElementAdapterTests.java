@@ -19,7 +19,7 @@ import static utam.core.selenium.element.ElementAdapter.FOCUS_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_CENTER_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_TOP_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.LocatorBy.byCss;
-import static utam.core.selenium.element.ShadowRootWebElement.SHADOW_ROOT_DETECTION_SCRIPT_FRAGMENT;
+import static utam.core.selenium.element.ShadowRootWebElement.*;
 
 import java.util.Collections;
 import org.openqa.selenium.By;
@@ -229,7 +229,7 @@ public class ElementAdapterTests {
   public void testContainsElementInShadow() {
     MockUtilities mock = new MockUtilities();
     when(mock.getExecutorMock()
-        .executeScript(contains(SHADOW_ROOT_DETECTION_SCRIPT_FRAGMENT),
+        .executeScript(contains(String.format(GET_SHADOW_ROOT_QUERY_SELECTOR_ALL, "css")),
             refEq(mock.getWebElementMock())))
         .thenReturn(Collections.singletonList(mock.getWebElementMock()));
     assertThat(mock.getElementAdapter().containsElements(byCss("css"), true), is(equalTo(1)));
