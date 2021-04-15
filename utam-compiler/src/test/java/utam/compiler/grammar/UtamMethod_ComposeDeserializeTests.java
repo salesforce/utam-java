@@ -343,4 +343,12 @@ public class UtamMethod_ComposeDeserializeTests {
     PageObjectMethod method = context.getMethod("testCompose");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
+
+  @Test
+  public void testComposeWithDocumentElement() {
+    MethodInfo methodInfo = new MethodInfo("testCompose", "String");
+    methodInfo.addCodeLine("this.getDocument().getUrl()");
+    TranslationContext context = new DeserializerUtilities().getContext("composeDocument");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
+  }
 }
