@@ -14,8 +14,7 @@ import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 import java.util.Objects;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
-import utam.core.selenium.element.Actionable;
-import utam.core.selenium.expectations.ExpectationsUtil;
+import utam.core.element.Actionable;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,8 +23,6 @@ import java.util.stream.Stream;
 /**
  * this enum links element actions with translator code <br>
  *
- * @see ExpectationsUtil every static method should be registered as enum here
- *     to use in JSON as applicable action <br>
  * @see Actionable as of 228 every method has enum here to use in translator
  * @author elizaveta.ivanova
  * @since 226
@@ -167,7 +164,7 @@ public enum ActionableActionType implements ActionType {
           String.format(
               ERR_NOT_HTML_ELEMENT,
               elementName,
-              elementType.getFullName()));
+              elementType.getSimpleName()));
     }
     TypeUtilities.Element actionableType = TypeUtilities.Element.getBasicElementType(elementType);
     if (actionableType == TypeUtilities.Element.editable) {

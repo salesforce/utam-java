@@ -153,7 +153,7 @@ public class TranslationUtilitiesTests {
     String code = getInterfaceCode(json);
     assertThat(code, containsString("package utam.test.pageobjects.test;"));
     assertThat(code, containsString("import utam.core.framework.base.PageObject;"));
-    assertThat(code, containsString("import utam.core.selenium.element.Clickable;"));
+    assertThat(code, containsString("import utam.core.element.Clickable;"));
     assertThat(code, containsString("public interface Test extends PageObject"));
     assertThat(code, containsString("void clickTestElement();"));
     assertThat(code, containsString("Clickable getTestElement();"));

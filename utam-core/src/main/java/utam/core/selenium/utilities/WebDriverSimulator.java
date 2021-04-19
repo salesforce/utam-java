@@ -155,6 +155,10 @@ public class WebDriverSimulator {
       return selector;
     }
 
+    public By getCssSelector() {
+      return By.cssSelector(selector);
+    }
+
     /**
      * Gets a value indicating whether the described element is in the ShadowDOM of its parent
      * element

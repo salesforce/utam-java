@@ -47,7 +47,7 @@ public abstract class ComposeMethodStatement {
       MatcherType matcher,
       List<MethodParameter> matcherParameters) {
     this.returns = matcher != null ? PrimitiveType.BOOLEAN : returnType;
-    operand.setParameters(this.parameters);
+    operand.setElementParameters(this.parameters);
     operation.setParameters(this.parameters);
     operation.setImports(this.imports);
     operation.setClassImports(this.classImports);
@@ -201,7 +201,7 @@ public abstract class ComposeMethodStatement {
       return String.format("this.%s(%s)", methodName, parameters);
     }
 
-    void setParameters(List<MethodParameter> parameters) {
+    void setElementParameters(List<MethodParameter> parameters) {
       if (methodContext.hasElement(elementContext.getName())) {
         return;
       }
@@ -218,8 +218,9 @@ public abstract class ComposeMethodStatement {
 
     /**
      * Creates a new UtilityOperand object.
+     *
      * @param methodContext context of the current method
-     * @param type holds information about the type of the utility class
+     * @param type          holds information about the type of the utility class
      */
     public UtilityOperand(MethodContext methodContext, TypeProvider type) {
       super(null, methodContext);
@@ -229,25 +230,45 @@ public abstract class ComposeMethodStatement {
     /**
      * @return the imperative utility class name from it's path (type property in the JSON statement)
      */
-    @Override
-    String getElementGetterString() {
+    @Override String getElementGetterString() {
       return this.type.getSimpleName();
     }
 
     /**
      * Stub method that doesn't do anything
+     *
      * @param parameters list of parameters associated with the utility method
      */
-    @Override
-    void setParameters(List<MethodParameter> parameters) {
+    @Override void setElementParameters(List<MethodParameter> parameters) {
     }
 
     /**
      * Getter that returns the type of the utility class. Used to add imports for the utility class
+     *
      * @return the type field
      */
     public TypeProvider getType() {
       return type;
+    }
+  }
+
+  /**
+   * operand for "element" : "document"
+   */
+  public static class DocumentOperand extends Operand {
+
+    public DocumentOperand() {
+      super(null, null);
+    }
+
+    @Override
+    String getElementGetterString() {
+      return "this.getDocument()";
+    }
+
+    @Override
+    void setElementParameters(List<MethodParameter> parameters) {
+      // document does not have parameters
     }
   }
 

@@ -9,14 +9,15 @@ package utam.compiler.helpers;
 
 import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.element.Locator;
 import utam.core.framework.base.PageMarker;
 import utam.core.framework.context.PlatformType;
 import org.testng.annotations.Test;
-import utam.core.selenium.element.ElementMarker;
-import utam.core.selenium.element.Selector;
+import utam.core.framework.base.ElementMarker;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+import utam.core.selenium.element.LocatorBy;
 
 import static utam.compiler.grammar.TestUtilities.TEST_PAGE_OBJECT;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
@@ -34,12 +35,12 @@ import static org.testng.Assert.expectThrows;
  */
 public class AnnotationUtilsTests {
 
-  static final String ELEMENT_MARKER_ANNOTATION_CLASS = ElementMarker.class.getName();
+  private static final String ELEMENT_MARKER_ANNOTATION_CLASS = ElementMarker.class.getName();
   private static final String PAGE_OBJECT_ANNOTATION_CLASS = PageMarker.class.getName();
 
   private static ElementContext getBasicElement(String value) {
     return new ElementContext.Basic(
-        ElementContext.ROOT_SCOPE,
+        null,
         value,
         actionable,
         EMPTY_SELECTOR,
@@ -88,7 +89,7 @@ public class AnnotationUtilsTests {
   public void testGetFindAnnotationCss() {
     AnnotationProvider provider =
         AnnotationUtils.getFindAnnotation(
-            getCssSelector(".fakeSelector"), getBasicElement("fakeElement"), true);
+            getCssSelector(".fakeSelector"), getBasicElement("fakeElement"), true, false);
     assertThat(
         provider.getAnnotationText(),
         is(
@@ -97,26 +98,25 @@ public class AnnotationUtilsTests {
     assertThat(getImportedTypes(provider), containsInAnyOrder(ELEMENT_MARKER_ANNOTATION_CLASS));
   }
 
-  /** The getFindAnnotation method should return the proper value: css selector when using NONE */
   @Test
-  public void testGetFindAnnotationNone() {
+  public void testGetFindAnnotationNullable() {
     AnnotationProvider provider =
         AnnotationUtils.getFindAnnotation(
-            getCssSelector(".fakeSelector"), getBasicElement("fakeElement"), true);
+            getCssSelector(".fakeSelector"), getBasicElement("fakeElement"), true, true);
     assertThat(
         provider.getAnnotationText(),
         is(
             equalTo(
-                "@ElementMarker.Find(css = \".fakeSelector\", scope = \"fakeElement\", expand = true)")));
+                "@ElementMarker.Find(css = \".fakeSelector\", scope = \"fakeElement\", expand = true, nullable = true)")));
     assertThat(getImportedTypes(provider), containsInAnyOrder(ELEMENT_MARKER_ANNOTATION_CLASS));
   }
 
   /** The getFindAnnotation method should return the proper value: Accessibility ID selector */
   @Test
   public void testGetFindAnnotationAccessId() {
-    Selector selector = Selector.byAccessibilityId("fakeSelector");
+    Locator selector = LocatorBy.byAccessibilityId("fakeSelector");
     AnnotationProvider provider =
-        AnnotationUtils.getFindAnnotation(selector, getBasicElement("fakeElement"), true);
+        AnnotationUtils.getFindAnnotation(selector, getBasicElement("fakeElement"), true, false);
     assertThat(
         provider.getAnnotationText(),
         is(
@@ -128,9 +128,9 @@ public class AnnotationUtilsTests {
   /** The getFindAnnotation method should return the proper value: iOS Class Chain selector */
   @Test
   public void testGetFindAnnotationClassChain() {
-    Selector selector = Selector.byClassChain("fakeSelector");
+    Locator selector = LocatorBy.byClassChain("fakeSelector");
     AnnotationProvider provider =
-        AnnotationUtils.getFindAnnotation(selector, getBasicElement("fakeElement"), true);
+        AnnotationUtils.getFindAnnotation(selector, getBasicElement("fakeElement"), true, false);
     assertThat(
         provider.getAnnotationText(),
         is(
@@ -142,14 +142,14 @@ public class AnnotationUtilsTests {
   /** The getFindAnnotation method should return the proper value: Android UIAutomator selector */
   @Test
   public void testGetFindAnnotationUIAutomator() {
-    Selector selector = Selector.byUiAutomator("new UiSelector().fakeSelector");
+    Locator selector = LocatorBy.byUiAutomator("new UiSelector().checked(true)");
     AnnotationProvider provider =
-        AnnotationUtils.getFindAnnotation(selector, getBasicElement("fakeElement"), true);
+        AnnotationUtils.getFindAnnotation(selector, getBasicElement("fakeElement"), true, false);
     assertThat(
         provider.getAnnotationText(),
         is(
             equalTo(
-                "@ElementMarker.Find(uiautomator = \"new UiSelector().fakeSelector\", scope = \"fakeElement\", expand = true)")));
+                "@ElementMarker.Find(uiautomator = \"new UiSelector().checked(true)\", scope = \"fakeElement\", expand = true)")));
     assertThat(getImportedTypes(provider), containsInAnyOrder(ELEMENT_MARKER_ANNOTATION_CLASS));
   }
 
@@ -158,7 +158,7 @@ public class AnnotationUtilsTests {
   public void testGetFindAnnotationWithEmptyElement() {
     AnnotationProvider provider =
         AnnotationUtils.getFindAnnotation(
-            getCssSelector(".fakeSelector"), new ElementContext.Root(TEST_PAGE_OBJECT), true);
+            getCssSelector(".fakeSelector"), new ElementContext.Root(TEST_PAGE_OBJECT), true, false);
     assertThat(
         provider.getAnnotationText(),
         is(equalTo("@ElementMarker.Find(css = \".fakeSelector\", expand = true)")));
@@ -170,7 +170,7 @@ public class AnnotationUtilsTests {
   public void testGetFindAnnotationWithQuotedString() {
     AnnotationProvider provider =
         AnnotationUtils.getFindAnnotation(
-            getCssSelector(".fakeSelector"), getBasicElement("\"scopeElement\""), false);
+            getCssSelector(".fakeSelector"), getBasicElement("\"scopeElement\""), false, false);
     assertThat(
         provider.getAnnotationText(),
         is(equalTo("@ElementMarker.Find(css = \".fakeSelector\", scope = \"scopeElement\")")));

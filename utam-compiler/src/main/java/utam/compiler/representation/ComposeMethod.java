@@ -49,11 +49,12 @@ public class ComposeMethod implements PageObjectMethod {
     this.comments = comments;
   }
 
-  static String getElementGetterString(ElementContext elementContext) {
-    List<MethodParameter> allParameters = elementContext.getParameters();
-    String methodName = elementContext.getElementMethod().getDeclaration().getName();
-    String parameters = getParametersValuesString(allParameters);
-    return "this." + String.format("%s(%s)", methodName, parameters);
+  static String getElementLocatorString(ElementContext elementContext) {
+    if(elementContext.getParameters().isEmpty()) {
+      return String.format("this.%s", elementContext.getName());
+    }
+    String parameters = getParametersValuesString(elementContext.getParameters());
+    return String.format("this.%s.setParameters(%s)", elementContext.getName(), parameters);
   }
 
   @Override
