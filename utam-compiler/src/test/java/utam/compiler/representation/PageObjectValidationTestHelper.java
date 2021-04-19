@@ -7,6 +7,7 @@
  */
 package utam.compiler.representation;
 
+import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.representation.*;
 
 import java.util.*;
@@ -333,32 +334,21 @@ public class PageObjectValidationTestHelper {
     private final String name;
     private final String typeName;
     private final List<String> annotationValues = new ArrayList<>();
-    private String comments = null;
 
     /**
      * Initializes a new instance of the FieldInfo class
      *
      * @param name the name of the field
      * @param typeName the simple type name of the field
-     * @param annotations a list of annotation string values
      */
-    public FieldInfo(String name, String typeName, String... annotations) {
+    public FieldInfo(String name, String typeName) {
       this.name = name;
       this.typeName = typeName;
-      this.addAnnotations(annotations);
     }
 
-    public void setComments(String comments) {
-      this.comments = comments;
-    }
-
-    /**
-     * Adds the text of an annotation for the field
-     *
-     * @param annotation the text of the annotation on the field
-     */
-    public void addAnnotationText(String annotation) {
-      addAnnotations(annotation);
+    public FieldInfo(String name) {
+      this.name = name;
+      this.typeName = TypeUtilities.ELEMENT_FIELD.getSimpleName();
     }
 
     /**
@@ -383,12 +373,6 @@ public class PageObjectValidationTestHelper {
               fieldObject.getType().getSimpleName(),
               is(equalTo(typeName)));
       validateAnnotationList(fieldObject.getAnnotations(), annotationValues);
-      if (comments != null) {
-        assertThat(
-                "field " + name + ": comment",
-                fieldObject.getComments(),
-                is(equalTo(comments)));
-      }
     }
   }
 

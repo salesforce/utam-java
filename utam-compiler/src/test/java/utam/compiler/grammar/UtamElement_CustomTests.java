@@ -188,7 +188,7 @@ public class UtamElement_CustomTests {
     UtamElement element = getPublicComponentElement();
     MethodInfo expectedMethodInfo = new MethodInfo(METHOD_NAME, COMPONENT_TYPE_SHORT_NAME);
     expectedMethodInfo.addCodeLines(
-        "ComponentName instance = inScope(this.getScopeElement(), by(\"selector\", Selector.Type.CSS, false), false)"
+        "ComponentName instance = inScope(this.scope, LocatorBy.byCss(\"selector\"), false, false)"
             + ".build(ComponentName.class)",
         "instance.load()",
         "instance");
@@ -215,7 +215,7 @@ public class UtamElement_CustomTests {
     MethodInfo expectedMethod = new MethodInfo(METHOD_NAME, COMPONENT_TYPE_SHORT_NAME);
     expectedMethod.addCodeLines(
         "ComponentName instance = "
-            + "inScope(this.getScopeElement(), by(\"selector\", Selector.Type.CSS, false)).build(ComponentName.class)",
+            + "inScope(this.scope, LocatorBy.byCss(\"selector\"), false).build(ComponentName.class)",
         "instance");
     PageObjectMethod method = getElementMethod(element);
     PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
@@ -225,7 +225,7 @@ public class UtamElement_CustomTests {
   public void testElementWithListCantBeExternal() {
     UtamElement element = getPublicComponentElement(getListCssSelector(), null);
     element.isExternal = true;
-    UtamError e = expectThrows(UtamError.class, () -> element.getAbstraction());
+    UtamError e = expectThrows(UtamError.class, element::getAbstraction);
     assertThat(
         e.getMessage(),
         containsString(String.format(ERR_ELEMENT_EXTERNAL_NOT_ALLOWED, ELEMENT_NAME)));
@@ -245,7 +245,7 @@ public class UtamElement_CustomTests {
     expectedMethod.addParameter(
         new PageObjectValidationTestHelper.MethodParameterInfo("arg2", "String"));
     expectedMethod.addCodeLines(
-        "inScope(this.getElementElement(arg1), by(String.format(\"selector2 %s\", arg2), Selector.Type.CSS, false), false)"
+        "inScope(this.element.setParameters(arg1), LocatorBy.byCss(String.format(\"selector2 %s\", arg2)), false, false)"
             + ".buildList(Test.class)");
     PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
   }
@@ -254,7 +254,7 @@ public class UtamElement_CustomTests {
   public void testCustomNullableList() {
     MethodInfo methodInfo = new MethodInfo("getCustomNullableList", "List<CustomTest>");
     methodInfo.addCodeLine(
-            "inScope(this.getRootElement(), by(\"selector2\", Selector.Type.CSS, false), true)" +
+            "inScope(this.root, LocatorBy.byCss(\"selector2\"), true, false)" +
                     ".buildList(CustomTest.class)");
     TranslationContext context = new DeserializerUtilities().getContext("customElementNullable");
     PageObjectMethod method = context.getMethod("getCustomNullableList");
@@ -265,7 +265,7 @@ public class UtamElement_CustomTests {
   public void testCustomNullableListWithFilter() {
     MethodInfo methodInfo = new MethodInfo("getCustomNullableListFilter", "List<CustomTest>");
     methodInfo.addCodeLine(
-            "inScope(this.getRootElement(), by(\".css\", Selector.Type.CSS, false), true)" +
+            "inScope(this.root, LocatorBy.byCss(\".css\"), true, false)" +
                     ".buildList(CustomTest.class, elm -> elm.isVisible())");
     TranslationContext context = new DeserializerUtilities().getContext("customElementNullable");
     PageObjectMethod method = context.getMethod("getCustomNullableListFilter");
@@ -276,7 +276,7 @@ public class UtamElement_CustomTests {
   public void testCustomNullableSingle() {
     MethodInfo methodInfo = new MethodInfo("getCustomNullable", "CustomTest");
     methodInfo.addCodeLine(
-            "CustomTest instance = inScope(this.getRootElement(), by(\"selector1\", Selector.Type.CSS, false), true)" +
+            "CustomTest instance = inScope(this.root, LocatorBy.byCss(\"selector1\"), true, false)" +
                     ".build(CustomTest.class)");
     methodInfo.addCodeLine("instance");
     TranslationContext context = new DeserializerUtilities().getContext("customElementNullable");

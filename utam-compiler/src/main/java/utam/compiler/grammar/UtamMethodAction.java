@@ -24,6 +24,7 @@ import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.compiler.representation.ComposeMethodStatement.BasicElementOperation;
+import utam.compiler.representation.ComposeMethodStatement.DocumentOperand;
 import utam.compiler.representation.ComposeMethodStatement.Operand;
 import utam.compiler.representation.ComposeMethodStatement.Operation;
 import utam.compiler.representation.ComposeMethodStatement.OperationWithPredicate;
@@ -96,11 +97,12 @@ class UtamMethodAction {
   ComposeMethodStatement getComposeAction(TranslationContext context, MethodContext methodContext, boolean isLastPredicateStatement) {
     ElementContext element = context.getElement(elementName);
     // register usage of getter from compose statement
-    context.setPrivateMethodUsage(element.getElementMethod().getDeclaration().getName());
-
-    ComposeMethodStatement.Operand operand = new Operand(element, methodContext);
+    if(!element.isDocumentElement()) {
+      context.setPrivateMethodUsage(element.getElementMethod().getDeclaration().getName());
+    }
+    ComposeMethodStatement.Operand operand = element.isDocumentElement()? new DocumentOperand() : new Operand(element, methodContext);
     ComposeMethodStatement.Operation operation =
-        element.isCustom() ? getCustomOperation(context, methodContext) :
+        element.isCustom() || element.isDocumentElement() ? getCustomOperation(context, methodContext) :
             getBasicOperation(context, element, methodContext, isLastPredicateStatement);
     ComposeMethodStatement statement;
     if (element.isList()

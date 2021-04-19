@@ -8,9 +8,9 @@
 package utam.compiler.helpers;
 
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.element.Locator;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
-import utam.core.selenium.element.Selector;
 
 import java.util.*;
 
@@ -47,9 +47,9 @@ public class ValidationTests {
     return new Validation(FIRST_PAGE_OBJECT_URI, map);
   }
 
-  private static ElementContext getBasicElement(String name, Selector selector) {
+  private static ElementContext getBasicElement(String name, Locator selector) {
     return new ElementContext.Basic(
-        ElementContext.ROOT_SCOPE,
+        null,
         name,
         actionable,
         selector,
@@ -67,7 +67,7 @@ public class ValidationTests {
 
   @Test
   public void testIsSameSelector() {
-    Selector TEST = getCssSelector(ELEMENT_SELECTOR);
+    Locator TEST = getCssSelector(ELEMENT_SELECTOR);
     assertThat(Validation.isSameSelector(TEST, TEST), is(equalTo(true)));
     assertThat(Validation.isSameSelector(getCssSelector(""), TEST), is(equalTo(false)));
     assertThat(Validation.isSameSelector(TEST, getCssSelector("")), is(equalTo(false)));
@@ -84,7 +84,7 @@ public class ValidationTests {
   @Test
   public void testIsLabelHardcoded() {
     var ref = new Object() {
-      Selector TEST;
+      Locator TEST;
     };
     HARDCODED_SELECTORS.forEach(selector ->
             assertThat(Validation.isLabelHardcoded(ref.TEST = getCssSelector(selector)), is(equalTo(true))));
@@ -125,7 +125,7 @@ public class ValidationTests {
 
   @Test
   public void testErr_COMPONENTS_WITH_SAME_SELECTOR_BUT_DIFFERENT_TYPES() {
-    Selector selector = getCssSelector(ELEMENT_SELECTOR);
+    Locator selector = getCssSelector(ELEMENT_SELECTOR);
     ElementContext.Custom first =
         new ElementContext.Custom("first", new TypeUtilities.FromString("test.First"), selector);
     ElementContext.Custom second =
@@ -160,7 +160,7 @@ public class ValidationTests {
 
   @Test
   public void testErr_COMPONENT_AND_ELEMENT_DUPLICATE_SELECTOR() {
-    Selector selector = getCssSelector(ELEMENT_SELECTOR);
+    Locator selector = getCssSelector(ELEMENT_SELECTOR);
     ElementContext.Basic first = new ElementContext.Basic("first", actionable, selector);
     ElementContext.Custom second =
         new ElementContext.Custom(
@@ -182,7 +182,7 @@ public class ValidationTests {
 
   @Test
   public void testErr_DUPLICATE_WITH_ROOT_SELECTOR() {
-    Selector selector = getCssSelector(ELEMENT_SELECTOR);
+    Locator selector = getCssSelector(ELEMENT_SELECTOR);
     ElementContext.Basic first = new ElementContext.Basic("first", actionable, selector);
     ElementContext.Root second =
         new ElementContext.Root(new TypeUtilities.FromString("test.Second"), actionable, selector);
@@ -216,7 +216,7 @@ public class ValidationTests {
 
   @Test
   public void validateRootWithNonEmptySelector() {
-    Selector selector = getCssSelector(ELEMENT_SELECTOR);
+    Locator selector = getCssSelector(ELEMENT_SELECTOR);
     TypeProvider elementType = actionable;
     ElementContext.Root root =
         new ElementContext.Root(new TypeUtilities.FromString("test.Type"), elementType, selector);
@@ -227,7 +227,6 @@ public class ValidationTests {
         root.validate(
             new ElementContext.Root(new TypeUtilities.FromString("test.AnotherType"), elementType, selector)),
         is(Validation.ErrorType.DUPLICATE_WITH_ROOT_SELECTOR));
-
     assertThat(
         root.validate(
             new ElementContext.Custom(
@@ -243,7 +242,7 @@ public class ValidationTests {
 
   @Test
   public void validateComponentElement() {
-    Selector selector = getCssSelector(ELEMENT_SELECTOR);
+    Locator selector = getCssSelector(ELEMENT_SELECTOR);
     TypeProvider elementType = actionable;
     ElementContext.Custom self =
         new ElementContext.Custom("name", new TypeUtilities.FromString("test.Type"), selector);
@@ -276,7 +275,7 @@ public class ValidationTests {
 
   @Test
   public void validateHtmlElement() {
-    Selector selector = getCssSelector(ELEMENT_SELECTOR);
+    Locator selector = getCssSelector(ELEMENT_SELECTOR);
     ElementContext self = getBasicElement("name", selector);
     assertThat(
         self.validate(new ElementContext.Root(new TypeUtilities.FromString("test.Type"), actionable, selector)),

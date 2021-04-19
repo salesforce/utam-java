@@ -36,7 +36,7 @@ import utam.compiler.representation.ComposeMethodStatement.ReturnsList;
 import utam.compiler.representation.ComposeMethodStatement.Single;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.selenium.element.Actionable;
+import utam.core.element.Actionable;
 
 /**
  * Provides tests for the ComposeMethod class

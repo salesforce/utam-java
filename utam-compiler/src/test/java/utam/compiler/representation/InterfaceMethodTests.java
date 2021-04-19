@@ -21,7 +21,7 @@ import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.selenium.element.Actionable;
+import utam.core.element.Actionable;
 
 /**
  * tests for the InterfaceMethod representation class

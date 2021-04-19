@@ -9,14 +9,11 @@ package utam.compiler.helpers;
 
 import java.util.Objects;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.ContainerElement;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
-import utam.core.selenium.element.Actionable;
-import utam.core.selenium.expectations.DriverExpectationsUtil;
+import utam.core.element.Actionable;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -25,6 +22,7 @@ import java.util.stream.Stream;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.ActionableActionType.ERR_NOT_HTML_ELEMENT;
 import static utam.compiler.helpers.ActionableActionType.ERR_UNKNOWN_ACTION;
+import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.GENERIC_TYPE;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.core.framework.UtamLogger.info;
@@ -197,25 +195,6 @@ public class ActionableActionTypeTests {
     validateAction(ActionableActionType.getClass, STRING_TYPE_NAME);
   }
 
-  @SuppressWarnings("rawtypes")
-  @Test
-  public void driverActions() {
-    for (DriverExpectationsUtil.Type action : DriverExpectationsUtil.Type.values()) {
-      Method method =
-          getMethod(DriverExpectationsUtil.class, action.name(), action.getParameterTypes());
-      // method returns expectations, so we need generic type parameter
-      Class expectationReturns =
-          (Class) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
-      // check that code is set
-      // N.B., currently, all actions return a valid type; if an action is added that
-      // will return null, something similar to the following will be required:
-      // Class expected = action.getReturnType() == null ? WebElement.class :
-      // action.getReturnType();
-      Class expected = action.getReturnType();
-      assertThat(expected, is(equalTo(expectationReturns)));
-    }
-  }
-
   @Test
   @SuppressWarnings("rawtypes")
   public void testStandardActionsMethods() {
@@ -336,7 +315,7 @@ public class ActionableActionTypeTests {
     assertThat(
         e.getMessage(),
         containsString(
-            String.format(ERR_NOT_HTML_ELEMENT, ELEMENT_NAME, ContainerElement.class.getName())));
+            String.format(ERR_NOT_HTML_ELEMENT, ELEMENT_NAME, CONTAINER_ELEMENT.getSimpleName())));
   }
 
   @Test

@@ -55,7 +55,6 @@ public final class ClassSerializer {
   private static List<String> getClassField(PageClassField field) {
     List<String> out = new ArrayList<>();
     out.add(NEW_LINE);
-    out.addAll(getWrappedJavadoc(field.getComments()));
     field.getAnnotations().forEach(a -> out.add(a.getAnnotationText()));
     out.add(getStatement(field.getDeclaration()));
     out.removeIf(String::isEmpty);

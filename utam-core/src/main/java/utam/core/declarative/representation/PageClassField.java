@@ -35,6 +35,4 @@ public interface PageClassField {
   TypeProvider getType();
 
   String getDeclaration();
-
-  String getComments();
 }

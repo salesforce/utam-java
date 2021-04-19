@@ -1,0 +1,14 @@
+{
+  "methods": [
+    {
+      "name": "testCompose",
+      "return" : "string",
+      "compose": [
+        {
+          "element": "document",
+          "apply": "getUrl"
+        }
+      ]
+    }
+  ]
+}

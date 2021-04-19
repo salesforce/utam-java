@@ -86,16 +86,15 @@ public class ClassSerializerTests {
     String code = getImplementationCode(json);
     assertThat(code, containsString("package utam.test.pageobjects.test.impl;"));
     assertThat(code, containsString("import utam.core.framework.base.BasePageObject;"));
-    assertThat(code, containsString("import utam.core.selenium.element.Clickable;"));
-    assertThat(code, containsString("import utam.core.selenium.element.Editable;"));
-    assertThat(code, containsString("import utam.core.selenium.element.Touchable;"));
-    assertThat(code, containsString("import utam.core.selenium.element.ElementMarker;"));
+    assertThat(code, containsString("import utam.core.element.Clickable;"));
+    assertThat(code, containsString("import utam.core.element.ElementLocation;"));
+    assertThat(code, containsString("import utam.core.framework.base.ElementMarker;"));
     assertThat(code, containsString("import utam.test.pageobjects.test.Test;"));
     assertThat(
         code, containsString("public final class TestImpl extends BasePageObject implements Test"));
-    assertThat(code, containsString("private Clickable testButton;"));
-    assertThat(code, containsString("private Editable testTextBox;"));
-    assertThat(code, containsString("private Touchable testFlickableMobileElement;"));
+    assertThat(code, containsString("private ElementLocation testButton;"));
+    assertThat(code, containsString("private ElementLocation testTextBox;"));
+    assertThat(code, containsString("private ElementLocation testFlickableMobileElement;"));
     assertThat(code, containsString("public final Clickable getTestButton()"));
     assertThat(code, containsString("public final void submitInfo(String text)"));
   }

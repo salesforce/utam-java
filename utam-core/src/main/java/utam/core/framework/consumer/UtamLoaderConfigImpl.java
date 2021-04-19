@@ -10,23 +10,17 @@ package utam.core.framework.consumer;
 import static utam.core.framework.consumer.PageObjectContextImpl.getClassFromName;
 import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
 
-import io.appium.java_client.AppiumDriver;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.openqa.selenium.WebDriver;
-import utam.core.appium.context.AppiumContextProvider;
-import utam.core.framework.base.PageObject;
-import utam.core.framework.base.PageObjectsFactory;
-import utam.core.framework.base.PageObjectsFactoryImpl;
-import utam.core.framework.context.Driver;
+import utam.core.framework.context.DefaultProfileContext;
 import utam.core.framework.context.Profile;
 import utam.core.framework.context.ProfileContext;
-import utam.core.framework.context.DefaultProfileContext;
-import utam.core.selenium.context.SeleniumContext;
-import utam.core.selenium.context.SeleniumContextProvider;
+import utam.core.driver.DriverContext;
+import utam.core.driver.DriverTimeouts;
+import utam.core.framework.base.PageObject;
 
 /**
  * This config can be used if consumer has a single POs dependency <br> In this case we do not need
@@ -38,20 +32,22 @@ import utam.core.selenium.context.SeleniumContextProvider;
  */
 public class UtamLoaderConfigImpl implements UtamLoaderConfig {
 
+  final List<String> overrideProfiles = new ArrayList<>();
+  final Map<String, ProfileContext> overrideProfilesContext = new HashMap<>();
   // dependencies
   private final List<String> activeProfiles = new ArrayList<>();
   private final Map<String, ProfileContext> activeProfilesContext = new HashMap<>();
-  final List<String> overrideProfiles = new ArrayList<>();
-  final Map<String, ProfileContext> overrideProfilesContext = new HashMap<>();
-  final DriverSettings driverSettings;
   // driver
-  private final WebDriver webDriver;
-  PageObjectsFactory pageObjectsFactory;
-  SeleniumContext seleniumContext;
+  private DriverTimeouts timeouts = DriverTimeouts.DEFAULT;
+  private String bridgeAppTitle;
 
-  public UtamLoaderConfigImpl(WebDriver driver) {
-    this.webDriver = driver;
-    this.driverSettings = new DriverSettings();
+  public UtamLoaderConfigImpl() {
+    setProfile(DEFAULT_PROFILE);
+  }
+
+  public UtamLoaderConfigImpl(DriverTimeouts timeouts) {
+    this();
+    this.timeouts = timeouts;
   }
 
   private static void setBean(ProfileContext profileContext,
@@ -80,20 +76,10 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
     // add to list to maintain order of overrides
     activeProfiles.add(key);
     activeProfilesContext.put(key, new DefaultProfileContext(profile));
-    resetFactory();
   }
 
-  final void setDefaultProfile() {
-    setProfile(DEFAULT_PROFILE);
-  }
-
-  /**
-   * create page objects context for dependency injection <br> for each Jar and each profile,
-   * search for override config and remember in context
-   *
-   * @return page objects context for factory
-   */
-  PageObjectContext setPageObjectsContext() {
+  @Override
+  public PageObjectContext getPageContext() {
     Map<Class<? extends PageObject>, Class<? extends PageObject>> overrides = new HashMap<>();
     activeProfiles
         .forEach(
@@ -108,45 +94,15 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
     return new PageObjectContextImpl(overrides);
   }
 
-  void resetSeleniumContext() {
-    if (this.seleniumContext != null) {
-      this.seleniumContext = this.driverSettings.getSeleniumContext(this.webDriver);
-    }
-  }
-
-  SeleniumContext getSeleniumContext() {
-    if (this.seleniumContext == null) {
-      this.seleniumContext = this.driverSettings.getSeleniumContext(this.webDriver);
-    }
-    return seleniumContext;
-  }
-
-  void resetFactory() {
-    if (pageObjectsFactory != null) {
-      this.pageObjectsFactory = new PageObjectsFactoryImpl(setPageObjectsContext(),
-          this.seleniumContext);
-    }
-  }
-
-  PageObjectsFactory getFactory() {
-    if (pageObjectsFactory == null) {
-      PageObjectContext context = setPageObjectsContext();
-      this.pageObjectsFactory = new PageObjectsFactoryImpl(context, getSeleniumContext());
-    }
-    return pageObjectsFactory;
-  }
-
   @Override
   public void setBridgeAppTitle(String title) {
-    this.driverSettings.bridgeAppTitle = title;
-    resetSeleniumContext();
-    resetFactory();
+    this.bridgeAppTitle = title;
   }
 
   @Override
   public <T extends PageObject> void setProfileOverride(Profile profile, Class<T> poInterface,
       Class<? extends T> poClass) {
-    Profile notNullProfile = profile == null? DEFAULT_PROFILE : profile;
+    Profile notNullProfile = profile == null ? DEFAULT_PROFILE : profile;
     String key = notNullProfile.getConfigName();
     ProfileContext context =
         overrideProfilesContext.containsKey(key) ? overrideProfilesContext.get(key)
@@ -156,46 +112,25 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
       overrideProfiles.add(key);
     }
     overrideProfilesContext.put(key, context);
-    resetFactory();
   }
 
   @Override
-  public void setLocationPolicy(LocationPolicy policy) {
-    this.driverSettings.locationPolicy = policy;
-    resetSeleniumContext();
-    resetFactory();
+  public DriverContext getDriverContext() {
+    return new DriverContext(timeouts, bridgeAppTitle);
   }
 
   @Override
-  public void setTimeout(Duration timeout) {
-    this.driverSettings.customTimeout = timeout;
-    resetSeleniumContext();
-    resetFactory();
+  public void setFindTimeout(Duration findTimeout) {
+    timeouts = new DriverTimeouts(findTimeout, timeouts.getWaitForTimeout(), timeouts.getPollingInterval());
   }
 
-  /**
-   * settings related to driver
-   */
-  static class DriverSettings {
+  @Override
+  public void setWaitForTimeout(Duration waitForTimeout) {
+    timeouts = new DriverTimeouts(timeouts.getFindTimeout(), waitForTimeout, timeouts.getPollingInterval());
+  }
 
-    String bridgeAppTitle;
-    Duration customTimeout;
-    LocationPolicy locationPolicy;
-
-    DriverSettings() {
-      this.bridgeAppTitle = null;
-      this.customTimeout = null;
-      this.locationPolicy = LocationPolicyType.getDefault();
-    }
-
-    SeleniumContext getSeleniumContext(WebDriver webDriver) {
-      SeleniumContextProvider seleniumContext = Driver.isMobileDriver(webDriver)
-          ? new AppiumContextProvider((AppiumDriver) webDriver, bridgeAppTitle)
-          : new SeleniumContextProvider(webDriver, locationPolicy);
-      if (customTimeout != null) {
-        seleniumContext.setPollingTimeout(customTimeout);
-      }
-      return seleniumContext;
-    }
+  @Override
+  public void setPollingInterval(Duration pollingInterval) {
+    timeouts = new DriverTimeouts(timeouts.getFindTimeout(), timeouts.getWaitForTimeout(), pollingInterval);
   }
 }

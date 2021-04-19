@@ -7,6 +7,8 @@
  */
 package utam.compiler.helpers;
 
+import utam.compiler.helpers.ElementContext.Document;
+import utam.compiler.helpers.ElementContext.Root;
 import utam.compiler.helpers.Validation.ErrorType;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
@@ -18,8 +20,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.mockito.Mockito.mock;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
-import static utam.compiler.helpers.ElementContext.EMPTY_SCOPE_ELEMENT_NAME;
+import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
+import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
@@ -27,7 +33,6 @@ import static utam.compiler.helpers.TypeUtilities.Element.editable;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.assertThrows;
-import static org.testng.Assert.expectThrows;
 
 /**
  * Provides tests for the ElementContext class
@@ -47,7 +52,6 @@ public class ElementContextTests {
       assertThat(actual.getType().getFullName(), is(equalTo(expected.typeName)));
     }
     assertThat(actual.isList(), is(equalTo(expected.isList)));
-    assertThat(actual.isRootScope(), is(equalTo(expected.isRoot)));
 
     List<String> actualParameterNames =
         actual.getParameters().stream()
@@ -73,6 +77,7 @@ public class ElementContextTests {
         new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
     ElementInfo expected = new ElementInfo(ELEMENT_NAME, elementType.getFullName());
     ElementContext element = getSingleElementContext(elementType);
+    assertThat(element.isDocumentElement(), is(false));
     validateElement(element, expected);
   }
 
@@ -156,16 +161,6 @@ public class ElementContextTests {
     expected.isRoot = true;
     ElementContext element = new ElementContext.Root(type, elementType, getCssSelector(SELECTOR_VALUE));
     validateElement(element, expected);
-  }
-
-  /** An Element object representing a root element with a null type should be able to be created */
-  @Test
-  public void testRootElementWithNullType() {
-    ElementInfo expected = new ElementInfo(EMPTY_SCOPE_ELEMENT_NAME, null);
-    expected.isRoot = true;
-    ElementContext element = ElementContext.ROOT_SCOPE;
-    validateElement(element, expected);
-    expectThrows(IllegalStateException.class, () -> element.validate(null));
   }
 
   @Test
@@ -307,7 +302,6 @@ public class ElementContextTests {
     ElementContext otherElement = new FakeElement(elementType);
     assertThat(otherElement.isList(), is(equalTo(false)));
     assertThat(otherElement.isRootElement(), is(equalTo(false)));
-    assertThat(otherElement.isRootScope(), is(equalTo(false)));
     assertThat(otherElement.isCustom(), is(equalTo(false)));
   }
 
@@ -520,6 +514,20 @@ public class ElementContextTests {
     ElementContext elementContext = getSingleElementContext(actionable);
     elementContext.setElementMethod(method);
     assertThrows(NullPointerException.class, () -> elementContext.setElementMethod(method));
+  }
+
+  @Test
+  public void testDocumentElement() {
+    ElementContext context = new Document();
+    assertThat(context.isDocumentElement(), is(true));
+    assertThat(context.getName(), is(equalTo(DOCUMENT_ELEMENT_NAME)));
+    assertThat(context.validate(null), is(ErrorType.NONE));
+  }
+
+  @Test
+  public void testRootElementName() {
+    ElementContext context = new Root(mock(TypeProvider.class));
+    assertThat(context.getName(), is(equalTo(ROOT_ELEMENT_NAME)));
   }
 
   private static class FakeElement extends ElementContext {

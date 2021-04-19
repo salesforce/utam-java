@@ -16,13 +16,13 @@ import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectClass;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.selenium.element.Selector;
 import utam.core.selenium.utilities.WebDriverSimulator;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.compiler.translator.TranslationUtilities.*;
 
@@ -250,7 +250,7 @@ public final class UnitTestSerializer {
     }
     imports.add(NEW_LINE);
     imports.add("import " + WebDriverSimulator.class.getName() + ";");
-    imports.add("import " + Selector.class.getName() + ";");
+    imports.add("import " + SELECTOR.getFullName() + ";");
     imports.add(NEW_LINE);
     imports.add("import utam.consumer.SalesforceSimulatorObjectFactory;");
     imports.add("import utam.consumer.UtamLoaderTestingContext;");

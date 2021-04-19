@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import org.openqa.selenium.By;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.PageObjectValidationTestHelper;
@@ -95,8 +96,8 @@ public class UtamElement_ContainerTests {
     UtamElement element = getPublicContainerElement();
     assertThat(element.getAbstraction(), is(instanceOf(UtamElement.Container.class)));
     assertThat(
-        element.selector.getSelector().getValue(),
-        is(equalTo(UtamElement.Container.DEFAULT_CONTAINER_SELECTOR_CSS)));
+        element.selector.getContext().getLocator().getValue(),
+        is(equalTo(By.cssSelector(UtamElement.Container.DEFAULT_CONTAINER_SELECTOR_CSS))));
   }
 
   /** The getDeclaredMethod method should return null for a non-public container */
@@ -111,8 +112,8 @@ public class UtamElement_ContainerTests {
             "getContainerInsideRoot", "<T extends PageObject> T");
     expectedMethod.addParameter(FIRST_CONTAINER_PARAMETER);
     expectedMethod.addCodeLines(
-        "this.inContainer(this.getRootElement(), true)"
-            + ".load(pageObjectType, by(\":scope > *:first-child\", Selector.Type.CSS))");
+        "this.inContainer(this.root, true)"
+            + ".load(pageObjectType, LocatorBy.byCss(\":scope > *:first-child\"))");
     PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
   }
 
@@ -132,8 +133,8 @@ public class UtamElement_ContainerTests {
     expectedMethod.addParameter(FIRST_CONTAINER_PARAMETER);
 
     expectedMethod.addCodeLines(
-        "this.inContainer(this.getScopeElement(scopeArg), true)"
-            + ".load(pageObjectType, by(\":scope > *:first-child\", Selector.Type.CSS))");
+        "this.inContainer(this.scope.setParameters(scopeArg), true)"
+            + ".load(pageObjectType, LocatorBy.byCss(\":scope > *:first-child\"))");
     PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
   }
 
@@ -152,8 +153,8 @@ public class UtamElement_ContainerTests {
         new PageObjectValidationTestHelper.MethodParameterInfo("selectorArg", "String"));
     expectedMethod.addParameter(FIRST_CONTAINER_PARAMETER);
     expectedMethod.addCodeLines(
-        "this.inContainer(this.getScopeElement(scopeArg), false)"
-            + ".loadList(pageObjectType, by(String.format(\".css%s\", selectorArg), Selector.Type.CSS))");
+        "this.inContainer(this.scope.setParameters(scopeArg), false)"
+            + ".loadList(pageObjectType, LocatorBy.byCss(String.format(\".css%s\", selectorArg)))");
     PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
   }
 }

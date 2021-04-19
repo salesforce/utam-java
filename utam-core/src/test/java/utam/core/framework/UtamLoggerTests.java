@@ -9,7 +9,6 @@ package utam.core.framework;
 
 import org.apache.log4j.Level;
 import org.testng.annotations.Test;
-import utam.core.framework.UtamLogger;
 
 import java.util.Arrays;
 import java.util.List;
