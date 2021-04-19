@@ -47,7 +47,7 @@ public class MockUtilities {
         JavascriptExecutor.class,
         SearchContext.class));
     DriverContext driverContext = DriverContext.TEST;
-    driverAdapter = WebDriverFactory.getAdapter(webDriverMock, driverContext);
+    driverAdapter = WebDriverFactory.getAdapter(webDriverMock);
     driverAdapterMock = mock(DriverAdapter.class);
     when(driverAdapterMock.getSeleniumDriver()).thenReturn(webDriverMock);
     PageObjectContext pageObjectContext = new PageObjectContextImpl(Collections.emptyMap());

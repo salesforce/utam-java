@@ -13,7 +13,6 @@ import static utam.core.selenium.factory.WebDriverFactory.getAdapter;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import utam.core.driver.Driver;
-import utam.core.driver.DriverContext;
 import utam.core.driver.DriverTimeouts;
 import utam.core.element.Element;
 import utam.core.element.ElementLocation;
@@ -45,15 +44,6 @@ public class UtamLoaderImpl implements UtamLoader {
   }
 
   /**
-   * creates instance of loader that does not accept dependency injection
-   *
-   * @param driver driver instance
-   */
-  public UtamLoaderImpl(WebDriver driver) {
-    this(new UtamLoaderConfigImpl(), getAdapter(driver, new DriverContext()));
-  }
-
-  /**
    * create instance of loader for unit tests with minimum possible timeout
    *
    * @param driver simulator driver
@@ -61,7 +51,7 @@ public class UtamLoaderImpl implements UtamLoader {
    */
   public static UtamLoader getSimulatorLoader(WebDriver driver) {
     UtamLoaderConfig config = new UtamLoaderConfigImpl(DriverTimeouts.TEST);
-    return new UtamLoaderImpl(config, getAdapter(driver, config.getDriverContext()));
+    return new UtamLoaderImpl(config, getAdapter(driver));
   }
 
   protected final PageObjectsFactory getFactory() {

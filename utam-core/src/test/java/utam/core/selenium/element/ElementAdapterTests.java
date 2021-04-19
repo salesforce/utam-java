@@ -238,7 +238,7 @@ public class ElementAdapterTests {
   @Test
   public void testMobileActionsThrow() {
     MockUtilities mock = new MockUtilities();
-    assertThrows(() -> mock.getElementAdapter().flick(mock.getDriverAdapter(), 0, 0));
+    assertThrows(() -> mock.getElementAdapter().flick(mock.getDriverAdapter(), null, null, 0, 0));
     assertThrows(() -> mock.getElementAdapter().flickItems(GestureDirection.DOWN));
   }
 }

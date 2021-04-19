@@ -1,4 +1,13 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.core.driver;
+
+import utam.core.element.Element;
 
 /**
  * expectations act as a function parameter for waits
@@ -6,15 +15,7 @@ package utam.core.driver;
  * @author elizaveta.ivanova
  * @since 234
  */
-public interface Expectations<T,R> {
-
-  /**
-   * if applied action returned falsy value (null or false), return this value,
-   * if not set return null which will cause exception inside wait
-   *
-   * @return non null value
-   */
-  R returnIfFalsy();
+public interface Expectations<T> {
 
   /**
    * provides log message when expectations are called
@@ -26,7 +27,9 @@ public interface Expectations<T,R> {
   /**
    * apply action and return value
    *
-   * @return function to apply
+   * @param driver  instance of a driver, can be null
+   * @param element instance of an element, can be null
+   * @return result of the applied method
    */
-  R apply(Driver driver, T args);
+  T apply(Driver driver, Element element);
 }

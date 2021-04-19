@@ -3,6 +3,7 @@ package utam.core.driver;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static utam.core.driver.DriverTimeouts.DEFAULT;
 
 import java.time.Duration;
 import org.testng.annotations.Test;
@@ -13,7 +14,6 @@ import org.testng.annotations.Test;
  */
 public class DriverTimeoutsTests {
 
-  private static final DriverTimeouts DEFAULT = new DriverTimeouts();
   static final Duration TEST_DURATION = Duration.ofSeconds(1024);
   static final DriverTimeouts TEST_TIMEOUTS = new DriverTimeouts(TEST_DURATION, TEST_DURATION,
       TEST_DURATION);

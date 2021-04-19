@@ -15,10 +15,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
+import static utam.core.driver.DriverTimeouts.TEST;
 import static utam.core.selenium.appium.MobileDriverAdapter.NATIVE_CONTEXT_HANDLE;
-import static utam.core.selenium.appium.MobileDriverAdapter.SWITCH_TO_WEB_VIEW;
-import static utam.core.selenium.appium.MobileDriverAdapter.WEBVIEW_CONTEXT;
+import static utam.core.selenium.appium.MobileDriverAdapter.WEBVIEW_AVAILABILITY;
 import static utam.core.selenium.appium.MobileDriverAdapter.WEBVIEW_CONTEXT_HANDLE_PREFIX;
+import static utam.core.selenium.appium.MobileDriverAdapter.switchToWebView;
 
 import io.appium.java_client.AppiumDriver;
 import java.time.Duration;
@@ -34,8 +35,6 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver.TargetLocator;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
-import utam.core.driver.DriverContext;
-import utam.core.driver.DriverTimeouts;
 import utam.core.framework.consumer.UtamError;
 
 /**
@@ -51,10 +50,8 @@ public class MobileDriverAdapterTests {
 
   @Test
   public void testCreation() {
-    MobileDriverAdapter driverAdapter = new MobileDriverAdapter(mock(AppiumDriver.class),
-        new DriverContext());
+    MobileDriverAdapter driverAdapter = new MobileDriverAdapter(mock(AppiumDriver.class));
     assertThat(driverAdapter, is(not(nullValue())));
-    assertThat(driverAdapter.getTimeouts(), is(equalTo(new DriverTimeouts())));
     assertThat(driverAdapter.getAppiumDriver(), is(instanceOf(AppiumDriver.class)));
     assertThat(driverAdapter.isMobile(), is(true));
     assertThat(driverAdapter.isNative(), is(false));
@@ -138,7 +135,8 @@ public class MobileDriverAdapterTests {
     mock.setMobilePlatform(Platform.LINUX);
     TimeoutException e = expectThrows(
         TimeoutException.class,
-        () -> provider.setPageContextToWebView("Nonexistent Title"));
+        () -> provider.setPageContextToWebView("Nonexistent Title", TEST.getWaitForTimeout(),
+            TEST.getPollingInterval()));
     assertThat(e.getMessage(), containsString("Expected condition failed"));
   }
 
@@ -161,7 +159,8 @@ public class MobileDriverAdapterTests {
       return driver;
     });
     when(driver.getContext()).thenReturn(tracker.currentContext);
-    provider.setPageContextToWebView(DEFAULT_WEBVIEW_TITLE);
+    provider.setPageContextToWebView(DEFAULT_WEBVIEW_TITLE,
+        TEST.getWaitForTimeout(), TEST.getPollingInterval());
 
     verify(driver, times(1)).context(testWebViewHandle);
     assertThat(provider.getAppiumDriver(), is(sameInstance(driver)));
@@ -191,7 +190,8 @@ public class MobileDriverAdapterTests {
     when(driver.getTitle()).thenReturn(DEFAULT_WEBVIEW_TITLE);
     when(driver.getContext()).thenReturn(tracker.currentContext);
 
-    provider.setPageContextToWebView(DEFAULT_WEBVIEW_TITLE);
+    provider.setPageContextToWebView(DEFAULT_WEBVIEW_TITLE, TEST.getWaitForTimeout(),
+        TEST.getPollingInterval());
     verify(driver, times(0)).context(anyString());
     assertThat(provider.getAppiumDriver(), is(sameInstance(driver)));
     assertThat(
@@ -220,7 +220,8 @@ public class MobileDriverAdapterTests {
     });
     when(driver.getContext()).thenReturn(tracker.currentContext);
     mock.setMobilePlatform(Platform.LINUX);
-    provider.setPageContextToWebView(DEFAULT_APP_CONTEXT_TITLE);
+    provider.setPageContextToWebView(DEFAULT_APP_CONTEXT_TITLE, TEST.getWaitForTimeout(),
+        TEST.getPollingInterval());
     verify(driver, times(1)).context(testWebViewHandle);
     assertThat(provider.getAppiumDriver(), is(sameInstance(driver)));
     assertThat(
@@ -236,7 +237,8 @@ public class MobileDriverAdapterTests {
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
     MobileDriverAdapter provider = (MobileDriverAdapter) mock.getDriverAdapter();
     UtamError e = expectThrows(
-        UtamError.class, () -> provider.setPageContextToWebView(null));
+        UtamError.class, () -> provider
+            .setPageContextToWebView(null, TEST.getWaitForTimeout(), TEST.getPollingInterval()));
     assertThat(
         e.getMessage(),
         containsString(MobileDriverAdapter.ERR_BRIDGE_TITLE_NULL));
@@ -255,7 +257,7 @@ public class MobileDriverAdapterTests {
     assertThrows(
         TimeoutException.class,
         () -> provider
-            .waitFor(Duration.ofMillis(10), Duration.ofMillis(1), WEBVIEW_CONTEXT, driver));
+            .waitFor(Duration.ofMillis(10), Duration.ofMillis(1), WEBVIEW_AVAILABILITY));
   }
 
   /**
@@ -273,7 +275,7 @@ public class MobileDriverAdapterTests {
 
     when(driver.getContextHandles()).thenReturn(contextHandles);
     boolean res = provider
-        .waitFor(Duration.ofMillis(10), Duration.ofMillis(1), WEBVIEW_CONTEXT, driver);
+        .waitFor(Duration.ofMillis(10), Duration.ofMillis(1), WEBVIEW_AVAILABILITY);
     assertThat(res, Matchers.is(equalTo(true)));
   }
 
@@ -285,7 +287,7 @@ public class MobileDriverAdapterTests {
     ContextTracker tracker = new ContextTracker();
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
     AppiumDriver driver = (AppiumDriver) mock.getWebDriverMock();
-    MobileDriverAdapter provider = (MobileDriverAdapter) mock.getDriverAdapter();
+    MobileDriverAdapter driverAdapter = (MobileDriverAdapter) mock.getDriverAdapter();
 
     String testWebViewHandle =
         MobileDriverAdapter.WEBVIEW_CONTEXT_HANDLE_PREFIX + "_1";
@@ -303,8 +305,9 @@ public class MobileDriverAdapterTests {
       return driver;
     });
     when(driver.getContext()).thenReturn(tracker.currentContext);
-    AppiumDriver sdriver = provider
-        .waitFor(Duration.ofMillis(10), Duration.ofMillis(1), SWITCH_TO_WEB_VIEW, testWebViewTitle);
+    AppiumDriver sdriver = driverAdapter
+        .waitFor(Duration.ofMillis(10), Duration.ofMillis(1),
+            MobileDriverAdapter.switchToWebView(testWebViewTitle));
     assertThat(driver, Matchers.is(sameInstance(sdriver)));
     assertThat(tracker.currentContext, Matchers.is(equalTo(testWebViewHandle)));
   }
@@ -333,7 +336,8 @@ public class MobileDriverAdapterTests {
     TimeoutException e = expectThrows(
         TimeoutException.class,
         () -> provider
-            .waitFor(SWITCH_TO_WEB_VIEW, "Test Application 2"));
+            .waitFor(Duration.ofMillis(10), Duration.ofMillis(1),
+                MobileDriverAdapter.switchToWebView("Test Application 2")));
     assertThat(e.getMessage(), containsString("Expected condition failed"));
   }
 
@@ -375,8 +379,8 @@ public class MobileDriverAdapterTests {
 
     assertThat(
         provider
-            .waitFor(Duration.ofMillis(10), Duration.ofMillis(1), SWITCH_TO_WEB_VIEW,
-                testWebViewTitle),
+            .waitFor(Duration.ofMillis(10), Duration.ofMillis(1),
+                switchToWebView(testWebViewTitle)),
         Matchers.is(sameInstance(driver)));
     assertThat(
         tracker.currentContext,
@@ -439,8 +443,8 @@ public class MobileDriverAdapterTests {
     mock.setMobilePlatform(Platform.LINUX);
     assertThat(
         provider
-            .waitFor(Duration.ofMillis(10), Duration.ofMillis(1), SWITCH_TO_WEB_VIEW,
-                testWebViewTitle),
+            .waitFor(Duration.ofMillis(10), Duration.ofMillis(1),
+                switchToWebView(testWebViewTitle)),
         Matchers.is(sameInstance(driver)));
     assertThat(
         windowHandleTracker.currentHandle,

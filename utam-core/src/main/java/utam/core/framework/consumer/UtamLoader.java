@@ -59,7 +59,8 @@ public interface UtamLoader {
   UtamLoaderConfig getConfig();
 
   /**
-   * should be called if config parameters were updated in runtime
+   * should be called if config parameters were updated in runtime,
+   * recreates instance of the page objects context and factory with new settings
    */
   void resetContext();
 }

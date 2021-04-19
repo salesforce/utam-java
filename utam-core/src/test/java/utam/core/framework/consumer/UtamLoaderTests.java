@@ -16,20 +16,20 @@ import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.mock;
 
 import io.appium.java_client.AppiumDriver;
-import java.time.Duration;
 import java.util.function.Supplier;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
-import utam.core.element.ElementLocation;
-import utam.core.framework.base.PageObjectsFactory;
-import utam.core.framework.consumer.impl.TestLoaderConfigPageObjectImpl;
 import utam.core.driver.Driver;
+import utam.core.driver.DriverContext;
 import utam.core.driver.DriverTimeouts;
+import utam.core.element.ElementLocation;
 import utam.core.framework.base.PageMarker;
+import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.RootPageObject;
+import utam.core.framework.consumer.impl.TestLoaderConfigPageObjectImpl;
 import utam.core.selenium.appium.MobileDriverAdapter;
 import utam.core.selenium.element.DriverAdapter;
 import utam.core.selenium.element.LocatorBy;
@@ -70,14 +70,16 @@ public class UtamLoaderTests {
     ContainerMock containerMock = new ContainerMock();
     TestLoaderConfigPageObject pageObjectMock =
         loader.create(containerMock, TestLoaderConfigPageObject.class, LocatorBy.byCss("root"));
-    assertThat(pageObjectMock.getRoot().getLocatorChainString(), is(equalTo("driver > element > By.cssSelector: root")));
+    assertThat(pageObjectMock.getRoot().getLocatorChainString(),
+        is(equalTo("driver > element > By.cssSelector: root")));
   }
 
   @Test
   public void testDefaultConstructor() {
-    UtamLoaderImpl loader = new UtamLoaderImpl(mock(WebDriver.class));
+    UtamLoaderImpl loader = new UtamLoaderImpl(new UtamLoaderConfigImpl(),
+        new DriverAdapter(mock(WebDriver.class)));
     assertThat(loader.getConfig().getDriverContext().getTimeouts(),
-        is(equalTo(new DriverTimeouts())));
+        is(equalTo(DriverTimeouts.DEFAULT)));
     assertThat(loader.getDriver(), is(instanceOf(DriverAdapter.class)));
   }
 
@@ -85,7 +87,7 @@ public class UtamLoaderTests {
   public void testConstructor() {
     UtamLoaderImpl loader = getDefaultLoader(true);
     assertThat(loader.getConfig().getDriverContext().getTimeouts(),
-        is(equalTo(new DriverTimeouts())));
+        is(equalTo(DriverTimeouts.DEFAULT)));
     assertThat(loader.getDriver(), is(instanceOf(MobileDriverAdapter.class)));
   }
 
@@ -95,8 +97,7 @@ public class UtamLoaderTests {
         .getSimulatorLoader(mock(AppiumDriver.class));
     assertThat(loader.getDriver(), is(instanceOf(MobileDriverAdapter.class)));
     assertThat(loader.getConfig().getDriverContext().getTimeouts(),
-        is(equalTo(new DriverTimeouts(Duration.ofSeconds(1), Duration.ofSeconds(1),
-            Duration.ofMillis(500)))));
+        is(equalTo(DriverTimeouts.TEST)));
   }
 
   @Test

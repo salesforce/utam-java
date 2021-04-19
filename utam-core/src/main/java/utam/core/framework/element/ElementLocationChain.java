@@ -10,12 +10,10 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 import utam.core.driver.Driver;
-import utam.core.driver.DriverTimeouts;
 import utam.core.element.Element;
 import utam.core.element.ElementLocation;
 import utam.core.element.FindContext;
 import utam.core.element.Locator;
-import utam.core.framework.base.PageObjectsFactory;
 
 /**
  * chain of locators for a page element
@@ -24,31 +22,6 @@ import utam.core.framework.base.PageObjectsFactory;
  * @since 234
  */
 public class ElementLocationChain implements ElementLocation {
-
-  private static final ExpectationsImpl<ElementLocation, Element> FINDER = new ExpectationsImpl<>(
-      "find element",
-      (driver, elementFinder) -> {
-        Selector[] chain = ((ElementLocationChain) elementFinder).chain;
-        Element current = chain[0].findElementInsideDriver(driver);
-        for (int i = 1; i < chain.length; i++) {
-          current = chain[i].findElementInsideElement(current);
-        }
-        return current;
-      });
-
-  private static final ExpectationsImpl<ElementLocation, List<Element>> LIST_FINDER = new ExpectationsImpl<>(
-      "find all elements",
-      (driver, elementFinder) -> {
-        Selector[] chain = ((ElementLocationChain) elementFinder).chain;
-        if (chain.length == 1) {
-          return chain[0].findElementsInsideDriver(driver);
-        }
-        Element current = chain[0].findElementInsideDriver(driver);
-        for (int i = 1; i < chain.length - 1; i++) {
-          current = chain[i].findElementInsideElement(current);
-        }
-        return chain[chain.length - 1].findElementsInsideElement(current);
-      });
 
   private final Selector[] chain;
   private final boolean isNullable;
@@ -68,18 +41,24 @@ public class ElementLocationChain implements ElementLocation {
   }
 
   @Override
-  public Element findElement(PageObjectsFactory factory) {
-    Driver driver = factory.getDriver();
-    DriverTimeouts timeouts = factory.getDriverContext().getTimeouts();
-    return driver.waitFor(timeouts.getFindTimeout(), timeouts.getPollingInterval(), FINDER, this);
+  public List<Element> findElements(Driver driver) {
+    if (chain.length == 1) {
+      return chain[0].findElementsInsideDriver(driver);
+    }
+    Element current = chain[0].findElementInsideDriver(driver);
+    for (int i = 1; i < chain.length - 1; i++) {
+      current = chain[i].findElementInsideElement(current);
+    }
+    return chain[chain.length - 1].findElementsInsideElement(current);
   }
 
   @Override
-  public List<Element> findElements(PageObjectsFactory factory) {
-    Driver driver = factory.getDriver();
-    DriverTimeouts timeouts = factory.getDriverContext().getTimeouts();
-    return driver
-        .waitFor(timeouts.getFindTimeout(), timeouts.getPollingInterval(), LIST_FINDER, this);
+  public Element findElement(Driver driver) {
+    Element current = chain[0].findElementInsideDriver(driver);
+    for (int i = 1; i < chain.length; i++) {
+      current = chain[i].findElementInsideElement(current);
+    }
+    return current;
   }
 
   @Override

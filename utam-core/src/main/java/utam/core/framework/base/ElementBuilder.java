@@ -35,7 +35,8 @@ public class ElementBuilder {
    */
   public <T extends Actionable> T build(Class<T> type, Object... values) {
     ElementLocation elementLocation = this.elementFinder.setParameters(values);
-    return (T) new BasePageElement(factory, elementLocation.findElement(factory));
+    Element element = factory.findElement(elementLocation);
+    return (T) new BasePageElement(factory, element);
   }
 
   /**
@@ -70,7 +71,7 @@ public class ElementBuilder {
    */
   public <T extends Actionable> List<T> buildList(Class<T> type, Object... parameters) {
     ElementLocation elementFinder = this.elementFinder.setParameters(parameters);
-    List<Element> elementsFound = elementFinder.findElements(factory);
+    List<Element> elementsFound = factory.findElements(elementFinder);
     if (elementsFound == null || elementsFound.isEmpty()) {
       return null;
     }

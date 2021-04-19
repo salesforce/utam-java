@@ -19,7 +19,6 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.FluentWait;
 import utam.core.driver.Driver;
-import utam.core.driver.DriverContext;
 import utam.core.driver.Expectations;
 import utam.core.element.Element;
 import utam.core.element.FindContext;
@@ -33,8 +32,8 @@ import utam.core.selenium.appium.MobileElementAdapter;
  * @since 234
  */
 public class DriverAdapter implements Driver {
+  static final String ERR_SUPPORTED_FOR_MOBILE = "method is applicable only for iOS/Android";
 
-  private static final String ERR_UNSUPPORTED = "method not supported for web";
   private static final List<Class<? extends Throwable>> IGNORE_EXCEPTIONS =
       Stream.of(
           NoSuchElementException.class,
@@ -42,13 +41,11 @@ public class DriverAdapter implements Driver {
           InvalidElementStateException.class,
           WebDriverException.class)
           .collect(Collectors.toList());
-  protected final WebDriver driver;
-  protected final DriverContext driverContext;
+  // not final because can be reset
+  private WebDriver driver;
 
-
-  public DriverAdapter(WebDriver driver, DriverContext driverContext) {
+  public DriverAdapter(WebDriver driver) {
     this.driver = driver;
-    this.driverContext = driverContext;
   }
 
   /**
@@ -127,19 +124,18 @@ public class DriverAdapter implements Driver {
     return element -> isMobile() ? new MobileElementAdapter(element) : new ElementAdapter(element);
   }
 
+  protected final void resetDriver(WebDriver driver) {
+    this.driver = driver;
+  }
+
   @Override
   public void setPageContextToNative() {
-    throw new IllegalStateException(ERR_UNSUPPORTED);
+    throw new IllegalStateException(ERR_SUPPORTED_FOR_MOBILE);
   }
 
   @Override
-  public Driver setPageContextToWebView() {
-    throw new IllegalStateException(ERR_UNSUPPORTED);
-  }
-
-  @Override
-  public Driver setPageContextToWebView(String title) {
-    throw new IllegalStateException(ERR_UNSUPPORTED);
+  public void setPageContextToWebView(String title, Duration timeout, Duration pollingInterval) {
+    throw new IllegalStateException(ERR_SUPPORTED_FOR_MOBILE);
   }
 
   @Override
@@ -163,19 +159,18 @@ public class DriverAdapter implements Driver {
   }
 
   @Override
-  public <T, R> R waitFor(Duration timeout, Duration pollingInterval,
-      Expectations<T, R> expectations, T parameter) {
+  public <T> T waitFor(Duration timeout, Duration pollingInterval, Expectations<T> expectations,
+      Element element) {
     if (timeout == null || timeout.isZero()) {
-      return expectations.apply(this, parameter);
+      return expectations.apply(this, element);
     }
     return new DriverWait(this, timeout, pollingInterval, expectations.getLogMessage())
-        .until(driver -> expectations.apply(driver, parameter));
+        .until(driver -> expectations.apply(driver, element));
   }
 
   @Override
-  public <T, R> R waitFor(Expectations<T, R> expectations, T parameter) {
-    return waitFor(driverContext.getTimeouts().getWaitForTimeout(),
-        driverContext.getTimeouts().getPollingInterval(), expectations, parameter);
+  public <T> T waitFor(Duration timeout, Duration pollingInterval, Expectations<T> expectations) {
+    return waitFor(timeout, pollingInterval, expectations, null);
   }
 
   public WebDriver getSeleniumDriver() {

@@ -93,13 +93,16 @@ public class DriverAdapterTests {
   @Test
   public void testWaitFor() {
     Driver driver = new MockUtilities().getDriverAdapter();
-    Expectations<Object, Object> expectations = new ExpectationsImpl<>("message",
-        (object1, object2) -> object1 != null && object2 != null);
+    Expectations<Object> expectations = new ExpectationsImpl<>("test", object -> object != null);
     assertThat(
-        driver.waitFor(TEST.getWaitForTimeout(), TEST.getPollingInterval(), expectations, true),
+        driver.waitFor(TEST.getWaitForTimeout(), TEST.getPollingInterval(), expectations),
         is(true));
+    Expectations<Object> nullExpectations = new ExpectationsImpl<>("test", object -> null);
     assertThrows(() -> driver
-        .waitFor(TEST.getWaitForTimeout(), TEST.getPollingInterval(), expectations, null));
+        .waitFor(TEST.getWaitForTimeout(), TEST.getPollingInterval(), nullExpectations));
+    Expectations<Object> falseExpectations = new ExpectationsImpl<>("test", object -> false);
+    assertThrows(() -> driver
+        .waitFor(TEST.getWaitForTimeout(), TEST.getPollingInterval(), falseExpectations, null));
   }
 
   @Test

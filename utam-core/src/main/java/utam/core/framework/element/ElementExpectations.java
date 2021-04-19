@@ -1,12 +1,7 @@
 package utam.core.framework.element;
 
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import utam.core.driver.Driver;
-import utam.core.element.Element;
+import utam.core.driver.Expectations;
 import utam.core.element.Element.ScrollOptions;
 import utam.core.framework.UtamLogger;
 
@@ -16,61 +11,41 @@ import utam.core.framework.UtamLogger;
  * @author elizaveta.ivanova
  * @since 234
  */
-public final class ElementExpectations<R> extends ExpectationsImpl<Element, R> {
+public abstract class ElementExpectations {
 
-
-  ElementExpectations(String log, BiFunction<Driver, Element, R> apply) {
-    super(log, apply, null);
+  static Expectations<Boolean> absence() {
+    return new ExpectationsImpl<>(
+        "wait for absence", (driver, element) -> !element.isExisting());
   }
 
-  private static ElementExpectations<String> getReturnsString(String log,
-      Function<Element, String> apply) {
-    return new ElementExpectations<>(log, (d, e) -> apply.apply(e));
-  }
-
-  private static ElementExpectations<Element> getReturnsElementBiConsumer(String log,
-      BiConsumer<Driver, Element> apply) {
-    return new ElementExpectations<>(log, (d, e) -> {
-      apply.accept(d, e);
-      return e;
-    });
-  }
-
-  private static ElementExpectations<Element> getReturnsElement(String log, Consumer<Element> apply) {
-    return new ElementExpectations<>(log, (d, e) -> {
-      apply.accept(e);
-      return e;
-    });
-  }
-
-  public static ElementExpectations<Boolean> absence() {
-    return new ElementExpectations<>(
-        "wait for absence", ((driver, element) -> !element.isExisting()));
-  }
-
-  public static ElementExpectations<Boolean> visibility(boolean isVisible) {
-    return new ElementExpectations<>(
+  static Expectations<Boolean> visibility(boolean isVisible) {
+    return new ExpectationsImpl<>(
         "wait for element " + (isVisible ? "visibility" : "invisibility"),
         (driver, element) -> isVisible == element.isDisplayed());
   }
 
-  public static ElementExpectations<Element> clear() {
-    return getReturnsElement("clear content of the element", Element::clear);
-  }
-
-  public static ElementExpectations<Element> clearAndType(String text) {
-    return getReturnsElement(
-        String.format("clear and type '%s'", text),
-        element -> {
+  static Expectations<Boolean> clear() {
+    return new ExpectationsImpl<>("clear content of the element",
+        (driver, element) -> {
           element.clear();
-          element.setText(text);
+          return true;
         });
   }
 
-  public static ElementExpectations<String> getAttribute(String attrName) {
-    return getReturnsString(
+  static Expectations<Boolean> clearAndType(String text) {
+    return new ExpectationsImpl<>(
+        String.format("clear and type '%s'", text),
+        (driver, element) -> {
+          element.clear();
+          element.setText(text);
+          return true;
+        });
+  }
+
+  static Expectations<String> getAttribute(String attrName) {
+    return new ExpectationsImpl<>(
         String.format("get attribute '%s'", attrName),
-        element -> {
+        (driver, element) -> {
           String res = element.getAttribute(attrName);
           if (res != null) {
             UtamLogger.info(String.format("attribute '%s' has value '%s'", attrName, res));
@@ -79,10 +54,10 @@ public final class ElementExpectations<R> extends ExpectationsImpl<Element, R> {
         });
   }
 
-  public static ElementExpectations<String> getText() {
-    return getReturnsString(
+  static Expectations<String> getText() {
+    return new ExpectationsImpl<>(
         "get element text",
-        element -> {
+        (driver, element) -> {
           String res = element.getText();
           if (res != null) {
             UtamLogger.info(String.format("text is '%s'", res));
@@ -91,24 +66,30 @@ public final class ElementExpectations<R> extends ExpectationsImpl<Element, R> {
         });
   }
 
-  public static ElementExpectations<Element> setText(String str) {
-    return getReturnsElement(
-        String.format("set element text to '%s'", str), element -> element.setText(str));
+  public static Expectations<Boolean> setText(String str) {
+    return new ExpectationsImpl<>(
+        String.format("set element text to '%s'", str), (driver, element) -> {
+      element.setText(str);
+      return true;
+    });
   }
 
-  public static ElementExpectations<Match> isPresent() {
-    return new ElementExpectations<>("check element presence",
+  static Expectations<Match> isPresent() {
+    return new ExpectationsImpl<>("check element presence",
         (driver, element) -> Match.from(element.isExisting()));
   }
 
-  public static ElementExpectations<Element> javascriptClick() {
-    return getReturnsElementBiConsumer(
+  static Expectations<Boolean> javascriptClick() {
+    return new ExpectationsImpl<>(
         "deprecated javascript click",
-        (driver, element) -> element.deprecatedClick(driver));
+        (driver, element) -> {
+          element.deprecatedClick(driver);
+          return true;
+        });
   }
 
-  public static ElementExpectations<Element> click() {
-    return getReturnsElementBiConsumer("click", (driver, element) -> {
+  static Expectations<Boolean> click() {
+    return new ExpectationsImpl<>("click", (driver, element) -> {
       try {
         element.click();
       } catch (Exception e) {
@@ -122,43 +103,49 @@ public final class ElementExpectations<R> extends ExpectationsImpl<Element, R> {
           throw e;
         }
       }
+      return true;
     });
   }
 
-  public static ElementExpectations<Element> moveTo() {
-    return getReturnsElementBiConsumer(
+  static Expectations<Boolean> moveTo() {
+    return new ExpectationsImpl<>(
         "move to element",
-        (driver, element) -> element.moveTo(driver));
+        (driver, element) -> {
+          element.moveTo(driver);
+          return true;
+        });
   }
 
-  public static ElementExpectations<Element> focus() {
-    return getReturnsElementBiConsumer(
+  static Expectations<Boolean> focus() {
+    return new ExpectationsImpl<>(
         "focus on the element",
-        (driver, element) -> element.focus(driver));
+        (driver, element) -> {
+          element.focus(driver);
+          return true;
+        });
   }
 
-  public static ElementExpectations<Element> scrollTo(ScrollOptions options) {
-    return getReturnsElementBiConsumer(
+  static Expectations<Boolean> scrollTo(ScrollOptions options) {
+    return new ExpectationsImpl<>(
         String.format("scroll to %s", options.name().toLowerCase()),
-        (driver, element) -> element
-            .scrollIntoView(driver, options));
+        (driver, element) -> {
+          element.scrollIntoView(driver, options);
+          return true;
+        });
   }
 
-  public static ElementExpectations<Element> blur() {
-    return getReturnsElementBiConsumer(
+  static Expectations<Boolean> blur() {
+    return new ExpectationsImpl<>(
         "blur",
-        (driver, element) -> element.blur(driver));
+        (driver, element) -> {
+          element.blur(driver);
+          return true;
+        });
   }
 
-  public static <T> ElementExpectations<T> waitFor(Supplier<T> condition) {
-    return new ElementExpectations<>("wait for condition", (driver, element) -> condition
+  static <T> Expectations<T> waitFor(Supplier<T> condition) {
+    return new ExpectationsImpl<>("wait for condition", (driver, element) -> condition
         .get());
-  }
-
-  public static ElementExpectations<Element> flick(int xOffset, int yOffset) {
-    return getReturnsElementBiConsumer(
-        String.format("flick element at X '%d' Y '%d'", xOffset, yOffset),
-        (driver, element) -> element.flick(driver, xOffset, yOffset));
   }
 
   /**

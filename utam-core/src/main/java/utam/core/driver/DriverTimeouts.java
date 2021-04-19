@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.core.driver;
 
 import java.time.Duration;
@@ -10,11 +17,14 @@ import java.time.Duration;
  */
 public class DriverTimeouts {
 
+  // short timeout for testing with mocks
   public static final DriverTimeouts TEST = new DriverTimeouts(Duration.ofSeconds(1),
       Duration.ofSeconds(1),
-      Duration.ofMillis(500));
-  final static Duration DEFAULT_TIMEOUT = Duration.ofSeconds(20);
-  final static Duration DEFAULT_POLLING_INTERVAL = Duration.ofMillis(500);
+      Duration.ofMillis(200));
+  static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(20);
+  static final Duration DEFAULT_POLLING_INTERVAL = Duration.ofMillis(500);
+  public static final DriverTimeouts DEFAULT = new DriverTimeouts(DEFAULT_TIMEOUT, DEFAULT_TIMEOUT,
+      DEFAULT_POLLING_INTERVAL);
   private final Duration findTimeout;
   private final Duration waitForTimeout;
   private final Duration fluentTimeout;
@@ -25,10 +35,6 @@ public class DriverTimeouts {
     this.waitForTimeout = waitForTimeout;
     this.fluentTimeout = waitForTimeout;
     this.pollingInterval = pollingInterval;
-  }
-
-  public DriverTimeouts() {
-    this(DEFAULT_TIMEOUT, DEFAULT_TIMEOUT, DEFAULT_POLLING_INTERVAL);
   }
 
   /**

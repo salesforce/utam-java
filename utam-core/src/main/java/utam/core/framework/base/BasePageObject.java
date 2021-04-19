@@ -67,7 +67,7 @@ public abstract class BasePageObject implements RootPageObject {
 
   protected final BasePageElement getRootElement() {
     if (rootElement == null) {
-      Element element = getRootLocator().findElement(getFactory());
+      Element element = getFactory().findElement(getRootLocator());
       rootElement = element.isNull() ? null : new BasePageElement(getFactory(), element);
     }
     return rootElement;
@@ -99,7 +99,7 @@ public abstract class BasePageObject implements RootPageObject {
   @Override
   public final boolean isPresent() {
     log("check for root element presence inside its scope");
-    return getRootLocator().findElements(getFactory()).size() > 0;
+    return getRootLocator().findElements(getFactory().getDriver()).size() > 0;
   }
 
   @SuppressWarnings("unused")

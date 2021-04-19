@@ -15,6 +15,7 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import utam.core.driver.Driver;
+import utam.core.driver.DriverContext;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.PlatformType;
 import utam.core.framework.context.Profile;
@@ -26,12 +27,15 @@ import utam.core.framework.context.Profile;
  * @since 232
  */
 @SuppressWarnings("rawtypes")
-public abstract class MobileDriverUtils {
+abstract class MobileDriverUtils {
 
   private static final String ERR_SUPPORTED_FOR_MOBILE = "Method is applicable only for iOS/Android";
   private static final Duration DEFAULT_FLICK_ACTION_WAIT_MILLISECONDS = Duration.ofMillis(500);
 
-  static void flickElement(Driver driverWrapper, WebElement element,
+  static void flickElement(Driver driverWrapper,
+      Duration timeout,
+      Duration pollingInterval,
+      WebElement element,
       int xOffset, int yOffset) {
     AppiumDriver driver = ((MobileDriverAdapter) driverWrapper).getAppiumDriver();
     Point nativeStartPoint = element.getLocation();
@@ -62,7 +66,7 @@ public abstract class MobileDriverUtils {
       flickAtLocation(driver, startX, startY, endX, endY);
     } finally {
       if (!originalContext.equals(MobileDriverAdapter.NATIVE_CONTEXT_HANDLE)) {
-        driverWrapper.setPageContextToWebView(originalContext);
+        driverWrapper.setPageContextToWebView(originalContext, timeout, pollingInterval);
       }
     }
   }

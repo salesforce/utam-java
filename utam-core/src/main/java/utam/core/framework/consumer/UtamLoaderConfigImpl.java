@@ -38,7 +38,7 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
   private final List<String> activeProfiles = new ArrayList<>();
   private final Map<String, ProfileContext> activeProfilesContext = new HashMap<>();
   // driver
-  private DriverTimeouts timeouts = new DriverTimeouts();
+  private DriverTimeouts timeouts = DriverTimeouts.DEFAULT;
   private String bridgeAppTitle;
 
   public UtamLoaderConfigImpl() {

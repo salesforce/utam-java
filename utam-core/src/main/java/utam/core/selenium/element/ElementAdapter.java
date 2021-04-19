@@ -1,8 +1,10 @@
 package utam.core.selenium.element;
 
+import static utam.core.selenium.element.DriverAdapter.ERR_SUPPORTED_FOR_MOBILE;
 import static utam.core.selenium.element.DriverAdapter.find;
 import static utam.core.selenium.element.DriverAdapter.findList;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.function.Function;
 import org.openqa.selenium.ElementNotVisibleException;
@@ -29,11 +31,11 @@ public class ElementAdapter implements Element {
   static final String FOCUS_VIA_JAVASCRIPT = "arguments[0].focus();";
   static final String SCROLL_CENTER_VIA_JAVASCRIPT = "arguments[0].scrollIntoView({block:'center'});";
   static final String BLUR_VIA_JAVASCRIPT = "arguments[0].blur();";
-  static final String SCROLL_TOP_VIA_JAVASCRIPT =
+  public static final String SCROLL_TOP_VIA_JAVASCRIPT =
       "return arguments[0].scrollIntoView(true);";
   static final String SCROLL_INTO_VIEW_ERR =
-      "Element is still not visible or clickable after scroll into view";
-  static final String SCROLL_INTO_VIEW_JS =
+      "element is still not visible or clickable after scroll into view";
+  public static final String SCROLL_INTO_VIEW_JS =
       "if (document.documentElement"
           + " && document.documentElement.style"
           + " && 'scrollBehavior' in document.documentElement.style) {"
@@ -43,7 +45,6 @@ public class ElementAdapter implements Element {
           + "}";
   private static final String SCROLL_TO_DOCUMENT_ORIGIN_JS =
       "window.scrollTo(0,0);";
-  private static final String ERR_SUPPORTED_FOR_MOBILE = "Method is applicable only for iOS/Android";
   private final WebElement webElement;
 
   public ElementAdapter(WebElement element) {
@@ -210,12 +211,13 @@ public class ElementAdapter implements Element {
   }
 
   @Override
-  public void flick(Driver driver, int xOffset, int yOffset) {
-    throw new UnsupportedOperationException(ERR_SUPPORTED_FOR_MOBILE);
+  public boolean flickItems(GestureDirection direction) {
+    throw new IllegalStateException(ERR_SUPPORTED_FOR_MOBILE);
   }
 
   @Override
-  public boolean flickItems(GestureDirection direction) {
-    throw new UnsupportedOperationException(ERR_SUPPORTED_FOR_MOBILE);
+  public void flick(Driver driver, Duration timeout, Duration pollingInterval, int xOffset,
+      int yOffset) {
+    throw new IllegalStateException(ERR_SUPPORTED_FOR_MOBILE);
   }
 }

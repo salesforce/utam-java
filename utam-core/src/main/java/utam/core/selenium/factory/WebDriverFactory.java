@@ -29,7 +29,6 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import utam.core.driver.Driver;
-import utam.core.driver.DriverContext;
 import utam.core.driver.DriverType;
 import utam.core.selenium.appium.MobileDriverAdapter;
 import utam.core.selenium.element.DriverAdapter;
@@ -37,13 +36,13 @@ import utam.core.selenium.element.DriverAdapter;
 /**
  * web driver factory
  *
- * @since 216
  * @author elizaveta.ivanova
+ * @since 216
  */
 public class WebDriverFactory {
 
-  private static final String ERR_APPIUM_LOCAL_SERVER = "Need to start an Appium Server at local";
   static final String ERR_UNKNOWN_DRIVER_TYPE = "Browser [%s] not supported";
+  private static final String ERR_APPIUM_LOCAL_SERVER = "Need to start an Appium Server at local";
 
   private static boolean isLocalRun() {
     return !Boolean.TRUE.toString().equals(System.getProperty("Jenkins"));
@@ -53,16 +52,16 @@ public class WebDriverFactory {
     return getWebDriver(browserType, null, null);
   }
 
-  public static Driver getAdapter(WebDriver webDriver, DriverContext context) {
-    return webDriver instanceof AppiumDriver ? new MobileDriverAdapter((AppiumDriver) webDriver,
-        context) : new DriverAdapter(webDriver, context);
+  public static Driver getAdapter(WebDriver webDriver) {
+    return webDriver instanceof AppiumDriver ? new MobileDriverAdapter((AppiumDriver) webDriver)
+        : new DriverAdapter(webDriver);
   }
 
   @SuppressWarnings("WeakerAccess")
   public static WebDriver getWebDriver(
-          DriverType browserType,
-          AppiumDriverLocalService service,
-          AppiumCapabilityProvider desiredCapabilities) {
+      DriverType browserType,
+      AppiumDriverLocalService service,
+      AppiumCapabilityProvider desiredCapabilities) {
     WebDriver driver;
     if (DriverType.chrome.equals(browserType)) {
       driver = chrome();
@@ -138,7 +137,8 @@ public class WebDriverFactory {
     return caps;
   }
 
-  private static AppiumDriver ios(AppiumDriverLocalService service, AppiumCapabilityProvider desiredCapabilities) {
+  private static AppiumDriver ios(AppiumDriverLocalService service,
+      AppiumCapabilityProvider desiredCapabilities) {
     SystemProperties.setNodeJSPath();
     SystemProperties.setAppiumPath();
     if (service == null) {
@@ -149,7 +149,8 @@ public class WebDriverFactory {
     return new IOSDriver(service, caps);
   }
 
-  private static AppiumDriver android(AppiumDriverLocalService service, AppiumCapabilityProvider desiredCapabilities) {
+  private static AppiumDriver android(AppiumDriverLocalService service,
+      AppiumCapabilityProvider desiredCapabilities) {
     SystemProperties.setNodeJSPath();
     SystemProperties.setAppiumPath();
     if (service == null) {

@@ -50,19 +50,19 @@ public class WebDriverFactoryTests {
     @Test
     public void testIsMobileDriver() {
         IOSDriver iosDriver = mock(IOSDriver.class);
-        assertThat(WebDriverFactory.getAdapter(iosDriver, driverContextMock), instanceOf(
+        assertThat(WebDriverFactory.getAdapter(iosDriver), instanceOf(
             MobileDriverAdapter.class));
 
         AndroidDriver androidDriver = mock(AndroidDriver.class);
-        assertThat(WebDriverFactory.getAdapter(androidDriver, driverContextMock), instanceOf(
+        assertThat(WebDriverFactory.getAdapter(androidDriver), instanceOf(
             MobileDriverAdapter.class));
 
         AppiumDriver appiumDriver = mock(AppiumDriver.class);
-        assertThat(WebDriverFactory.getAdapter(appiumDriver, driverContextMock), instanceOf(
+        assertThat(WebDriverFactory.getAdapter(appiumDriver), instanceOf(
             MobileDriverAdapter.class));
 
         WebDriver driver = mock(WebDriver.class);
-        assertThat(WebDriverFactory.getAdapter(driver, driverContextMock), instanceOf(
+        assertThat(WebDriverFactory.getAdapter(driver), instanceOf(
             DriverAdapter.class));
     }
 }

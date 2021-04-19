@@ -8,16 +8,19 @@
 package utam.core.framework.base;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 import utam.core.driver.Driver;
 import utam.core.driver.DriverContext;
+import utam.core.element.Element;
 import utam.core.element.ElementLocation;
 import utam.core.framework.consumer.PageObjectContext;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.consumer.UtamLoaderConfig;
 import utam.core.framework.context.PlatformType;
+import utam.core.framework.element.ExpectationsImpl;
 
 /**
  * selenium page objects factory
@@ -43,22 +46,6 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
     this(utamLoaderConfig.getPageContext(), utamLoaderConfig.getDriverContext(), driver);
   }
 
-  private static void setField(PageObject pageObject, Field field, Object instance) {
-    if (instance == null) {
-      return;
-    }
-    try {
-      field.setAccessible(true);
-      field.set(pageObject, instance);
-    } catch (Exception e) {
-      throw new RuntimeException(
-          String.format(
-              "Error while setting field '%s' in class '%s'",
-              field.getName(), pageObject.getClass().getSimpleName()),
-          e);
-    }
-  }
-
   @Override
   public void bootstrap(PageObject instance, ElementLocation root) {
     if (!(instance instanceof BasePageObject)) {
@@ -82,7 +69,9 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
     }
     if (getDriver().isMobile()) {
       if (pagePlatform.equals(PlatformType.WEB)) {
-        getDriver().setPageContextToWebView();
+        getDriver().setPageContextToWebView(getDriverContext().getBridgeAppTitle(),
+            getDriverContext().getTimeouts().getWaitForTimeout(),
+            getDriverContext().getTimeouts().getPollingInterval());
       } else {
         getDriver().setPageContextToNative();
       }
@@ -104,6 +93,21 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
     return driver;
   }
 
+  @Override
+  public Element findElement(ElementLocation location) {
+    return driver.waitFor(driverContext.getTimeouts().getFindTimeout(),
+        driverContext.getTimeouts().getPollingInterval(),
+        new ExpectationsImpl<>("find element", driver -> location.findElement(driver)));
+  }
+
+  @Override
+  public List<Element> findElements(ElementLocation location) {
+    return driver.waitFor(driverContext.getTimeouts().getFindTimeout(),
+        driverContext.getTimeouts().getPollingInterval(),
+        new ExpectationsImpl<>("find element", driver -> location.findElements(driver)));
+  }
+
+  // assign values to the fields
   static class FieldsBuilder {
 
     static final String NON_EXISTING_FIELD_ERROR = "non-existing field '%s' is referenced as a scope";
@@ -137,11 +141,19 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
     void bootstrapElements() {
       Stream.of(instance.getClass().getDeclaredFields())
           .filter(f -> ElementLocation.class.isAssignableFrom(f.getType()))
-          // fields in natural order by name
           .forEach(
               f -> {
                 ElementLocation elementLocation = getLocator(f);
-                setField(instance, f, elementLocation);
+                try {
+                  f.setAccessible(true);
+                  f.set(instance, elementLocation);
+                } catch (Exception e) {
+                  throw new UtamError(
+                      String.format(
+                          "Error while setting field '%s' in class '%s'",
+                          f.getName(), instance.getClass().getSimpleName()),
+                      e);
+                }
               });
     }
   }

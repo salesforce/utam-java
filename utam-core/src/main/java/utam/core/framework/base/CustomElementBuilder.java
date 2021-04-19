@@ -79,7 +79,7 @@ public class CustomElementBuilder {
    * @return instance of the Page Object of given type
    */
   public <T extends PageObject> T build(Class<T> type, Predicate<T> filter) {
-    List<Element> found = root.findElements(factory);
+    List<Element> found = factory.findElements(root);
     for (Element el : found) {
       T instance = new CustomElementBuilder(factory, new ElementLocationChain(el)).build(type);
       if (filter.test(instance)) {
@@ -114,7 +114,7 @@ public class CustomElementBuilder {
    * @return instance of the Page Object of given type
    */
   public <T extends PageObject> List<T> buildList(Class<T> type, Predicate<T> filter) {
-    List<Element> found = root.findElements(factory);
+    List<Element> found = factory.findElements(root);
     return found.stream()
         .map(el -> new CustomElementBuilder(factory, new ElementLocationChain(el)).build(type))
         .filter(po -> po != null && filter.test(po))
@@ -142,7 +142,7 @@ public class CustomElementBuilder {
                 instance.getClass().getName()));
       }
       Supplier<SearchContext> rootSupplier = () -> {
-        ElementAdapter element = (ElementAdapter) root.findElement(factory);
+        ElementAdapter element = (ElementAdapter) factory.findElement(root);
         return element.getWebElement();
       };
       ((Contained) instance).setRoot(rootSupplier);

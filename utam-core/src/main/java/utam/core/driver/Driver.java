@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.core.driver;
 
 import java.time.Duration;
@@ -14,15 +21,58 @@ import utam.core.element.Locator;
  */
 public interface Driver {
 
+  /**
+   * executes given javascript
+   *
+   * @param script     string with javascript code
+   * @param parameters parameters passed to the script
+   * @return result of the script execution
+   */
   Object executeScript(String script, Object... parameters);
 
+  /**
+   * find element inside driver
+   *
+   * @param by            selector used to find an element
+   * @param finderContext indicates conditions of the search, ex. element being nullable
+   * @return if finder context is nullable can return null
+   */
   Element findElement(Locator by, FindContext finderContext);
 
+  /**
+   * find multiple elements inside driver
+   *
+   * @param by            selector used to find elements
+   * @param finderContext indicates conditions of the search, ex. element being nullable
+   * @return if finder context is nullable can return null
+   */
   List<Element> findElements(Locator by, FindContext finderContext);
 
-  <T, R> R waitFor(Duration timeout, Duration pollingInterval, Expectations<T, R> expectations, T parameter);
+  /**
+   * polling wait repeatedly applies expectations until truthy value is return (not null or boolean
+   * true)
+   *
+   * @param timeout         timeout after which exception is thrown if condition is not met
+   * @param pollingInterval interval between calling expectations action
+   * @param expectations    action to apply
+   * @param element         element expectations are applied to
+   * @param <T>             return type
+   * @return result of the applied expectations
+   */
+  <T> T waitFor(Duration timeout, Duration pollingInterval, Expectations<T> expectations,
+      Element element);
 
-  <T, R> R waitFor(Expectations<T, R> expectations, T parameter);
+  /**
+   * polling wait repeatedly applies expectations until truthy value is return (not null or boolean
+   * true)
+   *
+   * @param timeout         timeout after which exception is thrown if condition is not met
+   * @param pollingInterval interval between calling expectations action
+   * @param expectations    action to apply
+   * @param <T>             return type
+   * @return result of the applied expectations
+   */
+  <T> T waitFor(Duration timeout, Duration pollingInterval, Expectations<T> expectations);
 
   /**
    * set active page context to NATIVE_APP
@@ -30,19 +80,14 @@ public interface Driver {
   void setPageContextToNative();
 
   /**
-   * set active page context to the target WebView page
+   * set active page context to the target WebView page, if view is different from current, new
+   * driver is created
    *
-   * @return if view is different from current, new driver is created
+   * @param title         title to switch to
+   * @param timeout         timeout after which exception is thrown if condition is not met
+   * @param pollingInterval interval between calling expectations action
    */
-  Driver setPageContextToWebView();
-
-  /**
-   * set active page context to the target WebView page
-   *
-   * @param title title to switch to
-   * @return if view is different from current, new driver is created
-   */
-  Driver setPageContextToWebView(String title);
+  void setPageContextToWebView(String title, Duration timeout, Duration pollingInterval);
 
   /**
    * check if current context is native
@@ -58,5 +103,10 @@ public interface Driver {
    */
   boolean isMobile();
 
+  /**
+   * get current URL
+   *
+   * @return string with URL
+   */
   String getUrl();
 }

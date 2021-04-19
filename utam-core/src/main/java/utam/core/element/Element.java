@@ -1,5 +1,6 @@
 package utam.core.element;
 
+import java.time.Duration;
 import java.util.List;
 import utam.core.driver.Driver;
 
@@ -53,7 +54,7 @@ public interface Element {
 
   void focus(Driver driver);
 
-  void flick(Driver driver, int xOffset, int yOffset);
+  void flick(Driver driver, Duration timeout, Duration pollingInterval, int xOffset, int yOffset);
 
   boolean flickItems(GestureDirection direction);
 

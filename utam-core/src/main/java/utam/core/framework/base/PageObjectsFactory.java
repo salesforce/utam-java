@@ -7,8 +7,10 @@
  */
 package utam.core.framework.base;
 
+import java.util.List;
 import utam.core.driver.Driver;
 import utam.core.driver.DriverContext;
+import utam.core.element.Element;
 import utam.core.element.ElementLocation;
 import utam.core.framework.consumer.PageObjectContext;
 
@@ -49,4 +51,8 @@ public interface PageObjectsFactory {
    * @param root scoped root locator
    */
   void bootstrap(PageObject instance, ElementLocation root);
+
+  Element findElement(ElementLocation location);
+
+  List<Element> findElements(ElementLocation location);
 }
