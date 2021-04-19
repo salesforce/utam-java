@@ -148,11 +148,7 @@ public interface Actionable extends BaseElement {
 
   /**
    * wait for condition to return true or not null before the timeout
-<<<<<<< HEAD:utam-core/src/main/java/utam/core/element/Actionable.java
    * @param condition condition to wait
-=======
-   * @param condition the condition to wait for
->>>>>>> dev:utam-core/src/main/java/utam/core/selenium/element/Actionable.java
    * @param <T> return type
    * @return method can only return not null or true
    */

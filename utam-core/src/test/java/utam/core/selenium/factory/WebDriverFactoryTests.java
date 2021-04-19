@@ -32,8 +32,6 @@ import static utam.core.selenium.factory.WebDriverFactory.ERR_UNKNOWN_DRIVER_TYP
  */
 public class WebDriverFactoryTests {
 
-    private static final DriverContext driverContextMock = mock(DriverContext.class);
-
     @Test
     void testChromeOptions() {
         WebDriverFactory.defaultChromeOptions(false);

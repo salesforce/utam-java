@@ -14,8 +14,8 @@ import org.testng.annotations.Test;
  */
 public class DriverTimeoutsTests {
 
-  static final Duration TEST_DURATION = Duration.ofSeconds(1024);
-  static final DriverTimeouts TEST_TIMEOUTS = new DriverTimeouts(TEST_DURATION, TEST_DURATION,
+  private static final Duration TEST_DURATION = Duration.ofSeconds(1024);
+  private static final DriverTimeouts TEST_TIMEOUTS = new DriverTimeouts(TEST_DURATION, TEST_DURATION,
       TEST_DURATION);
 
   @Test

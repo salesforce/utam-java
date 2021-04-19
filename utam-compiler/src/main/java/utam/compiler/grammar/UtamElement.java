@@ -285,7 +285,7 @@ public final class UtamElement {
       ElementField field =
           new ElementField(
               name, getFindAnnotation(selectorContext.getLocator(), scopeElement,
-              isExpandScopeShadowRoot));
+              isExpandScopeShadowRoot, isNullable()));
       if (filter != null) {
         filter.setElementFilter(Type.BASIC, elementType, name);
         addedParameters.addAll(filter.getApplyMethodParameters());

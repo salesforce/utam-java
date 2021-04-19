@@ -33,7 +33,7 @@ public class ContainerElementTests {
     Element elementMock = mock.getElementAdapter();
     ElementLocation elementLocation = new ElementLocationChain(elementMock);
     // nothing found, throw if not nullable
-    expectThrows(NoSuchElementException.class,
+    expectThrows(NullPointerException.class,
         () -> new ContainerElementImpl(mock.getFactory(), elementLocation, Type.EXISTING)
             .load(TestLoad.class, LocatorBy.byCss("css")));
     expectThrows(NoSuchElementException.class,

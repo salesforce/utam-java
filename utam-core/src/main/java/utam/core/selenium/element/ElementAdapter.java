@@ -3,12 +3,16 @@ package utam.core.selenium.element;
 import static utam.core.selenium.element.DriverAdapter.ERR_SUPPORTED_FOR_MOBILE;
 import static utam.core.selenium.element.DriverAdapter.find;
 import static utam.core.selenium.element.DriverAdapter.findList;
+import static utam.core.selenium.element.DriverAdapter.getNotFoundErr;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -27,14 +31,8 @@ import utam.core.selenium.appium.MobileElementAdapter;
 public class ElementAdapter implements Element {
 
   public static final Element NULL_ELEMENT = new ElementAdapter(null);
-  static final String CLICK_VIA_JAVASCRIPT = "arguments[0].click();";
-  static final String FOCUS_VIA_JAVASCRIPT = "arguments[0].focus();";
-  static final String SCROLL_CENTER_VIA_JAVASCRIPT = "arguments[0].scrollIntoView({block:'center'});";
-  static final String BLUR_VIA_JAVASCRIPT = "arguments[0].blur();";
   public static final String SCROLL_TOP_VIA_JAVASCRIPT =
       "return arguments[0].scrollIntoView(true);";
-  static final String SCROLL_INTO_VIEW_ERR =
-      "element is still not visible or clickable after scroll into view";
   public static final String SCROLL_INTO_VIEW_JS =
       "if (document.documentElement"
           + " && document.documentElement.style"
@@ -43,6 +41,13 @@ public class ElementAdapter implements Element {
           + "} else {"
           + "arguments[0].scrollIntoView(false);"
           + "}";
+  static final List<Element> EMPTY_LIST = Collections.EMPTY_LIST;
+  static final String CLICK_VIA_JAVASCRIPT = "arguments[0].click();";
+  static final String FOCUS_VIA_JAVASCRIPT = "arguments[0].focus();";
+  static final String SCROLL_CENTER_VIA_JAVASCRIPT = "arguments[0].scrollIntoView({block:'center'});";
+  static final String BLUR_VIA_JAVASCRIPT = "arguments[0].blur();";
+  static final String SCROLL_INTO_VIEW_ERR =
+      "element is still not visible or clickable after scroll into view";
   private static final String SCROLL_TO_DOCUMENT_ORIGIN_JS =
       "window.scrollTo(0,0);";
   private final WebElement webElement;
@@ -70,12 +75,30 @@ public class ElementAdapter implements Element {
 
   @Override
   public Element findElement(Locator by, FindContext finderContext) {
-    return find(getElementBuilder(), webElement, (LocatorBy) by, finderContext);
+    if (webElement == null && finderContext.isNullable()) {
+      return NULL_ELEMENT;
+    }
+    WebElement element = find(getScope(by, finderContext), (LocatorBy) by, finderContext);
+    return element == null ? NULL_ELEMENT : getElementBuilder().apply(element);
+  }
+
+  private SearchContext getScope(Locator by, FindContext findContext) {
+    if (webElement == null) {
+      throw new NullPointerException(getNotFoundErr(by) + ", scope element is null");
+    }
+    return findContext.isExpandScopeShadowRoot() ? new ShadowRootWebElement(webElement)
+        : webElement;
   }
 
   @Override
   public List<Element> findElements(Locator by, FindContext finderContext) {
-    return findList(getElementBuilder(), webElement, (LocatorBy) by, finderContext);
+    if (webElement == null && finderContext.isNullable()) {
+      return EMPTY_LIST;
+    }
+    List<WebElement> elements = findList(getScope(by, finderContext), (LocatorBy) by,
+        finderContext);
+    return elements == null ? EMPTY_LIST
+        : elements.stream().map(el -> getElementBuilder().apply(el)).collect(Collectors.toList());
   }
 
   @Override

@@ -72,7 +72,7 @@ public final class AnnotationUtils {
   }
 
   public static AnnotationProvider getFindAnnotation(
-      Locator locator, ElementContext scopeElement, boolean isExpand) {
+      Locator locator, ElementContext scopeElement, boolean isExpand, boolean isNullable) {
     StringBuilder res =
         new StringBuilder(
             String.format(
@@ -86,6 +86,9 @@ public final class AnnotationUtils {
     }
     if (isExpand) {
       res.append(", expand = true");
+    }
+    if (isNullable) {
+      res.append(", nullable = true");
     }
     res.append(")");
     return new Annotation(res.toString(), SELECTOR_CLASS_LIST);

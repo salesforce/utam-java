@@ -15,6 +15,7 @@ import static org.testng.Assert.assertThrows;
 import static utam.core.driver.DriverTimeouts.TEST;
 
 import java.util.Collections;
+import java.util.Objects;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -93,7 +94,7 @@ public class DriverAdapterTests {
   @Test
   public void testWaitFor() {
     Driver driver = new MockUtilities().getDriverAdapter();
-    Expectations<Object> expectations = new ExpectationsImpl<>("test", object -> object != null);
+    Expectations<Object> expectations = new ExpectationsImpl<>("test", Objects::nonNull);
     assertThat(
         driver.waitFor(TEST.getWaitForTimeout(), TEST.getPollingInterval(), expectations),
         is(true));

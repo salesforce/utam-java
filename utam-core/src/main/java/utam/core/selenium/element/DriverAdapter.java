@@ -1,10 +1,10 @@
 package utam.core.selenium.element;
 
 import static utam.core.framework.UtamLogger.error;
+import static utam.core.selenium.element.ElementAdapter.EMPTY_LIST;
 import static utam.core.selenium.element.ElementAdapter.NULL_ELEMENT;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
@@ -32,6 +32,7 @@ import utam.core.selenium.appium.MobileElementAdapter;
  * @since 234
  */
 public class DriverAdapter implements Driver {
+
   static final String ERR_SUPPORTED_FOR_MOBILE = "method is applicable only for iOS/Android";
 
   private static final List<Class<? extends Throwable>> IGNORE_EXCEPTIONS =
@@ -63,61 +64,36 @@ public class DriverAdapter implements Driver {
     ).toArray(Object[]::new);
   }
 
-  static Element find(Function<WebElement, Element> elementBuilder,
-      SearchContext searchContext,
-      LocatorBy by,
-      FindContext finderContext) {
-    if (searchContext == null && !finderContext.isNullable()) {
-      throw new NullPointerException(getNotFoundErr(by));
-    }
-    if (searchContext == null) {
-      return NULL_ELEMENT;
-    }
-    SearchContext scope =
-        finderContext.isExpandScopeShadowRoot() ? new ShadowRootWebElement(
-            (WebElement) searchContext)
-            : searchContext;
+  static WebElement find(SearchContext searchContext, LocatorBy by, FindContext finderContext) {
     try {
-      WebElement found = scope.findElement(by.getValue());
-      if (found == null && !finderContext.isNullable()) {
-        throw new org.openqa.selenium.NoSuchElementException(getNotFoundErr(by));
+      WebElement res = searchContext.findElement(by.getValue());
+      // mocks return null, so need this condition
+      if (res == null && !finderContext.isNullable()) {
+        throw new NullPointerException(getNotFoundErr(by));
       }
-      return found == null ? NULL_ELEMENT : elementBuilder.apply(found);
+      return res;
     } catch (org.openqa.selenium.NoSuchElementException e) {
       if (finderContext.isNullable()) {
-        return NULL_ELEMENT;
+        return null;
       }
-      throw e;
+      throw new org.openqa.selenium.NoSuchElementException(getNotFoundErr(by), e);
     }
   }
 
-  private static String getNotFoundErr(Locator by) {
+  static String getNotFoundErr(Locator by) {
     return String.format("can't find element with locator '%s'", by.getValue().toString());
   }
 
-  static List<Element> findList(Function<WebElement, Element> elementBuilder,
-      SearchContext searchContext,
-      LocatorBy by,
+  static List<WebElement> findList(SearchContext searchContext, LocatorBy by,
       FindContext finderContext) {
-    if (searchContext == null && !finderContext.isNullable()) {
-      throw new NullPointerException(getNotFoundErr(by));
-    }
-    if (searchContext == null) {
-      return Collections.EMPTY_LIST;
-    }
-    SearchContext scope =
-        finderContext.isExpandScopeShadowRoot() ? new ShadowRootWebElement(
-            (WebElement) searchContext)
-            : searchContext;
-    List<WebElement> founds = scope.findElements(by.getValue());
+    List<WebElement> founds = searchContext.findElements(by.getValue());
     if (founds == null || founds.isEmpty()) {
       if (finderContext.isNullable()) {
-        return Collections.EMPTY_LIST;
+        return null;
       }
       throw new org.openqa.selenium.NoSuchElementException(getNotFoundErr(by));
     }
-    return founds.stream()
-        .map(elementBuilder).collect(Collectors.toList());
+    return founds;
   }
 
   private Function<WebElement, Element> getElementBuilder() {
@@ -150,12 +126,15 @@ public class DriverAdapter implements Driver {
 
   @Override
   public Element findElement(Locator by, FindContext finderContext) {
-    return find(getElementBuilder(), getSeleniumDriver(), (LocatorBy) by, finderContext);
+    WebElement element = find(getSeleniumDriver(), (LocatorBy) by, finderContext);
+    return element == null ? NULL_ELEMENT : getElementBuilder().apply(element);
   }
 
   @Override
   public List<Element> findElements(Locator by, FindContext finderContext) {
-    return findList(getElementBuilder(), getSeleniumDriver(), (LocatorBy) by, finderContext);
+    List<WebElement> elements = findList(getSeleniumDriver(), (LocatorBy) by, finderContext);
+    return elements == null ? EMPTY_LIST
+        : elements.stream().map(el -> getElementBuilder().apply(el)).collect(Collectors.toList());
   }
 
   @Override

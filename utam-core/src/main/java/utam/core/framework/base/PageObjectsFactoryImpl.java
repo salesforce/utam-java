@@ -97,14 +97,14 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
   public Element findElement(ElementLocation location) {
     return driver.waitFor(driverContext.getTimeouts().getFindTimeout(),
         driverContext.getTimeouts().getPollingInterval(),
-        new ExpectationsImpl<>("find element", driver -> location.findElement(driver)));
+        new ExpectationsImpl<>("find element", location::findElement));
   }
 
   @Override
   public List<Element> findElements(ElementLocation location) {
     return driver.waitFor(driverContext.getTimeouts().getFindTimeout(),
         driverContext.getTimeouts().getPollingInterval(),
-        new ExpectationsImpl<>("find element", driver -> location.findElements(driver)));
+        new ExpectationsImpl<>("find element", location::findElements));
   }
 
   // assign values to the fields

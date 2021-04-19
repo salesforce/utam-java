@@ -36,6 +36,9 @@ public class ElementBuilder {
   public <T extends Actionable> T build(Class<T> type, Object... values) {
     ElementLocation elementLocation = this.elementFinder.setParameters(values);
     Element element = factory.findElement(elementLocation);
+    if(element.isNull()) {
+      return null;
+    }
     return (T) new BasePageElement(factory, element);
   }
 

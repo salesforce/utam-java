@@ -37,6 +37,7 @@ public abstract class BasePageObject implements RootPageObject {
 
   // lazy element injected by factory
   private BasePageElement rootElement;
+  // has to be protected as used in "inScope" method from POs
   protected ElementLocation root;
   // lazy factory injected by factory
   private PageObjectsFactory factory;

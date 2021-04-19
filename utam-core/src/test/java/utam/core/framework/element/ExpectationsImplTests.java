@@ -44,7 +44,6 @@ import utam.core.driver.Expectations;
 import utam.core.element.Element;
 import utam.core.element.Element.ScrollOptions;
 import utam.core.framework.element.ElementExpectations.Match;
-import utam.core.selenium.element.ElementAdapter;
 
 /**
  * @author elizaveta.ivanova

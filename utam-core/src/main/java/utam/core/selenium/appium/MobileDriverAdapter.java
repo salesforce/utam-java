@@ -4,7 +4,6 @@ import io.appium.java_client.AppiumDriver;
 import java.time.Duration;
 import java.util.Set;
 import utam.core.driver.Driver;
-import utam.core.driver.DriverContext;
 import utam.core.driver.Expectations;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.element.ExpectationsImpl;

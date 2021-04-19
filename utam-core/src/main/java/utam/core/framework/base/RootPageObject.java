@@ -10,7 +10,6 @@ package utam.core.framework.base;
 import static utam.core.element.FindContext.Type.EXISTING;
 
 import utam.core.element.ElementLocation;
-import utam.core.element.Locator;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.element.ElementLocationChain;
 
