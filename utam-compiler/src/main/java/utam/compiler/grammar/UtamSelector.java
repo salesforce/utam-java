@@ -7,31 +7,29 @@
  */
 package utam.compiler.grammar;
 
-import utam.core.appium.element.ClassChain;
-import utam.core.appium.element.ClassChain.Operator;
-import utam.core.appium.element.ClassChain.Quote;
-import utam.core.appium.element.UIAutomator;
+import static utam.compiler.grammar.UtamArgument.getArgsProcessor;
+import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
+import static utam.compiler.helpers.TypeUtilities.SELECTOR;
+import static utam.core.element.Locator.SELECTOR_STRING_PARAMETER;
+import static utam.core.selenium.element.LocatorBy.SELECTOR_INTEGER_PARAMETER;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import utam.compiler.helpers.PrimitiveType;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.element.Locator;
 import utam.core.framework.consumer.UtamError;
-import utam.core.selenium.element.Selector;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static utam.compiler.grammar.UtamArgument.getArgsProcessor;
-import static utam.core.selenium.element.LocatorParameters.SELECTOR_INTEGER_PARAMETER;
-import static utam.core.selenium.element.LocatorParameters.SELECTOR_STRING_PARAMETER;
+import utam.core.selenium.element.LocatorBy;
 
 /**
- * selector object mapping
- * class and methods are public to be used in tests
+ * selector object mapping class and methods are public to be used in tests
  *
  * @author elizaveta.ivanova
  * @since 228
@@ -43,38 +41,18 @@ public class UtamSelector {
   static final String ERR_SELECTOR_PARAM_UNKNOWN_TYPE =
       "unknown selector parameter type '%s', only string and number are supported";
   private static final String SUPPORTED_SELECTOR_TYPES =
-      Stream.of(Selector.Type.values())
-          .map(type -> type.name().toLowerCase())
+      Stream.of(Type.values())
+          .map(Enum::name)
           .collect(Collectors.joining(","));
-  private static final String SUPPORTED_UIAUTOMATOR_METHODS =
-      Stream.of(UIAutomator.Method.values())
-          .map(method -> method.name().toLowerCase())
-          .collect(Collectors.joining(","));
-  private static final String SUPPORTED_CLASSCHAIN_QUOTES = 
-      Stream.of(ClassChain.Quote.values())
-          .map(Quote::toString)
-          .collect(Collectors.joining(","));
-  private static final String SUPPORTED_CLASSCHAIN_OPERATORS = 
-      Stream.of(ClassChain.Operator.values())
-          .map(Operator::toString)
-          .collect(Collectors.joining(","));
-  private static final String UIAUTOMATOR_SELECTOR_PREFIX = "new UiSelector()";
+
+
   static final String ERR_SELECTOR_MISSING =
       String.format("one of { %s } should be set for selector", SUPPORTED_SELECTOR_TYPES);
   static final String ERR_SELECTOR_REDUNDANT_FORMAT =
       String.format("only one of selector types { %s } can be set", SUPPORTED_SELECTOR_TYPES);
-  static final String ERR_SELECTOR_UIAUTOMATOR_WRONG_FORMAT = 
-      String.format("should not include {%s} in selector string", UIAUTOMATOR_SELECTOR_PREFIX);
-  static final String ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD = 
-      String.format("only one of UiSelector methods {%s} can be set", SUPPORTED_UIAUTOMATOR_METHODS);
-  static final String ERR_SELECTOR_CLASSCHAIN_UNSUPPORTED_QUOTE = 
-      String.format("only one of quotes {%s} can be set", SUPPORTED_CLASSCHAIN_QUOTES);
-  static final String ERR_SELECTOR_CLASSCHAIN_UNSUPPORTED_OPERATOR = 
-      String.format("only operator {%s} can be set, and must be leading and ending with space(s)", SUPPORTED_CLASSCHAIN_OPERATORS);
-
-  private final Selector selector;
   final boolean isReturnAll;
-  UtamArgument[] args;
+  final UtamArgument[] args;
+  private final Context context;
 
   @JsonCreator
   UtamSelector(
@@ -86,23 +64,32 @@ public class UtamSelector {
       @JsonProperty(value = "args") UtamArgument[] args) {
     this.isReturnAll = isReturnAll;
     this.args = args;
-
-    Selector selector;
+    Locator locator;
+    Type type;
     if (css != null) {
-      selector = Selector.byCss(css);
+      locator = LocatorBy.byCss(css);
+      type = Type.css;
     } else if (accessid != null) {
-      selector = Selector.byAccessibilityId(accessid);
+      locator = LocatorBy.byAccessibilityId(accessid);
+      type = Type.accessid;
     } else if (classchain != null) {
-      validateClassChainSelector(classchain);
-      selector = Selector.byClassChain(classchain);
+      locator = LocatorBy.byClassChain(classchain);
+      type = Type.classchain;
     } else if (uiautomator != null) {
-      validateUIAutomatorSelector(uiautomator);
-      selector = Selector.byUiAutomator(UIAutomator.UI_AUTOMATOR_SELECTOR_PREFIX + uiautomator);
+      locator = LocatorBy.byUiAutomator(uiautomator);
+      type = Type.uiautomator;
     } else {
       throw new UtamError(ERR_SELECTOR_MISSING);
     }
     checkRedundantValue(css, accessid, classchain, uiautomator);
-    this.selector = selector;
+    String str = locator.getStringValue();
+    List<MethodParameter> parameters = getArgsProcessor(args, getParametersTypes(str), String.format("selector '%s'", str))
+        .getOrdered();
+    context = new Context(type, locator, parameters);
+  }
+
+  public Context getContext() {
+    return context;
   }
 
   // used in tests
@@ -138,81 +125,18 @@ public class UtamSelector {
     }
   }
 
-  void validateRootSelector() {
+  final void validateRootSelector() {
     if (isReturnAll) {
       throw new UtamError(ERR_ROOT_SELECTOR_LIST);
     }
-    if (args != null || !getParametersTypes().isEmpty()) {
+    if (!context.getParameters().isEmpty()) {
       throw new UtamError(ERR_ROOT_SELECTOR_ARGS);
     }
   }
 
-  void validateClassChainSelector(String classchain) {
-    Stream.of(classchain.split("/"))
-       .forEach(this::validateSubClassChainSelector);
-  }
-
-  void validateSubClassChainSelector(String classchain) {
-    // Only do attribute check when using any
-    if (classchain.contains("[")) {
-      classchain = classchain.substring(classchain.indexOf("[") + 1, classchain.indexOf("]"));
-      if (classchain.matches("-?[0-9]*") || classchain.equals("%d")) {
-        return;
-      }
-      validateQuote(classchain);
-      validateOperator(classchain);
-    }
-  }
-
-  void validateQuote(String classchain) {
-    if (!classchain.startsWith(ClassChain.Quote.SINGLE_BACKTICK.toString()) 
-        && !classchain.startsWith(ClassChain.Quote.SINGLE_DOLLARSIGN.toString())) {
-      throw new UtamError(ERR_SELECTOR_CLASSCHAIN_UNSUPPORTED_QUOTE);
-    }
-  }
-
-  void validateOperator(String classchain) {
-    String usedOpers = Stream.of(classchain.split(" "))
-                           .filter(subString -> (subString.matches("[A-Z]*") || 
-                                   subString.equals(ClassChain.Operator.EQUAL.toString())))
-                           .collect(Collectors.joining(","));
-    if ((Stream.of(usedOpers.split(","))
-             .filter(operator -> Arrays.toString(ClassChain.Operator.values()).contains(operator))
-             .collect(Collectors.joining(","))).isEmpty()) {
-      throw new UtamError(ERR_SELECTOR_CLASSCHAIN_UNSUPPORTED_OPERATOR);
-    }
-  }
-
-  void validateUIAutomatorSelector(String uiautomator) {
-    validatePrefix(uiautomator);
-    validateMethod(uiautomator);
-  }
-
-  void validatePrefix(String uiautomator) {
-    if (uiautomator.startsWith(UIAUTOMATOR_SELECTOR_PREFIX)) {
-      throw new UtamError(ERR_SELECTOR_UIAUTOMATOR_WRONG_FORMAT);
-    }
-  }
-
-  void validateMethod(String uiautomator) {
-    if(!uiautomator.contains("(")) {
-      throw new UtamError(String.format("Invalid UIAutomator selector: '%s'", uiautomator));
-    }
-    String match = uiautomator.subSequence(0, uiautomator.indexOf("(")).toString();
-    if (Stream.of(UIAutomator.Method.values())
-             .noneMatch(method -> method.toString().equals(match))){
-      throw new UtamError(ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD);
-    }
-  }
-
-  Selector getSelector() {
-    return selector;
-  }
-
   // parse selector string to find parameters %s or %d
-  List<TypeProvider> getParametersTypes() {
+  private static List<TypeProvider> getParametersTypes(String str) {
     List<TypeProvider> res = new ArrayList<>();
-    String str = selector.getValue();
     while (str.indexOf("%") > 0) {
       int index = str.indexOf("%");
       if (str.indexOf(SELECTOR_INTEGER_PARAMETER) == index) {
@@ -229,7 +153,59 @@ public class UtamSelector {
     return res;
   }
 
-  List<MethodParameter> getParameters(String elementName) {
-    return getArgsProcessor(args, getParametersTypes(), elementName).getOrdered();
+  enum Type {
+    css("%s.byCss(%s)"),
+    accessid("%s.byAccessibilityId(%s)"),
+    classchain("%s.byClassChain(%s)"),
+    uiautomator("%s.byUiAutomator(%s)");
+
+    private final String pattern;
+
+    Type(String pattern) {
+      this.pattern = pattern;
+    }
+  }
+
+  public static class Context {
+
+    private final String builderValue;
+    private final Locator locator;
+    private final List<MethodParameter> parameters;
+
+    Context(Type type, Locator locator, List<MethodParameter> parameters) {
+      this.locator = locator;
+      String stringValue = parameters.isEmpty() ? String
+          .format("\"%s\"", escapeDoubleQuotes(locator.getStringValue())) :
+          String.format("String.format(\"%s\", %s)",
+              escapeDoubleQuotes(locator.getStringValue()), getParametersValuesString(parameters));
+      this.builderValue = String.format(type.pattern, SELECTOR.getSimpleName(), stringValue);
+      this.parameters = parameters;
+    }
+
+    // used in tests
+    public Context(Locator locator) {
+      this(locator, Collections.EMPTY_LIST);
+    }
+
+    // used in tests
+    public Context(Locator locator, List<MethodParameter> parameters) {
+      this(Type.css, locator, parameters);
+    }
+
+    private static String escapeDoubleQuotes(String selectorString) {
+      return selectorString.replaceAll("\"", Matcher.quoteReplacement("\\\""));
+    }
+
+    public String getBuilderString() {
+      return builderValue;
+    }
+
+    public List<MethodParameter> getParameters() {
+      return parameters;
+    }
+
+    public Locator getLocator() {
+      return locator;
+    }
   }
 }

@@ -9,10 +9,9 @@ package utam.compiler.representation;
 
 import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.TypeProvider;
-import utam.compiler.helpers.AnnotationUtils;
-import utam.compiler.translator.TranslationUtilities;
 import org.testng.annotations.Test;
 
+import static org.hamcrest.Matchers.empty;
 import static utam.compiler.representation.UtilityMethodTests.getUtilityType;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -32,7 +31,6 @@ public class UtilityReferenceFieldTests {
     assertThat(
         field.getDeclaration(),
         is(equalTo("private final UtilityClass utilUtilityClass = getUtility(UtilityClass.class)")));
-    assertThat(field.getAnnotations(), is(equalTo(AnnotationUtils.EMPTY_ANNOTATIONS)));
-    assertThat(field.getComments(), is(equalTo(TranslationUtilities.EMPTY_COMMENTS)));
+    assertThat(field.getAnnotations(), is(empty()));
   }
 }

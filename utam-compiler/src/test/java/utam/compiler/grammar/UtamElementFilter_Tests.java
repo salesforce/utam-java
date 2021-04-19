@@ -155,7 +155,7 @@ public class UtamElementFilter_Tests {
     UtamElement utamElement = new UtamElement("element");
     utamElement.selector = new UtamSelector("css");
     utamElement.filter = getInnerTextFilter();
-    UtamError e = expectThrows(UtamError.class, () -> utamElement.getAbstraction());
+    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
     assertThat(
         e.getMessage(), containsString(String.format(ERR_ELEMENT_FILTER_NEEDS_LIST, "element")));
   }
@@ -166,7 +166,7 @@ public class UtamElementFilter_Tests {
     utamElement.type = TestUtilities.TEST_URI;
     utamElement.selector = new UtamSelector("css");
     utamElement.filter = getInnerTextFilter();
-    UtamError e = expectThrows(UtamError.class, () -> utamElement.getAbstraction());
+    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
     assertThat(
         e.getMessage(), containsString(String.format(ERR_ELEMENT_FILTER_NEEDS_LIST, "element")));
   }
@@ -195,7 +195,7 @@ public class UtamElementFilter_Tests {
           new PageObjectValidationTestHelper.MethodParameterInfo("arg" + i, "String"));
     }
     methodInfo.addCodeLines(
-        "element(this.element, false).buildList(Actionable.class, elm -> elm.getAttribute(arg2).contains(arg3), arg1)");
+        "element(this.element).buildList(Actionable.class, elm -> elm.getAttribute(arg2).contains(arg3), arg1)");
     methodInfo.setIsPublic(false);
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
@@ -214,7 +214,7 @@ public class UtamElementFilter_Tests {
     methodInfo.addParameter(
         new PageObjectValidationTestHelper.MethodParameterInfo("arg2", "String"));
     methodInfo.addCodeLines(
-        "element(this.element, false).build(Editable.class, elm -> Boolean.FALSE.equals(elm.isVisible()), arg1,arg2)");
+        "element(this.element).build(Editable.class, elm -> Boolean.FALSE.equals(elm.isVisible()), arg1,arg2)");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 
@@ -227,7 +227,7 @@ public class UtamElementFilter_Tests {
     PageObjectValidationTestHelper.MethodInfo methodInfo =
         new PageObjectValidationTestHelper.MethodInfo("getCustom", "List<Test>");
     methodInfo.addCodeLines(
-        "inScope(this.getRootElement(), by(\"selector3\", Selector.Type.CSS, true), true)"
+        "inScope(this.root, LocatorBy.byCss(\"selector3\"), true, true)"
             + ".buildList(Test.class, elm -> elm.isVisible())");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
@@ -248,7 +248,7 @@ public class UtamElementFilter_Tests {
           new PageObjectValidationTestHelper.MethodParameterInfo("arg" + i, "String"));
     }
     methodInfo.addCodeLines(
-        "inScope(this.getElementElement(arg1), by(String.format(\"selector2 %s\", arg2), Selector.Type.CSS, false), false)"
+        "inScope(this.element.setParameters(arg1), LocatorBy.byCss(String.format(\"selector2 %s\", arg2)), false, false)"
             + ".build(Test.class, elm -> elm.customMethod(arg3))");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }

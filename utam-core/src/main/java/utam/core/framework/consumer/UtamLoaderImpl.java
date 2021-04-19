@@ -7,13 +7,23 @@
  */
 package utam.core.framework.consumer;
 
-import java.time.Duration;
+import static utam.core.element.FindContext.Type.EXISTING;
+import static utam.core.selenium.factory.WebDriverFactory.getAdapter;
+
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import utam.core.driver.Driver;
+import utam.core.driver.DriverTimeouts;
+import utam.core.element.Element;
+import utam.core.element.ElementLocation;
+import utam.core.element.Locator;
 import utam.core.framework.base.PageObject;
-import utam.core.framework.base.PageObjectBuilderImpl;
 import utam.core.framework.base.PageObjectsFactory;
+import utam.core.framework.base.PageObjectsFactoryImpl;
 import utam.core.framework.base.RootPageObject;
-import utam.core.selenium.element.Selector;
+import utam.core.framework.element.ElementLocationChain;
+import utam.core.selenium.appium.MobileElementAdapter;
+import utam.core.selenium.element.ElementAdapter;
 
 /**
  * implementation of UtamLoader
@@ -23,26 +33,14 @@ import utam.core.selenium.element.Selector;
  */
 public class UtamLoaderImpl implements UtamLoader {
 
-  final UtamLoaderConfigImpl utamConfig;
+  private final Driver driver;
+  private final UtamLoaderConfig loaderConfig;
+  private PageObjectsFactory factory;
 
-  public UtamLoaderImpl(UtamLoaderConfig utamLoaderConfig) {
-    if (!(utamLoaderConfig instanceof UtamLoaderConfigImpl)) {
-      throw new UtamError(
-          String.format(
-              "Unsupported configuration class - instance of %s is expected to be passed to loader",
-              UtamLoaderConfigImpl.class.getSimpleName()));
-    }
-    this.utamConfig = (UtamLoaderConfigImpl) utamLoaderConfig;
-    this.utamConfig.setDefaultProfile();
-  }
-
-  /**
-   * creates instance of loader that does not accept dependency injection
-   *
-   * @param driver driver instance
-   */
-  public UtamLoaderImpl(WebDriver driver) {
-    this(new UtamLoaderConfigImpl(driver));
+  public UtamLoaderImpl(UtamLoaderConfig loaderConfig, Driver driver) {
+    this.loaderConfig = loaderConfig;
+    this.driver = driver;
+    this.factory = new PageObjectsFactoryImpl(loaderConfig, driver);
   }
 
   /**
@@ -52,23 +50,35 @@ public class UtamLoaderImpl implements UtamLoader {
    * @return loader instance
    */
   public static UtamLoader getSimulatorLoader(WebDriver driver) {
-    UtamLoaderConfig config = new UtamLoaderConfigImpl(driver);
-    config.setTimeout(Duration.ofSeconds(1));
-    return new UtamLoaderImpl(config);
+    UtamLoaderConfig config = new UtamLoaderConfigImpl(DriverTimeouts.TEST);
+    return new UtamLoaderImpl(config, getAdapter(driver));
   }
 
-  /**
-   * protected access because it might need override in a child class for test context
-   *
-   * @return factory instance to create a page object
-   */
-  protected PageObjectsFactory getFactory() {
-    return utamConfig.getFactory();
+  protected final PageObjectsFactory getFactory() {
+    return factory;
+  }
+
+  protected final Driver getDriver() {
+    return driver;
+  }
+
+  @Override
+  public final void resetContext() {
+    // new factory instance resets page context
+    this.factory = new PageObjectsFactoryImpl(loaderConfig, driver);
+  }
+
+  @Override
+  public final UtamLoaderConfig getConfig() {
+    return loaderConfig;
   }
 
   @Override
   public <T extends RootPageObject> T create(Class<T> type) {
-    return new PageObjectBuilderImpl(getFactory()).build(type);
+    T instance = factory.getPageContext().getBean(type);
+    ElementLocation finder = instance.setRootLocator();
+    factory.bootstrap(instance, finder);
+    return instance;
   }
 
   @Override
@@ -80,13 +90,15 @@ public class UtamLoaderImpl implements UtamLoader {
 
   @Override
   public <T extends PageObject> T create(
-      Container parent, Class<T> type, Selector injectedSelector) {
-    if (parent == null) {
-      throw new UtamError(
-          String.format("can't build %s, container page object is null", type.getName()));
-    }
-    PageObjectBuilderImpl builder =
-        new PageObjectBuilderImpl.UtamChild(getFactory(), parent, injectedSelector);
-    return builder.build(type);
+      Container parent, Class<T> type, Locator locator) {
+    T instance = factory.getPageContext().getBean(type);
+    // todo - abstract selenium
+    WebElement webElement = (WebElement) parent.getScope().get();
+    Element element =
+        driver.isMobile() ? new MobileElementAdapter(webElement) : new ElementAdapter(webElement);
+    ElementLocation finder = new ElementLocationChain(element)
+        .scope(locator, EXISTING);
+    factory.bootstrap(instance, finder);
+    return instance;
   }
 }

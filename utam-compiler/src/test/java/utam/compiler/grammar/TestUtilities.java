@@ -13,10 +13,11 @@ import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.core.declarative.translator.TranslatorConfig;
+import utam.core.element.Locator;
 import utam.core.framework.consumer.UtamError;
-import utam.core.selenium.element.Selector;
 
 import java.io.IOException;
+import utam.core.selenium.element.LocatorBy;
 
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 import static utam.compiler.translator.TranslatorMockUtilities.getDefaultConfig;
@@ -44,8 +45,8 @@ public class TestUtilities {
     }
   }
 
-  public static Selector getCssSelector(String value) {
-    return Selector.byCss(value);
+  public static Locator getCssSelector(String value) {
+    return LocatorBy.byCss(value);
   }
 
   public static JsonDeserializer getJsonStringDeserializer(String json) {

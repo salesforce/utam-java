@@ -7,17 +7,18 @@
  */
 package utam.core.framework.consumer.impl;
 
+import utam.core.element.ElementLocation;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageMarker;
 import utam.core.framework.consumer.TestLoaderConfigPageObject;
-import utam.core.selenium.element.Actionable;
 
 @PageMarker.Find(css = "root")
-public class TestLoaderConfigPageObjectImpl extends BasePageObject implements TestLoaderConfigPageObject {
+public class TestLoaderConfigPageObjectImpl extends BasePageObject implements
+    TestLoaderConfigPageObject {
 
   @Override
-  public Actionable getRoot() {
-    return getRootElement();
+  public ElementLocation getRoot() {
+    return getRootLocator();
   }
 
   @Override

@@ -18,15 +18,4 @@ import utam.core.framework.base.PageObject;
 public interface PageObjectContext {
 
   <T extends PageObject> T getBean(Class<T> type);
-
-  /**
-   * build external instance
-   * @param type type
-   * @param parameters optional parameters
-   * @param <T> type of page object to return
-   * @deprecated compatibility is deprecated
-   * @return externally injected Page Object
-   */
-  @Deprecated
-  <T extends PageObject> T getExternalBean(Class<T> type, Object[] parameters);
 }

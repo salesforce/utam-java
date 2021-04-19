@@ -7,9 +7,8 @@
  */
 package utam.core.framework.base;
 
-import utam.core.framework.consumer.UtamError;
-
 import java.lang.reflect.Constructor;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * provides imperative utility instance
@@ -28,7 +27,7 @@ public abstract class ImperativeProvider<T extends PageObject> implements Impera
 
   protected ImperativeProvider() {}
 
-  static <T extends ImperativeProvider> T build(Class<T> type) {
+  public static <T extends ImperativeProvider> T build(Class<T> type) {
     try {
       Constructor<T> constructor = type.getDeclaredConstructor();
       constructor.setAccessible(true);
@@ -43,7 +42,7 @@ public abstract class ImperativeProvider<T extends PageObject> implements Impera
     return instance;
   }
 
-  void setInstance(T instance) {
+  public void setInstance(T instance) {
     this.instance = instance;
   }
 }

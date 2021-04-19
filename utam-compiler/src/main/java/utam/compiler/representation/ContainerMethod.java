@@ -7,26 +7,24 @@
  */
 package utam.compiler.representation;
 
-import utam.core.declarative.representation.MethodDeclaration;
-import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.declarative.representation.TypeProvider;
-import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.ParameterUtils;
-import utam.compiler.helpers.TypeUtilities;
-import utam.core.selenium.element.Selector;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_LIST_RETURN_TYPE;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_RETURN_TYPE;
 import static utam.compiler.helpers.TypeUtilities.LIST_IMPORT;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
-import static utam.compiler.representation.ComposeMethod.getElementGetterString;
-import static utam.compiler.representation.CustomElementMethod.buildSelectorString;
+import static utam.compiler.representation.ComposeMethod.getElementLocatorString;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
+
+import java.util.ArrayList;
+import java.util.List;
+import utam.compiler.grammar.UtamSelector;
+import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.ParameterUtils;
+import utam.compiler.helpers.TypeUtilities;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 
 /**
  * method generated for container element
@@ -54,7 +52,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
     this.methodName = getElementGetterMethodName(elementName, true);
     this.methodParameters.addAll(scopeElement.getParameters());
     this.containerElement = String
-        .format("this.inContainer(%s, %s)", getElementGetterString(scopeElement), isExpandScope);
+        .format("this.inContainer(%s, %s)", getElementLocatorString(scopeElement), isExpandScope);
   }
 
   @Override public MethodDeclaration getDeclaration() {
@@ -76,18 +74,18 @@ public abstract class ContainerMethod implements PageObjectMethod {
   public static class WithSelectorReturnsList extends ContainerMethod {
 
     public WithSelectorReturnsList(ElementContext scopeElement, boolean isExpandScope,
-        String elementName, Selector injectSelector, List<MethodParameter> selectorParameters) {
+        String elementName, UtamSelector.Context selectorContext) {
       super(scopeElement, isExpandScope, elementName, CONTAINER_LIST_RETURN_TYPE);
       interfaceImports.add(PAGE_OBJECT);
       interfaceImports.add(LIST_IMPORT);
       classImports.addAll(interfaceImports);
       // because method that build selector uses Selector.Type
       classImports.add(SELECTOR);
-      methodParameters.addAll(selectorParameters);
+      methodParameters.addAll(selectorContext.getParameters());
       methodParameters.add(PAGE_OBJECT_PARAMETER);
-      String selectorValue = buildSelectorString(injectSelector, selectorParameters);
-      implCodeLines.add(String.format("%s.loadList(%s, by(%s, Selector.Type.%s))", containerElement,
-          PAGE_OBJECT_TYPE_PARAMETER_NAME, selectorValue, injectSelector.getType()));
+      String selectorValue = selectorContext.getBuilderString();
+      implCodeLines.add(String.format("%s.loadList(%s, %s)", containerElement,
+          PAGE_OBJECT_TYPE_PARAMETER_NAME, selectorValue));
     }
 
   }
@@ -95,16 +93,16 @@ public abstract class ContainerMethod implements PageObjectMethod {
   public static class WithSelector extends ContainerMethod {
 
     public WithSelector(ElementContext scopeElement, boolean isExpandScope, String elementName,
-        Selector injectSelector, List<MethodParameter> selectorParameters) {
+        UtamSelector.Context selectorContext) {
       super(scopeElement, isExpandScope, elementName, CONTAINER_RETURN_TYPE);
       interfaceImports.add(PAGE_OBJECT);
       classImports.addAll(interfaceImports);
       // because method that build selector uses Selector.Type
       classImports.add(SELECTOR);
-      String selectorValue = buildSelectorString(injectSelector, selectorParameters);
-      implCodeLines.add(String.format("%s.load(%s, by(%s, Selector.Type.%s))", containerElement,
-          PAGE_OBJECT_TYPE_PARAMETER_NAME, selectorValue, injectSelector.getType()));
-      methodParameters.addAll(selectorParameters);
+      String selectorValue = selectorContext.getBuilderString();
+      implCodeLines.add(String.format("%s.load(%s, %s)", containerElement,
+          PAGE_OBJECT_TYPE_PARAMETER_NAME, selectorValue));
+      methodParameters.addAll(selectorContext.getParameters());
       methodParameters.add(PAGE_OBJECT_PARAMETER);
     }
   }

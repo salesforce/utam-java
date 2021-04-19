@@ -7,13 +7,16 @@
  */
 package utam.compiler.helpers;
 
+import java.util.Collections;
+import utam.compiler.helpers.Validation.ErrorType;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.selenium.element.Selector;
+import utam.core.element.Locator;
 
 import java.util.ArrayList;
 import java.util.List;
+import utam.core.selenium.element.LocatorBy;
 
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
@@ -28,23 +31,11 @@ import static utam.compiler.helpers.Validation.isSameSelector;
  */
 public abstract class ElementContext {
 
-  public static final String ROOT_ELEMENT_NAME = "root";
-  public static final Selector EMPTY_SELECTOR = Selector.byCss("");
+  static final String ROOT_ELEMENT_NAME = "root";
+  static final String DOCUMENT_ELEMENT_NAME = "document";
+  static final Locator EMPTY_SELECTOR = LocatorBy.byCss("");
   static final String EMPTY_SCOPE_ELEMENT_NAME = "empty";
-  public static final ElementContext ROOT_SCOPE =
-      new ElementContext(
-          null, EMPTY_SCOPE_ELEMENT_NAME, null, EMPTY_SELECTOR, false, EMPTY_PARAMETERS) {
-        @Override
-        Validation.ErrorType validate(ElementContext element) {
-          throw new IllegalStateException();
-        }
-
-        @Override
-        public boolean isRootScope() {
-          return true;
-        }
-      };
-  private final Selector selector;
+  private final Locator selector;
   // parameters from scope + from element itself
   private final List<MethodParameter> parameters;
   private final String name;
@@ -56,7 +47,7 @@ public abstract class ElementContext {
       ElementContext scopeContext,
       String name,
       TypeProvider elementType,
-      Selector selector,
+      Locator selector,
       boolean isList, // selector can be list, but element not because of filter
       List<MethodParameter> parameters) {
     this.name = name;
@@ -88,10 +79,6 @@ public abstract class ElementContext {
     return this.isListElement;
   }
 
-  public boolean isRootScope() {
-    return false;
-  }
-
   boolean isRootElement() {
     return false;
   }
@@ -100,7 +87,11 @@ public abstract class ElementContext {
     return false;
   }
 
-  final Selector getSelector() {
+  public boolean isDocumentElement() {
+    return false;
+  }
+
+  final Locator getSelector() {
     return selector;
   }
 
@@ -126,20 +117,20 @@ public abstract class ElementContext {
         ElementContext scopeContext,
         String name,
         TypeProvider elementType,
-        Selector selector,
+        Locator selector,
         boolean isList, // selector can be list, but element not because of filter
         List<MethodParameter> parameters) {
       super(scopeContext, name, elementType, selector, isList, parameters);
     }
 
     // used in tests
-    public Basic(String name, TypeProvider elementType, Selector selector) {
-      super(ROOT_SCOPE, name, elementType, selector, false, EMPTY_PARAMETERS);
+    public Basic(String name, TypeProvider elementType, Locator selector) {
+      super(null, name, elementType, selector, false, EMPTY_PARAMETERS);
     }
 
     // used in tests
-    public Basic(String name, TypeProvider elementType, Selector selector, boolean isList) {
-      super(ROOT_SCOPE, name, elementType, selector, isList, EMPTY_PARAMETERS);
+    public Basic(String name, TypeProvider elementType, Locator selector, boolean isList) {
+      super(null, name, elementType, selector, isList, EMPTY_PARAMETERS);
     }
 
     // used in tests
@@ -175,7 +166,7 @@ public abstract class ElementContext {
     }
 
     Container(String name) {
-      this(ROOT_SCOPE, name);
+      this(null, name);
     }
 
     @Override
@@ -189,7 +180,7 @@ public abstract class ElementContext {
     private final TypeProvider enclosingPageObjectType;
 
     public Root(
-        TypeProvider enclosingPageObjectType, TypeProvider rootElementType, Selector selector) {
+        TypeProvider enclosingPageObjectType, TypeProvider rootElementType, Locator selector) {
       super(null, ROOT_ELEMENT_NAME, rootElementType, selector, false, EMPTY_PARAMETERS);
       this.enclosingPageObjectType = enclosingPageObjectType;
     }
@@ -224,11 +215,6 @@ public abstract class ElementContext {
     }
 
     @Override
-    public boolean isRootScope() {
-      return true;
-    }
-
-    @Override
     public boolean isRootElement() {
       return true;
     }
@@ -240,20 +226,19 @@ public abstract class ElementContext {
         ElementContext scopeContext,
         String elementName,
         TypeProvider type,
-        Selector selector,
-        boolean isList, // selector can be list, but element not because of filter
-        List<MethodParameter> parameters) {
-      super(scopeContext, elementName, type, selector, isList, parameters);
+        Locator locator,
+        boolean isList, List<MethodParameter> parameters) {
+      super(scopeContext, elementName, type, locator, isList, parameters);
     }
 
     // used in tests
-    Custom(String elementName, TypeProvider type, Selector selector) {
-      super(ROOT_SCOPE, elementName, type, selector, false, EMPTY_PARAMETERS);
+    Custom(String elementName, TypeProvider type, Locator selector) {
+      super(null, elementName, type, selector, false, EMPTY_PARAMETERS);
     }
 
     // used in tests
-    Custom(String elementName, TypeProvider type, Selector selector, boolean isList) {
-      super(ROOT_SCOPE, elementName, type, selector, isList, EMPTY_PARAMETERS);
+    Custom(String elementName, TypeProvider type, Locator selector, boolean isList) {
+      super(null, elementName, type, selector, isList, EMPTY_PARAMETERS);
     }
 
     @Override
@@ -285,6 +270,23 @@ public abstract class ElementContext {
 
     @Override
     public boolean isCustom() {
+      return true;
+    }
+  }
+
+  public static class Document extends ElementContext {
+
+    public Document() {
+      super(null, DOCUMENT_ELEMENT_NAME, null, EMPTY_SELECTOR, false, Collections.EMPTY_LIST);
+    }
+
+    @Override
+    ErrorType validate(ElementContext element) {
+      return ErrorType.NONE;
+    }
+
+    @Override
+    public boolean isDocumentElement() {
       return true;
     }
   }

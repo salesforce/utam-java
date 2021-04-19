@@ -7,30 +7,26 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.helpers.AnnotationUtils.getFindAnnotation;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementUnitTestHelper;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
-import utam.compiler.translator.TranslationTypesConfigJava;
-import utam.core.framework.consumer.UtamError;
 import utam.compiler.representation.ContainerMethod;
 import utam.compiler.representation.CustomElementMethod;
 import utam.compiler.representation.ElementField;
 import utam.compiler.representation.ElementMethod;
+import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.selenium.element.Selector;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static utam.compiler.helpers.AnnotationUtils.getFindAnnotation;
-import static utam.compiler.helpers.ElementContext.ROOT_SCOPE;
-import static utam.compiler.translator.TranslationUtilities.setHtmlElementComments;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * Page Object Element
@@ -45,7 +41,7 @@ public final class UtamElement {
       "element '%s': filter can only be set for list";
   static final String ERR_ELEMENT_MISSING_SELECTOR_PROPERTY =
       "element '%s': missing 'selector' property";
-  static final String ERR_ELEMENT_REDUNDANT_PROPERTIES =
+  private static final String ERR_ELEMENT_REDUNDANT_PROPERTIES =
       "%s element '%s': only properties { %s } are supported";
   static final String ERR_ELEMENT_NESTED_ELEMENTS = "element '%s' can't have nested elements";
   static final String ERR_ELEMENT_EXTERNAL_NOT_ALLOWED =
@@ -68,7 +64,7 @@ public final class UtamElement {
   UtamElementFilter filter;
   Boolean isNullable;
   Boolean isExternal;
-  Traversal traversalAbstraction;
+  private Traversal traversalAbstraction;
 
   // used in tests
   UtamElement(String name) {
@@ -135,11 +131,11 @@ public final class UtamElement {
     return traversalAbstraction;
   }
 
-  final boolean isPublic() {
+  private boolean isPublic() {
     return Boolean.TRUE.equals(isPublic);
   }
 
-  final boolean isNullable() {
+  private boolean isNullable() {
     return Boolean.TRUE.equals(isNullable);
   }
 
@@ -160,7 +156,7 @@ public final class UtamElement {
   }
 
   public void testTraverse(TranslationContext context) {
-    traverse(context, ROOT_SCOPE, false);
+    traverse(context, null, false);
   }
 
   public enum Type {
@@ -178,7 +174,7 @@ public final class UtamElement {
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot);
 
     ElementContext testRootTraverse(TranslationContext context) {
-      return traverse(context, ROOT_SCOPE, false)[0];
+      return traverse(context, null, false)[0];
     }
   }
 
@@ -205,12 +201,11 @@ public final class UtamElement {
         ElementContext scopeElement,
         boolean isExpandScopeShadowRoot) {
       boolean isReturnList = selector.isReturnAll && (filter == null || !filter.getFindFirst());
-      List<MethodParameter> addedParameters = selector.getParameters(name);
+      UtamSelector.Context selectorContext = selector.getContext();
+      List<MethodParameter> addedParameters = new ArrayList<>(selectorContext.getParameters());
       TypeProvider elementType = translatorContext.getType(type);
       // addedParameters should only include selector parameters!
-      CustomElementMethod.Root root =
-          new CustomElementMethod.Root(
-              selector.getSelector(), isExpandScopeShadowRoot, addedParameters);
+      CustomElementMethod.Root root = new CustomElementMethod.Root(selectorContext);
       if (filter != null) {
         filter.setElementFilter(Type.CUSTOM, elementType, name);
         addedParameters.addAll(filter.getApplyMethodParameters());
@@ -222,9 +217,8 @@ public final class UtamElement {
               scopeElement,
               name,
               elementType,
-              selector.getSelector(),
-              isReturnList,
-              addedParameters);
+              selectorContext.getLocator(),
+              isReturnList, addedParameters);
       PageObjectMethod method;
       if (filter != null) {
         method =
@@ -235,6 +229,7 @@ public final class UtamElement {
                 scopeElement,
                 elementType,
                 isNullable(),
+                isExpandScopeShadowRoot,
                 filter.applyMethod,
                 filter.getApplyMethodParameters(),
                 filter.getMatcherType(),
@@ -243,23 +238,20 @@ public final class UtamElement {
       } else if (selector.isReturnAll) {
         method =
             new CustomElementMethod.Multiple(
-                isPublic(), name, root, scopeElement, elementType, isNullable());
+                isPublic(), name, root, scopeElement, elementType, isNullable(), isExpandScopeShadowRoot);
       } else {
         boolean isExternalElement = Boolean.TRUE.equals(isExternal);
         method =
             new CustomElementMethod.Single(
-                isPublic(), name, root, scopeElement, isExternalElement, elementType, isNullable());
+                isPublic(), name, root, scopeElement, isExternalElement, elementType, isNullable(), isExpandScopeShadowRoot);
       }
       translatorContext.setElement(component);
       translatorContext.setMethod(method);
       component.setElementMethod(method);
-      // register usage of scope getter
-      String methodName = scopeElement.getElementMethod().getDeclaration().getName();
-      translatorContext.setPrivateMethodUsage(methodName);
       translatorContext.setTestableElement(
           name,
           new ElementUnitTestHelper(
-              selector.getSelector().getValue(),
+              selectorContext.getLocator().getStringValue(),
               scopeElement.getName(),
               isExpandScopeShadowRoot,
               isReturnList));
@@ -288,28 +280,27 @@ public final class UtamElement {
     final ElementContext[] traverse(
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
       TypeProvider elementType = TypeUtilities.Element.asBasicType(type);
+      UtamSelector.Context selectorContext = selector.getContext();
+      List<MethodParameter> addedParameters = new ArrayList<>(selectorContext.getParameters());
       ElementField field =
           new ElementField(
-              name,
-              elementType,
-              Collections.singletonList(
-                  getFindAnnotation(selector.getSelector(), scopeElement, isExpandScopeShadowRoot)),
-              setHtmlElementComments(selector.getSelector(), isExpandScopeShadowRoot));
-      List<MethodParameter> parameters = new ArrayList<>(selector.getParameters(name));
+              name, getFindAnnotation(selectorContext.getLocator(), scopeElement,
+              isExpandScopeShadowRoot, isNullable()));
       if (filter != null) {
         filter.setElementFilter(Type.BASIC, elementType, name);
-        parameters.addAll(filter.getApplyMethodParameters());
-        parameters.addAll(filter.getMatcherParameters());
+        addedParameters.addAll(filter.getApplyMethodParameters());
+        addedParameters.addAll(filter.getMatcherParameters());
       }
       boolean isList = selector.isReturnAll && (filter == null || !filter.getFindFirst());
       ElementContext elementContext =
           new ElementContext.Basic(
-              scopeElement, name, elementType, selector.getSelector(), isList, parameters);
+              scopeElement, name, elementType, selectorContext.getLocator(), isList,
+              addedParameters);
       final PageObjectMethod method;
       if (filter != null) {
         // element parameters do not include filter or matcher parameters
-        List<MethodParameter> elementParameters = new ArrayList<>(scopeElement.getParameters());
-        elementParameters.addAll(selector.getParameters(name));
+        List<MethodParameter> elementParameters = new ArrayList<>(scopeElement == null? Collections.EMPTY_LIST: scopeElement.getParameters());
+        elementParameters.addAll(selectorContext.getParameters());
         method =
             new ElementMethod.Filtered(
                 name,
@@ -322,17 +313,17 @@ public final class UtamElement {
                 filter.getMatcherParameters(),
                 filter.getFindFirst(), isNullable());
       } else if (isList) {
-        method = new ElementMethod.Multiple(elementContext, isPublic(), isNullable());
+        method = new ElementMethod.Multiple(elementContext, isPublic());
       } else {
-        method = new ElementMethod.Single(elementContext, isPublic(), isNullable());
+        method = new ElementMethod.Single(elementContext, isPublic());
       }
       context.setClassField(field);
       context.setElement(elementContext);
       context.setMethod(method);
       elementContext.setElementMethod(method);
       context.setTestableElement(name, new ElementUnitTestHelper(
-              selector.getSelector().getValue(),
-              scopeElement.getName(),
+              selectorContext.getLocator().getStringValue(),
+              scopeElement == null? null : scopeElement.getName(),
               isExpandScopeShadowRoot,
               isList
       ));
@@ -369,23 +360,20 @@ public final class UtamElement {
     @Override
     ElementContext[] traverse(
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
-      Selector injectSelector = selector.getSelector();
-      List<MethodParameter> selectorParameters = new ArrayList<>(selector.getParameters(name));
+      UtamSelector.Context selectorContext = selector.getContext();
       ElementContext elementContext = new ElementContext.Container(scopeElement, name);
       PageObjectMethod method;
       if (selector.isReturnAll) {
         method = new ContainerMethod.WithSelectorReturnsList(
-            scopeElement, isExpandScopeShadowRoot, name, injectSelector, selectorParameters);
+            scopeElement, isExpandScopeShadowRoot, name, selectorContext);
       } else {
         method = new ContainerMethod.WithSelector(
-            scopeElement, isExpandScopeShadowRoot, name, injectSelector, selectorParameters);
+            scopeElement, isExpandScopeShadowRoot, name, selectorContext);
       }
-      // we used scope method in container code, register
-      context.setPrivateMethodUsage(scopeElement.getElementMethod().getDeclaration().getName());
       elementContext.setElementMethod(method);
       context.setElement(elementContext);
       context.setMethod(method);
-      return new ElementContext[] {null, elementContext};
+      return new ElementContext[]{null, elementContext};
     }
   }
 }

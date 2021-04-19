@@ -8,7 +8,7 @@
 package utam.compiler.helpers;
 
 import utam.core.framework.consumer.UtamError;
-import utam.core.selenium.element.Selector;
+import utam.core.element.Locator;
 
 import java.util.*;
 
@@ -26,7 +26,7 @@ class Validation {
   static final String ERR_FORMAT_GLOBAL =
       "for element '%s' in Page Object '%s' and element '%s' in Page Object '%s': ";
   private static final String ERR_PREFIX = "Validation failure ";
-  static final String ERR_FORMAT_LABEL_HARDCODED = "on '%s' Page Object, selector for '%s' ";
+  private static final String ERR_FORMAT_LABEL_HARDCODED = "on '%s' Page Object, selector for '%s' ";
   private static final Map<String, Collection<ElementContext>> global = Collections.synchronizedMap(new HashMap<>());
   private static final List<String> SELECTORS_TO_MATCH = List.of(
           "[value",
@@ -40,16 +40,23 @@ class Validation {
     this.elementContextMap = elementContextMap;
   }
 
-  static boolean isSameSelector(Selector underTest, Selector testAgainst) {
-    if (underTest.getValue().isEmpty() || testAgainst.getValue().isEmpty()) { // for container
+  static boolean isSameSelector(Locator underTest, Locator testAgainst) {
+    if (underTest == null || testAgainst == null) {
+      // root can have null as selector
+      return false;
+    }
+    if (underTest.getStringValue().isEmpty() || testAgainst.getStringValue().isEmpty()) { // for container
       return false;
     }
     return testAgainst.equals(underTest);
   }
 
-  static boolean isLabelHardcoded(Selector underTest) {
-    String selector = underTest.getValue();
-    if (SELECTORS_TO_MATCH.stream().anyMatch(underTest.getValue()::contains)) {
+  static boolean isLabelHardcoded(Locator underTest) {
+    if(underTest == null) {
+      return false;
+    }
+    String selector = underTest.getStringValue();
+    if (SELECTORS_TO_MATCH.stream().anyMatch(selector::contains)) {
       return !selector.contains("%");
     }
     return false;

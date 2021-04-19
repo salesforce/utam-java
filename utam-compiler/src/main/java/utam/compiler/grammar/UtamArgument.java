@@ -7,7 +7,6 @@
  */
 package utam.compiler.grammar;
 
-import static utam.compiler.helpers.AnnotationUtils.getWrappedString;
 import static utam.compiler.helpers.PrimitiveType.BOOLEAN;
 import static utam.compiler.helpers.PrimitiveType.NUMBER;
 import static utam.compiler.helpers.PrimitiveType.STRING;
@@ -33,8 +32,6 @@ import utam.compiler.representation.ComposeMethodStatement;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
-import utam.core.selenium.element.Selector;
-import utam.core.selenium.element.Selector.Type;
 
 /**
  * @author elizaveta.ivanova
@@ -95,19 +92,6 @@ class UtamArgument {
     return getArgsProcessor(args, null, argsContext);
   }
 
-  static String getSelectorValuePattern(Selector.Type type) {
-    if (type == Type.CSS) {
-      return "%s.byCss(%s)";
-    } else if (type == Type.ACCESSID) {
-      return "%s.byAccessibilityId(%s)";
-    } else if (type == Type.CLASSCHAIN) {
-      return "%s.byClassChain(%s)";
-    } else if (type == Type.UIAUTOMATOR) {
-      return "%s.byUiAutomator(%s)";
-    }
-    throw new UtamError(String.format("Unknown selector type '%s'", type));
-  }
-
   private void checkExpectedType(String argsContext, TypeProvider expectedType,
       TypeProvider actualType) {
     if (expectedType != null && !actualType.isSameType(expectedType)) {
@@ -143,10 +127,7 @@ class UtamArgument {
     String strValue = value.toString();
     if (value instanceof UtamSelector) {
       type = SELECTOR;
-      Selector selector = ((UtamSelector) value).getSelector();
-      strValue = String
-          .format(getSelectorValuePattern(selector.getType()), SELECTOR.getSimpleName(),
-              getWrappedString(selector.getValue()));
+      strValue = ((UtamSelector) value).getContext().getBuilderString();
     } else if (value instanceof Boolean) {
       type = BOOLEAN;
     } else if (value instanceof Number) {

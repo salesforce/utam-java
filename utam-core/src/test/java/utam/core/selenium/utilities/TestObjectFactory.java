@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
+import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR;
 import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR_ALL;
 import static utam.core.selenium.element.ShadowRootWebElement.SHADOW_ROOT_DETECTION_SCRIPT_FRAGMENT;
 import java.util.Collections;
@@ -20,7 +21,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsDriver;
 import utam.core.selenium.utilities.WebDriverSimulator.WebElementInfo;
-import utam.core.selenium.utilities.WebDriverSimulatorObjectFactory;
 
 /*
  * Copyright (c) 2021, salesforce.com, inc.
@@ -51,8 +51,10 @@ public class TestObjectFactory extends WebDriverSimulatorObjectFactory {
       // If the parent element is null, the element is to be found from the
       // root of the page.
       if (elementInfo.getParentElementName() == null) {
-        when(driver.findElements(By.cssSelector(elementInfo.getSelector())))
+        when(driver.findElements(elementInfo.getCssSelector()))
             .thenReturn(Collections.singletonList(elementInfo.getElement()));
+        when(driver.findElement(elementInfo.getCssSelector()))
+            .thenReturn(elementInfo.getElement());
       }
 
       // Get a list all of the child element info objects that are children of this element
@@ -85,6 +87,10 @@ public class TestObjectFactory extends WebDriverSimulatorObjectFactory {
                 .collect(Collectors.toList());
         when(elementInfo.getElement().findElements(By.cssSelector(selector)))
             .thenReturn(childElements);
+        if(childElements.size() > 0) {
+          when(elementInfo.getElement().findElement(By.cssSelector(selector)))
+              .thenReturn(childElements.get(0));
+        }
 
         List<WebElement> shadowChildElements =
             childElementInfos.stream()
@@ -92,11 +98,18 @@ public class TestObjectFactory extends WebDriverSimulatorObjectFactory {
                     (info) -> Objects.equals(info.getSelector(), selector) && info.isInShadowDOM())
                 .map(WebElementInfo::getElement)
                 .collect(Collectors.toList());
-        String finderScript =
+        String finderScriptAll =
             String.format(GET_SHADOW_ROOT_QUERY_SELECTOR_ALL, selector.replace("'", "\\'"));
         when(((JavascriptExecutor) driver)
-                .executeScript(contains(finderScript), refEq(elementInfo.getElement())))
+                .executeScript(contains(finderScriptAll), refEq(elementInfo.getElement())))
             .thenReturn(shadowChildElements);
+        if(shadowChildElements.size() > 0) {
+          String finderScript =
+              String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, selector.replace("'", "\\'"));
+          when(((JavascriptExecutor) driver)
+              .executeScript(contains(finderScript), refEq(elementInfo.getElement())))
+              .thenReturn(shadowChildElements.get(0));
+        }
       }
     }
     return driver;

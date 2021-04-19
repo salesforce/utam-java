@@ -10,7 +10,6 @@ package utam.core.framework.consumer;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import org.testng.annotations.Test;
-import utam.core.framework.consumer.UtamError;
 
 /**
  * Provides tests for the UtamError class

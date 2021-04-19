@@ -47,7 +47,7 @@ public abstract class ComposeMethodStatement {
       MatcherType matcher,
       List<MethodParameter> matcherParameters) {
     this.returns = matcher != null ? PrimitiveType.BOOLEAN : returnType;
-    operand.setParameters(this.parameters);
+    operand.setElementParameters(this.parameters);
     operation.setParameters(this.parameters);
     operation.setImports(this.imports);
     operation.setClassImports(this.classImports);
@@ -174,11 +174,31 @@ public abstract class ComposeMethodStatement {
       return String.format("this.%s(%s)", methodName, parameters);
     }
 
-    void setParameters(List<MethodParameter> parameters) {
+    void setElementParameters(List<MethodParameter> parameters) {
       if (methodContext.hasElement(elementContext.getName())) {
         return;
       }
       parameters.addAll(elementContext.getParameters());
+    }
+  }
+
+  /**
+   * operand for "element" : "document"
+   */
+  public static class DocumentOperand extends Operand {
+
+    public DocumentOperand() {
+      super(null, null);
+    }
+
+    @Override
+    String getElementGetterString() {
+      return "this.getDocument()";
+    }
+
+    @Override
+    void setElementParameters(List<MethodParameter> parameters) {
+      // document does not have parameters
     }
   }
 

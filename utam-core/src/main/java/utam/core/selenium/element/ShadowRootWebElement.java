@@ -44,8 +44,8 @@ public class ShadowRootWebElement implements WebElement, WrapsElement, WrapsDriv
 
 
   // The host element of the shadowRoot. Needed to execute queries off of.
-  final WebElement rootElement;
-  final JavascriptExecutor executor;
+  private final WebElement rootElement;
+  private final JavascriptExecutor executor;
 
   public ShadowRootWebElement(WebElement we) {
     this.rootElement = we;
@@ -54,6 +54,10 @@ public class ShadowRootWebElement implements WebElement, WrapsElement, WrapsDriv
 
   private static String escapeForQuery(String queryString) {
     return queryString.replace("\\", "\\\\").replace("'", "\\'").replace("\"", "\\\"");
+  }
+
+  public JavascriptExecutor getExecutor() {
+    return executor;
   }
 
   @Override
@@ -204,15 +208,12 @@ public class ShadowRootWebElement implements WebElement, WrapsElement, WrapsDriv
   @Override
   public WebElement findElement(By by) {
     String selector = getSelectorString(by);
-    WebElement ret =
-        (WebElement)
-            executor.executeScript(
-                String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, selector), rootElement);
-
-    if (ret == null) {
+    Object obj = executor.executeScript(
+        String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, selector), rootElement);
+    if (obj == null) {
       throw new NoSuchElementException("Unable to locate element: " + by.toString());
     }
-    return ret;
+    return (WebElement) obj;
   }
 
   @Override
