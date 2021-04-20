@@ -30,11 +30,15 @@ public class DriverTimeouts {
   private final Duration fluentTimeout;
   private final Duration pollingInterval;
 
-  public DriverTimeouts(Duration findTimeout, Duration waitForTimeout, Duration pollingInterval) {
+  public DriverTimeouts(Duration findTimeout, Duration fluentTimeout, Duration waitForTimeout, Duration pollingInterval) {
     this.findTimeout = findTimeout;
     this.waitForTimeout = waitForTimeout;
-    this.fluentTimeout = waitForTimeout;
+    this.fluentTimeout = fluentTimeout;
     this.pollingInterval = pollingInterval;
+  }
+
+  public DriverTimeouts(Duration findTimeout, Duration waitForTimeout, Duration pollingInterval) {
+    this(findTimeout, Duration.ZERO, waitForTimeout, pollingInterval);
   }
 
   /**
