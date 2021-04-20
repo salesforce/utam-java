@@ -100,17 +100,4 @@ public class UtamMethod_AbstractTests {
     assertThat(
         e.getMessage(), containsString(String.format(ERR_METHOD_SHOULD_BE_ABSTRACT, METHOD_NAME)));
   }
-
-  /**
-   * The getAbstractMethod method should throw the proper exception if a utility element is
-   * specified
-   */
-  @Test
-  public void testGetAbstractMethodWithUtilityThrows() {
-    TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, null, (UtamArgument[]) null);
-    method.externalUtility = new UtamMethodUtil("getText", "String", null);
-    UtamError e = expectThrows(UtamError.class, () -> method.getAbstractMethod(context));
-    assertThat(e.getMessage(), containsString(String.format(ERR_METHOD_SHOULD_BE_ABSTRACT, METHOD_NAME)));
-  }
 }

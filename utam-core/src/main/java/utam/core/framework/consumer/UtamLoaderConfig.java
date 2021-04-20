@@ -13,13 +13,8 @@ import utam.core.framework.base.PageObject;
 import utam.core.framework.context.Profile;
 
 /**
-<<<<<<< HEAD
- * configuration of the UTAM integration by consumer </br> configuration should be created every
- * time Driver is created
-=======
- * configuration of the UTAM integration by consumer <br>
+ * configuration of the UTAM integration by consumer,
  * configuration should be created every time Driver is created
->>>>>>> dev
  *
  * @author elizaveta.ivanova
  * @since 230

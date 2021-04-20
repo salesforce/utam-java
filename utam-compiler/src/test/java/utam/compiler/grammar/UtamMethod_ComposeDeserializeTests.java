@@ -44,6 +44,8 @@ public class UtamMethod_ComposeDeserializeTests {
     return method;
   }
 
+  // TODO add test for deserialization errors as it's now a logic
+
   @Test
   public void testDeserializationDefaultValues() {
     String json =
@@ -64,7 +66,6 @@ public class UtamMethod_ComposeDeserializeTests {
     assertThat(method.isReturnList, is(nullValue()));
     assertThat(method.name, is(equalTo("composeMethod")));
     assertThat(method.returnStr, is(nullValue()));
-    assertThat(method.externalUtility, is(nullValue()));
   }
 
   /** Tests that a ComposeMethodNode can be created */
