@@ -86,7 +86,7 @@ final class UtamPageObject {
     this.rootElementType = type;
     if (beforeLoad != null) {
       this.beforeLoad =
-          new UtamMethod(BEFORELOAD_METHOD_MANE, beforeLoad, null, null, null, null, false);
+          new UtamMethod(BEFORELOAD_METHOD_MANE, beforeLoad, null, null, null, false);
     }
 
     if(selector == null) {
