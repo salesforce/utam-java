@@ -11,13 +11,15 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.*;
+
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
+import utam.compiler.representation.BeforeLoadMethod;
 import utam.compiler.representation.ChainMethod;
 import utam.compiler.representation.ComposeMethod;
 import utam.compiler.representation.ComposeMethodStatement;
@@ -26,6 +28,8 @@ import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
+
+import static utam.compiler.grammar.UtamPageObject.BEFORELOAD_METHOD_MANE;
 
 /**
  * public method declared at PO level
@@ -47,6 +51,9 @@ class UtamMethod {
       "method '%s': one of " + SUPPORTED_METHOD_TYPES + " should be set";
   static final String ERR_METHOD_REDUNDANT_TYPE =
       "method '%s': only one of " + SUPPORTED_METHOD_TYPES + " can be set";
+  static final String ERR_DUPLICATED_STATEMENT = "beforeLoad: duplicate declaration { element: %s, apply: %s } - already exists";
+  static final String ERR_BEFORELOAD_NAME_NOT_ALLOWED =
+          "method name \"load\" is reserved for 'beforeload' property, please use other name";
   final String name;
   private final String comments = "";
   UtamMethodAction[] compose;
@@ -98,6 +105,9 @@ class UtamMethod {
   }
 
   PageObjectMethod getMethod(TranslationContext context) {
+    if (!context.isBeforeLoad() && name.equals(BEFORELOAD_METHOD_MANE)) {
+      throw new UtamError(ERR_BEFORELOAD_NAME_NOT_ALLOWED);
+    }
     if (context.isAbstractPageObject()) {
       return getAbstractMethod(context);
     }
@@ -181,4 +191,37 @@ class UtamMethod {
         comments);
   }
 
+  PageObjectMethod getBeforeLoadMethod(TranslationContext context) {
+    if (args != null) {
+      throw new UtamError(String.format(ERR_ARGS_NOT_ALLOWED, name));
+    }
+    if (compose.length == 0) {
+      throw new UtamError(String.format(ERR_METHOD_EMPTY_STATEMENTS, name));
+    }
+    List<ComposeMethodStatement> statements = new ArrayList<>();
+    List<MethodParameter> methodParameters = new ArrayList<>();
+    Map<String ,String> beforeLoadMethodActions = new HashMap<>();
+
+    MethodContext methodContext = new MethodContext(name, VOID, false);
+    for (UtamMethodAction utamMethodAction : compose) {
+      // Check if a statement is already added, to avoid duplicates
+      if (beforeLoadMethodActions.containsKey(utamMethodAction.elementName) &&
+              beforeLoadMethodActions.get(utamMethodAction.elementName).equals(utamMethodAction.apply)) {
+        throw new UtamError(String.
+                format(ERR_DUPLICATED_STATEMENT, utamMethodAction.elementName, utamMethodAction.apply));
+      } else {
+        beforeLoadMethodActions.put(utamMethodAction.elementName, utamMethodAction.apply);
+      }
+      ComposeMethodStatement statement = utamMethodAction
+              .getComposeAction(context, methodContext, false);
+      statements.add(statement);
+      methodParameters.addAll(statement.getParameters());
+    }
+    methodParameters.removeIf(MethodParameter::isLiteral);
+    return new BeforeLoadMethod(
+            methodContext,
+            statements,
+            methodParameters,
+            comments);
+  }
 }

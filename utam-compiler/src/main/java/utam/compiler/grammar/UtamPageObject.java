@@ -26,9 +26,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static utam.compiler.helpers.AnnotationUtils.*;
+import static utam.compiler.helpers.TypeUtilities.*;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
-import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
-import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 
 /**
  * @author elizaveta.ivanova
@@ -43,6 +42,7 @@ final class UtamPageObject {
   static final String ERR_ROOT_REDUNDANT_SELECTOR = "non root page object can't have selector";
   static final String ERR_ROOT_ABSTRACT = "interface declaration can only have 'methods' property";
   static final String ERR_UNSUPPORTED_ROOT_ELEMENT_TYPE = "type '%s' is not supported for root element";
+  static final String BEFORELOAD_METHOD_MANE = "load";
   boolean isAbstract;
   boolean isRootPageObject;
   UtamMethod[] methods;
@@ -54,6 +54,7 @@ final class UtamPageObject {
   String rootElementType;
   boolean isExposeRootElement; // should be nullable as it's redundant for root
   UtamElement[] elements;
+  UtamMethod beforeLoad;
   final Locator rootLocator;
 
   @JsonCreator
@@ -71,7 +72,8 @@ final class UtamPageObject {
       // nested nodes
       @JsonProperty("shadow") UtamShadowElement shadow,
       @JsonProperty("elements") UtamElement[] elements,
-      @JsonProperty("methods") UtamMethod[] methods) {
+      @JsonProperty("methods") UtamMethod[] methods,
+      @JsonProperty("beforeLoad") UtamMethodAction[] beforeLoad) {
     this.profiles = profiles;
     this.methods = methods;
     this.isAbstract = isAbstract;
@@ -82,6 +84,11 @@ final class UtamPageObject {
     this.shadow = shadow;
     this.elements = elements;
     this.rootElementType = type;
+    if (beforeLoad != null) {
+      this.beforeLoad =
+          new UtamMethod(BEFORELOAD_METHOD_MANE, beforeLoad, null, null, null, false);
+    }
+
     if(selector == null) {
       this.rootLocator = null;
     } else {
@@ -93,12 +100,23 @@ final class UtamPageObject {
 
   // used in tests
   UtamPageObject(boolean isRoot, UtamSelector selector) {
-    this(null, false, null, null, null, false, isRoot, selector, null, null, null);
+    this(null, false, null, null, null, false, isRoot, selector, null, null, null, null);
   }
 
   // used in tests
   UtamPageObject() {
-    this(false, null);
+    this.profiles = null;
+    this.methods = null;
+    this.isAbstract = false;
+    this.platform = null;
+    this.isRootPageObject = false;
+    this.implementsType = null;
+    this.rootLocator = null;
+    this.shadow = null;
+    this.elements = null;
+    this.isExposeRootElement = false;
+    this.rootElementType = null;
+    this.beforeLoad = null;
   }
 
   void validate() {
@@ -196,6 +214,10 @@ final class UtamPageObject {
     }
     if (methods != null) {
       Stream.of(methods).forEach(method -> context.setMethod(method.getMethod(context)));
+    }
+    if (beforeLoad != null) {
+      context.setBeforeLoad(true);
+      context.setMethod(beforeLoad.getBeforeLoadMethod(context));
     }
   }
 }

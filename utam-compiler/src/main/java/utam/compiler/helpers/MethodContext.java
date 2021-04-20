@@ -34,6 +34,7 @@ public final class MethodContext {
   private final TypeProvider methodReturnType;
   private final boolean isReturnsList;
   private final TypeProvider listType;
+  private static final String BEFORELOAD_METHOD_MANE = "load";
 
   public MethodContext(String methodName, TypeProvider returns, boolean isReturnsList) {
     this.methodName = methodName;
@@ -65,7 +66,9 @@ public final class MethodContext {
     TypeProvider lastStatementReturns = lastStatement.getReturnType();
     if (lastStatementReturns != null
         && methodReturnType != null
-        && !lastStatementReturns.isSameType(methodReturnType)) {
+        && !lastStatementReturns.isSameType(methodReturnType)
+        // Exclude load() method from this check, since it is always VOID type
+        && !methodName.equals(BEFORELOAD_METHOD_MANE)) {
       throw new UtamError(String.format("method '%s' return type mismatch: "
               + "last statement returns '%s', method returns '%s'", methodName,
           lastStatementReturns.getSimpleName(), methodReturnType.getSimpleName()));
