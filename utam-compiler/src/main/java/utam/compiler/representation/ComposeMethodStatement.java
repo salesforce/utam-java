@@ -105,6 +105,33 @@ public abstract class ComposeMethodStatement {
       this(operand, operation, null, null);
     }
 
+    @Override
+    String getMethodCallString() {
+      return "%s.%s";
+    }
+  }
+
+  /**
+   * Represent a Compose Statement for an Imperative Extension
+   */
+  public static class Utility extends ComposeMethodStatement {
+
+    /**
+     * @param operand - Represent the imperative extension class
+     * @param operation - Represent the static method being called on the imperative extension
+     */
+    public Utility(UtilityOperand operand, Operation operation) {
+      super(operand, operation, operation.getReturnType());
+      classImports.add(operand.getType());
+      TypeProvider utilitiesContextType = new TypeUtilities.FromClass(UtamUtilitiesContext.class);
+      classImports.add(utilitiesContextType);
+    }
+
+    /**
+     * Method returning a template string that represents the main components of an imperative extension statement
+     * @return a String that represents imperative extension statement structure (ClassName.staticMethod)
+     */
+    @Override
     String getMethodCallString() {
       return "%s.%s";
     }
@@ -179,6 +206,49 @@ public abstract class ComposeMethodStatement {
         return;
       }
       parameters.addAll(elementContext.getParameters());
+    }
+  }
+
+  /**
+   * Information about an imperative extension class
+   */
+  public static class UtilityOperand extends Operand {
+
+    private final TypeProvider type;
+
+    /**
+     * Creates a new UtilityOperand object.
+     *
+     * @param methodContext context of the current method
+     * @param type          holds information about the type of the utility class
+     */
+    public UtilityOperand(MethodContext methodContext, TypeProvider type) {
+      super(null, methodContext);
+      this.type = type;
+    }
+
+    /**
+     * @return the imperative utility class name from it's path (type property in the JSON statement)
+     */
+    @Override String getElementGetterString() {
+      return this.type.getSimpleName();
+    }
+
+    /**
+     * Stub method that doesn't do anything
+     *
+     * @param parameters list of parameters associated with the utility method
+     */
+    @Override void setElementParameters(List<MethodParameter> parameters) {
+    }
+
+    /**
+     * Getter that returns the type of the utility class. Used to add imports for the utility class
+     *
+     * @return the type field
+     */
+    public TypeProvider getType() {
+      return type;
     }
   }
 
@@ -265,6 +335,43 @@ public abstract class ComposeMethodStatement {
 
     TypeProvider getReturnType() {
       return returnType;
+    }
+
+    public ActionType getAction() {
+      return action;
+    }
+  }
+
+  /**
+   * information about applied action on imperative extension
+   */
+  public static class UtilityOperation extends Operation {
+
+    /**
+     * @param action           method to invoke
+     * @param returnType       returnType from action
+     * @param actionParameters parameters for method invocation
+     */
+    public UtilityOperation(ActionType action, TypeProvider returnType, List<MethodParameter> actionParameters) {
+      super(action, returnType, actionParameters);
+    }
+
+    /**
+     * Method invoke to construct the statement associated with a utility extension.
+     * Utility statements are expressed as ClassName.staticMethod(this, [params])
+     * @param invocationPattern utility statement template string format
+     * @param utilityClassName utility class name
+     * @return a string that represents the code for a utility compose statement
+     */
+    @Override
+    String getCode(String invocationPattern, String utilityClassName) {
+      String parametersValues = getParametersValuesString(actionParameters);
+      String separator = parametersValues.length() > 0  ? ", " : "";
+      String methodInvocation = String.format("%s(new UtamUtilitiesContext(this)%s%s)",
+              super.getAction().getInvokeMethodName(),
+              separator,
+              getParametersValuesString(actionParameters));
+      return String.format(invocationPattern, utilityClassName, methodInvocation);
     }
   }
 

@@ -301,27 +301,6 @@ public class TranslationContextTests {
   }
 
   @Test
-  public void testSetUtilityField() {
-    TypeProvider utilityClassType =
-        getTypesProvider().getUtilityType("utam-test/utils/test/utilityClass");
-    TranslationContext context = getTestTranslationContext();
-    PageClassField utilityField = context.setUtilityField(utilityClassType);
-    PageObjectValidationTestHelper.FieldInfo fieldInfo =
-        new PageObjectValidationTestHelper.FieldInfo("utilUtilityClass", "UtilityClass");
-    fieldInfo.validateField(utilityField);
-  }
-
-  @Test
-  public void testSetUtilityFieldOnlySetOnce() {
-    TypeProvider utilityClassType =
-        getTypesProvider().getUtilityType("utam-test/utils/test/utilityClass");
-    TranslationContext context = getTestTranslationContext();
-    context.setUtilityField(utilityClassType);
-    context.setUtilityField(utilityClassType);
-    assertThat(context.getFields(), hasSize(1));
-  }
-
-  @Test
   public void testDuplicateNames() {
     PageClassField field = mock(PageClassField.class);
     when(field.getName()).thenReturn("name");

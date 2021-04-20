@@ -8,13 +8,10 @@
 package utam.compiler.grammar;
 
 import utam.compiler.helpers.TranslationContext;
-import utam.core.declarative.representation.PageObjectMethod;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
-
-import java.util.List;
 
 import static utam.compiler.grammar.TestUtilities.getDeserializedObject;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
@@ -97,14 +94,5 @@ public class UtamMethod_DeserializeTests {
                     .getChainMethod(getTestTranslationContext()));
     assertThat(
         e.getMessage(), containsString(String.format(ERR_METHOD_EMPTY_STATEMENTS, "chainMethod")));
-  }
-
-  @Test
-  public void testExternalMethod() {
-    TranslationContext context = new DeserializerUtilities().getContext("externalMethod");
-    PageObjectMethod method = context.getMethod("test");
-    assertEquals(method.getDeclaration().getCodeLine(), "String test(String arg1)");
-    List<String> code = method.getCodeLines();
-    assertEquals(code.size(), 1);
   }
 }

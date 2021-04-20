@@ -178,15 +178,11 @@ public class UtamMethod_ChainTests {
   }
 
   @Test
-  public void testChainRedundantComposeOrUtility() {
+  public void testChainRedundantCompose() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     UtamMethod method = new UtamMethod(METHOD_NAME, null, new UtamMethodChainLink[] {});
     method.compose = new UtamMethodAction[0];
     UtamError e = expectThrows(UtamError.class, () -> method.getMethod(context));
-    assertThat(e.getMessage(), containsString(getErr(ERR_METHOD_REDUNDANT_TYPE)));
-    method.compose = null;
-    method.externalUtility = new UtamMethodUtil(null, null, null);
-    e = expectThrows(UtamError.class, () -> method.getMethod(context));
     assertThat(e.getMessage(), containsString(getErr(ERR_METHOD_REDUNDANT_TYPE)));
   }
 }
