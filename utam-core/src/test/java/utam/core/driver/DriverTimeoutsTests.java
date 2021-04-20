@@ -38,7 +38,7 @@ public class DriverTimeoutsTests {
 
   @Test
   void testGetFluentWaitTimeout() {
-    assertThat(DEFAULT.getFluentWaitTimeout(), is(equalTo(DriverTimeouts.DEFAULT_TIMEOUT)));
-    assertThat(TEST_TIMEOUTS.getFluentWaitTimeout(), is(equalTo(TEST_DURATION)));
+    assertThat(DEFAULT.getFluentWaitTimeout(), is(equalTo(Duration.ZERO)));
+    assertThat(TEST_TIMEOUTS.getFluentWaitTimeout(), is(equalTo(Duration.ZERO)));
   }
 }
