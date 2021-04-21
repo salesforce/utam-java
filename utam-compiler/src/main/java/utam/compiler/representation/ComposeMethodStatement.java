@@ -25,6 +25,7 @@ import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.base.UtamUtilitiesContext;
 
 /**
  * single statement in a compose method, all statements are
