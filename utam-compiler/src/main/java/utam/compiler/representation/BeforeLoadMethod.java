@@ -49,7 +49,7 @@ public class BeforeLoadMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-        return new MethodDeclarationImpl(name, parameters, VOID, imports, comments);
+        return new MethodDeclarationImpl(name, parameters, VOID, imports, comments, false);
     }
 
     @Override
