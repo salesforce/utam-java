@@ -11,7 +11,7 @@ import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
@@ -28,17 +28,20 @@ class MethodDeclarationImpl implements MethodDeclaration {
 
   private final String comments;
 
+  private boolean hasMethodLevelArgs;
+
   MethodDeclarationImpl(
       String methodName,
       List<MethodParameter> parameters,
       TypeProvider returnType,
       List<TypeProvider> imports,
-      String comments) {
+      String comments, boolean hasMethodLevelArgs) {
     this.methodName = methodName;
     this.imports = imports;
     this.returnType = returnType;
     this.parameters = parameters;
     this.comments = comments;
+    this.hasMethodLevelArgs = hasMethodLevelArgs;
   }
 
   MethodDeclarationImpl(
@@ -46,11 +49,23 @@ class MethodDeclarationImpl implements MethodDeclaration {
           List<MethodParameter> parameters,
           TypeProvider returnType,
           List<TypeProvider> imports) {
-    this(methodName, parameters, returnType, imports, EMPTY_COMMENTS);
+    this(methodName, parameters, returnType, imports, EMPTY_COMMENTS, false);
   }
 
   @Override
   public final List<MethodParameter> getParameters() {
+    if (hasMethodLevelArgs) {
+      List<MethodParameter> knownParams = new ArrayList<>();
+      // Check parameters and remove duplicates if needed
+      for (Iterator<MethodParameter> iterator = parameters.iterator(); iterator.hasNext();) {
+        MethodParameter parameter = iterator.next();
+        if (knownParams.contains(parameter)) {
+          iterator.remove();
+        } else {
+          knownParams.add(parameter);
+        }
+      }
+    }
     return parameters;
   }
 

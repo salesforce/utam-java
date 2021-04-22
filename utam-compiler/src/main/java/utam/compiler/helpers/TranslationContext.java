@@ -33,7 +33,8 @@ public final class TranslationContext {
   static final String ERR_CONTEXT_ELEMENT_NOT_FOUND =
       "referenced element '%s' not found in context";
   static final String ERR_CONTEXT_DUPLICATE_PARAMETERS =
-      "duplicate parameters with name '%s' in method '%s'";
+      "duplicate parameters with name '%s' in method '%s'," +
+              " \n if the same parameter needed in multiple places, try to use 'reference' type parameter instead";
   static final String ERR_CONTEXT_DUPLICATE_METHOD = "duplicate method '%s'";
   static final String ERR_CONTEXT_DUPLICATE_FIELD = "duplicate field '%s'";
   static final String ERR_CONTEXT_DUPLICATE_ELEMENT_NAME =

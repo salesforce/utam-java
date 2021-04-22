@@ -11,8 +11,7 @@ import static utam.compiler.helpers.PrimitiveType.BOOLEAN;
 import static utam.compiler.helpers.PrimitiveType.NUMBER;
 import static utam.compiler.helpers.PrimitiveType.STRING;
 import static utam.compiler.helpers.PrimitiveType.isPrimitiveType;
-import static utam.compiler.helpers.TypeUtilities.FUNCTION;
-import static utam.compiler.helpers.TypeUtilities.SELECTOR;
+import static utam.compiler.helpers.TypeUtilities.*;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -42,13 +41,14 @@ class UtamArgument {
 
   static final String FUNCTION_TYPE_PROPERTY = "function";
   static final String SELECTOR_TYPE_PROPERTY = "locator";
+  static final String REFERENCE_TYPE_PROPERTY = "reference";
   static final String ERR_ARGS_NAME_TYPE_MANDATORY =
       "%s: argument name and type are required";
   static final String ERR_ARGS_WRONG_TYPE = "%s: expected type is '%s', actual was '%s'";
   static final String ERR_NAME_TYPE_REDUNDANT = "%s: properties 'name' or 'type' are redundant";
   static final String ERR_PREDICATE_REDUNDANT = "%s: property 'predicate' is only supported for 'function' type";
   private static final String SUPPORTED_ARGS_TYPES =
-      Stream.concat(Stream.of(FUNCTION_TYPE_PROPERTY, SELECTOR_TYPE_PROPERTY),
+      Stream.concat(Stream.of(FUNCTION_TYPE_PROPERTY, SELECTOR_TYPE_PROPERTY, REFERENCE_TYPE_PROPERTY),
           Stream.of(PrimitiveType.values())
               .map(PrimitiveType::getJsonTypeName))
           .collect(Collectors.joining(","));

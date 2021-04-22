@@ -72,7 +72,7 @@ public class ChainMethod implements PageObjectMethod {
 
   @Override
   public MethodDeclarationImpl getDeclaration() {
-    return new MethodDeclarationImpl(name, EMPTY_PARAMETERS, returns, imports, comments);
+    return new MethodDeclarationImpl(name, EMPTY_PARAMETERS, returns, imports, comments, false);
   }
 
   @Override
