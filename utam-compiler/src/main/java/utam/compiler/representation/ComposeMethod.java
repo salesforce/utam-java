@@ -33,9 +33,10 @@ public class ComposeMethod implements PageObjectMethod {
   private final List<TypeProvider> imports = new ArrayList<>();
   private final String comments;
   private final TypeProvider returns;
+  private boolean hasMethodLevelArgs;
 
   public ComposeMethod(MethodContext methodContext, List<ComposeMethodStatement> statements,
-      List<MethodParameter> parameters, String comments) {
+      List<MethodParameter> parameters, String comments, boolean hasMethodLevelArgs) {
     this.name = methodContext.getName();
     //if return type not set in JSON, get one from last statement
     this.returns = methodContext.getReturnType(statements, VOID);
@@ -47,6 +48,7 @@ public class ComposeMethod implements PageObjectMethod {
           classImports.addAll(statement.getClassImports());
         });
     this.comments = comments;
+    this.hasMethodLevelArgs = hasMethodLevelArgs;
   }
 
   static String getElementLocatorString(ElementContext elementContext) {
@@ -59,7 +61,7 @@ public class ComposeMethod implements PageObjectMethod {
 
   @Override
   public MethodDeclarationImpl getDeclaration() {
-    return new MethodDeclarationImpl(name, parameters, returns, imports, comments);
+    return new MethodDeclarationImpl(name, parameters, returns, imports, comments, hasMethodLevelArgs);
   }
 
   @Override

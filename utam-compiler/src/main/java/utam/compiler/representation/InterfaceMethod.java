@@ -27,13 +27,13 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
   private static final List<String> EMPTY_CODE = new ArrayList<>();
 
   public InterfaceMethod(MethodContext methodContext, List<MethodParameter> methodParameters,
-      String comments) {
+      String comments, boolean hasMethodLevelArgs) {
     super(
         methodContext.getName(),
         methodParameters,
         methodContext.getReturnType(VOID),
         methodContext.getReturnTypeImports(methodParameters),
-        comments);
+        comments, hasMethodLevelArgs);
   }
 
   @Override
