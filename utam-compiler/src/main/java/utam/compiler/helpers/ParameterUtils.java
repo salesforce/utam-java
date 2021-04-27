@@ -82,7 +82,7 @@ public class ParameterUtils {
       super(value, type);
     }
   }
-  
+
   public static class Literal extends Regular {
 
     public Literal(Object value, TypeProvider type) {
