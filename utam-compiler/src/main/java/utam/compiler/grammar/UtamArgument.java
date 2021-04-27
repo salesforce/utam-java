@@ -24,9 +24,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import utam.compiler.helpers.*;
+import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParameterUtils.Literal;
 import utam.compiler.helpers.ParameterUtils.Regular;
+import utam.compiler.helpers.ParameterUtils.SelectorArgument;
+import utam.compiler.helpers.PrimitiveType;
+import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
@@ -149,7 +152,7 @@ class UtamArgument {
     }
     if (isPrimitiveType(type)) {
       if (argsContext.equals(SELECTOR_PARAMETER_CONTEXT)) {
-        return new ParameterUtils.SelectorArgument(name, PrimitiveType.fromString(type));
+        return new SelectorArgument(name, PrimitiveType.fromString(type));
       }
       return new Regular(name, PrimitiveType.fromString(type));
     } else if (SELECTOR_TYPE_PROPERTY.equals(type)) {
