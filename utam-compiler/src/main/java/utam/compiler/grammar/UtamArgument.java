@@ -28,6 +28,7 @@ import utam.compiler.helpers.ParameterUtils.Literal;
 import utam.compiler.helpers.ParameterUtils.Regular;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
@@ -202,16 +203,31 @@ class UtamArgument {
     }
 
     private void setParameter(int index, Set<String> uniqueNames) {
-      MethodParameter parameter =
-          args[index].getParameterOrValue(argsContext,
-              expectedTypes == null ? null : expectedTypes.get(index));
+      UtamArgument arg = args[index];
+      TypeProvider expectedType = expectedTypes == null ? null : expectedTypes.get(index);
+      processArgument(arg, expectedType, uniqueNames);
+
+      // Special case: if the parameter is a selector, that selector might have
+      // arguments that need to be bubbled up as parameters to a method.
+      if (expectedType != null && expectedType.isSameType(SELECTOR)) {
+        UtamSelector selector = (UtamSelector)arg.value;
+        if (selector != null && selector.args != null) {
+          for (int i = 0; i < selector.args.length; i++) {
+            processArgument(selector.args[i], null, uniqueNames);
+          }
+        }
+      }
+    }
+
+    private void processArgument(UtamArgument arg, TypeProvider expectedType, Set<String> uniqueNames) {
+      MethodParameter parameter = arg.getParameterOrValue(argsContext, expectedType);
       if (parameter != null) {
         // check unique name
         if (uniqueNames.contains(parameter.getValue())) {
           throw new UtamError(
               String.format(ERR_ARGS_DUPLICATE_NAMES, argsContext, parameter.getValue()));
         }
-        String name = args[index].name;
+        String name = arg.name;
         if (name != null) {
           uniqueNames.add(name);
         }
