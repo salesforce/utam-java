@@ -25,7 +25,10 @@ public class ParameterUtils {
   public static final List<MethodParameter> EMPTY_PARAMETERS = new ArrayList<>();
 
   public static String getParametersValuesString(List<MethodParameter> parameters) {
-    return parameters.stream().map(MethodParameter::getValue).collect(Collectors.joining(","));
+    return parameters.stream()
+        .filter(p -> !p.isSelectorArgument())
+        .map(MethodParameter::getValue)
+        .collect(Collectors.joining(","));
   }
 
   public static class Regular implements MethodParameter {
@@ -38,34 +41,34 @@ public class ParameterUtils {
       this.type = type;
     }
 
-    @Override
-    public boolean isLiteral() {
+    @Override public boolean isLiteral() {
       return false;
     }
 
-    @Override
-    public String getValue() {
+    @Override public boolean isSelectorArgument() {
+      return false;
+    }
+
+    @Override public String getValue() {
       return valueAsString;
     }
 
-    @Override
-    public String getDeclaration() {
+    @Override public String getDeclaration() {
       return String.format("%s %s", type.getSimpleName(), getValue());
     }
 
-    @Override
-    public TypeProvider getType() {
+    @Override public TypeProvider getType() {
       return type;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-      if(!(obj instanceof MethodParameter)) {
+    @Override public boolean equals(Object obj) {
+      if (!(obj instanceof MethodParameter)) {
         return false;
       }
-      return this.getDeclaration().equals(((MethodParameter)obj).getDeclaration());
+      return this.getDeclaration().equals(((MethodParameter) obj).getDeclaration());
     }
   }
+
 
   public static class Primitive extends Regular {
 
@@ -74,27 +77,36 @@ public class ParameterUtils {
     }
   }
 
+
   public static class Literal extends Regular {
 
     public Literal(Object value, TypeProvider type) {
       super(value.toString(), type);
     }
 
-    @Override
-    public String getValue() {
-      if(type.isSameType(PrimitiveType.STRING)) {
+    @Override public String getValue() {
+      if (type.isSameType(PrimitiveType.STRING)) {
         return getWrappedString(valueAsString);
       }
       return super.getValue();
     }
 
-    @Override
-    public String getDeclaration() {
+    @Override public String getDeclaration() {
       return "";
     }
 
-    @Override
-    public boolean isLiteral() {
+    @Override public boolean isLiteral() {
+      return true;
+    }
+  }
+
+  public static class SelectorArgument extends Regular {
+
+    public SelectorArgument(String valueAsString, TypeProvider type) {
+      super(valueAsString, type);
+    }
+
+    @Override public boolean isSelectorArgument() {
       return true;
     }
   }
