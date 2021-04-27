@@ -84,18 +84,21 @@ public class ParameterUtils {
       super(value.toString(), type);
     }
 
-    @Override public String getValue() {
+    @Override
+    public String getValue() {
       if (type.isSameType(PrimitiveType.STRING)) {
         return getWrappedString(valueAsString);
       }
       return super.getValue();
     }
 
-    @Override public String getDeclaration() {
+    @Override
+    public String getDeclaration() {
       return "";
     }
 
-    @Override public boolean isLiteral() {
+    @Override
+    public boolean isLiteral() {
       return true;
     }
   }
@@ -106,7 +109,8 @@ public class ParameterUtils {
       super(valueAsString, type);
     }
 
-    @Override public boolean isSelectorArgument() {
+    @Override
+    public boolean isSelectorArgument() {
       return true;
     }
   }
