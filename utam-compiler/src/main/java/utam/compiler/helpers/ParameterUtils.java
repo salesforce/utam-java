@@ -41,31 +41,37 @@ public class ParameterUtils {
       this.type = type;
     }
 
-    @Override public boolean isLiteral() {
+    @Override
+    public boolean isLiteral() {
       return false;
     }
 
-    @Override public boolean isSelectorArgument() {
+    @Override
+    public boolean isSelectorArgument() {
       return false;
     }
 
-    @Override public String getValue() {
+    @Override
+    public String getValue() {
       return valueAsString;
     }
 
-    @Override public String getDeclaration() {
+    @Override
+    public String getDeclaration() {
       return String.format("%s %s", type.getSimpleName(), getValue());
     }
 
-    @Override public TypeProvider getType() {
+    @Override
+    public TypeProvider getType() {
       return type;
     }
 
-    @Override public boolean equals(Object obj) {
+    @Override
+    public boolean equals(Object obj) {
       if (!(obj instanceof MethodParameter)) {
         return false;
       }
-      return this.getDeclaration().equals(((MethodParameter) obj).getDeclaration());
+      return this.getDeclaration().equals(((MethodParameter)obj).getDeclaration());
     }
   }
 
