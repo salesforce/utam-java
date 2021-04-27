@@ -75,7 +75,6 @@ public class ParameterUtils {
     }
   }
 
-
   public static class Primitive extends Regular {
 
     public Primitive(String value, PrimitiveType type) {
