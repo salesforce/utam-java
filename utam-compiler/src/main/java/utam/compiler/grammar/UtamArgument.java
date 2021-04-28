@@ -156,6 +156,8 @@ class UtamArgument {
       return new Regular(name, PrimitiveType.fromString(type));
     } else if (SELECTOR_TYPE_PROPERTY.equals(type)) {
       return new Regular(name, SELECTOR);
+    } else if (REFERENCE_TYPE_PROPERTY.equals(type)) {
+      return new Regular(name, REFERENCE);
     }
     throw new UtamError(String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, argsContext, type));
   }

@@ -41,6 +41,7 @@ public final class TypeUtilities {
   public static final TypeProvider ROOT_PAGE_OBJECT =
       new TypeUtilities.FromClass(RootPageObject.class);
   public static final TypeProvider VOID = new UnimportableType("void");
+  public static final TypeProvider REFERENCE = new UnimportableType("reference");
   public static final TypeProvider BOUNDED_CLASS = new UnimportableType("Class<T>");
   static final TypeProvider GENERIC_TYPE = new UnimportableType("<T> T");
   static final TypeProvider CONTAINER_ELEMENT =

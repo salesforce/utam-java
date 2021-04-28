@@ -31,6 +31,14 @@ class UtamArgumentDeserializer extends
     com.fasterxml.jackson.databind.JsonDeserializer<UtamArgument> {
   private static final Map<JsonNode, JsonNode> methodArgs = new HashMap<>();
 
+  /**
+   * Getter for method argument collection.
+   * @return - Collection that keep track of all method arguments.
+   */
+  public static Map<JsonNode, JsonNode> getMethodArgs() {
+    return methodArgs;
+  }
+
   @Override
   public UtamArgument deserialize(JsonParser parser, DeserializationContext ctxt)
       throws IOException {
