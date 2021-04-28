@@ -262,7 +262,7 @@ public class UtamArgument_DeserializeTests {
 
   @Test
   public void testFunctionArgByType() {
-    String byType = "{  \"name\" :  \"name\",  \"type\" : \"function\" }";
+    String byType = "{  \"name\" :  \"argName\",  \"type\" : \"function\" }";
     UtamArgument argument = getDeserializedObject(byType, UtamArgument.class);
     assertThrows(() -> argument.getParameterOrValue("test", SELECTOR));
     assertThat(argument.getParameterOrValue("test", FUNCTION), is(nullValue()));

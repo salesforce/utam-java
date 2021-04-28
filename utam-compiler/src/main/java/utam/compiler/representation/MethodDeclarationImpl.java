@@ -55,16 +55,15 @@ class MethodDeclarationImpl implements MethodDeclaration {
   @Override
   public final List<MethodParameter> getParameters() {
     if (hasMethodLevelArgs) {
-      List<MethodParameter> knownParams = new ArrayList<>();
       // Check parameters and remove duplicates if needed
-      for (Iterator<MethodParameter> iterator = parameters.iterator(); iterator.hasNext();) {
-        MethodParameter parameter = iterator.next();
-        if (knownParams.contains(parameter)) {
-          iterator.remove();
-        } else {
-          knownParams.add(parameter);
+      List<MethodParameter> distinctParams = new ArrayList<>();
+      for (MethodParameter param : parameters) {
+        if (!distinctParams.contains(param)) {
+          distinctParams.add(param);
         }
       }
+      parameters.clear();
+      parameters.addAll(distinctParams);
     }
     return parameters;
   }
