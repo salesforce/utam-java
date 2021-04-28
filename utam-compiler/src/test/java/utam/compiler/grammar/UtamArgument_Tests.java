@@ -420,9 +420,13 @@ public class UtamArgument_Tests {
         is(equalTo("LocatorBy.byCss(String.format(\".selector[title='%s']\", title))")));
     assertThat(parameters.get(0).getType().isSameType(SELECTOR), is(equalTo(true)));
     assertThat(parameters.get(0).getDeclaration(), is(emptyString()));
+    assertThat(parameters.get(0).isLiteral(), is(equalTo(true)));
+    assertThat(parameters.get(0).isSelectorArgument(), is(equalTo(false)));
     assertThat(parameters.get(1).getValue(), is(equalTo("title")));
     assertThat(parameters.get(1).getType().isSameType(PrimitiveType.STRING), is(equalTo(true)));
     assertThat(parameters.get(1).getDeclaration(), is(equalTo("String title")));
+    assertThat(parameters.get(1).isLiteral(), is(equalTo(false)));
+    assertThat(parameters.get(1).isSelectorArgument(), is(equalTo(true)));
   }
 
   @Test
