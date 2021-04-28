@@ -29,7 +29,7 @@ import static utam.compiler.grammar.UtamArgument.*;
  */
 class UtamArgumentDeserializer extends
     com.fasterxml.jackson.databind.JsonDeserializer<UtamArgument> {
-  private static final Map<JsonNode, JsonNode> methodArgs = new HashMap<>();
+  private final Map<JsonNode, JsonNode> methodArgs = new HashMap<>();
 
   @Override
   public UtamArgument deserialize(JsonParser parser, DeserializationContext ctxt)
