@@ -132,15 +132,6 @@ public class UtamMethod_ComposeTests {
   }
 
   @Test
-  public void testComposeArgsRedundant() {
-    TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, new UtamMethodAction[] {});
-    method.args = new UtamArgument[0];
-    UtamError e = expectThrows(UtamError.class, () -> method.getComposeMethod(context));
-    assertThat(e.getMessage(), containsString(getErr(ERR_ARGS_NOT_ALLOWED)));
-  }
-
-  @Test
   public void testComposeRedundantChain() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     UtamMethod method = new UtamMethod(METHOD_NAME, new UtamMethodAction[] {});

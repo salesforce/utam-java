@@ -101,7 +101,7 @@ class UtamMethod {
     return new InterfaceMethod(
         methodContext,
         UtamArgument.getArgsProcessor(args, name).getOrdered(),
-        comments);
+        comments, false);
   }
 
   PageObjectMethod getMethod(TranslationContext context) {
@@ -164,8 +164,12 @@ class UtamMethod {
   }
 
   PageObjectMethod getComposeMethod(TranslationContext context) {
+    // methodArgs collection has to be reset for each method to avoid args collisions
+    UtamArgumentDeserializer.getMethodArgs().clear();
+    // Flag for method level args
+    boolean hasMethodLevelArgs = false;
     if (args != null) {
-      throw new UtamError(String.format(ERR_ARGS_NOT_ALLOWED, name));
+      hasMethodLevelArgs = true;
     }
     // List<Void> should throw error
     if (returnStr == null && isReturnList != null) {
@@ -188,7 +192,9 @@ class UtamMethod {
         methodContext,
         statements,
         methodParameters,
-        comments);
+        comments,
+        hasMethodLevelArgs
+    );
   }
 
   PageObjectMethod getBeforeLoadMethod(TranslationContext context) {

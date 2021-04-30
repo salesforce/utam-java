@@ -7,20 +7,19 @@
  */
 package utam.compiler.grammar;
 
-import static utam.compiler.grammar.UtamArgument.ERR_ARGS_TYPE_NOT_SUPPORTED;
-import static utam.compiler.grammar.UtamArgument.ERR_NAME_TYPE_REDUNDANT;
-import static utam.compiler.grammar.UtamArgument.FUNCTION_TYPE_PROPERTY;
-import static utam.compiler.grammar.UtamArgument.SELECTOR_TYPE_PROPERTY;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 import utam.compiler.helpers.PrimitiveType;
 import utam.core.framework.consumer.UtamError;
+
+import static utam.compiler.grammar.UtamArgument.*;
 
 /**
  * custom deserializer for UtamArgument to read value as UtamSelector
@@ -30,6 +29,15 @@ import utam.core.framework.consumer.UtamError;
  */
 class UtamArgumentDeserializer extends
     com.fasterxml.jackson.databind.JsonDeserializer<UtamArgument> {
+  private static final Map<JsonNode, JsonNode> methodArgs = new HashMap<>();
+
+  /**
+   * Getter for method argument collection.
+   * @return - Collection that keep track of all method arguments.
+   */
+  public static Map<JsonNode, JsonNode> getMethodArgs() {
+    return methodArgs;
+  }
 
   @Override
   public UtamArgument deserialize(JsonParser parser, DeserializationContext ctxt)
@@ -37,6 +45,13 @@ class UtamArgumentDeserializer extends
     UtamArgument res = new UtamArgument(null);
     ObjectMapper mapper = (ObjectMapper) parser.getCodec();
     ObjectNode root = mapper.readTree(parser);
+    // Track root level args and replace all reference type args at the method statement level
+    if (root.get("name") !=null && methodArgs.containsKey(root.get("name"))) {
+      root.replace("type", methodArgs.get(root.get("name")));
+    } else {
+      methodArgs.put(root.get("name"), root.get("type"));
+    }
+
     JsonNode valueNode = root.get("value");
     final String validationContext = "args";
     if (valueNode != null) {
@@ -65,7 +80,7 @@ class UtamArgumentDeserializer extends
         throw new UtamError(String.format(ERR_NAME_TYPE_REDUNDANT, validationContext));
       }
       res.type = root.get("type").asText();
-      Stream.concat(Stream.of(SELECTOR_TYPE_PROPERTY, FUNCTION_TYPE_PROPERTY),
+      Stream.concat(Stream.of(SELECTOR_TYPE_PROPERTY, FUNCTION_TYPE_PROPERTY, REFERENCE_TYPE_PROPERTY),
           Stream.of(PrimitiveType.STRING, PrimitiveType.BOOLEAN, PrimitiveType.NUMBER)
               .map(PrimitiveType::getJsonTypeName))
           .filter(s -> res.type.equals(s))

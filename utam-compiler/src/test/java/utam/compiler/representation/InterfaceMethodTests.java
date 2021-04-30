@@ -42,7 +42,7 @@ public class InterfaceMethodTests {
     MethodInfo info = new MethodInfo("testMethod", "Actionable");
     TypeProvider returnType = new TypeUtilities.FromClass(Actionable.class);
     InterfaceMethod method =
-        new InterfaceMethod(getMethodContext(returnType, false), Collections.EMPTY_LIST, "");
+        new InterfaceMethod(getMethodContext(returnType, false), Collections.EMPTY_LIST, "", false);
     PageObjectValidationTestHelper.validateMethod(method, info);
     assertThat(method.getClassImports(), hasSize(1));
   }
@@ -51,7 +51,7 @@ public class InterfaceMethodTests {
   public void testInterfaceMethodReturnsList() {
     TypeProvider returnType = new TypeUtilities.FromString("SomeReturnType");
     InterfaceMethod method = new InterfaceMethod(getMethodContext(returnType, true),
-        Collections.EMPTY_LIST, "");
+        Collections.EMPTY_LIST, "", false);
     assertThat(method.getCodeLines().isEmpty(), is(true));
     assertThat(method.getClassImports(), hasSize(2));
     assertThat(method.getClassImports().get(0).getSimpleName(), is(equalTo("List")));
@@ -66,7 +66,7 @@ public class InterfaceMethodTests {
     InterfaceMethod method = new InterfaceMethod(getMethodContext(returnType, false),
         Collections.singletonList(
             new ParameterUtils.Regular("name", new TypeUtilities.FromString("Type"))),
-        EMPTY_COMMENTS);
+        EMPTY_COMMENTS, false);
     assertThat(method.getCodeLines().isEmpty(), is(true));
     assertThat(method.getClassImports(), hasSize(2));
     assertThat(method.getClassImports().get(0).getSimpleName(), is(equalTo("Type")));
