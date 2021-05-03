@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.core.selenium.element;
 
 import static utam.core.selenium.element.DriverAdapter.ERR_SUPPORTED_FOR_MOBILE;
@@ -5,7 +12,6 @@ import static utam.core.selenium.element.DriverAdapter.find;
 import static utam.core.selenium.element.DriverAdapter.findList;
 import static utam.core.selenium.element.DriverAdapter.getNotFoundErr;
 
-import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -239,8 +245,7 @@ public class ElementAdapter implements Element {
   }
 
   @Override
-  public void flick(Driver driver, Duration timeout, Duration pollingInterval, int xOffset,
-      int yOffset) {
+  public void flick(Driver driver, int xOffset, int yOffset) {
     throw new IllegalStateException(ERR_SUPPORTED_FOR_MOBILE);
   }
 }

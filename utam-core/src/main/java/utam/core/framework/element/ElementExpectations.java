@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.core.framework.element;
 
 import java.util.function.Supplier;
@@ -146,6 +153,15 @@ public abstract class ElementExpectations {
   static <T> Expectations<T> waitFor(Supplier<T> condition) {
     return new ExpectationsImpl<>("wait for condition", (driver, element) -> condition
         .get());
+  }
+
+  static Expectations<Boolean> flick(int xOffset, int yOffset) {
+    return new ExpectationsImpl<>(
+        String.format("flick element at X '%d' Y '%d'", xOffset, yOffset),
+        (driver, element) -> {
+          element.flick(driver, xOffset, yOffset);
+          return true;
+        });
   }
 
   /**

@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.core.framework.element;
 
 import static utam.core.selenium.element.ElementAdapter.NULL_ELEMENT;
@@ -113,7 +120,7 @@ public class ElementLocationChain implements ElementLocation {
     }
 
     String getString() {
-      return String.format(" %s %s", findContext.getSeparator(), locator.getValue().toString());
+      return String.format(" %s %s", findContext.getString(), locator.getValue().toString());
     }
 
     Entry<Integer, Selector> setParameters(int index, Object... values) {

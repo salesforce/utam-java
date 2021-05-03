@@ -131,15 +131,6 @@ public interface Actionable extends BaseElement {
   void focus();
 
   /**
-   * scroll to the element <br>
-   * executes javascript `return arguments[0].scrollIntoView(true);` <br>
-   * Throws exception if element not found within timeout
-   * @deprecated use scrollToTop, will be removed after cleanup from core tests
-   */
-  @Deprecated
-  void scrollTo();
-
-  /**
    * blurs the current element <br>
    * executes javascript `arguments[0].blur()` <br>
    * Throws exception if element not found within timeout or element could not be scrolled to center

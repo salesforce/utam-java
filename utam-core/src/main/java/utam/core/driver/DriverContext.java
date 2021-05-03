@@ -23,7 +23,7 @@ public class DriverContext {
   /**
    * context with default timeouts
    */
-  public static final DriverContext DEFAULT = new DriverContext(DriverTimeouts.DEFAULT, "");
+  static final DriverContext DEFAULT = new DriverContext(DriverTimeouts.DEFAULT, "");
 
   private final DriverTimeouts timeouts;
   private final String bridgeAppTitle;

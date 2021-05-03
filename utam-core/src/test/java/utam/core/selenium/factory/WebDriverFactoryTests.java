@@ -11,7 +11,6 @@ import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 import org.openqa.selenium.WebDriver;
-import utam.core.driver.DriverContext;
 import utam.core.driver.DriverType;
 import org.testng.annotations.Test;
 import utam.core.selenium.appium.MobileDriverAdapter;

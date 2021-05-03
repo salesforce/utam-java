@@ -109,4 +109,11 @@ public interface Driver {
    * @return string with URL
    */
   String getUrl();
+
+  /**
+   * get current context, wraps AppiumDriver.getContext
+   *
+   * @return string with current context
+   */
+  String getContext();
 }

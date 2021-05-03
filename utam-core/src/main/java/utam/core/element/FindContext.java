@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.core.element;
 
 /**
@@ -9,12 +16,32 @@ package utam.core.element;
  */
 public interface FindContext {
 
+  /**
+   * when searching for an element, check if scope element shadow root should be expanded
+   *
+   * @return true if need to expand
+   */
   boolean isExpandScopeShadowRoot();
 
+  /**
+   * if element is marked as nullable, it can be not found inside its parent
+   *
+   * @return true is element can be non-existing
+   */
   boolean isNullable();
 
-  String getSeparator();
+  /**
+   * string for logging and errors
+   *
+   * @return string to use in logging
+   */
+  String getString();
 
+  /**
+   * currently known four types of context - nullable or not and in or outside shadow
+   *
+   * @author elizaveta.ivanova
+   */
   enum Type implements FindContext {
 
     EXISTING,
@@ -40,7 +67,7 @@ public interface FindContext {
     }
 
     @Override
-    public String getSeparator() {
+    public String getString() {
       return isExpandScopeShadowRoot() ? ">>" : ">";
     }
   }
