@@ -10,6 +10,7 @@ package utam.compiler.grammar;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -39,6 +40,7 @@ import org.testng.annotations.Test;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
@@ -404,6 +406,27 @@ public class UtamArgument_Tests {
     parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, SELECTOR);
     assertThat(parameter.getValue(),
         is(equalTo(prefix + ".byUiAutomator(\"new UiSelector().checkable()\")")));
+  }
+
+  @Test
+  public void testSelectorArgWithParameter() {
+    UtamArgument selectorArg = new UtamArgument("title", "string");
+    UtamSelector selector = new UtamSelector(".selector[title='%s']", new UtamArgument[] {selectorArg});
+    UtamArgument arg = new UtamArgument(selector);
+    List<MethodParameter> parameters = UtamArgument.getArgsProcessor(
+        new UtamArgument[] {arg}, Arrays.asList(SELECTOR), ARGS_CONTEXT).getOrdered();
+    assertThat(parameters, hasSize(2));
+    assertThat(parameters.get(0).getValue(),
+        is(equalTo("LocatorBy.byCss(String.format(\".selector[title='%s']\", title))")));
+    assertThat(parameters.get(0).getType().isSameType(SELECTOR), is(equalTo(true)));
+    assertThat(parameters.get(0).getDeclaration(), is(emptyString()));
+    assertThat(parameters.get(0).isLiteral(), is(equalTo(true)));
+    assertThat(parameters.get(0).isSelectorArgument(), is(equalTo(false)));
+    assertThat(parameters.get(1).getValue(), is(equalTo("title")));
+    assertThat(parameters.get(1).getType().isSameType(PrimitiveType.STRING), is(equalTo(true)));
+    assertThat(parameters.get(1).getDeclaration(), is(equalTo("String title")));
+    assertThat(parameters.get(1).isLiteral(), is(equalTo(false)));
+    assertThat(parameters.get(1).isSelectorArgument(), is(equalTo(true)));
   }
 
   @Test

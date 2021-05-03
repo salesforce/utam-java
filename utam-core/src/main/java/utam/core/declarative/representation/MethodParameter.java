@@ -17,6 +17,8 @@ public interface MethodParameter {
 
   boolean isLiteral();
 
+  boolean isSelectorArgument();
+
   String getValue();
 
   String getDeclaration();

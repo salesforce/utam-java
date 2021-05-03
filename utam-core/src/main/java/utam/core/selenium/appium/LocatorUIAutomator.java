@@ -37,7 +37,7 @@ public class LocatorUIAutomator extends LocatorBy {
   private static void validateUIAutomatorSelector(String uiautomator) {
     try {
       String match = uiautomator
-          .substring(uiautomator.indexOf(".") + 1, uiautomator.lastIndexOf("("));
+          .substring(uiautomator.indexOf(".") + 1, uiautomator.indexOf("(", uiautomator.indexOf(".") + 1));
       if (Stream.of(LocatorUIAutomator.Method.values())
           .noneMatch(method -> method.value.equals(match))) {
         throw new UtamError(String.format(ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD, match));

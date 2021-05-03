@@ -352,4 +352,14 @@ public class UtamMethod_ComposeDeserializeTests {
     TranslationContext context = new DeserializerUtilities().getContext("composeDocument");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
   }
+
+  @Test
+  public void testComposeMethodWithContainsElementAndParameterizedSelector() {
+    MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
+    methodInfo.addCodeLine("this.getRootElement().containsElement(LocatorBy.byCss(String.format(\".foo[title='%s']\", title)))");
+    methodInfo.addParameter(new MethodParameterInfo("title", "String"));
+    TranslationContext context = new DeserializerUtilities().getContext("customContainsElement");
+    PageObjectMethod method = context.getMethod("testCompose");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
+  }
 }

@@ -25,7 +25,10 @@ public class ParameterUtils {
   public static final List<MethodParameter> EMPTY_PARAMETERS = new ArrayList<>();
 
   public static String getParametersValuesString(List<MethodParameter> parameters) {
-    return parameters.stream().map(MethodParameter::getValue).collect(Collectors.joining(","));
+    return parameters.stream()
+        .filter(p -> !p.isSelectorArgument())
+        .map(MethodParameter::getValue)
+        .collect(Collectors.joining(","));
   }
 
   public static class Regular implements MethodParameter {
@@ -40,6 +43,11 @@ public class ParameterUtils {
 
     @Override
     public boolean isLiteral() {
+      return false;
+    }
+
+    @Override
+    public boolean isSelectorArgument() {
       return false;
     }
 
@@ -60,7 +68,7 @@ public class ParameterUtils {
 
     @Override
     public boolean equals(Object obj) {
-      if(!(obj instanceof MethodParameter)) {
+      if (!(obj instanceof MethodParameter)) {
         return false;
       }
       return this.getDeclaration().equals(((MethodParameter)obj).getDeclaration());
@@ -82,7 +90,7 @@ public class ParameterUtils {
 
     @Override
     public String getValue() {
-      if(type.isSameType(PrimitiveType.STRING)) {
+      if (type.isSameType(PrimitiveType.STRING)) {
         return getWrappedString(valueAsString);
       }
       return super.getValue();
@@ -95,6 +103,18 @@ public class ParameterUtils {
 
     @Override
     public boolean isLiteral() {
+      return true;
+    }
+  }
+
+  public static class SelectorArgument extends Regular {
+
+    public SelectorArgument(String valueAsString, TypeProvider type) {
+      super(valueAsString, type);
+    }
+
+    @Override
+    public boolean isSelectorArgument() {
       return true;
     }
   }

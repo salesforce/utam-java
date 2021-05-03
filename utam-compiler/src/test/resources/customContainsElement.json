@@ -1,0 +1,26 @@
+{
+  "methods": [
+    {
+      "name" : "testCompose",
+      "compose": [
+        {
+          "element" : "root",
+          "apply": "containsElement",
+          "args": [
+            {
+              "value": {
+                "css": ".foo[title='%s']",
+                "args": [
+                  {
+                    "name": "title",
+                    "type": "string"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
