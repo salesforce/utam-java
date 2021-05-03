@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.core.framework.element;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -10,14 +17,23 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
+import static utam.core.element.FindContext.Type.NULLABLE;
+import static utam.core.element.FindContext.Type.NULLABLE_IN_SHADOW;
 
+import io.appium.java_client.AppiumDriver;
+import java.util.Collections;
 import java.util.function.Supplier;
+import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
+import utam.core.element.Element;
+import utam.core.element.Element.GestureDirection;
+import utam.core.element.Locator;
+import utam.core.selenium.element.LocatorBy;
 
 /**
  * @author elizaveta.ivanova
@@ -123,10 +139,16 @@ public class BasePageElementTests {
 
   @Test
   public void testScrollToCenter() {
+    MockUtilities mock = new MockUtilities();
+    mock.getUtamElement().scrollToCenter();
   }
 
   @Test
   public void testScrollToTop() {
+    MockUtilities mock = new MockUtilities();
+    assertThrows(ElementNotVisibleException.class, () -> mock.getUtamElement().scrollToTop());
+    when(mock.getElementAdapter().isDisplayed()).thenReturn(true);
+    mock.getUtamElement().scrollToTop();
   }
 
   @Test
@@ -140,14 +162,14 @@ public class BasePageElementTests {
 
   @Test
   public void testFocus() {
-  }
-
-  @Test
-  public void testScrollTo() {
+    MockUtilities mock = new MockUtilities();
+    mock.getUtamElement().focus();
   }
 
   @Test
   public void testBlur() {
+    MockUtilities mock = new MockUtilities();
+    mock.getUtamElement().blur();
   }
 
   @Test
@@ -169,26 +191,34 @@ public class BasePageElementTests {
 
   @Test
   public void testContainsElement() {
-  }
-
-  @Test
-  public void testTestContainsElement() {
+    MockUtilities mock = new MockUtilities.MockAdapter();
+    Locator locator = LocatorBy.byCss("css");
+    assertThat(mock.getUtamElement().containsElement(locator, false), is(false));
+    assertThat(mock.getUtamElement().containsElement(locator, true), is(false));
+    when(mock.getElementAdapter().findElements(locator, NULLABLE))
+        .thenReturn(Collections.singletonList(mock(
+            Element.class)));
+    assertThat(mock.getUtamElement().containsElement(locator), is(true));
+    when(mock.getElementAdapter().findElements(locator, NULLABLE_IN_SHADOW))
+        .thenReturn(Collections.singletonList(mock(
+            Element.class)));
+    assertThat(mock.getUtamElement().containsElement(locator, true), is(true));
   }
 
   @Test
   public void testClear() {
-    MockUtilities mock = new MockUtilities();
+    MockUtilities mock = new MockUtilities.MockAdapter();
     mock.getUtamElement().clear();
-    verify(mock.getWebElementMock(), times(1)).clear();
+    verify(mock.getElementAdapter(), times(1)).clear();
   }
 
   @Test
   public void testClearAndType() {
     String text = "text";
-    MockUtilities mock = new MockUtilities();
+    MockUtilities mock = new MockUtilities.MockAdapter();
     mock.getUtamElement().clearAndType(text);
-    verify(mock.getWebElementMock(), times(1)).clear();
-    verify(mock.getWebElementMock(), times(1)).sendKeys(text);
+    verify(mock.getElementAdapter(), times(1)).clear();
+    verify(mock.getElementAdapter(), times(1)).setText(text);
   }
 
   @Test
@@ -217,9 +247,27 @@ public class BasePageElementTests {
 
   @Test
   public void testFlick() {
+    MockUtilities mock = new MockUtilities();
+    assertThrows(() -> mock.getUtamElement().flick(0, 0));
+  }
+
+  @Test
+  public void testFlickMobile() {
+    MockUtilities mock = new MockUtilities.MockDriver(AppiumDriver.class);
+    when(mock.getMobileDriverAdapter().isNative()).thenReturn(false);
+    mock.getUtamElement().flick(1, 1);
   }
 
   @Test
   public void testFlickItems() {
+    MockUtilities mock = new MockUtilities();
+    assertThrows(() -> mock.getUtamElement().flickItems(GestureDirection.DOWN));
+  }
+
+  @Test
+  public void testFlickItemsMobile() {
+    MockUtilities mock = new MockUtilities.MockAdapter(AppiumDriver.class);
+    assertThat(mock.getUtamElement().flickItems(GestureDirection.DOWN), is(false));
+    verify(mock.getElementAdapter(), times(1)).flickItems(GestureDirection.DOWN);
   }
 }

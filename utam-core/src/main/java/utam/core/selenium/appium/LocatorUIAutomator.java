@@ -8,6 +8,8 @@ import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.LocatorBy;
 
 /**
+ * owned by mobile team
+ *
  * @since 230
  */
 public class LocatorUIAutomator extends LocatorBy {

@@ -51,11 +51,13 @@ public class BasePageElement implements BaseElement, Actionable, Clickable, Edit
   }
 
   private <T> T waitFor(Expectations<T> expectations) {
+    log(expectations.getLogMessage());
     return driver.waitFor(timeouts.getWaitForTimeout(), timeouts.getPollingInterval(), expectations,
         getElement());
   }
 
   private <T> T apply(Expectations<T> expectations) {
+    log(expectations.getLogMessage());
     return driver
         .waitFor(timeouts.getFluentWaitTimeout(), timeouts.getPollingInterval(), expectations,
             getElement());
@@ -64,21 +66,18 @@ public class BasePageElement implements BaseElement, Actionable, Clickable, Edit
   @Override
   public void waitForAbsence() {
     Expectations<Boolean> expectations = ElementExpectations.absence();
-    log(expectations.getLogMessage());
     waitFor(expectations);
   }
 
   @Override
   public void waitForVisible() {
     Expectations<Boolean> expectations = ElementExpectations.visibility(true);
-    log(expectations.getLogMessage());
     waitFor(expectations);
   }
 
   @Override
   public void waitForInvisible() {
     Expectations<Boolean> expectations = ElementExpectations.visibility(false);
-    log(expectations.getLogMessage());
     waitFor(expectations);
   }
 
@@ -95,7 +94,6 @@ public class BasePageElement implements BaseElement, Actionable, Clickable, Edit
   @Override
   public String getAttribute(String attribute) {
     Expectations<String> expectations = ElementExpectations.getAttribute(attribute);
-    log(expectations.getLogMessage());
     return apply(expectations);
   }
 
@@ -107,14 +105,12 @@ public class BasePageElement implements BaseElement, Actionable, Clickable, Edit
   @Override
   public String getText() {
     Expectations<String> expectations = ElementExpectations.getText();
-    log(expectations.getLogMessage());
     return apply(expectations);
   }
 
   @Override
   public void setText(String text) {
     Expectations<Boolean> expectations = ElementExpectations.setText(text);
-    log(expectations.getLogMessage());
     apply(expectations);
   }
 
@@ -131,21 +127,18 @@ public class BasePageElement implements BaseElement, Actionable, Clickable, Edit
   @Override
   public void moveTo() {
     Expectations<Boolean> expectations = ElementExpectations.moveTo();
-    log(expectations.getLogMessage());
     apply(expectations);
   }
 
   @Override
   public void scrollToCenter() {
     Expectations<Boolean> expectations = ElementExpectations.scrollTo(ScrollOptions.CENTER);
-    log(expectations.getLogMessage());
     apply(expectations);
   }
 
   @Override
   public void scrollToTop() {
     Expectations<Boolean> expectations = ElementExpectations.scrollTo(ScrollOptions.TOP);
-    log(expectations.getLogMessage());
     apply(expectations);
   }
 
@@ -157,19 +150,12 @@ public class BasePageElement implements BaseElement, Actionable, Clickable, Edit
   @Override
   public void focus() {
     Expectations<Boolean> expectations = ElementExpectations.focus();
-    log(expectations.getLogMessage());
     apply(expectations);
-  }
-
-  @Override
-  public void scrollTo() {
-    scrollToTop();
   }
 
   @Override
   public void blur() {
     Expectations<Boolean> expectations = ElementExpectations.blur();
-    log(expectations.getLogMessage());
     apply(expectations);
   }
 
@@ -177,7 +163,6 @@ public class BasePageElement implements BaseElement, Actionable, Clickable, Edit
   public <T> T waitFor(Supplier<T> condition) {
     Expectations<T> expectations = new ExpectationsImpl<>("wait for condition",
         (driver, element) -> condition.get());
-    log(expectations.getLogMessage());
     return waitFor(expectations);
   }
 
@@ -196,14 +181,12 @@ public class BasePageElement implements BaseElement, Actionable, Clickable, Edit
   @Override
   public void clear() {
     Expectations<Boolean> expectations = ElementExpectations.clear();
-    log(expectations.getLogMessage());
     apply(expectations);
   }
 
   @Override
   public void clearAndType(String text) {
     Expectations<Boolean> expectations = ElementExpectations.clearAndType(text);
-    log(expectations.getLogMessage());
     apply(expectations);
   }
 
@@ -218,27 +201,26 @@ public class BasePageElement implements BaseElement, Actionable, Clickable, Edit
   @Override
   public void click() {
     Expectations<Boolean> expectations = ElementExpectations.click();
-    log(expectations.getLogMessage());
     apply(expectations);
   }
 
   @Override
   public void javascriptClick() {
     Expectations<Boolean> expectations = ElementExpectations.javascriptClick();
-    log(expectations.getLogMessage());
     apply(expectations);
   }
 
   @Override
   public void flick(int xOffset, int yOffset) {
-    Expectations<Boolean> expectations = new ExpectationsImpl<>(
-        String.format("flick element at X '%d' Y '%d'", xOffset, yOffset),
-        (driver, element) -> {
-          element.flick(driver, timeouts.getWaitForTimeout(), timeouts.getPollingInterval(),  xOffset, yOffset);
-          return true;
-        });
-    log(expectations.getLogMessage());
-    apply(expectations);
+    Expectations<Boolean> expectations = ElementExpectations.flick(xOffset, yOffset);
+    String originalContext = driver.getContext();
+    try {
+      apply(expectations);
+    } finally {
+      if (!driver.isNative()) {
+        driver.setPageContextToWebView(originalContext, timeouts.getWaitForTimeout(), timeouts.getPollingInterval());
+      }
+    }
   }
 
   private void log(String message) {

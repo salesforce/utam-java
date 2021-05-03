@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.core.selenium.element;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -94,9 +101,9 @@ public class ElementAdapterTests {
 
   @Test
   public void testJavascriptClick() {
-    MockUtilities mock = new MockUtilities();
-    mock.getElementAdapter().deprecatedClick(mock.getDriverAdapterMock());
-    verify(mock.getDriverAdapterMock(), times(1))
+    MockUtilities mock = new MockUtilities.MockDriver();
+    mock.getElementAdapter().deprecatedClick(mock.getDriverAdapter());
+    verify(mock.getDriverAdapter(), times(1))
         .executeScript(CLICK_VIA_JAVASCRIPT, mock.getWebElementMock());
   }
 
@@ -123,12 +130,13 @@ public class ElementAdapterTests {
     assertThat(mock.getElementAdapter().isExisting(), is(true));
     when(mock.getWebElementMock().isDisplayed()).thenThrow(StaleElementReferenceException.class);
     assertThat(mock.getElementAdapter().isExisting(), is(false));
-    // todo - fix
-    /*
-    when(mock.getWebElementMock().isDisplayed())
-        .thenThrow(org.openqa.selenium.NoSuchElementException.class);
+  }
+
+  @Test
+  public void testIsExistingNotFound() {
+    MockUtilities mock = new MockUtilities();
+    when(mock.getWebElementMock().isDisplayed()).thenThrow(org.openqa.selenium.NoSuchElementException.class);
     assertThat(mock.getElementAdapter().isExisting(), is(false));
-     */
   }
 
   @Test
@@ -158,8 +166,8 @@ public class ElementAdapterTests {
 
   @Test
   public void testMoveTo() {
-    MockUtilities mock = new MockUtilities();
-    mock.getElementAdapter().moveTo(mock.getDriverAdapterMock());
+    MockUtilities mock = new MockUtilities.MockDriver();
+    mock.getElementAdapter().moveTo(mock.getDriverAdapter());
   }
 
   @Test
@@ -184,27 +192,27 @@ public class ElementAdapterTests {
 
   @Test
   public void testFocus() {
-    MockUtilities mock = new MockUtilities();
-    mock.getElementAdapter().focus(mock.getDriverAdapterMock());
-    verify(mock.getDriverAdapterMock(), times(1))
+    MockUtilities mock = new MockUtilities.MockDriver();
+    mock.getElementAdapter().focus(mock.getDriverAdapter());
+    verify(mock.getDriverAdapter(), times(1))
         .executeScript(FOCUS_VIA_JAVASCRIPT, mock.getWebElementMock());
   }
 
   @Test
   public void testScrollToTop() {
-    MockUtilities mock = new MockUtilities();
+    MockUtilities mock = new MockUtilities.MockDriver();
     when(mock.getElementAdapter().isDisplayed()).thenReturn(false).thenReturn(false)
         .thenReturn(false).thenReturn(true);
-    mock.getElementAdapter().scrollIntoView(mock.getDriverAdapterMock(), ScrollOptions.TOP);
-    verify(mock.getDriverAdapterMock(), times(2))
+    mock.getElementAdapter().scrollIntoView(mock.getDriverAdapter(), ScrollOptions.TOP);
+    verify(mock.getDriverAdapter(), times(2))
         .executeScript(SCROLL_TOP_VIA_JAVASCRIPT, mock.getWebElementMock());
   }
 
   @Test
   public void testScrollToCenter() {
-    MockUtilities mock = new MockUtilities();
-    mock.getElementAdapter().scrollIntoView(mock.getDriverAdapterMock(), ScrollOptions.CENTER);
-    verify(mock.getDriverAdapterMock(), times(1))
+    MockUtilities mock = new MockUtilities.MockDriver();
+    mock.getElementAdapter().scrollIntoView(mock.getDriverAdapter(), ScrollOptions.CENTER);
+    verify(mock.getDriverAdapter(), times(1))
         .executeScript(SCROLL_CENTER_VIA_JAVASCRIPT, mock.getWebElementMock());
   }
 
@@ -238,7 +246,7 @@ public class ElementAdapterTests {
   @Test
   public void testMobileActionsThrow() {
     MockUtilities mock = new MockUtilities();
-    assertThrows(() -> mock.getElementAdapter().flick(mock.getDriverAdapter(), null, null, 0, 0));
+    assertThrows(() -> mock.getElementAdapter().flick(mock.getDriverAdapter(), 0, 0));
     assertThrows(() -> mock.getElementAdapter().flickItems(GestureDirection.DOWN));
   }
 }

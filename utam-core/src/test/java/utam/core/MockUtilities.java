@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.core;
 
 import static org.mockito.Mockito.mock;
@@ -15,14 +22,16 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsDriver;
-import utam.core.element.Element;
-import utam.core.framework.consumer.PageObjectContext;
-import utam.core.framework.consumer.PageObjectContextImpl;
 import utam.core.driver.Driver;
 import utam.core.driver.DriverContext;
+import utam.core.element.Element;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.PageObjectsFactoryImpl;
+import utam.core.framework.consumer.PageObjectContext;
+import utam.core.framework.consumer.PageObjectContextImpl;
 import utam.core.framework.element.BasePageElement;
+import utam.core.selenium.appium.MobileDriverAdapter;
+import utam.core.selenium.appium.MobileElementAdapter;
 import utam.core.selenium.element.DriverAdapter;
 import utam.core.selenium.element.ElementAdapter;
 import utam.core.selenium.element.ShadowRootWebElement;
@@ -36,7 +45,6 @@ public class MockUtilities {
 
   private final WebDriver webDriverMock;
   private final Driver driverAdapter;
-  private final DriverAdapter driverAdapterMock;
   private final PageObjectsFactory factory;
   private final WebElement webElementMock;
   private final ElementAdapter elementAdapter;
@@ -46,24 +54,38 @@ public class MockUtilities {
     webDriverMock = mock(driverType, withSettings().extraInterfaces(
         JavascriptExecutor.class,
         SearchContext.class));
-    DriverContext driverContext = DriverContext.TEST;
-    driverAdapter = WebDriverFactory.getAdapter(webDriverMock);
-    driverAdapterMock = mock(DriverAdapter.class);
-    when(driverAdapterMock.getSeleniumDriver()).thenReturn(webDriverMock);
-    PageObjectContext pageObjectContext = new PageObjectContextImpl(Collections.emptyMap());
-    factory = new PageObjectsFactoryImpl(pageObjectContext, driverContext,
-        driverAdapter);
     webElementMock = mock(WebElement.class, withSettings().extraInterfaces(WrapsDriver.class));
     when(((WrapsDriver) webElementMock).getWrappedDriver()).thenReturn(webDriverMock);
-    elementAdapter = new ElementAdapter(webElementMock);
+    DriverContext driverContext = DriverContext.TEST;
+    driverAdapter = setDriverAdapter(driverType);
+    PageObjectContext pageObjectContext = new PageObjectContextImpl(Collections.emptyMap());
+    factory = new PageObjectsFactoryImpl(pageObjectContext, driverContext, driverAdapter);
+    elementAdapter = setElementAdapter(driverType);
     utamElement = new BasePageElement(factory, elementAdapter);
-    if(driverType.equals(AppiumDriver.class)) {
+    if (isMobileMock(driverType)) {
       setMobilePlatform(Platform.LINUX);
     }
   }
 
   public MockUtilities() {
     this(WebDriver.class);
+  }
+
+  private static boolean isMobileMock(Class<? extends WebDriver> driverType) {
+    return AppiumDriver.class.isAssignableFrom(driverType);
+  }
+
+  public MobileDriverAdapter getMobileDriverAdapter() {
+    return (MobileDriverAdapter) driverAdapter;
+  }
+
+  ElementAdapter setElementAdapter(Class<? extends WebDriver> driverType) {
+    return isMobileMock(driverType) ? new MobileElementAdapter(webElementMock)
+        : new ElementAdapter(webElementMock);
+  }
+
+  DriverAdapter setDriverAdapter(Class<? extends WebDriver> driverType) {
+    return (DriverAdapter) WebDriverFactory.getAdapter(getWebDriverMock());
   }
 
   public void setMobilePlatform(Platform platform) {
@@ -85,6 +107,10 @@ public class MockUtilities {
 
   public WebDriver getWebDriverMock() {
     return webDriverMock;
+  }
+
+  public AppiumDriver getAppiumDriverMock() {
+    return (AppiumDriver) webDriverMock;
   }
 
   public JavascriptExecutor getExecutorMock() {
@@ -111,7 +137,43 @@ public class MockUtilities {
     return utamElement;
   }
 
-  public DriverAdapter getDriverAdapterMock() {
-    return driverAdapterMock;
+  //sometimes Driver Adaptor should be mocked to intercept method calls
+  public static class MockDriver extends MockUtilities {
+
+    public MockDriver(Class<? extends WebDriver> driverType) {
+      super(driverType);
+    }
+
+    public MockDriver() {
+      super();
+    }
+
+    @Override
+    DriverAdapter setDriverAdapter(Class<? extends WebDriver> driverType) {
+      DriverAdapter driverAdapterMock =
+          isMobileMock(driverType) ? mock(MobileDriverAdapter.class) : mock(DriverAdapter.class);
+      when(driverAdapterMock.getSeleniumDriver()).thenReturn(getWebDriverMock());
+      return driverAdapterMock;
+    }
+  }
+
+  //sometimes Element Adaptor should be mocked to intercept method calls
+  public static class MockAdapter extends MockUtilities {
+
+    public MockAdapter(Class<? extends WebDriver> driverType) {
+      super(driverType);
+    }
+
+    public MockAdapter() {
+      super();
+    }
+
+    @Override
+    ElementAdapter setElementAdapter(Class<? extends WebDriver> driverType) {
+      ElementAdapter elementAdapter =
+          isMobileMock(driverType) ? mock(MobileElementAdapter.class) : mock(ElementAdapter.class);
+      when(elementAdapter.getWebElement()).thenReturn(getWebElementMock());
+      return elementAdapter;
+    }
   }
 }
