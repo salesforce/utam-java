@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.core.selenium.element;
 
 import static utam.core.framework.UtamLogger.error;
@@ -164,6 +171,11 @@ public class DriverAdapter implements Driver {
   @Override
   public String getUrl() {
     return driver.getCurrentUrl();
+  }
+
+  @Override
+  public String getContext() {
+    throw new IllegalStateException(ERR_SUPPORTED_FOR_MOBILE);
   }
 
   static class DriverWait extends FluentWait<Driver> {

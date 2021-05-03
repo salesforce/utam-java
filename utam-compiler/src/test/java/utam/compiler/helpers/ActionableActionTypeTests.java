@@ -78,10 +78,6 @@ public class ActionableActionTypeTests {
   @Test
   public void checkSupportedActions() {
     for (Method method : Actionable.class.getDeclaredMethods()) {
-      // skip scrollTo for now
-      if (method.getName().equals("scrollTo")) {
-        continue;
-      }
       if (method.getName().equals(ActionableActionType.getClass.getInvokeMethodName())) {
         continue;
       }

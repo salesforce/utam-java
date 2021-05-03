@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.core.framework.element;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -17,6 +24,7 @@ import static utam.core.framework.element.ElementExpectations.blur;
 import static utam.core.framework.element.ElementExpectations.clear;
 import static utam.core.framework.element.ElementExpectations.clearAndType;
 import static utam.core.framework.element.ElementExpectations.click;
+import static utam.core.framework.element.ElementExpectations.flick;
 import static utam.core.framework.element.ElementExpectations.focus;
 import static utam.core.framework.element.ElementExpectations.getAttribute;
 import static utam.core.framework.element.ElementExpectations.getText;
@@ -30,11 +38,14 @@ import static utam.core.selenium.element.ElementAdapter.NULL_ELEMENT;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_INTO_VIEW_JS;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_TOP_VIA_JAVASCRIPT;
 
+import io.appium.java_client.android.AndroidDriver;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
@@ -270,6 +281,17 @@ public class ExpectationsImplTests {
   public void testWaitFor() {
     MockUtilities mock = new MockUtilities();
     Expectations<Element> expectations = waitFor(mock::getElementAdapter);
+    assertThat(expectations.apply(mock.getDriverAdapter(), mock.getElementAdapter()),
+        Matchers.is(notNullValue()));
+  }
+
+  @Test
+  public void testFlick() {
+    MockUtilities mock = new MockUtilities(AndroidDriver.class);
+    when(mock.getMobileDriverAdapter().getWebViewElement()).thenReturn(mock.getWebElementMock());
+    when(mock.getWebElementMock().getLocation()).thenReturn(new Point(125,125));
+    when(mock.getWebElementMock().getSize()).thenReturn(new Dimension(5,5));
+    Expectations expectations = flick(1,1);
     assertThat(expectations.apply(mock.getDriverAdapter(), mock.getElementAdapter()),
         Matchers.is(notNullValue()));
   }

@@ -1,11 +1,17 @@
-package utam.core.driver;
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
+package utam.core.element;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.testng.annotations.Test;
-import utam.core.element.FindContext;
 import utam.core.element.FindContext.Type;
 
 /**
@@ -32,8 +38,8 @@ public class FindContextTests {
 
   @Test
   public void testGetSeparator() {
-    assertThat(FindContext.Type.EXISTING.getSeparator(), is(equalTo(">")));
-    assertThat(FindContext.Type.EXISTING_IN_SHADOW.getSeparator(), is(">>"));
+    assertThat(FindContext.Type.EXISTING.getString(), is(equalTo(">")));
+    assertThat(FindContext.Type.EXISTING_IN_SHADOW.getString(), is(">>"));
   }
 
   @Test

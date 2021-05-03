@@ -36,11 +36,34 @@ public interface ElementLocation {
    */
   ElementLocation setParameters(Object... parameters);
 
+  /**
+   * get full chain of locators for logging and reporting, ex. "driver > By.cssSelector: css1 >>
+   * By.cssSelector: css2"
+   *
+   * @return string with full chain
+   */
   String getLocatorChainString();
 
+  /**
+   * find element starting from driver with all locators chain
+   *
+   * @param driver instance of the driver
+   * @return instance of the element or null if element is nullable
+   */
   Element findElement(Driver driver);
 
+  /**
+   * find elements starting from driver with all locators chain
+   *
+   * @param driver instance of the driver
+   * @return list of found elements or null if element is nullable
+   */
   List<Element> findElements(Driver driver);
 
+  /**
+   * marker of possible element absence
+   *
+   * @return true if element might ot be present
+   */
   boolean isNullable();
 }
