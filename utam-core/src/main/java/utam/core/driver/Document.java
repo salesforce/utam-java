@@ -36,4 +36,12 @@ public interface Document {
    * @return true if element found
    */
   boolean containsElement(Locator locator);
+  
+  /**
+   * Trigger the onChange event for the element with the given locator 
+   * in the dom, since appium doesn't use the native keyboard
+   * 
+   * @param locator locator to find an element
+   */
+  void triggerChangeEvent(Locator locator);
 }

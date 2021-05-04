@@ -8,9 +8,14 @@
 package utam.core.framework.element;
 
 import java.time.Duration;
+import java.util.List;
+
+import org.openqa.selenium.WebElement;
+
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.driver.Expectations;
+import utam.core.element.Element;
 import utam.core.element.FindContext.Type;
 import utam.core.element.Locator;
 import utam.core.framework.base.PageObjectsFactory;
@@ -24,6 +29,14 @@ import utam.core.framework.base.PageObjectsFactory;
 public class DocumentObject implements Document {
 
   static final String DOM_READY_JAVASCRIPT = "document.readyState === 'complete'";
+  static final String ONCHANGE_JAVASCRIPT = 
+          "if ('createEvent in document') {" +
+          "   var evt = document.createEvent('HTMLEvents');" +
+          "   evt.initEvent('change', false, true);" +
+          "   arguments[0].dispatchEvent(evt);" +
+          "} else {" +
+          "   arguments[0].fireEvent('onchange')" +
+          "}";
 
   private static final Expectations<Boolean> isDOMReady =
       new ExpectationsImpl<>("wait for document ready state", driver ->
@@ -52,5 +65,11 @@ public class DocumentObject implements Document {
   @Override
   public boolean containsElement(Locator locator) {
     return driver.findElements(locator, Type.NULLABLE).size() > 0;
+  }
+  
+  @Override
+  public void triggerChangeEvent(Locator locator) {
+      List<Element> elements = driver.findElements(locator, Type.NULLABLE);
+      driver.executeScript(ONCHANGE_JAVASCRIPT, elements.get(0));
   }
 }
