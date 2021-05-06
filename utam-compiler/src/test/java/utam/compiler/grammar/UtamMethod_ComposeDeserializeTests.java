@@ -359,7 +359,15 @@ public class UtamMethod_ComposeDeserializeTests {
     methodInfo.addCodeLine("this.getRootElement().containsElement(LocatorBy.byCss(String.format(\".foo[title='%s']\", title)))");
     methodInfo.addParameter(new MethodParameterInfo("title", "String"));
     TranslationContext context = new DeserializerUtilities().getContext("customContainsElement");
-    PageObjectMethod method = context.getMethod("testCompose");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
+  }
+
+  @Test
+  public void testComposeMethodWithImperativeExtensionReturningCustomType() {
+    MethodInfo methodInfo = new MethodInfo("testExtension", "CustomReturnType");
+    methodInfo.addCodeLine("CustomExtensionUtils.getFieldValue(new UtamUtilitiesContext(this), fieldType)");
+    methodInfo.addParameter(new MethodParameterInfo("fieldType", "String"));
+    TranslationContext context = new DeserializerUtilities().getContext("customExtensionReturnType");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testExtension"), methodInfo);
   }
 }

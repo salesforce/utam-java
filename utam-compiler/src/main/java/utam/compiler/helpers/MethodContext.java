@@ -76,6 +76,9 @@ public final class MethodContext {
     if (methodReturnType == null) {
       return lastStatement.getReturnType();
     }
+    if (lastStatement.isUtilityMethodStatement()) {
+      return methodReturnType;
+    }
     return getReturnType(defaultReturn);
   }
 
