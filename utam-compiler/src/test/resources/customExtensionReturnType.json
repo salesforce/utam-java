@@ -1,0 +1,22 @@
+{
+  "methods": [
+    {
+      "name": "testExtension",
+      "return": "utam-extension/pageObjects/customReturnType",
+      "compose": [
+        {
+          "applyExternal": {
+            "type": "utam-extension/utils/customExtensionUtils",
+            "invoke": "getFieldValue",
+            "args": [
+              {
+                "name": "fieldType",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

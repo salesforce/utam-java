@@ -81,6 +81,10 @@ public abstract class ComposeMethodStatement {
     return codeLines;
   }
 
+  public boolean isUtilityMethodStatement() {
+    return false;
+  }
+
   List<TypeProvider> getImports() {
     return imports;
   }
@@ -135,6 +139,11 @@ public abstract class ComposeMethodStatement {
     @Override
     String getMethodCallString() {
       return "%s.%s";
+    }
+
+    @Override
+    public boolean isUtilityMethodStatement() {
+      return true;
     }
   }
 
