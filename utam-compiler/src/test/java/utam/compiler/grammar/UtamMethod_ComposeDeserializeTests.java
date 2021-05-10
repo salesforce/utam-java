@@ -365,6 +365,10 @@ public class UtamMethod_ComposeDeserializeTests {
   @Test
   public void testComposeMethodWithImperativeExtensionReturningCustomType() {
     MethodInfo methodInfo = new MethodInfo("testExtension", "CustomReturnType");
+    methodInfo.addImportedTypes("java.lang.String", "utam.extension.pageobjects.CustomReturnType");
+    methodInfo.addImpliedImportedTypes(
+        "utam.extension.utils.CustomExtensionUtils",
+        "utam.core.framework.base.UtamUtilitiesContext");
     methodInfo.addCodeLine("CustomExtensionUtils.getFieldValue(new UtamUtilitiesContext(this), fieldType)");
     methodInfo.addParameter(new MethodParameterInfo("fieldType", "String"));
     TranslationContext context = new DeserializerUtilities().getContext("customExtensionReturnType");

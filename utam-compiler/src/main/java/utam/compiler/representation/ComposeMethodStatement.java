@@ -366,6 +366,22 @@ public abstract class ComposeMethodStatement {
       super(action, returnType, actionParameters);
     }
 
+    @Override
+    public void setImports(List<TypeProvider> imports) {
+      super.setImports(imports);
+      if (!PrimitiveType.isPrimitiveType(getReturnType().getFullName())) {
+        imports.add(getReturnType());
+      }
+    }
+
+    @Override
+    public void setClassImports(List<TypeProvider> imports) {
+      super.setClassImports(imports);
+      if (!PrimitiveType.isPrimitiveType(getReturnType().getFullName())) {
+        imports.add(getReturnType());
+      }
+    }
+
     /**
      * Method invoke to construct the statement associated with a utility extension.
      * Utility statements are expressed as ClassName.staticMethod(this, [params])
