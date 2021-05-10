@@ -264,7 +264,7 @@ public class PageObjectValidationTestHelper {
      *
      * @param importedTypes the full names of the types to be imported into the class by the method
      */
-    void addImpliedImportedTypes(String... importedTypes) {
+    public void addImpliedImportedTypes(String... importedTypes) {
       this.impliedImportedTypes.addAll(Arrays.asList(importedTypes));
     }
 
