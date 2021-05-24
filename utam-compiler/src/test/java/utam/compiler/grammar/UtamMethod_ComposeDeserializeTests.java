@@ -325,7 +325,7 @@ public class UtamMethod_ComposeDeserializeTests {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
     methodInfo.addCodeLine("this.getRootElement().waitFor(() -> {\n"
         + "this.getRootElement().getText();\n"
-        + "return Boolean.FALSE.equals(this.getRootElement().containsElement(LocatorBy.byCss(\".css\")));\n"
+        + "return Boolean.FALSE.equals(this.getRootElement().containsElement(LocatorBy.byCss(\".css\"),false));\n"
         + "})");
     TranslationContext context = new DeserializerUtilities().getContext("composeWaitForSelector");
     PageObjectMethod method = context.getMethod("testCompose");
@@ -356,9 +356,17 @@ public class UtamMethod_ComposeDeserializeTests {
   @Test
   public void testComposeMethodWithContainsElementAndParameterizedSelector() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
-    methodInfo.addCodeLine("this.getRootElement().containsElement(LocatorBy.byCss(String.format(\".foo[title='%s']\", title)))");
+    methodInfo.addCodeLine("this.getRootElement().containsElement(LocatorBy.byCss(String.format(\".foo[title='%s']\", title)),false)");
     methodInfo.addParameter(new MethodParameterInfo("title", "String"));
     TranslationContext context = new DeserializerUtilities().getContext("customContainsElement");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
+  }
+
+  @Test
+  public void testComposeMethodWithContainsElementInShadowDom() {
+    MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
+    methodInfo.addCodeLine("this.getRootElement().containsElement(LocatorBy.byCss(\".foo\"),true)");
+    TranslationContext context = new DeserializerUtilities().getContext("containsElementShadow");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
   }
 

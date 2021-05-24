@@ -35,11 +35,11 @@ public enum ActionableActionType implements ActionType {
    */
   blur(null),
   /**
-   * blur the element <br>
-   * executes javascript `return arguments[0].blur();` <br>
+   * contains element <br>
+   * returns whether an element contains the element specified by the selector <br>
    * Throws exception if element not found within timeout
    */
-  containsElement(PrimitiveType.BOOLEAN, SELECTOR),
+  containsElement(PrimitiveType.BOOLEAN, SELECTOR, PrimitiveType.BOOLEAN),
   /**
    * focus on the value <br>
    * throws exception if fails

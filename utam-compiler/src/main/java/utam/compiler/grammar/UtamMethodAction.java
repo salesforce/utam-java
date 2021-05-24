@@ -79,8 +79,7 @@ class UtamMethodAction {
     List<MethodParameter> parameters = UtamArgument
         .getArgsProcessor(args, expectedParameters, methodContext.getName()).getOrdered();
     // return type is irrelevant at statement level as we don't assign except for last statement
-    ActionType action = new Custom(apply, methodContext.getReturnType(VOID),
-        parameters);
+    ActionType action = new Custom(apply, methodContext.getReturnType(VOID), parameters);
     if (isWaitFor) {
       List<ComposeMethodStatement> predicate = args[0].getPredicate(context, methodContext);
       return new OperationWithPredicate(action, methodContext.getReturnType(predicate,
@@ -93,6 +92,14 @@ class UtamMethodAction {
   private Operation getBasicOperation(TranslationContext context, ElementContext element,
       MethodContext methodContext, boolean isLastPredicateStatement) {
     ActionType action = getActionType(apply, element.getType(), element.getName());
+    if (ActionableActionType.containsElement.getApplyString().equals(apply) && args.length < 2) {
+      // If the action is "containsElement", it may have one argument (a selector),
+      // or two arguments (a selector and a boolean indicating whether to search in
+      // the shadow DOM) declared in the JSON. If the second argument is omitted,
+      // it can be assumed to be false, so substitute that value here.
+      UtamArgument[] containsArgs = new UtamArgument[] { args[0], new UtamArgument(Boolean.FALSE) };
+      args = containsArgs;
+    }
     List<MethodParameter> parameters = UtamArgument
         .getArgsProcessor(args, action.getParametersTypes(), methodContext.getName())
         .getOrdered();
