@@ -92,7 +92,7 @@ class UtamMethodAction {
   private Operation getBasicOperation(TranslationContext context, ElementContext element,
       MethodContext methodContext, boolean isLastPredicateStatement) {
     ActionType action = getActionType(apply, element.getType(), element.getName());
-    if (ActionableActionType.containsElement.getApplyString().equals(apply) && args.length < 2) {
+    if (ActionableActionType.containsElement.getApplyString().equals(apply) && args.length == 1) {
       // If the action is "containsElement", it may have one argument (a selector),
       // or two arguments (a selector and a boolean indicating whether to search in
       // the shadow DOM) declared in the JSON. If the second argument is omitted,
