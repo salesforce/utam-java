@@ -37,8 +37,8 @@ public interface ElementLocation {
   ElementLocation setParameters(Object... parameters);
 
   /**
-   * get full chain of locators for logging and reporting, ex. "driver > By.cssSelector: css1 >>
-   * By.cssSelector: css2"
+   * get full chain of locators for logging and reporting, ex. "driver &lt; By.cssSelector: css1
+   * &lt;&lt; By.cssSelector: css2"
    *
    * @return string with full chain
    */

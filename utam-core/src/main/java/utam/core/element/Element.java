@@ -43,7 +43,7 @@ public interface Element {
 
   /**
    * provided as temporary workaround when regular click does not work
-   *
+   * @param driver Driver instance used in deprecated click
    * @deprecated when all browsers work as expected, will be removed
    */
   @Deprecated

@@ -42,7 +42,7 @@ public interface UtamLoaderConfig {
       Class<? extends T> poClass);
 
   /**
-   * create page objects context for dependency injection <br/> for each Jar and each profile,
+   * create page objects context for dependency injection for each Jar and each profile,
    * search for override config and remember in context
    *
    * @return page objects context for factory
