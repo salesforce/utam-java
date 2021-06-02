@@ -173,23 +173,6 @@ public class BasePageElementTests {
   }
 
   @Test
-  public void testWaitFor() {
-    MockUtilities mock = new MockUtilities();
-    BasePageElement element = mock.getUtamElement();
-    Supplier<Object> apply = () -> {
-      mock.getElementAdapter().setText("text");
-      return mock.getElementAdapter();
-    };
-    assertThat(element.waitFor(apply), is(notNullValue()));
-    when(mock.getElementAdapter().isDisplayed()).thenReturn(true);
-    // condition returns true
-    assertThat(element.waitFor(() -> mock.getUtamElement().isVisible()), is(true));
-    when(mock.getElementAdapter().isDisplayed()).thenReturn(false);
-    // condition returns false
-    assertThrows(() -> element.waitFor(() -> mock.getUtamElement().isVisible()));
-  }
-
-  @Test
   public void testContainsElement() {
     MockUtilities mock = new MockUtilities.MockAdapter();
     Locator locator = LocatorBy.byCss("css");

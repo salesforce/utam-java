@@ -17,6 +17,7 @@ package utam.core.framework.base;
 import static utam.core.framework.UtamLogger.info;
 
 import utam.core.driver.Document;
+import utam.core.driver.Expectations;
 import utam.core.element.Element;
 import utam.core.element.ElementLocation;
 import utam.core.element.FindContext;
@@ -26,6 +27,9 @@ import utam.core.framework.consumer.ContainerElement;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.element.BasePageElement;
 import utam.core.framework.element.DocumentObject;
+import utam.core.framework.element.ExpectationsImpl;
+
+import java.util.function.Supplier;
 
 /**
  * base class for any UTAM page object
@@ -137,5 +141,24 @@ public abstract class BasePageObject implements RootPageObject {
     T utility = ImperativeProvider.build(type);
     utility.setInstance(this);
     return utility;
+  }
+
+  /**
+   * wait for condition to return true or not null before the timeout
+   *
+   * @param condition condition to wait
+   * @param <T> return type
+   * @return method can only return not null or true
+   */
+  protected final <T> T waitFor(Supplier<T> condition) {
+    Expectations<T> expectations =
+            new ExpectationsImpl<>("wait for condition", (driver, element) -> condition.get());
+    log(expectations.getLogMessage());
+    return getFactory()
+            .getDriver()
+            .waitFor(
+                    getFactory().getDriverContext().getTimeouts().getWaitForTimeout(),
+                    getFactory().getDriverContext().getTimeouts().getPollingInterval(),
+                    expectations);
   }
 }

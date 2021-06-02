@@ -48,7 +48,6 @@ public abstract class ComposeMethodStatement {
       MatcherType matcher,
       List<MethodParameter> matcherParameters) {
     this.returns = matcher != null ? PrimitiveType.BOOLEAN : returnType;
-    operand.setElementParameters(this.parameters);
     operation.setParameters(this.parameters);
     operation.setImports(this.imports);
     operation.setClassImports(this.classImports);
@@ -56,8 +55,15 @@ public abstract class ComposeMethodStatement {
       this.parameters.addAll(matcherParameters);
     }
     parameters.removeIf(p -> p == null || p.isLiteral());
-    String invocationStr = operation
-        .getCode(getMethodCallString(), operand.getElementGetterString());
+    String invocationStr;
+    if(operand!=null){
+      operand.setElementParameters(this.parameters);
+      invocationStr = operation
+              .getCode(getMethodCallString(), operand.getElementGetterString());
+    } else {
+      invocationStr = operation
+              .getCode(getMethodCallString(), "this");
+    }
     if (matcher != null) {
       codeLines.add(matcher.getCode(matcherParameters, invocationStr));
     } else {
@@ -127,7 +133,9 @@ public abstract class ComposeMethodStatement {
      */
     public Utility(UtilityOperand operand, Operation operation) {
       super(operand, operation, operation.getReturnType());
-      classImports.add(operand.getType());
+      if(operand!=null){
+        classImports.add(operand.getType());
+      }
       TypeProvider utilitiesContextType = new TypeUtilities.FromClass(UtamUtilitiesContext.class);
       classImports.add(utilitiesContextType);
     }

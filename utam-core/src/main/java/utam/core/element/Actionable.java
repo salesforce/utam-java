@@ -138,14 +138,6 @@ public interface Actionable extends BaseElement {
   void blur();
 
   /**
-   * wait for condition to return true or not null before the timeout
-   * @param condition condition to wait
-   * @param <T> return type
-   * @return method can only return not null or true
-   */
-  <T> T waitFor(Supplier<T> condition);
-
-  /**
    * check if current element contains another element with the given selector
    * @param locator value of the locator
    * @param isExpandShadow if set to true, search inside shadow root

@@ -291,10 +291,20 @@ public class UtamMethod_ComposeDeserializeTests {
   @Test
   public void testComposeWaitForBasicActionThatReturnsString() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "String");
-    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> {\n"
+    methodInfo.addCodeLine("this.waitFor(() -> {\n"
         + "return this.getRootElement().getText();\n"
         + "})");
     TranslationContext context = new DeserializerUtilities().getContext("composeWaitFor1");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
+  }
+
+  @Test
+  public void testComposeWaitForBasicActionWithElementReferenceIsIgnored() {
+    MethodInfo methodInfo = new MethodInfo("testCompose", "String");
+    methodInfo.addCodeLine("this.waitFor(() -> {\n"
+            + "return this.getRootElement().getText();\n"
+            + "})");
+    TranslationContext context = new DeserializerUtilities().getContext("composeWaitFor2");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
   }
 
@@ -310,7 +320,7 @@ public class UtamMethod_ComposeDeserializeTests {
   @Test
   public void testComposeWaitForBasicVoidAction() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
-    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> {\n"
+    methodInfo.addCodeLine("this.waitFor(() -> {\n"
         + "this.getRootElement().getText().contains(\"subString\");\n"
         + "this.getRootElement().focus();\n"
         + "return true;\n"
@@ -323,7 +333,7 @@ public class UtamMethod_ComposeDeserializeTests {
   @Test
   public void testComposeWaitForContainsElementAction() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
-    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> {\n"
+    methodInfo.addCodeLine("this.waitFor(() -> {\n"
         + "this.getRootElement().getText();\n"
         + "return Boolean.FALSE.equals(this.getRootElement().containsElement(LocatorBy.byCss(\".css\"),false));\n"
         + "})");
@@ -337,7 +347,7 @@ public class UtamMethod_ComposeDeserializeTests {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
     methodInfo.addParameter(new MethodParameterInfo("selectorArg", "LocatorBy"));
     methodInfo.addParameter(new MethodParameterInfo("matcherArg", "String"));
-    methodInfo.addCodeLine("this.getCustomElement().waitFor(() -> {\n"
+    methodInfo.addCodeLine("this.waitFor(() -> {\n"
         + "return this.getCustomElement().returnsString(selectorArg).contains(matcherArg);\n"
         + "})");
     TranslationContext context = new DeserializerUtilities().getContext("composeWaitForCustom");

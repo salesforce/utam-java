@@ -160,13 +160,6 @@ public class BasePageElement implements BaseElement, Actionable, Clickable, Edit
   }
 
   @Override
-  public <T> T waitFor(Supplier<T> condition) {
-    Expectations<T> expectations = new ExpectationsImpl<>("wait for condition",
-        (driver, element) -> condition.get());
-    return waitFor(expectations);
-  }
-
-  @Override
   public boolean containsElement(Locator locator, boolean isExpandShadow) {
     return
         getElement().findElements(locator, isExpandShadow ? NULLABLE_IN_SHADOW : NULLABLE).size()

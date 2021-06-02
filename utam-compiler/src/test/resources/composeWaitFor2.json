@@ -4,6 +4,7 @@
       "name": "testCompose",
       "compose": [
         {
+          "element": "root",
           "apply": "waitFor",
           "args": [
             {

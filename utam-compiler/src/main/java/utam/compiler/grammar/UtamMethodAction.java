@@ -24,12 +24,13 @@ import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static utam.compiler.helpers.ActionableActionType.getActionType;
-import static utam.compiler.helpers.ActionableActionType.isWaitFor;
 import static utam.compiler.helpers.TypeUtilities.VOID;
+import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 
 /**
  * Compose statement mapping
@@ -39,6 +40,7 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
  */
 class UtamMethodAction {
 
+  static final String WAIT_FOR = "waitFor";
   static final String ERR_COMPOSE_ACTION_REQUIRED_KEYS =
       "Statements for compose method '%s' should either have 'element' and 'apply' or 'applyExternal' properties";
 
@@ -75,7 +77,7 @@ class UtamMethodAction {
   private Operation getCustomOperation(TranslationContext context, MethodContext methodContext) {
     boolean isWaitFor = isWaitFor(apply);
     List<TypeProvider> expectedParameters =
-        isWaitFor ? ActionableActionType.waitFor.getParametersTypes() : null;
+        isWaitFor ? Arrays.asList(FUNCTION) : null;
     List<MethodParameter> parameters = UtamArgument
         .getArgsProcessor(args, expectedParameters, methodContext.getName()).getOrdered();
     // return type is irrelevant at statement level as we don't assign except for last statement
@@ -145,7 +147,7 @@ class UtamMethodAction {
       );
     }
     if (apply != null) {
-      if (elementName == null) {
+      if (!isWaitFor(apply) && elementName == null) {
         throw new UtamError(
             String.format(
                     ERR_COMPOSE_ACTION_REQUIRED_KEYS,
@@ -164,28 +166,32 @@ class UtamMethodAction {
       operation = getUtilityOperation(methodContext);
       statement = new Utility(utilityOperand, operation);
     } else {
-      ElementContext element = context.getElement(elementName);
-      // register usage of getter from compose statement
-      if (!element.isDocumentElement()) {
-        context.setPrivateMethodUsage(element.getElementMethod().getDeclaration().getName());
-      }
-
-      ComposeMethodStatement.Operand operand = element.isDocumentElement() ?
-          new DocumentOperand() : new Operand(element, methodContext);
-      operation = element.isCustom() || element.isDocumentElement() ?
-          getCustomOperation(context, methodContext) :
-          getBasicOperation(context, element, methodContext, isLastPredicateStatement);
-      if (element.isList()
-          // size() can only be applied to a single element
-          && !operation.isSizeAction()) {
-        statement =
-            operation.isReturnsVoid() ? new ComposeMethodStatement.VoidList(operand, operation)
-                : new ComposeMethodStatement.ReturnsList(operand, operation);
+      if (isWaitFor(apply)){
+        statement = new Utility(null, getCustomOperation(context, methodContext));
       } else {
-        statement = new Single(operand, operation, getMatcherType(), getMatcherParameters(methodContext));
+        ElementContext element = context.getElement(elementName);
+        // register usage of getter from compose statement
+        if (!element.isDocumentElement()) {
+          context.setPrivateMethodUsage(element.getElementMethod().getDeclaration().getName());
+        }
+
+        ComposeMethodStatement.Operand operand = element.isDocumentElement() ?
+                new DocumentOperand() : new Operand(element, methodContext);
+        operation = element.isCustom() || element.isDocumentElement() ?
+                getCustomOperation(context, methodContext) :
+                getBasicOperation(context, element, methodContext, isLastPredicateStatement);
+        if (element.isList()
+                // size() can only be applied to a single element
+                && !operation.isSizeAction()) {
+          statement =
+                  operation.isReturnsVoid() ? new ComposeMethodStatement.VoidList(operand, operation)
+                          : new ComposeMethodStatement.ReturnsList(operand, operation);
+        } else {
+          statement = new Single(operand, operation, getMatcherType(), getMatcherParameters(methodContext));
+        }
+        // remember that element is used to not propagate its parameters to method for second time
+        methodContext.setElementUsage(element);
       }
-      // remember that element is used to not propagate its parameters to method for second time
-      methodContext.setElementUsage(element);
     }
     return statement;
   }
@@ -235,5 +241,9 @@ class UtamMethodAction {
     public String getApplyString() {
       return methodName;
     }
+  }
+
+  private static boolean isWaitFor(String apply) {
+    return WAIT_FOR.equals(apply);
   }
 }

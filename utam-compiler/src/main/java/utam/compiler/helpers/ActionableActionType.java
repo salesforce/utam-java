@@ -121,11 +121,6 @@ public enum ActionableActionType implements ActionType {
    * wait for element absence <br>
    * throws exception if fails
    */
-  waitFor(TypeUtilities.GENERIC_TYPE, FUNCTION),
-  /**
-   * wait for element absence <br>
-   * throws exception if fails
-   */
   waitForAbsence(null),
   /**
    * wait for element absence <br>
@@ -152,10 +147,6 @@ public enum ActionableActionType implements ActionType {
       this.actionParameters = parameters;
     }
     this.returnType = Objects.requireNonNullElse(returnType, VOID);
-  }
-
-  public static boolean isWaitFor(String apply) {
-    return ActionableActionType.waitFor.getApplyString().equals(apply);
   }
 
   public static ActionType getActionType(String apply, TypeProvider elementType, String elementName) {
