@@ -1,0 +1,14 @@
+{
+  "methods" : [
+    {
+      "name" : "testCompose",
+      "return" : "boolean",
+      "compose": [
+        {
+          "element" : "self",
+          "apply": "isPresent"
+        }
+      ]
+    }
+  ]
+}

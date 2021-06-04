@@ -41,6 +41,9 @@ import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 class UtamMethodAction {
 
   static final String WAIT_FOR = "waitFor";
+  static final String IS_PRESENT = "isPresent";
+  static final String SELF_ELEMENT = "self";
+
   static final String ERR_COMPOSE_ACTION_REQUIRED_KEYS =
       "Statements for compose method '%s' should either have 'element' and 'apply' or 'applyExternal' properties";
 
@@ -166,7 +169,7 @@ class UtamMethodAction {
       operation = getUtilityOperation(methodContext);
       statement = new Utility(utilityOperand, operation);
     } else {
-      if (isWaitFor(apply)){
+      if((isSelfElement(elementName) && isIsPresent(apply)) || isWaitFor(apply)) {
         statement = new Utility(null, getCustomOperation(context, methodContext));
       } else {
         ElementContext element = context.getElement(elementName);
@@ -246,4 +249,13 @@ class UtamMethodAction {
   private static boolean isWaitFor(String apply) {
     return WAIT_FOR.equals(apply);
   }
+
+  private static boolean isIsPresent(String apply) {
+    return IS_PRESENT.equals(apply);
+  }
+
+  private static boolean isSelfElement(String elementName) {
+    return elementName == null || elementName.isEmpty() || SELF_ELEMENT.equalsIgnoreCase(elementName);
+  }
+
 }
