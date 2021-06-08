@@ -56,7 +56,7 @@ public abstract class ComposeMethodStatement {
     }
     parameters.removeIf(p -> p == null || p.isLiteral());
     String invocationStr;
-    if(operand!=null){
+    if(operand != null){
       operand.setElementParameters(this.parameters);
       invocationStr = operation
               .getCode(getMethodCallString(), operand.getElementGetterString());
@@ -112,7 +112,7 @@ public abstract class ComposeMethodStatement {
           matcher, matcherParameters);
     }
 
-    Single(Operand operand, Operation operation) {
+    public Single(Operand operand, Operation operation) {
       this(operand, operation, null, null);
     }
 
@@ -133,7 +133,7 @@ public abstract class ComposeMethodStatement {
      */
     public Utility(UtilityOperand operand, Operation operation) {
       super(operand, operation, operation.getReturnType());
-      if(operand!=null){
+      if(operand != null){
         classImports.add(operand.getType());
       }
       TypeProvider utilitiesContextType = new TypeUtilities.FromClass(UtamUtilitiesContext.class);

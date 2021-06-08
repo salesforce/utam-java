@@ -170,7 +170,7 @@ class UtamMethodAction {
       statement = new Utility(utilityOperand, operation);
     } else {
       if((isSelfElement(elementName) && isIsPresent(apply)) || isWaitFor(apply)) {
-        statement = new Utility(null, getCustomOperation(context, methodContext));
+        statement = new Single(null, getCustomOperation(context, methodContext));
       } else {
         ElementContext element = context.getElement(elementName);
         // register usage of getter from compose statement
