@@ -158,7 +158,6 @@ public class ElementContextTests {
     TypeProvider type = new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
     TypeProvider elementType = actionable;
     ElementInfo expected = new ElementInfo("root", elementType.getFullName());
-    expected.isRoot = true;
     ElementContext element = new ElementContext.Root(type, elementType, getCssSelector(SELECTOR_VALUE));
     validateElement(element, expected);
   }
@@ -554,7 +553,6 @@ public class ElementContextTests {
     private final List<String> scopeParameterNames = new ArrayList<>();
     private final List<String> scopeParameterTypes = new ArrayList<>();
     private boolean isList;
-    private boolean isRoot;
 
     ElementInfo(String name, String typeName) {
       this.name = name;

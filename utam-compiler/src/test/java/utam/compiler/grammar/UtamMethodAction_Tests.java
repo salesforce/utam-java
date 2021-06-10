@@ -8,7 +8,11 @@
 package utam.compiler.grammar;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.TEST_PAGE_OBJECT;
 import static utam.compiler.grammar.TestUtilities.TEST_URI;
@@ -24,6 +28,7 @@ import org.testng.annotations.Test;
 import utam.compiler.grammar.UtamMethodAction.Custom;
 import utam.compiler.helpers.ActionableActionType;
 import utam.compiler.helpers.ClickableActionType;
+import utam.compiler.helpers.ElementContext.Document;
 import utam.compiler.helpers.ElementContext.Root;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParameterUtils.Literal;
@@ -84,11 +89,10 @@ public class UtamMethodAction_Tests {
     new UtamElement(ELEMENT_NAME, "clickable", getSelector()).testTraverse(context);
     UtamMethodAction action =
             new UtamMethodAction(
-                    null, ClickableActionType.click.toString());
-    UtamError e = expectThrows(
+                    null, ClickableActionType.click.toString(), null, null, new UtamUtilityMethodAction());
+    expectThrows(
             UtamError.class, () -> action.getComposeAction(context, getMethodContext(VOID), false )
     );
-    assertThat(e.getMessage(), is(equalTo("Statements for compose method 'testMethod' should either have 'element' and 'apply' or 'applyExternal' properties")));
   }
 
   /**
@@ -100,10 +104,9 @@ public class UtamMethodAction_Tests {
     new UtamElement(ELEMENT_NAME, "clickable", getSelector()).testTraverse(context);
     UtamMethodAction action =
             new UtamMethodAction(null);
-    UtamError e = expectThrows(
+    expectThrows(
             UtamError.class, () -> action.getComposeAction(context, getMethodContext(VOID), false )
     );
-    assertThat(e.getMessage(), is(equalTo("Statements for compose method 'testMethod' should either have 'element' and 'apply' or 'applyExternal' properties")));
   }
 
   /**
@@ -281,5 +284,21 @@ public class UtamMethodAction_Tests {
     ).collect(Collectors.toList());
     assertThat(new Custom("customMethod", VOID, parameters).getParametersTypes(),
         is(containsInAnyOrder(PrimitiveType.BOOLEAN, SELECTOR)));
+  }
+
+  @Test
+  public void testWaitWithIncorrectElementThrows() {
+    TranslationContext context = TestUtilities.getTestTranslationContext();
+    context.setElement(new Document());
+    new UtamElement(ELEMENT_NAME, "clickable", getListSelector()).testTraverse(context);
+    // document element does not have waitFor API
+    expectThrows(
+        UtamError.class, () -> new UtamMethodAction("document", "waitFor")
+            .getComposeAction(context, getMethodContext(VOID), false));
+    // list element
+    expectThrows(
+        UtamError.class, () -> new UtamMethodAction(ELEMENT_NAME, "waitFor")
+            .getComposeAction(context, getMethodContext(VOID), false)
+    );
   }
 }

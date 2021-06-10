@@ -7,7 +7,7 @@
  */
 package utam.core.element;
 
-import java.util.function.Supplier;
+import utam.core.framework.base.UtamBase;
 
 /**
  * interaction methods for UI element
@@ -15,34 +15,7 @@ import java.util.function.Supplier;
  * @author elizaveta.ivanova
  * @since 226
  */
-public interface Actionable extends BaseElement {
-
-  /**
-   * waits for element to be absent within timeout <br>
-   * Throws exception if element still present after timeout
-   */
-  void waitForAbsence();
-
-  /**
-   * waits for element to become visible (present AND displayed) within timeout <br>
-   * Throws exception if element still visible after timeout
-   */
-  void waitForVisible();
-
-  /**
-   * waits for element to become not present OR not displayed within timeout <br>
-   * Throws exception if element still present or visible after timeout
-   */
-  void waitForInvisible();
-
-  /**
-   * returns true if element is found AND displayed. <br>
-   * it's an immediate check, no waiting is involved. Never throws any exceptions, just returns
-   * true/false
-   *
-   * @return true if element is present and visible
-   */
-  boolean isVisible();
+public interface Actionable extends UtamBase {
 
   /**
    * returns true if element is found AND enabled <br>
@@ -136,21 +109,4 @@ public interface Actionable extends BaseElement {
    * Throws exception if element not found within timeout or element could not be scrolled to center
    */
   void blur();
-
-  /**
-   * check if current element contains another element with the given selector
-   * @param locator value of the locator
-   * @param isExpandShadow if set to true, search inside shadow root
-   * @return true if element found
-   */
-  boolean containsElement(Locator locator, boolean isExpandShadow);
-
-  /**
-   * same as containsElement(Selector selector, boolean isExpandShadow); with isExpandShadow set to  false
-   * @param locator value of the locator
-   * @return true if element found
-   */
-  boolean containsElement(Locator locator);
-
-  boolean isPresent();
 }

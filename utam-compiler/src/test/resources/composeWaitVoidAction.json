@@ -5,6 +5,7 @@
       "return" : "boolean",
       "compose": [
         {
+          "element": "root",
           "apply": "waitFor",
           "args": [
             {

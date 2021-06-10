@@ -9,7 +9,6 @@ package utam.core.framework.element;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -22,7 +21,6 @@ import static utam.core.element.FindContext.Type.NULLABLE_IN_SHADOW;
 
 import io.appium.java_client.AppiumDriver;
 import java.util.Collections;
-import java.util.function.Supplier;
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;

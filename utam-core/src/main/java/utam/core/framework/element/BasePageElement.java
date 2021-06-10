@@ -7,25 +7,17 @@
  */
 package utam.core.framework.element;
 
-import static utam.core.element.FindContext.Type.NULLABLE;
-import static utam.core.element.FindContext.Type.NULLABLE_IN_SHADOW;
-
-import java.util.function.Supplier;
 import org.openqa.selenium.Keys;
-import utam.core.driver.Driver;
-import utam.core.driver.DriverTimeouts;
 import utam.core.driver.Expectations;
 import utam.core.element.Actionable;
-import utam.core.element.BaseElement;
 import utam.core.element.Clickable;
 import utam.core.element.Editable;
 import utam.core.element.Element;
 import utam.core.element.Element.GestureDirection;
 import utam.core.element.Element.ScrollOptions;
-import utam.core.element.Locator;
 import utam.core.element.Touchable;
-import utam.core.framework.UtamLogger;
 import utam.core.framework.base.PageObjectsFactory;
+import utam.core.framework.base.UtamBaseImpl;
 
 /**
  * base element that wraps Element implementation with Driver waits, instantiated on the FOUND
@@ -34,56 +26,31 @@ import utam.core.framework.base.PageObjectsFactory;
  * @author elizaveta.ivanova
  * @since 234
  */
-public class BasePageElement implements BaseElement, Actionable, Clickable, Editable, Touchable {
+public class BasePageElement extends UtamBaseImpl implements Actionable, Clickable, Editable, Touchable {
 
-  private final Driver driver;
-  private final DriverTimeouts timeouts;
   private final Element element;
+  private final PageObjectsFactory factory;
 
   public BasePageElement(PageObjectsFactory factory, Element element) {
-    this.driver = factory.getDriver();
     this.element = element;
-    this.timeouts = factory.getDriverContext().getTimeouts();
+    this.factory = factory;
   }
 
-  private Element getElement() {
+  @Override
+  protected final PageObjectsFactory getFactory() {
+    return factory;
+  }
+
+  @Override
+  protected final Element getElement() {
     return element;
-  }
-
-  private <T> T waitFor(Expectations<T> expectations) {
-    log(expectations.getLogMessage());
-    return driver.waitFor(timeouts.getWaitForTimeout(), timeouts.getPollingInterval(), expectations,
-        getElement());
   }
 
   private <T> T apply(Expectations<T> expectations) {
     log(expectations.getLogMessage());
-    return driver
-        .waitFor(timeouts.getFluentWaitTimeout(), timeouts.getPollingInterval(), expectations,
+    return getDriver()
+        .waitFor(getDriverTimeouts().getFluentWaitTimeout(), getDriverTimeouts().getPollingInterval(), expectations,
             getElement());
-  }
-
-  @Override
-  public void waitForAbsence() {
-    Expectations<Boolean> expectations = ElementExpectations.absence();
-    waitFor(expectations);
-  }
-
-  @Override
-  public void waitForVisible() {
-    Expectations<Boolean> expectations = ElementExpectations.visibility(true);
-    waitFor(expectations);
-  }
-
-  @Override
-  public void waitForInvisible() {
-    Expectations<Boolean> expectations = ElementExpectations.visibility(false);
-    waitFor(expectations);
-  }
-
-  @Override
-  public boolean isVisible() {
-    return getElement().isDisplayed();
   }
 
   @Override
@@ -144,7 +111,7 @@ public class BasePageElement implements BaseElement, Actionable, Clickable, Edit
 
   @Override
   public boolean isFocused() {
-    return getElement().hasFocus(driver);
+    return getElement().hasFocus(getDriver());
   }
 
   @Override
@@ -157,18 +124,6 @@ public class BasePageElement implements BaseElement, Actionable, Clickable, Edit
   public void blur() {
     Expectations<Boolean> expectations = ElementExpectations.blur();
     apply(expectations);
-  }
-
-  @Override
-  public boolean containsElement(Locator locator, boolean isExpandShadow) {
-    return
-        getElement().findElements(locator, isExpandShadow ? NULLABLE_IN_SHADOW : NULLABLE).size()
-            > 0;
-  }
-
-  @Override
-  public boolean containsElement(Locator locator) {
-    return containsElement(locator, false);
   }
 
   @Override
@@ -206,27 +161,18 @@ public class BasePageElement implements BaseElement, Actionable, Clickable, Edit
   @Override
   public void flick(int xOffset, int yOffset) {
     Expectations<Boolean> expectations = ElementExpectations.flick(xOffset, yOffset);
-    String originalContext = driver.getContext();
+    String originalContext = getDriver().getContext();
     try {
       apply(expectations);
     } finally {
-      if (!driver.isNative()) {
-        driver.setPageContextToWebView(originalContext, timeouts.getWaitForTimeout(), timeouts.getPollingInterval());
+      if (!getDriver().isNative()) {
+        getDriver().setPageContextToWebView(originalContext, getDriverTimeouts().getWaitForTimeout(), getDriverTimeouts().getPollingInterval());
       }
     }
-  }
-
-  private void log(String message) {
-    UtamLogger.info(message);
   }
 
   @Override
   public boolean flickItems(GestureDirection direction) {
     return getElement().flickItems(direction);
-  }
-
-  @Override
-  public boolean isPresent() {
-    return !getElement().isNull();
   }
 }

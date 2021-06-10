@@ -13,6 +13,7 @@
       "name": "testCompose",
       "compose": [
         {
+          "element" : "custom",
           "apply": "waitFor",
           "args": [
             {

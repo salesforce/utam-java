@@ -13,8 +13,6 @@ import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.FieldInfo;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.declarative.representation.*;
-import utam.core.declarative.translator.TranslationTypesConfig;
-import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
@@ -63,10 +61,6 @@ public class TranslationContextTests {
     context.setMethod(new ElementMethod.Single(elementContext, true));
     context.setElement(new ElementContext.Container("containerObject"));
     return context;
-  }
-
-  private static TranslationTypesConfig getTypesProvider() {
-    return new TranslationTypesConfigJava();
   }
 
   private static MethodParameter getStringParameter() {

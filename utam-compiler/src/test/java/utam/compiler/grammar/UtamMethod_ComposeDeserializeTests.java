@@ -299,9 +299,9 @@ public class UtamMethod_ComposeDeserializeTests {
   }
 
   @Test
-  public void testComposeWaitForBasicActionWithElementReferenceIsIgnored() {
+  public void testComposeWaitForBasicActionWithElementReference() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "String");
-    methodInfo.addCodeLine("this.waitFor(() -> {\n"
+    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> {\n"
             + "return this.getRootElement().getText();\n"
             + "})");
     TranslationContext context = new DeserializerUtilities().getContext("composeWaitForElementSpecified");
@@ -328,9 +328,9 @@ public class UtamMethod_ComposeDeserializeTests {
   }
 
   @Test
-  public void testComposeWaitForBasicVoidAction() {
+  public void testComposeWaitForBasicVoidActionOnRoot() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
-    methodInfo.addCodeLine("this.waitFor(() -> {\n"
+    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> {\n"
         + "this.getRootElement().getText().contains(\"subString\");\n"
         + "this.getRootElement().focus();\n"
         + "return true;\n"
@@ -357,7 +357,7 @@ public class UtamMethod_ComposeDeserializeTests {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
     methodInfo.addParameter(new MethodParameterInfo("selectorArg", "LocatorBy"));
     methodInfo.addParameter(new MethodParameterInfo("matcherArg", "String"));
-    methodInfo.addCodeLine("this.waitFor(() -> {\n"
+    methodInfo.addCodeLine("this.getCustomElement().waitFor(() -> {\n"
         + "return this.getCustomElement().returnsString(selectorArg).contains(matcherArg);\n"
         + "})");
     TranslationContext context = new DeserializerUtilities().getContext("composeWaitForCustom");
@@ -415,7 +415,7 @@ public class UtamMethod_ComposeDeserializeTests {
   public void testComposeIsPresentImplicit() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
     methodInfo.addCodeLine("this.isPresent()");
-    TranslationContext context = new DeserializerUtilities().getContext("composeIsPresentSelf");
+    TranslationContext context = new DeserializerUtilities().getContext("composeIsPresentImplicit");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
   }
 

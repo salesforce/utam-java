@@ -40,7 +40,6 @@ import org.testng.annotations.Test;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;

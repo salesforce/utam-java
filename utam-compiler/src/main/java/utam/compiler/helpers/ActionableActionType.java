@@ -9,7 +9,6 @@ package utam.compiler.helpers;
 
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
-import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 
 import java.util.Objects;
 import utam.core.declarative.representation.TypeProvider;

@@ -7,30 +7,37 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.helpers.ActionableActionType.getActionType;
+import static utam.compiler.helpers.ActionableActionType.size;
+import static utam.compiler.helpers.TypeUtilities.FUNCTION;
+import static utam.compiler.helpers.TypeUtilities.VOID;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import utam.compiler.helpers.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import utam.compiler.UtamCompilationError;
+import utam.compiler.helpers.ActionType;
+import utam.compiler.helpers.ActionableActionType;
+import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.MatcherType;
+import utam.compiler.helpers.MethodContext;
+import utam.compiler.helpers.PrimitiveType;
+import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.compiler.representation.ComposeMethodStatement.BasicElementOperation;
 import utam.compiler.representation.ComposeMethodStatement.DocumentOperand;
 import utam.compiler.representation.ComposeMethodStatement.Operand;
 import utam.compiler.representation.ComposeMethodStatement.Operation;
 import utam.compiler.representation.ComposeMethodStatement.OperationWithPredicate;
-import utam.compiler.representation.ComposeMethodStatement.Single;
+import utam.compiler.representation.ComposeMethodStatement.SelfOperand;
 import utam.compiler.representation.ComposeMethodStatement.Utility;
 import utam.compiler.representation.ComposeMethodStatement.UtilityOperand;
 import utam.compiler.representation.ComposeMethodStatement.UtilityOperation;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static utam.compiler.helpers.ActionableActionType.getActionType;
-import static utam.compiler.helpers.TypeUtilities.VOID;
-import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 
 /**
  * Compose statement mapping
@@ -40,18 +47,26 @@ import static utam.compiler.helpers.TypeUtilities.FUNCTION;
  */
 class UtamMethodAction {
 
-  static final String WAIT_FOR = "waitFor";
-  static final String IS_PRESENT = "isPresent";
-  static final String SELF_ELEMENT = "self";
+  private static final String WAIT_FOR = "waitFor";
+  private static final String SELF_ELEMENT = "self";
 
-  static final String ERR_COMPOSE_ACTION_REQUIRED_KEYS =
-      "Statements for compose method '%s' should either have 'element' and 'apply' or 'applyExternal' properties";
+  private static final String ERR_COMPOSE_ACTION_REQUIRED_KEYS =
+      "compose method '%s': statement should either have 'apply' or 'applyExternal' properties";
+
+  private static final String ERR_COMPOSE_ACTION_REDUNDANT_KEYS =
+      "compose method '%s': statement should not have both 'apply' and 'applyExternal' properties";
+
+  private static final String ERR_COMPOSE_ACTION_REDUNDANT_ELEMENT =
+      "compose method '%s': utility statement should not have 'element' property";
+
+  private static final String ERR_COMPOSE_WAIT_FOR_INCORRECT_OPERAND =
+      "compose method '%s': waitFor cannot be applied to document or to an element marked as a list";
 
   final String elementName;
   final String apply;
-  UtamArgument[] args;
-  UtamUtilityMethodAction applyExternal;
   private final UtamMatcher matcher;
+  UtamArgument[] args;
+  final UtamUtilityMethodAction applyExternal;
 
   @JsonCreator
   UtamMethodAction(
@@ -77,126 +92,170 @@ class UtamMethodAction {
     this(null, null, null, null, applyExternal);
   }
 
-  private Operation getCustomOperation(TranslationContext context, MethodContext methodContext) {
-    boolean isWaitFor = isWaitFor(apply);
-    List<TypeProvider> expectedParameters =
-        isWaitFor ? Arrays.asList(FUNCTION) : null;
+  private Operation getCustomOperation(MethodContext methodContext) {
+    List<MethodParameter> parameters = UtamArgument
+        .getArgsProcessor(args, null, methodContext.getName()).getOrdered();
+    // return type is irrelevant at statement level as we don't assign except for last statement
+    ActionType action = new Custom(apply, methodContext.getReturnType(VOID), parameters);
+    TypeProvider returnType = matcher == null ? action.getReturnType() : PrimitiveType.BOOLEAN;
+    return new Operation(action, returnType, parameters);
+  }
+
+  private Operation getWaitForOperation(TranslationContext context, MethodContext methodContext) {
+    List<TypeProvider> expectedParameters = Collections.singletonList(FUNCTION);
     List<MethodParameter> parameters = UtamArgument
         .getArgsProcessor(args, expectedParameters, methodContext.getName()).getOrdered();
     // return type is irrelevant at statement level as we don't assign except for last statement
     ActionType action = new Custom(apply, methodContext.getReturnType(VOID), parameters);
-    if (isWaitFor) {
-      List<ComposeMethodStatement> predicate = args[0].getPredicate(context, methodContext);
-      return new OperationWithPredicate(action, methodContext.getReturnType(predicate,
-          PrimitiveType.BOOLEAN), predicate);
-    }
-    TypeProvider returnType = matcher == null? action.getReturnType() : PrimitiveType.BOOLEAN;
-    return new Operation(action, returnType, parameters);
+    List<ComposeMethodStatement> predicate = args[0].getPredicate(context, methodContext);
+    return new OperationWithPredicate(action, methodContext.getReturnType(predicate,
+        PrimitiveType.BOOLEAN), predicate);
   }
 
-  private Operation getBasicOperation(TranslationContext context, ElementContext element,
-      MethodContext methodContext, boolean isLastPredicateStatement) {
+  private Operation getBasicOperation(ElementContext element, MethodContext methodContext,
+      boolean isLastPredicateStatement) {
     ActionType action = getActionType(apply, element.getType(), element.getName());
     if (ActionableActionType.containsElement.getApplyString().equals(apply) && args.length == 1) {
       // If the action is "containsElement", it may have one argument (a selector),
       // or two arguments (a selector and a boolean indicating whether to search in
       // the shadow DOM) declared in the JSON. If the second argument is omitted,
       // it can be assumed to be false, so substitute that value here.
-      UtamArgument[] containsArgs = new UtamArgument[] { args[0], new UtamArgument(Boolean.FALSE) };
-      args = containsArgs;
+      args = new UtamArgument[]{args[0], new UtamArgument(Boolean.FALSE)};
     }
     List<MethodParameter> parameters = UtamArgument
         .getArgsProcessor(args, action.getParametersTypes(), methodContext.getName())
         .getOrdered();
-    if (isWaitFor(apply)) {
-      List<ComposeMethodStatement> predicate = args[0].getPredicate(context, methodContext);
-      return new OperationWithPredicate(action, methodContext.getReturnType(predicate, null),
-          predicate);
-    }
     return new BasicElementOperation(action, parameters, isLastPredicateStatement);
   }
 
   /**
-   * Create an Operation for a utility statement.
-   * For imperative extension, an operation is a custom action specified in the invoke property in the JSON file.
-   * We access the value of the invoke property through `applyExternal.getMethodName()`
+   * Create an Operation for a utility statement. For imperative extension, an operation is a custom
+   * action specified in the invoke property in the JSON file. We access the value of the invoke
+   * property through `applyExternal.getMethodName()`
+   *
    * @param methodContext context of the current method being compiled
    * @return an operation that represents the structure of an imperative extension statement
    */
   private Operation getUtilityOperation(MethodContext methodContext) {
     List<MethodParameter> parameters = UtamArgument
-            .getArgsProcessor(applyExternal.args, null, methodContext.getName()).getOrdered();
-    ActionType action = new Custom(applyExternal.getMethodName(), methodContext.getReturnType(VOID), parameters);
+        .getArgsProcessor(applyExternal.args, null, methodContext.getName()).getOrdered();
+    ActionType action = new Custom(applyExternal.getMethodName(), methodContext.getReturnType(VOID),
+        parameters);
     TypeProvider returnType = action.getReturnType();
     return new UtilityOperation(action, returnType, parameters);
   }
 
   /**
-   * Create a compose statement object from mapped Java entity.
-   * This method creates a structure that will be used to generate the code for a given object in the `compose` array.
-   * Each object in the `compose` array from the JSON PO will create one `ComposeMethodStatement`.
-   * @param context current PO context
-   * @param methodContext context of the current method being compiled
-   * @param isLastPredicateStatement boolean that adds extra logic if the last statement is a predicate
-   * @return
+   * Create a compose statement object from mapped Java entity. This method creates a structure that
+   * will be used to generate the code for a given object in the `compose` array. Each object in the
+   * `compose` array from the JSON PO will create one `ComposeMethodStatement`.
+   *
+   * @param context                  current PO context
+   * @param methodContext            context of the current method being compiled
+   * @param isLastPredicateStatement boolean that adds extra logic if the last statement is a
+   *                                 predicate
+   * @return compose method statement
    */
-  ComposeMethodStatement getComposeAction(TranslationContext context, MethodContext methodContext, boolean isLastPredicateStatement) {
+  ComposeMethodStatement getComposeAction(TranslationContext context, MethodContext methodContext,
+      boolean isLastPredicateStatement) {
+    // either "apply" or "applyExternal" should be set
     if (apply == null && applyExternal == null) {
       throw new UtamError(
-        String.format(
-            ERR_COMPOSE_ACTION_REQUIRED_KEYS,
-            methodContext.getName()
-        )
+          String.format(
+              ERR_COMPOSE_ACTION_REQUIRED_KEYS,
+              methodContext.getName()
+          )
       );
     }
-    if (apply != null) {
-      if (!isWaitFor(apply) && elementName == null) {
+
+    // both "apply" and "applyExternal" can't be set
+    if (apply != null && applyExternal != null) {
+      throw new UtamError(
+          String.format(
+              ERR_COMPOSE_ACTION_REDUNDANT_KEYS,
+              methodContext.getName()
+          )
+      );
+    }
+
+    if (applyExternal != null) {
+      if (elementName != null) {
         throw new UtamError(
             String.format(
-                    ERR_COMPOSE_ACTION_REQUIRED_KEYS,
-                    methodContext.getName()
+                ERR_COMPOSE_ACTION_REDUNDANT_ELEMENT,
+                methodContext.getName()
             )
         );
       }
+      return getUtilityStatement(context, methodContext);
     }
 
-    ComposeMethodStatement.Operation operation;
-    ComposeMethodStatement statement;
+    if (isWaitFor()) {
+      return getWaitForStatement(context, methodContext);
+    }
 
-    if (applyExternal != null) {
-      TypeProvider type = context.getUtilityType(applyExternal.getExternalClassPath());
-      UtilityOperand utilityOperand = new UtilityOperand(methodContext, type);
-      operation = getUtilityOperation(methodContext);
-      statement = new Utility(utilityOperand, operation);
+    if (isSelfElement()) {
+      return new ComposeMethodStatement.Single(new SelfOperand(),
+          getCustomOperation(methodContext));
+    }
+
+    ElementContext element = context.getElement(elementName);
+
+    if (element.isDocumentElement()) {
+      return new ComposeMethodStatement.Single(new DocumentOperand(),
+          getCustomOperation(methodContext));
+    }
+
+    // register usage of getter from compose statement
+    context.setPrivateMethodUsage(element.getElementMethod().getDeclaration().getName());
+
+    ComposeMethodStatement.Operand operand = new Operand(element, methodContext);
+
+    if (isSizeAction()) {
+      ComposeMethodStatement.Operation operation = new BasicElementOperation(size,
+          Collections.EMPTY_LIST, isLastPredicateStatement);
+      return new ComposeMethodStatement.Single(operand, operation);
+    }
+    ComposeMethodStatement.Operation operation = element.isCustom() ?
+        getCustomOperation(methodContext) :
+        getBasicOperation(element, methodContext, isLastPredicateStatement);
+
+    if (element.isList()) {
+      return
+          operation.isReturnsVoid() ? new ComposeMethodStatement.VoidList(operand, operation)
+              : new ComposeMethodStatement.ReturnsList(operand, operation);
+    }
+    return new ComposeMethodStatement.Single(operand, operation, getMatcherType(),
+        getMatcherParameters(methodContext));
+
+
+  }
+
+  private ComposeMethodStatement getUtilityStatement(TranslationContext context,
+      MethodContext methodContext) {
+    TypeProvider type = context.getUtilityType(applyExternal.getExternalClassPath());
+    UtilityOperand utilityOperand = new UtilityOperand(type);
+    ComposeMethodStatement.Operation operation = getUtilityOperation(methodContext);
+    return new Utility(utilityOperand, operation);
+  }
+
+  private ComposeMethodStatement getWaitForStatement(TranslationContext context,
+      MethodContext methodContext) {
+    Operand operand;
+    // for waitFor operand is irrelevant, but we do not validate for it to be redundant
+    if (isSelfElement()) {
+      operand = new SelfOperand();
     } else {
-      if((isSelfElement(elementName) && isIsPresent(apply)) || isWaitFor(apply)) {
-        statement = new Single(null, getCustomOperation(context, methodContext));
-      } else {
-        ElementContext element = context.getElement(elementName);
-        // register usage of getter from compose statement
-        if (!element.isDocumentElement()) {
-          context.setPrivateMethodUsage(element.getElementMethod().getDeclaration().getName());
-        }
-
-        ComposeMethodStatement.Operand operand = element.isDocumentElement() ?
-                new DocumentOperand() : new Operand(element, methodContext);
-        operation = element.isCustom() || element.isDocumentElement() ?
-                getCustomOperation(context, methodContext) :
-                getBasicOperation(context, element, methodContext, isLastPredicateStatement);
-        if (element.isList()
-                // size() can only be applied to a single element
-                && !operation.isSizeAction()) {
-          statement =
-                  operation.isReturnsVoid() ? new ComposeMethodStatement.VoidList(operand, operation)
-                          : new ComposeMethodStatement.ReturnsList(operand, operation);
-        } else {
-          statement = new Single(operand, operation, getMatcherType(), getMatcherParameters(methodContext));
-        }
-        // remember that element is used to not propagate its parameters to method for second time
-        methodContext.setElementUsage(element);
+      ElementContext element = context.getElement(elementName);
+      if (element.isList() || element.isDocumentElement()) {
+        throw new UtamCompilationError(String.format(
+            ERR_COMPOSE_WAIT_FOR_INCORRECT_OPERAND,
+            methodContext.getName()
+        ));
       }
+      operand = new Operand(element, methodContext);
     }
-    return statement;
+    return new ComposeMethodStatement.Single(operand, getWaitForOperation(context, methodContext));
   }
 
   private List<MethodParameter> getMatcherParameters(MethodContext methodContext) {
@@ -213,6 +272,18 @@ class UtamMethodAction {
     return this.matcher.matcherType;
   }
 
+  private boolean isWaitFor() {
+    return WAIT_FOR.equals(apply);
+  }
+
+  private boolean isSizeAction() {
+    return size.getInvokeMethodName().equals(apply);
+  }
+
+  private boolean isSelfElement() {
+    return elementName == null || SELF_ELEMENT.equals(elementName);
+  }
+
   /**
    * custom action to be invoked on the element
    *
@@ -226,7 +297,8 @@ class UtamMethodAction {
 
     Custom(String methodName, TypeProvider returnType, List<MethodParameter> parameters) {
       this.methodName = methodName;
-      this.parametersTypes = parameters.stream().map(MethodParameter::getType).collect(Collectors.toList());
+      this.parametersTypes = parameters.stream().map(MethodParameter::getType)
+          .collect(Collectors.toList());
       this.returnType = returnType;
     }
 
@@ -245,17 +317,4 @@ class UtamMethodAction {
       return methodName;
     }
   }
-
-  private static boolean isWaitFor(String apply) {
-    return WAIT_FOR.equals(apply);
-  }
-
-  private static boolean isIsPresent(String apply) {
-    return IS_PRESENT.equals(apply);
-  }
-
-  private static boolean isSelfElement(String elementName) {
-    return elementName == null || elementName.isEmpty() || SELF_ELEMENT.equalsIgnoreCase(elementName);
-  }
-
 }

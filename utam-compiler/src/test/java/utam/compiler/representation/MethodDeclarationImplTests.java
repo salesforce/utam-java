@@ -143,10 +143,6 @@ public class MethodDeclarationImplTests {
     public TestHelper(String methodName, String comments) {
       super(methodName, EMPTY_PARAMETERS, VOID, new ArrayList<>(), comments, false);
     }
-
-    public TestHelper(String methodName, boolean hasMethodLevelArgs) {
-      super(methodName, EMPTY_PARAMETERS, VOID, new ArrayList<>(), "", hasMethodLevelArgs);
-    }
   }
   private static MethodParameter getStringParameter() {
     return new ParameterUtils.Regular("text", PrimitiveType.STRING);

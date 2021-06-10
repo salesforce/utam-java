@@ -16,8 +16,8 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import utam.compiler.helpers.ActionType;
-import utam.compiler.helpers.ActionableActionType;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.MethodContext;
@@ -48,27 +48,18 @@ public abstract class ComposeMethodStatement {
       MatcherType matcher,
       List<MethodParameter> matcherParameters) {
     this.returns = matcher != null ? PrimitiveType.BOOLEAN : returnType;
-    operation.setParameters(this.parameters);
-    operation.setImports(this.imports);
-    operation.setClassImports(this.classImports);
-    if (matcherParameters != null) {
-      this.parameters.addAll(matcherParameters);
-    }
-    parameters.removeIf(p -> p == null || p.isLiteral());
-    String invocationStr;
-    if(operand != null){
-      operand.setElementParameters(this.parameters);
-      invocationStr = operation
-              .getCode(getMethodCallString(), operand.getElementGetterString());
-    } else {
-      invocationStr = operation
-              .getCode(getMethodCallString(), "this");
-    }
+    this.imports.addAll(operation.getImports());
+    this.classImports.addAll(operation.getClassImports());
+    this.parameters.addAll(operand.getElementParameters());
+    this.parameters.addAll(operation.getActionParameters());
+    String invocationStr = operation.getCode(getMethodCallString(), operand.getElementGetterString());
     if (matcher != null) {
       codeLines.add(matcher.getCode(matcherParameters, invocationStr));
+      this.parameters.addAll(matcherParameters);
     } else {
       codeLines.add(invocationStr);
     }
+    parameters.removeIf(MethodParameter::isLiteral);
   }
 
   ComposeMethodStatement(Operand operand, Operation operation, TypeProvider returnType) {
@@ -133,9 +124,7 @@ public abstract class ComposeMethodStatement {
      */
     public Utility(UtilityOperand operand, Operation operation) {
       super(operand, operation, operation.getReturnType());
-      if(operand != null){
-        classImports.add(operand.getType());
-      }
+      classImports.add(operand.getType());
       TypeProvider utilitiesContextType = new TypeUtilities.FromClass(UtamUtilitiesContext.class);
       classImports.add(utilitiesContextType);
     }
@@ -195,21 +184,22 @@ public abstract class ComposeMethodStatement {
   public static class Operand {
 
     private final ElementContext elementContext;
-    //this means that scope parameters were already added, same element can be used twice
-    private final MethodContext methodContext;
+    private final List<MethodParameter> parameters;
 
     /**
      * @param elementContext element action is applied to
-     * @param methodContext  methodContext to track elements
      */
     public Operand(ElementContext elementContext, MethodContext methodContext) {
       this.elementContext = elementContext;
-      this.methodContext = methodContext;
-    }
-
-    // used in tests
-    Operand(ElementContext elementContext) {
-      this(elementContext, new MethodContext("test", null, false));
+      if(elementContext == null || methodContext.hasElement(elementContext.getName())) {
+        parameters = Collections.EMPTY_LIST;
+      } else {
+        // remember that element is used to not propagate its parameters to method for second time
+        // if element is already used in a previous statement, parameters were already added
+        // should be done AFTER statement is created
+        methodContext.setElementUsage(elementContext);
+        parameters = elementContext.getParameters();
+      }
     }
 
     String getElementGetterString() {
@@ -219,11 +209,8 @@ public abstract class ComposeMethodStatement {
       return String.format("this.%s(%s)", methodName, parameters);
     }
 
-    void setElementParameters(List<MethodParameter> parameters) {
-      if (methodContext.hasElement(elementContext.getName())) {
-        return;
-      }
-      parameters.addAll(elementContext.getParameters());
+    List<MethodParameter> getElementParameters() {
+      return parameters;
     }
   }
 
@@ -237,11 +224,10 @@ public abstract class ComposeMethodStatement {
     /**
      * Creates a new UtilityOperand object.
      *
-     * @param methodContext context of the current method
      * @param type          holds information about the type of the utility class
      */
-    public UtilityOperand(MethodContext methodContext, TypeProvider type) {
-      super(null, methodContext);
+    public UtilityOperand(TypeProvider type) {
+      super(null, null);
       this.type = type;
     }
 
@@ -253,19 +239,11 @@ public abstract class ComposeMethodStatement {
     }
 
     /**
-     * Stub method that doesn't do anything
-     *
-     * @param parameters list of parameters associated with the utility method
-     */
-    @Override void setElementParameters(List<MethodParameter> parameters) {
-    }
-
-    /**
      * Getter that returns the type of the utility class. Used to add imports for the utility class
      *
      * @return the type field
      */
-    public TypeProvider getType() {
+    TypeProvider getType() {
       return type;
     }
   }
@@ -284,9 +262,20 @@ public abstract class ComposeMethodStatement {
       return "this.getDocument()";
     }
 
+  }
+
+  /**
+   * operand for "element" : "self"
+   */
+  public static class SelfOperand extends Operand {
+
+    public SelfOperand() {
+      super(null, null);
+    }
+
     @Override
-    void setElementParameters(List<MethodParameter> parameters) {
-      // document does not have parameters
+    String getElementGetterString() {
+      return "this";
     }
   }
 
@@ -311,8 +300,8 @@ public abstract class ComposeMethodStatement {
       this.returnType = returnType;
     }
 
-    void setParameters(List<MethodParameter> parameters) {
-      parameters.addAll(actionParameters);
+    List<MethodParameter> getActionParameters() {
+      return actionParameters;
     }
 
     String getCode(String invocationPattern, String elementGetter) {
@@ -322,40 +311,38 @@ public abstract class ComposeMethodStatement {
       return String.format(invocationPattern, elementGetter, methodInvocation);
     }
 
-    void setImports(List<TypeProvider> imports) {
+    List<TypeProvider> getImports() {
       // parameters can be non primitive like Selector
-      actionParameters
+      return actionParameters
           .stream()
           .filter(p -> p != null && !p.isLiteral())
-          .forEach(p -> imports.add(p.getType()));
+          .map(MethodParameter::getType)
+          .collect(Collectors.toList());
     }
 
-    void setClassImports(List<TypeProvider> imports) {
+    List<TypeProvider> getClassImports() {
       // parameters can be non primitive like Selector
-      setImports(imports);
+      List<TypeProvider> res = new ArrayList<>(getImports());
       actionParameters
           .stream()
           .filter(p -> p != null && p.isLiteral())
           .forEach(p -> {
             if (SELECTOR.isSameType(p.getType())) {
-              imports.add(p.getType());
+              res.add(p.getType());
             }
           });
-    }
-
-    public boolean isSizeAction() {
-      return action.equals(ActionableActionType.size);
+      return res;
     }
 
     public boolean isReturnsVoid() {
       return VOID.isSameType(getReturnType());
     }
 
-    TypeProvider getReturnType() {
+    final TypeProvider getReturnType() {
       return returnType;
     }
 
-    public ActionType getAction() {
+    final ActionType getAction() {
       return action;
     }
   }
@@ -374,20 +361,24 @@ public abstract class ComposeMethodStatement {
       super(action, returnType, actionParameters);
     }
 
-    @Override
-    public void setImports(List<TypeProvider> imports) {
-      super.setImports(imports);
+    private void setReturnTypeImport(List<TypeProvider> res) {
       if (!PrimitiveType.isPrimitiveType(getReturnType().getFullName())) {
-        imports.add(getReturnType());
+        res.add(getReturnType());
       }
     }
 
     @Override
-    public void setClassImports(List<TypeProvider> imports) {
-      super.setClassImports(imports);
-      if (!PrimitiveType.isPrimitiveType(getReturnType().getFullName())) {
-        imports.add(getReturnType());
-      }
+    List<TypeProvider> getImports() {
+      List<TypeProvider> res = new ArrayList<>(super.getImports());
+      setReturnTypeImport(res);
+      return res;
+    }
+
+    @Override
+    List<TypeProvider> getClassImports() {
+      List<TypeProvider> res = new ArrayList<>(super.getClassImports());
+      setReturnTypeImport(res);
+      return res;
     }
 
     /**
@@ -470,15 +461,17 @@ public abstract class ComposeMethodStatement {
     }
 
     @Override
-    void setImports(List<TypeProvider> imports) {
-      super.setImports(imports);
-      imports.addAll(this.imports);
+    List<TypeProvider> getImports() {
+      List<TypeProvider> res = new ArrayList<>(super.getImports());
+      res.addAll(this.imports); // add accumulated parameters from prev statements
+      return res;
     }
 
     @Override
-    void setClassImports(List<TypeProvider> imports) {
-      super.setClassImports(imports);
-      imports.addAll(this.classImports);
+    List<TypeProvider> getClassImports() {
+      List<TypeProvider> res = new ArrayList<>(super.getClassImports());
+      res.addAll(this.classImports); // add accumulated parameters from prev statements
+      return res;
     }
   }
 }

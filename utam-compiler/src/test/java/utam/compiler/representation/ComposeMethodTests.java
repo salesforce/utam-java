@@ -52,10 +52,9 @@ public class ComposeMethodTests {
     return new MethodContext(METHOD_NAME, null, false);
   }
 
-  private static ComposeMethod getComposeMethod(ComposeMethodStatement statement) {
-    // used in tests
+  private static ComposeMethod getComposeMethod(MethodContext methodContext, ComposeMethodStatement statement) {
     return new ComposeMethod(
-        getMethodContext(),
+        methodContext,
         Collections.singletonList(statement),
         EMPTY_PARAMETERS,
         EMPTY_COMMENTS, false);
@@ -84,7 +83,7 @@ public class ComposeMethodTests {
     when(methodAction.getReturnType()).thenReturn(fakeReturnType);
     when(methodAction.getImports()).thenReturn(Collections.singletonList(fakeReturnType));
 
-    ComposeMethod method = getComposeMethod(methodAction);
+    ComposeMethod method = getComposeMethod(getMethodContext(), methodAction);
     PageObjectValidationTestHelper.validateMethod(method, info);
     assertThat(method.getClassImports(), hasSize(0));
   }
@@ -98,10 +97,11 @@ public class ComposeMethodTests {
     TypeProvider elementType = new TypeUtilities.FromClass(Actionable.class);
     ElementContext element = new ElementContext.Root(elementType, actionable, null);
     element.setElementMethod(new RootElementMethod.Public(actionable));
+    MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action =
-        new Single(new Operand(element),
+        new Single(new Operand(element, methodContext),
             getBasicElementOperation(ActionableActionType.focus));
-    ComposeMethod method = getComposeMethod(action);
+    ComposeMethod method = getComposeMethod(methodContext, action);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
@@ -114,10 +114,11 @@ public class ComposeMethodTests {
     TranslationContext context = getTestTranslationContext();
     new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
+    MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action =
-        new ComposeMethodStatement.VoidList(new Operand(element),
+        new ComposeMethodStatement.VoidList(new Operand(element, methodContext),
             getBasicElementOperation(ActionableActionType.focus));
-    ComposeMethod method = getComposeMethod(action);
+    ComposeMethod method = getComposeMethod(methodContext, action);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
@@ -129,10 +130,11 @@ public class ComposeMethodTests {
     TranslationContext context = getTestTranslationContext();
     new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
+    MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action =
-        new Single(new Operand(element),
+        new Single(new Operand(element, methodContext),
             getBasicElementOperation(ActionableActionType.size));
-    ComposeMethod method = getComposeMethod(action);
+    ComposeMethod method = getComposeMethod(methodContext, action);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
@@ -146,11 +148,12 @@ public class ComposeMethodTests {
     TranslationContext context = getTestTranslationContext();
     new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
+    MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action =
         new ReturnsList(
-            new Operand(element),
+            new Operand(element, methodContext),
             getBasicElementOperation(ActionableActionType.getText));
-    ComposeMethod method = getComposeMethod(action);
+    ComposeMethod method = getComposeMethod(methodContext, action);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
@@ -162,9 +165,10 @@ public class ComposeMethodTests {
     TranslationContext context = getTestTranslationContext();
     new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
-    ComposeMethodStatement action = new Single(new Operand(element),
+    MethodContext methodContext = getMethodContext();
+    ComposeMethodStatement action = new Single(new Operand(element, methodContext),
         getBasicElementOperation(ActionableActionType.getText));
-    ComposeMethod method = getComposeMethod(action);
+    ComposeMethod method = getComposeMethod(methodContext, action);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
@@ -175,20 +179,18 @@ public class ComposeMethodTests {
     info.addCodeLine(getElementPrivateMethodCalled(ELEMENT_NAME) + "().getText(paramName)");
     info.addParameter(
         new PageObjectValidationTestHelper.MethodParameterInfo("paramName", "String"));
-
     MethodParameter parameter = new Primitive("paramName", PrimitiveType.STRING);
-
     TranslationContext context = getTestTranslationContext();
     new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
-
+    MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action =
         new Single(
-            new Operand(element),
+            new Operand(element, methodContext),
             getBasicElementOperation(ActionableActionType.getText, parameter));
     ComposeMethod method =
         new ComposeMethod(
-            getMethodContext(), Collections.singletonList(action),
+            methodContext, Collections.singletonList(action),
             action.getParameters(), EMPTY_COMMENTS, false);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
@@ -207,12 +209,13 @@ public class ComposeMethodTests {
         new PageObjectValidationTestHelper.MethodParameterInfo("paramName", "String"));
 
     MethodParameter parameter = new Primitive("paramName", PrimitiveType.STRING);
+    MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action = new ComposeMethodStatement.ReturnsList(
-        new Operand(element),
+        new Operand(element, methodContext),
         getBasicElementOperation(ActionableActionType.getText, parameter));
     ComposeMethod method =
         new ComposeMethod(
-            getMethodContext(), Collections.singletonList(action),
+            methodContext, Collections.singletonList(action),
             action.getParameters(), EMPTY_COMMENTS, false);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }

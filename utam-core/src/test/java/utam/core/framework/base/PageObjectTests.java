@@ -10,15 +10,12 @@ package utam.core.framework.base;
 import org.hamcrest.CoreMatchers;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
-import utam.core.framework.base.PageObject;
 import utam.core.framework.element.BasePageElement;
 import utam.core.framework.element.ElementLocationChain;
 
 import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
@@ -28,13 +25,6 @@ import static org.testng.Assert.assertThrows;
  * @author james.evans
  */
 public class PageObjectTests {
-
-    @Test
-    public void testDefaultMethods() {
-        final PageObject MOCK = new PageObject() {};
-        MOCK.load();
-        assertThat(MOCK.isPresent(), is(equalTo(false)));
-    }
 
     @Test
     public void testWaitFor() {

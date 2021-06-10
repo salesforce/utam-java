@@ -34,7 +34,6 @@ public abstract class ElementContext {
   static final String ROOT_ELEMENT_NAME = "root";
   static final String DOCUMENT_ELEMENT_NAME = "document";
   static final Locator EMPTY_SELECTOR = LocatorBy.byCss("");
-  static final String EMPTY_SCOPE_ELEMENT_NAME = "empty";
   private final Locator selector;
   // parameters from scope + from element itself
   private final List<MethodParameter> parameters;
