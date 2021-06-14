@@ -38,12 +38,17 @@ public class DeserializerUtilities {
   }
 
   private static String readJSON(String fileName) {
-    InputStream stream =
-        DeserializerUtilities.class.getClassLoader().getResourceAsStream(fileName + ".json");
-    return new BufferedReader(new InputStreamReader(stream))
-        .lines()
-        .parallel()
-        .collect(Collectors.joining("\n"));
+    String testFileName = fileName + ".json";
+    try {
+      InputStream stream =
+          DeserializerUtilities.class.getClassLoader().getResourceAsStream(testFileName);
+      return new BufferedReader(new InputStreamReader(stream))
+          .lines()
+          .parallel()
+          .collect(Collectors.joining("\n"));
+    } catch (NullPointerException e) {
+      throw new AssertionError(String.format("Cant read file '%s'", testFileName), e);
+    }
   }
 
   Result getResultFromFile(String fileName) {
