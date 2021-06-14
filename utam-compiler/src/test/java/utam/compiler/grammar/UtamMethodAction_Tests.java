@@ -17,6 +17,10 @@ import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.TEST_PAGE_OBJECT;
 import static utam.compiler.grammar.TestUtilities.TEST_URI;
 import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
+import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REDUNDANT_ELEMENT;
+import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REDUNDANT_KEYS;
+import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REQUIRED_KEYS;
+import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_WAIT_FOR_INCORRECT_OPERAND;
 import static utam.compiler.helpers.PrimitiveType.NUMBER;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
@@ -45,9 +49,10 @@ import utam.core.framework.consumer.UtamError;
 public class UtamMethodAction_Tests {
 
   private static final String ELEMENT_NAME = "testElement";
+  private static final String METHOD_NAME = "testMethod";
 
   private static MethodContext getMethodContext(TypeProvider returns) {
-    return new MethodContext("testMethod", returns, false);
+    return new MethodContext(METHOD_NAME, returns, false);
   }
 
   private static MethodContext getVoidMethodContext() {
@@ -90,9 +95,23 @@ public class UtamMethodAction_Tests {
     UtamMethodAction action =
             new UtamMethodAction(
                     null, ClickableActionType.click.toString(), null, null, new UtamUtilityMethodAction());
-    expectThrows(
+    UtamError e = expectThrows(
             UtamError.class, () -> action.getComposeAction(context, getMethodContext(VOID), false )
     );
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_COMPOSE_ACTION_REDUNDANT_KEYS, METHOD_NAME))));
+  }
+
+  @Test
+  public void testGetComposeActionRedundantElementForUtility() {
+    TranslationContext context = TestUtilities.getTestTranslationContext();
+    new UtamElement(ELEMENT_NAME, "clickable", getSelector()).testTraverse(context);
+    UtamMethodAction action =
+        new UtamMethodAction(
+            ELEMENT_NAME, null, null, null, new UtamUtilityMethodAction());
+    UtamError e = expectThrows(
+        UtamError.class, () -> action.getComposeAction(context, getMethodContext(VOID), false )
+    );
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_COMPOSE_ACTION_REDUNDANT_ELEMENT, METHOD_NAME))));
   }
 
   /**
@@ -104,9 +123,10 @@ public class UtamMethodAction_Tests {
     new UtamElement(ELEMENT_NAME, "clickable", getSelector()).testTraverse(context);
     UtamMethodAction action =
             new UtamMethodAction(null);
-    expectThrows(
+    UtamError e = expectThrows(
             UtamError.class, () -> action.getComposeAction(context, getMethodContext(VOID), false )
     );
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_COMPOSE_ACTION_REQUIRED_KEYS, METHOD_NAME))));
   }
 
   /**
@@ -292,13 +312,15 @@ public class UtamMethodAction_Tests {
     context.setElement(new Document());
     new UtamElement(ELEMENT_NAME, "clickable", getListSelector()).testTraverse(context);
     // document element does not have waitFor API
-    expectThrows(
+    UtamError e = expectThrows(
         UtamError.class, () -> new UtamMethodAction("document", "waitFor")
             .getComposeAction(context, getMethodContext(VOID), false));
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_COMPOSE_WAIT_FOR_INCORRECT_OPERAND, METHOD_NAME))));
     // list element
-    expectThrows(
+    e = expectThrows(
         UtamError.class, () -> new UtamMethodAction(ELEMENT_NAME, "waitFor")
             .getComposeAction(context, getMethodContext(VOID), false)
     );
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_COMPOSE_WAIT_FOR_INCORRECT_OPERAND, METHOD_NAME))));
   }
 }

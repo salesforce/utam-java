@@ -17,7 +17,7 @@ import utam.core.framework.consumer.ContainerElement;
  */
 public final class ContainerElementPageObject implements PageObject {
 
-  private static final String ERR_UNSUPPORTED_METHOD =
+  static final String ERR_UNSUPPORTED_METHOD =
       "method is not supported for a " + ContainerElementPageObject.class.getSimpleName();
   private final ContainerElement container;
 

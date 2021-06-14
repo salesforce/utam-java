@@ -50,16 +50,16 @@ class UtamMethodAction {
   private static final String WAIT_FOR = "waitFor";
   private static final String SELF_ELEMENT = "self";
 
-  private static final String ERR_COMPOSE_ACTION_REQUIRED_KEYS =
+  static final String ERR_COMPOSE_ACTION_REQUIRED_KEYS =
       "compose method '%s': statement should either have 'apply' or 'applyExternal' properties";
 
-  private static final String ERR_COMPOSE_ACTION_REDUNDANT_KEYS =
+  static final String ERR_COMPOSE_ACTION_REDUNDANT_KEYS =
       "compose method '%s': statement should not have both 'apply' and 'applyExternal' properties";
 
-  private static final String ERR_COMPOSE_ACTION_REDUNDANT_ELEMENT =
+  static final String ERR_COMPOSE_ACTION_REDUNDANT_ELEMENT =
       "compose method '%s': utility statement should not have 'element' property";
 
-  private static final String ERR_COMPOSE_WAIT_FOR_INCORRECT_OPERAND =
+  static final String ERR_COMPOSE_WAIT_FOR_INCORRECT_OPERAND =
       "compose method '%s': waitFor cannot be applied to document or to an element marked as a list";
 
   final String elementName;
