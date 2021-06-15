@@ -32,7 +32,7 @@ import static utam.compiler.helpers.Validation.isSameSelector;
 public abstract class ElementContext {
 
   static final String ROOT_ELEMENT_NAME = "root";
-  static final String DOCUMENT_ELEMENT_NAME = "document";
+  public static final String DOCUMENT_ELEMENT_NAME = "document";
   static final Locator EMPTY_SELECTOR = LocatorBy.byCss("");
   private final Locator selector;
   // parameters from scope + from element itself

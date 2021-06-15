@@ -8,6 +8,7 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.helpers.ActionableActionType.getActionType;
+import static utam.compiler.helpers.ActionableActionType.isPresent;
 import static utam.compiler.helpers.ActionableActionType.size;
 import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 import static utam.compiler.helpers.TypeUtilities.VOID;
@@ -30,6 +31,7 @@ import utam.compiler.representation.ComposeMethodStatement.BasicElementOperation
 import utam.compiler.representation.ComposeMethodStatement.DocumentOperand;
 import utam.compiler.representation.ComposeMethodStatement.Operand;
 import utam.compiler.representation.ComposeMethodStatement.Operation;
+import utam.compiler.representation.ComposeMethodStatement.OperationIsPresent;
 import utam.compiler.representation.ComposeMethodStatement.OperationWithPredicate;
 import utam.compiler.representation.ComposeMethodStatement.SelfOperand;
 import utam.compiler.representation.ComposeMethodStatement.Utility;
@@ -47,26 +49,21 @@ import utam.core.framework.consumer.UtamError;
  */
 class UtamMethodAction {
 
-  private static final String WAIT_FOR = "waitFor";
-  private static final String SELF_ELEMENT = "self";
-
   static final String ERR_COMPOSE_ACTION_REQUIRED_KEYS =
       "compose method '%s': statement should either have 'apply' or 'applyExternal' properties";
-
   static final String ERR_COMPOSE_ACTION_REDUNDANT_KEYS =
       "compose method '%s': statement should not have both 'apply' and 'applyExternal' properties";
-
   static final String ERR_COMPOSE_ACTION_REDUNDANT_ELEMENT =
       "compose method '%s': utility statement should not have 'element' property";
-
-  static final String ERR_COMPOSE_WAIT_FOR_INCORRECT_OPERAND =
-      "compose method '%s': waitFor cannot be applied to document or to an element marked as a list";
-
+  static final String ERR_COMPOSE_INCORRECT_OPERAND =
+      "compose method '%s': action '%s' cannot be applied to document or to an element marked as a list";
+  static final String WAIT_FOR = "waitFor";
+  private static final String SELF_ELEMENT = "self";
   final String elementName;
   final String apply;
+  final UtamUtilityMethodAction applyExternal;
   private final UtamMatcher matcher;
   UtamArgument[] args;
-  final UtamUtilityMethodAction applyExternal;
 
   @JsonCreator
   UtamMethodAction(
@@ -190,8 +187,16 @@ class UtamMethodAction {
       return getUtilityStatement(context, methodContext);
     }
 
-    if (isWaitFor()) {
-      return getWaitForStatement(context, methodContext);
+    // waitFor action generates special code, should be checked for before other conditions
+    if (isWaitForAction()) {
+      return new ComposeMethodStatement.Single(getSingleNonDocumentElement(context, methodContext),
+          getWaitForOperation(context, methodContext));
+    }
+
+    // isPresent action generates special code, should be checked for before other conditions
+    if (isPresentAction()) {
+      return new ComposeMethodStatement.Single(getSingleNonDocumentElement(context, methodContext),
+          new OperationIsPresent());
     }
 
     if (isSelfElement()) {
@@ -239,23 +244,22 @@ class UtamMethodAction {
     return new Utility(utilityOperand, operation);
   }
 
-  private ComposeMethodStatement getWaitForStatement(TranslationContext context,
+  // for waitFor or isPresent element can only be single and non document
+  private Operand getSingleNonDocumentElement(TranslationContext context,
       MethodContext methodContext) {
-    Operand operand;
-    // for waitFor operand is irrelevant, but we do not validate for it to be redundant
     if (isSelfElement()) {
-      operand = new SelfOperand();
-    } else {
-      ElementContext element = context.getElement(elementName);
-      if (element.isList() || element.isDocumentElement()) {
-        throw new UtamCompilationError(String.format(
-            ERR_COMPOSE_WAIT_FOR_INCORRECT_OPERAND,
-            methodContext.getName()
-        ));
-      }
-      operand = new Operand(element, methodContext);
+      return new SelfOperand();
     }
-    return new ComposeMethodStatement.Single(operand, getWaitForOperation(context, methodContext));
+    ElementContext element = context.getElement(elementName);
+    if (element.isList() || element.isDocumentElement()) {
+      throw new UtamCompilationError(String.format(
+          ERR_COMPOSE_INCORRECT_OPERAND,
+          methodContext.getName(), apply
+      ));
+    }
+    // register usage of getter from compose statement
+    context.setPrivateMethodUsage(element.getElementMethod().getDeclaration().getName());
+    return new Operand(element, methodContext);
   }
 
   private List<MethodParameter> getMatcherParameters(MethodContext methodContext) {
@@ -272,12 +276,16 @@ class UtamMethodAction {
     return this.matcher.matcherType;
   }
 
-  private boolean isWaitFor() {
+  private boolean isWaitForAction() {
     return WAIT_FOR.equals(apply);
   }
 
   private boolean isSizeAction() {
     return size.getInvokeMethodName().equals(apply);
+  }
+
+  private boolean isPresentAction() {
+    return isPresent.getInvokeMethodName().equals(apply);
   }
 
   private boolean isSelfElement() {

@@ -20,7 +20,10 @@ import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
 import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REDUNDANT_ELEMENT;
 import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REDUNDANT_KEYS;
 import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REQUIRED_KEYS;
-import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_WAIT_FOR_INCORRECT_OPERAND;
+import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_INCORRECT_OPERAND;
+import static utam.compiler.grammar.UtamMethodAction.WAIT_FOR;
+import static utam.compiler.helpers.ActionableActionType.isPresent;
+import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.PrimitiveType.NUMBER;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
@@ -311,16 +314,36 @@ public class UtamMethodAction_Tests {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     context.setElement(new Document());
     new UtamElement(ELEMENT_NAME, "clickable", getListSelector()).testTraverse(context);
+    final String applyStr = WAIT_FOR;
     // document element does not have waitFor API
     UtamError e = expectThrows(
-        UtamError.class, () -> new UtamMethodAction("document", "waitFor")
+        UtamError.class, () -> new UtamMethodAction(DOCUMENT_ELEMENT_NAME, applyStr)
             .getComposeAction(context, getMethodContext(VOID), false));
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_COMPOSE_WAIT_FOR_INCORRECT_OPERAND, METHOD_NAME))));
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_COMPOSE_INCORRECT_OPERAND, METHOD_NAME, applyStr))));
     // list element
     e = expectThrows(
-        UtamError.class, () -> new UtamMethodAction(ELEMENT_NAME, "waitFor")
+        UtamError.class, () -> new UtamMethodAction(ELEMENT_NAME, applyStr)
             .getComposeAction(context, getMethodContext(VOID), false)
     );
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_COMPOSE_WAIT_FOR_INCORRECT_OPERAND, METHOD_NAME))));
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_COMPOSE_INCORRECT_OPERAND, METHOD_NAME, applyStr))));
+  }
+
+  @Test
+  public void testisPresentWithIncorrectElementThrows() {
+    TranslationContext context = TestUtilities.getTestTranslationContext();
+    context.setElement(new Document());
+    new UtamElement(ELEMENT_NAME, "clickable", getListSelector()).testTraverse(context);
+    final String applyStr = isPresent.getInvokeMethodName();
+    // document element does not have waitFor API
+    UtamError e = expectThrows(
+        UtamError.class, () -> new UtamMethodAction(DOCUMENT_ELEMENT_NAME, applyStr)
+            .getComposeAction(context, getMethodContext(VOID), false));
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_COMPOSE_INCORRECT_OPERAND, METHOD_NAME, applyStr))));
+    // list element
+    e = expectThrows(
+        UtamError.class, () -> new UtamMethodAction(ELEMENT_NAME, applyStr)
+            .getComposeAction(context, getMethodContext(VOID), false)
+    );
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_COMPOSE_INCORRECT_OPERAND, METHOD_NAME, applyStr))));
   }
 }

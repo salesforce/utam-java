@@ -321,7 +321,7 @@ public class UtamMethod_ComposeDeserializeTests {
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
 
     methodInfo = new MethodInfo("testComposeBaseMethod", "Boolean");
-    methodInfo.addCodeLine("this.getCustomElement().isPresent()");
+    methodInfo.addCodeLine("this.isElementPresent(this.getCustomElement())");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testComposeBaseMethod"), methodInfo);
   }
 
@@ -405,10 +405,10 @@ public class UtamMethod_ComposeDeserializeTests {
   public void testSelf() {
     TranslationContext context = new DeserializerUtilities().getContext("composeSelf");
     MethodInfo methodInfo = new MethodInfo("testComposeSelf", "Boolean");
-    methodInfo.addCodeLine("this.isPresent()");
+    methodInfo.addCodeLine("this.isElementPresent(this)");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testComposeSelf"), methodInfo);
     methodInfo = new MethodInfo("testComposeSelfOmitted", "Boolean");
-    methodInfo.addCodeLine("this.isPresent()");
+    methodInfo.addCodeLine("this.isElementPresent(this)");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testComposeSelfOmitted"), methodInfo);
   }
 

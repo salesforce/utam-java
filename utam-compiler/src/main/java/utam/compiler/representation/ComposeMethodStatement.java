@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import utam.compiler.helpers.ActionType;
+import utam.compiler.helpers.ActionableActionType;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.MethodContext;
@@ -472,6 +473,21 @@ public abstract class ComposeMethodStatement {
       List<TypeProvider> res = new ArrayList<>(super.getClassImports());
       res.addAll(this.classImports); // add accumulated parameters from prev statements
       return res;
+    }
+  }
+
+  /**
+   * isPresent can be called on null, hence special generated code
+   */
+  public static class OperationIsPresent extends Operation {
+
+    public OperationIsPresent() {
+      super(ActionableActionType.isPresent, PrimitiveType.BOOLEAN, Collections.EMPTY_LIST);
+    }
+
+    @Override
+    String getCode(String invocationPattern, String elementGetter) {
+      return String.format("this.isElementPresent(%s)", elementGetter);
     }
   }
 }
