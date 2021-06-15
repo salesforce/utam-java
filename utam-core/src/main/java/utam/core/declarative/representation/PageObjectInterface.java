@@ -19,6 +19,8 @@ public interface PageObjectInterface {
 
   Collection<MethodDeclaration> getDeclaredApi();
 
+  Collection<TypeProvider> getNestedInterfaces();
+
   TypeProvider getInterfaceType();
 
   TypeProvider getBaseInterfaceType();

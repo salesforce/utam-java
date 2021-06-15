@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_LIST_RETURN_TYPE;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_RETURN_TYPE;
-import static utam.compiler.helpers.TypeUtilities.Element.actionable;
+import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.representation.ContainerMethod.PAGE_OBJECT_PARAMETER;
 

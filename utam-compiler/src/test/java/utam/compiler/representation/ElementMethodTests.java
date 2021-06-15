@@ -18,8 +18,8 @@ import java.util.Collections;
 
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
-import static utam.compiler.helpers.TypeUtilities.Element.actionable;
-import static utam.compiler.helpers.TypeUtilities.Element.clickable;
+import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
+import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.clickable;
 
 /**
  * Provides tests for the ElementMethod class
@@ -32,12 +32,13 @@ public class ElementMethodTests {
   private static final String ELEMENT_METHOD_NAME = "getTest";
   private static final TypeProvider ACTIONABLE_TYPE = actionable;
   private static final TypeProvider CLICKABLE_TYPE = clickable;
+  private static final String BASE_ELEMENT_TYPE = "utam.core.framework.element.BasePageElement";
 
   @Test
   public void testSingleElementGetterMethodCreated() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, ACTIONABLE_TYPE.getSimpleName());
-    info.addCodeLine("element(this.test).build(Actionable.class)");
-    info.addImportedTypes(ACTIONABLE_TYPE.getFullName());
+    info.addCodeLine("element(this.test).build(Actionable.class, ActionableImpl.class)");
+    info.addImportedTypes(ACTIONABLE_TYPE.getFullName(), BASE_ELEMENT_TYPE);
 
     ElementContext element =
         new ElementContext.Basic(ELEMENT_NAME, ACTIONABLE_TYPE, getCssSelector(".css"));
@@ -48,8 +49,8 @@ public class ElementMethodTests {
   @Test
   public void testSingleElementWithParametersGetterMethodCreated() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, CLICKABLE_TYPE.getSimpleName());
-    info.addCodeLine("element(this.test).build(Clickable.class, selectorArg)");
-    info.addImportedTypes(CLICKABLE_TYPE.getFullName());
+    info.addCodeLine("element(this.test).build(Clickable.class, ClickableImpl.class, selectorArg)");
+    info.addImportedTypes(CLICKABLE_TYPE.getFullName(), BASE_ELEMENT_TYPE);
     info.addParameter(new MethodParameterInfo("selectorArg", "String"));
     ElementContext element =
         new ElementContext.Basic(
@@ -67,8 +68,8 @@ public class ElementMethodTests {
   @Test
   public void testListElementMethodCreation() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, "List<Actionable>");
-    info.addCodeLine("element(this.test).buildList(Actionable.class)");
-    info.addImportedTypes("java.util.List", ACTIONABLE_TYPE.getFullName());
+    info.addCodeLine("element(this.test).buildList(Actionable.class, ActionableImpl.class)");
+    info.addImportedTypes("java.util.List", ACTIONABLE_TYPE.getFullName(), BASE_ELEMENT_TYPE);
     ElementContext element =
         new ElementContext.Basic(ELEMENT_NAME, ACTIONABLE_TYPE, getCssSelector("css"), true);
     PageObjectMethod method = new ElementMethod.Multiple(element, true);
@@ -79,8 +80,8 @@ public class ElementMethodTests {
   @Test
   public void testListElementMethodWithParametersGetterMethodCreated() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME,"List<Clickable>");
-    info.addCodeLine("element(this.test).buildList(Clickable.class, selectorArg)");
-    info.addImportedTypes("java.util.List", CLICKABLE_TYPE.getFullName());
+    info.addCodeLine("element(this.test).buildList(Clickable.class, ClickableImpl.class, selectorArg)");
+    info.addImportedTypes("java.util.List", CLICKABLE_TYPE.getFullName(), BASE_ELEMENT_TYPE);
     info.addParameter(new MethodParameterInfo("selectorArg", "String"));
     ElementContext element =
         new ElementContext.Basic(
@@ -99,8 +100,8 @@ public class ElementMethodTests {
   public void testFilteredElementMethodCreation() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, "Actionable");
     info.addParameter(new MethodParameterInfo("test", "String"));
-    info.addCodeLine("element(this.test).build(Actionable.class, elm -> elm.getText().contains(test))");
-    info.addImportedTypes(ACTIONABLE_TYPE.getFullName());
+    info.addCodeLine("element(this.test).build(Actionable.class, ActionableImpl.class, elm -> elm.getText().contains(test))");
+    info.addImportedTypes(ACTIONABLE_TYPE.getFullName(), BASE_ELEMENT_TYPE);
     PageObjectMethod method = new ElementMethod.Filtered(
         ELEMENT_NAME,
         ACTIONABLE_TYPE,

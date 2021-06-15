@@ -24,4 +24,8 @@ public interface PageObjectMethod {
   List<TypeProvider> getClassImports();
 
   boolean isPublic();
+
+  default boolean isElementMethod() {
+    return false;
+  }
 }

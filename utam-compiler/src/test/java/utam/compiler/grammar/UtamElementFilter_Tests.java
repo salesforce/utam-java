@@ -19,8 +19,8 @@ import java.util.List;
 
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_FILTER_NEEDS_LIST;
 import static utam.compiler.grammar.UtamElementFilter.ERR_INCORRECT_MATCHER_FOR_METHOD;
-import static utam.compiler.helpers.TypeUtilities.Element.actionable;
-import static utam.compiler.helpers.TypeUtilities.Element.editable;
+import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
+import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.editable;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -163,7 +163,7 @@ public class UtamElementFilter_Tests {
   @Test
   public void testCustomFilterWithoutListThrows() {
     UtamElement utamElement = new UtamElement("element");
-    utamElement.type = TestUtilities.TEST_URI;
+    utamElement.type = new String[] {TestUtilities.TEST_URI};
     utamElement.selector = new UtamSelector("css");
     utamElement.filter = getInnerTextFilter();
     UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
@@ -189,13 +189,13 @@ public class UtamElementFilter_Tests {
     PageObjectMethod method = elementContext.getElementMethod();
     assertThat(elementContext.isList(), is(equalTo(true)));
     PageObjectValidationTestHelper.MethodInfo methodInfo =
-        new PageObjectValidationTestHelper.MethodInfo("getElementElement", "List<Actionable>");
+        new PageObjectValidationTestHelper.MethodInfo("getElementElement", "List<ElementElement>");
     for (int i = 1; i <= 3; i++) {
       methodInfo.addParameter(
           new PageObjectValidationTestHelper.MethodParameterInfo("arg" + i, "String"));
     }
     methodInfo.addCodeLines(
-        "element(this.element).buildList(Actionable.class, elm -> elm.getAttribute(arg2).contains(arg3), arg1)");
+        "element(this.element).buildList(ElementElement.class, ElementElementImpl.class, elm -> elm.getAttribute(arg2).contains(arg3), arg1)");
     methodInfo.setIsPublic(false);
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
@@ -208,13 +208,13 @@ public class UtamElementFilter_Tests {
     assertThat(elementContext.isList(), is(equalTo(false)));
     PageObjectValidationTestHelper.MethodInfo methodInfo =
         new PageObjectValidationTestHelper.MethodInfo(
-            "getElement", editable.getSimpleName());
+            "getElement", "ElementElement");
     methodInfo.addParameter(
         new PageObjectValidationTestHelper.MethodParameterInfo("arg1", "String"));
     methodInfo.addParameter(
         new PageObjectValidationTestHelper.MethodParameterInfo("arg2", "String"));
     methodInfo.addCodeLines(
-        "element(this.element).build(Editable.class, elm -> Boolean.FALSE.equals(elm.isVisible()), arg1,arg2)");
+        "element(this.element).build(ElementElement.class, ElementElementImpl.class, elm -> Boolean.FALSE.equals(elm.isVisible()), arg1,arg2)");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 

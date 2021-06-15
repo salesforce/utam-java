@@ -22,6 +22,7 @@ import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.element.BasePageElement;
 
 /**
  * generate code of getter method for basic element
@@ -39,9 +40,10 @@ public abstract class ElementMethod implements PageObjectMethod {
   }
 
   private static String getElementMethodCode(ElementContext element, boolean isList) {
-    return String.format("element(this.%s).%s(%s.class%s)",
+    return String.format("element(this.%s).%s(%s.class, %sImpl.class%s)",
         element.getName(),
         isList? "buildList" : "build",
+        element.getType().getSimpleName(),
         element.getType().getSimpleName(),
         getParametersVararg(element.getParameters()));
   }
@@ -53,9 +55,10 @@ public abstract class ElementMethod implements PageObjectMethod {
       String predicateCode,
       boolean isReturnFirstMatch) {
     return String.format(
-        "element(this.%s).%s(%s.class, %s%s)",
+        "element(this.%s).%s(%s.class, %sImpl.class, %s%s)",
         elementName,
         isReturnFirstMatch ? "build" : "buildList",
+        elementType.getSimpleName(),
         elementType.getSimpleName(),
         predicateCode,
         getParametersVararg(elementParameters));
@@ -90,8 +93,12 @@ public abstract class ElementMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(
-          methodName, parameters, returnType, Stream.of(returnType).collect(Collectors.toList()));
+      List<TypeProvider> imports = Stream.of(returnType).collect(Collectors.toList());
+//      if (returnType instanceof TypeUtilities.Element) {
+//        imports.addAll(((TypeUtilities.Element)returnType).getBasicInterfaces());
+//      }
+      imports.add(new TypeUtilities.FromClass(BasePageElement.class));
+      return new MethodDeclarationImpl(methodName, parameters, returnType, imports);
     }
 
     @Override
@@ -107,6 +114,11 @@ public abstract class ElementMethod implements PageObjectMethod {
     @Override
     public boolean isPublic() {
       return this.isPublic;
+    }
+
+    @Override
+    public boolean isElementMethod() {
+      return true;
     }
   }
 
@@ -128,11 +140,16 @@ public abstract class ElementMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
+      List<TypeProvider> imports = Stream.of(returnType, LIST_IMPORT).collect(Collectors.toList());
+//      if (returnType instanceof TypeUtilities.Element) {
+//        imports.addAll(((TypeUtilities.Element)returnType).getBasicInterfaces());
+//      }
+      imports.add(new TypeUtilities.FromClass(BasePageElement.class));
       return new MethodDeclarationImpl(
           methodName,
           parameters,
           new TypeUtilities.ListOf(returnType),
-          Stream.of(returnType, LIST_IMPORT).collect(Collectors.toList()));
+          imports);
     }
 
     @Override
@@ -148,6 +165,11 @@ public abstract class ElementMethod implements PageObjectMethod {
     @Override
     public boolean isPublic() {
       return this.isPublic;
+    }
+
+    @Override
+    public boolean isElementMethod() {
+      return true;
     }
   }
 
@@ -183,6 +205,7 @@ public abstract class ElementMethod implements PageObjectMethod {
       if (returnListType != null) {
         this.imports.add(returnListType);
       }
+      this.imports.add(new TypeUtilities.FromClass(BasePageElement.class));
       this.codeLines.add(
           getElementFilteredListMethodCode(
               elementName,
@@ -212,6 +235,11 @@ public abstract class ElementMethod implements PageObjectMethod {
     @Override
     public boolean isPublic() {
       return this.isPublic;
+    }
+
+    @Override
+    public boolean isElementMethod() {
+      return true;
     }
   }
 }

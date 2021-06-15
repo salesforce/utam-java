@@ -56,18 +56,18 @@ public class ActionableActionTypeTests {
     }
   }
 
-  private static ElementContext.Basic getElementContext(TypeUtilities.Element type) {
+  private static ElementContext.Basic getElementContext(TypeUtilities.BasicElementInterface type) {
     return new ElementContext.Basic(ELEMENT_NAME, type, getCssSelector("selector"));
   }
 
   private static ElementContext.Basic getEditableElementContext() {
     return new ElementContext.Basic(
-        ELEMENT_NAME, TypeUtilities.Element.editable, getCssSelector("selector"));
+        ELEMENT_NAME, TypeUtilities.BasicElementInterface.editable, getCssSelector("selector"));
   }
 
   private static ElementContext.Basic getTouchableElementContext() {
     return new ElementContext.Basic(
-        ELEMENT_NAME, TypeUtilities.Element.touchable, getCssSelector("selector"));
+        ELEMENT_NAME, TypeUtilities.BasicElementInterface.touchable, getCssSelector("selector"));
   }
 
   private static void validateAction(ActionType action, String returnType) {
@@ -243,7 +243,7 @@ public class ActionableActionTypeTests {
   @Test
   public void testGetActionFromStringForActionable() {
     final ActionType waitForAbsence = ActionableActionType.waitForAbsence;
-    ElementContext elementContext = getElementContext(TypeUtilities.Element.actionable);
+    ElementContext elementContext = getElementContext(TypeUtilities.BasicElementInterface.actionable);
     assertThat(
         ActionableActionType.getActionType(
             waitForAbsence.getApplyString(), elementContext.getType(), elementContext.getName()),
@@ -255,7 +255,7 @@ public class ActionableActionTypeTests {
             elementContext.getType(),
             elementContext.getName()),
         is(equalTo(ActionableActionType.getClass)));
-    elementContext = getElementContext(TypeUtilities.Element.clickable);
+    elementContext = getElementContext(TypeUtilities.BasicElementInterface.clickable);
     assertThat(
         ActionableActionType.getActionType(
             waitForAbsence.getApplyString(), elementContext.getType(), elementContext.getName()),
@@ -270,7 +270,7 @@ public class ActionableActionTypeTests {
         ActionableActionType.getActionType(
             ACTION.getApplyString(), elementContext.getType(), elementContext.getName()),
         is(equalTo(ACTION)));
-    elementContext = getElementContext(TypeUtilities.Element.clickable);
+    elementContext = getElementContext(TypeUtilities.BasicElementInterface.clickable);
     assertThat(
         ActionableActionType.getActionType(
             ACTION.getApplyString(), elementContext.getType(), elementContext.getName()),
@@ -317,7 +317,7 @@ public class ActionableActionTypeTests {
   @Test
   public void testActionFromStringWrongActionNameError() {
     final String ACTION_NAME = "error";
-    ElementContext elementContext = getElementContext(TypeUtilities.Element.actionable);
+    ElementContext elementContext = getElementContext(TypeUtilities.BasicElementInterface.actionable);
     UtamError e =
         expectThrows(
             UtamError.class,
@@ -330,14 +330,14 @@ public class ActionableActionTypeTests {
             String.format(
                 ERR_UNKNOWN_ACTION,
                 ACTION_NAME,
-                TypeUtilities.Element.actionable.name(),
-                ELEMENT_NAME)));
+                ELEMENT_NAME,
+                TypeUtilities.BasicElementInterface.actionable.name())));
   }
 
   @Test
   public void testActionFromStringForTouchableWrongActionNameError() {
     final String ACTION_NAME = "error";
-    ElementContext elementContext = getElementContext(TypeUtilities.Element.touchable);
+    ElementContext elementContext = getElementContext(TypeUtilities.BasicElementInterface.touchable);
     UtamError e =
         expectThrows(
             UtamError.class,
@@ -350,14 +350,14 @@ public class ActionableActionTypeTests {
             String.format(
                 ERR_UNKNOWN_ACTION,
                 ACTION_NAME,
-                TypeUtilities.Element.touchable.name(),
-                ELEMENT_NAME)));
+                ELEMENT_NAME,
+                TypeUtilities.BasicElementInterface.touchable.name())));
   }
 
   @Test
   public void testActionFromStringWrongActionTypeError() {
     final String ACTION_NAME = ClickableActionType.click.name();
-    ElementContext elementContext = getElementContext(TypeUtilities.Element.actionable);
+    ElementContext elementContext = getElementContext(TypeUtilities.BasicElementInterface.actionable);
     UtamError e =
         expectThrows(
             UtamError.class,
@@ -370,7 +370,7 @@ public class ActionableActionTypeTests {
             String.format(
                 ERR_UNKNOWN_ACTION,
                 ACTION_NAME,
-                TypeUtilities.Element.actionable.name(),
-                ELEMENT_NAME)));
+                ELEMENT_NAME,
+                TypeUtilities.BasicElementInterface.actionable.name())));
   }
 }

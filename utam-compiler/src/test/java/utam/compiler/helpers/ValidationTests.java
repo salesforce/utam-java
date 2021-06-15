@@ -16,7 +16,7 @@ import java.util.*;
 
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
-import static utam.compiler.helpers.TypeUtilities.Element.actionable;
+import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
 import static utam.compiler.helpers.Validation.ERR_FORMAT_GLOBAL;
 import static utam.compiler.helpers.Validation.ERR_FORMAT_LOCAL;
 import static org.hamcrest.MatcherAssert.assertThat;

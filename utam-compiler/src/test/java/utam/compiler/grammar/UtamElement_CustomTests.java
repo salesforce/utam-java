@@ -40,7 +40,7 @@ public class UtamElement_CustomTests {
   private static UtamElement getPublicComponentElement(
       UtamSelector selector, UtamElementFilter filter) {
     UtamElement utamElement = new UtamElement(ELEMENT_NAME);
-    utamElement.type = COMPONENT_TYPE_URI;
+    utamElement.type = new String[] {COMPONENT_TYPE_URI};
     utamElement.isPublic = true;
     utamElement.selector = selector;
     utamElement.filter = filter;
@@ -70,7 +70,7 @@ public class UtamElement_CustomTests {
   @Test
   public void testGetSimpleTypeWithInvalidTypeThrows() {
     UtamElement element = new UtamElement(ELEMENT_NAME);
-    element.type = "invalid";
+    element.type = new String[] {"invalid"};
     UtamError e = expectThrows(UtamError.class, element::getAbstraction);
     assertThat(
         e.getMessage(), containsString(String.format(ERR_ELEMENT_OF_UNKNOWN_TYPE, ELEMENT_NAME)));

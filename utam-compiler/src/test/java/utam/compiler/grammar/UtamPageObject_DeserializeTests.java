@@ -8,6 +8,8 @@
 package utam.compiler.grammar;
 
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.helpers.TypeUtilities;
+import utam.core.element.RootElement;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 import utam.core.selenium.element.LocatorBy;
@@ -16,8 +18,6 @@ import static utam.compiler.grammar.TestUtilities.*;
 import static utam.compiler.grammar.UtamPageObject.*;
 import static utam.compiler.grammar.UtamSelector.ERR_ROOT_SELECTOR_ARGS;
 import static utam.compiler.grammar.UtamSelector.ERR_ROOT_SELECTOR_LIST;
-import static utam.compiler.helpers.TypeUtilities.Element.actionable;
-import static utam.compiler.helpers.TypeUtilities.Element.clickable;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -61,7 +61,10 @@ public class UtamPageObject_DeserializeTests {
     assertThat(root.getBaseType().getFullName(), containsString(PAGE_OBJECT.getFullName()));
     TranslationContext context = getTestTranslationContext();
     root.compile(context);
-    assertThat(context.getRootElement().getType(), is(equalTo(actionable)));
+    assertThat(
+        context.getRootElement().getType().isSameType(new TypeUtilities.FromClass(
+            RootElement.class)),
+        is(equalTo(true)));
   }
 
   /** A root node with a selector property should be valid */
@@ -125,7 +128,7 @@ public class UtamPageObject_DeserializeTests {
     assertThat(root.elements.length, is(equalTo(1)));
     assertThat(
         context.getRootElement().getType().getSimpleName(),
-        is(equalTo(clickable.getSimpleName())));
+        is(equalTo("RootElement")));
   }
 
   /** Tests that a root element with a platform using invalid value throws the proper exception */

@@ -8,6 +8,8 @@
 package utam.compiler.translator;
 
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.helpers.TypeUtilities;
+import utam.compiler.representation.ElementMethod;
 import utam.core.declarative.representation.*;
 
 import java.util.ArrayList;
@@ -95,6 +97,15 @@ public final class ClassSerializer {
             .filter(method -> method.isPublic() || translationContext.getUsedPrivateMethods().contains(method.getDeclaration().getName()))
             .flatMap(method -> getMethodDeclaration(method).stream()).forEach(out::add);
     out.add(NEW_LINE);
+    source.getMethods().stream()
+        .filter(method -> (method.isPublic() || translationContext.getUsedPrivateMethods().contains(method.getDeclaration().getName())) && method.isElementMethod())
+        .map(method -> method.getDeclaration().getReturnType())
+        .map(returnType -> returnType instanceof TypeUtilities.ListOf ? ((TypeUtilities.ListOf)returnType).getElementType() : returnType)
+        .map(returnType -> String.format(
+            "public static class %s extends BasePageElement implements %s {}",
+            returnType.getSimpleName() + "Impl",
+            returnType.getSimpleName()))
+        .collect(Collectors.toList()).forEach(out::add);
     out.add(NEW_LINE);
     out.add("}");
     return applyJavaFormatter(out);

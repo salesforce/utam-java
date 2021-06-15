@@ -15,15 +15,11 @@ import org.openqa.selenium.Keys;
 import utam.core.driver.Driver;
 import utam.core.driver.DriverTimeouts;
 import utam.core.driver.Expectations;
-import utam.core.element.Actionable;
-import utam.core.element.BaseElement;
-import utam.core.element.Clickable;
-import utam.core.element.Editable;
 import utam.core.element.Element;
+import utam.core.element.Locator;
+import utam.core.element.RootElement;
 import utam.core.element.Element.GestureDirection;
 import utam.core.element.Element.ScrollOptions;
-import utam.core.element.Locator;
-import utam.core.element.Touchable;
 import utam.core.framework.UtamLogger;
 import utam.core.framework.base.PageObjectsFactory;
 
@@ -34,17 +30,13 @@ import utam.core.framework.base.PageObjectsFactory;
  * @author elizaveta.ivanova
  * @since 234
  */
-public class BasePageElement implements BaseElement, Actionable, Clickable, Editable, Touchable {
+public class BasePageElement implements RootElement {
 
-  private final Driver driver;
-  private final DriverTimeouts timeouts;
-  private final Element element;
+  private Driver driver;
+  private DriverTimeouts timeouts;
+  private Element element;
 
-  public BasePageElement(PageObjectsFactory factory, Element element) {
-    this.driver = factory.getDriver();
-    this.element = element;
-    this.timeouts = factory.getDriverContext().getTimeouts();
-  }
+  public BasePageElement() {}
 
   private Element getElement() {
     return element;
@@ -61,6 +53,12 @@ public class BasePageElement implements BaseElement, Actionable, Clickable, Edit
     return driver
         .waitFor(timeouts.getFluentWaitTimeout(), timeouts.getPollingInterval(), expectations,
             getElement());
+  }
+
+  public void initialize(PageObjectsFactory factory, Element element) {
+    this.driver = factory.getDriver();
+    this.element = element;
+    this.timeouts = factory.getDriverContext().getTimeouts();
   }
 
   @Override

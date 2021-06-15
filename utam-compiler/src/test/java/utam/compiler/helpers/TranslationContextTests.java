@@ -28,7 +28,7 @@ import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.helpers.AnnotationUtils.EMPTY_ANNOTATION;
 import static utam.compiler.helpers.TranslationContext.*;
-import static utam.compiler.helpers.TypeUtilities.Element.editable;
+import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.editable;
 import static utam.compiler.helpers.ValidationTests.ELEMENT_SELECTOR;
 import static utam.compiler.helpers.ValidationTests.ELEMENT_TYPE;
 import static utam.compiler.translator.AbstractTranslatorConfiguration.ERR_PROFILE_NOT_CONFIGURED;
@@ -49,7 +49,7 @@ public class TranslationContextTests {
 
   private static ElementContext getElementContext(String elementName, String selector) {
     return new ElementContext.Basic(
-        elementName, TypeUtilities.Element.clickable, getCssSelector(selector));
+        elementName, TypeUtilities.BasicElementInterface.clickable, getCssSelector(selector));
   }
 
   private static TranslationContext getContainerContext() {
@@ -132,7 +132,7 @@ public class TranslationContextTests {
   @Test
   public void testGetMethods() {
     MethodInfo methodInfo = new MethodInfo("getTestElement", "Clickable");
-    methodInfo.addCodeLine("element(this.testElement).build(Clickable.class)");
+    methodInfo.addCodeLine("element(this.testElement).build(Clickable.class, ClickableImpl.class)");
 
     PageObjectValidationTestHelper.validateMethods(
         "translator context",
@@ -190,7 +190,7 @@ public class TranslationContextTests {
         new ElementContext.Basic(
             null,
             "parameterElement",
-            TypeUtilities.Element.clickable,
+            TypeUtilities.BasicElementInterface.clickable,
             getCssSelector("a[title=*'%s']"),
             false,
             Collections.singletonList(getStringParameter()));
@@ -207,7 +207,7 @@ public class TranslationContextTests {
         new ElementContext.Basic(
             null,
             "parameterElement",
-            TypeUtilities.Element.clickable,
+            TypeUtilities.BasicElementInterface.clickable,
             getCssSelector("a[title=*'%s'][alt=*'%s]"),
             false,
             Arrays.asList(
@@ -225,7 +225,7 @@ public class TranslationContextTests {
         new ElementContext.Basic(
             null,
             "parameterElement",
-            TypeUtilities.Element.clickable,
+            TypeUtilities.BasicElementInterface.clickable,
             getCssSelector("a[title=*'%s']"),
             false,
             Arrays.asList(getStringParameter(), getStringParameter()));

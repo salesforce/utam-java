@@ -11,8 +11,10 @@ import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 
+import java.util.Arrays;
 import java.util.Objects;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.element.RootElement;
 import utam.core.framework.consumer.UtamError;
 import utam.core.element.Actionable;
 
@@ -139,7 +141,7 @@ public enum ActionableActionType implements ActionType {
   waitForVisible(null);
 
   static final String ERR_NOT_HTML_ELEMENT = "element '%s' is not HTML element, its type is '%s'";
-  static final String ERR_UNKNOWN_ACTION = "unknown action '%s' for %s element '%s'";
+  static final String ERR_UNKNOWN_ACTION = "unknown action '%s' for element '%s' with declared interfaces %s";
   // return type of the action
   private final TypeProvider returnType;
   // parameters accepted by the action
@@ -159,42 +161,46 @@ public enum ActionableActionType implements ActionType {
   }
 
   public static ActionType getActionType(String apply, TypeProvider elementType, String elementName) {
-    if(!TypeUtilities.Element.isBasicType(elementType)) {
+    if (!TypeUtilities.BasicElementInterface.isBasicType(elementType)
+        && !elementType.isSameType(new TypeUtilities.FromClass(RootElement.class))) {
       throw new UtamError(
           String.format(
               ERR_NOT_HTML_ELEMENT,
               elementName,
               elementType.getSimpleName()));
     }
-    TypeUtilities.Element actionableType = TypeUtilities.Element.getBasicElementType(elementType);
-    if (actionableType == TypeUtilities.Element.editable) {
-      for (EditableActionType action : EditableActionType.values()) {
+    TypeUtilities.BasicElementInterface actionableTypes[] = TypeUtilities.BasicElementInterface.getBasicElementTypes(elementType);
+    for (TypeUtilities.BasicElementInterface actionableType : actionableTypes) {
+      if (actionableType == TypeUtilities.BasicElementInterface.editable) {
+        for (EditableActionType action : EditableActionType.values()) {
+          if (action.getApplyString().equals(apply)) {
+            return action;
+          }
+        }
+      }
+      if (actionableType == TypeUtilities.BasicElementInterface.touchable) {
+        for (TouchableActionType action : TouchableActionType.values()) {
+          if (action.getApplyString().equals(apply)) {
+            return action;
+          }
+        }
+      }
+      if (actionableType == TypeUtilities.BasicElementInterface.editable || actionableType == TypeUtilities.BasicElementInterface.clickable) {
+        for (ClickableActionType action : ClickableActionType.values()) {
+          if (action.getApplyString().equals(apply)) {
+            return action;
+          }
+        }
+      }
+      for (ActionableActionType action : ActionableActionType.values()) {
         if (action.getApplyString().equals(apply)) {
           return action;
         }
       }
     }
-    if (actionableType == TypeUtilities.Element.touchable) {
-      for (TouchableActionType action : TouchableActionType.values()) {
-        if (action.getApplyString().equals(apply)) {
-          return action;
-        }
-      }
-    }
-    if (actionableType == TypeUtilities.Element.editable
-        || actionableType == TypeUtilities.Element.clickable) {
-      for (ClickableActionType action : ClickableActionType.values()) {
-        if (action.getApplyString().equals(apply)) {
-          return action;
-        }
-      }
-    }
-    for (ActionableActionType action : ActionableActionType.values()) {
-      if (action.getApplyString().equals(apply)) {
-        return action;
-      }
-    }
-    throw new UtamError(String.format(ERR_UNKNOWN_ACTION, apply, actionableType.name(), elementName));
+    String actionableTypeNames = Arrays.stream(actionableTypes).map(interfaceType -> interfaceType.name()).collect(
+        Collectors.joining(","));
+    throw new UtamError(String.format(ERR_UNKNOWN_ACTION, apply, elementName, actionableTypeNames));
   }
 
   // used in unit tests

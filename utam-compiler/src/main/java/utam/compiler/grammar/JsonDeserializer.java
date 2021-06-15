@@ -7,10 +7,13 @@
  */
 package utam.compiler.grammar;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.io.CharStreams;
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.helpers.TypeUtilities;
+import utam.compiler.representation.ElementMethod;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.Profile;
 import utam.compiler.translator.ClassSerializer;
@@ -22,11 +25,11 @@ import utam.core.declarative.translator.TranslatorSourceConfig;
 import utam.core.declarative.translator.UnitTestRunner;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_COMMENTS;
+import static com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY;
 import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT;
 
 /**
@@ -79,6 +82,7 @@ public final class JsonDeserializer {
   private static ObjectMapper getDeserializerMapper() {
     ObjectMapper mapper = new ObjectMapper();
     mapper.enable(ALLOW_COMMENTS);
+    mapper.enable(ACCEPT_SINGLE_VALUE_AS_ARRAY);
     SimpleModule module = new SimpleModule();
     module.addDeserializer(UtamProfile.class, new UtamProfile.Deserializer());
     module.addDeserializer(UtamArgument.class, new UtamArgumentDeserializer());
@@ -159,6 +163,21 @@ public final class JsonDeserializer {
           .filter(PageObjectMethod::isPublic)
           .map(PageObjectMethod::getDeclaration)
           .collect(Collectors.toList());
+    }
+
+    @Override
+    public Collection<TypeProvider> getNestedInterfaces() {
+      List<TypeProvider> typeList = context.getMethods().stream()
+          .filter(method -> method.isElementMethod())
+          .map(method -> method.getDeclaration().getReturnType())
+          .map(returnType -> {
+            if (returnType instanceof TypeUtilities.ListOf) {
+              return ((TypeUtilities.ListOf)returnType).getElementType();
+            }
+            return returnType;
+          })
+          .collect(Collectors.toList());
+      return typeList;
     }
 
     @Override

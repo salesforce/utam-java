@@ -37,7 +37,7 @@ public class DeserializerUtilities {
     this.translatorConfig = getDefaultConfig();
   }
 
-  private static String readJSON(String fileName) {
+  public static String readJSON(String fileName) {
     InputStream stream =
         DeserializerUtilities.class.getClassLoader().getResourceAsStream(fileName + ".json");
     return new BufferedReader(new InputStreamReader(stream))

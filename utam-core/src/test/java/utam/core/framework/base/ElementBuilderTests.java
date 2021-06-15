@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.element.Actionable;
 import utam.core.element.ElementLocation;
+import utam.core.framework.element.BasePageElement;
 import utam.core.framework.element.ElementLocationChain;
 import utam.core.selenium.element.LocatorBy;
 
@@ -42,24 +43,24 @@ public class ElementBuilderTests {
     MockUtilities mock = new MockUtilities();
     // with WebElement
     new ElementBuilder(mock.getFactory(), new ElementLocationChain(mock.getElementAdapter()))
-        .build(Actionable.class);
+        .build(Actionable.class, BasePageElement.class);
     // with locator, expected exist
     assertThrows(() -> new ElementBuilder(mock.getFactory(),
         new ElementLocationChain(LocatorBy.byCss("css1"), EXISTING))
-        .build(Actionable.class));
+        .build(Actionable.class, BasePageElement.class));
     when(mock.getWebDriverMock().findElement(By.cssSelector("css1"))).thenReturn(mock.getWebElementMock());
     new ElementBuilder(mock.getFactory(),
         new ElementLocationChain(LocatorBy.byCss("css1"), EXISTING))
-        .build(Actionable.class);
+        .build(Actionable.class, BasePageElement.class);
     // with locator, expected does not exist
     new ElementBuilder(mock.getFactory(),
         new ElementLocationChain(LocatorBy.byCss("css2"), NULLABLE))
-        .build(Actionable.class);
+        .build(Actionable.class, BasePageElement.class);
     // with parametrizes locator
     when(mock.getWebDriverMock().findElement(By.cssSelector("css[string]")))
         .thenReturn(mock.getWebElementMock());
     ElementLocation location = new ElementLocationChain(LocatorBy.byCss("css[%s]"), EXISTING);
-    new ElementBuilder(mock.getFactory(), location).build(Actionable.class, "string");
+    new ElementBuilder(mock.getFactory(), location).build(Actionable.class, BasePageElement.class, "string");
   }
 
   @Test
@@ -73,22 +74,22 @@ public class ElementBuilderTests {
     // with WebElement
     List<Actionable> list = new ElementBuilder(mock.getFactory(),
         new ElementLocationChain(mock.getElementAdapter()))
-        .buildList(Actionable.class);
+        .buildList(Actionable.class, BasePageElement.class);
     assertThat(list.size(), Matchers.is(equalTo(1)));
     // with locator, nullable
     assertThat(new ElementBuilder(mock.getFactory(),
         new ElementLocationChain(LocatorBy.byCss("css"), NULLABLE))
-        .buildList(Actionable.class), is(nullValue()));
+        .buildList(Actionable.class, BasePageElement.class), is(nullValue()));
     // with locator, not nullable
     assertThrows(() -> new ElementBuilder(mock.getFactory(),
         new ElementLocationChain(LocatorBy.byCss("css"), EXISTING))
-        .buildList(Actionable.class));
+        .buildList(Actionable.class, BasePageElement.class));
     // with parameter
     when(mock.getWebDriverMock().findElements(By.cssSelector("css[string]")))
         .thenReturn(Collections.singletonList(mock.getWebElementMock()));
     assertThat(new ElementBuilder(mock.getFactory(),
         new ElementLocationChain(LocatorBy.byCss("css[%s]"), EXISTING))
-        .buildList(Actionable.class, "string"), is(not(empty())));
+        .buildList(Actionable.class, BasePageElement.class, "string"), is(not(empty())));
   }
 
   @Test

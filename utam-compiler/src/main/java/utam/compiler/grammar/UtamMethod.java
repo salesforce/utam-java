@@ -129,8 +129,8 @@ class UtamMethod {
       type = defaultReturn;
     } else if (PrimitiveType.isPrimitiveType(returnStr)) {
       type = PrimitiveType.fromString(returnStr);
-    } else if (TypeUtilities.Element.isBasicType(returnStr)) {
-      type = TypeUtilities.Element.asBasicType(returnStr);
+    } else if (TypeUtilities.BasicElementInterface.isBasicType(returnStr)) {
+      type = TypeUtilities.BasicElementInterface.asBasicType(returnStr);
     } else {
       type = context.getType(returnStr);
     }

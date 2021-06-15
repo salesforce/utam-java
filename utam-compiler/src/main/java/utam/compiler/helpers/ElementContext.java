@@ -19,7 +19,7 @@ import java.util.List;
 import utam.core.selenium.element.LocatorBy;
 
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
-import static utam.compiler.helpers.TypeUtilities.Element.actionable;
+import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
 import static utam.compiler.helpers.Validation.isLabelHardcoded;
 import static utam.compiler.helpers.Validation.isSameSelector;
 

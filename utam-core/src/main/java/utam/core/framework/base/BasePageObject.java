@@ -69,7 +69,10 @@ public abstract class BasePageObject implements RootPageObject {
   protected final BasePageElement getRootElement() {
     if (rootElement == null) {
       Element element = getFactory().findElement(getRootLocator());
-      rootElement = element.isNull() ? null : new BasePageElement(getFactory(), element);
+      rootElement = element.isNull() ? null : new BasePageElement();
+      if (rootElement != null) {
+        rootElement.initialize(getFactory(), element);
+      }
     }
     return rootElement;
   }
