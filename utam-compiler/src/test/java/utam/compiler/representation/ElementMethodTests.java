@@ -7,19 +7,26 @@
  */
 package utam.compiler.representation;
 
-import utam.compiler.helpers.*;
-import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.declarative.representation.TypeProvider;
-import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
-import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
-import org.testng.annotations.Test;
-
-import java.util.Collections;
-
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
 import static utam.compiler.helpers.TypeUtilities.Element.clickable;
+import static utam.compiler.representation.ElementMethod.DOCUMENT_GETTER;
+
+import java.util.Collections;
+import org.testng.annotations.Test;
+import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.MatcherType;
+import utam.compiler.helpers.ParameterUtils;
+import utam.compiler.helpers.PrimitiveType;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 
 /**
  * Provides tests for the ElementMethod class
@@ -59,7 +66,7 @@ public class ElementMethodTests {
             getCssSelector(".css[%s]"),
             false,
             Collections.singletonList(
-                new ParameterUtils.Regular("selectorArg", PrimitiveType.STRING)));
+                new ParameterUtils.Regular("selectorArg", PrimitiveType.STRING)), false);
     PageObjectMethod method = new ElementMethod.Single(element, true);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
@@ -78,7 +85,7 @@ public class ElementMethodTests {
 
   @Test
   public void testListElementMethodWithParametersGetterMethodCreated() {
-    MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME,"List<Clickable>");
+    MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, "List<Clickable>");
     info.addCodeLine("element(this.test).buildList(Clickable.class, selectorArg)");
     info.addImportedTypes("java.util.List", CLICKABLE_TYPE.getFullName());
     info.addParameter(new MethodParameterInfo("selectorArg", "String"));
@@ -90,7 +97,7 @@ public class ElementMethodTests {
             getCssSelector(".css[%s]"),
             false,
             Collections.singletonList(
-                new ParameterUtils.Regular("selectorArg", PrimitiveType.STRING)));
+                new ParameterUtils.Regular("selectorArg", PrimitiveType.STRING)), false);
     PageObjectMethod method = new ElementMethod.Multiple(element, true);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
@@ -99,7 +106,8 @@ public class ElementMethodTests {
   public void testFilteredElementMethodCreation() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, "Actionable");
     info.addParameter(new MethodParameterInfo("test", "String"));
-    info.addCodeLine("element(this.test).build(Actionable.class, elm -> elm.getText().contains(test))");
+    info.addCodeLine(
+        "element(this.test).build(Actionable.class, elm -> elm.getText().contains(test))");
     info.addImportedTypes(ACTIONABLE_TYPE.getFullName());
     PageObjectMethod method = new ElementMethod.Filtered(
         ELEMENT_NAME,
@@ -110,7 +118,15 @@ public class ElementMethodTests {
         EMPTY_PARAMETERS,
         MatcherType.stringContains,
         Collections.singletonList(new ParameterUtils.Primitive("test", PrimitiveType.STRING)),
-        true, false);
+        true);
     PageObjectValidationTestHelper.validateMethod(method, info);
+  }
+
+  @Test
+  public void testDocumentGetter() {
+    PageObjectMethod method = DOCUMENT_GETTER;
+    assertThat(method.isPublic(), is(false));
+    assertThat(method.getClassImports(), is(empty()));
+    assertThat(method.getCodeLines().get(0), is(equalTo("this.getDocument()")));
   }
 }

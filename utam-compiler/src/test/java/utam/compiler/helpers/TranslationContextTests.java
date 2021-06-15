@@ -187,7 +187,8 @@ public class TranslationContextTests {
             TypeUtilities.Element.clickable,
             getCssSelector("a[title=*'%s']"),
             false,
-            Collections.singletonList(getStringParameter()));
+            Collections.singletonList(getStringParameter()),
+            false);
 
     int currentSize = context.getMethods().size();
     context.setMethod(new ElementMethod.Single(elementContext, true));
@@ -205,7 +206,7 @@ public class TranslationContextTests {
             getCssSelector("a[title=*'%s'][alt=*'%s]"),
             false,
             Arrays.asList(
-                getStringParameter(), new ParameterUtils.Regular("alt", PrimitiveType.STRING)));
+                getStringParameter(), new ParameterUtils.Regular("alt", PrimitiveType.STRING)), false);
 
     int currentSize = context.getMethods().size();
     context.setMethod(new ElementMethod.Single(elementContext, true));
@@ -222,7 +223,7 @@ public class TranslationContextTests {
             TypeUtilities.Element.clickable,
             getCssSelector("a[title=*'%s']"),
             false,
-            Arrays.asList(getStringParameter(), getStringParameter()));
+            Arrays.asList(getStringParameter(), getStringParameter()), false);
 
     UtamError e =
         expectThrows(

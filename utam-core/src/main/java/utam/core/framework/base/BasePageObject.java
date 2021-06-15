@@ -19,7 +19,6 @@ import utam.core.element.Element;
 import utam.core.element.ElementLocation;
 import utam.core.element.FindContext;
 import utam.core.element.Locator;
-import utam.core.framework.base.CustomElementBuilder.External;
 import utam.core.framework.consumer.ContainerElement;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.element.BasePageElement;
@@ -145,19 +144,5 @@ public abstract class BasePageObject extends UtamBaseImpl implements RootPageObj
     T utility = ImperativeProvider.build(type);
     utility.setInstance(this);
     return utility;
-  }
-
-  /**
-   * to avoid isPresent being called on null for nullable element, this method is used by generated
-   * code
-   *
-   * @param pageElement basic or custom element
-   * @return true is element is either null or present
-   */
-  protected final boolean isElementPresent(UtamBase pageElement) {
-    if (pageElement == null) { //getter for nullable element can return null
-      return false;
-    }
-    return pageElement.isPresent();
   }
 }

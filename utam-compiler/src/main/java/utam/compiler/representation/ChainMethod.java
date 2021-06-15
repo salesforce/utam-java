@@ -117,7 +117,7 @@ public class ChainMethod implements PageObjectMethod {
       if (!firstElement.getParameters().isEmpty()) {
         throw new UtamError(String.format(ERR_CHAIN_LINK_ARGS_NOT_SUPPORTED, elementName));
       }
-      this.methodCallString = "this." + firstElement.getElementMethod().getDeclaration().getName() + "()";
+      this.methodCallString = String.format("this.%s()", firstElement.getElementGetterName());
       this.apply = firstElement.isList() ? ApplyLink.map : ApplyLink.get;
     }
 

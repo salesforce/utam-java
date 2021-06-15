@@ -7,21 +7,21 @@
  */
 package utam.compiler.helpers;
 
-import java.util.Collections;
-import utam.compiler.helpers.Validation.ErrorType;
-import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.element.Locator;
-
-import java.util.ArrayList;
-import java.util.List;
-import utam.core.selenium.element.LocatorBy;
-
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
 import static utam.compiler.helpers.Validation.isLabelHardcoded;
 import static utam.compiler.helpers.Validation.isSameSelector;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import utam.compiler.helpers.Validation.ErrorType;
+import utam.compiler.representation.ElementMethod;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.element.Locator;
+import utam.core.selenium.element.LocatorBy;
 
 /**
  * helper class to store element context
@@ -33,6 +33,7 @@ public abstract class ElementContext {
 
   static final String ROOT_ELEMENT_NAME = "root";
   public static final String DOCUMENT_ELEMENT_NAME = "document";
+  static final String SELF_ELEMENT_NAME = "self";
   static final Locator EMPTY_SELECTOR = LocatorBy.byCss("");
   private final Locator selector;
   // parameters from scope + from element itself
@@ -41,6 +42,7 @@ public abstract class ElementContext {
   private final TypeProvider type;
   private final boolean isListElement;
   private PageObjectMethod elementGetter;
+  private final boolean isNullable;
 
   ElementContext(
       ElementContext scopeContext,
@@ -48,7 +50,8 @@ public abstract class ElementContext {
       TypeProvider elementType,
       Locator selector,
       boolean isList, // selector can be list, but element not because of filter
-      List<MethodParameter> parameters) {
+      List<MethodParameter> parameters,
+      boolean isNullable) {
     this.name = name;
     this.type = elementType;
     this.selector = selector;
@@ -58,6 +61,7 @@ public abstract class ElementContext {
     }
     this.parameters.addAll(parameters);
     this.isListElement = isList;
+    this.isNullable = isNullable;
   }
 
   public final String getName() {
@@ -86,6 +90,10 @@ public abstract class ElementContext {
     return false;
   }
 
+  public boolean isSelfElement() {
+    return false;
+  }
+
   public boolean isDocumentElement() {
     return false;
   }
@@ -94,12 +102,24 @@ public abstract class ElementContext {
     return selector;
   }
 
+  public final boolean isNullable() {
+    return isNullable;
+  }
+
   public PageObjectMethod getElementMethod() {
     if (this.elementGetter == null) {
       throw new NullPointerException(
           String.format("element getter is missing for an element '%s'", getName()));
     }
     return this.elementGetter;
+  }
+
+  public String getElementGetterName() {
+    return getElementMethod().getDeclaration().getName();
+  }
+
+  public void setElementMethodUsage(TranslationContext translationContext) {
+    translationContext.setPrivateMethodUsage(getElementGetterName());
   }
 
   public void setElementMethod(PageObjectMethod method) {
@@ -118,18 +138,19 @@ public abstract class ElementContext {
         TypeProvider elementType,
         Locator selector,
         boolean isList, // selector can be list, but element not because of filter
-        List<MethodParameter> parameters) {
-      super(scopeContext, name, elementType, selector, isList, parameters);
+        List<MethodParameter> parameters,
+        boolean isNullable) {
+      super(scopeContext, name, elementType, selector, isList, parameters, isNullable);
     }
 
     // used in tests
     public Basic(String name, TypeProvider elementType, Locator selector) {
-      super(null, name, elementType, selector, false, EMPTY_PARAMETERS);
+      super(null, name, elementType, selector, false, EMPTY_PARAMETERS, false);
     }
 
     // used in tests
     public Basic(String name, TypeProvider elementType, Locator selector, boolean isList) {
-      super(null, name, elementType, selector, isList, EMPTY_PARAMETERS);
+      super(null, name, elementType, selector, isList, EMPTY_PARAMETERS, false);
     }
 
     // used in tests
@@ -161,7 +182,8 @@ public abstract class ElementContext {
           TypeUtilities.CONTAINER_ELEMENT,
           EMPTY_SELECTOR,
           false,
-          EMPTY_PARAMETERS);
+          EMPTY_PARAMETERS,
+          false);
     }
 
     Container(String name) {
@@ -180,7 +202,7 @@ public abstract class ElementContext {
 
     public Root(
         TypeProvider enclosingPageObjectType, TypeProvider rootElementType, Locator selector) {
-      super(null, ROOT_ELEMENT_NAME, rootElementType, selector, false, EMPTY_PARAMETERS);
+      super(null, ROOT_ELEMENT_NAME, rootElementType, selector, false, EMPTY_PARAMETERS, false);
       this.enclosingPageObjectType = enclosingPageObjectType;
     }
 
@@ -226,18 +248,20 @@ public abstract class ElementContext {
         String elementName,
         TypeProvider type,
         Locator locator,
-        boolean isList, List<MethodParameter> parameters) {
-      super(scopeContext, elementName, type, locator, isList, parameters);
+        boolean isList,
+        List<MethodParameter> parameters,
+        boolean isNullable) {
+      super(scopeContext, elementName, type, locator, isList, parameters, isNullable);
     }
 
     // used in tests
     Custom(String elementName, TypeProvider type, Locator selector) {
-      super(null, elementName, type, selector, false, EMPTY_PARAMETERS);
+      super(null, elementName, type, selector, false, EMPTY_PARAMETERS, false);
     }
 
     // used in tests
     Custom(String elementName, TypeProvider type, Locator selector, boolean isList) {
-      super(null, elementName, type, selector, isList, EMPTY_PARAMETERS);
+      super(null, elementName, type, selector, isList, EMPTY_PARAMETERS, false);
     }
 
     @Override
@@ -275,8 +299,11 @@ public abstract class ElementContext {
 
   public static class Document extends ElementContext {
 
-    public Document() {
-      super(null, DOCUMENT_ELEMENT_NAME, null, EMPTY_SELECTOR, false, Collections.EMPTY_LIST);
+    public static final ElementContext DOCUMENT_ELEMENT = new Document();
+
+    private Document() {
+      super(null, DOCUMENT_ELEMENT_NAME, null, EMPTY_SELECTOR, false, Collections.EMPTY_LIST, false);
+      setElementMethod(ElementMethod.DOCUMENT_GETTER);
     }
 
     @Override
@@ -287,6 +314,26 @@ public abstract class ElementContext {
     @Override
     public boolean isDocumentElement() {
       return true;
+    }
+  }
+
+  public static class Self extends ElementContext {
+
+    static final ElementContext SELF_ELEMENT = new Self();
+
+    private Self() {
+      super(null, SELF_ELEMENT_NAME, null, EMPTY_SELECTOR, false, Collections.EMPTY_LIST, false);
+
+    }
+
+    @Override
+    public boolean isSelfElement() {
+      return true;
+    }
+
+    @Override
+    ErrorType validate(ElementContext element) {
+      return ErrorType.NONE;
     }
   }
 }

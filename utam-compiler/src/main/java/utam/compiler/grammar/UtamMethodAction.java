@@ -8,17 +8,16 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.helpers.ActionableActionType.getActionType;
-import static utam.compiler.helpers.ActionableActionType.isPresent;
 import static utam.compiler.helpers.ActionableActionType.size;
 import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 import static utam.compiler.helpers.TypeUtilities.VOID;
+import static utam.compiler.representation.ComposeMethodStatement.WAIT_FOR;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.ActionableActionType;
 import utam.compiler.helpers.ElementContext;
@@ -28,13 +27,10 @@ import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.compiler.representation.ComposeMethodStatement.BasicElementOperation;
-import utam.compiler.representation.ComposeMethodStatement.DocumentOperand;
+import utam.compiler.representation.ComposeMethodStatement.ElementOperand;
 import utam.compiler.representation.ComposeMethodStatement.Operand;
 import utam.compiler.representation.ComposeMethodStatement.Operation;
-import utam.compiler.representation.ComposeMethodStatement.OperationIsPresent;
 import utam.compiler.representation.ComposeMethodStatement.OperationWithPredicate;
-import utam.compiler.representation.ComposeMethodStatement.SelfOperand;
-import utam.compiler.representation.ComposeMethodStatement.Utility;
 import utam.compiler.representation.ComposeMethodStatement.UtilityOperand;
 import utam.compiler.representation.ComposeMethodStatement.UtilityOperation;
 import utam.core.declarative.representation.MethodParameter;
@@ -55,10 +51,6 @@ class UtamMethodAction {
       "compose method '%s': statement should not have both 'apply' and 'applyExternal' properties";
   static final String ERR_COMPOSE_ACTION_REDUNDANT_ELEMENT =
       "compose method '%s': utility statement should not have 'element' property";
-  static final String ERR_COMPOSE_INCORRECT_OPERAND =
-      "compose method '%s': action '%s' cannot be applied to document or to an element marked as a list";
-  static final String WAIT_FOR = "waitFor";
-  private static final String SELF_ELEMENT = "self";
   final String elementName;
   final String apply;
   final UtamUtilityMethodAction applyExternal;
@@ -109,8 +101,7 @@ class UtamMethodAction {
         PrimitiveType.BOOLEAN), predicate);
   }
 
-  private Operation getBasicOperation(ElementContext element, MethodContext methodContext,
-      boolean isLastPredicateStatement) {
+  private Operation getBasicOperation(ElementContext element, MethodContext methodContext) {
     ActionType action = getActionType(apply, element.getType(), element.getName());
     if (ActionableActionType.containsElement.getApplyString().equals(apply) && args.length == 1) {
       // If the action is "containsElement", it may have one argument (a selector),
@@ -122,7 +113,7 @@ class UtamMethodAction {
     List<MethodParameter> parameters = UtamArgument
         .getArgsProcessor(args, action.getParametersTypes(), methodContext.getName())
         .getOrdered();
-    return new BasicElementOperation(action, parameters, isLastPredicateStatement);
+    return new BasicElementOperation(action, parameters);
   }
 
   /**
@@ -175,91 +166,63 @@ class UtamMethodAction {
       );
     }
 
+    if (applyExternal != null && elementName != null) {
+      throw new UtamError(
+          String.format(
+              ERR_COMPOSE_ACTION_REDUNDANT_ELEMENT,
+              methodContext.getName()
+          )
+      );
+    }
+
+    Operand operand = getOperand(context, methodContext);
+    Operation operation = getOperation(context, methodContext);
+
     if (applyExternal != null) {
-      if (elementName != null) {
-        throw new UtamError(
-            String.format(
-                ERR_COMPOSE_ACTION_REDUNDANT_ELEMENT,
-                methodContext.getName()
-            )
-        );
-      }
-      return getUtilityStatement(context, methodContext);
+      return new ComposeMethodStatement.Utility(operand, operation, isLastPredicateStatement);
     }
-
-    // waitFor action generates special code, should be checked for before other conditions
-    if (isWaitForAction()) {
-      return new ComposeMethodStatement.Single(getSingleNonDocumentElement(context, methodContext),
-          getWaitForOperation(context, methodContext));
-    }
-
-    // isPresent action generates special code, should be checked for before other conditions
-    if (isPresentAction()) {
-      return new ComposeMethodStatement.Single(getSingleNonDocumentElement(context, methodContext),
-          new OperationIsPresent());
-    }
-
-    if (isSelfElement()) {
-      return new ComposeMethodStatement.Single(new SelfOperand(),
-          getCustomOperation(methodContext));
-    }
-
-    ElementContext element = context.getElement(elementName);
-
-    if (element.isDocumentElement()) {
-      return new ComposeMethodStatement.Single(new DocumentOperand(),
-          getCustomOperation(methodContext));
-    }
-
-    // register usage of getter from compose statement
-    context.setPrivateMethodUsage(element.getElementMethod().getDeclaration().getName());
-
-    ComposeMethodStatement.Operand operand = new Operand(element, methodContext);
-
-    if (isSizeAction()) {
-      ComposeMethodStatement.Operation operation = new BasicElementOperation(size,
-          Collections.EMPTY_LIST, isLastPredicateStatement);
-      return new ComposeMethodStatement.Single(operand, operation);
-    }
-    ComposeMethodStatement.Operation operation = element.isCustom() ?
-        getCustomOperation(methodContext) :
-        getBasicOperation(element, methodContext, isLastPredicateStatement);
-
-    if (element.isList()) {
+    if (operand.isList() && !isSizeAction()) {
       return
-          operation.isReturnsVoid() ? new ComposeMethodStatement.VoidList(operand, operation)
-              : new ComposeMethodStatement.ReturnsList(operand, operation);
+          operation.isReturnsVoid() ? new ComposeMethodStatement.VoidList(operand, operation,
+              isLastPredicateStatement)
+              : new ComposeMethodStatement.ReturnsList(operand, operation,
+                  isLastPredicateStatement);
     }
     return new ComposeMethodStatement.Single(operand, operation, getMatcherType(),
-        getMatcherParameters(methodContext));
-
-
-  }
-
-  private ComposeMethodStatement getUtilityStatement(TranslationContext context,
-      MethodContext methodContext) {
-    TypeProvider type = context.getUtilityType(applyExternal.getExternalClassPath());
-    UtilityOperand utilityOperand = new UtilityOperand(type);
-    ComposeMethodStatement.Operation operation = getUtilityOperation(methodContext);
-    return new Utility(utilityOperand, operation);
+        getMatcherParameters(methodContext), isLastPredicateStatement);
   }
 
   // for waitFor or isPresent element can only be single and non document
-  private Operand getSingleNonDocumentElement(TranslationContext context,
+  private Operand getOperand(TranslationContext context,
       MethodContext methodContext) {
-    if (isSelfElement()) {
-      return new SelfOperand();
+    if (applyExternal != null) {
+      TypeProvider type = context.getUtilityType(applyExternal.getExternalClassPath());
+      return new UtilityOperand(type);
     }
     ElementContext element = context.getElement(elementName);
-    if (element.isList() || element.isDocumentElement()) {
-      throw new UtamCompilationError(String.format(
-          ERR_COMPOSE_INCORRECT_OPERAND,
-          methodContext.getName(), apply
-      ));
+    if (element.isSelfElement()) {
+      return ComposeMethodStatement.SELF_OPERAND;
+    }
+    if (element.isDocumentElement()) {
+      return ComposeMethodStatement.DOCUMENT_OPERAND;
     }
     // register usage of getter from compose statement
-    context.setPrivateMethodUsage(element.getElementMethod().getDeclaration().getName());
-    return new Operand(element, methodContext);
+    element.setElementMethodUsage(context);
+    return new ElementOperand(element, methodContext);
+  }
+
+  private Operation getOperation(TranslationContext context, MethodContext methodContext) {
+    if (applyExternal != null) {
+      return getUtilityOperation(methodContext);
+    }
+    if (isWaitForAction()) {
+      return getWaitForOperation(context, methodContext);
+    }
+    ElementContext element = context.getElement(elementName);
+    if (element.isCustom() || element.isDocumentElement() || element.isSelfElement()) {
+      return getCustomOperation(methodContext);
+    }
+    return getBasicOperation(element, methodContext);
   }
 
   private List<MethodParameter> getMatcherParameters(MethodContext methodContext) {
@@ -282,14 +245,6 @@ class UtamMethodAction {
 
   private boolean isSizeAction() {
     return size.getInvokeMethodName().equals(apply);
-  }
-
-  private boolean isPresentAction() {
-    return isPresent.getInvokeMethodName().equals(apply);
-  }
-
-  private boolean isSelfElement() {
-    return elementName == null || SELF_ELEMENT.equals(elementName);
   }
 
   /**

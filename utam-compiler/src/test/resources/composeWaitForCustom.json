@@ -5,7 +5,8 @@
       "type" : "utam-test/pageObjects/custom",
       "selector" : {
         "css" : ".css"
-      }
+      },
+      "nullable" : true
     }
   ],
   "methods": [

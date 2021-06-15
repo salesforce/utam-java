@@ -58,7 +58,7 @@ public class UtamMethod_BeforeLoadTests {
                         });
         PageObjectValidationTestHelper.MethodInfo methodInfo =
                 new PageObjectValidationTestHelper.MethodInfo("load", "void");
-        methodInfo.addCodeLine("this.isElementPresent(" + getElementPrivateMethodCalled(ELEMENT_NAME_1) + "())");
+        methodInfo.addCodeLine("this.getTestElement1Element().isPresent()");
         methodInfo.addCodeLine(getElementPrivateMethodCalled(ELEMENT_NAME_2) + "().isVisible()");
 
         PageObjectMethod methodObject = method.getBeforeLoadMethod(context);

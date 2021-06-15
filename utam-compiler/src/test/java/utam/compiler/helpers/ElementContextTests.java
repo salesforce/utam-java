@@ -9,6 +9,7 @@ package utam.compiler.helpers;
 
 import utam.compiler.helpers.ElementContext.Document;
 import utam.compiler.helpers.ElementContext.Root;
+import utam.compiler.helpers.ElementContext.Self;
 import utam.compiler.helpers.Validation.ErrorType;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.mock;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
+import static utam.compiler.helpers.ElementContext.SELF_ELEMENT_NAME;
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
@@ -517,9 +519,21 @@ public class ElementContextTests {
 
   @Test
   public void testDocumentElement() {
-    ElementContext context = new Document();
+    ElementContext context = Document.DOCUMENT_ELEMENT;
     assertThat(context.isDocumentElement(), is(true));
+    assertThat(context.isSelfElement(), is(false));
+    assertThat(context.isNullable(), is(false));
     assertThat(context.getName(), is(equalTo(DOCUMENT_ELEMENT_NAME)));
+    assertThat(context.validate(null), is(ErrorType.NONE));
+  }
+
+  @Test
+  public void testSelfElement() {
+    ElementContext context = Self.SELF_ELEMENT;
+    assertThat(context.isDocumentElement(), is(false));
+    assertThat(context.isSelfElement(), is(true));
+    assertThat(context.isNullable(), is(false));
+    assertThat(context.getName(), is(equalTo(SELF_ELEMENT_NAME)));
     assertThat(context.validate(null), is(ErrorType.NONE));
   }
 
@@ -538,7 +552,7 @@ public class ElementContextTests {
           elementType,
           getCssSelector(SELECTOR_VALUE),
           false,
-          EMPTY_PARAMETERS);
+          EMPTY_PARAMETERS, false);
     }
 
     @Override

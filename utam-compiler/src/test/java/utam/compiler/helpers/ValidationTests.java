@@ -54,7 +54,8 @@ public class ValidationTests {
         actionable,
         selector,
         false,
-        EMPTY_PARAMETERS);
+        EMPTY_PARAMETERS,
+        false);
   }
 
   private static void testGlobalDuplicates(

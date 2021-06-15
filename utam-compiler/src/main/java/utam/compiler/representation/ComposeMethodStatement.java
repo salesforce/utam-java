@@ -16,14 +16,17 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.ActionType;
-import utam.compiler.helpers.ActionableActionType;
 import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.ElementContext.Document;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TypeUtilities;
+import utam.compiler.helpers.TypeUtilities.ListOf;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.base.UtamUtilitiesContext;
@@ -36,7 +39,9 @@ import utam.core.framework.base.UtamUtilitiesContext;
  */
 public abstract class ComposeMethodStatement {
 
-  private static final String PREDICATE_RETURN_TRUE = "return true;";
+  public static final Operand SELF_OPERAND = new SelfOperand();
+  public static final Operand DOCUMENT_OPERAND = new DocumentOperand();
+  public static final String WAIT_FOR = "waitFor";
   final List<TypeProvider> classImports = new ArrayList<>();
   final List<TypeProvider> imports = new ArrayList<>();
   private final List<String> codeLines = new ArrayList<>();
@@ -47,25 +52,43 @@ public abstract class ComposeMethodStatement {
       Operation operation,
       TypeProvider returnType,
       MatcherType matcher,
-      List<MethodParameter> matcherParameters) {
-    this.returns = matcher != null ? PrimitiveType.BOOLEAN : returnType;
+      List<MethodParameter> matcherParameters,
+      boolean isLastPredicateStatement) {
+    TypeProvider actionReturns = matcher != null ? PrimitiveType.BOOLEAN : returnType;
     this.imports.addAll(operation.getImports());
     this.classImports.addAll(operation.getClassImports());
     this.parameters.addAll(operand.getElementParameters());
     this.parameters.addAll(operation.getActionParameters());
-    String invocationStr = operation.getCode(getMethodCallString(), operand.getElementGetterString());
+    String elementValue = operand.getOperandCode(codeLines,
+        str -> getNullConditionCode(str, actionReturns, isLastPredicateStatement));
+    String invocationStr = operation.getCode(getMethodCallString(), elementValue);
     if (matcher != null) {
-      codeLines.add(matcher.getCode(matcherParameters, invocationStr));
+      invocationStr = matcher.getCode(matcherParameters, invocationStr);
       this.parameters.addAll(matcherParameters);
-    } else {
-      codeLines.add(invocationStr);
     }
+    if (isLastPredicateStatement) {
+      if (MethodContext.isNullOrVoid(actionReturns)) {
+        // last statement of predicate can't return void, has to return boolean or original type
+        invocationStr = invocationStr.concat(";\nreturn true;");
+      } else {
+        invocationStr = String.format("return %s;", invocationStr);
+      }
+    }
+    codeLines.add(invocationStr);
     parameters.removeIf(MethodParameter::isLiteral);
+    classImports.addAll(operand.getAddedClassImports());
+    this.returns = isLastPredicateStatement && MethodContext.isNullOrVoid(actionReturns)
+        ? PrimitiveType.BOOLEAN
+        : actionReturns;
   }
 
-  ComposeMethodStatement(Operand operand, Operation operation, TypeProvider returnType) {
-    this(operand, operation, returnType, null, null);
+  ComposeMethodStatement(Operand operand, Operation operation, TypeProvider returnType,
+      boolean isLastPredicateStatement) {
+    this(operand, operation, returnType, null, null, isLastPredicateStatement);
   }
+
+  // for nullable element we need to check if getter returned null and exit
+
 
   public List<MethodParameter> getParameters() {
     return parameters;
@@ -93,24 +116,41 @@ public abstract class ComposeMethodStatement {
 
   abstract String getMethodCallString();
 
+  // for nullable element we need to check if getter returned null and exit
+  abstract String getNullConditionCode(String value, TypeProvider returns,
+      boolean isLastPredicateStatement);
+
   /**
    * invokes method on a single element
    */
   public static class Single extends ComposeMethodStatement {
 
     public Single(Operand operand, Operation operation, MatcherType matcher,
-        List<MethodParameter> matcherParameters) {
-      super(operand, operation, matcher == null ? operation.getReturnType() : PrimitiveType.BOOLEAN,
-          matcher, matcherParameters);
+        List<MethodParameter> matcherParameters, boolean isLastPredicateStatement) {
+      super(operand, operation, operation.getReturnType(), matcher, matcherParameters,
+          isLastPredicateStatement);
     }
 
-    public Single(Operand operand, Operation operation) {
-      this(operand, operation, null, null);
+    // used in tests
+    Single(Operand operand, Operation operation) {
+      this(operand, operation, null, null, false);
     }
 
     @Override
     String getMethodCallString() {
       return "%s.%s";
+    }
+
+    @Override
+    String getNullConditionCode(String value, TypeProvider returns,
+        boolean isLastPredicateStatement) {
+      if (isLastPredicateStatement && returns.isSameType(VOID)) {
+        return String.format("if (%s == null) { return false; }", value);
+      }
+      if (returns.isSameType(VOID)) {
+        return String.format("if (%s == null) { return; }", value);
+      }
+      return String.format("if (%s == null) { return %s; }", value, returns.getFalsyValue());
     }
   }
 
@@ -119,20 +159,24 @@ public abstract class ComposeMethodStatement {
    */
   public static class Utility extends ComposeMethodStatement {
 
+    static final String ERR_NULLABLE_NOT_SUPPORTED = "Nullable path is not supported for utility";
+
     /**
-     * @param operand - Represent the imperative extension class
+     * @param operand   - Represent the imperative extension class
      * @param operation - Represent the static method being called on the imperative extension
      */
-    public Utility(UtilityOperand operand, Operation operation) {
-      super(operand, operation, operation.getReturnType());
-      classImports.add(operand.getType());
+    public Utility(Operand operand, Operation operation, boolean isLastPredicateStatement) {
+      super(operand, operation, operation.getReturnType(), isLastPredicateStatement);
       TypeProvider utilitiesContextType = new TypeUtilities.FromClass(UtamUtilitiesContext.class);
       classImports.add(utilitiesContextType);
     }
 
     /**
-     * Method returning a template string that represents the main components of an imperative extension statement
-     * @return a String that represents imperative extension statement structure (ClassName.staticMethod)
+     * Method returning a template string that represents the main components of an imperative
+     * extension statement
+     *
+     * @return a String that represents imperative extension statement structure
+     * (ClassName.staticMethod)
      */
     @Override
     String getMethodCallString() {
@@ -143,6 +187,12 @@ public abstract class ComposeMethodStatement {
     public boolean isUtilityMethodStatement() {
       return true;
     }
+
+    @Override
+    String getNullConditionCode(String value, TypeProvider returns,
+        boolean isLastPredicateStatement) {
+      throw new UtamCompilationError(ERR_NULLABLE_NOT_SUPPORTED);
+    }
   }
 
   /**
@@ -150,13 +200,22 @@ public abstract class ComposeMethodStatement {
    */
   public static class VoidList extends ComposeMethodStatement {
 
-    public VoidList(Operand operand, Operation operation) {
-      super(operand, operation, VOID);
+    public VoidList(Operand operand, Operation operation, boolean isLastPredicateStatement) {
+      super(operand, operation, VOID, isLastPredicateStatement);
     }
 
     @Override
     String getMethodCallString() {
       return "%s.forEach(element -> element.%s)";
+    }
+
+    @Override
+    String getNullConditionCode(String value, TypeProvider returns,
+        boolean isLastPredicateStatement) {
+      if (isLastPredicateStatement) {
+        return String.format("if (%s == null || %s.isEmpty()) { return false; }", value, value);
+      }
+      return String.format("if (%s == null || %s.isEmpty()) { return; }", value, value);
     }
   }
 
@@ -165,8 +224,9 @@ public abstract class ComposeMethodStatement {
    */
   public static final class ReturnsList extends ComposeMethodStatement {
 
-    public ReturnsList(Operand operand, Operation operation) {
-      super(operand, operation, new TypeUtilities.ListOf(operation.getReturnType()));
+    public ReturnsList(Operand operand, Operation operation, boolean isLastPredicateStatement) {
+      super(operand, operation, new TypeUtilities.ListOf(operation.getReturnType()),
+          isLastPredicateStatement);
       imports.add(LIST_IMPORT);
       imports.add(operation.action.getReturnType());
       classImports.addAll(imports);
@@ -177,23 +237,50 @@ public abstract class ComposeMethodStatement {
     String getMethodCallString() {
       return "%s.stream().map(element -> element.%s).collect(Collectors.toList())";
     }
+
+    @Override
+    String getNullConditionCode(String value, TypeProvider returns,
+        boolean isLastPredicateStatement) {
+      if (isLastPredicateStatement) {
+        return String.format("if (%s == null || %s.isEmpty()) { return %s; }", value, value,
+            returns.getFalsyValue());
+      }
+      return String.format("if (%s == null || %s.isEmpty()) { return null; }", value, value);
+    }
   }
 
   /**
    * information about element action is applied to
    */
-  public static class Operand {
+  public static abstract class Operand {
 
-    private final ElementContext elementContext;
+    List<MethodParameter> getElementParameters() {
+      return new ArrayList<>();
+    }
+
+    public boolean isList() {
+      return false;
+    }
+
+    abstract String getOperandCode(List<String> codeLines,
+        Function<String, String> getNullConditionCode);
+
+    List<TypeProvider> getAddedClassImports() {
+      return new ArrayList<>();
+    }
+  }
+
+  public static class ElementOperand extends Operand {
+
     private final List<MethodParameter> parameters;
+    private final ElementContext elementContext;
+    private final boolean isElementAlreadyUsed;
 
-    /**
-     * @param elementContext element action is applied to
-     */
-    public Operand(ElementContext elementContext, MethodContext methodContext) {
+    public ElementOperand(ElementContext elementContext, MethodContext methodContext) {
       this.elementContext = elementContext;
-      if(elementContext == null || methodContext.hasElement(elementContext.getName())) {
-        parameters = Collections.EMPTY_LIST;
+      this.isElementAlreadyUsed = methodContext.hasElement(elementContext.getName());
+      if (isElementAlreadyUsed) {
+        parameters = new ArrayList<>();
       } else {
         // remember that element is used to not propagate its parameters to method for second time
         // if element is already used in a previous statement, parameters were already added
@@ -203,13 +290,47 @@ public abstract class ComposeMethodStatement {
       }
     }
 
-    String getElementGetterString() {
-      List<MethodParameter> allParameters = elementContext.getParameters();
-      String methodName = elementContext.getElementMethod().getDeclaration().getName();
-      String parameters = getParametersValuesString(allParameters);
-      return String.format("this.%s(%s)", methodName, parameters);
+    @Override
+    String getOperandCode(List<String> codeLines, Function<String, String> getNullConditionCode) {
+      if (elementContext.isNullable()) {
+        String elementValue = getElementVariableName();
+        // if element was not used in prev statements:
+        // - add line like Type myElement = getMyElement();
+        // add null check
+        if (!isElementAlreadyUsed) {
+          codeLines.add(String
+              .format("%s %s = %s", getElementVariableType(), getElementVariableName(),
+                  getElementGetterString()));
+          codeLines.add(getNullConditionCode.apply(elementValue));
+        }
+        return elementValue;
+      }
+      return getElementGetterString();
     }
 
+    private String getElementVariableName() {
+      return elementContext.getName();
+    }
+
+    private String getElementVariableType() {
+      if (elementContext.isList()) {
+        return new ListOf(elementContext.getType()).getSimpleName();
+      }
+      return elementContext.getType().getSimpleName();
+    }
+
+    private String getElementGetterString() {
+      List<MethodParameter> allParameters = elementContext.getParameters();
+      String parameters = getParametersValuesString(allParameters);
+      return String.format("this.%s(%s)", elementContext.getElementGetterName(), parameters);
+    }
+
+    @Override
+    public boolean isList() {
+      return elementContext.isList();
+    }
+
+    @Override
     List<MethodParameter> getElementParameters() {
       return parameters;
     }
@@ -225,58 +346,52 @@ public abstract class ComposeMethodStatement {
     /**
      * Creates a new UtilityOperand object.
      *
-     * @param type          holds information about the type of the utility class
+     * @param type holds information about the type of the utility class
      */
     public UtilityOperand(TypeProvider type) {
-      super(null, null);
       this.type = type;
     }
 
-    /**
-     * @return the imperative utility class name from it's path (type property in the JSON statement)
-     */
-    @Override String getElementGetterString() {
+    // the imperative utility class name from it's path (type property in the JSON statement)
+    @Override
+    String getOperandCode(List<String> codeLines, Function<String, String> getNullConditionCode) {
       return this.type.getSimpleName();
     }
 
-    /**
-     * Getter that returns the type of the utility class. Used to add imports for the utility class
-     *
-     * @return the type field
-     */
-    TypeProvider getType() {
-      return type;
+    @Override
+    List<TypeProvider> getAddedClassImports() {
+      return Collections.singletonList(type);
+    }
+  }
+
+  /**
+   * operand for "element" : "self"
+   */
+  static class SelfOperand extends Operand {
+
+    SelfOperand() {
+    }
+
+    @Override
+    String getOperandCode(List<String> codeLines, Function<String, String> getNullConditionCode) {
+      return "this";
     }
   }
 
   /**
    * operand for "element" : "document"
    */
-  public static class DocumentOperand extends Operand {
+  static class DocumentOperand extends Operand {
 
-    public DocumentOperand() {
-      super(null, null);
+    private final ElementContext elementContext;
+
+    DocumentOperand() {
+      this.elementContext = Document.DOCUMENT_ELEMENT;
     }
 
     @Override
-    String getElementGetterString() {
-      return "this.getDocument()";
-    }
-
-  }
-
-  /**
-   * operand for "element" : "self"
-   */
-  public static class SelfOperand extends Operand {
-
-    public SelfOperand() {
-      super(null, null);
-    }
-
-    @Override
-    String getElementGetterString() {
-      return "this";
+    String getOperandCode(List<String> codeLines, Function<String, String> getNullConditionCode) {
+      return String.format("this.%s()", elementContext.getElementGetterName());
     }
   }
 
@@ -358,12 +473,13 @@ public abstract class ComposeMethodStatement {
      * @param returnType       returnType from action
      * @param actionParameters parameters for method invocation
      */
-    public UtilityOperation(ActionType action, TypeProvider returnType, List<MethodParameter> actionParameters) {
+    public UtilityOperation(ActionType action, TypeProvider returnType,
+        List<MethodParameter> actionParameters) {
       super(action, returnType, actionParameters);
     }
 
-    private void setReturnTypeImport(List<TypeProvider> res) {
-      if (!PrimitiveType.isPrimitiveType(getReturnType().getFullName())) {
+    void setReturnTypeImport(List<TypeProvider> res) {
+      if (!(getReturnType() instanceof PrimitiveType)) {
         res.add(getReturnType());
       }
     }
@@ -383,47 +499,30 @@ public abstract class ComposeMethodStatement {
     }
 
     /**
-     * Method invoke to construct the statement associated with a utility extension.
-     * Utility statements are expressed as ClassName.staticMethod(this, [params])
+     * Method invoke to construct the statement associated with a utility extension. Utility
+     * statements are expressed as ClassName.staticMethod(this, [params])
+     *
      * @param invocationPattern utility statement template string format
-     * @param utilityClassName utility class name
+     * @param utilityClassName  utility class name
      * @return a string that represents the code for a utility compose statement
      */
     @Override
     String getCode(String invocationPattern, String utilityClassName) {
       String parametersValues = getParametersValuesString(actionParameters);
-      String separator = parametersValues.length() > 0  ? ", " : "";
-      String methodInvocation = String.format("%s(new UtamUtilitiesContext(this)%s%s)",
-              super.getAction().getInvokeMethodName(),
-              separator,
-              getParametersValuesString(actionParameters));
+      String separator = parametersValues.length() > 0 ? ", " : "";
+      String methodInvocation = String.format("%s(new %s(this)%s%s)",
+          super.getAction().getInvokeMethodName(),
+          UtamUtilitiesContext.class.getSimpleName(),
+          separator,
+          getParametersValuesString(actionParameters));
       return String.format(invocationPattern, utilityClassName, methodInvocation);
     }
   }
 
   public static class BasicElementOperation extends Operation {
 
-    private final boolean isLastPredicateStatement;
-
-    public BasicElementOperation(ActionType action,
-        List<MethodParameter> actionParameters, boolean isLastPredicateStatement) {
-      super(action,
-          isLastPredicateStatement && MethodContext.isNullOrVoid(action.getReturnType())
-              ? PrimitiveType.BOOLEAN
-              : action.getReturnType(),
-          actionParameters);
-      this.isLastPredicateStatement =
-          isLastPredicateStatement && MethodContext.isNullOrVoid(action.getReturnType());
-    }
-
-    @Override
-    String getCode(String invocationPattern, String elementGetter) {
-      String code = super.getCode(invocationPattern, elementGetter);
-      if (isLastPredicateStatement) {
-        // add last statement of predicate can't return null, has to return boolean or original type
-        return String.format("%s;\n%s", code, PREDICATE_RETURN_TRUE);
-      }
-      return code;
+    public BasicElementOperation(ActionType action, List<MethodParameter> actionParameters) {
+      super(action, action.getReturnType(), actionParameters);
     }
   }
 
@@ -438,26 +537,19 @@ public abstract class ComposeMethodStatement {
 
     public OperationWithPredicate(ActionType action, TypeProvider returnType,
         List<ComposeMethodStatement> predicate) {
-      super(action, returnType, Collections.EMPTY_LIST);
+      super(action, returnType, new ArrayList<>());
       for (ComposeMethodStatement statement : predicate) {
         predicateCode.addAll(statement.getCodeLines());
         imports.addAll(statement.getImports());
         classImports.addAll(statement.getClassImports());
         actionParameters.addAll(statement.getParameters());
       }
-      int lastStatementIndex = predicateCode.size() - 1;
-      if (!predicateCode.get(lastStatementIndex).endsWith(PREDICATE_RETURN_TRUE)) {
-        // last statement should be return, unless it's void action and 'return true' was already added
-        predicateCode
-            .set(lastStatementIndex,
-                String.format("return %s;", predicateCode.get(lastStatementIndex)));
-      }
     }
 
     @Override
     String getCode(String invocationPattern, String elementGetter) {
       String methodInvocation = String
-          .format("waitFor(() -> {\n%s\n})", String.join(";\n", predicateCode));
+          .format("%s(() -> {\n%s\n})", WAIT_FOR, String.join(";\n", predicateCode));
       return String.format(invocationPattern, elementGetter, methodInvocation);
     }
 
@@ -473,21 +565,6 @@ public abstract class ComposeMethodStatement {
       List<TypeProvider> res = new ArrayList<>(super.getClassImports());
       res.addAll(this.classImports); // add accumulated parameters from prev statements
       return res;
-    }
-  }
-
-  /**
-   * isPresent can be called on null, hence special generated code
-   */
-  public static class OperationIsPresent extends Operation {
-
-    public OperationIsPresent() {
-      super(ActionableActionType.isPresent, PrimitiveType.BOOLEAN, Collections.EMPTY_LIST);
-    }
-
-    @Override
-    String getCode(String invocationPattern, String elementGetter) {
-      return String.format("this.isElementPresent(%s)", elementGetter);
     }
   }
 }

@@ -20,11 +20,13 @@ import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
 import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REDUNDANT_ELEMENT;
 import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REDUNDANT_KEYS;
 import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REQUIRED_KEYS;
-import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_INCORRECT_OPERAND;
-import static utam.compiler.grammar.UtamMethodAction.WAIT_FOR;
+import static utam.compiler.helpers.ActionableActionType.getText;
 import static utam.compiler.helpers.ActionableActionType.isPresent;
-import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
+import static utam.compiler.helpers.ClickableActionType.click;
+import static utam.compiler.helpers.PrimitiveType.BOOLEAN;
 import static utam.compiler.helpers.PrimitiveType.NUMBER;
+import static utam.compiler.helpers.PrimitiveType.STRING;
+import static utam.compiler.helpers.TypeUtilities.Element.clickable;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
@@ -34,14 +36,13 @@ import java.util.stream.Stream;
 import org.testng.annotations.Test;
 import utam.compiler.grammar.UtamMethodAction.Custom;
 import utam.compiler.helpers.ActionableActionType;
-import utam.compiler.helpers.ClickableActionType;
-import utam.compiler.helpers.ElementContext.Document;
 import utam.compiler.helpers.ElementContext.Root;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParameterUtils.Literal;
 import utam.compiler.helpers.ParameterUtils.Regular;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.helpers.TypeUtilities.ListOf;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.compiler.representation.ComposeMethodStatement.Single;
 import utam.compiler.representation.RootElementMethod;
@@ -97,7 +98,7 @@ public class UtamMethodAction_Tests {
     new UtamElement(ELEMENT_NAME, "clickable", getSelector()).testTraverse(context);
     UtamMethodAction action =
             new UtamMethodAction(
-                    null, ClickableActionType.click.toString(), null, null, new UtamUtilityMethodAction());
+                    null, click.toString(), null, null, new UtamUtilityMethodAction());
     UtamError e = expectThrows(
             UtamError.class, () -> action.getComposeAction(context, getMethodContext(VOID), false )
     );
@@ -141,7 +142,7 @@ public class UtamMethodAction_Tests {
     new UtamElement(ELEMENT_NAME, "clickable", getSelector()).testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
-            ELEMENT_NAME, ClickableActionType.click.toString());
+            ELEMENT_NAME, click.toString());
     ComposeMethodStatement actionObject = getVoidStatement(action, context);
     assertThat(actionObject, is(instanceOf(Single.class)));
     assertThat(actionObject.getReturnType().isSameType(VOID), is(true));
@@ -161,7 +162,7 @@ public class UtamMethodAction_Tests {
         .testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
-            ELEMENT_NAME, ClickableActionType.click.toString());
+            ELEMENT_NAME, click.toString());
     ComposeMethodStatement actionObject = getVoidStatement(action, context);
     assertThat(actionObject, is(instanceOf(ComposeMethodStatement.VoidList.class)));
     assertThat(actionObject.getReturnType().isSameType(VOID), is(true));
@@ -310,40 +311,72 @@ public class UtamMethodAction_Tests {
   }
 
   @Test
-  public void testWaitWithIncorrectElementThrows() {
+  public void testisPresentNullableList() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    context.setElement(new Document());
-    new UtamElement(ELEMENT_NAME, "clickable", getListSelector()).testTraverse(context);
-    final String applyStr = WAIT_FOR;
-    // document element does not have waitFor API
-    UtamError e = expectThrows(
-        UtamError.class, () -> new UtamMethodAction(DOCUMENT_ELEMENT_NAME, applyStr)
-            .getComposeAction(context, getMethodContext(VOID), false));
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_COMPOSE_INCORRECT_OPERAND, METHOD_NAME, applyStr))));
-    // list element
-    e = expectThrows(
-        UtamError.class, () -> new UtamMethodAction(ELEMENT_NAME, applyStr)
-            .getComposeAction(context, getMethodContext(VOID), false)
-    );
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_COMPOSE_INCORRECT_OPERAND, METHOD_NAME, applyStr))));
+    new UtamElement(ELEMENT_NAME, null, getListSelector(), true).testTraverse(context);
+    final String applyStr = isPresent.getInvokeMethodName();
+    TypeProvider returns = new ListOf(BOOLEAN);
+    UtamMethodAction action =
+        new UtamMethodAction(
+            ELEMENT_NAME, applyStr);
+    ComposeMethodStatement statement = action.getComposeAction(context, getMethodContext(returns), false);
+    assertThat(statement, is(instanceOf(ComposeMethodStatement.ReturnsList.class)));
+    assertThat(statement.getReturnType().isSameType(returns), is(true));
+    assertThat(statement.getCodeLines(), is(hasSize(3)));
+    assertThat(statement.getCodeLines().get(0), is(equalTo("List<Actionable> testElement = this.getTestElementElement()")));
+    assertThat(statement.getCodeLines().get(1), is(equalTo("if (testElement == null || testElement.isEmpty()) { return null; }")));
+    assertThat(statement.getCodeLines().get(2), is(equalTo("testElement.stream().map(element -> element.isPresent()).collect(Collectors.toList())")));
   }
 
   @Test
-  public void testisPresentWithIncorrectElementThrows() {
+  public void testClickNullableList() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    context.setElement(new Document());
-    new UtamElement(ELEMENT_NAME, "clickable", getListSelector()).testTraverse(context);
-    final String applyStr = isPresent.getInvokeMethodName();
-    // document element does not have waitFor API
-    UtamError e = expectThrows(
-        UtamError.class, () -> new UtamMethodAction(DOCUMENT_ELEMENT_NAME, applyStr)
-            .getComposeAction(context, getMethodContext(VOID), false));
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_COMPOSE_INCORRECT_OPERAND, METHOD_NAME, applyStr))));
-    // list element
-    e = expectThrows(
-        UtamError.class, () -> new UtamMethodAction(ELEMENT_NAME, applyStr)
-            .getComposeAction(context, getMethodContext(VOID), false)
-    );
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_COMPOSE_INCORRECT_OPERAND, METHOD_NAME, applyStr))));
+    new UtamElement(ELEMENT_NAME, clickable.name(), getListSelector(), true).testTraverse(context);
+    final String applyStr = click.getInvokeMethodName();
+    TypeProvider returns = VOID;
+    UtamMethodAction action =
+        new UtamMethodAction(
+            ELEMENT_NAME, applyStr);
+    ComposeMethodStatement statement = action.getComposeAction(context, getMethodContext(returns), false);
+    assertThat(statement, is(instanceOf(ComposeMethodStatement.VoidList.class)));
+    assertThat(statement.getReturnType().isSameType(returns), is(true));
+    assertThat(statement.getCodeLines(), is(hasSize(3)));
+    assertThat(statement.getCodeLines().get(0), is(equalTo("List<Clickable> testElement = this.getTestElementElement()")));
+    assertThat(statement.getCodeLines().get(1), is(equalTo("if (testElement == null || testElement.isEmpty()) { return; }")));
+    assertThat(statement.getCodeLines().get(2), is(equalTo("testElement.forEach(element -> element.click())")));
+  }
+
+  @Test
+  public void testClickNullableListInPredicate() {
+    TranslationContext context = TestUtilities.getTestTranslationContext();
+    new UtamElement(ELEMENT_NAME, clickable.name(), getListSelector(), true).testTraverse(context);
+    final String applyStr = click.getInvokeMethodName();
+    TypeProvider returns = BOOLEAN;
+    UtamMethodAction action =
+        new UtamMethodAction(
+            ELEMENT_NAME, applyStr);
+    ComposeMethodStatement statement = action.getComposeAction(context, getMethodContext(returns), true);
+    assertThat(statement, is(instanceOf(ComposeMethodStatement.VoidList.class)));
+    assertThat(statement.getReturnType().isSameType(returns), is(true));
+    assertThat(statement.getCodeLines(), is(hasSize(3)));
+    assertThat(statement.getCodeLines().get(0), is(equalTo("List<Clickable> testElement = this.getTestElementElement()")));
+    assertThat(statement.getCodeLines().get(1), is(equalTo("if (testElement == null || testElement.isEmpty()) { return false; }")));
+    assertThat(statement.getCodeLines().get(2), is(equalTo("testElement.forEach(element -> element.click());\nreturn true;")));
+  }
+
+  @Test
+  public void testEditNullableListInPredicate() {
+    TranslationContext context = TestUtilities.getTestTranslationContext();
+    new UtamElement(ELEMENT_NAME, clickable.name(), getListSelector(), true).testTraverse(context);
+    final String applyStr = getText.getInvokeMethodName();
+    UtamMethodAction action =
+        new UtamMethodAction(
+            ELEMENT_NAME, applyStr);
+    ComposeMethodStatement statement = action.getComposeAction(context, getMethodContext(STRING), true);
+    assertThat(statement, is(instanceOf(ComposeMethodStatement.ReturnsList.class)));
+    assertThat(statement.getCodeLines(), is(hasSize(3)));
+    assertThat(statement.getCodeLines().get(0), is(equalTo("List<Clickable> testElement = this.getTestElementElement()")));
+    assertThat(statement.getCodeLines().get(1), is(equalTo("if (testElement == null || testElement.isEmpty()) { return null; }")));
+    assertThat(statement.getCodeLines().get(2), is(equalTo("return testElement.stream().map(element -> element.getText()).collect(Collectors.toList());")));
   }
 }

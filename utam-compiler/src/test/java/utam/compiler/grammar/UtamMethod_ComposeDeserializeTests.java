@@ -321,7 +321,7 @@ public class UtamMethod_ComposeDeserializeTests {
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
 
     methodInfo = new MethodInfo("testComposeBaseMethod", "Boolean");
-    methodInfo.addCodeLine("this.isElementPresent(this.getCustomElement())");
+    methodInfo.addCodeLine("this.getCustomElement().isPresent()");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testComposeBaseMethod"), methodInfo);
   }
 
@@ -355,8 +355,10 @@ public class UtamMethod_ComposeDeserializeTests {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
     methodInfo.addParameter(new MethodParameterInfo("selectorArg", "LocatorBy"));
     methodInfo.addParameter(new MethodParameterInfo("matcherArg", "String"));
-    methodInfo.addCodeLine("this.getCustomElement().waitFor(() -> {\n"
-        + "return this.getCustomElement().returnsString(selectorArg).contains(matcherArg);\n"
+    methodInfo.addCodeLine("Custom custom = this.getCustomElement()");
+    methodInfo.addCodeLine("if (custom == null) { return false; }");
+    methodInfo.addCodeLine("custom.waitFor(() -> {\n"
+        + "return custom.returnsString(selectorArg).contains(matcherArg);\n"
         + "})");
     TranslationContext context = new DeserializerUtilities().getContext("composeWaitForCustom");
     PageObjectMethod method = context.getMethod("testCompose");
@@ -405,11 +407,48 @@ public class UtamMethod_ComposeDeserializeTests {
   public void testSelf() {
     TranslationContext context = new DeserializerUtilities().getContext("composeSelf");
     MethodInfo methodInfo = new MethodInfo("testComposeSelf", "Boolean");
-    methodInfo.addCodeLine("this.isElementPresent(this)");
+    methodInfo.addCodeLine("this.isPresent()");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testComposeSelf"), methodInfo);
     methodInfo = new MethodInfo("testComposeSelfOmitted", "Boolean");
-    methodInfo.addCodeLine("this.isElementPresent(this)");
+    methodInfo.addCodeLine("this.isPresent()");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testComposeSelfOmitted"), methodInfo);
   }
 
+  @Test
+  public void testSameNullableBasicElementReused() {
+    TranslationContext context = new DeserializerUtilities().getContext("composeBasicSameElements");
+    MethodInfo methodInfo = new MethodInfo("testCompose", "Integer");
+    methodInfo.addCodeLine("List<Actionable> basicNullableList = this.getBasicNullableListElement()");
+    methodInfo.addCodeLine("if (basicNullableList == null || basicNullableList.isEmpty()) { return null; }");
+    methodInfo.addCodeLine("basicNullableList.stream().map(element -> element.getText()).collect(Collectors.toList())");
+    methodInfo.addCodeLine("basicNullableList.size()");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
+
+    methodInfo = new MethodInfo("testComposeWaitFor", "Integer");
+    methodInfo.addCodeLine("this.waitFor(() -> {\n"
+        + "List<Actionable> basicNullableList = this.getBasicNullableListElement();\n"
+        + "if (basicNullableList == null) { return null; };\n"
+        + "return basicNullableList.size();\n"
+        + "})");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testComposeWaitFor"), methodInfo);
+  }
+
+  @Test
+  public void testNullableBasicElement() {
+    TranslationContext context = new DeserializerUtilities().getContext("composeBasicNullable");
+    MethodInfo methodInfo = new MethodInfo("testCompose", "void");
+    methodInfo.addCodeLine("Actionable basic = this.getBasic()");
+    methodInfo.addCodeLine("if (basic == null) { return; }");
+    methodInfo.addCodeLine("basic.focus()");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
+
+    methodInfo = new MethodInfo("testComposeWaitFor", "Boolean");
+    methodInfo.addCodeLine("this.waitFor(() -> {\n"
+        + "Actionable basic = this.getBasic();\n"
+        + "if (basic == null) { return false; };\n"
+        + "basic.focus();\n"
+        + "return true;\n"
+        + "})");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testComposeWaitFor"), methodInfo);
+  }
 }

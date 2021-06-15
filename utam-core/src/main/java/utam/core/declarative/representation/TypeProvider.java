@@ -47,4 +47,13 @@ public interface TypeProvider {
     return this.getFullName().equals(anotherType.getFullName())
         && (this.getSimpleName().equals(anotherType.getSimpleName()));
   }
+
+  /**
+   * used to return from predicate if element is nullable and returned null
+   *
+   * @return string with falsy value
+   */
+  default String getFalsyValue() {
+    return "null";
+  }
 }

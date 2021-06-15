@@ -7,7 +7,6 @@
  */
 package utam.core.framework.base;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -52,15 +51,6 @@ public class PageObjectTests {
     // throws exception when visibility times out
     when(mockUtilities.getElementAdapter().isDisplayed()).thenReturn(false);
     assertThrows(() -> testPage.waitFor(() -> mockUtilities.getUtamElement().isVisible()));
-  }
-
-  @Test
-  public void testIsElementPresent() {
-    TestPageImpl testPage = new TestPageImpl();
-    assertThat(testPage.isElementPresent(null), is(equalTo(false)));
-    UtamBase element = mock(UtamBase.class);
-    when(element.isPresent()).thenReturn(true);
-    assertThat(testPage.isElementPresent(element), is(equalTo(true)));
   }
 
   @Test
