@@ -12,7 +12,6 @@ import org.testng.annotations.Test;
 import static utam.compiler.grammar.TestUtilities.getDeserializedObject;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.testng.Assert.assertThrows;
 
 /**
  * @author elizaveta.ivanova
@@ -20,8 +19,10 @@ import static org.testng.Assert.assertThrows;
  */
 public class UtamMethodAction_DeserializeTests {
 
-    /** A UtamMethodAction object should be able to be created through deserialization */
-    /** For built-in actions on basic & custom elements */
+    /**
+     * A UtamMethodAction object should be able to be created through deserialization,
+     * For built-in actions on basic & custom elements
+     */
     @Test
     public void testDeserializationDefaultValues() {
         String json = "{  \"element\": \"element\",  \"apply\": \"click\" }";
@@ -33,7 +34,7 @@ public class UtamMethodAction_DeserializeTests {
     }
 
     @Test
-    /** For imperative extensions */
+    // For imperative extensions
     public void testDeserializationDefaultValuesForUtilityStatement() {
         String json = "{"
                 + " \"applyExternal\": {"

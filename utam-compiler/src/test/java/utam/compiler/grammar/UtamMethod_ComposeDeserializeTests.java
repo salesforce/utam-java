@@ -44,8 +44,6 @@ public class UtamMethod_ComposeDeserializeTests {
     return method;
   }
 
-  // TODO add test for deserialization errors as it's now a logic
-
   @Test
   public void testDeserializationDefaultValues() {
     String json =
@@ -284,31 +282,51 @@ public class UtamMethod_ComposeDeserializeTests {
   public void testRootComposeGetClass() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "String");
     methodInfo.addCodeLine("this.getRootElement().getClassAttribute()");
-    TranslationContext context = new DeserializerUtilities().getContext("composeMethod");
+    TranslationContext context = new DeserializerUtilities().getContext("composeRootElement");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
   }
 
   @Test
-  public void testComposeWaitForBasicActionThatReturnsString() {
+  public void testComposeWaitForBasicActionWithElementReference() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "String");
     methodInfo.addCodeLine("this.getRootElement().waitFor(() -> {\n"
-        + "return this.getRootElement().getText();\n"
-        + "})");
-    TranslationContext context = new DeserializerUtilities().getContext("composeWaitFor1");
+            + "return this.getRootElement().getText();\n"
+            + "})");
+    TranslationContext context = new DeserializerUtilities().getContext("composeWaitForRoot");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
   }
 
   @Test
-  public void testComposeWithCustomElementReturnsList() {
+  public void testComposeWaitForSelf() {
+    MethodInfo methodInfo = new MethodInfo("testCompose", "String");
+    methodInfo.addCodeLine("this.waitFor(() -> {\n"
+            + "return this.getRootElement().getText();\n"
+            + "})");
+    TranslationContext context = new DeserializerUtilities().getContext("composeWaitForSelf");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
+
+    methodInfo = new MethodInfo("testComposeSelfOmitted", "String");
+    methodInfo.addCodeLine("this.waitFor(() -> {\n"
+        + "return this.getRootElement().getText();\n"
+        + "})");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testComposeSelfOmitted"), methodInfo);
+  }
+
+  @Test
+  public void testComposeWithCustomElement() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "List<String>");
     methodInfo.addParameter(new MethodParameterInfo("strArg", "String"));
     methodInfo.addCodeLine("this.getCustomElement().someMethod(strArg,true)");
     TranslationContext context = new DeserializerUtilities().getContext("composeCustom");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
+
+    methodInfo = new MethodInfo("testComposeBaseMethod", "Boolean");
+    methodInfo.addCodeLine("this.getCustomElement().isPresent()");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testComposeBaseMethod"), methodInfo);
   }
 
   @Test
-  public void testComposeWaitForBasicVoidAction() {
+  public void testComposeWaitForBasicVoidActionOnRoot() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
     methodInfo.addCodeLine("this.getRootElement().waitFor(() -> {\n"
         + "this.getRootElement().getText().contains(\"subString\");\n"
@@ -323,7 +341,7 @@ public class UtamMethod_ComposeDeserializeTests {
   @Test
   public void testComposeWaitForContainsElementAction() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
-    methodInfo.addCodeLine("this.getRootElement().waitFor(() -> {\n"
+    methodInfo.addCodeLine("this.waitFor(() -> {\n"
         + "this.getRootElement().getText();\n"
         + "return Boolean.FALSE.equals(this.getRootElement().containsElement(LocatorBy.byCss(\".css\"),false));\n"
         + "})");
@@ -337,8 +355,10 @@ public class UtamMethod_ComposeDeserializeTests {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
     methodInfo.addParameter(new MethodParameterInfo("selectorArg", "LocatorBy"));
     methodInfo.addParameter(new MethodParameterInfo("matcherArg", "String"));
-    methodInfo.addCodeLine("this.getCustomElement().waitFor(() -> {\n"
-        + "return this.getCustomElement().returnsString(selectorArg).contains(matcherArg);\n"
+    methodInfo.addCodeLine("Custom custom = this.getCustomElement()");
+    methodInfo.addCodeLine("if (custom == null) { return false; }");
+    methodInfo.addCodeLine("custom.waitFor(() -> {\n"
+        + "return custom.returnsString(selectorArg).contains(matcherArg);\n"
         + "})");
     TranslationContext context = new DeserializerUtilities().getContext("composeWaitForCustom");
     PageObjectMethod method = context.getMethod("testCompose");
@@ -381,5 +401,54 @@ public class UtamMethod_ComposeDeserializeTests {
     methodInfo.addParameter(new MethodParameterInfo("fieldType", "String"));
     TranslationContext context = new DeserializerUtilities().getContext("customExtensionReturnType");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testExtension"), methodInfo);
+  }
+
+  @Test
+  public void testSelf() {
+    TranslationContext context = new DeserializerUtilities().getContext("composeSelf");
+    MethodInfo methodInfo = new MethodInfo("testComposeSelf", "Boolean");
+    methodInfo.addCodeLine("this.isPresent()");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testComposeSelf"), methodInfo);
+    methodInfo = new MethodInfo("testComposeSelfOmitted", "Boolean");
+    methodInfo.addCodeLine("this.isPresent()");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testComposeSelfOmitted"), methodInfo);
+  }
+
+  @Test
+  public void testSameNullableBasicElementReused() {
+    TranslationContext context = new DeserializerUtilities().getContext("composeBasicSameElements");
+    MethodInfo methodInfo = new MethodInfo("testCompose", "Integer");
+    methodInfo.addCodeLine("List<Actionable> basicNullableList = this.getBasicNullableListElement()");
+    methodInfo.addCodeLine("if (basicNullableList == null || basicNullableList.isEmpty()) { return null; }");
+    methodInfo.addCodeLine("basicNullableList.stream().map(element -> element.getText()).collect(Collectors.toList())");
+    methodInfo.addCodeLine("basicNullableList.size()");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
+
+    methodInfo = new MethodInfo("testComposeWaitFor", "Integer");
+    methodInfo.addCodeLine("this.waitFor(() -> {\n"
+        + "List<Actionable> basicNullableList = this.getBasicNullableListElement();\n"
+        + "if (basicNullableList == null) { return null; };\n"
+        + "return basicNullableList.size();\n"
+        + "})");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testComposeWaitFor"), methodInfo);
+  }
+
+  @Test
+  public void testNullableBasicElement() {
+    TranslationContext context = new DeserializerUtilities().getContext("composeBasicNullable");
+    MethodInfo methodInfo = new MethodInfo("testCompose", "void");
+    methodInfo.addCodeLine("Actionable basic = this.getBasic()");
+    methodInfo.addCodeLine("if (basic == null) { return; }");
+    methodInfo.addCodeLine("basic.focus()");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
+
+    methodInfo = new MethodInfo("testComposeWaitFor", "Boolean");
+    methodInfo.addCodeLine("this.waitFor(() -> {\n"
+        + "Actionable basic = this.getBasic();\n"
+        + "if (basic == null) { return false; };\n"
+        + "basic.focus();\n"
+        + "return true;\n"
+        + "})");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testComposeWaitFor"), methodInfo);
   }
 }

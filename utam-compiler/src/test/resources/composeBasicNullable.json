@@ -1,0 +1,42 @@
+{
+  "elements": [
+    {
+      "name": "basic",
+      "nullable": true,
+      "public": true,
+      "selector": {
+        "css": "selector1"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "testCompose",
+      "compose": [
+        {
+          "element": "basic",
+          "apply": "focus"
+        }
+      ]
+    },
+    {
+      "name": "testComposeWaitFor",
+      "compose": [
+        {
+          "apply" : "waitFor",
+          "args": [
+            {
+              "type": "function",
+              "predicate": [
+                {
+                  "element": "basic",
+                  "apply": "focus"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

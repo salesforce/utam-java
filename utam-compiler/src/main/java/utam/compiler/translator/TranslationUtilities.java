@@ -19,8 +19,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
@@ -39,7 +37,6 @@ public class TranslationUtilities {
   static final String JAVADOC_CLOSE_LINE = "   */";
   static final String METHOD_JAVADOC_RETURNS_LINE = "@return %s";
   static final String METHOD_JAVADOC_PARAMETER_LINE = "@param %s %s";
-  private static final String COMMENTS_SEPARATOR = NEW_LINE;
   private static final String ERR_METHOD_IS_EMPTY = "method '%s': implementation code is empty";
   private static final List<String> EMPTY_JAVADOC_LIST = new ArrayList<>();
 
@@ -58,11 +55,6 @@ public class TranslationUtilities {
     }
     res.add(JAVADOC_CLOSE_LINE);
     return res;
-  }
-
-  static List<String> getWrappedJavadoc(String comments) {
-    return getWrappedJavadoc(
-        Stream.of(comments.split(COMMENTS_SEPARATOR)).collect(Collectors.toList()));
   }
 
   static String handleSpecialChars(String selector) {

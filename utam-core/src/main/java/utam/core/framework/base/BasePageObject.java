@@ -14,38 +14,37 @@
 
 package utam.core.framework.base;
 
-import static utam.core.framework.UtamLogger.info;
-
 import utam.core.driver.Document;
 import utam.core.element.Element;
 import utam.core.element.ElementLocation;
 import utam.core.element.FindContext;
 import utam.core.element.Locator;
-import utam.core.framework.base.CustomElementBuilder.External;
 import utam.core.framework.consumer.ContainerElement;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.element.BasePageElement;
 import utam.core.framework.element.DocumentObject;
 
 /**
- * base class for any UTAM page object
+ * base class for any UTAM page object, analogue of the UtamBasePageObject in JS library
  *
  * @author elizaveta.ivanova
  * @since 228
  */
-public abstract class BasePageObject implements RootPageObject {
+public abstract class BasePageObject extends UtamBaseImpl implements RootPageObject {
 
-  // lazy element injected by factory
-  private BasePageElement rootElement;
-  // has to be protected as used in "inScope" method from POs
-  protected ElementLocation root;
   // lazy factory injected by factory
   private PageObjectsFactory factory;
+
+  // lazy element injected in runtime when a Page Object is loaded
+  private Element rootFound;
+  private BasePageElement rootElement;
+
+  // has to be protected as used in "inScope" method from generated page objects
+  protected ElementLocation root;
   // lazy document injected by factory
   private Document document;
 
-  protected BasePageObject() {
-  }
+  protected BasePageObject() {}
 
   final void setBootstrap(ElementLocation root, PageObjectsFactory factory) {
     this.root = root;
@@ -61,46 +60,54 @@ public abstract class BasePageObject implements RootPageObject {
 
   protected final ElementLocation getRootLocator() {
     if (root == null) {
-      throw new UtamError(getLogMessage("root element locator is null"));
+      throw new UtamError(getLogMessage("page object root locator is null"));
     }
     return root;
   }
 
+  // this method can be called from generated Page Objects when root element is not public
   protected final BasePageElement getRootElement() {
     if (rootElement == null) {
-      Element element = getFactory().findElement(getRootLocator());
-      rootElement = element.isNull() ? null : new BasePageElement(getFactory(), element);
+      rootElement = getElement().isNull() ? null : new BasePageElement(getFactory(), getElement());
     }
     return rootElement;
   }
 
-  private PageObjectsFactory getFactory() {
+  @Override
+  protected final Element getElement() {
+    if(rootFound == null) {
+      rootFound = getFactory().findElement(getRootLocator());
+    }
+    return rootFound;
+  }
+
+  @Override
+  protected final PageObjectsFactory getFactory() {
     return factory;
   }
 
-  private void log(String message) {
-    info(getLogMessage(message));
-  }
-
-  private String getLogMessage(String message) {
+  @Override
+  protected final String getLogMessage(String message) {
     return String.format("Page Object '%s': %s", getClass().getSimpleName(), message);
   }
 
   @Override
   public void load() {
     log("find page object root element");
-    getRootElement();
-    if (rootElement == null) {
+    // find if was not already
+    Element element = getElement();
+    // then check if it was found
+    if (element == null || element.isNull()) {
       throw new NullPointerException(getLogMessage(String
           .format("root element not found with locator '%s'",
-              root.getLocatorChainString())));
+              getRootLocator().getLocatorChainString())));
     }
   }
 
   @Override
   public final boolean isPresent() {
-    log("check for root element presence inside its scope");
-    return getRootLocator().findElements(getFactory().getDriver()).size() > 0;
+    log("check for page object root element presence inside its scope");
+    return getRootLocator().findElements(getDriver()).size() > 0;
   }
 
   @SuppressWarnings("unused")
@@ -117,7 +124,7 @@ public abstract class BasePageObject implements RootPageObject {
   // used by generator for external page objects only (result is never nullable)
   protected final CustomElementBuilder inScope(ElementLocation scopeElement, Locator selector,
       boolean isExpandParentShadowRoot) {
-    return new External(
+    return new CustomElementBuilder.External(
         getFactory(), scopeElement, selector, isExpandParentShadowRoot);
   }
 

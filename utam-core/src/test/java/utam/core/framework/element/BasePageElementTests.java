@@ -9,7 +9,6 @@ package utam.core.framework.element;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -22,7 +21,6 @@ import static utam.core.element.FindContext.Type.NULLABLE_IN_SHADOW;
 
 import io.appium.java_client.AppiumDriver;
 import java.util.Collections;
-import java.util.function.Supplier;
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -170,23 +168,6 @@ public class BasePageElementTests {
   public void testBlur() {
     MockUtilities mock = new MockUtilities();
     mock.getUtamElement().blur();
-  }
-
-  @Test
-  public void testWaitFor() {
-    MockUtilities mock = new MockUtilities();
-    BasePageElement element = mock.getUtamElement();
-    Supplier<Object> apply = () -> {
-      mock.getElementAdapter().setText("text");
-      return mock.getElementAdapter();
-    };
-    assertThat(element.waitFor(apply), is(notNullValue()));
-    when(mock.getElementAdapter().isDisplayed()).thenReturn(true);
-    // condition returns true
-    assertThat(element.waitFor(() -> mock.getUtamElement().isVisible()), is(true));
-    when(mock.getElementAdapter().isDisplayed()).thenReturn(false);
-    // condition returns false
-    assertThrows(() -> element.waitFor(() -> mock.getUtamElement().isVisible()));
   }
 
   @Test

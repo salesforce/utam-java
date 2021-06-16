@@ -7,21 +7,25 @@
  */
 package utam.compiler.representation;
 
+import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
 import static utam.compiler.helpers.TypeUtilities.LIST_IMPORT;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.TypeUtilities;
+import utam.compiler.helpers.TypeUtilities.FromClass;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.driver.Document;
 
 /**
  * generate code of getter method for basic element
@@ -30,6 +34,35 @@ import utam.core.declarative.representation.TypeProvider;
  * @since 226
  */
 public abstract class ElementMethod implements PageObjectMethod {
+
+  private static final TypeProvider DOCUMENT_TYPE = new FromClass(Document.class);
+  private static final MethodDeclaration DOCUMENT_GETTER_DECLARATION = new MethodDeclarationImpl(
+      "getDocument",
+      EMPTY_PARAMETERS,
+      DOCUMENT_TYPE,
+      Collections.EMPTY_LIST);
+  public static final PageObjectMethod DOCUMENT_GETTER = new PageObjectMethod() {
+    @Override
+    public MethodDeclaration getDeclaration() {
+      return DOCUMENT_GETTER_DECLARATION;
+    }
+
+    @Override
+    public List<String> getCodeLines() {
+      return Collections
+          .singletonList("this.getDocument()");
+    }
+
+    @Override
+    public List<TypeProvider> getClassImports() {
+      return Collections.EMPTY_LIST;
+    }
+
+    @Override
+    public boolean isPublic() {
+      return false;
+    }
+  };
 
   private static String getParametersVararg(List<MethodParameter> parameters) {
     if (!parameters.isEmpty()) {
@@ -170,8 +203,7 @@ public abstract class ElementMethod implements PageObjectMethod {
         List<MethodParameter> applyParameters,
         MatcherType matcherType,
         List<MethodParameter> matcherParameters,
-        boolean isFindFirstMatch,
-        boolean isNullable) {
+        boolean isFindFirstMatch) {
       this.isPublic = isPublic;
       this.methodName = getElementGetterMethodName(elementName, isPublic);
       this.returnType = elementType;

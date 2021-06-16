@@ -45,7 +45,8 @@ public class AnnotationUtilsTests {
         actionable,
         EMPTY_SELECTOR,
         false,
-        EMPTY_PARAMETERS);
+        EMPTY_PARAMETERS,
+        false);
   }
 
   /** The getShadowHostAnnotation method should return the proper value */

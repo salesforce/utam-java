@@ -50,10 +50,14 @@ final class ContainerElementImpl implements ContainerElement {
     return load(utamType, LocatorBy.byCss(injectCss));
   }
 
+  private ContainerElementPageObject getContainerElementPageObject() {
+    return new ContainerElementPageObject(this);
+  }
+
   @Override
   public <T extends PageObject> T load(Class<T> type, Locator locator) {
     if (type.equals(ContainerElementPageObject.class)) {
-      return (T) (new ContainerElementPageObject(this));
+      return (T) getContainerElementPageObject();
     }
     T instance = new CustomElementBuilder(factory, containerRoot, locator, finderContext)
         .build(type);
@@ -64,7 +68,7 @@ final class ContainerElementImpl implements ContainerElement {
   @Override
   public <T extends PageObject> List<T> loadList(Class<T> type, Locator locator) {
     if (type.equals(ContainerElementPageObject.class)) {
-      return Collections.singletonList((T) (new ContainerElementPageObject(this)));
+      return Collections.singletonList((T) getContainerElementPageObject());
     }
     return new CustomElementBuilder(factory, containerRoot, locator, finderContext).buildList(type);
   }
