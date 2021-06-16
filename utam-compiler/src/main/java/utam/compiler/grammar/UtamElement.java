@@ -78,7 +78,7 @@ public final class UtamElement {
 
   // used in tests
   UtamElement(String name, String type, UtamSelector selector, Boolean isNullable) {
-    this(new String[] { type }, name, false, isNullable, null, selector, null, null, null);
+    this(type == null ? null : new String[] { type }, name, false, isNullable, null, selector, null, null, null);
   }
 
   // used in tests

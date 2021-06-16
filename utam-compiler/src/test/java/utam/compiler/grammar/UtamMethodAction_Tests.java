@@ -323,7 +323,7 @@ public class UtamMethodAction_Tests {
     assertThat(statement, is(instanceOf(ComposeMethodStatement.ReturnsList.class)));
     assertThat(statement.getReturnType().isSameType(returns), is(true));
     assertThat(statement.getCodeLines(), is(hasSize(3)));
-    assertThat(statement.getCodeLines().get(0), is(equalTo("List<Actionable> testElement = this.getTestElementElement()")));
+    assertThat(statement.getCodeLines().get(0), is(equalTo("List<TestElementElement> testElement = this.getTestElementElement()")));
     assertThat(statement.getCodeLines().get(1), is(equalTo("if (testElement == null || testElement.isEmpty()) { return null; }")));
     assertThat(statement.getCodeLines().get(2), is(equalTo("testElement.stream().map(element -> element.isPresent()).collect(Collectors.toList())")));
   }
@@ -341,7 +341,7 @@ public class UtamMethodAction_Tests {
     assertThat(statement, is(instanceOf(ComposeMethodStatement.VoidList.class)));
     assertThat(statement.getReturnType().isSameType(returns), is(true));
     assertThat(statement.getCodeLines(), is(hasSize(3)));
-    assertThat(statement.getCodeLines().get(0), is(equalTo("List<Clickable> testElement = this.getTestElementElement()")));
+    assertThat(statement.getCodeLines().get(0), is(equalTo("List<TestElementElement> testElement = this.getTestElementElement()")));
     assertThat(statement.getCodeLines().get(1), is(equalTo("if (testElement == null || testElement.isEmpty()) { return; }")));
     assertThat(statement.getCodeLines().get(2), is(equalTo("testElement.forEach(element -> element.click())")));
   }
@@ -359,7 +359,7 @@ public class UtamMethodAction_Tests {
     assertThat(statement, is(instanceOf(ComposeMethodStatement.VoidList.class)));
     assertThat(statement.getReturnType().isSameType(returns), is(true));
     assertThat(statement.getCodeLines(), is(hasSize(3)));
-    assertThat(statement.getCodeLines().get(0), is(equalTo("List<Clickable> testElement = this.getTestElementElement()")));
+    assertThat(statement.getCodeLines().get(0), is(equalTo("List<TestElementElement> testElement = this.getTestElementElement()")));
     assertThat(statement.getCodeLines().get(1), is(equalTo("if (testElement == null || testElement.isEmpty()) { return false; }")));
     assertThat(statement.getCodeLines().get(2), is(equalTo("testElement.forEach(element -> element.click());\nreturn true;")));
   }
@@ -375,7 +375,7 @@ public class UtamMethodAction_Tests {
     ComposeMethodStatement statement = action.getComposeAction(context, getMethodContext(STRING), true);
     assertThat(statement, is(instanceOf(ComposeMethodStatement.ReturnsList.class)));
     assertThat(statement.getCodeLines(), is(hasSize(3)));
-    assertThat(statement.getCodeLines().get(0), is(equalTo("List<Clickable> testElement = this.getTestElementElement()")));
+    assertThat(statement.getCodeLines().get(0), is(equalTo("List<TestElementElement> testElement = this.getTestElementElement()")));
     assertThat(statement.getCodeLines().get(1), is(equalTo("if (testElement == null || testElement.isEmpty()) { return null; }")));
     assertThat(statement.getCodeLines().get(2), is(equalTo("return testElement.stream().map(element -> element.getText()).collect(Collectors.toList());")));
   }
