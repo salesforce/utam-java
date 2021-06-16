@@ -20,12 +20,14 @@ import utam.core.framework.UtamLogger;
  */
 public abstract class ElementExpectations {
 
-  static Expectations<Boolean> absence() {
+  // public because used in base class for element and page object
+  public static Expectations<Boolean> absence() {
     return new ExpectationsImpl<>(
         "wait for absence", (driver, element) -> !element.isExisting());
   }
 
-  static Expectations<Boolean> visibility(boolean isVisible) {
+  // public because used in base class for element and page object
+  public static Expectations<Boolean> visibility(boolean isVisible) {
     return new ExpectationsImpl<>(
         "wait for element " + (isVisible ? "visibility" : "invisibility"),
         (driver, element) -> isVisible == element.isDisplayed());

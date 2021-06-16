@@ -177,7 +177,7 @@ public class ChainMethodTests {
             FIRST,
             getCssSelector("css"),
             false,
-            Collections.singletonList(new ParameterUtils.Regular("arg", PrimitiveType.STRING)));
+            Collections.singletonList(new ParameterUtils.Regular("arg", PrimitiveType.STRING)), false);
     UtamError e = expectThrows(UtamError.class, () -> new ChainMethod.Link(elementContext));
     assertThat(
         e.getMessage(), is(equalTo(String.format(ERR_CHAIN_LINK_ARGS_NOT_SUPPORTED, "first"))));

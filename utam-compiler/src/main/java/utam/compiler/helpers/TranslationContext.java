@@ -7,6 +7,8 @@
  */
 package utam.compiler.helpers;
 
+import utam.compiler.helpers.ElementContext.Document;
+import utam.compiler.helpers.ElementContext.Self;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -19,7 +21,11 @@ import utam.core.framework.context.Profile;
 
 import java.util.*;
 
+import static utam.compiler.helpers.ElementContext.Document.DOCUMENT_ELEMENT;
+import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
+import static utam.compiler.helpers.ElementContext.Self.SELF_ELEMENT;
+import static utam.compiler.helpers.ElementContext.SELF_ELEMENT_NAME;
 
 /**
  * instance is created for every Page Object that is being translated <br>
@@ -59,6 +65,9 @@ public final class TranslationContext {
     this.validation = new Validation(pageObjectURI, elementContextMap);
     this.translationTypesConfig = translatorConfiguration.getTranslationTypesConfig();
     this.translatorConfiguration = translatorConfiguration;
+    // register elements to prevent names collisions
+    setElement(Document.DOCUMENT_ELEMENT);
+    setElement(Self.SELF_ELEMENT);
   }
 
   private static void checkParameters(PageObjectMethod method) {
@@ -139,6 +148,12 @@ public final class TranslationContext {
   }
 
   public ElementContext getElement(String name) {
+    if (name == null || SELF_ELEMENT_NAME.equals(name)) {
+      return SELF_ELEMENT;
+    }
+    if (DOCUMENT_ELEMENT_NAME.equals(name)) {
+      return DOCUMENT_ELEMENT;
+    }
     if (!elementContextMap.containsKey(name)) {
       throw new UtamError(String.format(ERR_CONTEXT_ELEMENT_NOT_FOUND, name));
     }
@@ -165,7 +180,7 @@ public final class TranslationContext {
    *
    * @param name method name
    */
-  public void setPrivateMethodUsage(String name) {
+  void setPrivateMethodUsage(String name) {
     usedPrivateMethods.add(name);
   }
 
@@ -177,7 +192,7 @@ public final class TranslationContext {
     return pageObjectMethods.stream()
         .filter(pageObjectMethod -> pageObjectMethod.getDeclaration().getName().equals(name))
         .findFirst()
-        .orElseThrow();
+        .orElseThrow(() -> new AssertionError(String.format("method '%s' not found in JSON", name)));
   }
 
   /**
@@ -208,7 +223,7 @@ public final class TranslationContext {
   }
 
   /**
-   * Used to set beforeLoad flag.
+   * set beforeLoad flag
    * @param beforeLoad boolean beforeLoad
    */
   public void setBeforeLoad(boolean beforeLoad) {

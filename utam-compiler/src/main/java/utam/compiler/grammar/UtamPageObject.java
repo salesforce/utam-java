@@ -10,7 +10,6 @@ package utam.compiler.grammar;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.ElementContext.Document;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
 import utam.core.element.Locator;
@@ -201,7 +200,6 @@ final class UtamPageObject {
       context.setAbstract();
     }
     // register element to prevent names collisions
-    context.setElement(new Document());
     ElementContext rootElement = setRootElementMethod(context);
     if (elements != null) {
       for (UtamElement nextElement : elements) {

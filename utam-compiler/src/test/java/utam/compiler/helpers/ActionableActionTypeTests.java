@@ -47,12 +47,19 @@ public class ActionableActionTypeTests {
   private static Method getMethod(Class clazz, String methodName, Class[] parameters) {
     try {
       return clazz.getDeclaredMethod(methodName, parameters);
-    } catch (Exception e) {
-      throw new AssertionError(
-          String.format("method '%s' with parameters {%s} not found in class %s",
-              methodName,
-              Stream.of(parameters).filter(Objects::nonNull).map(Class::getSimpleName).collect(Collectors.joining(",")),
-              clazz.getName()), e);
+    } catch (NoSuchMethodException e) {
+      // some methods are declared in parent interface
+      Class parent = clazz.getInterfaces().length > 0? clazz.getInterfaces()[0] : null;
+      try {
+        return parent.getDeclaredMethod(methodName, parameters);
+      } catch (Exception eParent) {
+        throw new AssertionError(
+            String.format("method '%s' with parameters {%s} not found in class %s or its parent %s",
+                methodName,
+                Stream.of(parameters).filter(Objects::nonNull).map(Class::getSimpleName)
+                    .collect(Collectors.joining(",")),
+                clazz.getName(), parent.getName()));
+      }
     }
   }
 

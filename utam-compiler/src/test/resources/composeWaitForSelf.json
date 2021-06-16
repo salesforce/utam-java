@@ -4,26 +4,36 @@
       "name": "testCompose",
       "compose": [
         {
+          "element": "self",
           "apply": "waitFor",
           "args": [
             {
+              "name" : "redundant",
               "type" : "function",
               "predicate": [
                 {
                   "element" : "root",
                   "apply" : "getText"
-                },
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "testComposeSelfOmitted",
+      "compose": [
+        {
+          "apply": "waitFor",
+          "args": [
+            {
+              "name" : "redundant",
+              "type" : "function",
+              "predicate": [
                 {
                   "element" : "root",
-                  "apply" : "containsElement",
-                  "args" : [
-                    {
-                      "value" : { "css" :  ".css"}
-                    }
-                  ],
-                  "matcher" : {
-                    "type" : "isFalse"
-                  }
+                  "apply" : "getText"
                 }
               ]
             }

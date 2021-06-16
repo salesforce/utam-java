@@ -5,7 +5,8 @@
       "type" : "utam-test/pageObjects/custom",
       "selector" : {
         "css" : ".css"
-      }
+      },
+      "nullable" : true
     }
   ],
   "methods": [
@@ -13,7 +14,7 @@
       "name": "testCompose",
       "compose": [
         {
-          "element": "custom",
+          "element" : "custom",
           "apply": "waitFor",
           "args": [
             {

@@ -1,0 +1,23 @@
+{
+  "methods" : [
+    {
+      "name" : "testComposeSelf",
+      "return" : "boolean",
+      "compose": [
+        {
+          "element" : "self",
+          "apply": "isPresent"
+        }
+      ]
+    },
+    {
+      "name" : "testComposeSelfOmitted",
+      "return" : "boolean",
+      "compose": [
+        {
+          "apply": "isPresent"
+        }
+      ]
+    }
+  ]
+}

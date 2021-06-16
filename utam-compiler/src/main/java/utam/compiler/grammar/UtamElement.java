@@ -70,9 +70,15 @@ public final class UtamElement {
   UtamElement(String name) {
     this(null, name, false, null, null, null, null, null, null);
   }
+
   // used in tests
   public UtamElement(String name, String[] type, UtamSelector selector) {
     this(type, name, false, null, null, selector, null, null, null);
+  }
+
+  // used in tests
+  UtamElement(String name, String type, UtamSelector selector, Boolean isNullable) {
+    this(new String[] { type }, name, false, isNullable, null, selector, null, null, null);
   }
 
   // used in tests
@@ -231,7 +237,9 @@ public final class UtamElement {
               name,
               elementType,
               selectorContext.getLocator(),
-              isReturnList, addedParameters);
+              isReturnList,
+              addedParameters,
+              isNullable());
       PageObjectMethod method;
       if (filter != null) {
         method =
@@ -308,7 +316,7 @@ public final class UtamElement {
       ElementContext elementContext =
           new ElementContext.Basic(
               scopeElement, name, elementType, selectorContext.getLocator(), isList,
-              addedParameters);
+              addedParameters, isNullable());
       final PageObjectMethod method;
       if (filter != null) {
         // element parameters do not include filter or matcher parameters
@@ -324,7 +332,7 @@ public final class UtamElement {
                 filter.getApplyMethodParameters(),
                 filter.getMatcherType(),
                 filter.getMatcherParameters(),
-                filter.getFindFirst(), isNullable());
+                filter.getFindFirst());
       } else if (isList) {
         method = new ElementMethod.Multiple(elementContext, isPublic());
       } else {

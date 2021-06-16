@@ -28,6 +28,16 @@
           ]
         }
       ]
+    },
+    {
+      "name" : "testComposeBaseMethod",
+      "return" : "boolean",
+      "compose": [
+        {
+          "element" : "custom",
+          "apply": "isPresent"
+        }
+      ]
     }
   ]
 }

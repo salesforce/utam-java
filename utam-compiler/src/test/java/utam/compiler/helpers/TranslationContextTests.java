@@ -13,8 +13,6 @@ import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.FieldInfo;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.declarative.representation.*;
-import utam.core.declarative.translator.TranslationTypesConfig;
-import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
@@ -63,10 +61,6 @@ public class TranslationContextTests {
     context.setMethod(new ElementMethod.Single(elementContext, true));
     context.setElement(new ElementContext.Container("containerObject"));
     return context;
-  }
-
-  private static TranslationTypesConfig getTypesProvider() {
-    return new TranslationTypesConfigJava();
   }
 
   private static MethodParameter getStringParameter() {
@@ -193,7 +187,8 @@ public class TranslationContextTests {
             TypeUtilities.BasicElementInterface.clickable,
             getCssSelector("a[title=*'%s']"),
             false,
-            Collections.singletonList(getStringParameter()));
+            Collections.singletonList(getStringParameter()),
+            false);
 
     int currentSize = context.getMethods().size();
     context.setMethod(new ElementMethod.Single(elementContext, true));
@@ -211,7 +206,7 @@ public class TranslationContextTests {
             getCssSelector("a[title=*'%s'][alt=*'%s]"),
             false,
             Arrays.asList(
-                getStringParameter(), new ParameterUtils.Regular("alt", PrimitiveType.STRING)));
+                getStringParameter(), new ParameterUtils.Regular("alt", PrimitiveType.STRING)), false);
 
     int currentSize = context.getMethods().size();
     context.setMethod(new ElementMethod.Single(elementContext, true));
@@ -228,7 +223,7 @@ public class TranslationContextTests {
             TypeUtilities.BasicElementInterface.clickable,
             getCssSelector("a[title=*'%s']"),
             false,
-            Arrays.asList(getStringParameter(), getStringParameter()));
+            Arrays.asList(getStringParameter(), getStringParameter()), false);
 
     UtamError e =
         expectThrows(

@@ -33,7 +33,7 @@ public class ComposeMethod implements PageObjectMethod {
   private final List<TypeProvider> imports = new ArrayList<>();
   private final String comments;
   private final TypeProvider returns;
-  private boolean hasMethodLevelArgs;
+  private final boolean hasMethodLevelArgs;
 
   public ComposeMethod(MethodContext methodContext, List<ComposeMethodStatement> statements,
       List<MethodParameter> parameters, String comments, boolean hasMethodLevelArgs) {

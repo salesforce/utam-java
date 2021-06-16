@@ -32,6 +32,7 @@ class ValidationExclusions {
     ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/select", "label");
     ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/datetimepicker", "label");
     ELEMENT_AND_COMPONENT.put("utam-lightning/pageObjects/datepicker", "label");
+    ELEMENT_AND_COMPONENT.put("utam-aura/pageObjects/modal", "modalFooter");
   }
 
   static synchronized boolean isExceptionAllowed(String pageObject, String elementName, Validation.ErrorType error) {

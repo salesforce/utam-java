@@ -28,7 +28,7 @@ class MethodDeclarationImpl implements MethodDeclaration {
 
   private final String comments;
 
-  private boolean hasMethodLevelArgs;
+  private final boolean hasMethodLevelArgs;
 
   MethodDeclarationImpl(
       String methodName,

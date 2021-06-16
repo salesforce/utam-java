@@ -34,9 +34,9 @@ import static utam.compiler.translator.TranslationUtilities.getElementGetterMeth
  */
 public abstract class CustomElementMethod implements PageObjectMethod {
 
-  static final String BASE_PAGE_OBJECT_METHOD = "inScope";
-  static final String BUILDER_METHOD = "build";
-  static final String LIST_BUILDER_METHOD = "buildList";
+  private static final String BASE_PAGE_OBJECT_METHOD = "inScope";
+  private static final String BUILDER_METHOD = "build";
+  private static final String LIST_BUILDER_METHOD = "buildList";
   private static final String TMP_VARIABLE = "instance";
 
   private static String getBuilderPrefix(ElementContext scopeElement, Root root, boolean isNullable, boolean isExpandParentShadow) {
