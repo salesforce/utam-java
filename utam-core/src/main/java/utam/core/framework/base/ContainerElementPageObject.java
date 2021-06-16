@@ -41,12 +41,15 @@ public final class ContainerElementPageObject implements PageObject {
 
   @Override
   public void load() {
-    throw new UtamCoreError(ERR_UNSUPPORTED_METHOD);
+    // instead of throwing, do nothing
+    // for compatibility with already existing POs
   }
 
   @Override
   public boolean isPresent() {
-    throw new UtamCoreError(ERR_UNSUPPORTED_METHOD);
+    // instead of throwing, return false
+    // for compatibility with already existing POs
+    return false;
   }
 
   @Override

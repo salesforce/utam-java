@@ -34,20 +34,23 @@ public class ContainerElementPageObjectTests {
   }
 
   @Test
+  public void testSupportedCompatibilityMethods() {
+    ContainerElement containerElement = mock(ContainerElement.class);
+    ContainerElementPageObject pageObject = new ContainerElementPageObject(containerElement);
+    assertThat(pageObject.isPresent(), is(equalTo(false)));
+    pageObject.load();
+  }
+
+  @Test
   public void testUnsupportedMethods() {
     ContainerElementPageObject pageObject = new ContainerElementPageObject(
         mock(ContainerElement.class));
-    UtamCoreError e = expectThrows(UtamCoreError.class, pageObject::load);
-    assertThat(e.getMessage(), is(equalTo(ERR_UNSUPPORTED_METHOD)));
 
-    e = expectThrows(UtamCoreError.class, () -> pageObject.containsElement(mock(LocatorBy.class)));
+    UtamCoreError e = expectThrows(UtamCoreError.class, () -> pageObject.containsElement(mock(LocatorBy.class)));
     assertThat(e.getMessage(), is(equalTo(ERR_UNSUPPORTED_METHOD)));
 
     e = expectThrows(UtamCoreError.class,
         () -> pageObject.containsElement(mock(LocatorBy.class), false));
-    assertThat(e.getMessage(), is(equalTo(ERR_UNSUPPORTED_METHOD)));
-
-    e = expectThrows(UtamCoreError.class, pageObject::isPresent);
     assertThat(e.getMessage(), is(equalTo(ERR_UNSUPPORTED_METHOD)));
 
     e = expectThrows(UtamCoreError.class, pageObject::isVisible);
