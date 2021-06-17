@@ -28,7 +28,7 @@ import utam.core.element.Locator;
  * @author elizaveta.ivanova
  * @since 234
  */
-public class ElementLocationChain implements ElementLocation {
+public final class ElementLocationChain implements ElementLocation {
 
   private final Selector[] chain;
   private final boolean isNullable;
@@ -64,6 +64,10 @@ public class ElementLocationChain implements ElementLocation {
     Element current = chain[0].findElementInsideDriver(driver);
     for (int i = 1; i < chain.length; i++) {
       current = chain[i].findElementInsideElement(current);
+      if(current.isNull()) {
+        // if intermittent element was not found, no point to continue search
+        return NULL_ELEMENT;
+      }
     }
     return current;
   }
