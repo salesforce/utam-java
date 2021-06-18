@@ -101,7 +101,7 @@ public abstract class ElementMethod implements PageObjectMethod {
       List<MethodParameter> matcherParameters) {
     String applyInvocationCode =
         String.format("elm.%s(%s)", applyMethod, getParametersValuesString(applyParameters));
-    String matcherCode = matcherType.getCode(matcherParameters, applyInvocationCode);
+    String matcherCode = matcherType.getCode(false, matcherParameters, applyInvocationCode);
     return String.format("elm -> %s", matcherCode);
   }
 

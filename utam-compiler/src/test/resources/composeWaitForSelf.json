@@ -28,7 +28,6 @@
           "apply": "waitFor",
           "args": [
             {
-              "name" : "redundant",
               "type" : "function",
               "predicate": [
                 {

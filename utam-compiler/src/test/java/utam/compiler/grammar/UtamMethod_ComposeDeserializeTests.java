@@ -27,6 +27,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.helpers.PrimitiveType.BOOLEAN;
+import static utam.compiler.helpers.PrimitiveType.STRING;
 
 /**
  * Provides deserialization tests for the UtamMethod class with compose methods
@@ -329,7 +331,6 @@ public class UtamMethod_ComposeDeserializeTests {
   public void testComposeWaitForBasicVoidActionOnRoot() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
     methodInfo.addCodeLine("this.getRootElement().waitFor(() -> {\n"
-        + "this.getRootElement().getText().contains(\"subString\");\n"
         + "this.getRootElement().focus();\n"
         + "return true;\n"
         + "})");
@@ -358,7 +359,8 @@ public class UtamMethod_ComposeDeserializeTests {
     methodInfo.addCodeLine("Custom custom = this.getCustomElement()");
     methodInfo.addCodeLine("if (custom == null) { return false; }");
     methodInfo.addCodeLine("custom.waitFor(() -> {\n"
-        + "return custom.returnsString(selectorArg).contains(matcherArg);\n"
+        + "String tmp = custom.returnsString(selectorArg);\n"
+        + "return tmp!= null && tmp.contains(matcherArg);\n"
         + "})");
     TranslationContext context = new DeserializerUtilities().getContext("composeWaitForCustom");
     PageObjectMethod method = context.getMethod("testCompose");

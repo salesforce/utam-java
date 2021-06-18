@@ -7,64 +7,83 @@
  */
 package utam.compiler.helpers;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+
 import java.util.Collections;
+import java.util.List;
 import org.testng.annotations.Test;
 import utam.compiler.helpers.ParameterUtils.Regular;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.UtamError;
-
-import java.util.List;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.testng.Assert.expectThrows;
 
 public class MatcherTypeTests {
 
+  private static final String ACTUAL_VALUE = "getTestValue";
+  private static final List<MethodParameter> EMPTY = ParameterUtils.EMPTY_PARAMETERS;
+
   @Test
-  public void testGetCode() {
+  public void isTrueTest() {
+    MatcherType matcherType = MatcherType.isTrue;
+    assertThat(
+        matcherType.getCode(false, EMPTY, ACTUAL_VALUE),
+        is(equalTo(ACTUAL_VALUE)));
+    assertThat(
+        matcherType.getCode(true, EMPTY, ACTUAL_VALUE),
+        is(equalTo("return " + ACTUAL_VALUE + ";")));
+    assertThat(matcherType.getOperandType(), is(equalTo(PrimitiveType.BOOLEAN)));
+    assertThat(matcherType.getExpectedParametersTypes(), hasSize(0));
+  }
+
+  @Test
+  public void isFalseTest() {
+    MatcherType matcherType = MatcherType.isFalse;
+    assertThat(
+        matcherType.getCode(false, EMPTY, ACTUAL_VALUE),
+        is(equalTo("Boolean.FALSE.equals(" + ACTUAL_VALUE + ")")));
+    assertThat(
+        matcherType.getCode(true, EMPTY, ACTUAL_VALUE),
+        is(equalTo("return Boolean.FALSE.equals(" + ACTUAL_VALUE + ");")));
+    assertThat(matcherType.getOperandType(), is(equalTo(PrimitiveType.BOOLEAN)));
+    assertThat(matcherType.getExpectedParametersTypes(), hasSize(0));
+  }
+
+  @Test
+  public void stringEqualsTest() {
+    MatcherType matcherType = MatcherType.stringEquals;
     List<MethodParameter> paramTypes = Collections.singletonList(
         new Regular("text", PrimitiveType.STRING));
     assertThat(
-        MatcherType.stringContains.getCode(paramTypes, "test"),
-        is(equalTo("test.contains(text)")));
-
+        matcherType.getCode(false, paramTypes, ACTUAL_VALUE),
+        is(equalTo("text.equals(getTestValue)")));
     assertThat(
-        MatcherType.stringEquals.getCode(paramTypes, "test"),
-        is(equalTo("test.equals(text)")));
-
-    assertThat(
-        MatcherType.isTrue.getCode(ParameterUtils.EMPTY_PARAMETERS, "test"),
-        is(equalTo("test")));
-
-    assertThat(
-        MatcherType.isFalse.getCode(ParameterUtils.EMPTY_PARAMETERS, "test"),
-        is(equalTo("Boolean.FALSE.equals(test)")));
-
-    UtamError e = expectThrows(
-        UtamError.class,
-        () -> MatcherType.stringContains.getCode(ParameterUtils.EMPTY_PARAMETERS, "test"));
-    assertThat(e.getMessage(), containsString("expected 1 parameters with type {String}, provided were {}"));
+        matcherType.getCode(true, paramTypes, ACTUAL_VALUE),
+        is(equalTo("return text.equals(getTestValue);")));
+    assertThat(matcherType.getOperandType(), is(equalTo(PrimitiveType.STRING)));
+    List<TypeProvider> parameterTypes = matcherType.getExpectedParametersTypes();
+    assertThat(parameterTypes, hasSize(1));
+    assertThat(parameterTypes, contains(PrimitiveType.STRING));
+    assertThat(matcherType.getOperandType(), is(equalTo(PrimitiveType.STRING)));
   }
 
   @Test
-  public void testGetExpectedParametersTypes() {
-    List<TypeProvider> parameterTypes = MatcherType.stringContains.getExpectedParametersTypes();
+  public void stringContainsTest() {
+    MatcherType matcherType = MatcherType.stringContains;
+    List<MethodParameter> paramTypes = Collections.singletonList(
+        new Regular("text", PrimitiveType.STRING));
+    assertThat(
+        matcherType.getCode(false, paramTypes, ACTUAL_VALUE),
+        is(equalTo("{ String tmp = getTestValue;\nreturn tmp!= null && tmp.contains(text); }")));
+    assertThat(
+        matcherType.getCode(true, paramTypes, ACTUAL_VALUE),
+        is(equalTo("String tmp = getTestValue;\nreturn tmp!= null && tmp.contains(text);")));
+    assertThat(matcherType.getOperandType(), is(equalTo(PrimitiveType.STRING)));
+    List<TypeProvider> parameterTypes = matcherType.getExpectedParametersTypes();
     assertThat(parameterTypes, hasSize(1));
     assertThat(parameterTypes, contains(PrimitiveType.STRING));
-    parameterTypes = MatcherType.stringEquals.getExpectedParametersTypes();
-    assertThat(parameterTypes, hasSize(1));
-    assertThat(parameterTypes, contains(PrimitiveType.STRING));
-    assertThat(MatcherType.isTrue.getExpectedParametersTypes(), hasSize(0));
-    assertThat(MatcherType.isFalse.getExpectedParametersTypes(), hasSize(0));
-  }
-
-  @Test
-  public void testGetOperandType() {
-    assertThat(MatcherType.stringContains.getOperandType(), is(equalTo(PrimitiveType.STRING)));
-    assertThat(MatcherType.stringEquals.getOperandType(), is(equalTo(PrimitiveType.STRING)));
-    assertThat(MatcherType.isTrue.getOperandType(), is(equalTo(PrimitiveType.BOOLEAN)));
-    assertThat(MatcherType.isFalse.getOperandType(), is(equalTo(PrimitiveType.BOOLEAN)));
+    assertThat(matcherType.getOperandType(), is(equalTo(PrimitiveType.STRING)));
   }
 }
