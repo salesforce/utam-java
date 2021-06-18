@@ -63,15 +63,16 @@ public abstract class ComposeMethodStatement {
         str -> getNullConditionCode(str, actionReturns, isLastPredicateStatement));
     String invocationStr = operation.getCode(getMethodCallString(), elementValue);
     if (matcher != null) {
-      invocationStr = matcher.getCode(matcherParameters, invocationStr);
+      invocationStr = matcher.getCode(isLastPredicateStatement, matcherParameters, invocationStr);
       this.parameters.addAll(matcherParameters);
-    }
-    if (isLastPredicateStatement) {
-      if (MethodContext.isNullOrVoid(actionReturns)) {
-        // last statement of predicate can't return void, has to return boolean or original type
-        invocationStr = invocationStr.concat(";\nreturn true;");
-      } else {
-        invocationStr = String.format("return %s;", invocationStr);
+    } else {
+      if (isLastPredicateStatement) {
+        if (MethodContext.isNullOrVoid(actionReturns)) {
+          // last statement of predicate can't return void, has to return boolean or original type
+          invocationStr = invocationStr.concat(";\nreturn true;");
+        } else {
+          invocationStr = String.format("return %s;", invocationStr);
+        }
       }
     }
     codeLines.add(invocationStr);

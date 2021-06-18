@@ -106,8 +106,9 @@ public class ElementMethodTests {
   public void testFilteredElementMethodCreation() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, "Actionable");
     info.addParameter(new MethodParameterInfo("test", "String"));
-    info.addCodeLine(
-        "element(this.test).build(Actionable.class, elm -> elm.getText().contains(test))");
+    info.addCodeLine("element(this.test)"
+        + ".build(Actionable.class, elm -> { String tmp = elm.getText();\n"
+            + "return tmp!= null && tmp.contains(test); })");
     info.addImportedTypes(ACTIONABLE_TYPE.getFullName());
     PageObjectMethod method = new ElementMethod.Filtered(
         ELEMENT_NAME,

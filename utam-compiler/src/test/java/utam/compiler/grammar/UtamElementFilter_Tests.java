@@ -7,26 +7,31 @@
  */
 package utam.compiler.grammar;
 
-import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.PageObjectMethod;
-import utam.compiler.representation.PageObjectValidationTestHelper;
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.UtamError;
-import org.testng.annotations.Test;
-import utam.compiler.helpers.*;
-
-import java.util.List;
-
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.testng.Assert.assertThrows;
+import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_FILTER_NEEDS_LIST;
 import static utam.compiler.grammar.UtamElementFilter.ERR_INCORRECT_MATCHER_FOR_METHOD;
 import static utam.compiler.helpers.TypeUtilities.Element.actionable;
 import static utam.compiler.helpers.TypeUtilities.Element.editable;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.testng.Assert.assertThrows;
-import static org.testng.Assert.expectThrows;
+
+import java.util.List;
+import org.testng.annotations.Test;
+import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.MatcherType;
+import utam.compiler.helpers.ParameterUtils;
+import utam.compiler.helpers.PrimitiveType;
+import utam.compiler.helpers.TranslationContext;
+import utam.compiler.representation.PageObjectValidationTestHelper;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * Provides tests of UtamElementFilter for basic and custom elements
@@ -195,7 +200,10 @@ public class UtamElementFilter_Tests {
           new PageObjectValidationTestHelper.MethodParameterInfo("arg" + i, "String"));
     }
     methodInfo.addCodeLines(
-        "element(this.element).buildList(Actionable.class, elm -> elm.getAttribute(arg2).contains(arg3), arg1)");
+        "element(this.element)"
+            + ".buildList(Actionable.class, "
+            + "elm -> { String tmp = elm.getAttribute(arg2);\n"
+            + "return tmp!= null && tmp.contains(arg3); }, arg1)");
     methodInfo.setIsPublic(false);
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
