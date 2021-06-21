@@ -13,18 +13,6 @@
               "predicate": [
                 {
                   "element" : "root",
-                  "apply" : "getText",
-                  "matcher" : {
-                    "type" : "stringContains",
-                    "args" : [
-                      {
-                        "value" : "subString"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "element" : "root",
                   "apply" : "focus"
                 }
               ]
