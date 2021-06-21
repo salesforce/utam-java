@@ -127,9 +127,6 @@ public abstract class ElementMethod implements PageObjectMethod {
     @Override
     public MethodDeclaration getDeclaration() {
       List<TypeProvider> imports = Stream.of(returnType).collect(Collectors.toList());
-//      if (returnType instanceof TypeUtilities.Element) {
-//        imports.addAll(((TypeUtilities.Element)returnType).getBasicInterfaces());
-//      }
       imports.add(new TypeUtilities.FromClass(BasePageElement.class));
       return new MethodDeclarationImpl(methodName, parameters, returnType, imports);
     }
@@ -174,9 +171,6 @@ public abstract class ElementMethod implements PageObjectMethod {
     @Override
     public MethodDeclaration getDeclaration() {
       List<TypeProvider> imports = Stream.of(returnType, LIST_IMPORT).collect(Collectors.toList());
-//      if (returnType instanceof TypeUtilities.Element) {
-//        imports.addAll(((TypeUtilities.Element)returnType).getBasicInterfaces());
-//      }
       imports.add(new TypeUtilities.FromClass(BasePageElement.class));
       return new MethodDeclarationImpl(
           methodName,
