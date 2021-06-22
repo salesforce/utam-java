@@ -28,7 +28,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static utam.compiler.helpers.TypeUtilities.Element.actionable;
+import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
 import static utam.compiler.helpers.TypeUtilities.Element.asBasicType;
 
 /**
@@ -49,14 +49,14 @@ public class TypeUtilitiesTests {
   /** Static isElementType method should return proper values */
   @Test
   public void testIsElementType() {
-    MatcherAssert.assertThat(Element.isBasicType("actionable"), is(equalTo(true)));
-    assertThat(Element.isBasicType((String) null), is(equalTo(false)));
-    assertThat(Element.isBasicType("invalid"), is(equalTo(false)));
+    MatcherAssert.assertThat(Element.isBasicType(new String[] { "actionable" }), is(equalTo(true)));
+    assertThat(Element.isBasicType((String[]) null), is(equalTo(true)));
+    assertThat(Element.isBasicType(new String[] { "invalid" }), is(equalTo(false)));
   }
 
   @Test
   public void testActionableGetTypeMethod() {
-    TypeProvider type = TypeUtilities.Element.actionable;
+    TypeProvider type = TypeUtilities.BasicElementInterface.actionable;
     assertThat(type.getClassType(), is(equalTo(Actionable.class)));
     assertThat(type.getFullName(), is(equalTo(type.getClassType().getName())));
   }
@@ -294,15 +294,16 @@ public class TypeUtilitiesTests {
   @Test
   public void testGetElementType() {
     assertThat(
-        Objects.requireNonNull(asBasicType("actionable")).getSimpleName(),
-        is(equalTo("Actionable")));
+        Objects.requireNonNull(asBasicType("basicType", new String[] { "actionable" })).getSimpleName(),
+        is(equalTo("BasicTypeElement")));
     assertThat(
-        Objects.requireNonNull(asBasicType("clickable")).getSimpleName(),
-        is(equalTo("Clickable")));
+        Objects.requireNonNull(asBasicType("basicType", new String[] { "clickable" })).getSimpleName(),
+        is(equalTo("BasicTypeElement")));
     assertThat(
-        Objects.requireNonNull(asBasicType("editable")).getSimpleName(),
-        is(equalTo("Editable")));
-    assertThat(asBasicType("unknown"), is(nullValue()));
+        Objects.requireNonNull(asBasicType("basicType", new String[] { "editable" })).getSimpleName(),
+        is(equalTo("BasicTypeElement")));
+    assertThat(asBasicType("basicType", new String[] { "unknown" }), is(nullValue()));
+    assertThat(asBasicType("basicType", null).getSimpleName(), is(equalTo("BasicTypeElement")));
   }
 
   /** The isTypesMatch static method should return true for matching lists of types */
@@ -474,7 +475,7 @@ public class TypeUtilitiesTests {
 
   @Test
   public void testGetBasicType() {
-    assertThat(Element.getBasicElementType(actionable), is(actionable));
-    assertThat(Element.getBasicElementType(SELECTOR), is(nullValue()));
+    assertThat(BasicElementInterface.getBasicElementType(actionable), is(actionable));
+    assertThat(BasicElementInterface.getBasicElementType(SELECTOR), is(nullValue()));
   }
 }

@@ -68,7 +68,10 @@ public abstract class BasePageObject extends UtamBaseImpl implements RootPageObj
   // this method can be called from generated Page Objects when root element is not public
   protected final BasePageElement getRootElement() {
     if (rootElement == null) {
-      rootElement = getElement().isNull() ? null : new BasePageElement(getFactory(), getElement());
+      rootElement = getElement().isNull() ? null : new BasePageElement();
+      if (rootElement != null) {
+        rootElement.initialize(getFactory(), getElement());
+      }
     }
     return rootElement;
   }

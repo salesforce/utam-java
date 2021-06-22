@@ -13,6 +13,7 @@ import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
 import utam.core.element.Locator;
+import utam.core.element.RootElement;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.Profile;
 import utam.compiler.representation.RootElementMethod;
@@ -26,7 +27,6 @@ import java.util.stream.Stream;
 
 import static utam.compiler.helpers.AnnotationUtils.*;
 import static utam.compiler.helpers.TypeUtilities.*;
-import static utam.compiler.helpers.TypeUtilities.Element.actionable;
 
 /**
  * @author elizaveta.ivanova
@@ -50,7 +50,7 @@ final class UtamPageObject {
   String implementsType;
   final String comments = "";
   UtamShadowElement shadow;
-  String rootElementType;
+  String[] rootElementType;
   boolean isExposeRootElement; // should be nullable as it's redundant for root
   UtamElement[] elements;
   UtamMethod beforeLoad;
@@ -63,7 +63,7 @@ final class UtamPageObject {
       @JsonProperty(value = "platform") String platform,
       @JsonProperty(value = "profile") UtamProfile[] profiles,
       // to expose root element
-      @JsonProperty("type") String type,
+      @JsonProperty(value = "type", defaultValue = "[]") String[] type,
       @JsonProperty(value = "exposeRootElement", defaultValue = "false") boolean isExposeRootElement,
       // root selector
       @JsonProperty(value = "root", defaultValue = "false") boolean isRootPageObject,
@@ -170,24 +170,25 @@ final class UtamPageObject {
 
   private ElementContext setRootElementMethod(TranslationContext context) {
     TypeProvider interfaceType = context.getInterfaceType(implementsType);
-    TypeProvider elementType = TypeUtilities.Element.asBasicType(rootElementType);
+    // TODO: Fix root elements to create correct base type from component interfaces
+    TypeProvider elementType = new TypeUtilities.FromClass(RootElement.class);
+
     ElementContext rootElement = new ElementContext.Root(interfaceType, elementType, rootLocator);
     // register root element and its method in context
     context.setElement(rootElement);
     PageObjectMethod rootElementMethod;
-    // if "exposeRootElement" is set - declare public method
     if (this.isExposeRootElement) {
+      // if "exposeRootElement" is set - declare public method
       rootElementMethod = new RootElementMethod.Public(elementType);
       context.setMethod(rootElementMethod);
-    }
-    // if type for root element is set and it's not actionable
-    // declare private method to typecast because BasePageObject.getRootElement returns actionable
-    else if(rootElementType != null && !rootElementType.equals(actionable.name())) {
+    } else if (rootElementType != null && TypeUtilities.Element.isBasicType(rootElementType)) {
+      // if type for root element is set and it consists of all basic type interfaces,
+      // declare private method to typecast because BasePageObject.getRootElement
+      // returns RootElement
       rootElementMethod = new RootElementMethod.Private(elementType);
       context.setMethod(rootElementMethod);
-    }
-    // BasePageObject.getRootElement should be registered in context to call from compose
-    else {
+    } else {
+      // BasePageObject.getRootElement should be registered in context to call from compose
       rootElementMethod = new RootElementMethod.Protected();
     }
     rootElement.setElementMethod(rootElementMethod);

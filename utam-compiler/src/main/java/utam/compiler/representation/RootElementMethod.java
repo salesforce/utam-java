@@ -8,15 +8,17 @@
 package utam.compiler.representation;
 
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
-import static utam.compiler.helpers.TypeUtilities.Element.actionable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.element.RootElement;
 
 /**
  * getter for root element
@@ -29,7 +31,7 @@ public class RootElementMethod {
   public static class Protected extends Public {
 
     public Protected() {
-      super(actionable);
+      super(new TypeUtilities.FromClass(RootElement.class));
     }
 
     @Override

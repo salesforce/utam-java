@@ -61,7 +61,8 @@ public class MockUtilities {
     PageObjectContext pageObjectContext = new PageObjectContextImpl(Collections.emptyMap());
     factory = new PageObjectsFactoryImpl(pageObjectContext, driverContext, driverAdapter);
     elementAdapter = setElementAdapter(driverType);
-    utamElement = new BasePageElement(factory, elementAdapter);
+    utamElement = new BasePageElement();
+    utamElement.initialize(factory, elementAdapter);
     if (isMobileMock(driverType)) {
       setMobilePlatform(Platform.LINUX);
     }

@@ -8,7 +8,6 @@
 package utam.compiler.helpers;
 
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
-import static utam.compiler.helpers.TypeUtilities.Element.actionable;
 import static utam.compiler.helpers.Validation.isLabelHardcoded;
 import static utam.compiler.helpers.Validation.isSameSelector;
 
@@ -22,6 +21,8 @@ import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Locator;
 import utam.core.selenium.element.LocatorBy;
+
+import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
 
 /**
  * helper class to store element context

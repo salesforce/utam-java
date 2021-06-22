@@ -48,7 +48,7 @@ public class UtamMethodChainLink_Tests {
     UtamPageObject object = new UtamPageObject();
     TranslationContext context = getTestTranslationContext();
     object.elements =
-        new UtamElement[] {new UtamElement(ELEMENT_NAME, TEST_URI, new UtamSelector("selector"))};
+        new UtamElement[] {new UtamElement(ELEMENT_NAME, new String[] {TEST_URI}, new UtamSelector("selector"))};
     object.compile(context);
     UtamError e =
         expectThrows(
@@ -81,7 +81,7 @@ public class UtamMethodChainLink_Tests {
     UtamPageObject object = new UtamPageObject();
     TranslationContext context = getTestTranslationContext();
     object.elements =
-        new UtamElement[] {new UtamElement(ELEMENT_NAME, TEST_URI, new UtamSelector("selector"))};
+        new UtamElement[] {new UtamElement(ELEMENT_NAME, new String[] {TEST_URI}, new UtamSelector("selector"))};
     object.compile(context);
     UtamError e =
         expectThrows(
@@ -100,7 +100,7 @@ public class UtamMethodChainLink_Tests {
     UtamPageObject object = new UtamPageObject();
     TranslationContext context = getTestTranslationContext();
     object.elements =
-        new UtamElement[] {new UtamElement(ELEMENT_NAME, TEST_URI, new UtamSelector("selector", true))};
+        new UtamElement[] {new UtamElement(ELEMENT_NAME, new String[] {TEST_URI}, new UtamSelector("selector", true))};
     object.compile(context);
     UtamError e =
         expectThrows(

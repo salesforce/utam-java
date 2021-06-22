@@ -196,7 +196,7 @@ public final class UnitTestSerializer {
     if (returnType.isSameType(PrimitiveType.BOOLEAN)) {
       return ", is(equalTo(false))";
     }
-    if(TypeUtilities.Element.isBasicType(returnType)) {
+    if(TypeUtilities.BasicElementInterface.isBasicType(returnType)) {
       return ".isPresent(), is(equalTo(true))";
     }
     if (returnType instanceof ListOf) {

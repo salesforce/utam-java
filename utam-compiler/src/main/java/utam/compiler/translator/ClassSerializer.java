@@ -8,7 +8,10 @@
 package utam.compiler.translator;
 
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.helpers.TypeUtilities;
+import utam.compiler.representation.ElementMethod;
 import utam.core.declarative.representation.*;
+import utam.core.framework.element.BasePageElement;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -92,12 +95,33 @@ public final class ClassSerializer {
     out.add(NEW_LINE);
     source.getMethods().stream()
             // if method is private and never used, do not not declare to avoid test coverage alert
-            .filter(method -> method.isPublic() || translationContext.getUsedPrivateMethods().contains(method.getDeclaration().getName()))
+            .filter(method -> isUsedMethod(method))
             .flatMap(method -> getMethodDeclaration(method).stream()).forEach(out::add);
     out.add(NEW_LINE);
+    addElementClassDeclarations(out);
     out.add(NEW_LINE);
     out.add("}");
     return applyJavaFormatter(out);
+  }
+
+  private void addElementClassDeclarations(List<String> out) {
+    source.getMethods().stream()
+        .filter(method -> isUsedMethod(method) && method.isElementMethod())
+        .map(method -> method.getDeclaration().getReturnType())
+        .map(returnType -> returnType instanceof TypeUtilities.ListOf ?
+            ((TypeUtilities.ListOf)returnType).getElementType() :
+            returnType)
+        .map(returnType -> String.format(
+            "public static class %s extends %s implements %s {}",
+            returnType.getSimpleName() + "Impl",
+            BasePageElement.class.getSimpleName(),
+            returnType.getSimpleName()))
+        .forEach(out::add);
+  }
+
+  private boolean isUsedMethod(PageObjectMethod method) {
+    return method.isPublic() ||
+        translationContext.getUsedPrivateMethods().contains(method.getDeclaration().getName());
   }
 
   private String getDeclaration() {

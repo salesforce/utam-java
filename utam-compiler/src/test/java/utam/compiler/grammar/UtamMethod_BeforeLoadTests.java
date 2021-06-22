@@ -36,7 +36,7 @@ public class UtamMethod_BeforeLoadTests {
     }
 
     private static void setClickableElementContext(TranslationContext context, String elementName) {
-        new UtamElement(elementName, "clickable", new UtamSelector(".fakeSelector"))
+        new UtamElement(elementName, new String[] {"clickable"}, new UtamSelector(".fakeSelector"))
                 .testTraverse(context);
     }
 

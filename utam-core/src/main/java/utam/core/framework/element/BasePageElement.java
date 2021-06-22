@@ -9,13 +9,10 @@ package utam.core.framework.element;
 
 import org.openqa.selenium.Keys;
 import utam.core.driver.Expectations;
-import utam.core.element.Actionable;
-import utam.core.element.Clickable;
-import utam.core.element.Editable;
 import utam.core.element.Element;
+import utam.core.element.RootElement;
 import utam.core.element.Element.GestureDirection;
 import utam.core.element.Element.ScrollOptions;
-import utam.core.element.Touchable;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.UtamBaseImpl;
 
@@ -26,10 +23,12 @@ import utam.core.framework.base.UtamBaseImpl;
  * @author elizaveta.ivanova
  * @since 234
  */
-public class BasePageElement extends UtamBaseImpl implements Actionable, Clickable, Editable, Touchable {
+public class BasePageElement extends UtamBaseImpl implements RootElement {
 
-  private final Element element;
-  private final PageObjectsFactory factory;
+  private Element element;
+  private PageObjectsFactory factory;
+
+  public BasePageElement() {}
 
   public BasePageElement(PageObjectsFactory factory, Element element) {
     this.element = element;
@@ -51,6 +50,11 @@ public class BasePageElement extends UtamBaseImpl implements Actionable, Clickab
     return getDriver()
         .waitFor(getDriverTimeouts().getFluentWaitTimeout(), getDriverTimeouts().getPollingInterval(), expectations,
             getElement());
+  }
+
+  public void initialize(PageObjectsFactory factory, Element element) {
+    this.factory = factory;
+    this.element = element;
   }
 
   @Override

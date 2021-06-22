@@ -7,6 +7,7 @@
  */
 package utam.core.framework.base;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -40,14 +41,30 @@ public class ElementBuilder {
    * @param <T>    element type
    * @return instance with parameters set in selector
    */
-  public <T extends Actionable> T build(Class<T> type, Object... values) {
+  public <T extends Actionable, R extends BasePageElement> T build(
+      Class<T> type, Class<R> implType, Object... values) {
     ElementLocation elementLocation = this.elementFinder.setParameters(values);
     Element element = factory.findElement(elementLocation);
     if(element.isNull()) {
       return null;
     }
-    return (T) new BasePageElement(factory, element);
+    return createInstance(implType, element);
   }
+
+  private <T extends Actionable, R extends BasePageElement> T createInstance(
+      Class<R> implType, Element element) {
+    R result = null;
+    try {
+      result = implType.getConstructor().newInstance();
+      result.initialize(factory, element);
+    } catch (ReflectiveOperationException e) {
+      throw new UtamError(
+          String.format("Unexpected error creating instance of type %s", implType.getSimpleName()),
+          e);
+    }
+    return (T)result;
+  }
+
 
   /**
    * set parameters in actionable, then find it and apply filter to return first match
@@ -58,8 +75,9 @@ public class ElementBuilder {
    * @param <T>    element type
    * @return instance with parameters set in selector
    */
-  public <T extends Actionable> T build(Class<T> type, Predicate<T> filter, Object... values) {
-    List<T> list = buildList(type, values);
+  public <T extends Actionable, R extends BasePageElement> T build(
+      Class<T> type, Class<R> implType, Predicate<T> filter, Object... values) {
+    List<T> list = buildList(type, implType, values);
     if (list == null) {
       return null;
     }
@@ -79,14 +97,16 @@ public class ElementBuilder {
    * @param <T>        element type
    * @return list of instances with index in selector
    */
-  public <T extends Actionable> List<T> buildList(Class<T> type, Object... parameters) {
+  public <T extends Actionable, R extends BasePageElement> List<T> buildList(
+      Class<T> type, Class<R> implType, Object... parameters) {
     ElementLocation elementFinder = this.elementFinder.setParameters(parameters);
     List<Element> elementsFound = factory.findElements(elementFinder);
     if (elementsFound == null || elementsFound.isEmpty()) {
       return null;
     }
-    return (List<T>) elementsFound.stream().map(el -> new BasePageElement(factory, el))
+    List<?> elementList = elementsFound.stream().map(el -> createInstance(implType, el))
         .collect(Collectors.toList());
+    return (List<T>)elementList;
   }
 
   /**
@@ -98,9 +118,9 @@ public class ElementBuilder {
    * @param <T>    element type
    * @return instance with parameters set in selector
    */
-  public <T extends Actionable> List<T> buildList(Class<T> type, Predicate<T> filter,
-      Object... values) {
-    List<T> list = buildList(type, values);
+  public <T extends Actionable, R extends BasePageElement> List<T> buildList(
+      Class<T> type, Class<R> implType, Predicate<T> filter, Object... values) {
+    List<T> list = buildList(type, implType, values);
     if (list.isEmpty()) {
       throw new UtamError("can't find matching element");
     }

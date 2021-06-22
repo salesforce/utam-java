@@ -186,7 +186,7 @@ public class ChainMethodTests {
   @Test
   public void testFirstElement() {
     TranslationContext context = getTestTranslationContext();
-    compile(new UtamElement("first", TEST_URI, new UtamSelector("selector")), context);
+    compile(new UtamElement("first", new String[] { TEST_URI }, new UtamSelector("selector")), context);
     ElementContext elementContext = context.getElement("first");
     StringBuilder stringBuilder = new StringBuilder();
     new ChainMethod.Link(elementContext).setCodeString(stringBuilder, ChainMethod.Cardinality.ONE);
@@ -197,7 +197,7 @@ public class ChainMethodTests {
   @Test
   public void testFirstElementList() {
     TranslationContext context = getTestTranslationContext();
-    compile(new UtamElement("first", TEST_URI, new UtamSelector("selector", true)), context);
+    compile(new UtamElement("first", new String[] { TEST_URI }, new UtamSelector("selector", true)), context);
     ElementContext elementContext = context.getElement("first");
     ChainMethod.Link first = new ChainMethod.Link(elementContext);
     ChainMethod.Link second = new ChainMethod.Link(SECOND, "secondList", false);

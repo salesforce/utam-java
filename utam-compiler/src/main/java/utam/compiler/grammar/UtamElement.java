@@ -58,7 +58,7 @@ public final class UtamElement {
   final String name;
   UtamSelector selector;
   UtamShadowElement shadow;
-  String type;
+  String[] type;
   Boolean isPublic; // should be nullable as it's redundant for root
   UtamElement[] elements;
   UtamElementFilter filter;
@@ -72,13 +72,13 @@ public final class UtamElement {
   }
 
   // used in tests
-  public UtamElement(String name, String type, UtamSelector selector) {
+  public UtamElement(String name, String[] type, UtamSelector selector) {
     this(type, name, false, null, null, selector, null, null, null);
   }
 
   // used in tests
   UtamElement(String name, String type, UtamSelector selector, Boolean isNullable) {
-    this(type, name, false, isNullable, null, selector, null, null, null);
+    this(type == null ? null : new String[] { type }, name, false, isNullable, null, selector, null, null, null);
   }
 
   // used in tests
@@ -88,7 +88,7 @@ public final class UtamElement {
 
   @JsonCreator
   UtamElement(
-      @JsonProperty(value = "type") String type, // optional for actionable
+      @JsonProperty(value = "type", defaultValue = "[]") String[] type, // optional for actionable
       @JsonProperty(value = "name", required = true) String name,
       @JsonProperty(value = "public") Boolean isPublic,
       @JsonProperty(value = "nullable") Boolean isNullable,
@@ -97,7 +97,7 @@ public final class UtamElement {
       @JsonProperty(value = "filter") UtamElementFilter filter,
       @JsonProperty("shadow") UtamShadowElement shadow,
       @JsonProperty("elements") UtamElement[] elements) {
-    this.type = type;
+    this.type = type == null ? new String[] {} : type;
     this.name = name;
     this.isPublic = isPublic;
     this.selector = selector;
@@ -125,16 +125,28 @@ public final class UtamElement {
     if (traversalAbstraction != null) {
       return traversalAbstraction;
     }
-    if ("container".equals(type)) {
+    Type elementType = getElementType();
+    if (elementType == Type.CONTAINER) {
       traversalAbstraction = new Container();
-    } else if (type == null || TypeUtilities.Element.isBasicType(type)) {
+    } else if (elementType == Type.BASIC) {
       traversalAbstraction = new Basic();
-    } else if (TranslationTypesConfigJava.isPageObjectType(type)) {
+    } else if (elementType == Type.CUSTOM) {
       traversalAbstraction = new Custom();
     } else {
       throw new UtamError(String.format(ERR_ELEMENT_OF_UNKNOWN_TYPE, name));
     }
     return traversalAbstraction;
+  }
+
+  Type getElementType() {
+    if (type.length == 1 && "container".equals(type[0])) {
+      return Type.CONTAINER;
+    } else if (type.length == 1 && TranslationTypesConfigJava.isPageObjectType(type[0])) {
+      return Type.CUSTOM;
+    } else if (TypeUtilities.Element.isBasicType(type)) {
+      return Type.BASIC;
+    }
+    return Type.UNKNOWN;
   }
 
   private boolean isPublic() {
@@ -166,6 +178,7 @@ public final class UtamElement {
   }
 
   public enum Type {
+    UNKNOWN,
     BASIC,
     CUSTOM,
     CONTAINER
@@ -209,7 +222,7 @@ public final class UtamElement {
       boolean isReturnList = selector.isReturnAll && (filter == null || !filter.getFindFirst());
       UtamSelector.Context selectorContext = selector.getContext();
       List<MethodParameter> addedParameters = new ArrayList<>(selectorContext.getParameters());
-      TypeProvider elementType = translatorContext.getType(type);
+      TypeProvider elementType = translatorContext.getType(type[0]);
       // addedParameters should only include selector parameters!
       CustomElementMethod.Root root = new CustomElementMethod.Root(selectorContext);
       if (filter != null) {
@@ -287,7 +300,7 @@ public final class UtamElement {
     @Override
     final ElementContext[] traverse(
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
-      TypeProvider elementType = TypeUtilities.Element.asBasicType(type);
+      TypeProvider elementType = TypeUtilities.Element.asBasicType(name, type);
       UtamSelector.Context selectorContext = selector.getContext();
       List<MethodParameter> addedParameters = new ArrayList<>(selectorContext.getParameters());
       ElementField field =

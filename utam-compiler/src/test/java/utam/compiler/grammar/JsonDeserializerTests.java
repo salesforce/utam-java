@@ -183,14 +183,14 @@ public class JsonDeserializerTests {
     fieldInfo.addAnnotations("@ElementMarker.Find(css = \".fakeSelector\")");
 
     PageObjectValidationTestHelper.MethodInfo rootElementMethod =
-            new PageObjectValidationTestHelper.MethodInfo("getRoot", Clickable.class.getSimpleName());
+            new PageObjectValidationTestHelper.MethodInfo("getRoot", "RootElement");
     rootElementMethod.addCodeLine("this.getRootElement()");
     rootElementMethod.setIsPublic(false);
 
     PageObjectValidationTestHelper.MethodInfo childElementGetter =
         new PageObjectValidationTestHelper.MethodInfo(
-            getElementPrivateMethod("childElement"), "Clickable");
-    childElementGetter.addCodeLine("element(this.childElement).build(Clickable.class)");
+            getElementPrivateMethod("childElement"), "ChildElementElement");
+    childElementGetter.addCodeLine("element(this.childElement).build(ChildElementElement.class, ChildElementElementImpl.class)");
     childElementGetter.setIsPublic(false);
 
     PageObjectValidationTestHelper.MethodInfo composeMethod =

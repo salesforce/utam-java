@@ -34,7 +34,7 @@ public class UtamMethod_ComposeTests {
   private static final String ELEMENT_NAME = "testElement";
 
   private static void setClickableElementContext(TranslationContext context) {
-    new UtamElement(ELEMENT_NAME, "clickable", new UtamSelector(".fakeSelector"))
+    new UtamElement(ELEMENT_NAME, new String[] {"clickable"}, new UtamSelector(".fakeSelector"))
         .testTraverse(context);
   }
 
@@ -103,7 +103,7 @@ public class UtamMethod_ComposeTests {
     UtamElement scopeElement =
         new UtamElement(
             ELEMENT_NAME,
-            "clickable",
+            new String[] {"clickable"},
             new UtamSelector(
                 ".fakeSelector[%s]",
                 new UtamArgument[] {new UtamArgument("selectorParameter", "string")}));

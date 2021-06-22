@@ -15,12 +15,11 @@ import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.element.RootElement;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.PlatformType;
 import utam.core.framework.context.Profile;
 import org.testng.annotations.Test;
-import utam.core.element.Actionable;
-import utam.core.element.Clickable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -155,7 +154,7 @@ public class UtamPageObject_Tests {
         };
     pageObject.methods = new UtamMethod[] {new UtamMethod("testMethod", null, chainLinks)};
     pageObject.elements = new UtamElement[] {
-            new UtamElement("first", TEST_URI, new UtamSelector("css"))
+            new UtamElement("first", new String[] {TEST_URI}, new UtamSelector("css"))
     };
     pageObject.compile(context);
     assertThat(context.getMethods().size(), is(equalTo(2)));
@@ -272,7 +271,7 @@ public class UtamPageObject_Tests {
   @Test
   public void testAbstractWithNonNullTypeThrows() {
     UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.rootElementType = "clickable";
+    utamPageObject.rootElementType = new String[] {"clickable"};
     utamPageObject.isAbstract = true;
     UtamError e = expectThrows(UtamError.class, utamPageObject::validate);
     assertThat(e.getMessage(), containsString(ERR_ROOT_ABSTRACT));
@@ -328,12 +327,12 @@ public class UtamPageObject_Tests {
 
   @Test
   public void testRootElementWithType() {
-    MethodInfo info = new MethodInfo("getRoot", Clickable.class.getSimpleName());
+    MethodInfo info = new MethodInfo("getRoot", "RootElement");
     info.addCodeLine("this.getRootElement()");
-    info.addImportedTypes(Clickable.class.getName());
+    //info.addImportedTypes(Clickable.class.getName());
     info.setIsPublic(false);
     UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.rootElementType = "clickable";
+    utamPageObject.rootElementType = new String[] { "clickable" };
     TranslationContext context = getTestTranslationContext();
     utamPageObject.compile(context);
     PageObjectMethod rootElementMethod = context.getRootElement().getElementMethod();
@@ -342,12 +341,12 @@ public class UtamPageObject_Tests {
 
   @Test
   public void testRootElementWithActionableType() {
-    MethodInfo info = new MethodInfo("getRootElement", Actionable.class.getSimpleName());
+    MethodInfo info = new MethodInfo("getRoot", "RootElement");
     info.addCodeLine("this.getRootElement()");
-    info.addImportedTypes(Actionable.class.getName());
+    info.addImportedTypes(RootElement.class.getName());
     info.setIsPublic(false);
     UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.rootElementType = "actionable";
+    utamPageObject.rootElementType = new String[] { "actionable" };
     TranslationContext context = getTestTranslationContext();
     utamPageObject.compile(context);
     PageObjectMethod rootElementMethod = context.getRootElement().getElementMethod();
@@ -356,11 +355,11 @@ public class UtamPageObject_Tests {
 
   @Test
   public void testPublicRootElementWithType() {
-    MethodInfo info = new MethodInfo("getRoot", Clickable.class.getSimpleName());
+    MethodInfo info = new MethodInfo("getRoot", "RootElement");
     info.addCodeLine("this.getRootElement()");
-    info.addImportedTypes(Clickable.class.getName());
+    //info.addImportedTypes(Clickable.class.getName());
     UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.rootElementType = "clickable";
+    utamPageObject.rootElementType = new String[] { "clickable" };
     utamPageObject.isExposeRootElement = true;
     TranslationContext context = getTestTranslationContext();
     utamPageObject.compile(context);
@@ -376,7 +375,7 @@ public class UtamPageObject_Tests {
     utamPageObject.compile(context);
     ElementContext notRootWithRootName =
             new ElementContext.Basic(
-                    "root", TypeUtilities.Element.clickable, getCssSelector("css"));
+                    "root", TypeUtilities.BasicElementInterface.clickable, getCssSelector("css"));
     expectThrows(UtamError.class, () -> context.setElement(notRootWithRootName));
   }
 }

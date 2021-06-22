@@ -420,7 +420,7 @@ public class UtamMethod_ComposeDeserializeTests {
   public void testSameNullableBasicElementReused() {
     TranslationContext context = new DeserializerUtilities().getContext("composeBasicSameElements");
     MethodInfo methodInfo = new MethodInfo("testCompose", "Integer");
-    methodInfo.addCodeLine("List<Actionable> basicNullableList = this.getBasicNullableListElement()");
+    methodInfo.addCodeLine("List<BasicNullableListElement> basicNullableList = this.getBasicNullableListElement()");
     methodInfo.addCodeLine("if (basicNullableList == null || basicNullableList.isEmpty()) { return null; }");
     methodInfo.addCodeLine("basicNullableList.stream().map(element -> element.getText()).collect(Collectors.toList())");
     methodInfo.addCodeLine("basicNullableList.size()");
@@ -428,7 +428,7 @@ public class UtamMethod_ComposeDeserializeTests {
 
     methodInfo = new MethodInfo("testComposeWaitFor", "Integer");
     methodInfo.addCodeLine("this.waitFor(() -> {\n"
-        + "List<Actionable> basicNullableList = this.getBasicNullableListElement();\n"
+        + "List<BasicNullableListElement> basicNullableList = this.getBasicNullableListElement();\n"
         + "if (basicNullableList == null) { return null; };\n"
         + "return basicNullableList.size();\n"
         + "})");
@@ -439,14 +439,14 @@ public class UtamMethod_ComposeDeserializeTests {
   public void testNullableBasicElement() {
     TranslationContext context = new DeserializerUtilities().getContext("composeBasicNullable");
     MethodInfo methodInfo = new MethodInfo("testCompose", "void");
-    methodInfo.addCodeLine("Actionable basic = this.getBasic()");
+    methodInfo.addCodeLine("BasicElement basic = this.getBasic()");
     methodInfo.addCodeLine("if (basic == null) { return; }");
     methodInfo.addCodeLine("basic.focus()");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
 
     methodInfo = new MethodInfo("testComposeWaitFor", "Boolean");
     methodInfo.addCodeLine("this.waitFor(() -> {\n"
-        + "Actionable basic = this.getBasic();\n"
+        + "BasicElement basic = this.getBasic();\n"
         + "if (basic == null) { return false; };\n"
         + "basic.focus();\n"
         + "return true;\n"

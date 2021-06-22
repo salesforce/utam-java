@@ -26,7 +26,7 @@ import static utam.compiler.helpers.ClickableActionType.click;
 import static utam.compiler.helpers.PrimitiveType.BOOLEAN;
 import static utam.compiler.helpers.PrimitiveType.NUMBER;
 import static utam.compiler.helpers.PrimitiveType.STRING;
-import static utam.compiler.helpers.TypeUtilities.Element.clickable;
+import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.clickable;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
@@ -95,7 +95,7 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeActionInvalidStatement() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, "clickable", getSelector()).testTraverse(context);
+    new UtamElement(ELEMENT_NAME, new String[] {"clickable"}, getSelector()).testTraverse(context);
     UtamMethodAction action =
             new UtamMethodAction(
                     null, click.toString(), null, null, new UtamUtilityMethodAction());
@@ -108,7 +108,7 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeActionRedundantElementForUtility() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, "clickable", getSelector()).testTraverse(context);
+    new UtamElement(ELEMENT_NAME, new String[] {"clickable"}, getSelector()).testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
             ELEMENT_NAME, null, null, null, new UtamUtilityMethodAction());
@@ -124,7 +124,7 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeActionInvalidUtilityStatement() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, "clickable", getSelector()).testTraverse(context);
+    new UtamElement(ELEMENT_NAME, new String[] {"clickable"}, getSelector()).testTraverse(context);
     UtamMethodAction action =
             new UtamMethodAction(null);
     UtamError e = expectThrows(
@@ -139,7 +139,7 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeAction() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, "clickable", getSelector()).testTraverse(context);
+    new UtamElement(ELEMENT_NAME, new String[] {"clickable"}, getSelector()).testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
             ELEMENT_NAME, click.toString());
@@ -158,7 +158,7 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeActionWithListElementAndVoidListAction() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, "clickable", getListSelector())
+    new UtamElement(ELEMENT_NAME, new String[] {"clickable"}, getListSelector())
         .testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
@@ -181,7 +181,7 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeActionWithListElementAndListAction() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, "clickable", getListSelector())
+    new UtamElement(ELEMENT_NAME, new String[] {"clickable"}, getListSelector())
         .testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
@@ -201,7 +201,7 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetSizeActionWithListElement() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, "clickable", getListSelector())
+    new UtamElement(ELEMENT_NAME, new String[] {"clickable"}, getListSelector())
         .testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
@@ -213,7 +213,7 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeActionCustomElement() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamElement utamElement = new UtamElement(ELEMENT_NAME, TEST_URI, getSelector());
+    UtamElement utamElement = new UtamElement(ELEMENT_NAME, new String[] {TEST_URI}, getSelector());
     setupRoot(context, utamElement);
     UtamMethodAction action = new UtamMethodAction(ELEMENT_NAME, "myMethod");
     ComposeMethodStatement actionObject = getVoidStatement(action, context);
@@ -227,7 +227,7 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeActionCustomElementListWithParameters() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamElement utamElement = new UtamElement(ELEMENT_NAME, TEST_URI, getListSelector());
+    UtamElement utamElement = new UtamElement(ELEMENT_NAME, new String[] {TEST_URI}, getListSelector());
     setupRoot(context, utamElement);
     UtamMethodAction action = new UtamMethodAction(ELEMENT_NAME, "myMethod");
     action.args = new UtamArgument[]{
@@ -323,7 +323,7 @@ public class UtamMethodAction_Tests {
     assertThat(statement, is(instanceOf(ComposeMethodStatement.ReturnsList.class)));
     assertThat(statement.getReturnType().isSameType(returns), is(true));
     assertThat(statement.getCodeLines(), is(hasSize(3)));
-    assertThat(statement.getCodeLines().get(0), is(equalTo("List<Actionable> testElement = this.getTestElementElement()")));
+    assertThat(statement.getCodeLines().get(0), is(equalTo("List<TestElementElement> testElement = this.getTestElementElement()")));
     assertThat(statement.getCodeLines().get(1), is(equalTo("if (testElement == null || testElement.isEmpty()) { return null; }")));
     assertThat(statement.getCodeLines().get(2), is(equalTo("testElement.stream().map(element -> element.isPresent()).collect(Collectors.toList())")));
   }
@@ -341,7 +341,7 @@ public class UtamMethodAction_Tests {
     assertThat(statement, is(instanceOf(ComposeMethodStatement.VoidList.class)));
     assertThat(statement.getReturnType().isSameType(returns), is(true));
     assertThat(statement.getCodeLines(), is(hasSize(3)));
-    assertThat(statement.getCodeLines().get(0), is(equalTo("List<Clickable> testElement = this.getTestElementElement()")));
+    assertThat(statement.getCodeLines().get(0), is(equalTo("List<TestElementElement> testElement = this.getTestElementElement()")));
     assertThat(statement.getCodeLines().get(1), is(equalTo("if (testElement == null || testElement.isEmpty()) { return; }")));
     assertThat(statement.getCodeLines().get(2), is(equalTo("testElement.forEach(element -> element.click())")));
   }
@@ -359,7 +359,7 @@ public class UtamMethodAction_Tests {
     assertThat(statement, is(instanceOf(ComposeMethodStatement.VoidList.class)));
     assertThat(statement.getReturnType().isSameType(returns), is(true));
     assertThat(statement.getCodeLines(), is(hasSize(3)));
-    assertThat(statement.getCodeLines().get(0), is(equalTo("List<Clickable> testElement = this.getTestElementElement()")));
+    assertThat(statement.getCodeLines().get(0), is(equalTo("List<TestElementElement> testElement = this.getTestElementElement()")));
     assertThat(statement.getCodeLines().get(1), is(equalTo("if (testElement == null || testElement.isEmpty()) { return false; }")));
     assertThat(statement.getCodeLines().get(2), is(equalTo("testElement.forEach(element -> element.click());\nreturn true;")));
   }
@@ -375,7 +375,7 @@ public class UtamMethodAction_Tests {
     ComposeMethodStatement statement = action.getComposeAction(context, getMethodContext(STRING), true);
     assertThat(statement, is(instanceOf(ComposeMethodStatement.ReturnsList.class)));
     assertThat(statement.getCodeLines(), is(hasSize(3)));
-    assertThat(statement.getCodeLines().get(0), is(equalTo("List<Clickable> testElement = this.getTestElementElement()")));
+    assertThat(statement.getCodeLines().get(0), is(equalTo("List<TestElementElement> testElement = this.getTestElementElement()")));
     assertThat(statement.getCodeLines().get(1), is(equalTo("if (testElement == null || testElement.isEmpty()) { return null; }")));
     assertThat(statement.getCodeLines().get(2), is(equalTo("return testElement.stream().map(element -> element.getText()).collect(Collectors.toList());")));
   }

@@ -11,9 +11,9 @@ import utam.core.declarative.representation.PageObjectMethod;
 import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import org.testng.annotations.Test;
-import utam.core.element.Actionable;
 import utam.core.element.Clickable;
 import utam.core.element.Editable;
+import utam.core.element.RootElement;
 
 /**
  * Provides tests for the ElementMethod class
@@ -35,9 +35,9 @@ public class RootElementMethodTests {
 
   @Test
   public void testProtectedRootElementMethodCreation() {
-    MethodInfo info = new MethodInfo("getRootElement", Actionable.class.getSimpleName());
+    MethodInfo info = new MethodInfo("getRootElement", RootElement.class.getSimpleName());
     info.addCodeLine("this.getRootElement()");
-    info.addImportedTypes(Actionable.class.getName());
+    info.addImportedTypes(RootElement.class.getName());
     info.setIsPublic(false);
     PageObjectMethod method = new RootElementMethod.Protected();
     PageObjectValidationTestHelper.validateMethod(method, info);
@@ -50,7 +50,7 @@ public class RootElementMethodTests {
     info.addImportedTypes(Editable.class.getName());
     info.setIsPublic(false);
     PageObjectMethod method =
-        new RootElementMethod.Private(TypeUtilities.Element.editable);
+        new RootElementMethod.Private(TypeUtilities.BasicElementInterface.editable);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 }

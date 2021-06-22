@@ -48,7 +48,7 @@ public class UtamMethod_ChainTests {
     UtamPageObject object = new UtamPageObject();
     TranslationContext context = getTestTranslationContext();
     object.elements =
-        new UtamElement[] {new UtamElement("firstElement", TEST_URI, new UtamSelector("css"))};
+        new UtamElement[] {new UtamElement("firstElement", new String[] {TEST_URI}, new UtamSelector("css"))};
     object.compile(context);
     UtamMethod method =
         new UtamMethod(
@@ -73,7 +73,7 @@ public class UtamMethod_ChainTests {
     TranslationContext context = getTestTranslationContext();
     object.elements =
         new UtamElement[] {
-          new UtamElement("firstElement", TEST_URI, new UtamSelector("css", true))
+          new UtamElement("firstElement", new String[] {TEST_URI}, new UtamSelector("css", true))
         };
     object.compile(context);
     UtamMethod method =
@@ -104,7 +104,7 @@ public class UtamMethod_ChainTests {
     TranslationContext context = getTestTranslationContext();
     object.elements =
         new UtamElement[] {
-          new UtamElement("firstElement", TEST_URI, new UtamSelector("css", true))
+          new UtamElement("firstElement", new String[] {TEST_URI}, new UtamSelector("css", true))
         };
     object.compile(context);
     UtamMethod method =

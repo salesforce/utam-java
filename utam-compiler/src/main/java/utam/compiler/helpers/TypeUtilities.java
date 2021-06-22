@@ -7,22 +7,18 @@
  */
 package utam.compiler.helpers;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.element.ElementLocation;
+import utam.core.element.*;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.consumer.ContainerElement;
-import utam.core.element.Actionable;
-import utam.core.element.Clickable;
-import utam.core.element.Editable;
 import utam.core.selenium.element.LocatorBy;
-import utam.core.element.Touchable;
 
 /**
  * implementation of type provider based on existing class
@@ -88,7 +84,7 @@ public final class TypeUtilities {
     return true;
   }
 
-  public enum Element implements TypeProvider {
+  public enum BasicElementInterface implements TypeProvider {
     actionable(Actionable.class),
     clickable(Clickable.class),
     editable(Editable.class),
@@ -96,12 +92,12 @@ public final class TypeUtilities {
 
     private final Class type;
 
-    Element(Class type) {
+    BasicElementInterface(Class type) {
       this.type = type;
     }
 
     public static boolean isBasicType(String jsonString) {
-      for (TypeUtilities.Element type : TypeUtilities.Element.values()) {
+      for (TypeUtilities.BasicElementInterface type : TypeUtilities.BasicElementInterface.values()) {
         if (type.name().equals(jsonString)) {
           return true;
         }
@@ -109,11 +105,11 @@ public final class TypeUtilities {
       return false;
     }
 
-    public static Element asBasicType(String jsonString) {
+    public static BasicElementInterface asBasicType(String jsonString) {
       if (jsonString == null) {
         return actionable;
       }
-      for (TypeUtilities.Element type : TypeUtilities.Element.values()) {
+      for (TypeUtilities.BasicElementInterface type : TypeUtilities.BasicElementInterface.values()) {
         if (jsonString.equals(type.name())) {
           return type;
         }
@@ -122,7 +118,10 @@ public final class TypeUtilities {
     }
 
     public static boolean isBasicType(TypeProvider type) {
-      for (TypeUtilities.Element basicType : TypeUtilities.Element.values()) {
+      if (type instanceof Element) {
+        return true;
+      }
+      for (TypeUtilities.BasicElementInterface basicType : TypeUtilities.BasicElementInterface.values()) {
         if (basicType.isSameType(type)) {
           return true;
         }
@@ -130,8 +129,25 @@ public final class TypeUtilities {
       return false;
     }
 
-    public static TypeUtilities.Element getBasicElementType(TypeProvider type) {
-      for (TypeUtilities.Element basicType : TypeUtilities.Element.values()) {
+    public static BasicElementInterface[] getBasicElementTypes(TypeProvider type) {
+      if (type instanceof Element) {
+        return ((Element)type).basicInterfaces.toArray(BasicElementInterface[]::new);
+      }
+
+      if (type.isSameType(new TypeUtilities.FromClass(RootElement.class))) {
+        return BasicElementInterface.values();
+      }
+
+      BasicElementInterface basicInterface = getBasicElementType(type);
+      if (basicInterface != null) {
+        return new BasicElementInterface[] { basicInterface };
+      }
+
+      return null;
+    }
+
+    public static TypeUtilities.BasicElementInterface getBasicElementType(TypeProvider type) {
+      for (TypeUtilities.BasicElementInterface basicType : TypeUtilities.BasicElementInterface.values()) {
         if (basicType.isSameType(type)) {
           return basicType;
         }
@@ -157,6 +173,69 @@ public final class TypeUtilities {
     @Override
     public Class getClassType() {
       return type;
+    }
+  }
+
+  public static class Element implements TypeProvider {
+    private final String name;
+    private String containingType = "";
+    private List<BasicElementInterface> basicInterfaces = new ArrayList<>();
+
+    Element(String name, String[] interfaceTypes, String containingType) {
+      this.name = name.substring(0, 1).toUpperCase() + name.substring(1) + "Element";
+      this.containingType = containingType;
+      for(String interfaceType : interfaceTypes) {
+        if (BasicElementInterface.isBasicType(interfaceType)) {
+          basicInterfaces.add(BasicElementInterface.asBasicType(interfaceType));
+        }
+      }
+    }
+
+    public static boolean isBasicType(String[] interfaceTypes) {
+      if (interfaceTypes == null) {
+        return true;
+      }
+      for (String interfaceType : interfaceTypes) {
+        if (!BasicElementInterface.isBasicType(interfaceType)) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    public static Element asBasicType(String name, String[] interfaceTypes) {
+      if (interfaceTypes == null || interfaceTypes.length == 0) {
+        return new Element(name, new String[] { BasicElementInterface.actionable.name() }, "");
+      }
+      if (isBasicType(interfaceTypes)) {
+        return new Element(name, interfaceTypes, "");
+      }
+      return null;
+    }
+
+    public Collection<BasicElementInterface> getBasicInterfaces() {
+      return basicInterfaces;
+    }
+
+    @Override
+    public String getFullName() {
+      String separator = "".equals(containingType) ? "" : ".";
+      return containingType + separator + name;
+    }
+
+    @Override
+    public String getSimpleName() {
+      return name;
+    }
+
+    @Override
+    public String getPackageName() {
+      return containingType;
+    }
+
+    @Override
+    public Class getClassType() {
+      return null;
     }
   }
 
@@ -267,6 +346,10 @@ public final class TypeUtilities {
 
     public ListOf(TypeProvider elementType) {
       this.elementType = elementType;
+    }
+
+    public TypeProvider getElementType() {
+      return elementType;
     }
 
     @Override
