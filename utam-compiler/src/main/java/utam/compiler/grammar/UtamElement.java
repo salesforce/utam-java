@@ -97,7 +97,7 @@ public final class UtamElement {
       @JsonProperty(value = "filter") UtamElementFilter filter,
       @JsonProperty("shadow") UtamShadowElement shadow,
       @JsonProperty("elements") UtamElement[] elements) {
-    this.type = type;
+    this.type = type == null ? new String[] {} : type;
     this.name = name;
     this.isPublic = isPublic;
     this.selector = selector;

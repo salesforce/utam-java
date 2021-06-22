@@ -63,7 +63,7 @@ final class UtamPageObject {
       @JsonProperty(value = "platform") String platform,
       @JsonProperty(value = "profile") UtamProfile[] profiles,
       // to expose root element
-      @JsonProperty(value = "type") String[] type,
+      @JsonProperty(value = "type", defaultValue = "[]") String[] type,
       @JsonProperty(value = "exposeRootElement", defaultValue = "false") boolean isExposeRootElement,
       // root selector
       @JsonProperty(value = "root", defaultValue = "false") boolean isRootPageObject,
