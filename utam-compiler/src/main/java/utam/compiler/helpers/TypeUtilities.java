@@ -131,8 +131,7 @@ public final class TypeUtilities {
 
     public static BasicElementInterface[] getBasicElementTypes(TypeProvider type) {
       if (type instanceof Element) {
-        Element element = (Element)type;
-        return element.basicInterfaces.toArray(BasicElementInterface[]::new);
+        return ((Element)type).basicInterfaces.toArray(BasicElementInterface[]::new);
       }
 
       if (type.isSameType(new TypeUtilities.FromClass(RootElement.class))) {
