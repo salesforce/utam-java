@@ -167,7 +167,7 @@ public final class JsonDeserializer {
 
     @Override
     public Collection<TypeProvider> getNestedInterfaces() {
-      List<TypeProvider> typeList = context.getMethods().stream()
+      return context.getMethods().stream()
           .filter(method -> method.isElementMethod())
           .map(method -> method.getDeclaration().getReturnType())
           .map(returnType -> {
@@ -177,7 +177,6 @@ public final class JsonDeserializer {
             return returnType;
           })
           .collect(Collectors.toList());
-      return typeList;
     }
 
     @Override

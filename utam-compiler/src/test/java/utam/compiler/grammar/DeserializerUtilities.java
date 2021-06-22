@@ -37,7 +37,7 @@ public class DeserializerUtilities {
     this.translatorConfig = getDefaultConfig();
   }
 
-  public static String readJSON(String fileName) {
+  private static String readJSON(String fileName) {
     String testFileName = fileName + ".json";
     try {
       InputStream stream =

@@ -132,9 +132,7 @@ public final class TypeUtilities {
     public static BasicElementInterface[] getBasicElementTypes(TypeProvider type) {
       if (type instanceof Element) {
         Element element = (Element)type;
-        BasicElementInterface[] interfaceArray = new BasicElementInterface[element.basicInterfaces.size()];
-        element.basicInterfaces.toArray(interfaceArray);
-        return interfaceArray;
+        return element.basicInterfaces.toArray(BasicElementInterface[]::new);
       }
 
       if (type.isSameType(new TypeUtilities.FromClass(RootElement.class))) {
@@ -184,10 +182,6 @@ public final class TypeUtilities {
     private String containingType = "";
     private List<BasicElementInterface> basicInterfaces = new ArrayList<>();
 
-    Element(String name, String[] interfaceTypes) {
-      this(name, interfaceTypes, "");
-    }
-
     Element(String name, String[] interfaceTypes, String containingType) {
       this.name = name.substring(0, 1).toUpperCase() + name.substring(1) + "Element";
       this.containingType = containingType;
@@ -211,15 +205,11 @@ public final class TypeUtilities {
     }
 
     public static Element asBasicType(String name, String[] interfaceTypes) {
-      return asBasicType(name, interfaceTypes, "");
-    }
-
-    public static Element asBasicType(String name, String[] interfaceTypes, String containingType) {
       if (interfaceTypes == null || interfaceTypes.length == 0) {
-        return new Element(name, new String[] { "actionable" }, containingType);
+        return new Element(name, new String[] { BasicElementInterface.actionable.name() }, "");
       }
       if (isBasicType(interfaceTypes)) {
-        return new Element(name, interfaceTypes, containingType);
+        return new Element(name, interfaceTypes, "");
       }
       return null;
     }
@@ -228,20 +218,24 @@ public final class TypeUtilities {
       return basicInterfaces;
     }
 
-    @Override public String getFullName() {
+    @Override
+    public String getFullName() {
       String separator = "".equals(containingType) ? "" : ".";
       return containingType + separator + name;
     }
 
-    @Override public String getSimpleName() {
+    @Override
+    public String getSimpleName() {
       return name;
     }
 
-    @Override public String getPackageName() {
+    @Override
+    public String getPackageName() {
       return containingType;
     }
 
-    @Override public Class getClassType() {
+    @Override
+    public Class getClassType() {
       return null;
     }
   }

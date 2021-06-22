@@ -19,6 +19,11 @@ public interface PageObjectInterface {
 
   Collection<MethodDeclaration> getDeclaredApi();
 
+  /**
+   * Gets the set of interfaces of elements declared in this Page Object interface.
+   * @return the collection of TypeProvider objects describing the interfaces declared for elements
+   *         in this Page Object
+   */
   Collection<TypeProvider> getNestedInterfaces();
 
   TypeProvider getInterfaceType();

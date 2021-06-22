@@ -58,7 +58,9 @@ public class ElementBuilder {
       result = implType.getConstructor().newInstance();
       result.initialize(factory, element);
     } catch (ReflectiveOperationException e) {
-      return null;
+      throw new UtamError(
+          String.format("Unexpected error creating instance of type %s", implType.getSimpleName()),
+          e);
     }
     return (T)result;
   }

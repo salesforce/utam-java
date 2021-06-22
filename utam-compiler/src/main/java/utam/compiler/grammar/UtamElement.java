@@ -88,7 +88,7 @@ public final class UtamElement {
 
   @JsonCreator
   UtamElement(
-      @JsonProperty(value = "type") String[] type, // optional for actionable
+      @JsonProperty(value = "type", defaultValue = "[]") String[] type, // optional for actionable
       @JsonProperty(value = "name", required = true) String name,
       @JsonProperty(value = "public") Boolean isPublic,
       @JsonProperty(value = "nullable") Boolean isNullable,
@@ -97,7 +97,7 @@ public final class UtamElement {
       @JsonProperty(value = "filter") UtamElementFilter filter,
       @JsonProperty("shadow") UtamShadowElement shadow,
       @JsonProperty("elements") UtamElement[] elements) {
-    this.type = type == null ? new String[] {} : type;
+    this.type = type;
     this.name = name;
     this.isPublic = isPublic;
     this.selector = selector;
