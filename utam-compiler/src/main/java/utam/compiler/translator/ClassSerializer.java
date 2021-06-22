@@ -112,7 +112,7 @@ public final class ClassSerializer {
             ((TypeUtilities.ListOf)returnType).getElementType() :
             returnType)
         .map(returnType -> String.format(
-            "static class %s extends %s implements %s {}",
+            "public static class %s extends %s implements %s {}",
             returnType.getSimpleName() + "Impl",
             BasePageElement.class.getSimpleName(),
             returnType.getSimpleName()))
