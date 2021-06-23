@@ -320,7 +320,8 @@ public final class UtamElement {
       final PageObjectMethod method;
       if (filter != null) {
         // element parameters do not include filter or matcher parameters
-        List<MethodParameter> elementParameters = new ArrayList<>(scopeElement == null? Collections.EMPTY_LIST: scopeElement.getParameters());
+        List<MethodParameter> elementParameters =  new ArrayList<>(
+            scopeElement == null ? Collections.emptyList() : scopeElement.getParameters());
         elementParameters.addAll(selectorContext.getParameters());
         method =
             new ElementMethod.Filtered(

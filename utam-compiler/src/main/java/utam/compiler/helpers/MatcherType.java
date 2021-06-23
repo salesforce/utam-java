@@ -20,8 +20,8 @@ import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
  * @since 232
  */
 public enum MatcherType {
-  isTrue("%s", "return %s;", Collections.EMPTY_LIST, PrimitiveType.BOOLEAN),
-  isFalse("Boolean.FALSE.equals(%s)", "return Boolean.FALSE.equals(%s);", Collections.EMPTY_LIST, PrimitiveType.BOOLEAN),
+  isTrue("%s", "return %s;", Collections.emptyList(), PrimitiveType.BOOLEAN),
+  isFalse("Boolean.FALSE.equals(%s)", "return Boolean.FALSE.equals(%s);", Collections.emptyList(), PrimitiveType.BOOLEAN),
   stringContains("{ String tmp = %s;\nreturn tmp!= null && tmp.contains(%s); }",
       "String tmp = %s;\nreturn tmp!= null && tmp.contains(%s);",
       Collections.singletonList(PrimitiveType.STRING), PrimitiveType.STRING),

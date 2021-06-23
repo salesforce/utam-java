@@ -31,6 +31,6 @@ public interface AnnotationProvider {
    * @return by default empty list
    */
   default List<TypeProvider> getImportTypes() {
-    return Collections.EMPTY_LIST;
+    return Collections.emptyList();
   }
 }

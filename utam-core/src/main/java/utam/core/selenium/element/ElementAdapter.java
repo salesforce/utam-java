@@ -47,7 +47,7 @@ public class ElementAdapter implements Element {
           + "} else {"
           + "arguments[0].scrollIntoView(false);"
           + "}";
-  static final List<Element> EMPTY_LIST = Collections.EMPTY_LIST;
+  static final List<Element> EMPTY_LIST = Collections.emptyList();
   static final String CLICK_VIA_JAVASCRIPT = "arguments[0].click();";
   static final String FOCUS_VIA_JAVASCRIPT = "arguments[0].focus();";
   static final String SCROLL_CENTER_VIA_JAVASCRIPT = "arguments[0].scrollIntoView({block:'center'});";

@@ -41,7 +41,7 @@ public abstract class ElementMethod implements PageObjectMethod {
       "getDocument",
       EMPTY_PARAMETERS,
       DOCUMENT_TYPE,
-      Collections.EMPTY_LIST);
+      Collections.emptyList());
   public static final PageObjectMethod DOCUMENT_GETTER = new PageObjectMethod() {
     @Override
     public MethodDeclaration getDeclaration() {
@@ -56,7 +56,7 @@ public abstract class ElementMethod implements PageObjectMethod {
 
     @Override
     public List<TypeProvider> getClassImports() {
-      return Collections.EMPTY_LIST;
+      return Collections.emptyList();
     }
 
     @Override
