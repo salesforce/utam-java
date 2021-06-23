@@ -287,7 +287,7 @@ public class UtamArgument_Tests {
   @Test
   public void testGetParametersWithNullArgumentArray() {
     assertThat(
-        getArgsProcessor(null, Collections.EMPTY_LIST, ARGS_CONTEXT).getOrdered(),
+        getArgsProcessor(null, Collections.emptyList(), ARGS_CONTEXT).getOrdered(),
         is(empty()));
     assertThat(getArgsProcessor(null, ARGS_CONTEXT).getOrdered(), is(empty()));
   }
@@ -413,7 +413,7 @@ public class UtamArgument_Tests {
     UtamSelector selector = new UtamSelector(".selector[title='%s']", new UtamArgument[] {selectorArg});
     UtamArgument arg = new UtamArgument(selector);
     List<MethodParameter> parameters = UtamArgument.getArgsProcessor(
-        new UtamArgument[] {arg}, Arrays.asList(SELECTOR), ARGS_CONTEXT).getOrdered();
+        new UtamArgument[] {arg}, Collections.singletonList(SELECTOR), ARGS_CONTEXT).getOrdered();
     assertThat(parameters, hasSize(2));
     assertThat(parameters.get(0).getValue(),
         is(equalTo("LocatorBy.byCss(String.format(\".selector[title='%s']\", title))")));

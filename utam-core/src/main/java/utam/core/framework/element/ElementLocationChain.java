@@ -166,7 +166,7 @@ public final class ElementLocationChain implements ElementLocation {
     Instance(Element element) {
       super(null, null);
       this.elements =
-          element.isNull() ? Collections.EMPTY_LIST : Collections.singletonList(element);
+          element.isNull() ? Collections.emptyList() : Collections.singletonList(element);
     }
 
     @Override

@@ -303,7 +303,13 @@ public abstract class ElementContext {
     public static final ElementContext DOCUMENT_ELEMENT = new Document();
 
     private Document() {
-      super(null, DOCUMENT_ELEMENT_NAME, null, EMPTY_SELECTOR, false, Collections.EMPTY_LIST, false);
+      super(null,
+          DOCUMENT_ELEMENT_NAME,
+          null,
+          EMPTY_SELECTOR,
+          false,
+          Collections.emptyList(),
+          false);
       setElementMethod(ElementMethod.DOCUMENT_GETTER);
     }
 
@@ -323,7 +329,13 @@ public abstract class ElementContext {
     static final ElementContext SELF_ELEMENT = new Self();
 
     private Self() {
-      super(null, SELF_ELEMENT_NAME, null, EMPTY_SELECTOR, false, Collections.EMPTY_LIST, false);
+      super(null,
+          SELF_ELEMENT_NAME,
+          null,
+          EMPTY_SELECTOR,
+          false,
+          Collections.emptyList(),
+          false);
 
     }
 

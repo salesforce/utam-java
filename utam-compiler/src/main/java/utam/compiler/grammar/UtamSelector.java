@@ -184,7 +184,7 @@ public class UtamSelector {
 
     // used in tests
     public Context(Locator locator) {
-      this(locator, Collections.EMPTY_LIST);
+      this(locator, Collections.emptyList());
     }
 
     // used in tests

@@ -48,7 +48,7 @@ public class MethodContextTests {
   public void testReturnList() {
     MethodContext methodContext = new MethodContext("name", STRING, true);
     assertThat(methodContext.getReturnType(null), is(instanceOf(ListOf.class)));
-    List<TypeProvider> imports = methodContext.getReturnTypeImports(Collections.EMPTY_LIST);
+    List<TypeProvider> imports = methodContext.getReturnTypeImports(Collections.emptyList());
     assertThat(imports.size(), is(2));
     assertThat(imports.get(0).isSameType(LIST_IMPORT), is(true));
     assertThat(imports.get(1).isSameType(STRING), is(true));

@@ -52,7 +52,7 @@ public enum ClickableActionType implements ActionType {
 
   @Override
   public List<TypeProvider> getParametersTypes() {
-    return Collections.EMPTY_LIST;
+    return Collections.emptyList();
   }
 
   @Override
