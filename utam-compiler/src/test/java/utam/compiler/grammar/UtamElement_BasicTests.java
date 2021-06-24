@@ -492,4 +492,65 @@ public class UtamElement_BasicTests {
     assertThat(e.getMessage(), containsString(ERR_BEFORELOAD_NAME_NOT_ALLOWED));
 
   }
+
+  @Test
+  public void testBasicElementTypeAsStringThrows() {
+    UtamError e = expectThrows(
+        UtamError.class,
+        () -> TestUtilities.UtamEntityCreator.createUtamElement(
+            ELEMENT_NAME, "actionable", getUtamCssSelector()));
+    assertThat(
+        e.getMessage(),
+        containsString(String.format(
+            UtamElement.ERR_TYPE_PROPERTY_INVALID_STRING_VALUE, ELEMENT_NAME, "actionable")));
+  }
+
+  @Test
+  public void testBasicElementTypeArrayWithInvalidValueThrows() {
+    UtamError e = expectThrows(
+        UtamError.class,
+        () -> TestUtilities.UtamEntityCreator.createUtamElement(
+            ELEMENT_NAME, new String[] {"invalid"}, getUtamCssSelector()));
+    assertThat(
+        e.getMessage(),
+        containsString(String.format(
+            UtamElement.ERR_TYPE_PROPERTY_INVALID_ARRAY_VALUES, ELEMENT_NAME,
+            TypeUtilities.BasicElementInterface.nameList())));
+  }
+
+  @Test
+  public void testElementNodeWithInvalidTypeThrows() {
+    String json =
+        "{"
+            + "  \"name\": \"simpleElement\","
+            + "  \"type\": {},"
+            + "  \"selector\": {"
+            + "    \"css\": \"simpleSelector\""
+            + "  }"
+            + "}";
+    UtamError e = expectThrows(UtamError.class, () ->
+        getElementAbstraction(json).testRootTraverse(TestUtilities.getTestTranslationContext()));
+    assertThat(
+        e.getCause().getMessage(),
+        containsString(String.format(
+            UtamElement.ERR_TYPE_PROPERTY_INVALID_VALUE_TYPE, "simpleElement")));
+  }
+
+  @Test
+  public void testElementNodeWithInvalidArrayElementTypeThrows() {
+    String json =
+        "{"
+            + "  \"name\": \"simpleElement\","
+            + "  \"type\": [ true ],"
+            + "  \"selector\": {"
+            + "    \"css\": \"simpleSelector\""
+            + "  }"
+            + "}";
+    UtamError e = expectThrows(UtamError.class, () ->
+        getElementAbstraction(json).testRootTraverse(TestUtilities.getTestTranslationContext()));
+    assertThat(
+        e.getCause().getMessage(),
+        containsString(String.format(
+            UtamElement.ERR_TYPE_PROPERTY_INVALID_ARRAY_TYPES, "simpleElement")));
+  }
 }
