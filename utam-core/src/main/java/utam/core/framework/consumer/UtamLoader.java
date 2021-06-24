@@ -7,6 +7,7 @@
  */
 package utam.core.framework.consumer;
 
+import utam.core.driver.Document;
 import utam.core.element.Locator;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.RootPageObject;
@@ -63,4 +64,12 @@ public interface UtamLoader {
    * recreates instance of the page objects context and factory with new settings
    */
   void resetContext();
+
+  /**
+   * get instance of the Document Object to call its public methods from test, ex.
+   * loader.getDocument().containsObject(MyModal.class);
+   *
+   * @return new instance every time method is called
+   */
+  Document getDocument();
 }

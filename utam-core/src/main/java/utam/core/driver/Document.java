@@ -8,6 +8,7 @@
 package utam.core.driver;
 
 import utam.core.element.Locator;
+import utam.core.framework.base.RootPageObject;
 
 /**
  * document object to interact with a browser
@@ -36,4 +37,12 @@ public interface Document {
    * @return true if element found
    */
   boolean containsElement(Locator locator);
+
+  /**
+   * check if there is a root page object present in the DOM
+   *
+   * @param pageObjectType
+   * @return true if Page Object's root element is found
+   */
+  boolean containsObject(Class<? extends RootPageObject> pageObjectType);
 }
