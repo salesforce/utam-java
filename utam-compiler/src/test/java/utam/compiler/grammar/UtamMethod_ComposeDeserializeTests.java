@@ -27,8 +27,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.helpers.PrimitiveType.BOOLEAN;
-import static utam.compiler.helpers.PrimitiveType.STRING;
 
 /**
  * Provides deserialization tests for the UtamMethod class with compose methods
@@ -86,7 +84,7 @@ public class UtamMethod_ComposeDeserializeTests {
             + "  \"elements\": ["
             + "    {"
             + "      \"name\": \"element1\","
-            + "      \"type\": \"clickable\","
+            + "      \"type\": [\"clickable\"],"
             + "      \"selector\": {"
             + "        \"css\": \".element\""
             + "      }"
@@ -133,7 +131,7 @@ public class UtamMethod_ComposeDeserializeTests {
             + "  \"elements\": ["
             + "    {"
             + "      \"name\": \"element1\","
-            + "      \"type\": \"clickable\","
+            + "      \"type\": [\"clickable\"],"
             + "      \"selector\": {"
             + "        \"css\": \".element\","
             + "        \"returnAll\": true"
@@ -242,7 +240,7 @@ public class UtamMethod_ComposeDeserializeTests {
             + "      ]\n"
             + "    }";
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamElement utamElement = new UtamElement(ELEMENT_NAME);
+    UtamElement utamElement = UtamEntityCreator.createUtamElement(ELEMENT_NAME);
     utamElement.selector = new UtamSelector("selector");
     utamElement.getAbstraction().testRootTraverse(context);
     UtamMethod method = getDeserializedObject(json, UtamMethod.class);

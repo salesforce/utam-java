@@ -35,7 +35,7 @@ public class UtamElement_ContainerTests {
   private static final String ELEMENT_NAME = "test";
 
   private static UtamElement getPublicContainerElement() {
-    UtamElement utamElement = new UtamElement(ELEMENT_NAME);
+    UtamElement utamElement = TestUtilities.UtamEntityCreator.createUtamElement(ELEMENT_NAME);
     utamElement.type = new String[] {"container"};
     utamElement.isPublic = true;
     return utamElement;

@@ -33,7 +33,7 @@ public class UtamShadowElement_Tests {
 
   @Test
   public void testUtamShadowNestedElement() {
-    UtamShadowElement shadow = new UtamShadowElement(new UtamElement[] { new UtamElement("nested")});
+    UtamShadowElement shadow = new UtamShadowElement(new UtamElement[] { TestUtilities.UtamEntityCreator.createUtamElement("nested")});
     assertThat(shadow.elements, is(arrayWithSize(1)));
   }
 

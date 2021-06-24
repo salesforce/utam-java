@@ -142,7 +142,7 @@ public class TranslationUtilitiesTests {
             + "  \"elements\": ["
             + "    {"
             + "      \"name\": \"testElement\","
-            + "      \"type\": \"clickable\","
+            + "      \"type\": [\"clickable\"],"
             + "      \"public\": true,"
             + "      \"selector\": {"
             + "        \"css\": \".fakeSelector\""

@@ -155,6 +155,11 @@ public final class TypeUtilities {
       return null;
     }
 
+    public static String nameList() {
+      return Arrays.stream(values())
+          .map(basicInterface -> basicInterface.name()).collect(Collectors.joining(","));
+    }
+
     @Override
     public String getFullName() {
       return type.getName();

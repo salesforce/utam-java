@@ -26,7 +26,8 @@ public class UtamMethodChainLink_Tests {
   public void testGetChainStatement() {
     final String ELEMENT_NAME = "elementName";
     TranslationContext context = getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new UtamSelector("selector")).testTraverse(context);
+    UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new UtamSelector("selector")).testTraverse(context);
     UtamMethodChainLink link = new UtamMethodChainLink(ELEMENT_NAME, false, TEST_URI);
     assertThat(link.getChainStatement(context, null), is(instanceOf(ChainMethod.Link.class)));
     link.getChainStatement(context, null);
@@ -37,7 +38,8 @@ public class UtamMethodChainLink_Tests {
   public void testGetChainStatementWithList() {
     final String ELEMENT_NAME = "elementName";
     TranslationContext context = getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new UtamSelector("selector")).testTraverse(context);
+    UtamEntityCreator.createUtamElement
+        (ELEMENT_NAME, new UtamSelector("selector")).testTraverse(context);
     UtamMethodChainLink link = new UtamMethodChainLink(ELEMENT_NAME, true, TEST_URI);
     assertThat(link.getChainStatement(context, null), is(instanceOf(ChainMethod.Link.class)));
   }
@@ -47,8 +49,10 @@ public class UtamMethodChainLink_Tests {
     final String ELEMENT_NAME = "elementName";
     UtamPageObject object = new UtamPageObject();
     TranslationContext context = getTestTranslationContext();
-    object.elements =
-        new UtamElement[] {new UtamElement(ELEMENT_NAME, new String[] {TEST_URI}, new UtamSelector("selector"))};
+    object.elements = new UtamElement[] {
+        UtamEntityCreator.createUtamElement(
+            ELEMENT_NAME, TEST_URI, new UtamSelector("selector"))
+    };
     object.compile(context);
     UtamError e =
         expectThrows(
@@ -80,8 +84,10 @@ public class UtamMethodChainLink_Tests {
     final String ELEMENT_NAME = "elementName";
     UtamPageObject object = new UtamPageObject();
     TranslationContext context = getTestTranslationContext();
-    object.elements =
-        new UtamElement[] {new UtamElement(ELEMENT_NAME, new String[] {TEST_URI}, new UtamSelector("selector"))};
+    object.elements = new UtamElement[] {
+        UtamEntityCreator.createUtamElement(
+            ELEMENT_NAME, TEST_URI, new UtamSelector("selector"))
+    };
     object.compile(context);
     UtamError e =
         expectThrows(
@@ -99,8 +105,10 @@ public class UtamMethodChainLink_Tests {
     final String ELEMENT_NAME = "elementName";
     UtamPageObject object = new UtamPageObject();
     TranslationContext context = getTestTranslationContext();
-    object.elements =
-        new UtamElement[] {new UtamElement(ELEMENT_NAME, new String[] {TEST_URI}, new UtamSelector("selector", true))};
+    object.elements = new UtamElement[] {
+        UtamEntityCreator.createUtamElement(
+            ELEMENT_NAME, TEST_URI, new UtamSelector("selector", true))
+    };
     object.compile(context);
     UtamError e =
         expectThrows(

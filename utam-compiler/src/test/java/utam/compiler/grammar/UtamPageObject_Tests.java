@@ -154,7 +154,8 @@ public class UtamPageObject_Tests {
         };
     pageObject.methods = new UtamMethod[] {new UtamMethod("testMethod", null, chainLinks)};
     pageObject.elements = new UtamElement[] {
-            new UtamElement("first", new String[] {TEST_URI}, new UtamSelector("css"))
+        UtamEntityCreator.createUtamElement(
+            "first", TEST_URI, new UtamSelector("css"))
     };
     pageObject.compile(context);
     assertThat(context.getMethods().size(), is(equalTo(2)));

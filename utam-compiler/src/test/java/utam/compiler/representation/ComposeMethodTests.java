@@ -20,6 +20,7 @@ import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
 import java.util.ArrayList;
 import java.util.Collections;
 import org.testng.annotations.Test;
+import utam.compiler.grammar.TestUtilities;
 import utam.compiler.grammar.UtamElement;
 import utam.compiler.grammar.UtamSelector;
 import utam.compiler.helpers.ActionType;
@@ -113,7 +114,8 @@ public class ComposeMethodTests {
     info.addCodeLine(
         getElementPrivateMethodCalled(ELEMENT_NAME) + "().forEach(element -> element.focus())");
     TranslationContext context = getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
     MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action =
@@ -129,7 +131,8 @@ public class ComposeMethodTests {
         new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "Integer");
     info.addCodeLine(getElementPrivateMethodCalled(ELEMENT_NAME) + "().size()");
     TranslationContext context = getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
     MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action =
@@ -147,7 +150,8 @@ public class ComposeMethodTests {
         getElementPrivateMethodCalled(ELEMENT_NAME)
             + "().stream().map(element -> element.getText()).collect(Collectors.toList())");
     TranslationContext context = getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
     MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action =
@@ -164,7 +168,8 @@ public class ComposeMethodTests {
         new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "String");
     info.addCodeLine(getElementPrivateMethodCalled(ELEMENT_NAME) + "().getText()");
     TranslationContext context = getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
     MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action = new Single(new ElementOperand(element, methodContext),
@@ -182,7 +187,8 @@ public class ComposeMethodTests {
         new PageObjectValidationTestHelper.MethodParameterInfo("paramName", "String"));
     MethodParameter parameter = new Primitive("paramName", PrimitiveType.STRING);
     TranslationContext context = getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
     MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action =
@@ -199,7 +205,8 @@ public class ComposeMethodTests {
   @Test
   public void testComposeMethodWithListAndParameter() {
     TranslationContext context = getTestTranslationContext();
-    UtamElement utamElement = new UtamElement(ELEMENT_NAME, new UtamSelector("css", true));
+    UtamElement utamElement = TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new UtamSelector("css", true));
     utamElement.testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
     PageObjectValidationTestHelper.MethodInfo info =

@@ -129,7 +129,7 @@ public class JsonDeserializerTests {
             + "      \"selector\": {"
             + "        \"css\": \"childSelector\""
             + "      },"
-            + "      \"type\": \"clickable\""
+            + "      \"type\": [\"clickable\"]"
             + "    }"
             + "  ]"
             + "}";
@@ -144,7 +144,7 @@ public class JsonDeserializerTests {
   public void testGetImplementedType() {
     String json =
         "{"
-            + "  \"type\":\"clickable\","
+            + "  \"type\":[\"clickable\"],"
             + "  \"selector\": {"
             + "    \"css\": \"rootSelector\""
             + "  },"
@@ -152,7 +152,7 @@ public class JsonDeserializerTests {
             + "  \"elements\": ["
             + "    {"
             + "      \"name\": \"childElement\","
-            + "      \"type\": \"clickable\","
+            + "      \"type\": [\"clickable\"],"
             + "      \"selector\": {"
             + "        \"css\": \".fakeSelector\""
             + "      }"
@@ -366,7 +366,7 @@ public class JsonDeserializerTests {
             + "      \"selector\": {"
             + "        \"css\": \"childSelector\""
             + "      },"
-            + "      \"type\": \"clickable\""
+            + "      \"type\": [\"clickable\"]"
             + "    }"
             + "  ]"
             + "}";
@@ -401,7 +401,7 @@ public class JsonDeserializerTests {
             + "      \"selector\": {"
             + "        \"css\": \"childSelector\""
             + "      },"
-            + "      \"type\": \"clickable\""
+            + "      \"type\": [\"clickable\"]"
             + "    }"
             + "  ]"
             + "}";
@@ -447,7 +447,7 @@ public class JsonDeserializerTests {
             + "      \"selector\": {"
             + "        \"css\": \"childSelector\""
             + "      },"
-            + "      \"type\": \"clickable\""
+            + "      \"type\": [\"clickable\"]"
             + "    }"
             + "  ]"
             + "}";

@@ -95,7 +95,8 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeActionInvalidStatement() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new String[] {"clickable"}, getSelector()).testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new String[] {"clickable"}, getSelector()).testTraverse(context);
     UtamMethodAction action =
             new UtamMethodAction(
                     null, click.toString(), null, null, new UtamUtilityMethodAction());
@@ -108,7 +109,8 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeActionRedundantElementForUtility() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new String[] {"clickable"}, getSelector()).testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new String[] {"clickable"}, getSelector()).testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
             ELEMENT_NAME, null, null, null, new UtamUtilityMethodAction());
@@ -124,9 +126,9 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeActionInvalidUtilityStatement() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new String[] {"clickable"}, getSelector()).testTraverse(context);
-    UtamMethodAction action =
-            new UtamMethodAction(null);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new String[] {"clickable"}, getSelector()).testTraverse(context);
+    UtamMethodAction action = new UtamMethodAction(null);
     UtamError e = expectThrows(
             UtamError.class, () -> action.getComposeAction(context, getMethodContext(VOID), false )
     );
@@ -139,10 +141,9 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeAction() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new String[] {"clickable"}, getSelector()).testTraverse(context);
-    UtamMethodAction action =
-        new UtamMethodAction(
-            ELEMENT_NAME, click.toString());
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new String[] {"clickable"}, getSelector()).testTraverse(context);
+    UtamMethodAction action = new UtamMethodAction(ELEMENT_NAME, click.toString());
     ComposeMethodStatement actionObject = getVoidStatement(action, context);
     assertThat(actionObject, is(instanceOf(Single.class)));
     assertThat(actionObject.getReturnType().isSameType(VOID), is(true));
@@ -158,8 +159,8 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeActionWithListElementAndVoidListAction() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new String[] {"clickable"}, getListSelector())
-        .testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new String[] {"clickable"}, getListSelector()).testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
             ELEMENT_NAME, click.toString());
@@ -181,8 +182,8 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeActionWithListElementAndListAction() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new String[] {"clickable"}, getListSelector())
-        .testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new String[] {"clickable"}, getListSelector()).testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
             ELEMENT_NAME, ActionableActionType.getText.toString());
@@ -201,8 +202,8 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetSizeActionWithListElement() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new String[] {"clickable"}, getListSelector())
-        .testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new String[] {"clickable"}, getListSelector()).testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
             ELEMENT_NAME, ActionableActionType.size.toString());
@@ -213,7 +214,8 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeActionCustomElement() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamElement utamElement = new UtamElement(ELEMENT_NAME, new String[] {TEST_URI}, getSelector());
+    UtamElement utamElement = TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, TEST_URI, getSelector());
     setupRoot(context, utamElement);
     UtamMethodAction action = new UtamMethodAction(ELEMENT_NAME, "myMethod");
     ComposeMethodStatement actionObject = getVoidStatement(action, context);
@@ -227,7 +229,8 @@ public class UtamMethodAction_Tests {
   @Test
   public void testGetComposeActionCustomElementListWithParameters() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamElement utamElement = new UtamElement(ELEMENT_NAME, new String[] {TEST_URI}, getListSelector());
+    UtamElement utamElement = TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, TEST_URI, getListSelector());
     setupRoot(context, utamElement);
     UtamMethodAction action = new UtamMethodAction(ELEMENT_NAME, "myMethod");
     action.args = new UtamArgument[]{
@@ -313,7 +316,8 @@ public class UtamMethodAction_Tests {
   @Test
   public void testisPresentNullableList() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, null, getListSelector(), true).testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, (String)null, getListSelector(), true).testTraverse(context);
     final String applyStr = isPresent.getInvokeMethodName();
     TypeProvider returns = new ListOf(BOOLEAN);
     UtamMethodAction action =
@@ -331,7 +335,8 @@ public class UtamMethodAction_Tests {
   @Test
   public void testClickNullableList() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, clickable.name(), getListSelector(), true).testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new String[] { clickable.name() }, getListSelector(), true).testTraverse(context);
     final String applyStr = click.getInvokeMethodName();
     TypeProvider returns = VOID;
     UtamMethodAction action =
@@ -349,7 +354,8 @@ public class UtamMethodAction_Tests {
   @Test
   public void testClickNullableListInPredicate() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, clickable.name(), getListSelector(), true).testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new String[] { clickable.name() }, getListSelector(), true).testTraverse(context);
     final String applyStr = click.getInvokeMethodName();
     TypeProvider returns = BOOLEAN;
     UtamMethodAction action =
@@ -367,7 +373,8 @@ public class UtamMethodAction_Tests {
   @Test
   public void testEditNullableListInPredicate() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, clickable.name(), getListSelector(), true).testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new String[] { clickable.name() }, getListSelector(), true).testTraverse(context);
     final String applyStr = getText.getInvokeMethodName();
     UtamMethodAction action =
         new UtamMethodAction(
