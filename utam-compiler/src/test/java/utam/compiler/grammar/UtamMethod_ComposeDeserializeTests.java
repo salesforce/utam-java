@@ -21,6 +21,7 @@ import utam.core.declarative.representation.PageObjectMethod;
 import java.util.Collection;
 
 import static utam.compiler.grammar.TestUtilities.*;
+import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_DUPLICATE_NAMES;
 import static utam.compiler.grammar.UtamMethod.ERR_METHOD_EMPTY_STATEMENTS;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -450,5 +451,43 @@ public class UtamMethod_ComposeDeserializeTests {
         + "return true;\n"
         + "})");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testComposeWaitFor"), methodInfo);
+  }
+
+  @Test
+  public void testComposeWithReferenceArgsReplacesWithMethodLevelPrimitive() {
+    MethodInfo methodInfo = new MethodInfo("testReference", "List<String>");
+    methodInfo.addParameter(new MethodParameterInfo("strArg", "String"));
+    methodInfo.addCodeLine("this.getCustomElement().someMethod(strArg)");
+    TranslationContext context = new DeserializerUtilities().getContext("composeReference");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testReference"), methodInfo);
+  }
+
+  @Test
+  public void testComposeWithMismatchedArgTypes() {
+    UtamError e =
+        expectThrows(
+            UtamError.class,
+            () ->
+                new DeserializerUtilities()
+                    .getContext("composeMisMatchedArgs")
+                    .getMethod("testReference"));
+    assertThat(
+        e.getCause().getMessage(),
+        containsString(
+            String.format(UtamArgument.ERR_ARG_TYPE_MISMATCH, "args", "strArg", "boolean")));
+  }
+
+  @Test
+  public void testComposeWithInvalidArgReference() {
+    UtamError e =
+        expectThrows(
+            UtamError.class,
+            () ->
+                new DeserializerUtilities()
+                    .getContext("composeInvalidReference")
+                    .getMethod("testReference"));
+    assertThat(
+        e.getCause().getMessage(),
+        containsString(String.format(UtamArgument.ERR_REFERENCE_MISSING, "args", "strArg1")));
   }
 }

@@ -45,15 +45,39 @@ class UtamArgumentDeserializer extends
     UtamArgument res = new UtamArgument(null);
     ObjectMapper mapper = (ObjectMapper) parser.getCodec();
     ObjectNode root = mapper.readTree(parser);
+    final String validationContext = "args";
+
     // Track root level args and replace all reference type args at the method statement level
-    if (root.get("name") !=null && methodArgs.containsKey(root.get("name"))) {
+    if (root.get("name") != null && methodArgs.containsKey(root.get("name"))) {
+      // Validate if the method level arg and the statement level arg's types are mismatched, if
+      // not, throw an error. e.g string vs boolean
+      if (root.get("type") != null
+          && !UtamArgument.REFERENCE_TYPE_PROPERTY.equalsIgnoreCase(root.get("type").asText())
+          && !(root.get("type")
+              .asText()
+              .equalsIgnoreCase(methodArgs.get(root.get("name")).asText()))) {
+
+        throw new UtamError(
+            String.format(
+                ERR_ARG_TYPE_MISMATCH,
+                validationContext,
+                root.get("name").asText(),
+                root.get("type").asText()));
+      }
       root.replace("type", methodArgs.get(root.get("name")));
+    } else if (root.get("name") != null
+        && !methodArgs.containsKey(root.get("name"))
+        && root.get("type") != null
+        && UtamArgument.REFERENCE_TYPE_PROPERTY.equalsIgnoreCase(root.get("type").asText())) {
+      // Validate if a reference type is not referenced in methodArgs already, if not, throw an
+      // error
+      throw new UtamError(
+          String.format(ERR_REFERENCE_MISSING, validationContext, root.get("name").asText()));
     } else {
       methodArgs.put(root.get("name"), root.get("type"));
     }
 
     JsonNode valueNode = root.get("value");
-    final String validationContext = "args";
     if (valueNode != null) {
       if (valueNode.isObject()) {
         res.value = mapper.treeToValue(valueNode, UtamSelector.class);
