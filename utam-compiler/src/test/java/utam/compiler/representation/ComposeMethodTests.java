@@ -53,7 +53,7 @@ public class ComposeMethodTests {
         methodContext,
         Collections.singletonList(statement),
         EMPTY_PARAMETERS,
-        EMPTY_COMMENTS, false);
+        EMPTY_COMMENTS);
   }
 
   private static Operation getBasicElementOperation(ActionType actionType) {
@@ -192,7 +192,7 @@ public class ComposeMethodTests {
     ComposeMethod method =
         new ComposeMethod(
             methodContext, Collections.singletonList(action),
-            action.getParameters(), EMPTY_COMMENTS, false);
+            action.getParameters(), EMPTY_COMMENTS);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
@@ -218,7 +218,7 @@ public class ComposeMethodTests {
     ComposeMethod method =
         new ComposeMethod(
             methodContext, Collections.singletonList(action),
-            action.getParameters(), EMPTY_COMMENTS, false);
+            action.getParameters(), EMPTY_COMMENTS);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 }

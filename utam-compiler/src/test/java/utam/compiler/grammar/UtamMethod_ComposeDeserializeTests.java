@@ -7,26 +7,35 @@
  */
 package utam.compiler.grammar;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.TestUtilities.getDeserializedObject;
+import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
+import static utam.compiler.grammar.TestUtilities.getJsonStringDeserializer;
+import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
+import static utam.compiler.grammar.UtamMethod.ERR_METHOD_EMPTY_STATEMENTS;
+import static utam.compiler.helpers.MethodContext.ERR_ARG_TYPE_MISMATCH;
+import static utam.compiler.helpers.MethodContext.ERR_REFERENCE_MISSING;
+
+import java.util.Collection;
+import org.testng.annotations.Test;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethod;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
-import utam.core.framework.consumer.UtamError;
-import org.testng.annotations.Test;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.PageObjectMethod;
-
-import java.util.Collection;
-
 import static utam.compiler.grammar.TestUtilities.*;
-import static utam.compiler.grammar.UtamMethod.ERR_METHOD_EMPTY_STATEMENTS;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.testng.Assert.expectThrows;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * Provides deserialization tests for the UtamMethod class with compose methods
@@ -451,5 +460,41 @@ public class UtamMethod_ComposeDeserializeTests {
         + "return true;\n"
         + "})");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testComposeWaitFor"), methodInfo);
+  }
+
+  @Test
+  public void testComposeWithReferenceArgsReplacesWithMethodLevelPrimitive() {
+    MethodInfo methodInfo = new MethodInfo("testReference", "List<String>");
+    methodInfo.addParameter(new MethodParameterInfo("strArg", "String"));
+    methodInfo.addCodeLine("this.getCustomElement().someMethod(strArg)");
+    TranslationContext context = new DeserializerUtilities().getContext("composeArgsReference");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("testReference"), methodInfo);
+  }
+
+  @Test
+  public void testComposeWithMismatchedArgTypes() {
+    UtamError e =
+        expectThrows(
+            UtamError.class,
+            () ->
+                new DeserializerUtilities().getContext("composeArgsTypeMismatch"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            String.format(
+                ERR_ARG_TYPE_MISMATCH, "method 'testReference'", "strArg", "Boolean")));
+  }
+
+  @Test
+  public void testComposeWithInvalidArgReference() {
+    UtamError e =
+        expectThrows(
+            UtamError.class,
+            () ->
+                new DeserializerUtilities()
+                    .getContext("composeArgsInvalidReference"));
+    assertThat(
+        e.getMessage(),
+        containsString(String.format(ERR_REFERENCE_MISSING, "method 'testReference'", "strArg1")));
   }
 }

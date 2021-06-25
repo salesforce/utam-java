@@ -50,7 +50,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
   private final TranslatorConfig translatorConfig;
   private final Map<String, PageObjectDeclaration> generated = new HashMap<>();
   private final Map<Profile, Map<String, String>> profilesMapping = new HashMap<>();
-  private Profile defaultProfile;
+  private final Profile defaultProfile;
   // max number of POs to generate for generator performance measurements
   private int maxPageObjectsCounter  = Integer.MAX_VALUE;
 

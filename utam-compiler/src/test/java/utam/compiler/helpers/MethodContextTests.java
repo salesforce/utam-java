@@ -9,10 +9,13 @@ package utam.compiler.helpers;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
+import static org.testng.Assert.expectThrows;
+import static utam.compiler.helpers.MethodContext.ERR_ARG_DUPLICATE_NAME;
 import static utam.compiler.helpers.PrimitiveType.BOOLEAN;
 import static utam.compiler.helpers.PrimitiveType.STRING;
 import static utam.compiler.helpers.TypeUtilities.LIST_IMPORT;
@@ -21,9 +24,11 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
 import java.util.Collections;
 import java.util.List;
 import org.testng.annotations.Test;
+import utam.compiler.helpers.ParameterUtils.Primitive;
 import utam.compiler.helpers.TypeUtilities.ListOf;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * @author elizaveta.ivanova
@@ -52,5 +57,21 @@ public class MethodContextTests {
     assertThat(imports.size(), is(2));
     assertThat(imports.get(0).isSameType(LIST_IMPORT), is(true));
     assertThat(imports.get(1).isSameType(STRING), is(true));
+  }
+
+  @Test
+  public void testDuplicateArgNameInMethod() {
+    MethodContext methodContext = new MethodContext();
+    methodContext.setMethodArg(new Primitive("name", STRING));
+    UtamError e = expectThrows(UtamError.class, () -> methodContext.setMethodArg(new Primitive("name", STRING)));
+    assertThat(e.getMessage(), containsString(String.format(ERR_ARG_DUPLICATE_NAME, "method 'test'", "name")));
+  }
+
+  @Test
+  public void testDuplicateArgNameInStmnt() {
+    MethodContext methodContext = new MethodContext();
+    methodContext.setStatementArg(new Primitive("name", STRING));
+    UtamError e = expectThrows(UtamError.class, () -> methodContext.setStatementArg(new Primitive("name", STRING)));
+    assertThat(e.getMessage(), containsString(String.format(ERR_ARG_DUPLICATE_NAME, "method 'test'", "name")));
   }
 }

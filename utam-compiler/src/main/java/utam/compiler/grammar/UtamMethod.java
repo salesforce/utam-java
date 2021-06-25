@@ -7,13 +7,15 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.UtamPageObject.BEFORELOAD_METHOD_MANE;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.PrimitiveType;
@@ -28,8 +30,6 @@ import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
-
-import static utam.compiler.grammar.UtamPageObject.BEFORELOAD_METHOD_MANE;
 
 /**
  * public method declared at PO level
@@ -164,36 +164,31 @@ class UtamMethod {
   }
 
   PageObjectMethod getComposeMethod(TranslationContext context) {
-    // methodArgs collection has to be reset for each method to avoid args collisions
-    UtamArgumentDeserializer.getMethodArgs().clear();
-    // Flag for method level args
-    boolean hasMethodLevelArgs = false;
+    MethodContext methodContext = new MethodContext(name, getReturnType(context, null),
+        isReturnsList());
     if (args != null) {
-      hasMethodLevelArgs = true;
-    }
-    // List<Void> should throw error
-    if (returnStr == null && isReturnList != null) {
-      throw new UtamError(String.format(ERR_METHOD_RETURN_ALL_REDUNDANT, name));
+      UtamArgument.getArgsProcessor(args, String.format("method '%s'", this.name)).getOrdered()
+          .forEach(methodContext::setMethodArg);
     }
     if (compose.length == 0) {
       throw new UtamError(String.format(ERR_METHOD_EMPTY_STATEMENTS, name));
     }
     List<ComposeMethodStatement> statements = new ArrayList<>();
     List<MethodParameter> methodParameters = new ArrayList<>();
-    MethodContext methodContext = new MethodContext(name, getReturnType(context, null), isReturnsList());
+
     for (UtamMethodAction utamMethodAction : compose) {
       ComposeMethodStatement statement = utamMethodAction
           .getComposeAction(context, methodContext, false);
       statements.add(statement);
       methodParameters.addAll(statement.getParameters());
+      methodContext.nextStatement();
     }
     methodParameters.removeIf(MethodParameter::isLiteral);
     return new ComposeMethod(
         methodContext,
         statements,
         methodParameters,
-        comments,
-        hasMethodLevelArgs
+        comments
     );
   }
 

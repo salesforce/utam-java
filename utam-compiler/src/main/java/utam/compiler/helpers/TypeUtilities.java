@@ -184,8 +184,8 @@ public final class TypeUtilities {
 
   public static class Element implements TypeProvider {
     private final String name;
-    private String containingType = "";
-    private List<BasicElementInterface> basicInterfaces = new ArrayList<>();
+    private String containingType;
+    private final List<BasicElementInterface> basicInterfaces = new ArrayList<>();
 
     Element(String name, String[] interfaceTypes, String containingType) {
       this.name = name.substring(0, 1).toUpperCase() + name.substring(1) + "Element";

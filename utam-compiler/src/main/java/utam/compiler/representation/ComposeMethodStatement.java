@@ -48,7 +48,8 @@ public abstract class ComposeMethodStatement {
   private final List<MethodParameter> parameters = new ArrayList<>();
   private final TypeProvider returns;
 
-  ComposeMethodStatement(Operand operand,
+  ComposeMethodStatement(
+      Operand operand,
       Operation operation,
       TypeProvider returnType,
       MatcherType matcher,
@@ -57,14 +58,14 @@ public abstract class ComposeMethodStatement {
     TypeProvider actionReturns = matcher != null ? PrimitiveType.BOOLEAN : returnType;
     this.imports.addAll(operation.getImports());
     this.classImports.addAll(operation.getClassImports());
-    this.parameters.addAll(operand.getElementParameters());
-    this.parameters.addAll(operation.getActionParameters());
+    setParameters(operand.getElementParameters());
+    setParameters(operation.getActionParameters());
     String elementValue = operand.getOperandCode(codeLines,
         str -> getNullConditionCode(str, actionReturns, isLastPredicateStatement));
     String invocationStr = operation.getCode(getMethodCallString(), elementValue);
     if (matcher != null) {
       invocationStr = matcher.getCode(isLastPredicateStatement, matcherParameters, invocationStr);
-      this.parameters.addAll(matcherParameters);
+      setParameters(matcherParameters);
     } else {
       if (isLastPredicateStatement) {
         if (MethodContext.isNullOrVoid(actionReturns)) {
@@ -76,11 +77,14 @@ public abstract class ComposeMethodStatement {
       }
     }
     codeLines.add(invocationStr);
-    parameters.removeIf(MethodParameter::isLiteral);
     classImports.addAll(operand.getAddedClassImports());
     this.returns = isLastPredicateStatement && MethodContext.isNullOrVoid(actionReturns)
         ? PrimitiveType.BOOLEAN
         : actionReturns;
+  }
+
+  private void setParameters(List<MethodParameter> parameters) {
+    this.parameters.addAll(parameters);
   }
 
   ComposeMethodStatement(Operand operand, Operation operation, TypeProvider returnType,
@@ -287,7 +291,10 @@ public abstract class ComposeMethodStatement {
         // if element is already used in a previous statement, parameters were already added
         // should be done AFTER statement is created
         methodContext.setElementUsage(elementContext);
-        parameters = elementContext.getParameters();
+        parameters = elementContext.getParameters()
+            .stream()
+            .map(methodContext::setStatementArg)
+            .collect(Collectors.toList());
       }
     }
 

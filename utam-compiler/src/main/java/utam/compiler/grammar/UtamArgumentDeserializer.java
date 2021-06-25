@@ -13,13 +13,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Stream;
 import utam.compiler.helpers.PrimitiveType;
 import utam.core.framework.consumer.UtamError;
 
 import static utam.compiler.grammar.UtamArgument.*;
+import static utam.compiler.helpers.TypeUtilities.REFERENCE;
 
 /**
  * custom deserializer for UtamArgument to read value as UtamSelector
@@ -29,15 +28,8 @@ import static utam.compiler.grammar.UtamArgument.*;
  */
 class UtamArgumentDeserializer extends
     com.fasterxml.jackson.databind.JsonDeserializer<UtamArgument> {
-  private static final Map<JsonNode, JsonNode> methodArgs = new HashMap<>();
 
-  /**
-   * Getter for method argument collection.
-   * @return - Collection that keep track of all method arguments.
-   */
-  public static Map<JsonNode, JsonNode> getMethodArgs() {
-    return methodArgs;
-  }
+  private static final String ARGS_PROPERTY_NAME = "args";
 
   @Override
   public UtamArgument deserialize(JsonParser parser, DeserializationContext ctxt)
@@ -45,15 +37,9 @@ class UtamArgumentDeserializer extends
     UtamArgument res = new UtamArgument(null);
     ObjectMapper mapper = (ObjectMapper) parser.getCodec();
     ObjectNode root = mapper.readTree(parser);
-    // Track root level args and replace all reference type args at the method statement level
-    if (root.get("name") !=null && methodArgs.containsKey(root.get("name"))) {
-      root.replace("type", methodArgs.get(root.get("name")));
-    } else {
-      methodArgs.put(root.get("name"), root.get("type"));
-    }
+    final String validationContext = ARGS_PROPERTY_NAME;
 
     JsonNode valueNode = root.get("value");
-    final String validationContext = "args";
     if (valueNode != null) {
       if (valueNode.isObject()) {
         res.value = mapper.treeToValue(valueNode, UtamSelector.class);
@@ -80,7 +66,7 @@ class UtamArgumentDeserializer extends
         throw new UtamError(String.format(ERR_NAME_TYPE_REDUNDANT, validationContext));
       }
       res.type = root.get("type").asText();
-      Stream.concat(Stream.of(SELECTOR_TYPE_PROPERTY, FUNCTION_TYPE_PROPERTY, REFERENCE_TYPE_PROPERTY),
+      Stream.concat(Stream.of(SELECTOR_TYPE_PROPERTY, FUNCTION_TYPE_PROPERTY, REFERENCE.getSimpleName()),
           Stream.of(PrimitiveType.STRING, PrimitiveType.BOOLEAN, PrimitiveType.NUMBER)
               .map(PrimitiveType::getJsonTypeName))
           .filter(s -> res.type.equals(s))
