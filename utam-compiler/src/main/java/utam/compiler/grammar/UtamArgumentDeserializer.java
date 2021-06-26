@@ -61,8 +61,8 @@ class UtamArgumentDeserializer extends
             String.format(
                 ERR_ARG_TYPE_MISMATCH,
                 validationContext,
-                root.get("name").asText(),
-                root.get("type").asText()));
+                root.get("name").toPrettyString(),
+                root.get("type").toPrettyString()));
       }
       root.replace("type", methodArgs.get(root.get("name")));
     } else if (root.get("name") != null
@@ -72,7 +72,8 @@ class UtamArgumentDeserializer extends
       // Validate if a reference type is not referenced in methodArgs already, if not, throw an
       // error
       throw new UtamError(
-          String.format(ERR_REFERENCE_MISSING, validationContext, root.get("name").asText()));
+          String.format(
+              ERR_REFERENCE_MISSING, validationContext, root.get("name").toPrettyString()));
     } else {
       methodArgs.put(root.get("name"), root.get("type"));
     }

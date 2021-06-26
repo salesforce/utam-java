@@ -49,7 +49,7 @@ class UtamArgument {
   static final String ERR_NAME_TYPE_REDUNDANT = "%s: properties 'name' or 'type' are redundant";
   static final String ERR_PREDICATE_REDUNDANT = "%s: property 'predicate' is only supported for 'function' type";
   static final String ERR_REFERENCE_MISSING = "%s: A statement declares a reference to argument %s but there’s no matching method-level argument";
-  static final String ERR_ARG_TYPE_MISMATCH = "%s: A statement declares an argument %s 's type as %s, but the type does not match with the same argument at method-level";
+  static final String ERR_ARG_TYPE_MISMATCH = "%s: A statement declares an argument %s's type as %s, but the type does not match with the same argument at method-level";
 
   private static final String SUPPORTED_ARGS_TYPES =
       Stream.concat(Stream.of(FUNCTION_TYPE_PROPERTY, SELECTOR_TYPE_PROPERTY, REFERENCE_TYPE_PROPERTY),

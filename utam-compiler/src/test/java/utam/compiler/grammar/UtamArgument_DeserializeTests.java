@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getDeserializedObject;
-import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_DUPLICATE_NAMES;
+import static utam.compiler.grammar.UtamArgument.ERR_ARG_TYPE_MISMATCH;
 import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_WRONG_COUNT;
 import static utam.compiler.grammar.UtamArgument.getArgsProcessor;
 import static utam.compiler.helpers.TypeUtilities.FUNCTION;
@@ -92,10 +92,11 @@ public class UtamArgument_DeserializeTests {
   }
 
   /**
-   * Creating a UtamArgument object with duplicate parameter names throws the proper exception
+   * Creating a UtamArgument object with duplicate parameter names but mismatched types throws the
+   * proper exception
    */
   @Test
-  public void testCreationWithDuplicateNamesThrows() {
+  public void testCreationWithMismatchedTypesThrows() {
     String json =
         "{"
             + "  \"name\" : \"testParameterMethod\",\n"
@@ -119,8 +120,8 @@ public class UtamArgument_DeserializeTests {
 
     UtamError e = expectThrows(UtamError.class, () -> getParameters(json));
     assertThat(
-        e.getMessage(),
-        containsString(String.format(ERR_ARGS_DUPLICATE_NAMES, "testParameterMethod", "attrName")));
+        e.getCause().getMessage(),
+        containsString(String.format(ERR_ARG_TYPE_MISMATCH, "args", "\"attrName\"", "\"number\"")));
   }
 
   @Test

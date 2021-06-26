@@ -474,7 +474,8 @@ public class UtamMethod_ComposeDeserializeTests {
     assertThat(
         e.getCause().getMessage(),
         containsString(
-            String.format(UtamArgument.ERR_ARG_TYPE_MISMATCH, "args", "strArg", "boolean")));
+            String.format(
+                UtamArgument.ERR_ARG_TYPE_MISMATCH, "args", "\"strArg\"", "\"boolean\"")));
   }
 
   @Test
@@ -488,6 +489,6 @@ public class UtamMethod_ComposeDeserializeTests {
                     .getMethod("testReference"));
     assertThat(
         e.getCause().getMessage(),
-        containsString(String.format(UtamArgument.ERR_REFERENCE_MISSING, "args", "strArg1")));
+        containsString(String.format(UtamArgument.ERR_REFERENCE_MISSING, "args", "\"strArg1\"")));
   }
 }
