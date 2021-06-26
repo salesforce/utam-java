@@ -8,6 +8,7 @@
 package utam.core.framework.consumer;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -105,6 +106,11 @@ public class UtamLoaderTests {
     PageObjectsFactory factory = loader.getFactory();
     loader.resetContext();
     assertThat(loader.getFactory(), is(not(sameInstance(factory))));
+  }
+
+  @Test
+  public void testGetDocument() {
+    assertThat(getDefaultLoader().getDocument(), is(notNullValue()));
   }
 
   private static class ContainerMock implements Container {

@@ -12,6 +12,7 @@ import static utam.core.selenium.factory.WebDriverFactory.getAdapter;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.driver.DriverTimeouts;
 import utam.core.element.Element;
@@ -21,6 +22,7 @@ import utam.core.framework.base.PageObject;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.PageObjectsFactoryImpl;
 import utam.core.framework.base.RootPageObject;
+import utam.core.framework.element.DocumentObject;
 import utam.core.framework.element.ElementLocationChain;
 import utam.core.selenium.appium.MobileElementAdapter;
 import utam.core.selenium.element.ElementAdapter;
@@ -76,7 +78,7 @@ public class UtamLoaderImpl implements UtamLoader {
   @Override
   public <T extends RootPageObject> T create(Class<T> type) {
     T instance = factory.getPageContext().getBean(type);
-    ElementLocation finder = instance.setRootLocator();
+    ElementLocation finder = instance.setRootLocator(EXISTING);
     factory.bootstrap(instance, finder);
     return instance;
   }
@@ -100,5 +102,10 @@ public class UtamLoaderImpl implements UtamLoader {
         .scope(locator, EXISTING);
     factory.bootstrap(instance, finder);
     return instance;
+  }
+
+  @Override
+  public Document getDocument() {
+    return new DocumentObject(factory);
   }
 }
