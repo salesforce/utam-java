@@ -11,12 +11,10 @@ import static utam.compiler.helpers.AnnotationUtils.getFindAnnotation;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.fasterxml.jackson.databind.JsonNode;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementUnitTestHelper;
 import utam.compiler.helpers.TranslationContext;
