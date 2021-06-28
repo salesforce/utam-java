@@ -23,14 +23,8 @@ import org.testng.annotations.Test;
 import utam.compiler.grammar.TestUtilities;
 import utam.compiler.grammar.UtamElement;
 import utam.compiler.grammar.UtamSelector;
-import utam.compiler.helpers.ActionType;
-import utam.compiler.helpers.ActionableActionType;
-import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.MethodContext;
+import utam.compiler.helpers.*;
 import utam.compiler.helpers.ParameterUtils.Primitive;
-import utam.compiler.helpers.PrimitiveType;
-import utam.compiler.helpers.TranslationContext;
-import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.ComposeMethodStatement.BasicElementOperation;
 import utam.compiler.representation.ComposeMethodStatement.ElementOperand;
 import utam.compiler.representation.ComposeMethodStatement.Operation;
@@ -137,7 +131,7 @@ public class ComposeMethodTests {
     MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action =
         new Single(new ElementOperand(element, methodContext),
-            getBasicElementOperation(ActionableActionType.size));
+            getBasicElementOperation(BasicElementActionType.size));
     ComposeMethod method = getComposeMethod(methodContext, action);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
@@ -157,7 +151,7 @@ public class ComposeMethodTests {
     ComposeMethodStatement action =
         new ReturnsList(
             new ElementOperand(element, methodContext),
-            getBasicElementOperation(ActionableActionType.getText), false);
+            getBasicElementOperation(BasicElementActionType.getText), false);
     ComposeMethod method = getComposeMethod(methodContext, action);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
@@ -173,7 +167,7 @@ public class ComposeMethodTests {
     ElementContext element = context.getElement(ELEMENT_NAME);
     MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action = new Single(new ElementOperand(element, methodContext),
-        getBasicElementOperation(ActionableActionType.getText));
+        getBasicElementOperation(BasicElementActionType.getText));
     ComposeMethod method = getComposeMethod(methodContext, action);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
@@ -194,7 +188,7 @@ public class ComposeMethodTests {
     ComposeMethodStatement action =
         new Single(
             new ElementOperand(element, methodContext),
-            getBasicElementOperation(ActionableActionType.getText, parameter));
+            getBasicElementOperation(BasicElementActionType.getText, parameter));
     ComposeMethod method =
         new ComposeMethod(
             methodContext, Collections.singletonList(action),
@@ -220,7 +214,7 @@ public class ComposeMethodTests {
     MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action = new ComposeMethodStatement.ReturnsList(
         new ElementOperand(element, methodContext),
-        getBasicElementOperation(ActionableActionType.getText, parameter), false);
+        getBasicElementOperation(BasicElementActionType.getText, parameter), false);
     ComposeMethod method =
         new ComposeMethod(
             methodContext, Collections.singletonList(action),

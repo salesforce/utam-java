@@ -242,6 +242,7 @@ public class UtamMethod_ComposeDeserializeTests {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     UtamElement utamElement = UtamEntityCreator.createUtamElement(ELEMENT_NAME);
     utamElement.selector = new UtamSelector("selector");
+    utamElement.type = new String[] {"actionable"};
     utamElement.getAbstraction().testRootTraverse(context);
     UtamMethod method = getDeserializedObject(json, UtamMethod.class);
     assertThat(method.getMethod(context), instanceOf(ComposeMethod.class));

@@ -17,6 +17,7 @@ import utam.core.element.*;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.RootPageObject;
+import utam.core.framework.base.UtamBase;
 import utam.core.framework.consumer.ContainerElement;
 import utam.core.selenium.element.LocatorBy;
 
@@ -210,7 +211,7 @@ public final class TypeUtilities {
 
     public static Element asBasicType(String name, String[] interfaceTypes) {
       if (interfaceTypes == null || interfaceTypes.length == 0) {
-        return new Element(name, new String[] { BasicElementInterface.actionable.name() }, "");
+        return new Element(name, new String[] { BasicElement.class.getSimpleName() }, "");
       }
       if (isBasicType(interfaceTypes)) {
         return new Element(name, interfaceTypes, "");

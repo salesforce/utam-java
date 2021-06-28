@@ -20,8 +20,8 @@ import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
 import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REDUNDANT_ELEMENT;
 import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REDUNDANT_KEYS;
 import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REQUIRED_KEYS;
-import static utam.compiler.helpers.ActionableActionType.getText;
-import static utam.compiler.helpers.ActionableActionType.isPresent;
+import static utam.compiler.helpers.BasicElementActionType.getText;
+import static utam.compiler.helpers.BasicElementActionType.isPresent;
 import static utam.compiler.helpers.ClickableActionType.click;
 import static utam.compiler.helpers.PrimitiveType.BOOLEAN;
 import static utam.compiler.helpers.PrimitiveType.NUMBER;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.testng.annotations.Test;
 import utam.compiler.grammar.UtamMethodAction.Custom;
-import utam.compiler.helpers.ActionableActionType;
+import utam.compiler.helpers.BasicElementActionType;
 import utam.compiler.helpers.ElementContext.Root;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParameterUtils.Literal;
@@ -186,7 +186,7 @@ public class UtamMethodAction_Tests {
         ELEMENT_NAME, new String[] {"clickable"}, getListSelector()).testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
-            ELEMENT_NAME, ActionableActionType.getText.toString());
+            ELEMENT_NAME, BasicElementActionType.getText.toString());
     ComposeMethodStatement actionObject =
         action.getComposeAction(context, getMethodContext(PrimitiveType.STRING), false);
     assertThat(actionObject, is(instanceOf(ComposeMethodStatement.ReturnsList.class)));
@@ -206,7 +206,7 @@ public class UtamMethodAction_Tests {
         ELEMENT_NAME, new String[] {"clickable"}, getListSelector()).testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(
-            ELEMENT_NAME, ActionableActionType.size.toString());
+            ELEMENT_NAME, BasicElementActionType.size.toString());
     ComposeMethodStatement statement = action.getComposeAction(context, getMethodContext(NUMBER), false);
     assertThat(statement, is(instanceOf(Single.class)));
   }

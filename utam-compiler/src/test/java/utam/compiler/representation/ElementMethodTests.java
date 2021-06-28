@@ -45,7 +45,8 @@ public class ElementMethodTests {
   public void testSingleElementGetterMethodCreated() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, ACTIONABLE_TYPE.getSimpleName());
     info.addCodeLine("element(this.test).build(Actionable.class, ActionableImpl.class)");
-    info.addImportedTypes(ACTIONABLE_TYPE.getFullName(), BASE_ELEMENT_TYPE);
+    info.addImportedTypes(ACTIONABLE_TYPE.getFullName());
+    info.addImpliedImportedTypes(BASE_ELEMENT_TYPE);
 
     ElementContext element =
         new ElementContext.Basic(ELEMENT_NAME, ACTIONABLE_TYPE, getCssSelector(".css"));
@@ -57,7 +58,8 @@ public class ElementMethodTests {
   public void testSingleElementWithParametersGetterMethodCreated() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, CLICKABLE_TYPE.getSimpleName());
     info.addCodeLine("element(this.test).build(Clickable.class, ClickableImpl.class, selectorArg)");
-    info.addImportedTypes(CLICKABLE_TYPE.getFullName(), BASE_ELEMENT_TYPE);
+    info.addImportedTypes(CLICKABLE_TYPE.getFullName());
+    info.addImpliedImportedTypes(BASE_ELEMENT_TYPE);
     info.addParameter(new MethodParameterInfo("selectorArg", "String"));
     ElementContext element =
         new ElementContext.Basic(
@@ -76,7 +78,8 @@ public class ElementMethodTests {
   public void testListElementMethodCreation() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, "List<Actionable>");
     info.addCodeLine("element(this.test).buildList(Actionable.class, ActionableImpl.class)");
-    info.addImportedTypes("java.util.List", ACTIONABLE_TYPE.getFullName(), BASE_ELEMENT_TYPE);
+    info.addImportedTypes("java.util.List", ACTIONABLE_TYPE.getFullName());
+    info.addImpliedImportedTypes(BASE_ELEMENT_TYPE);
     ElementContext element =
         new ElementContext.Basic(ELEMENT_NAME, ACTIONABLE_TYPE, getCssSelector("css"), true);
     PageObjectMethod method = new ElementMethod.Multiple(element, true);
@@ -88,7 +91,8 @@ public class ElementMethodTests {
   public void testListElementMethodWithParametersGetterMethodCreated() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME,"List<Clickable>");
     info.addCodeLine("element(this.test).buildList(Clickable.class, ClickableImpl.class, selectorArg)");
-    info.addImportedTypes("java.util.List", CLICKABLE_TYPE.getFullName(), BASE_ELEMENT_TYPE);
+    info.addImportedTypes("java.util.List", CLICKABLE_TYPE.getFullName());
+    info.addImpliedImportedTypes(BASE_ELEMENT_TYPE);
     info.addParameter(new MethodParameterInfo("selectorArg", "String"));
     ElementContext element =
         new ElementContext.Basic(

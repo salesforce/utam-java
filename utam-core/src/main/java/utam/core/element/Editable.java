@@ -13,7 +13,7 @@ package utam.core.element;
  * @author elizaveta.ivanova
  * @since 226
  */
-public interface Editable extends Clickable {
+public interface Editable extends BasicElement {
 
   /**
    * Apply WebElement.sendKeys from Selenium - "simulate typing into an element, which may set its

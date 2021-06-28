@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static utam.compiler.helpers.ActionableActionTypeTests.sameType;
+import static utam.compiler.helpers.BasicElementActionTypeTests.sameType;
 import static utam.core.framework.UtamLogger.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;

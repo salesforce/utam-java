@@ -9,7 +9,6 @@ package utam.compiler.translator;
 
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
-import utam.compiler.representation.ElementMethod;
 import utam.core.declarative.representation.*;
 import utam.core.framework.element.BasePageElement;
 

@@ -11,6 +11,7 @@ import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.PageObjectInterface;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.element.BasicElement;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -70,11 +71,15 @@ public final class InterfaceSerializer {
   }
 
   private String getNestedInterfaceDeclaration(TypeProvider type) {
-    return String.format("interface %s extends %s {}",
-        type.getSimpleName(),
-        ((TypeUtilities.Element)type).getBasicInterfaces().stream()
-            .map(basicInterface -> basicInterface.getSimpleName())
-            .collect(Collectors.joining(", ")));
+    String interfacesExtended = BasicElement.class.getSimpleName();
+    Collection<TypeUtilities.BasicElementInterface> basicInterfaces =
+        ((TypeUtilities.Element)type).getBasicInterfaces();
+    if (basicInterfaces.size() != 0) {
+      interfacesExtended = basicInterfaces.stream()
+          .map(TypeUtilities.BasicElementInterface::getSimpleName)
+          .collect(Collectors.joining(", "));
+    }
+    return String.format("interface %s extends %s {}", type.getSimpleName(), interfacesExtended);
   }
 
   private String getImportStatement(TypeProvider type) {
@@ -84,9 +89,15 @@ public final class InterfaceSerializer {
   private Set<String> getImports(Collection<MethodDeclaration> declaredApi) {
     Set<String> res = new HashSet<>();
     res.add(getImportStatement(source.getBaseInterfaceType()));
-    source.getNestedInterfaces().stream()
-        .flatMap(nested -> ((TypeUtilities.Element)nested).getBasicInterfaces().stream())
-        .forEach(basicInterface -> res.add(getImportStatement(basicInterface)));
+    for (TypeProvider nestedInterface : source.getNestedInterfaces()) {
+      Collection<TypeUtilities.BasicElementInterface> basicInterfaces =
+          ((TypeUtilities.Element)nestedInterface).getBasicInterfaces();
+      if (basicInterfaces.size() == 0) {
+        res.add(getImportStatement(new TypeUtilities.FromClass(BasicElement.class)));
+      } else {
+        basicInterfaces.forEach(basicInterface -> res.add(getImportStatement(basicInterface)));
+      }
+    }
     declaredApi.stream()
         .flatMap(method -> method.getImports().stream())
         .forEach(importStr -> res.add(getImportStatement(importStr)));
