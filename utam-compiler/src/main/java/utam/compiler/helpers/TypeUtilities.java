@@ -219,8 +219,13 @@ public final class TypeUtilities {
       return null;
     }
 
-    public Collection<BasicElementInterface> getBasicInterfaces() {
-      return basicInterfaces;
+    public Collection<TypeProvider> getBasicInterfaces() {
+      if (basicInterfaces.size() == 0) {
+        // If there are no basic interfaces declared, the only interface implemented by this
+        // element is BasicElement.
+        return new ArrayList<>(List.of(new TypeUtilities.FromClass(BasicElement.class)));
+      }
+      return new ArrayList<>(basicInterfaces);
     }
 
     @Override
