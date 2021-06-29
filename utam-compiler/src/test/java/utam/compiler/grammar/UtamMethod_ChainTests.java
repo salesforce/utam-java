@@ -47,8 +47,10 @@ public class UtamMethod_ChainTests {
   public void testGetChainMethod() {
     UtamPageObject object = new UtamPageObject();
     TranslationContext context = getTestTranslationContext();
-    object.elements =
-        new UtamElement[] {new UtamElement("firstElement", new String[] {TEST_URI}, new UtamSelector("css"))};
+    object.elements = new UtamElement[] {
+        UtamEntityCreator.createUtamElement(
+            "firstElement", TEST_URI, new UtamSelector("css"))
+    };
     object.compile(context);
     UtamMethod method =
         new UtamMethod(
@@ -71,10 +73,10 @@ public class UtamMethod_ChainTests {
   public void testChainMethodWithList() {
     UtamPageObject object = new UtamPageObject();
     TranslationContext context = getTestTranslationContext();
-    object.elements =
-        new UtamElement[] {
-          new UtamElement("firstElement", new String[] {TEST_URI}, new UtamSelector("css", true))
-        };
+    object.elements = new UtamElement[] {
+        UtamEntityCreator.createUtamElement(
+            "firstElement", TEST_URI, new UtamSelector("css", true))
+    };
     object.compile(context);
     UtamMethod method =
         new UtamMethod(
@@ -102,10 +104,10 @@ public class UtamMethod_ChainTests {
   public void testChainMethodWithListOfLists() {
     UtamPageObject object = new UtamPageObject();
     TranslationContext context = getTestTranslationContext();
-    object.elements =
-        new UtamElement[] {
-          new UtamElement("firstElement", new String[] {TEST_URI}, new UtamSelector("css", true))
-        };
+    object.elements = new UtamElement[] {
+        UtamEntityCreator.createUtamElement(
+            "firstElement", TEST_URI, new UtamSelector("css", true))
+    };
     object.compile(context);
     UtamMethod method =
         new UtamMethod(

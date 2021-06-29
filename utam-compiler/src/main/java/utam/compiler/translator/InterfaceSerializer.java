@@ -73,7 +73,7 @@ public final class InterfaceSerializer {
     return String.format("interface %s extends %s {}",
         type.getSimpleName(),
         ((TypeUtilities.Element)type).getBasicInterfaces().stream()
-            .map(basicInterface -> basicInterface.getSimpleName())
+            .map(TypeProvider::getSimpleName)
             .collect(Collectors.joining(", ")));
   }
 

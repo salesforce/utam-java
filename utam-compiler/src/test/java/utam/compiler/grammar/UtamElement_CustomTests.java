@@ -39,7 +39,7 @@ public class UtamElement_CustomTests {
 
   private static UtamElement getPublicComponentElement(
       UtamSelector selector, UtamElementFilter filter) {
-    UtamElement utamElement = new UtamElement(ELEMENT_NAME);
+    UtamElement utamElement = TestUtilities.UtamEntityCreator.createUtamElement(ELEMENT_NAME);
     utamElement.type = new String[] {COMPONENT_TYPE_URI};
     utamElement.isPublic = true;
     utamElement.selector = selector;
@@ -59,7 +59,7 @@ public class UtamElement_CustomTests {
 
   private static PageObjectMethod getElementMethod(UtamElement element) {
     TranslationContext context = getTestTranslationContext();
-    UtamElement scope = new UtamElement(SCOPE_ELEMENT_NAME);
+    UtamElement scope = TestUtilities.UtamEntityCreator.createUtamElement(SCOPE_ELEMENT_NAME);
     scope.selector = new UtamSelector("scopeSelector");
     scope.elements = new UtamElement[] {element};
     scope.testTraverse(context);
@@ -69,7 +69,7 @@ public class UtamElement_CustomTests {
   /** The getSimpleType method for an invalid element type should throw the proper exception */
   @Test
   public void testGetSimpleTypeWithInvalidTypeThrows() {
-    UtamElement element = new UtamElement(ELEMENT_NAME);
+    UtamElement element = TestUtilities.UtamEntityCreator.createUtamElement(ELEMENT_NAME);
     element.type = new String[] {"invalid"};
     UtamError e = expectThrows(UtamError.class, element::getAbstraction);
     assertThat(

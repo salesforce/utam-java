@@ -20,16 +20,11 @@ import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
 import java.util.ArrayList;
 import java.util.Collections;
 import org.testng.annotations.Test;
+import utam.compiler.grammar.TestUtilities;
 import utam.compiler.grammar.UtamElement;
 import utam.compiler.grammar.UtamSelector;
-import utam.compiler.helpers.ActionType;
-import utam.compiler.helpers.ActionableActionType;
-import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.MethodContext;
+import utam.compiler.helpers.*;
 import utam.compiler.helpers.ParameterUtils.Primitive;
-import utam.compiler.helpers.PrimitiveType;
-import utam.compiler.helpers.TranslationContext;
-import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.ComposeMethodStatement.BasicElementOperation;
 import utam.compiler.representation.ComposeMethodStatement.ElementOperand;
 import utam.compiler.representation.ComposeMethodStatement.Operation;
@@ -113,7 +108,8 @@ public class ComposeMethodTests {
     info.addCodeLine(
         getElementPrivateMethodCalled(ELEMENT_NAME) + "().forEach(element -> element.focus())");
     TranslationContext context = getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
     MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action =
@@ -129,12 +125,13 @@ public class ComposeMethodTests {
         new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "Integer");
     info.addCodeLine(getElementPrivateMethodCalled(ELEMENT_NAME) + "().size()");
     TranslationContext context = getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
     MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action =
         new Single(new ElementOperand(element, methodContext),
-            getBasicElementOperation(ActionableActionType.size));
+            getBasicElementOperation(BasicElementActionType.size));
     ComposeMethod method = getComposeMethod(methodContext, action);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
@@ -147,13 +144,14 @@ public class ComposeMethodTests {
         getElementPrivateMethodCalled(ELEMENT_NAME)
             + "().stream().map(element -> element.getText()).collect(Collectors.toList())");
     TranslationContext context = getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
     MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action =
         new ReturnsList(
             new ElementOperand(element, methodContext),
-            getBasicElementOperation(ActionableActionType.getText), false);
+            getBasicElementOperation(BasicElementActionType.getText), false);
     ComposeMethod method = getComposeMethod(methodContext, action);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
@@ -164,11 +162,12 @@ public class ComposeMethodTests {
         new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "String");
     info.addCodeLine(getElementPrivateMethodCalled(ELEMENT_NAME) + "().getText()");
     TranslationContext context = getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
     MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action = new Single(new ElementOperand(element, methodContext),
-        getBasicElementOperation(ActionableActionType.getText));
+        getBasicElementOperation(BasicElementActionType.getText));
     ComposeMethod method = getComposeMethod(methodContext, action);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
@@ -182,13 +181,14 @@ public class ComposeMethodTests {
         new PageObjectValidationTestHelper.MethodParameterInfo("paramName", "String"));
     MethodParameter parameter = new Primitive("paramName", PrimitiveType.STRING);
     TranslationContext context = getTestTranslationContext();
-    new UtamElement(ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
+    TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new UtamSelector("css")).testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
     MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action =
         new Single(
             new ElementOperand(element, methodContext),
-            getBasicElementOperation(ActionableActionType.getText, parameter));
+            getBasicElementOperation(BasicElementActionType.getText, parameter));
     ComposeMethod method =
         new ComposeMethod(
             methodContext, Collections.singletonList(action),
@@ -199,7 +199,8 @@ public class ComposeMethodTests {
   @Test
   public void testComposeMethodWithListAndParameter() {
     TranslationContext context = getTestTranslationContext();
-    UtamElement utamElement = new UtamElement(ELEMENT_NAME, new UtamSelector("css", true));
+    UtamElement utamElement = TestUtilities.UtamEntityCreator.createUtamElement(
+        ELEMENT_NAME, new UtamSelector("css", true));
     utamElement.testTraverse(context);
     ElementContext element = context.getElement(ELEMENT_NAME);
     PageObjectValidationTestHelper.MethodInfo info =
@@ -213,7 +214,7 @@ public class ComposeMethodTests {
     MethodContext methodContext = getMethodContext();
     ComposeMethodStatement action = new ComposeMethodStatement.ReturnsList(
         new ElementOperand(element, methodContext),
-        getBasicElementOperation(ActionableActionType.getText, parameter), false);
+        getBasicElementOperation(BasicElementActionType.getText, parameter), false);
     ComposeMethod method =
         new ComposeMethod(
             methodContext, Collections.singletonList(action),

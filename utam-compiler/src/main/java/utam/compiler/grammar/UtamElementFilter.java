@@ -18,7 +18,7 @@ import utam.core.framework.consumer.UtamError;
 import java.util.List;
 
 import static utam.compiler.grammar.UtamArgument.getArgsProcessor;
-import static utam.compiler.helpers.ActionableActionType.getActionType;
+import static utam.compiler.helpers.BasicElementActionType.getActionType;
 
 /**
  * @author elizaveta.ivanova

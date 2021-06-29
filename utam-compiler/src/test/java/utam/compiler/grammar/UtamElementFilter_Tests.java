@@ -158,7 +158,7 @@ public class UtamElementFilter_Tests {
 
   @Test
   public void testBasicFilterWithoutListThrows() {
-    UtamElement utamElement = new UtamElement("element");
+    UtamElement utamElement = TestUtilities.UtamEntityCreator.createUtamElement("element");
     utamElement.selector = new UtamSelector("css");
     utamElement.filter = getInnerTextFilter();
     UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
@@ -168,7 +168,7 @@ public class UtamElementFilter_Tests {
 
   @Test
   public void testCustomFilterWithoutListThrows() {
-    UtamElement utamElement = new UtamElement("element");
+    UtamElement utamElement = TestUtilities.UtamEntityCreator.createUtamElement("element");
     utamElement.type = new String[] {TestUtilities.TEST_URI};
     utamElement.selector = new UtamSelector("css");
     utamElement.filter = getInnerTextFilter();

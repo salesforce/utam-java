@@ -7,8 +7,8 @@
  */
 package utam.compiler.grammar;
 
-import static utam.compiler.helpers.ActionableActionType.getActionType;
-import static utam.compiler.helpers.ActionableActionType.size;
+import static utam.compiler.helpers.BasicElementActionType.getActionType;
+import static utam.compiler.helpers.BasicElementActionType.size;
 import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.compiler.representation.ComposeMethodStatement.WAIT_FOR;
@@ -18,13 +18,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import utam.compiler.helpers.ActionType;
-import utam.compiler.helpers.ActionableActionType;
-import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.MatcherType;
-import utam.compiler.helpers.MethodContext;
-import utam.compiler.helpers.PrimitiveType;
-import utam.compiler.helpers.TranslationContext;
+
+import utam.compiler.helpers.*;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.compiler.representation.ComposeMethodStatement.BasicElementOperation;
 import utam.compiler.representation.ComposeMethodStatement.ElementOperand;
@@ -103,7 +98,7 @@ class UtamMethodAction {
 
   private Operation getBasicOperation(ElementContext element, MethodContext methodContext) {
     ActionType action = getActionType(apply, element.getType(), element.getName());
-    if (ActionableActionType.containsElement.getApplyString().equals(apply) && args.length == 1) {
+    if (BasicElementActionType.containsElement.getApplyString().equals(apply) && args.length == 1) {
       // If the action is "containsElement", it may have one argument (a selector),
       // or two arguments (a selector and a boolean indicating whether to search in
       // the shadow DOM) declared in the JSON. If the second argument is omitted,

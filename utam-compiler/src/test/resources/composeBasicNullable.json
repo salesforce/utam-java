@@ -4,6 +4,7 @@
       "name": "basic",
       "nullable": true,
       "public": true,
+      "type": [ "actionable" ],
       "selector": {
         "css": "selector1"
       }

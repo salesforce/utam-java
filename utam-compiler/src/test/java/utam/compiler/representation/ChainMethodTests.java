@@ -8,7 +8,6 @@
 package utam.compiler.representation;
 
 import utam.core.declarative.representation.TypeProvider;
-import utam.compiler.grammar.UtamElement;
 import utam.compiler.grammar.UtamSelector;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.framework.consumer.UtamError;
@@ -186,7 +185,10 @@ public class ChainMethodTests {
   @Test
   public void testFirstElement() {
     TranslationContext context = getTestTranslationContext();
-    compile(new UtamElement("first", new String[] { TEST_URI }, new UtamSelector("selector")), context);
+    compile(
+        UtamEntityCreator.createUtamElement(
+            "first", TEST_URI, new UtamSelector("selector")),
+        context);
     ElementContext elementContext = context.getElement("first");
     StringBuilder stringBuilder = new StringBuilder();
     new ChainMethod.Link(elementContext).setCodeString(stringBuilder, ChainMethod.Cardinality.ONE);
@@ -197,7 +199,10 @@ public class ChainMethodTests {
   @Test
   public void testFirstElementList() {
     TranslationContext context = getTestTranslationContext();
-    compile(new UtamElement("first", new String[] { TEST_URI }, new UtamSelector("selector", true)), context);
+    compile(
+        UtamEntityCreator.createUtamElement(
+            "first", TEST_URI, new UtamSelector("selector", true)),
+        context);
     ElementContext elementContext = context.getElement("first");
     ChainMethod.Link first = new ChainMethod.Link(elementContext);
     ChainMethod.Link second = new ChainMethod.Link(SECOND, "secondList", false);

@@ -7,11 +7,10 @@
  */
 package utam.core.framework.base;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import utam.core.element.Actionable;
+import utam.core.element.BasicElement;
 import utam.core.element.Element;
 import utam.core.element.ElementLocation;
 import utam.core.framework.consumer.UtamError;
@@ -41,7 +40,7 @@ public class ElementBuilder {
    * @param <T>    element type
    * @return instance with parameters set in selector
    */
-  public <T extends Actionable, R extends BasePageElement> T build(
+  public <T extends BasicElement, R extends BasePageElement> T build(
       Class<T> type, Class<R> implType, Object... values) {
     ElementLocation elementLocation = this.elementFinder.setParameters(values);
     Element element = factory.findElement(elementLocation);
@@ -51,7 +50,7 @@ public class ElementBuilder {
     return createInstance(implType, element);
   }
 
-  private <T extends Actionable, R extends BasePageElement> T createInstance(
+  private <T extends BasicElement, R extends BasePageElement> T createInstance(
       Class<R> implType, Element element) {
     R result = null;
     try {
@@ -75,7 +74,7 @@ public class ElementBuilder {
    * @param <T>    element type
    * @return instance with parameters set in selector
    */
-  public <T extends Actionable, R extends BasePageElement> T build(
+  public <T extends BasicElement, R extends BasePageElement> T build(
       Class<T> type, Class<R> implType, Predicate<T> filter, Object... values) {
     List<T> list = buildList(type, implType, values);
     if (list == null) {
@@ -97,7 +96,7 @@ public class ElementBuilder {
    * @param <T>        element type
    * @return list of instances with index in selector
    */
-  public <T extends Actionable, R extends BasePageElement> List<T> buildList(
+  public <T extends BasicElement, R extends BasePageElement> List<T> buildList(
       Class<T> type, Class<R> implType, Object... parameters) {
     ElementLocation elementFinder = this.elementFinder.setParameters(parameters);
     List<Element> elementsFound = factory.findElements(elementFinder);
@@ -118,7 +117,7 @@ public class ElementBuilder {
    * @param <T>    element type
    * @return instance with parameters set in selector
    */
-  public <T extends Actionable, R extends BasePageElement> List<T> buildList(
+  public <T extends BasicElement, R extends BasePageElement> List<T> buildList(
       Class<T> type, Class<R> implType, Predicate<T> filter, Object... values) {
     List<T> list = buildList(type, implType, values);
     if (list.isEmpty()) {

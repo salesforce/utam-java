@@ -15,7 +15,7 @@ import utam.core.element.Element.GestureDirection;
  * @since 232
  */
 
-public interface Touchable extends Actionable {
+public interface Touchable extends BasicElement {
 
   /**
    * Flick on the touch screen using finger motion events. Start point is middle of the element.

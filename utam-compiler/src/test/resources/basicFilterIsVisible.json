@@ -15,7 +15,7 @@
         "elements" : [
           {
             "name" : "element",
-            "type": "editable",
+            "type": ["editable"],
             "public": true,
             "selector" : {
               "css" : "selector2 %s",

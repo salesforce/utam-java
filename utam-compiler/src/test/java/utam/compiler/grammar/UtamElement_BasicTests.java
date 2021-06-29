@@ -25,8 +25,6 @@ import static utam.compiler.grammar.UtamMethod.ERR_BEFORELOAD_NAME_NOT_ALLOWED;
 import static utam.compiler.grammar.UtamPageObject.BEFORELOAD_METHOD_MANE;
 import static utam.compiler.grammar.UtamSelector_Tests.getListCssSelector;
 import static utam.compiler.grammar.UtamSelector_Tests.getUtamCssSelector;
-import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
-import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.clickable;
 
 import java.util.List;
 import java.util.Objects;
@@ -37,12 +35,8 @@ import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.FieldInfo;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
-import utam.compiler.translator.ClassSerializer;
-import utam.compiler.translator.ClassSerializerTests;
-import utam.compiler.translator.InterfaceSerializer;
 import utam.core.declarative.representation.*;
 import utam.core.element.Actionable;
-import utam.core.element.Clickable;
 import utam.core.framework.consumer.UtamError;
 
 public class UtamElement_BasicTests {
@@ -64,7 +58,7 @@ public class UtamElement_BasicTests {
   }
 
   private static UtamElement getPublicHtmlElement(UtamSelector selector, UtamElementFilter filter) {
-    UtamElement utamElement = new UtamElement(ELEMENT_NAME);
+    UtamElement utamElement = UtamEntityCreator.createUtamElement(ELEMENT_NAME);
     utamElement.selector = selector;
     utamElement.filter = filter;
     utamElement.isPublic = true;
@@ -270,7 +264,7 @@ public class UtamElement_BasicTests {
    */
   @Test
   public void testTraverseWithNonPublicAndNonRoot() {
-    UtamElement element = new UtamElement(ELEMENT_NAME);
+    UtamElement element = UtamEntityCreator.createUtamElement(ELEMENT_NAME);
     element.selector = getUtamCssSelector();
     assertThat(getElementMethod(element), is(not(nullValue())));
   }
@@ -281,7 +275,7 @@ public class UtamElement_BasicTests {
    */
   @Test
   public void testTraverseWithInnerElements() {
-    UtamElement element = new UtamElement("outerElement");
+    UtamElement element = UtamEntityCreator.createUtamElement("outerElement");
     element.isPublic = true;
     element.selector = getUtamCssSelector();
     element.elements = new UtamElement[]{getPublicHtmlElement(new UtamSelector(".other"), null)};
@@ -297,7 +291,7 @@ public class UtamElement_BasicTests {
    */
   @Test
   public void testTraverseWithInnerShadowElements() {
-    UtamElement element = new UtamElement("outerElement");
+    UtamElement element = UtamEntityCreator.createUtamElement("outerElement");
     element.isPublic = true;
     element.selector = getUtamCssSelector();
     element.shadow =
@@ -340,14 +334,14 @@ public class UtamElement_BasicTests {
    */
   @Test
   public void testGetDeclaredMethodsWithComponentPrivateElement() {
-    UtamElement element = new UtamElement(ELEMENT_NAME);
+    UtamElement element = UtamEntityCreator.createUtamElement(ELEMENT_NAME);
     element.selector = getUtamCssSelector();
     assertThat(getElementMethod(element), is(not(nullValue())));
   }
 
   @Test
   public void testElementWithListCantHaveNestedElements() {
-    UtamElement element = new UtamElement(ELEMENT_NAME);
+    UtamElement element = UtamEntityCreator.createUtamElement(ELEMENT_NAME);
     element.selector = getListCssSelector();
     element.elements = new UtamElement[0];
     UtamError e = expectThrows(UtamError.class, element::getAbstraction);
@@ -426,7 +420,7 @@ public class UtamElement_BasicTests {
     String json =
         "{"
             + "  \"name\": \"simpleElement\","
-            + "  \"type\": \"clickable\","
+            + "  \"type\": [\"clickable\"],"
             + "  \"selector\": {"
             + "    \"css\": \"customSelector\""
             + "  },"
@@ -497,5 +491,66 @@ public class UtamElement_BasicTests {
     UtamError e = expectThrows(UtamError.class, () -> method.getMethod(context));
     assertThat(e.getMessage(), containsString(ERR_BEFORELOAD_NAME_NOT_ALLOWED));
 
+  }
+
+  @Test
+  public void testBasicElementTypeAsStringThrows() {
+    UtamError e = expectThrows(
+        UtamError.class,
+        () -> TestUtilities.UtamEntityCreator.createUtamElement(
+            ELEMENT_NAME, "actionable", getUtamCssSelector()));
+    assertThat(
+        e.getMessage(),
+        containsString(String.format(
+            UtamElement.ERR_TYPE_PROPERTY_INVALID_STRING_VALUE, ELEMENT_NAME, "actionable")));
+  }
+
+  @Test
+  public void testBasicElementTypeArrayWithInvalidValueThrows() {
+    UtamError e = expectThrows(
+        UtamError.class,
+        () -> TestUtilities.UtamEntityCreator.createUtamElement(
+            ELEMENT_NAME, new String[] {"invalid"}, getUtamCssSelector()));
+    assertThat(
+        e.getMessage(),
+        containsString(String.format(
+            UtamElement.ERR_TYPE_PROPERTY_INVALID_ARRAY_VALUES, ELEMENT_NAME,
+            TypeUtilities.BasicElementInterface.nameList())));
+  }
+
+  @Test
+  public void testElementNodeWithInvalidTypeThrows() {
+    String json =
+        "{"
+            + "  \"name\": \"simpleElement\","
+            + "  \"type\": {},"
+            + "  \"selector\": {"
+            + "    \"css\": \"simpleSelector\""
+            + "  }"
+            + "}";
+    UtamError e = expectThrows(UtamError.class, () ->
+        getElementAbstraction(json).testRootTraverse(TestUtilities.getTestTranslationContext()));
+    assertThat(
+        e.getCause().getMessage(),
+        containsString(String.format(
+            UtamElement.ERR_TYPE_PROPERTY_INVALID_VALUE_TYPE, "simpleElement")));
+  }
+
+  @Test
+  public void testElementNodeWithInvalidArrayElementTypeThrows() {
+    String json =
+        "{"
+            + "  \"name\": \"simpleElement\","
+            + "  \"type\": [ true ],"
+            + "  \"selector\": {"
+            + "    \"css\": \"simpleSelector\""
+            + "  }"
+            + "}";
+    UtamError e = expectThrows(UtamError.class, () ->
+        getElementAbstraction(json).testRootTraverse(TestUtilities.getTestTranslationContext()));
+    assertThat(
+        e.getCause().getMessage(),
+        containsString(String.format(
+            UtamElement.ERR_TYPE_PROPERTY_INVALID_ARRAY_TYPES, "simpleElement")));
   }
 }

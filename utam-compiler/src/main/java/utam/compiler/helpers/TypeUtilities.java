@@ -17,6 +17,7 @@ import utam.core.element.*;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.RootPageObject;
+import utam.core.framework.base.UtamBase;
 import utam.core.framework.consumer.ContainerElement;
 import utam.core.selenium.element.LocatorBy;
 
@@ -155,6 +156,11 @@ public final class TypeUtilities {
       return null;
     }
 
+    public static String nameList() {
+      return Arrays.stream(values())
+          .map(basicInterface -> basicInterface.name()).collect(Collectors.joining(","));
+    }
+
     @Override
     public String getFullName() {
       return type.getName();
@@ -205,7 +211,7 @@ public final class TypeUtilities {
 
     public static Element asBasicType(String name, String[] interfaceTypes) {
       if (interfaceTypes == null || interfaceTypes.length == 0) {
-        return new Element(name, new String[] { BasicElementInterface.actionable.name() }, "");
+        return new Element(name, new String[] { BasicElement.class.getSimpleName() }, "");
       }
       if (isBasicType(interfaceTypes)) {
         return new Element(name, interfaceTypes, "");
@@ -213,8 +219,13 @@ public final class TypeUtilities {
       return null;
     }
 
-    public Collection<BasicElementInterface> getBasicInterfaces() {
-      return basicInterfaces;
+    public Collection<TypeProvider> getBasicInterfaces() {
+      if (basicInterfaces.size() == 0) {
+        // If there are no basic interfaces declared, the only interface implemented by this
+        // element is BasicElement.
+        return new ArrayList<>(List.of(new TypeUtilities.FromClass(BasicElement.class)));
+      }
+      return new ArrayList<>(basicInterfaces);
     }
 
     @Override

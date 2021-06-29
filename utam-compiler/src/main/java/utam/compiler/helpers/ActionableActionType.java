@@ -7,14 +7,10 @@
  */
 package utam.compiler.helpers;
 
-import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
-import java.util.Arrays;
 import java.util.Objects;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.element.RootElement;
-import utam.core.framework.consumer.UtamError;
 import utam.core.element.Actionable;
 
 import java.util.List;
@@ -36,63 +32,10 @@ public enum ActionableActionType implements ActionType {
    */
   blur(null),
   /**
-   * contains element <br>
-   * returns whether an element contains the element specified by the selector <br>
-   * Throws exception if element not found within timeout
-   */
-  containsElement(PrimitiveType.BOOLEAN, SELECTOR, PrimitiveType.BOOLEAN),
-  /**
    * focus on the value <br>
    * throws exception if fails
    */
   focus(null),
-  /**
-   * focus on the element <br>
-   * executes javascript `arguments[0].focus();` <br>
-   * Throws exception if element not found within timeout
-   */
-  isFocused(PrimitiveType.BOOLEAN),
-  /**
-   * get value of the given attribute <br>
-   * returns value of the attribute with the given name
-   */
-  getAttribute(PrimitiveType.STRING, PrimitiveType.STRING),
-  /**
-   * get value of the "class" attribute <br>
-   */
-  getClass(PrimitiveType.STRING),
-  /**
-   * get inner text of the element <br>
-   */
-  getText(PrimitiveType.STRING),
-  /**
-   * get value of the title attribute <br>
-   * returns value of the "title" attribute
-   */
-  getTitle(PrimitiveType.STRING),
-  /**
-   * get value of the value attribute <br>
-   * returns value of the "value" attribute
-   */
-  getValue(PrimitiveType.STRING),
-  /**
-   * check if element is displayed <br>
-   * same as "displayed" but does not throw exception if false returned
-   */
-  isVisible(PrimitiveType.BOOLEAN),
-  /**
-   * returns true if element is found AND enabled <br>
-   * it's an immediate check, no waiting is involved. Never throws any exceptions, just returns
-   * true/false
-   *
-   * <p>return true if element is present and enabled
-   */
-  isEnabled(PrimitiveType.BOOLEAN),
-  /**
-   * check if element is present immediately <br>
-   * same as "present" but does not throw exception if false returned
-   */
-  isPresent(PrimitiveType.BOOLEAN),
   /**
    * performs Actions.moveToElement from Selenium, <br>
    * which "Moves the mouse to the middle of the element. The element is scrolled into view". <br>
@@ -110,32 +53,10 @@ public enum ActionableActionType implements ActionType {
    * executes javascript `arguments[0].scrollIntoView({block:'center'})` <br>
    * Throws exception if element not found within timeout or element could not be scrolled to center
    */
-  scrollToCenter(null),
-  /**
-   * Only applicable to the element marked as a list <br>
-   * Throws exception if element not found within timeout
-   *
-   * <p>return number of found elements if element is marked as a list
-   */
-  size(PrimitiveType.NUMBER),
-  /**
-   * wait for element absence <br>
-   * throws exception if fails
-   */
-  waitForAbsence(null),
-  /**
-   * wait for element absence <br>
-   * throws TimeoutException if fails
-   */
-  waitForInvisible(null),
-  /**
-   * wait for element visibility <br>
-   * throws TimeoutException if fails
-   */
-  waitForVisible(null);
+  scrollToCenter(null);
 
   static final String ERR_NOT_HTML_ELEMENT = "element '%s' is not HTML element, its type is '%s'";
-  static final String ERR_UNKNOWN_ACTION = "unknown action '%s' for element '%s' with declared interfaces %s";
+  static final String ERR_UNKNOWN_ACTION = "unknown action '%s' for element '%s' with %s";
   // return type of the action
   private final TypeProvider returnType;
   // parameters accepted by the action
@@ -150,57 +71,14 @@ public enum ActionableActionType implements ActionType {
     this.returnType = Objects.requireNonNullElse(returnType, VOID);
   }
 
-  public static ActionType getActionType(String apply, TypeProvider elementType, String elementName) {
-    if (!TypeUtilities.BasicElementInterface.isBasicType(elementType)
-        && !elementType.isSameType(new TypeUtilities.FromClass(RootElement.class))) {
-      throw new UtamError(
-          String.format(
-              ERR_NOT_HTML_ELEMENT,
-              elementName,
-              elementType.getSimpleName()));
-    }
-    TypeUtilities.BasicElementInterface actionableTypes[] = TypeUtilities.BasicElementInterface.getBasicElementTypes(elementType);
-    for (TypeUtilities.BasicElementInterface actionableType : actionableTypes) {
-      if (actionableType == TypeUtilities.BasicElementInterface.editable) {
-        for (EditableActionType action : EditableActionType.values()) {
-          if (action.getApplyString().equals(apply)) {
-            return action;
-          }
-        }
-      }
-      if (actionableType == TypeUtilities.BasicElementInterface.touchable) {
-        for (TouchableActionType action : TouchableActionType.values()) {
-          if (action.getApplyString().equals(apply)) {
-            return action;
-          }
-        }
-      }
-      if (actionableType == TypeUtilities.BasicElementInterface.editable || actionableType == TypeUtilities.BasicElementInterface.clickable) {
-        for (ClickableActionType action : ClickableActionType.values()) {
-          if (action.getApplyString().equals(apply)) {
-            return action;
-          }
-        }
-      }
-      for (ActionableActionType action : ActionableActionType.values()) {
-        if (action.getApplyString().equals(apply)) {
-          return action;
-        }
-      }
-    }
-    String actionableTypeNames = Arrays.stream(actionableTypes).map(interfaceType -> interfaceType.name()).collect(
-        Collectors.joining(","));
-    throw new UtamError(String.format(ERR_UNKNOWN_ACTION, apply, elementName, actionableTypeNames));
+  // used in unit tests
+  Class getElementClass() {
+    return Actionable.class;
   }
 
   // used in unit tests
   Class[] getParameterClasses() {
     return Stream.of(actionParameters).map(TypeProvider::getClassType).toArray(Class[]::new);
-  }
-
-  // used in unit tests
-  Class getElementClass() {
-    return Actionable.class;
   }
 
   @Override
@@ -220,18 +98,6 @@ public enum ActionableActionType implements ActionType {
 
   @Override
   public String getInvokeMethodName() {
-    if( this == getClass) {
-      return "getClassAttribute";
-    }
     return name();
-  }
-
-  /**
-   * most action types have corresponding method for UI element, which we test in unit tests
-   * except for size or containsElement that has overloaded method and can't be found
-   * @return false if there is no method to check for presence in unit tests
-   */
-  boolean hasMethodToTest() {
-    return this != size && this != containsElement;
   }
 }

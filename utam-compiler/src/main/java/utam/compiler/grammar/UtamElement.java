@@ -11,6 +11,7 @@ import static utam.compiler.helpers.AnnotationUtils.getFindAnnotation;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +37,7 @@ import utam.core.framework.consumer.UtamError;
  */
 public final class UtamElement {
 
+  static final String CONTAINER_ELEMENT_TYPE = "container";
   static final String ERR_ELEMENT_OF_UNKNOWN_TYPE = "element '%s' has unknown type";
   static final String ERR_ELEMENT_FILTER_NEEDS_LIST =
       "element '%s': filter can only be set for list";
@@ -48,6 +50,14 @@ public final class UtamElement {
       "element '%s': external flag is not supported";
   static final String ERR_CONTAINER_SHOULD_BE_PUBLIC =
       "element '%s': private container is redundant, please mark element public";
+  static final String ERR_TYPE_PROPERTY_INVALID_VALUE_TYPE =
+      "element '%s': type property must be 'container', a Page Object type reference, or an array of basic element interfaces";
+  static final String ERR_TYPE_PROPERTY_INVALID_STRING_VALUE =
+      "element '%s': invalid string value '%s'; type property string values must be either 'container' or a Page Object type reference.";
+  static final String ERR_TYPE_PROPERTY_INVALID_ARRAY_TYPES =
+      "element '%s': type property array must contain only string values";
+  static final String ERR_TYPE_PROPERTY_INVALID_ARRAY_VALUES =
+      "element '%s': type property array contains invalid values; valid values are %s";
   private static final String[] SUPPORTED_BASIC_ELEMENT_PROPERTIES = {
     "name", "public", "selector", "filter", "nullable", "shadow", "elements"
   };
@@ -66,29 +76,9 @@ public final class UtamElement {
   Boolean isExternal;
   private Traversal traversalAbstraction;
 
-  // used in tests
-  UtamElement(String name) {
-    this(null, name, false, null, null, null, null, null, null);
-  }
-
-  // used in tests
-  public UtamElement(String name, String[] type, UtamSelector selector) {
-    this(type, name, false, null, null, selector, null, null, null);
-  }
-
-  // used in tests
-  UtamElement(String name, String type, UtamSelector selector, Boolean isNullable) {
-    this(type == null ? null : new String[] { type }, name, false, isNullable, null, selector, null, null, null);
-  }
-
-  // used in tests
-  public UtamElement(String name, UtamSelector selector) {
-    this(null, name, false, null, null, selector, null, null, null);
-  }
-
   @JsonCreator
   UtamElement(
-      @JsonProperty(value = "type", defaultValue = "[]") String[] type, // optional for actionable
+      @JsonProperty(value = "type", defaultValue = "[]") JsonNode type, // optional for actionable
       @JsonProperty(value = "name", required = true) String name,
       @JsonProperty(value = "public") Boolean isPublic,
       @JsonProperty(value = "nullable") Boolean isNullable,
@@ -97,7 +87,7 @@ public final class UtamElement {
       @JsonProperty(value = "filter") UtamElementFilter filter,
       @JsonProperty("shadow") UtamShadowElement shadow,
       @JsonProperty("elements") UtamElement[] elements) {
-    this.type = type == null ? new String[] {} : type;
+    this.type = processTypeNode(name, type);
     this.name = name;
     this.isPublic = isPublic;
     this.selector = selector;
@@ -106,6 +96,35 @@ public final class UtamElement {
     this.filter = filter;
     this.isNullable = isNullable;
     this.isExternal = isExternal;
+  }
+
+  private static String[] processTypeNode(String name, JsonNode typeNode) {
+    if (typeNode == null || typeNode.isNull()) {
+      return new String[]{};
+    }
+    if (typeNode.isTextual()) {
+      String value = typeNode.textValue();
+      if (!CONTAINER_ELEMENT_TYPE.equals(value) && !TranslationTypesConfigJava.isPageObjectType(value)) {
+        throw new UtamError(String.format(ERR_TYPE_PROPERTY_INVALID_STRING_VALUE, name, value));
+      }
+      return new String[] {value};
+    }
+    if (typeNode.isArray()) {
+      List<String> values = new ArrayList<>();
+      for (JsonNode valueNode : typeNode) {
+        if (!valueNode.isTextual()) {
+          throw new UtamError(String.format(ERR_TYPE_PROPERTY_INVALID_ARRAY_TYPES, name));
+        }
+        values.add(valueNode.textValue());
+      }
+      String[] res = values.toArray(String[]::new);
+      if (!TypeUtilities.Element.isBasicType(res)) {
+        throw new UtamError(String.format(ERR_TYPE_PROPERTY_INVALID_ARRAY_VALUES, name,
+            TypeUtilities.BasicElementInterface.nameList()));
+      }
+      return res;
+    }
+    throw new UtamError(String.format(ERR_TYPE_PROPERTY_INVALID_VALUE_TYPE, name));
   }
 
   String getSupportedPropertiesErr(Type elementType) {
@@ -139,7 +158,7 @@ public final class UtamElement {
   }
 
   Type getElementType() {
-    if (type.length == 1 && "container".equals(type[0])) {
+    if (type.length == 1 && CONTAINER_ELEMENT_TYPE.equals(type[0])) {
       return Type.CONTAINER;
     } else if (type.length == 1 && TranslationTypesConfigJava.isPageObjectType(type[0])) {
       return Type.CUSTOM;

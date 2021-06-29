@@ -12,7 +12,7 @@ package utam.core.element;
  * @author elizaveta.ivanova
  * @since 228
  */
-public interface Clickable extends Actionable {
+public interface Clickable extends BasicElement {
 
   /**
    * clicks on the element using Selenium WebElement.click.
