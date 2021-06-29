@@ -123,15 +123,6 @@ public class UtamMethod_ComposeTests {
   }
 
   @Test
-  public void testComposeWithListThrows() {
-    TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, new UtamMethodAction[] {});
-    method.isReturnList = true;
-    UtamError e = expectThrows(UtamError.class, () -> method.getMethod(context));
-    assertThat(e.getMessage(), containsString(getErr(ERR_METHOD_RETURN_ALL_REDUNDANT)));
-  }
-
-  @Test
   public void testComposeRedundantChain() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     UtamMethod method = new UtamMethod(METHOD_NAME, new UtamMethodAction[] {});

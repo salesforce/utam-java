@@ -50,7 +50,7 @@ public class TypeUtilitiesTests {
   @Test
   public void testIsElementType() {
     MatcherAssert.assertThat(Element.isBasicType(new String[] { "actionable" }), is(equalTo(true)));
-    assertThat(Element.isBasicType((String[]) null), is(equalTo(true)));
+    assertThat(Element.isBasicType(null), is(equalTo(true)));
     assertThat(Element.isBasicType(new String[] { "invalid" }), is(equalTo(false)));
   }
 

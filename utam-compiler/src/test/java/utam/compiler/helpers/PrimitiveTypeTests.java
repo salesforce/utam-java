@@ -73,6 +73,5 @@ public class PrimitiveTypeTests {
     assertThat(PrimitiveType.isPrimitiveType("number"), is(true));
     assertThat(PrimitiveType.isPrimitiveType("selector"), is(false));
     assertThat(PrimitiveType.isPrimitiveType("invalid"), is(false));
-    assertThat(PrimitiveType.isPrimitiveType("function"), is(false));
   }
 }

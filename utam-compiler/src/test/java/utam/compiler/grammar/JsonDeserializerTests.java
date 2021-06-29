@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import utam.compiler.helpers.TypeUtilities;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
-import utam.core.element.Clickable;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.translator.DefaultSourceConfigurationTests;
 import utam.core.declarative.representation.PageObjectClass;

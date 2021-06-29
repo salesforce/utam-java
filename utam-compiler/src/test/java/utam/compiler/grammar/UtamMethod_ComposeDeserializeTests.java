@@ -7,26 +7,29 @@
  */
 package utam.compiler.grammar;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.UtamMethod.ERR_METHOD_EMPTY_STATEMENTS;
+
+import java.util.Collection;
+import org.testng.annotations.Test;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethod;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
-import utam.core.framework.consumer.UtamError;
-import org.testng.annotations.Test;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.PageObjectMethod;
-
-import java.util.Collection;
-
 import static utam.compiler.grammar.TestUtilities.*;
-import static utam.compiler.grammar.UtamMethod.ERR_METHOD_EMPTY_STATEMENTS;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.testng.Assert.expectThrows;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * Provides deserialization tests for the UtamMethod class with compose methods
@@ -451,5 +454,14 @@ public class UtamMethod_ComposeDeserializeTests {
         + "return true;\n"
         + "})");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testComposeWaitFor"), methodInfo);
+  }
+
+  @Test
+  public void testComposeWithReferenceArgsReplacesWithMethodLevelPrimitive() {
+    MethodInfo methodInfo = new MethodInfo("test", "void");
+    methodInfo.addParameter(new MethodParameterInfo("strArg", "String"));
+    methodInfo.addCodeLine("this.someMethod(strArg)");
+    TranslationContext context = new DeserializerUtilities().getContext("composeArgsReference");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("test"), methodInfo);
   }
 }

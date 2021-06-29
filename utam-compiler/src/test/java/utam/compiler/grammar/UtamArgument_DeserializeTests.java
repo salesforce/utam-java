@@ -92,13 +92,14 @@ public class UtamArgument_DeserializeTests {
   }
 
   /**
-   * Creating a UtamArgument object with duplicate parameter names throws the proper exception
+   * Creating a UtamArgument object with duplicate parameter names but mismatched types throws the
+   * proper exception
    */
   @Test
-  public void testCreationWithDuplicateNamesThrows() {
+  public void testCreationWithMismatchedTypesThrows() {
     String json =
         "{"
-            + "  \"name\" : \"testParameterMethod\",\n"
+            + "  \"name\" : \"test\",\n"
             + "  \"args\" : [\n"
             + "    {\n"
             + "      \"name\" :  \"attrName\",\n"
@@ -116,11 +117,10 @@ public class UtamArgument_DeserializeTests {
             + "    }\n"
             + "  ]\n"
             + "}\n";
-
     UtamError e = expectThrows(UtamError.class, () -> getParameters(json));
     assertThat(
         e.getMessage(),
-        containsString(String.format(ERR_ARGS_DUPLICATE_NAMES, "testParameterMethod", "attrName")));
+        containsString(String.format(ERR_ARGS_DUPLICATE_NAMES, "test", "attrName")));
   }
 
   @Test

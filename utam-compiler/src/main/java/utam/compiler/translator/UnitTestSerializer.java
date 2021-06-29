@@ -39,6 +39,7 @@ public final class UnitTestSerializer {
       "//assertThat(testObject.%s(%s), containsInAnyOrder(\"replaceWithValidExpectedValueList\"));";
 
   private static final String TODO_MARKER = "//TODO: ";
+  private static final Class WEB_DRIVER_SIMULATOR_CLASS = WebDriverSimulator.class;
 
   private final UnitTestRunner testRunner;
   private final List<String> elementRegistrationStatements;
@@ -249,7 +250,7 @@ public final class UnitTestSerializer {
       imports.add("import org.testng.annotations.Test;");
     }
     imports.add(NEW_LINE);
-    imports.add("import " + WebDriverSimulator.class.getName() + ";");
+    imports.add("import " + WEB_DRIVER_SIMULATOR_CLASS.getName() + ";");
     imports.add("import " + SELECTOR.getFullName() + ";");
     imports.add(NEW_LINE);
     imports.add("import utam.consumer.SalesforceSimulatorObjectFactory;");
@@ -274,9 +275,9 @@ public final class UnitTestSerializer {
   private List<String> getTestClassFields() {
     List<String> fields = new ArrayList<>();
     fields.add("//TODO: add root selector");
-    fields.add("private static final Selector ROOT_SELECTOR = Selector.byCss(\"\");");
+    fields.add(String.format("private static final %s ROOT_SELECTOR = %s.byCss(\"\");", SELECTOR.getSimpleName(), SELECTOR.getSimpleName()));
     fields.add(NEW_LINE);
-    fields.add("private WebDriverSimulator simulator;");
+    fields.add(String.format("private %s simulator;", WEB_DRIVER_SIMULATOR_CLASS.getSimpleName()));
     fields.add(
         "private "
             + interfaceType.getSimpleName()
@@ -288,8 +289,8 @@ public final class UnitTestSerializer {
     List<String> content = new ArrayList<>();
     content.add("@BeforeClass");
     content.add("public void setupSimulator() {");
-    content.add("simulator = new WebDriverSimulator(SalesforceSimulatorObjectFactory.class);");
-    content.add("simulator.registerElement(\"rootElement\", ROOT_SELECTOR.getValue());");
+    content.add(String.format("simulator = new %s(SalesforceSimulatorObjectFactory.class);", WEB_DRIVER_SIMULATOR_CLASS.getSimpleName()));
+    content.add("simulator.registerElement(\"rootElement\", ROOT_SELECTOR.getStringValue());");
     return content;
   }
 

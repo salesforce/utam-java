@@ -42,14 +42,14 @@ class UtamArgument {
 
   static final String FUNCTION_TYPE_PROPERTY = "function";
   static final String SELECTOR_TYPE_PROPERTY = "locator";
-  static final String REFERENCE_TYPE_PROPERTY = "reference";
   static final String ERR_ARGS_NAME_TYPE_MANDATORY =
       "%s: argument name and type are required";
   static final String ERR_ARGS_WRONG_TYPE = "%s: expected type is '%s', actual was '%s'";
   static final String ERR_NAME_TYPE_REDUNDANT = "%s: properties 'name' or 'type' are redundant";
   static final String ERR_PREDICATE_REDUNDANT = "%s: property 'predicate' is only supported for 'function' type";
+
   private static final String SUPPORTED_ARGS_TYPES =
-      Stream.concat(Stream.of(FUNCTION_TYPE_PROPERTY, SELECTOR_TYPE_PROPERTY, REFERENCE_TYPE_PROPERTY),
+      Stream.concat(Stream.of(FUNCTION_TYPE_PROPERTY, SELECTOR_TYPE_PROPERTY, REFERENCE.getSimpleName()),
           Stream.of(PrimitiveType.values())
               .map(PrimitiveType::getJsonTypeName))
           .collect(Collectors.joining(","));
@@ -156,7 +156,7 @@ class UtamArgument {
       return new Regular(name, PrimitiveType.fromString(type));
     } else if (SELECTOR_TYPE_PROPERTY.equals(type)) {
       return new Regular(name, SELECTOR);
-    } else if (REFERENCE_TYPE_PROPERTY.equals(type)) {
+    } else if (REFERENCE.getSimpleName().equals(type)) {
       return new Regular(name, REFERENCE);
     }
     throw new UtamError(String.format(ERR_ARGS_TYPE_NOT_SUPPORTED, argsContext, type));

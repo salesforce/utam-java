@@ -78,7 +78,11 @@ class UtamMethodAction {
 
   private Operation getCustomOperation(MethodContext methodContext) {
     List<MethodParameter> parameters = UtamArgument
-        .getArgsProcessor(args, null, methodContext.getName()).getOrdered();
+        .getArgsProcessor(args, null, methodContext.getName())
+        .getOrdered()
+        .stream()
+        .map(methodContext::setStatementArg)
+        .collect(Collectors.toList());
     // return type is irrelevant at statement level as we don't assign except for last statement
     ActionType action = new Custom(apply, methodContext.getReturnType(VOID), parameters);
     TypeProvider returnType = matcher == null ? action.getReturnType() : PrimitiveType.BOOLEAN;
@@ -107,7 +111,10 @@ class UtamMethodAction {
     }
     List<MethodParameter> parameters = UtamArgument
         .getArgsProcessor(args, action.getParametersTypes(), methodContext.getName())
-        .getOrdered();
+        .getOrdered()
+        .stream()
+        .map(methodContext::setStatementArg)
+        .collect(Collectors.toList());
     return new BasicElementOperation(action, parameters);
   }
 
@@ -121,7 +128,11 @@ class UtamMethodAction {
    */
   private Operation getUtilityOperation(MethodContext methodContext) {
     List<MethodParameter> parameters = UtamArgument
-        .getArgsProcessor(applyExternal.args, null, methodContext.getName()).getOrdered();
+        .getArgsProcessor(applyExternal.args, null, methodContext.getName())
+        .getOrdered()
+        .stream()
+        .map(methodContext::setStatementArg)
+        .collect(Collectors.toList());
     ActionType action = new Custom(applyExternal.getMethodName(), methodContext.getReturnType(VOID),
         parameters);
     TypeProvider returnType = action.getReturnType();
@@ -180,8 +191,7 @@ class UtamMethodAction {
       return
           operation.isReturnsVoid() ? new ComposeMethodStatement.VoidList(operand, operation,
               isLastPredicateStatement)
-              : new ComposeMethodStatement.ReturnsList(operand, operation,
-                  isLastPredicateStatement);
+              : new ComposeMethodStatement.ReturnsList(operand, operation, isLastPredicateStatement);
     }
     return new ComposeMethodStatement.Single(operand, operation, getMatcherType(),
         getMatcherParameters(methodContext), isLastPredicateStatement);

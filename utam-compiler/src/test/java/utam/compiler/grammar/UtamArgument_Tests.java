@@ -25,8 +25,10 @@ import static utam.compiler.grammar.UtamArgument.ERR_ARGS_TYPE_NOT_SUPPORTED;
 import static utam.compiler.grammar.UtamArgument.ERR_ARGS_WRONG_TYPE;
 import static utam.compiler.grammar.UtamArgument.ERR_NAME_TYPE_REDUNDANT;
 import static utam.compiler.grammar.UtamArgument.ERR_PREDICATE_REDUNDANT;
+import static utam.compiler.grammar.UtamArgument.FUNCTION_TYPE_PROPERTY;
 import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_DUPLICATE_NAMES;
 import static utam.compiler.grammar.UtamArgument.Processor.ERR_ARGS_WRONG_COUNT;
+import static utam.compiler.grammar.UtamArgument.SELECTOR_TYPE_PROPERTY;
 import static utam.compiler.grammar.UtamArgument.getArgsProcessor;
 import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
@@ -102,7 +104,7 @@ public class UtamArgument_Tests {
                 new UtamArgument("name1", "string"),
                 new UtamArgument("name2", "number"),
                 new UtamArgument("name3", "boolean"),
-                new UtamArgument("name4", "locator"),
+                new UtamArgument("name4", SELECTOR_TYPE_PROPERTY),
             }, ARGS_CONTEXT)
             .getOrdered();
     assertThat(parameters, hasSize(4));
@@ -128,7 +130,7 @@ public class UtamArgument_Tests {
                 new UtamArgument("name1", "string"),
                 new UtamArgument("name2", "number"),
                 new UtamArgument("name3", "boolean"),
-                new UtamArgument("name4", "locator"),
+                new UtamArgument("name4", SELECTOR_TYPE_PROPERTY),
             }, expectedTypes, ARGS_CONTEXT)
             .getOrdered();
     assertThat(parameters, hasSize(4));
@@ -361,13 +363,13 @@ public class UtamArgument_Tests {
 
   @Test
   public void testFunctionTypeReturnsNullParameter() {
-    UtamArgument utamArgument = new UtamArgument(null, "name", "function", null);
+    UtamArgument utamArgument = new UtamArgument(null, "name", FUNCTION_TYPE_PROPERTY, null);
     assertThat(utamArgument.getParameterOrValue(ARGS_CONTEXT, null), is(nullValue()));
   }
 
   @Test
   public void testSelectorByNameType() {
-    UtamArgument utamArgument = new UtamArgument("name", "locator");
+    UtamArgument utamArgument = new UtamArgument("name", SELECTOR_TYPE_PROPERTY);
     MethodParameter parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, null);
     assertThat(parameter.getType(), is(equalTo(SELECTOR)));
     parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, SELECTOR);
@@ -430,7 +432,7 @@ public class UtamArgument_Tests {
 
   @Test
   public void testFunctionArgType() {
-    UtamArgument utamArgument = new UtamArgument("name", "function");
+    UtamArgument utamArgument = new UtamArgument("name", FUNCTION_TYPE_PROPERTY);
     MethodParameter parameter = utamArgument.getParameterOrValue(ARGS_CONTEXT, FUNCTION);
     assertThat(parameter, is(nullValue()));
   }
@@ -439,7 +441,7 @@ public class UtamArgument_Tests {
   public void testGetPredicateMethod() {
     TranslationContext context = getTestTranslationContext();
     MethodContext methodContext = new MethodContext("method", null, false);
-    UtamArgument utamArgument = new UtamArgument("name", "function");
+    UtamArgument utamArgument = new UtamArgument("name", FUNCTION_TYPE_PROPERTY);
     UtamMethodAction conditionMock = mock(UtamMethodAction.class);
     when(conditionMock.getComposeAction(context, methodContext, false))
         .thenReturn(mock(ComposeMethodStatement.class));
@@ -452,7 +454,7 @@ public class UtamArgument_Tests {
   public void testGetPredicateMethodWithValueThrows() {
     TranslationContext context = getTestTranslationContext();
     MethodContext methodContext = new MethodContext("method", null, false);
-    UtamArgument utamArgument = new UtamArgument("name", "function");
+    UtamArgument utamArgument = new UtamArgument("name", FUNCTION_TYPE_PROPERTY);
     utamArgument.value = true;
     assertThrows(() -> utamArgument.getPredicate(context, methodContext));
     utamArgument.value = null;

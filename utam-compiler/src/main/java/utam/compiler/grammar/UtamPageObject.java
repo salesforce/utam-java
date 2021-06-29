@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static utam.compiler.helpers.AnnotationUtils.*;
+import static utam.compiler.helpers.MethodContext.BEFORE_LOAD_METHOD_MANE;
 import static utam.compiler.helpers.TypeUtilities.*;
 
 /**
@@ -41,7 +42,6 @@ final class UtamPageObject {
   static final String ERR_ROOT_REDUNDANT_SELECTOR = "non root page object can't have selector";
   static final String ERR_ROOT_ABSTRACT = "interface declaration can only have 'methods' property";
   static final String ERR_UNSUPPORTED_ROOT_ELEMENT_TYPE = "type '%s' is not supported for root element";
-  static final String BEFORELOAD_METHOD_MANE = "load";
   boolean isAbstract;
   boolean isRootPageObject;
   UtamMethod[] methods;
@@ -53,7 +53,7 @@ final class UtamPageObject {
   String[] rootElementType;
   boolean isExposeRootElement; // should be nullable as it's redundant for root
   UtamElement[] elements;
-  UtamMethod beforeLoad;
+  final UtamMethod beforeLoad;
   final Locator rootLocator;
 
   @JsonCreator
@@ -85,9 +85,10 @@ final class UtamPageObject {
     this.rootElementType = type;
     if (beforeLoad != null) {
       this.beforeLoad =
-          new UtamMethod(BEFORELOAD_METHOD_MANE, beforeLoad, null, null, null, false);
+          new UtamMethod(BEFORE_LOAD_METHOD_MANE, beforeLoad, null, null, null, false);
+    } else {
+      this.beforeLoad = null;
     }
-
     if(selector == null) {
       this.rootLocator = null;
     } else {
@@ -211,12 +212,12 @@ final class UtamPageObject {
         nextElement.traverse(context, rootElement, true);
       }
     }
+    // should be before processing methods to ensure unique name
+    if (beforeLoad != null) {
+      context.setMethod(beforeLoad.getBeforeLoadMethod(context));
+    }
     if (methods != null) {
       Stream.of(methods).forEach(method -> context.setMethod(method.getMethod(context)));
-    }
-    if (beforeLoad != null) {
-      context.setBeforeLoad(true);
-      context.setMethod(beforeLoad.getBeforeLoadMethod(context));
     }
   }
 }

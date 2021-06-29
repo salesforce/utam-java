@@ -10,6 +10,7 @@ package utam.compiler.grammar;
 import org.testng.annotations.Test;
 import utam.compiler.helpers.*;
 import utam.compiler.representation.PageObjectValidationTestHelper;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.framework.consumer.UtamError;
 
@@ -17,9 +18,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
-import static utam.compiler.grammar.UtamMethod.ERR_ARGS_NOT_ALLOWED;
+import static utam.compiler.grammar.UtamMethod.ERR_BEFORE_LOAD_HAS_NO_ARGS;
 import static utam.compiler.grammar.UtamMethod.ERR_METHOD_EMPTY_STATEMENTS;
-import static utam.compiler.grammar.UtamMethod.ERR_DUPLICATED_STATEMENT;
+import static utam.compiler.helpers.MethodContext.BEFORE_LOAD_METHOD_MANE;
 
 /**
  * Provides tests for UtamMethod class with beforeLoad method.
@@ -31,9 +32,6 @@ public class UtamMethod_BeforeLoadTests {
     private static final String METHOD_NAME = "testMethod";
     private static final String ELEMENT_NAME_1 = "testElement1";
     private static final String ELEMENT_NAME_2 = "testElement2";
-    private static String getErr(String message) {
-        return String.format(message, METHOD_NAME);
-    }
 
     private static void setClickableElementContext(TranslationContext context, String elementName) {
         TestUtilities.UtamEntityCreator.createUtamElement(
@@ -52,13 +50,13 @@ public class UtamMethod_BeforeLoadTests {
         setClickableElementContext(context, ELEMENT_NAME_2);
         UtamMethod method =
                 new UtamMethod(
-                        "load",
+                    BEFORE_LOAD_METHOD_MANE,
                         new UtamMethodAction[] {
                                 new UtamMethodAction(ELEMENT_NAME_1, "isPresent"),
                                 new UtamMethodAction(ELEMENT_NAME_2, "isVisible")
                         });
         PageObjectValidationTestHelper.MethodInfo methodInfo =
-                new PageObjectValidationTestHelper.MethodInfo("load", "void");
+                new PageObjectValidationTestHelper.MethodInfo(BEFORE_LOAD_METHOD_MANE, "void");
         methodInfo.addCodeLine("this.getTestElement1Element().isPresent()");
         methodInfo.addCodeLine(getElementPrivateMethodCalled(ELEMENT_NAME_2) + "().isVisible()");
 
@@ -66,40 +64,17 @@ public class UtamMethod_BeforeLoadTests {
         PageObjectValidationTestHelper.validateMethod(methodObject, methodInfo);
     }
 
-    /**
-     * The beforeLoad method should throw proper UtamError if UtamMethodAction list contains duplicated statements.
-     */
     @Test
-    public void testBeforeLoadMethodWithDuplicatedStatementsThrows() {
+    public void testBeforeLoadArgsThrows() {
         TranslationContext context = TestUtilities.getTestTranslationContext();
-        // traverses
-        setClickableElementContext(context, ELEMENT_NAME_1);
-        UtamMethod method =
-                new UtamMethod(
-                        "load",
-                        new UtamMethodAction[] {
-                                new UtamMethodAction(ELEMENT_NAME_1, "isPresent"),
-                                new UtamMethodAction(ELEMENT_NAME_1, "isPresent")
-                        });
-        PageObjectValidationTestHelper.MethodInfo methodInfo =
-                new PageObjectValidationTestHelper.MethodInfo("load", "void");
-        methodInfo.addCodeLine(getElementPrivateMethodCalled(ELEMENT_NAME_1) + "().isPresent()");
-        methodInfo.addCodeLine(getElementPrivateMethodCalled(ELEMENT_NAME_1) + "().isPresent()");
-
+        UtamMethod method = new UtamMethod(METHOD_NAME, new UtamMethodAction[] {
+            new UtamMethodAction("self", "isPresent")
+        });
+        method.compose[0].args = new UtamArgument[] {
+            new UtamArgument("str", "string")
+        };
         UtamError e = expectThrows(UtamError.class, () -> method.getBeforeLoadMethod(context));
-        assertThat(e.getMessage(), containsString(String.format(ERR_DUPLICATED_STATEMENT, ELEMENT_NAME_1, "isPresent")));
-    }
-
-    /**
-     * The beforeLoad method should throw proper UtamError if UtamArgumets list is not null.
-     */
-    @Test
-    public void testBeforeLoadArgsRedundant() {
-        TranslationContext context = TestUtilities.getTestTranslationContext();
-        UtamMethod method = new UtamMethod(METHOD_NAME, new UtamMethodAction[] {});
-        method.args = new UtamArgument[0];
-        UtamError e = expectThrows(UtamError.class, () -> method.getBeforeLoadMethod(context));
-        assertThat(e.getMessage(), containsString(getErr(ERR_ARGS_NOT_ALLOWED)));
+        assertThat(e.getMessage(), containsString(ERR_BEFORE_LOAD_HAS_NO_ARGS));
     }
 
     /**
@@ -108,9 +83,17 @@ public class UtamMethod_BeforeLoadTests {
     @Test
     public void testGetBeforeLoadMethodWithEmptyStatementListThrows() {
         TranslationContext context = TestUtilities.getTestTranslationContext();
-        UtamMethod method = new UtamMethod("load", new UtamMethodAction[] {});
-
+        UtamMethod method = new UtamMethod(BEFORE_LOAD_METHOD_MANE, new UtamMethodAction[] {});
         UtamError e = expectThrows(UtamError.class, () -> method.getBeforeLoadMethod(context));
-        assertThat(e.getMessage(), containsString(String.format(ERR_METHOD_EMPTY_STATEMENTS, "load")));
+        assertThat(e.getMessage(), containsString(String.format(ERR_METHOD_EMPTY_STATEMENTS, BEFORE_LOAD_METHOD_MANE)));
+    }
+
+    @Test
+    public void testBeforeLoad() {
+        MethodInfo methodInfo = new MethodInfo(BEFORE_LOAD_METHOD_MANE, "void");
+        methodInfo.addCodeLine("this.getRootElement().isPresent()");
+        methodInfo.addCodeLine("this.getRootElement().getText()");
+        TranslationContext context = new DeserializerUtilities().getContext("beforeLoadMethod");
+        PageObjectValidationTestHelper.validateMethod(context.getMethod(BEFORE_LOAD_METHOD_MANE), methodInfo);
     }
 }
