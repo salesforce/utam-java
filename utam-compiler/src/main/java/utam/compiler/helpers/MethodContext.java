@@ -13,8 +13,10 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.TypeUtilities.ListOf;
@@ -31,11 +33,12 @@ import utam.core.framework.consumer.UtamError;
  */
 public final class MethodContext {
 
-  public static final String ERR_METHOD_REFERENCE_ARGS = "%s: method level argument '%s' can't have reference type";
-  public static final String ERR_REFERENCE_MISSING = "%s: statement declares a reference to '%s', but there’s no matching method parameter";
-  public static final String ERR_ARG_TYPE_MISMATCH = "%s: statement declares an argument '%s' with type '%s', but the type does not match method parameter";
+  static final String ERR_METHOD_REFERENCE_ARGS = "%s: method level argument '%s' can't have reference type";
+  static final String ERR_REFERENCE_MISSING = "%s: statement declares a reference to '%s', but there’s no matching method parameter";
+  static final String ERR_ARG_TYPE_MISMATCH = "%s: statement declares an argument '%s' with type '%s', but the type does not match method parameter";
   static final String ERR_ARG_DUPLICATE_NAME = "%s: argument with name '%s' already declared";
-  public static final String ERR_LIST_OF_VOID_NOT_ALLOWED = "%s: cannot return list of null or void";
+  static final String ERR_LIST_OF_VOID_NOT_ALLOWED = "%s: cannot return list of null or void";
+  static final String ERR_LITERAL_PARAMETER_NOT_ALLOWED = "%s: literal parameter '%s' not allowed at the method level";
   private final String methodName;
   // to keep track of element usages
   private final Map<String, ElementContext> elementNames = new HashMap<>();
@@ -117,7 +120,16 @@ public final class MethodContext {
     return imports;
   }
 
+  /**
+   * register method level args to make sure it's used
+   *
+   * @param parameter parameter
+   */
   public void setMethodArg(MethodParameter parameter) {
+    if (parameter.isLiteral()) {
+      throw new UtamCompilationError(
+          String.format(ERR_LITERAL_PARAMETER_NOT_ALLOWED, validationContext, parameter.getValue()));
+    }
     String argName = parameter.getValue();
     TypeProvider argType = parameter.getType();
     if (methodArgs.containsKey(argName)) {
@@ -136,6 +148,9 @@ public final class MethodContext {
     return methodArgs.size() > 0;
   }
 
+  /**
+   * iterate to next statement to add args
+   */
   public void nextStatement() {
     statementIndex++;
   }

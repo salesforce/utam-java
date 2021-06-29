@@ -22,9 +22,6 @@ import static utam.compiler.grammar.UtamMethod.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.helpers.MethodContext.ERR_LIST_OF_VOID_NOT_ALLOWED;
-import static utam.compiler.helpers.MethodContext.ERR_METHOD_REFERENCE_ARGS;
-import static utam.compiler.helpers.TypeUtilities.REFERENCE;
 
 /**
  * Provides tests for the UtamElementFilter class
@@ -126,29 +123,11 @@ public class UtamMethod_ComposeTests {
   }
 
   @Test
-  public void testComposeWithListThrows() {
-    TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, new UtamMethodAction[] {});
-    method.isReturnList = true;
-    UtamError e = expectThrows(UtamError.class, () -> method.getMethod(context));
-    assertThat(e.getMessage(), containsString(String.format(ERR_LIST_OF_VOID_NOT_ALLOWED, "method 'testMethod'")));
-  }
-
-  @Test
   public void testComposeRedundantChain() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     UtamMethod method = new UtamMethod(METHOD_NAME, new UtamMethodAction[] {});
     method.chain = new UtamMethodChainLink[0];
     UtamError e = expectThrows(UtamError.class, () -> method.getMethod(context));
     assertThat(e.getMessage(), containsString(getErr(ERR_METHOD_REDUNDANT_TYPE)));
-  }
-
-  @Test
-  public void testReferenceTypeNotAllowed() {
-    TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, new UtamMethodAction[] {});
-    method.args = new UtamArgument[] { new UtamArgument("arg", REFERENCE.getSimpleName()) };
-    UtamError e = expectThrows(UtamError.class, () -> method.getMethod(context));
-    assertThat(e.getMessage(), containsString(String.format(ERR_METHOD_REFERENCE_ARGS, "method 'testMethod'", "arg")));
   }
 }
