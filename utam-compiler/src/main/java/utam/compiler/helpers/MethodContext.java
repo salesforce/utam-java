@@ -37,6 +37,7 @@ public final class MethodContext {
   static final String ERR_ARG_DUPLICATE_NAME = "%s: argument with name '%s' already declared";
   static final String ERR_LIST_OF_VOID_NOT_ALLOWED = "%s: cannot return list of null or void";
   static final String ERR_LITERAL_PARAMETER_NOT_ALLOWED = "%s: literal parameter '%s' not allowed at the method level";
+  public static final String BEFORE_LOAD_METHOD_MANE = "load";
   private final String methodName;
   // to keep track of element usages
   private final Map<String, ElementContext> elementNames = new HashMap<>();
@@ -86,7 +87,7 @@ public final class MethodContext {
         && methodReturnType != null
         && !lastStatementReturns.isSameType(methodReturnType)
         // Exclude load() method from this check, since it is always VOID type
-        && !methodName.equals("load")) {
+        && !methodName.equals(BEFORE_LOAD_METHOD_MANE)) {
       throw new UtamError(String.format("method '%s' return type mismatch: "
               + "last statement returns '%s', method returns '%s'", methodName,
           lastStatementReturns.getSimpleName(), methodReturnType.getSimpleName()));

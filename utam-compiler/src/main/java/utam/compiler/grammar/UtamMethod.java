@@ -7,7 +7,6 @@
  */
 package utam.compiler.grammar;
 
-import static utam.compiler.grammar.UtamPageObject.BEFORELOAD_METHOD_MANE;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -45,8 +44,6 @@ class UtamMethod {
       "method '%s': 'return' property is redundant";
   static final String ERR_METHOD_RETURN_ALL_REDUNDANT =
       "method '%s': 'returnAll' property is redundant";
-  static final String ERR_BEFORELOAD_NAME_NOT_ALLOWED =
-      "method name \"load\" is reserved for 'beforeload' property, please use other name";
   static final String ERR_BEFORE_LOAD_HAS_NO_ARGS = "method beforeLoad cannot have parameters";
   private static final String SUPPORTED_METHOD_TYPES = "\"compose\" or \"chain\"";
   static final String ERR_METHOD_UNKNOWN_TYPE =
@@ -105,9 +102,6 @@ class UtamMethod {
   }
 
   PageObjectMethod getMethod(TranslationContext context) {
-    if (!context.isBeforeLoad() && name.equals(BEFORELOAD_METHOD_MANE)) {
-      throw new UtamError(ERR_BEFORELOAD_NAME_NOT_ALLOWED);
-    }
     if (context.isAbstractPageObject()) {
       return getAbstractMethod(context);
     }

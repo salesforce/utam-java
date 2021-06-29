@@ -20,6 +20,7 @@ import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
 import static utam.compiler.grammar.UtamMethod.ERR_BEFORE_LOAD_HAS_NO_ARGS;
 import static utam.compiler.grammar.UtamMethod.ERR_METHOD_EMPTY_STATEMENTS;
+import static utam.compiler.helpers.MethodContext.BEFORE_LOAD_METHOD_MANE;
 
 /**
  * Provides tests for UtamMethod class with beforeLoad method.
@@ -49,13 +50,13 @@ public class UtamMethod_BeforeLoadTests {
         setClickableElementContext(context, ELEMENT_NAME_2);
         UtamMethod method =
                 new UtamMethod(
-                        "load",
+                    BEFORE_LOAD_METHOD_MANE,
                         new UtamMethodAction[] {
                                 new UtamMethodAction(ELEMENT_NAME_1, "isPresent"),
                                 new UtamMethodAction(ELEMENT_NAME_2, "isVisible")
                         });
         PageObjectValidationTestHelper.MethodInfo methodInfo =
-                new PageObjectValidationTestHelper.MethodInfo("load", "void");
+                new PageObjectValidationTestHelper.MethodInfo(BEFORE_LOAD_METHOD_MANE, "void");
         methodInfo.addCodeLine("this.getTestElement1Element().isPresent()");
         methodInfo.addCodeLine(getElementPrivateMethodCalled(ELEMENT_NAME_2) + "().isVisible()");
 
@@ -82,17 +83,17 @@ public class UtamMethod_BeforeLoadTests {
     @Test
     public void testGetBeforeLoadMethodWithEmptyStatementListThrows() {
         TranslationContext context = TestUtilities.getTestTranslationContext();
-        UtamMethod method = new UtamMethod("load", new UtamMethodAction[] {});
+        UtamMethod method = new UtamMethod(BEFORE_LOAD_METHOD_MANE, new UtamMethodAction[] {});
         UtamError e = expectThrows(UtamError.class, () -> method.getBeforeLoadMethod(context));
-        assertThat(e.getMessage(), containsString(String.format(ERR_METHOD_EMPTY_STATEMENTS, "load")));
+        assertThat(e.getMessage(), containsString(String.format(ERR_METHOD_EMPTY_STATEMENTS, BEFORE_LOAD_METHOD_MANE)));
     }
 
     @Test
     public void testBeforeLoad() {
-        MethodInfo methodInfo = new MethodInfo("load", "void");
+        MethodInfo methodInfo = new MethodInfo(BEFORE_LOAD_METHOD_MANE, "void");
         methodInfo.addCodeLine("this.getRootElement().isPresent()");
         methodInfo.addCodeLine("this.getRootElement().getText()");
         TranslationContext context = new DeserializerUtilities().getContext("beforeLoadMethod");
-        PageObjectValidationTestHelper.validateMethod(context.getMethod("load"), methodInfo);
+        PageObjectValidationTestHelper.validateMethod(context.getMethod(BEFORE_LOAD_METHOD_MANE), methodInfo);
     }
 }
