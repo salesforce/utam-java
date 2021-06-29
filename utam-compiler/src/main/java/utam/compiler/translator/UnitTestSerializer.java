@@ -274,7 +274,7 @@ public final class UnitTestSerializer {
   private List<String> getTestClassFields() {
     List<String> fields = new ArrayList<>();
     fields.add("//TODO: add root selector");
-    fields.add("private static final Selector ROOT_SELECTOR = Selector.byCss(\"\");");
+    fields.add(String.format("private static final %s ROOT_SELECTOR = %s.byCss(\"\");", SELECTOR.getSimpleName(), SELECTOR.getSimpleName()));
     fields.add(NEW_LINE);
     fields.add("private WebDriverSimulator simulator;");
     fields.add(
