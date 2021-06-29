@@ -36,14 +36,12 @@ import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.FieldInfo;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.declarative.representation.*;
-import utam.core.element.Actionable;
 import utam.core.framework.consumer.UtamError;
 
 public class UtamElement_BasicTests {
 
   private static final String ELEMENT_NAME = "test";
   private static final String METHOD_NAME = "getTest";
-  private static final String ACTIONABLE_TYPE_NAME = Actionable.class.getSimpleName();
 
   private static UtamElement.Traversal getAbstraction(UtamElement element) {
     UtamElement.Traversal res = element.getAbstraction();

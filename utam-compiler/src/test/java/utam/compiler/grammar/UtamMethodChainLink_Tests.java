@@ -120,4 +120,14 @@ public class UtamMethodChainLink_Tests {
         e.getMessage(),
         is(equalTo(String.format(ERR_WRONG_CARDINALITY_FOR_FIRST_LINK, ELEMENT_NAME, ""))));
   }
+
+  @Test
+  public void testDeserializationDefaultValues() {
+    String json = "{" + "  \"element\": \"element\"," + "  \"type\": \"clickable\"" + "}";
+    UtamMethodChainLink method = getDeserializedObject(json, UtamMethodChainLink.class);
+    assertThat(method, is(not(nullValue())));
+    assertThat(method.elementName, is(equalTo("element")));
+    assertThat(method.isReturnList, is(equalTo(false)));
+    assertThat(method.type, is(equalTo("clickable")));
+  }
 }

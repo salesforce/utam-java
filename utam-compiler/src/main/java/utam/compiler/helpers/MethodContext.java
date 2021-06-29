@@ -13,10 +13,8 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.TypeUtilities.ListOf;
@@ -161,7 +159,7 @@ public final class MethodContext {
     }
     String argName = parameter.getValue();
     TypeProvider argType = parameter.getType();
-    if (statementsArgs.size() <= statementIndex) {
+    while (statementsArgs.size() <= statementIndex) {
       statementsArgs.add(new HashMap<>());
     }
     Map<String, MethodParameter> statementArgs = statementsArgs.get(statementIndex);

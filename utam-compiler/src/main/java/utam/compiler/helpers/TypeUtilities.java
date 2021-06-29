@@ -7,17 +7,25 @@
  */
 package utam.compiler.helpers;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.element.*;
+import utam.core.element.Actionable;
+import utam.core.element.BasicElement;
+import utam.core.element.Clickable;
+import utam.core.element.Editable;
+import utam.core.element.ElementLocation;
+import utam.core.element.RootElement;
+import utam.core.element.Touchable;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.RootPageObject;
-import utam.core.framework.base.UtamBase;
 import utam.core.framework.consumer.ContainerElement;
 import utam.core.selenium.element.LocatorBy;
 
@@ -158,7 +166,7 @@ public final class TypeUtilities {
 
     public static String nameList() {
       return Arrays.stream(values())
-          .map(basicInterface -> basicInterface.name()).collect(Collectors.joining(","));
+          .map(Enum::name).collect(Collectors.joining(","));
     }
 
     @Override
@@ -184,7 +192,7 @@ public final class TypeUtilities {
 
   public static class Element implements TypeProvider {
     private final String name;
-    private String containingType;
+    private final String containingType;
     private final List<BasicElementInterface> basicInterfaces = new ArrayList<>();
 
     Element(String name, String[] interfaceTypes, String containingType) {

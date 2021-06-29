@@ -13,9 +13,8 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.PrimitiveType;
@@ -46,14 +45,14 @@ class UtamMethod {
       "method '%s': 'return' property is redundant";
   static final String ERR_METHOD_RETURN_ALL_REDUNDANT =
       "method '%s': 'returnAll' property is redundant";
+  static final String ERR_BEFORELOAD_NAME_NOT_ALLOWED =
+      "method name \"load\" is reserved for 'beforeload' property, please use other name";
+  static final String ERR_BEFORE_LOAD_HAS_NO_ARGS = "method beforeLoad cannot have parameters";
   private static final String SUPPORTED_METHOD_TYPES = "\"compose\" or \"chain\"";
   static final String ERR_METHOD_UNKNOWN_TYPE =
       "method '%s': one of " + SUPPORTED_METHOD_TYPES + " should be set";
   static final String ERR_METHOD_REDUNDANT_TYPE =
       "method '%s': only one of " + SUPPORTED_METHOD_TYPES + " can be set";
-  static final String ERR_DUPLICATED_STATEMENT = "beforeLoad: duplicate declaration { element: %s, apply: %s } - already exists";
-  static final String ERR_BEFORELOAD_NAME_NOT_ALLOWED =
-          "method name \"load\" is reserved for 'beforeload' property, please use other name";
   final String name;
   private final String comments = "";
   UtamMethodAction[] compose;
@@ -97,7 +96,8 @@ class UtamMethod {
     if (compose != null || chain != null) {
       throw new UtamError(String.format(ERR_METHOD_SHOULD_BE_ABSTRACT, name));
     }
-    MethodContext methodContext = new MethodContext(name, getReturnType(context, VOID), isReturnsList());
+    MethodContext methodContext = new MethodContext(name, getReturnType(context, VOID),
+        isReturnsList());
     return new InterfaceMethod(
         methodContext,
         UtamArgument.getArgsProcessor(args, name).getOrdered(),
@@ -170,20 +170,9 @@ class UtamMethod {
       UtamArgument.getArgsProcessor(args, String.format("method '%s'", this.name)).getOrdered()
           .forEach(methodContext::setMethodArg);
     }
-    if (compose.length == 0) {
-      throw new UtamError(String.format(ERR_METHOD_EMPTY_STATEMENTS, name));
-    }
     List<ComposeMethodStatement> statements = new ArrayList<>();
     List<MethodParameter> methodParameters = new ArrayList<>();
-
-    for (UtamMethodAction utamMethodAction : compose) {
-      ComposeMethodStatement statement = utamMethodAction
-          .getComposeAction(context, methodContext, false);
-      statements.add(statement);
-      methodParameters.addAll(statement.getParameters());
-      methodContext.nextStatement();
-    }
-    methodParameters.removeIf(MethodParameter::isLiteral);
+    setComposeStatements(statements, methodParameters, context, methodContext);
     return new ComposeMethod(
         methodContext,
         statements,
@@ -193,36 +182,33 @@ class UtamMethod {
   }
 
   PageObjectMethod getBeforeLoadMethod(TranslationContext context) {
-    if (args != null) {
-      throw new UtamError(String.format(ERR_ARGS_NOT_ALLOWED, name));
+    MethodContext methodContext = new MethodContext(name, VOID, false);
+    List<ComposeMethodStatement> statements = new ArrayList<>();
+    List<MethodParameter> methodParameters = new ArrayList<>();
+    setComposeStatements(statements, methodParameters, context, methodContext);
+    if (!methodParameters.isEmpty()) {
+      throw new UtamCompilationError(ERR_BEFORE_LOAD_HAS_NO_ARGS);
     }
+    return new BeforeLoadMethod(
+        methodContext,
+        statements,
+        methodParameters,
+        comments);
+  }
+
+  private void setComposeStatements(List<ComposeMethodStatement> statements,
+      List<MethodParameter> methodParameters,
+      TranslationContext context, MethodContext methodContext) {
     if (compose.length == 0) {
       throw new UtamError(String.format(ERR_METHOD_EMPTY_STATEMENTS, name));
     }
-    List<ComposeMethodStatement> statements = new ArrayList<>();
-    List<MethodParameter> methodParameters = new ArrayList<>();
-    Map<String ,String> beforeLoadMethodActions = new HashMap<>();
-
-    MethodContext methodContext = new MethodContext(name, VOID, false);
     for (UtamMethodAction utamMethodAction : compose) {
-      // Check if a statement is already added, to avoid duplicates
-      if (beforeLoadMethodActions.containsKey(utamMethodAction.elementName) &&
-              beforeLoadMethodActions.get(utamMethodAction.elementName).equals(utamMethodAction.apply)) {
-        throw new UtamError(String.
-                format(ERR_DUPLICATED_STATEMENT, utamMethodAction.elementName, utamMethodAction.apply));
-      } else {
-        beforeLoadMethodActions.put(utamMethodAction.elementName, utamMethodAction.apply);
-      }
       ComposeMethodStatement statement = utamMethodAction
-              .getComposeAction(context, methodContext, false);
+          .getComposeAction(context, methodContext, false);
       statements.add(statement);
       methodParameters.addAll(statement.getParameters());
+      methodContext.nextStatement();
     }
     methodParameters.removeIf(MethodParameter::isLiteral);
-    return new BeforeLoadMethod(
-            methodContext,
-            statements,
-            methodParameters,
-            comments);
   }
 }

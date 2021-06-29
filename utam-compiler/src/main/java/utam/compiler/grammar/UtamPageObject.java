@@ -53,7 +53,7 @@ final class UtamPageObject {
   String[] rootElementType;
   boolean isExposeRootElement; // should be nullable as it's redundant for root
   UtamElement[] elements;
-  UtamMethod beforeLoad;
+  final UtamMethod beforeLoad;
   final Locator rootLocator;
 
   @JsonCreator
@@ -86,8 +86,9 @@ final class UtamPageObject {
     if (beforeLoad != null) {
       this.beforeLoad =
           new UtamMethod(BEFORELOAD_METHOD_MANE, beforeLoad, null, null, null, false);
+    } else {
+      this.beforeLoad = null;
     }
-
     if(selector == null) {
       this.rootLocator = null;
     } else {

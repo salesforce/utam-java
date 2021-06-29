@@ -9,6 +9,7 @@ package utam.compiler.grammar;
 
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.PageObjectValidationTestHelper;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
@@ -99,5 +100,25 @@ public class UtamMethod_AbstractTests {
     UtamError e = expectThrows(UtamError.class, () -> method.getAbstractMethod(context));
     assertThat(
         e.getMessage(), containsString(String.format(ERR_METHOD_SHOULD_BE_ABSTRACT, METHOD_NAME)));
+  }
+
+  @Test
+  public void testAbstractMethod() {
+    TranslationContext context = new DeserializerUtilities().getContext("abstractMethod");
+    // return type that is not primitive nor a base element type
+    MethodInfo methodInfo1 = new MethodInfo("returnsCustomType", "FakeType");
+    PageObjectValidationTestHelper.validateMethod(
+        context.getMethod("returnsCustomType"), methodInfo1);
+    // return actionable
+    MethodInfo methodInfo2 = new MethodInfo("returnsActionable", "Actionable");
+    PageObjectValidationTestHelper.validateMethod(
+        context.getMethod("returnsActionable"), methodInfo2);
+    // return list of strings
+    MethodInfo methodInfo3 = new MethodInfo("returnsListString", "List<String>");
+    PageObjectValidationTestHelper.validateMethod(
+        context.getMethod("returnsListString"), methodInfo3);
+    // return void
+    MethodInfo methodInfo4 = new MethodInfo("returnsVoid", "void");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("returnsVoid"), methodInfo4);
   }
 }

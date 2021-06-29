@@ -16,15 +16,10 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.TestUtilities.getDeserializedObject;
-import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
-import static utam.compiler.grammar.TestUtilities.getJsonStringDeserializer;
-import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.grammar.UtamMethod.ERR_METHOD_EMPTY_STATEMENTS;
 
 import java.util.Collection;
 import org.testng.annotations.Test;
-import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethod;
 import utam.compiler.representation.PageObjectValidationTestHelper;
