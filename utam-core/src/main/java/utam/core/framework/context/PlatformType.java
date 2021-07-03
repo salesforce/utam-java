@@ -7,16 +7,17 @@
  */
 package utam.core.framework.context;
 
+/**
+ * platform type can be native or web to switch driver context inside a page object
+ *
+ * @author elizaveta.ivanova
+ * @since 230
+ */
 public enum PlatformType {
   NONE(""),
   WEB("web"),
   NATIVE("native");
 
-  private static final String PLATFORM_PROFILE_KEY = "platform";
-  public static final Profile PLATFORM_WEB = new StringValueProfile(PLATFORM_PROFILE_KEY, "web");
-  public static final Profile PLATFORM_IOS = new StringValueProfile(PLATFORM_PROFILE_KEY, "ios");
-  public static final Profile PLATFORM_ANDROID = new StringValueProfile(PLATFORM_PROFILE_KEY,
-      "android");
   private final String name;
 
   PlatformType(String name) {
@@ -28,7 +29,7 @@ public enum PlatformType {
       return NONE;
     }
     for (PlatformType type : PlatformType.values()) {
-      if (type.name().toLowerCase().equals(string)) {
+      if (type.name.equals(string)) {
         return type;
       }
     }
@@ -37,9 +38,5 @@ public enum PlatformType {
 
   public String getAnnotation() {
     return String.format("%s.%s", getClass().getSimpleName(), name());
-  }
-
-  public String getName() {
-    return name;
   }
 }

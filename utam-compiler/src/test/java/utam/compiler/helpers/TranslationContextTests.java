@@ -29,7 +29,6 @@ import static utam.compiler.helpers.TranslationContext.*;
 import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.editable;
 import static utam.compiler.helpers.ValidationTests.ELEMENT_SELECTOR;
 import static utam.compiler.helpers.ValidationTests.ELEMENT_TYPE;
-import static utam.compiler.translator.AbstractTranslatorConfiguration.ERR_PROFILE_NOT_CONFIGURED;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -244,15 +243,6 @@ public class TranslationContextTests {
                 getContainerContext()
                     .setMethod(new ElementMethod.Single(getElementContext(), true)));
     assertThat(e.getMessage(), containsString("duplicate method 'getTestElement'"));
-  }
-
-  @Test
-  public void nonExistingProfile() {
-    TranslationContext translationInstantContext = getTestTranslationContext();
-    UtamError e =
-        expectThrows(
-            UtamError.class, () -> translationInstantContext.getProfile("driver", "chrome"));
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_PROFILE_NOT_CONFIGURED, "driver"))));
   }
 
   @Test

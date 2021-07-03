@@ -7,27 +7,38 @@
  */
 package utam.compiler.translator;
 
-import utam.compiler.grammar.TestUtilities;
-import utam.compiler.grammar.JsonDeserializer;
-import utam.core.framework.consumer.UtamError;
-import utam.core.framework.context.StringValueProfile;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.testng.Assert.expectThrows;
+import static utam.compiler.translator.DefaultTranslatorRunner.PROFILE_NOT_CONFIGURED_ERR;
+import static utam.compiler.translator.TranslatorMockUtilities.IMPL_ONLY_CLASS_NAME;
+import static utam.compiler.translator.TranslatorMockUtilities.IMPL_ONLY_URI;
+import static utam.compiler.translator.TranslatorMockUtilities.INTERFACE_ONLY_CLASS_NAME;
+import static utam.compiler.translator.TranslatorMockUtilities.INTERFACE_ONLY_URI;
+import static utam.compiler.translator.TranslatorMockUtilities.PAGE_OBJECT_IMPL_CLASS_NAME;
+import static utam.compiler.translator.TranslatorMockUtilities.PAGE_OBJECT_INTERFACE_CLASS_NAME;
+import static utam.compiler.translator.TranslatorMockUtilities.PAGE_OBJECT_URI;
+import static utam.compiler.translator.TranslatorMockUtilities.TEST_URI;
+import static utam.compiler.translator.TranslatorMockUtilities.TEST_URI_CLASS_NAME;
+import static utam.compiler.translator.TranslatorMockUtilities.TEST_URI_INTERFACE_NAME;
+import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
+
+import java.io.IOException;
+import java.util.Properties;
 import org.hamcrest.CoreMatchers;
 import org.testng.annotations.Test;
+import utam.compiler.grammar.JsonDeserializer;
+import utam.compiler.grammar.TestUtilities;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorRunner;
 import utam.core.declarative.translator.UnitTestRunner;
-
-import java.io.IOException;
-import java.util.Properties;
-
-import static utam.compiler.translator.AbstractTranslatorConfiguration.ERR_PROFILE_NOT_CONFIGURED;
-import static utam.compiler.translator.TranslatorMockUtilities.*;
-import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.testng.Assert.expectThrows;
+import utam.core.framework.consumer.UtamError;
+import utam.core.framework.context.StringValueProfile;
 
 /**
  * @author jim.evans
@@ -35,15 +46,17 @@ import static org.testng.Assert.expectThrows;
 public class DefaultTranslatorRunnerTests {
 
   @Test
-  public void testRun() throws IOException {
+  public void testRun() {
     DefaultSourceConfigurationTests.Mock sourceConfig =
-            new DefaultSourceConfigurationTests.Mock();
+        new DefaultSourceConfigurationTests.Mock();
     sourceConfig.setSources();
     DefaultTargetConfigurationTests.Mock targetConfig =
-            new DefaultTargetConfigurationTests.Mock();
-    TranslatorConfig translatorConfig =
-            new AbstractTranslatorConfigurationTests.Mock(targetConfig, sourceConfig);
-    TranslatorRunner translator = new DefaultTranslatorRunnerTests.Mock(translatorConfig);
+        new DefaultTargetConfigurationTests.Mock();
+    TranslatorConfig translatorConfig = new DefaultTranslatorConfiguration(sourceConfig,
+        targetConfig);
+    DefaultTranslatorRunner translator = new DefaultTranslatorRunner(translatorConfig);
+    assertThat(translator.getAllProfiles().size(), is(equalTo(1)));
+    assertThat(translator.getAllProfiles().iterator().next(), is(equalTo(DEFAULT_PROFILE)));
     translator.run();
   }
 
@@ -54,9 +67,9 @@ public class DefaultTranslatorRunnerTests {
     sourceConfig.setSources();
     DefaultTargetConfigurationTests.Mock targetConfig =
         new DefaultTargetConfigurationTests.Mock();
-    TranslatorConfig translatorConfig =
-        new AbstractTranslatorConfigurationTests.Mock(targetConfig, sourceConfig);
-    TranslatorRunner translator = new DefaultTranslatorRunnerTests.Mock(translatorConfig);
+    TranslatorConfig translatorConfig = new DefaultTranslatorConfiguration(sourceConfig,
+        targetConfig);
+    TranslatorRunner translator = new DefaultTranslatorRunner(translatorConfig);
     translator.run();
     translator.write();
     assertThat(targetConfig.writers.keySet(), hasSize(4));
@@ -89,11 +102,10 @@ public class DefaultTranslatorRunnerTests {
         new DefaultSourceConfigurationTests.Mock();
     sourceConfig.setSources();
     DefaultTargetConfigurationTests.Mock targetConfig =
-        new DefaultTargetConfigurationTests.Mock();
-    AbstractTranslatorConfiguration translatorConfig =
-        new AbstractTranslatorConfigurationTests.Mock(targetConfig, sourceConfig);
-    TranslatorRunner translator = new DefaultTranslatorRunnerTests.Mock(translatorConfig);
-    translatorConfig.setUnitTestRunner(UnitTestRunner.JUNIT);
+        new DefaultTargetConfigurationTests.Mock(UnitTestRunner.JUNIT);
+    TranslatorConfig translatorConfig = new DefaultTranslatorConfiguration(sourceConfig,
+        targetConfig);
+    TranslatorRunner translator = new DefaultTranslatorRunner(translatorConfig);
     translator.run();
     translator.write();
     assertThat(targetConfig.writers.keySet(), hasSize(6));
@@ -134,10 +146,10 @@ public class DefaultTranslatorRunnerTests {
         new DefaultSourceConfigurationTests.Mock();
     sourceConfig.setSources();
     DefaultTargetConfigurationTests.Mock targetConfig =
-        new DefaultTargetConfigurationTests.Mock();
-    AbstractTranslatorConfiguration translatorConfig = new AbstractTranslatorConfigurationTests.Mock(targetConfig, sourceConfig);
-    TranslatorRunner translator = new DefaultTranslatorRunnerTests.Mock(translatorConfig);
-    translatorConfig.setUnitTestRunner(UnitTestRunner.TESTNG);
+        new DefaultTargetConfigurationTests.Mock(UnitTestRunner.TESTNG);
+    TranslatorConfig translatorConfig = new DefaultTranslatorConfiguration(sourceConfig,
+        targetConfig);
+    TranslatorRunner translator = new DefaultTranslatorRunner(translatorConfig);
     translator.run();
     translator.write();
     assertThat(targetConfig.writers.keySet(), hasSize(6));
@@ -177,7 +189,11 @@ public class DefaultTranslatorRunnerTests {
     DefaultSourceConfigurationTests.Mock sourceConfig =
         new DefaultSourceConfigurationTests.Mock();
     sourceConfig.setSources();
-    DefaultTranslatorRunner runner = sourceConfig.getRunner();
+    DefaultTargetConfigurationTests.Mock targetConfig =
+        new DefaultTargetConfigurationTests.Mock();
+    TranslatorConfig translatorConfig = new DefaultTranslatorConfiguration(sourceConfig,
+        targetConfig);
+    DefaultTranslatorRunner runner = new DefaultTranslatorRunner(translatorConfig);
     runner.run();
     assertThat(
         runner.getGeneratedObject(PAGE_OBJECT_URI).getImplementation().getProfiles().length,
@@ -203,7 +219,7 @@ public class DefaultTranslatorRunnerTests {
             UtamError.class, () -> deserializer.getObject().getImplementation().getProfiles());
     assertThat(
         e.getMessage(),
-        CoreMatchers.is(CoreMatchers.equalTo(String.format(ERR_PROFILE_NOT_CONFIGURED, "driver"))));
+        CoreMatchers.is(CoreMatchers.equalTo(String.format(PROFILE_NOT_CONFIGURED_ERR, "driver"))));
   }
 
   @Test
@@ -211,13 +227,17 @@ public class DefaultTranslatorRunnerTests {
     DefaultSourceConfigurationTests.Mock sourceConfig =
         new DefaultSourceConfigurationTests.Mock();
     sourceConfig.setSources();
-    DefaultTranslatorRunner runner = sourceConfig.getRunner();
+    DefaultTargetConfigurationTests.Mock targetConfig =
+        new DefaultTargetConfigurationTests.Mock();
+    TranslatorConfig translatorConfig = new DefaultTranslatorConfiguration(sourceConfig,
+        targetConfig);
+    DefaultTranslatorRunner runner = new DefaultTranslatorRunner(translatorConfig);
     runner.run();
     Properties properties = runner.getProfileMapping(DEFAULT_PROFILE);
     assertThat(
         properties.containsKey(
             TranslationTypesConfigJava.getJavaType(
-                    INTERFACE_ONLY_URI, TranslationTypesConfigJava.Mask.pageObjects)
+                INTERFACE_ONLY_URI, TranslationTypesConfigJava.Mask.pageObjects)
                 .getFullName()),
         is(true));
   }
@@ -230,44 +250,18 @@ public class DefaultTranslatorRunnerTests {
     DefaultSourceConfigurationTests.Mock sourceConfig =
         new DefaultSourceConfigurationTests.Mock();
     sourceConfig.setJSONSource(TEST_URI, JSON_WITH_DRIVER_PROFILE);
-    AbstractTranslatorConfiguration translatorConfig = sourceConfig.getConfig();
+    DefaultTargetConfigurationTests.Mock targetConfig =
+        new DefaultTargetConfigurationTests.Mock();
+    DefaultTranslatorConfiguration translatorConfig = new DefaultTranslatorConfiguration(
+        sourceConfig, targetConfig);
     final ProfileConfiguration
         DRIVER_PROFILE_CONFIG = new StringValueProfileConfig("driver", "chrome");
     translatorConfig.setConfiguredProfile(DRIVER_PROFILE_CONFIG);
-    DefaultTranslatorRunner translator = new DefaultTranslatorRunnerTests.Mock(translatorConfig);
+    DefaultTranslatorRunner translator = new DefaultTranslatorRunner(translatorConfig);
     translator.run();
     Properties profiles = translator.getProfileMapping(new StringValueProfile("driver", "chrome"));
     assertThat(profiles.size(), is(equalTo(1)));
     assertThat(profiles.keySet().iterator().next(), is(equalTo(TEST_URI_INTERFACE_NAME)));
     assertThat(profiles.values().iterator().next(), is(equalTo(TEST_URI_CLASS_NAME)));
-  }
-
-  @Test
-  public void testDefaultProfiles() {
-    DefaultTranslatorRunner runner = new Mock();
-    assertThat(runner.getAllProfiles().size(), is(equalTo(1)));
-    assertThat(runner.getAllProfiles().iterator().next(), is(equalTo(DEFAULT_PROFILE)));
-  }
-
-
-
-  static class Mock extends DefaultTranslatorRunner {
-
-    Mock(TranslatorConfig translatorConfig) {
-      super(translatorConfig);
-    }
-
-    Mock() {
-      super(getConfig());
-    }
-
-    static TranslatorConfig getConfig() {
-      DefaultSourceConfigurationTests.Mock sourceConfig =
-              new DefaultSourceConfigurationTests.Mock();
-      DefaultTargetConfigurationTests.Mock targetConfig =
-              new DefaultTargetConfigurationTests.Mock();
-      return
-              new AbstractTranslatorConfigurationTests.Mock(targetConfig, sourceConfig);
-    }
   }
 }

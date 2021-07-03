@@ -33,7 +33,8 @@ public interface Profile {
   /**
    * Each profile can have associated dependencies injection config
    *
+   * @param moduleName name of the module to distinguish properties
    * @return name of the config to further use for UTAM Loader Configuration
    */
-  String getConfigName();
+  String getConfigName(String moduleName);
 }

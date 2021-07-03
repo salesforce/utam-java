@@ -86,7 +86,11 @@ public class MockUtilities {
   }
 
   DriverAdapter setDriverAdapter(Class<? extends WebDriver> driverType) {
-    return (DriverAdapter) WebDriverFactory.getAdapter(getWebDriverMock());
+    WebDriver driver = getWebDriverMock();
+    if(driverType.equals(AppiumDriver.class)) {
+      setMobilePlatform(Platform.LINUX);
+    }
+    return (DriverAdapter) WebDriverFactory.getAdapter(driver);
   }
 
   public void setMobilePlatform(Platform platform) {

@@ -7,6 +7,9 @@
  */
 package utam.compiler.translator;
 
+import static utam.core.framework.consumer.PageObjectContextImpl.getDefaultImplType;
+
+import utam.compiler.helpers.TypeUtilities.FromString;
 import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.representation.TypeProvider;
@@ -14,8 +17,6 @@ import utam.core.framework.consumer.UtamError;
 
 import java.util.Arrays;
 import java.util.regex.Pattern;
-
-import static utam.core.framework.consumer.PageObjectContextImpl.getDefaultImplType;
 
 /**
  * @author elizaveta.ivanova
@@ -73,8 +74,8 @@ public class TranslationTypesConfigJava implements TranslationTypesConfig {
 
   @Override
   public TypeProvider getClassType(String pageObjectURI) {
-    String[] types = getDefaultImplType(getInterfaceType(pageObjectURI).getFullName());
-    return new TypeUtilities.FromString(types[0], types[1]);
+    String[] implType = getDefaultImplType(getInterfaceType(pageObjectURI).getFullName());
+    return new FromString(implType[0], implType[1]);
   }
 
   @Override

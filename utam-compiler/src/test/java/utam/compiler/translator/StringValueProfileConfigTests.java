@@ -11,6 +11,7 @@ import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.Profile;
 import org.testng.annotations.Test;
+import utam.core.framework.context.StringValueProfile;
 
 import static utam.compiler.translator.StringValueProfileConfig.*;
 import static org.testng.Assert.expectThrows;
@@ -23,6 +24,14 @@ public class StringValueProfileConfigTests {
   public void testStringValueProfileConfig() {
     assertThat(
         new StringValueProfileConfig("testName", "testValue"),
+        is(not(nullValue())));
+  }
+
+  @Test
+  public void testStringValueProfileConfigFromProfiles() {
+    Profile profile = new StringValueProfile("testName", "testValue");
+    assertThat(
+        new StringValueProfileConfig("name", profile),
         is(not(nullValue())));
   }
   

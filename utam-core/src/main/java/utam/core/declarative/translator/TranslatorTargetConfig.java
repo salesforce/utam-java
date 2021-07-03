@@ -39,6 +39,13 @@ public interface TranslatorTargetConfig {
   Writer getUnitTestWriter(TypeProvider typeProvider) throws IOException;
 
   /**
+   * get configured type for unit test generator
+   *
+   * @return type of the unit tests to generate
+   */
+  UnitTestRunner getUnitTestRunnerType();
+
+  /**
    * full path to the injection configuration files directory <br>
    * translator will write into dependency configs <br>
    * then Page Objects Provider will read from those to configure dependencies

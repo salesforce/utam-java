@@ -25,4 +25,8 @@ public class UtamCoreError extends UtamError {
   public UtamCoreError(String message) {
     super(message);
   }
+
+  public UtamCoreError(String message, Exception e) {
+    super(message, e);
+  }
 }

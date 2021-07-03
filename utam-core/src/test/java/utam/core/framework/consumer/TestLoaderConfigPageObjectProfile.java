@@ -15,7 +15,7 @@ import utam.core.framework.base.PageMarker;
  * used to test loader config
  */
 @PageMarker.Find(css = "root")
-public class TestLoaderConfigPageObjectIOS extends BasePageObject implements TestLoaderConfigPageObject {
+public class TestLoaderConfigPageObjectProfile extends BasePageObject implements TestLoaderConfigPageObject {
 
   @Override
   public ElementLocation getRoot() {

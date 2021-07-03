@@ -7,7 +7,9 @@
  */
 package utam.compiler.translator;
 
+import java.util.ArrayList;
 import utam.core.declarative.translator.TranslationTypesConfig;
+import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorSourceConfig;
 import utam.core.declarative.translator.TranslatorTargetConfig;
 
@@ -27,16 +29,15 @@ public abstract class TranslatorMockUtilities {
   static final String TEST_URI_CLASS_NAME = "utam.test.pageobjects.test.impl.TestImpl";
   static final String PAGE_OBJECT_SOURCE = "{}";
 
-  public static AbstractTranslatorConfiguration getDefaultConfig() {
-    TranslatorTargetConfig targetConfiguration = new DefaultTargetConfigurationTests.Mock();
+  public static DefaultTranslatorConfiguration getDefaultConfig() {
+    TranslatorTargetConfig targetConfig = new DefaultTargetConfigurationTests.Mock();
     TranslatorSourceConfig sourceConfig = new DefaultSourceConfigurationTests.Mock();
-    return new AbstractTranslatorConfigurationTests.Mock(targetConfiguration, sourceConfig);
+    return new DefaultTranslatorConfiguration("", sourceConfig, targetConfig, new ArrayList<>());
   }
 
-  public static AbstractTranslatorConfiguration getDefaultConfig(
-      TranslationTypesConfig translationTypesConfig) {
-    AbstractTranslatorConfiguration res = getDefaultConfig();
-    res.setTranslatorTypesConfig(translationTypesConfig);
-    return res;
+  public static TranslatorConfig getDefaultConfig(TranslationTypesConfig translationTypesConfig) {
+    TranslatorTargetConfig targetConfig = new DefaultTargetConfigurationTests.Mock();
+    TranslatorSourceConfig sourceConfig = new DefaultSourceConfigurationTests.Mock();
+    return new DefaultTranslatorConfiguration("", translationTypesConfig, sourceConfig, targetConfig, new ArrayList<>());
   }
 }

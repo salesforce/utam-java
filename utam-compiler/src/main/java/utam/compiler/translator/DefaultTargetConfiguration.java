@@ -7,16 +7,22 @@
  */
 package utam.compiler.translator;
 
-import com.google.common.io.Files;
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.declarative.translator.TranslatorTargetConfig;
-
-import java.io.*;
-import java.util.regex.Pattern;
-
 import static utam.core.framework.UtamLogger.info;
 
+import com.google.common.io.Files;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.regex.Pattern;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.translator.TranslatorTargetConfig;
+import utam.core.declarative.translator.UnitTestRunner;
+
 /**
+ * compiler output configuration
+ *
  * @author elizaveta.ivanova
  * @since 228
  */
@@ -28,12 +34,21 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
   private final String resourcesHomePath;
   private final String targetPath;
   private final String unitTestDirectory;
+  private final UnitTestRunner unitTestRunner;
 
-  public DefaultTargetConfiguration(String targetPath, String resourcesHomePath) {
-    this(targetPath, resourcesHomePath, null);
-  }
-
-  public DefaultTargetConfiguration(String targetPath, String resourcesHomePath,
+  /**
+   * compiler output configuration
+   *
+   * @param targetPath        the root output directory where the generated Page Object source files
+   *                          will be written
+   * @param resourcesHomePath the output directory in which to write profile information
+   * @param unitTestRunner    the test runner to use when generating unit tests
+   * @param unitTestDirectory the root output directory where generated unit tests for generated
+   *                          Page Objects will be written
+   */
+  public DefaultTargetConfiguration(String targetPath,
+      String resourcesHomePath,
+      UnitTestRunner unitTestRunner,
       String unitTestDirectory) {
     this.resourcesHomePath = resourcesHomePath;
     this.targetPath = targetPath;
@@ -42,6 +57,12 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
     } else {
       this.unitTestDirectory = unitTestDirectory;
     }
+    this.unitTestRunner = unitTestRunner == null ? UnitTestRunner.NONE : unitTestRunner;
+  }
+
+  // used in tests
+  DefaultTargetConfiguration() {
+    this("", "", UnitTestRunner.NONE, null);
   }
 
   @SuppressWarnings("UnstableApiUsage")
@@ -81,14 +102,19 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
   @Override
   public Writer getUnitTestWriter(TypeProvider pageObjectType) throws IOException {
     String fullPath = unitTestDirectory
-            + File.separator
-            + replaceWithPath(pageObjectType.getFullName())
-            + "Tests.java";
+        + File.separator
+        + replaceWithPath(pageObjectType.getFullName())
+        + "Tests.java";
     if (new File(fullPath).exists()) {
       // Important: If the path exists, we do not want to overwrite existing
       // test files.
       return null;
     }
     return getWriter(fullPath);
+  }
+
+  @Override
+  public UnitTestRunner getUnitTestRunnerType() {
+    return unitTestRunner;
   }
 }

@@ -26,7 +26,6 @@ import static utam.core.driver.DriverTimeouts.TEST;
 import static utam.core.selenium.appium.MobileDriverAdapter.NATIVE_CONTEXT_HANDLE;
 import static utam.core.selenium.appium.MobileDriverAdapter.WEBVIEW_AVAILABILITY;
 import static utam.core.selenium.appium.MobileDriverAdapter.WEBVIEW_CONTEXT_HANDLE_PREFIX;
-import static utam.core.selenium.appium.MobileDriverAdapter.switchToWebView;
 
 import io.appium.java_client.AppiumDriver;
 import java.time.Duration;
@@ -314,8 +313,7 @@ public class MobileDriverAdapterTests {
     });
     when(driver.getContext()).thenReturn(tracker.currentContext);
     AppiumDriver sdriver = driverAdapter
-        .waitFor(Duration.ofMillis(10), Duration.ofMillis(1),
-            MobileDriverAdapter.switchToWebView(driver, testWebViewTitle));
+        .waitFor(Duration.ofMillis(10), Duration.ofMillis(1), driverAdapter.getSwitchToWebViewExpectations(testWebViewTitle));
     assertThat(driver, Matchers.is(sameInstance(sdriver)));
     assertThat(tracker.currentContext, Matchers.is(equalTo(testWebViewHandle)));
   }
@@ -340,11 +338,12 @@ public class MobileDriverAdapterTests {
     when(driver.getContext()).thenReturn(MobileDriverAdapter.NATIVE_CONTEXT_HANDLE);
     when(driver.getTitle()).thenReturn("Test Application");
     when(driver.context(testWebViewHandle)).thenReturn(driver);
+    MobileDriverAdapter adapter = mock.getMobileDriverAdapter();
     TimeoutException e = expectThrows(
         TimeoutException.class,
-        () -> mock.getDriverAdapter()
+        () -> adapter
             .waitFor(Duration.ofMillis(10), Duration.ofMillis(1),
-                MobileDriverAdapter.switchToWebView(driver, "Test Application 2")));
+                adapter.getSwitchToWebViewExpectations("Test Application 2")));
     assertThat(e.getMessage(), containsString("Expected condition failed"));
   }
 
@@ -382,11 +381,11 @@ public class MobileDriverAdapterTests {
         .thenReturn(testWebViewTitle);
     when(driver.getContext())
         .thenReturn(tracker.currentContext);
-
+    MobileDriverAdapter adapter = mock.getMobileDriverAdapter();
     assertThat(
-        mock.getDriverAdapter()
+        adapter
             .waitFor(Duration.ofMillis(10), Duration.ofMillis(1),
-                switchToWebView(driver, testWebViewTitle)),
+                adapter.getSwitchToWebViewExpectations(testWebViewTitle)),
         Matchers.is(sameInstance(driver)));
     assertThat(
         tracker.currentContext,
@@ -442,10 +441,11 @@ public class MobileDriverAdapterTests {
     when(driver.getContext())
         .thenReturn(contextTracker.currentContext);
     mock.setMobilePlatform(Platform.LINUX);
+    MobileDriverAdapter adapter = mock.getMobileDriverAdapter();
     assertThat(
-        mock.getDriverAdapter()
+        adapter
             .waitFor(Duration.ofMillis(10), Duration.ofMillis(1),
-                switchToWebView(driver, testWebViewTitle)),
+                adapter.getSwitchToWebViewExpectations(testWebViewTitle)),
         Matchers.is(sameInstance(driver)));
     assertThat(
         windowHandleTracker.currentHandle,

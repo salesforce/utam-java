@@ -7,132 +7,157 @@
  */
 package utam.compiler.translator;
 
-import utam.core.declarative.translator.ProfileConfiguration;
-import utam.core.declarative.translator.UnitTestRunner;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import utam.compiler.translator.DefaultSourceConfiguration.FilesScanner;
+import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
+import utam.compiler.translator.DefaultSourceConfiguration.ScannerConfig;
+import utam.core.declarative.translator.ProfileConfiguration;
+import utam.core.declarative.translator.TranslationTypesConfig;
+import utam.core.declarative.translator.TranslatorConfig;
+import utam.core.declarative.translator.TranslatorSourceConfig;
+import utam.core.declarative.translator.TranslatorTargetConfig;
 
 /**
  * The default configuration object for executing the generator in a runner class
  *
  * @author james.evans
- *
+ * @since 230
  */
-public class DefaultTranslatorConfiguration extends AbstractTranslatorConfiguration {
+public class DefaultTranslatorConfiguration implements TranslatorConfig {
+
+  private final List<ProfileConfiguration> profileConfigurations = new ArrayList<>();
+  private final TranslatorSourceConfig translatorSourceConfig;
+  private final TranslationTypesConfig translatorTypesConfig;
+  private final TranslatorTargetConfig translatorTargetConfig;
+  private final String moduleName;
 
   /**
    * Initializes a new instance of the translator configuration class
+   *
+   * @param moduleName         name of the module with page object sources
+   * @param typesConfig        types provider config
+   * @param sourceConfig       configuration to scan for page object sources
+   * @param targetConfig       information about output folders for page objects, configs and unit
+   *                           tests
+   * @param profileDefinitions list of known profiles and their values
+   */
+  DefaultTranslatorConfiguration(
+      String moduleName,
+      TranslationTypesConfig typesConfig,
+      TranslatorSourceConfig sourceConfig,
+      TranslatorTargetConfig targetConfig,
+      List<ProfileConfiguration> profileDefinitions) {
+    this.moduleName = moduleName;
+    this.translatorSourceConfig = sourceConfig;
+    this.translatorTargetConfig = targetConfig;
+    this.translatorTypesConfig = typesConfig;
+    for (ProfileConfiguration profileDefinition : profileDefinitions) {
+      setConfiguredProfile(profileDefinition);
+    }
+  }
+
+  public DefaultTranslatorConfiguration(
+      String moduleName,
+      TranslatorSourceConfig sourceConfig,
+      TranslatorTargetConfig targetConfig,
+      List<ProfileConfiguration> profileDefinitions) {
+    this(moduleName, new TranslationTypesConfigJava(), sourceConfig, targetConfig, profileDefinitions);
+  }
+
+  // used in tests
+  DefaultTranslatorConfiguration(
+      TranslatorSourceConfig sourceConfig,
+      TranslatorTargetConfig targetConfig) {
+    this("", new TranslationTypesConfigJava(), sourceConfig, targetConfig, new ArrayList<>());
+  }
+
+  /**
    * @param inputDirectory the root input directory to be recursively searched for the *.utam.json
    *                       Page Object description files
-   * @param outputDirectory the root output directory where the generated Page Object source files
-   *                        will be written
-   * @param unitTestDirectory the root output directory where generated unit tests for generated
-   *                          Page Objects will be written
-   * @param testRunner the test runner to use when generating unit tests
-   * @param packageMap the mapping between directories containing the description files and
-   *                   directories containing the generated source files
-   * @param profileConfigDirectory the output directory in which to write profile information
-   * @param profileDefinitions the map defining the list of known profiles and their values
-   * @throws IOException if there are any issues reading or writing files
+   * @param inputFiles     the list of the *.utam.json Page Object description files to be
+   *                       generated
+   * @return instance of a source configuration
    */
-  public DefaultTranslatorConfiguration(
-      String inputDirectory,
-      String outputDirectory,
-      String unitTestDirectory,
-      String testRunner,
-      Map<String, String> packageMap,
-      String profileConfigDirectory,
-      Map<String, List<String>> profileDefinitions) throws IOException {
-    super(new DefaultTargetConfiguration(
-        outputDirectory,
-        profileConfigDirectory,
-        validateUnitTestDirectory(testRunner, unitTestDirectory)));
-    setUnitTestRunner(UnitTestRunner.fromString(testRunner));
-    setSourceConfig(new DefaultSourceConfiguration(inputDirectory, packageMap));
-    for (Map.Entry<String, List<String>> profileDefinition : profileDefinitions.entrySet()) {
-      setConfiguredProfile(
-          createProfileConfiguration(profileDefinition.getKey(), profileDefinition.getValue()));
+  static RecursiveScanner getScanner(File inputDirectory, List<File> inputFiles) {
+    if (inputFiles != null && inputFiles.size() > 0) {
+      return new FilesScanner(inputFiles);
+    } else {
+      return new RecursiveScanner(inputDirectory.toString());
     }
   }
 
   /**
-   * Initializes a new instance of the translator configuration class
-   * @param inputFiles the list of the *.utam.json Page Object description files to be generated
-   * @param outputDirectory the root output directory where the generated Page Object source files
-   *                        will be written
-   * @param unitTestDirectory the root output directory where generated unit tests for generated
-   *                          Page Objects will be written
-   * @param testRunner the test runner to use when generating unit tests
-   * @param packageMap the mapping between directories containing the description files and
-   *                   directories containing the generated source files
-   * @param profileConfigDirectory the output directory in which to write profile information
-   * @param profileDefinitions the map defining the list of known profiles and their values
+   * Read the package mapping file, and translate the properties therein into an in-memory map
+   *
+   * @param packageMapFile name of the file
+   * @return configured packages for scanner
+   * @throws IOException if packages config is missing
    */
-  public DefaultTranslatorConfiguration(
-      List<File> inputFiles,
-      String outputDirectory,
-      String unitTestDirectory,
-      String testRunner,
-      Map<String, String> packageMap,
-      String profileConfigDirectory,
-      Map<String, List<String>> profileDefinitions) {
-    super(new DefaultTargetConfiguration(
-        outputDirectory,
-        profileConfigDirectory,
-        validateUnitTestDirectory(testRunner, unitTestDirectory)));
-    setUnitTestRunner(UnitTestRunner.fromString(testRunner));
-    setSourceConfig(new DefaultSourceConfiguration(inputFiles, packageMap));
-    for (Map.Entry<String, List<String>> profileDefinition : profileDefinitions.entrySet()) {
-      setConfiguredProfile(
-          createProfileConfiguration(profileDefinition.getKey(), profileDefinition.getValue()));
-    }
+  static ScannerConfig getScannerConfig(File packageMapFile) throws IOException {
+    FileInputStream packageInput = new FileInputStream(packageMapFile.toString());
+    Properties packageProperties = new Properties();
+    packageProperties.load(packageInput);
+    return new ScannerConfig(packageProperties.entrySet().stream()
+        .collect(Collectors.toMap(
+            entry -> entry.getKey().toString(),
+            entry -> entry.getValue().toString())));
   }
 
-  public static Map<String, String> createPackageMap(String packageMapFile) throws IOException {
-    // Read the package mapping file, and translate the properties therein
-    // into an in-memory map
-    FileInputStream packageInput = new FileInputStream(packageMapFile);
+  /**
+   * read profiles config and translate into list of ProfileConfigurations
+   *
+   * @param profileDefinitionsFile profiles configuration file
+   * @return list of configured profiles
+   * @throws IOException if properties file does not exist
+   */
+  static List<ProfileConfiguration> getConfiguredProfiles(File profileDefinitionsFile)
+      throws IOException {
+    if (profileDefinitionsFile == null) {
+      return new ArrayList<>();
+    }
+    FileInputStream packageInput = new FileInputStream(profileDefinitionsFile.toString());
     Properties packageProperties = new Properties();
     packageProperties.load(packageInput);
     return packageProperties.entrySet().stream()
-        .collect(Collectors.toMap(
-            entry -> entry.getKey().toString(),
-            entry -> entry.getValue().toString()));
+        .map(entry -> new StringValueProfileConfig(entry.getKey().toString(),
+            entry.getValue().toString().split(",")))
+        .collect(Collectors.toList());
   }
 
-  public static Map<String, List<String>> createProfileMap(String profileMapFile) throws IOException {
-    if (profileMapFile == null || profileMapFile.isEmpty()) {
-      return new HashMap<>();
-    }
-
-    // Read the profile mapping file, and translate the properties therein
-    // into an in-memory map
-    FileInputStream packageInput = new FileInputStream(profileMapFile);
-    Properties packageProperties = new Properties();
-    packageProperties.load(packageInput);
-    return packageProperties.entrySet().stream()
-        .collect(Collectors.toMap(
-            entry -> entry.getKey().toString(),
-            entry -> Arrays.stream(entry.getValue().toString().split(",")).collect(Collectors.toList())));
+  // used in profiles tests in another package, hence public
+  public void setConfiguredProfile(ProfileConfiguration profileConfiguration) {
+    this.profileConfigurations.add(profileConfiguration);
   }
 
-  private static ProfileConfiguration createProfileConfiguration(String key, List<String> value) {
-    String[] profileValues = new String[value.size()];
-    return new StringValueProfileConfig(key, value.toArray(profileValues));
+  @Override
+  public TranslatorSourceConfig getConfiguredSource() {
+    return translatorSourceConfig;
   }
 
-  private static String validateUnitTestDirectory(String testRunner, String unitTestDirectory) {
-    if (testRunner == null || testRunner.equals("none")) {
-      return "";
-    }
-    return unitTestDirectory;
+  @Override
+  public TranslatorTargetConfig getConfiguredTarget() {
+    return translatorTargetConfig;
+  }
+
+  @Override
+  public Collection<ProfileConfiguration> getConfiguredProfiles() {
+    return profileConfigurations;
+  }
+
+  @Override
+  public TranslationTypesConfig getTranslationTypesConfig() {
+    return translatorTypesConfig;
+  }
+
+  @Override
+  public String getModuleName() {
+    return moduleName;
   }
 }

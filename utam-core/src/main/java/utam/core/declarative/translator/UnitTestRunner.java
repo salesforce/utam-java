@@ -37,4 +37,11 @@ public enum UnitTestRunner {
     }
     return runner;
   }
+
+  public static String validateUnitTestDirectory(UnitTestRunner unitTestRunner, String unitTestDirectory) {
+    if(unitTestRunner == null || unitTestRunner == NONE) {
+      return "";
+    }
+    return unitTestDirectory;
+  }
 }

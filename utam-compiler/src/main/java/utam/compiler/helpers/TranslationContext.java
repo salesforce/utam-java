@@ -45,6 +45,7 @@ public final class TranslationContext {
   static final String ERR_CONTEXT_DUPLICATE_FIELD = "duplicate field '%s'";
   static final String ERR_CONTEXT_DUPLICATE_ELEMENT_NAME =
       "element with name '%s' already exists in same JSON";
+  static final String ERR_PROFILE_NOT_CONFIGURED = "profile '%s' is not configured";
 
   private final List<PageClassField> pageObjectFields = new ArrayList<>();
   private final List<PageObjectMethod> pageObjectMethods = new ArrayList<>();
@@ -167,9 +168,11 @@ public final class TranslationContext {
     return pageObjectFields;
   }
 
-  public Profile getProfile(String name, String value) {
-    ProfileConfiguration profileConfiguration =
-        translatorConfiguration.getProfileConfiguration(name);
+  public Profile getProfile(String jsonKey, String value) {
+    ProfileConfiguration profileConfiguration = translatorConfiguration.getConfiguredProfiles().stream()
+        .filter(configuration -> configuration.getPropertyKey().equals(jsonKey))
+        .findAny()
+        .orElseThrow(() -> new UtamError(String.format(ERR_PROFILE_NOT_CONFIGURED, jsonKey)));
     return profileConfiguration.getFromString(value);
   }
 

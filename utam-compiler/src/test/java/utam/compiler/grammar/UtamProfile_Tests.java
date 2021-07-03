@@ -8,9 +8,9 @@
 package utam.compiler.grammar;
 
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.translator.DefaultTranslatorConfiguration;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.compiler.translator.StringValueProfileConfig;
-import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.framework.context.Profile;
 import utam.core.framework.context.StringValueProfile;
 import org.hamcrest.Matchers;
@@ -38,7 +38,7 @@ public class UtamProfile_Tests {
   private static final Profile MOCK_PROFILE = new StringValueProfile(PROFILE_KEY, PROFILE_VALUE);
 
   static TranslationContext getContextWithProfile() {
-    TranslatorConfig config = getDefaultConfig();
+    DefaultTranslatorConfiguration config = getDefaultConfig();
     ProfileConfiguration profileConfiguration = mock(ProfileConfiguration.class);
     when(profileConfiguration.getPropertyKey()).thenReturn(PROFILE_KEY);
     when(profileConfiguration.getFromString(PROFILE_VALUE))
@@ -49,7 +49,7 @@ public class UtamProfile_Tests {
 
   @Test
   public void testDriverProfile() {
-    TranslatorConfig config = getDefaultConfig();
+    DefaultTranslatorConfiguration config = getDefaultConfig();
     config.setConfiguredProfile(DRIVER_PROFILE);
     TranslationContext translationInstantContext = new TranslationContext(TEST_URI, config);
     final String DRIVER_KEY = "driver";
@@ -66,7 +66,7 @@ public class UtamProfile_Tests {
     ProfileConfiguration profileConfiguration = mock(ProfileConfiguration.class);
     when(profileConfiguration.getPropertyKey()).thenReturn(PROFILE_KEY);
     when(profileConfiguration.getFromString(PROFILE_VALUE)).thenReturn(mockProfile);
-    TranslatorConfig translatorConfig = getDefaultConfig();
+    DefaultTranslatorConfiguration translatorConfig = getDefaultConfig();
     translatorConfig.setConfiguredProfile(profileConfiguration);
     TranslationContext context = new TranslationContext(TEST_URI, translatorConfig);
     assertThat(

@@ -33,8 +33,7 @@ public interface TranslatorRunner {
   void write() throws IOException;
 
   /**
-   * after translator generated code, dependencies that do not follow default injection algorithm
-   * <br>
+   * after translator generated code, dependencies that do not follow default injection rule
    * will be written into configuration files later used by Page Objects Provider
    */
   void writeDependenciesConfigs();
