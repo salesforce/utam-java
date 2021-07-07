@@ -95,7 +95,7 @@ public final class ClassSerializer {
     out.add(NEW_LINE);
     source.getMethods().stream()
             // if method is private and never used, do not not declare to avoid test coverage alert
-            .filter(method -> isUsedMethod(method))
+            .filter(this::isUsedMethod)
             .flatMap(method -> getMethodDeclaration(method).stream()).forEach(out::add);
     out.add(NEW_LINE);
     addPublicElementClassDeclarations(out);
@@ -122,7 +122,7 @@ public final class ClassSerializer {
             "public interface %s extends %s {}",
             returnType.getSimpleName(),
             ((TypeUtilities.Element)returnType).getBasicInterfaces().stream()
-                .map(basicInterface -> basicInterface.getSimpleName())
+                .map(TypeProvider::getSimpleName)
                 .collect(Collectors.joining(", "))))
         .forEach(out::add);
 
