@@ -12,7 +12,10 @@ import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.representation.*;
 import utam.core.framework.element.BasePageElement;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static utam.compiler.translator.TranslationUtilities.*;
