@@ -64,4 +64,6 @@ public interface PageObjectClass {
   Profile[] getProfiles();
 
   String getComments();
+
+  List<TypeProvider> getDeclaredElementTypes(boolean isPublicElements);
 }
