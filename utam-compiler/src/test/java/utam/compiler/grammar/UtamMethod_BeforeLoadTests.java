@@ -49,7 +49,7 @@ public class UtamMethod_BeforeLoadTests {
         setClickableElementContext(context, ELEMENT_NAME_1);
         setClickableElementContext(context, ELEMENT_NAME_2);
         UtamMethod method =
-                new UtamMethod(
+            TestUtilities.UtamEntityCreator.createUtamMethod(
                     BEFORE_LOAD_METHOD_MANE,
                         new UtamMethodAction[] {
                                 new UtamMethodAction(ELEMENT_NAME_1, "isPresent"),
@@ -67,9 +67,10 @@ public class UtamMethod_BeforeLoadTests {
     @Test
     public void testBeforeLoadArgsThrows() {
         TranslationContext context = TestUtilities.getTestTranslationContext();
-        UtamMethod method = new UtamMethod(METHOD_NAME, new UtamMethodAction[] {
-            new UtamMethodAction("self", "isPresent")
-        });
+        UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+            METHOD_NAME, new UtamMethodAction[] {
+                new UtamMethodAction("self", "isPresent")
+            });
         method.compose[0].args = new UtamArgument[] {
             new UtamArgument("str", "string")
         };
@@ -83,7 +84,8 @@ public class UtamMethod_BeforeLoadTests {
     @Test
     public void testGetBeforeLoadMethodWithEmptyStatementListThrows() {
         TranslationContext context = TestUtilities.getTestTranslationContext();
-        UtamMethod method = new UtamMethod(BEFORE_LOAD_METHOD_MANE, new UtamMethodAction[] {});
+        UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+            BEFORE_LOAD_METHOD_MANE, new UtamMethodAction[] {});
         UtamError e = expectThrows(UtamError.class, () -> method.getBeforeLoadMethod(context));
         assertThat(e.getMessage(), containsString(String.format(ERR_METHOD_EMPTY_STATEMENTS, BEFORE_LOAD_METHOD_MANE)));
     }

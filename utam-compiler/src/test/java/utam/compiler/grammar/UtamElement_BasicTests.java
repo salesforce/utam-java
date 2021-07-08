@@ -485,7 +485,7 @@ public class UtamElement_BasicTests {
     assertThat(
         e.getMessage(),
         containsString(String.format(
-            UtamElement.ERR_TYPE_PROPERTY_INVALID_STRING_VALUE, ELEMENT_NAME, "actionable")));
+            TypeUtilities.ERR_TYPE_PROPERTY_INVALID_STRING_VALUE, ELEMENT_NAME, "actionable")));
   }
 
   @Test
@@ -497,7 +497,7 @@ public class UtamElement_BasicTests {
     assertThat(
         e.getMessage(),
         containsString(String.format(
-            UtamElement.ERR_TYPE_PROPERTY_INVALID_ARRAY_VALUES, ELEMENT_NAME,
+            TypeUtilities.ERR_TYPE_INVALID_ARRAY_VALUES, "element", ELEMENT_NAME,
             TypeUtilities.BasicElementInterface.nameList())));
   }
 
@@ -516,7 +516,7 @@ public class UtamElement_BasicTests {
     assertThat(
         e.getCause().getMessage(),
         containsString(String.format(
-            UtamElement.ERR_TYPE_PROPERTY_INVALID_VALUE_TYPE, "simpleElement")));
+            TypeUtilities.ERR_TYPE_INVALID_VALUE_TYPE, "element", "simpleElement", "'container'")));
   }
 
   @Test
@@ -534,6 +534,6 @@ public class UtamElement_BasicTests {
     assertThat(
         e.getCause().getMessage(),
         containsString(String.format(
-            UtamElement.ERR_TYPE_PROPERTY_INVALID_ARRAY_TYPES, "simpleElement")));
+            TypeUtilities.ERR_TYPE_INVALID_ARRAY_TYPES, "element", "simpleElement")));
   }
 }

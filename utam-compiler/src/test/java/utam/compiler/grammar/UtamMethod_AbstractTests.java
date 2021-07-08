@@ -30,7 +30,8 @@ public class UtamMethod_AbstractTests {
   @Test
   public void testGetAbstractMethod() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, "string", (UtamArgument[]) null);
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, "string", (UtamArgument[]) null);
     PageObjectValidationTestHelper.MethodInfo info =
         new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "String");
     PageObjectValidationTestHelper.validateMethod(method.getAbstractMethod(context), info);
@@ -39,7 +40,8 @@ public class UtamMethod_AbstractTests {
   @Test
   public void testGetAbstractListMethod() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, "string", (UtamArgument[]) null);
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, "string", (UtamArgument[]) null);
     method.isReturnList = true;
     PageObjectValidationTestHelper.MethodInfo info =
             new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "List<String>");
@@ -50,7 +52,8 @@ public class UtamMethod_AbstractTests {
   @Test
   public void testGetAbstractMethodWithNullReturnType() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, null, (UtamArgument[]) null);
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, (String)null, (UtamArgument[]) null);
     PageObjectValidationTestHelper.MethodInfo info =
         new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "void");
     PageObjectValidationTestHelper.validateMethod(method.getAbstractMethod(context), info);
@@ -60,9 +63,10 @@ public class UtamMethod_AbstractTests {
   @Test
   public void testGetAbstractMethodWithElementReturnType() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, "clickable", (UtamArgument[]) null);
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, new String[] {"clickable"}, (UtamArgument[]) null);
     PageObjectValidationTestHelper.MethodInfo info =
-        new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "Clickable");
+        new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "TestMethodElement");
     PageObjectValidationTestHelper.validateMethod(method.getAbstractMethod(context), info);
   }
 
@@ -70,7 +74,8 @@ public class UtamMethod_AbstractTests {
   @Test
   public void testGetAbstractMethodWithComponentReturnType() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, "utam-test/pageObjects/test/componentType", (UtamArgument[]) null);
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, "utam-test/pageObjects/test/componentType", (UtamArgument[]) null);
     PageObjectValidationTestHelper.MethodInfo info =
         new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "ComponentType");
     PageObjectValidationTestHelper.validateMethod(method.getAbstractMethod(context), info);
@@ -83,7 +88,8 @@ public class UtamMethod_AbstractTests {
   @Test
   public void testGetAbstractMethodWithComposeThrows() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, new UtamMethodAction[] {});
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, new UtamMethodAction[] {});
     UtamError e = expectThrows(UtamError.class, () -> method.getAbstractMethod(context));
     assertThat(
         e.getMessage(), containsString(String.format(ERR_METHOD_SHOULD_BE_ABSTRACT, METHOD_NAME)));
@@ -95,7 +101,8 @@ public class UtamMethod_AbstractTests {
   @Test
   public void testGetAbstractMethodWithChainThrows() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, null, (UtamArgument[]) null);
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, (String)null, (UtamArgument[]) null);
     method.chain = new UtamMethodChainLink[]{};
     UtamError e = expectThrows(UtamError.class, () -> method.getAbstractMethod(context));
     assertThat(
@@ -110,7 +117,7 @@ public class UtamMethod_AbstractTests {
     PageObjectValidationTestHelper.validateMethod(
         context.getMethod("returnsCustomType"), methodInfo1);
     // return actionable
-    MethodInfo methodInfo2 = new MethodInfo("returnsActionable", "Actionable");
+    MethodInfo methodInfo2 = new MethodInfo("returnsActionable", "ReturnsActionableElement");
     PageObjectValidationTestHelper.validateMethod(
         context.getMethod("returnsActionable"), methodInfo2);
     // return list of strings

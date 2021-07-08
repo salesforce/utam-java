@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Actionable;
@@ -27,6 +30,7 @@ import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.consumer.ContainerElement;
+import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -66,6 +70,18 @@ public final class TypeUtilities {
   };
   public static final TypeProvider ELEMENT_FIELD = new FromClass(ElementLocation.class);
 
+  static final String CONTAINER_ELEMENT_TYPE = "container";
+  public static final String ERR_TYPE_INVALID_VALUE_TYPE =
+      "%s '%s': type must be %s, a Page Object type reference, or an array of basic element interfaces";
+  public static final String ERR_TYPE_PROPERTY_INVALID_STRING_VALUE =
+      "element '%s': invalid string value '%s'; type property string values must be either 'container' or a Page Object type reference.";
+  public static final String ERR_RETURNS_PROPERTY_INVALID_STRING_VALUE =
+      "method '%s': invalid string value '%s'; returns property string values must be either a primitive type or a Page Object type reference.";
+  public static final String ERR_TYPE_INVALID_ARRAY_TYPES =
+      "%s '%s': type array must contain only string values";
+  public static final String ERR_TYPE_INVALID_ARRAY_VALUES =
+      "%s '%s': type array contains invalid values; valid values are %s";
+
   static String getUnmatchedParametersErr(
       List<TypeProvider> expectedTypes, List<MethodParameter> providedParameters) {
     return String.format(
@@ -91,6 +107,52 @@ public final class TypeUtilities {
       }
     }
     return true;
+  }
+
+  public static String[] processTypeNode(
+      String name, PropertyType propertyType, JsonNode typeNode) {
+    if (typeNode == null || typeNode.isNull()) {
+      return new String[]{};
+    }
+    if (typeNode.isTextual()) {
+      String value = typeNode.textValue();
+      if (propertyType == PropertyType.TYPE &&
+          !CONTAINER_ELEMENT_TYPE.equals(value) &&
+          !TranslationTypesConfigJava.isPageObjectType(value)) {
+        throw new UtamError(String.format(ERR_TYPE_PROPERTY_INVALID_STRING_VALUE, name, value));
+      }
+      if (propertyType == PropertyType.RETURNS &&
+          !PrimitiveType.isPrimitiveType(value) &&
+          !TranslationTypesConfigJava.isPageObjectType(value)) {
+        throw new UtamError(String.format(ERR_RETURNS_PROPERTY_INVALID_STRING_VALUE, name, value));
+      }
+      return new String[] {value};
+    }
+    String entityType = propertyType == PropertyType.TYPE ? "element" : "method";
+    if (typeNode.isArray()) {
+      List<String> values = new ArrayList<>();
+      for (JsonNode valueNode : typeNode) {
+        if (!valueNode.isTextual()) {
+          throw new UtamError(String.format(ERR_TYPE_INVALID_ARRAY_TYPES, entityType, name));
+        }
+        values.add(valueNode.textValue());
+      }
+      String[] res = values.toArray(String[]::new);
+      if (!TypeUtilities.Element.isBasicType(res)) {
+        throw new UtamError(String.format(ERR_TYPE_INVALID_ARRAY_VALUES, entityType, name,
+            TypeUtilities.BasicElementInterface.nameList()));
+      }
+      return res;
+    }
+    throw new UtamError(String.format(ERR_TYPE_INVALID_VALUE_TYPE,
+        entityType,
+        name,
+        propertyType == PropertyType.TYPE ? "'" + CONTAINER_ELEMENT_TYPE + "'" : "a primitive data type"));
+  }
+
+  public enum PropertyType {
+    TYPE,
+    RETURNS
   }
 
   public enum BasicElementInterface implements TypeProvider {

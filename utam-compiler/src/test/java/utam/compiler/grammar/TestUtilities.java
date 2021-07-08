@@ -120,6 +120,26 @@ public class TestUtilities {
           null, null, null);
     }
 
+    public static UtamMethod createUtamMethod(String name, UtamMethodAction[] compose) {
+      return new UtamMethod(name, compose, null, null, null, null);
+    }
+
+    public static UtamMethod createUtamMethod(String name, String returns, UtamArgument[] args) {
+      return new UtamMethod(
+          name, null, null, args, createStringTypeNode(returns), null);
+    }
+
+    public static UtamMethod createUtamMethod(String name, String[] returns, UtamArgument[] args) {
+      return new UtamMethod(
+          name, null, null, args, createArrayTypeNode(returns), null);
+    }
+
+    public static UtamMethod createUtamMethod(
+        String name, String returns, UtamMethodChainLink[] chain) {
+      return new UtamMethod(
+          name, null, chain, null, createStringTypeNode(returns), null);
+    }
+
     private static JsonNode createStringTypeNode(String type) {
       if (type == null) {
         return null;
