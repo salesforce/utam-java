@@ -9,7 +9,6 @@ package utam.compiler.translator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.aMapWithSize;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
@@ -17,9 +16,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_IMPL_ERR;
 import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_IMPL_WITH_PROFILE_ERR;
-import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_PAGE_OBJECT_NAME;
 import static utam.compiler.translator.DefaultTranslatorRunner.PROFILE_NOT_CONFIGURED_ERR;
 import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
 
@@ -37,8 +34,6 @@ import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.Profile;
 
 /**
- * created by Jim for no longer existing class PageObjectsInventory <br> to be revised
- *
  * @author jim.evans
  */
 public class DefaultTranslatorRunnerTests_Profiles {
@@ -102,92 +97,6 @@ public class DefaultTranslatorRunnerTests_Profiles {
     UtamError e = expectThrows(UtamError.class, () -> runner.getProfileMapping(testProfile));
     assertThat(
         e.getMessage(), is(equalTo(String.format(PROFILE_NOT_CONFIGURED_ERR, "test = testValue"))));
-  }
-
-  @Test
-  public void testSetPageObject() {
-    PageObjectDeclaration declaration = TestUtilities.getPageObject("{}");
-    DefaultTranslatorRunner runner = getRunnerMock();
-    runner.setPageObject("initial", declaration);
-    assertThat(runner.getGeneratedObject("initial"), is(sameInstance(declaration)));
-  }
-
-  @Test
-  public void testSetPageObjectWithDuplicateNameThrows() {
-    PageObjectDeclaration declaration = TestUtilities.getPageObject("{}");
-    DefaultTranslatorRunner runner = getRunnerMock();
-    runner.setPageObject("initial", declaration);
-    UtamError e = expectThrows(UtamError.class, () -> runner.setPageObject("initial", declaration));
-    assertThat(
-        e.getMessage(), containsString(String.format(DUPLICATE_PAGE_OBJECT_NAME, "initial")));
-  }
-
-  @Test
-  public void testSetPageObjectWithInterface() {
-    String json = "{  \"interface\": true  }";
-    PageObjectDeclaration declaration = TestUtilities.getPageObject(json);
-    DefaultTranslatorRunner runner = getRunnerMock();
-    runner.setPageObject("initial", declaration);
-    assertThat(runner.getGeneratedObject("initial"), is(sameInstance(declaration)));
-  }
-
-  @Test
-  public void testSetPageObjectWithInterfaceWithDuplicateTypeThrows() {
-    String json = "{  \"interface\": true  }";
-    PageObjectDeclaration declaration = TestUtilities.getPageObject(json);
-    DefaultTranslatorRunner runner = getRunnerMock();
-    runner.setPageObject("initial", declaration);
-    String type = declaration.getInterface().getInterfaceType().getFullName();
-    UtamError e = expectThrows(UtamError.class, () -> runner.setPageObject(type, declaration));
-    assertThat(e.getMessage(), containsString(String.format(DUPLICATE_PAGE_OBJECT_NAME, type)));
-  }
-
-  @Test
-  public void testSetPageObjectWithImplementation() {
-    String json = "{ \"implements\": \"utam-test/pageObjects/test/testInterface\"}";
-    PageObjectDeclaration declaration = TestUtilities.getPageObject(json);
-    DefaultTranslatorRunner runner = getRunnerMock();
-    runner.setPageObject("initial", declaration);
-    assertThat(runner.getGeneratedObject("initial"), is(sameInstance(declaration)));
-  }
-
-  @Test
-  public void testSetPageObjectWithImplementationOfDeclaredInterface() {
-    String interfaceJson = "{ \"interface\": true }";
-    String implementationJson = "{\"implements\": \"utam-test/pageObjects/test/test\"}";
-
-    PageObjectDeclaration interfaceDeclaration = TestUtilities.getPageObject(interfaceJson);
-    String interfaceTypeName = interfaceDeclaration.getInterface().getInterfaceType().getFullName();
-    PageObjectDeclaration implDeclaration = TestUtilities.getPageObject(implementationJson);
-    String implementationTypeName =
-        implDeclaration.getImplementation().getClassType().getFullName();
-    DefaultTranslatorRunner runner = getRunnerMock();
-    runner.setPageObject(interfaceTypeName, interfaceDeclaration);
-    runner.setPageObject(implementationTypeName, implDeclaration);
-    assertThat(
-        runner.getGeneratedObject(interfaceTypeName), is(sameInstance(interfaceDeclaration)));
-    assertThat(
-        runner.getGeneratedObject(implementationTypeName), is(sameInstance(implDeclaration)));
-  }
-
-  @Test
-  public void testSetPageObjectWithImplementationWithDuplicateTypeThrows() {
-    PageObjectDeclaration declaration =
-        TestUtilities
-            .getPageObject("{\"implements\": \"utam-test/pageObjects/test/testInterface\"}");
-    String interfaceTypeName = declaration.getInterface().getInterfaceType().getFullName();
-    DefaultTranslatorRunner runner = getRunnerMock();
-    runner.setPageObject("initial", declaration);
-    UtamError e =
-        expectThrows(UtamError.class, () -> runner.setPageObject(interfaceTypeName, declaration));
-    assertThat(
-        e.getMessage(),
-        is(
-            equalTo(
-                String.format(
-                    DUPLICATE_IMPL_ERR,
-                    "utam.test.pageobjects.test.TestInterface",
-                    "utam.test.pageobjects.test.impl.TestImpl"))));
   }
 
   @Test

@@ -7,7 +7,6 @@
  */
 package utam.compiler.translator;
 
-import java.util.Arrays;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -91,14 +90,5 @@ public class StringValueProfileConfig implements ProfileConfiguration {
   @Override
   public Set<String> getSupportedValues() {
     return values;
-  }
-
-  @Override // used in tests
-  public boolean equals(Object obj) {
-    if(obj instanceof StringValueProfileConfig) {
-      return ((StringValueProfileConfig) obj).jsonKey.equals(jsonKey)
-          && ((StringValueProfileConfig) obj).values.containsAll(values);
-    }
-    return super.equals(obj);
   }
 }

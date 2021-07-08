@@ -41,53 +41,76 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
       "You cannot specify a unit test runner without a destination directory for unit tests";
   static final String OUTPUT_DIRECTORY_MISSING = "Output directory is not configured";
   static final String PACKAGE_CONFIG_MISSING = "Packages mapping is not configured";
+  static final String REDUNDANT_CLI_ARGS = "If JSON file is set, all other arguments are ignored";
 
   @Option(names = {"-c", "-config", "--config"},
       description = "JSON file with configuration. "
           + "Path should be relative to the current module. "
           + "When set, all other command line parameters will be ignored!")
   File jsonConfig;
+
   @Option(names = {"-o", "-outputDirectory", "--outputDirectory"}, required = true,
       description = "Output directory to which generated Page Object files will be written.")
   File outputDirectory;
+
   @Option(names = {"-m", "-packageMappingFile", "--packageMappingFile"}, required = true,
       description = "File containing mapping between directories and package names.")
   File packageMappingFile;
+
   @Option(names = {"-r", "-unitTestRunner", "--unitTestRunner"}, defaultValue = "NONE",
       description = "Unit test runner to use for generated unit tests for Page Objects. Valid values: ${COMPLETION-CANDIDATES} (default: ${DEFAULT-VALUE})")
   UnitTestRunner testRunner;
+
   @Option(names = {"-i", "-inputDirectory", "--inputDirectory"},
       description = "Input directory to be recursively scanned for UTAM declarative Page Object description files. Cannot be used with an explicit file list.")
   File inputDirectory;
+
   @Parameters(description = "Explicit list of UTAM declarative Page Object description files to generate. Cannot be used with the --inputDirectory option.")
   List<File> inputFiles;
-  Integer returnCode;
+
   @Option(names = {"-p", "-profileDirectory", "--profileDirectory"}, required = true,
       description = "Destination directory to which profile information will be written.")
   private File profileDirectory;
+
   @Option(names = {"-d", "-profileDefinitionsFile", "--profileDefinitionsFile"},
       description = "File containing definitions of profile names and their valid values.")
   private File profileDefinitionsFile;
+
   @Option(names = {"-u", "-unitTestDirectory", "--unitTestDirectory"},
       description = "Destination directory to which generated unit tests will be written.")
   private File unitTestDirectory;
+
   @Option(names = {"-n", "-moduleName", "--moduleName"},
-      description = "Name of the current POs module, when set it's used as a prefix to profile property files.",
-      defaultValue = "")
+      description = "Name of the current POs module, when set it's used as a prefix to profile property files.")
   private String moduleName;
+
   private Exception thrownError;
+  Integer returnCode;
 
   public Exception getThrownError() {
     return thrownError;
   }
 
   private TranslatorConfig setConfigFromJSON() {
+    if (outputDirectory != null
+        || packageMappingFile != null
+        || testRunner != null
+        || inputFiles != null
+        || inputDirectory != null
+        || profileDirectory != null
+        || profileDefinitionsFile != null
+        || unitTestDirectory != null
+        || moduleName != null) {
+      thrownError = new UnsupportedOperationException(REDUNDANT_CLI_ARGS);
+      returnCode = CONFIG_ERR;
+      return null;
+    }
     try {
       JsonBasedCompilerConfig jsonConfig = new JsonBasedCompilerConfig(this.jsonConfig.toString());
       TranslatorSourceConfig sourceConfig = jsonConfig.getSourceConfig();
       TranslatorTargetConfig targetConfig = jsonConfig.getTargetConfig();
       List<ProfileConfiguration> profiles = jsonConfig.getConfiguredProfiles();
-      return new DefaultTranslatorConfiguration(moduleName, sourceConfig, targetConfig, profiles);
+      return new DefaultTranslatorConfiguration(jsonConfig.getModuleName(), sourceConfig, targetConfig, profiles);
     } catch (IOException e) {
       thrownError = e;
       returnCode = RUNTIME_ERR;

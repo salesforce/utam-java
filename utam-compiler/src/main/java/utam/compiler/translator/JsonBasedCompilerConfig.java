@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.compiler.translator;
 
 import static utam.compiler.translator.DefaultSourceConfiguration.DEFAULT_JSON_FILE_MASK_REGEX;
@@ -26,14 +33,15 @@ import utam.core.declarative.translator.UnitTestRunner;
  * @author elizaveta.ivanova
  * @since 234
  */
-public class JsonBasedCompilerConfig {
+class JsonBasedCompilerConfig {
 
   static final String ERR_READING_COMPILER_CONFIG = "Error reading compiler config '%s'";
+  static final String DEFAULT_CONFIG_NAME = "utam.config";
 
   private final ModuleConfig moduleConfig;
   private final String configRoot = System.getProperty("user.dir");
 
-  public JsonBasedCompilerConfig(String configFileName) throws IOException {
+  JsonBasedCompilerConfig(String configFileName) throws IOException {
     String jsonFileName = configFileName + ".json";
     try {
       URL url = getClass().getClassLoader().getResource(jsonFileName);
@@ -47,7 +55,7 @@ public class JsonBasedCompilerConfig {
   }
 
   JsonBasedCompilerConfig() throws IOException {
-    this("utam.config");
+    this(DEFAULT_CONFIG_NAME);
   }
 
   List<ProfileConfiguration> getConfiguredProfiles() {

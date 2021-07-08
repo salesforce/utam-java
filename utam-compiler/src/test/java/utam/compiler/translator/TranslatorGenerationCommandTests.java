@@ -19,6 +19,7 @@ import static utam.compiler.translator.TranslatorGenerationCommand.INVALID_UNIT_
 import static utam.compiler.translator.TranslatorGenerationCommand.MISSING_INPUT;
 import static utam.compiler.translator.TranslatorGenerationCommand.OUTPUT_DIRECTORY_MISSING;
 import static utam.compiler.translator.TranslatorGenerationCommand.PACKAGE_CONFIG_MISSING;
+import static utam.compiler.translator.TranslatorGenerationCommand.REDUNDANT_CLI_ARGS;
 import static utam.compiler.translator.TranslatorGenerationCommand.RUNTIME_ERR;
 import static utam.compiler.translator.TranslatorGenerationCommand.TOO_MANY_INPUTS;
 
@@ -41,6 +42,17 @@ public class TranslatorGenerationCommandTests {
     command.jsonConfig = new File("utam.config");
     TranslatorConfig config = command.getTranslationConfig();
     assertThat(config, is(not(nullValue())));
+  }
+
+  @Test
+  public void testJsonConfigWithOtherArgsThrows() {
+    TranslatorGenerationCommand command = new TranslatorGenerationCommand();
+    command.jsonConfig = new File("utam.config");
+    command.inputDirectory = new File("input");
+    TranslatorConfig config = command.getTranslationConfig();
+    assertThat(config, is(nullValue()));
+    assertThat(command.returnCode, is(equalTo(CONFIG_ERR)));
+    assertThat(command.getThrownError().getMessage(), containsString(REDUNDANT_CLI_ARGS));
   }
 
   @Test

@@ -11,9 +11,11 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.TestUtilities.getJsonStringDeserializer;
 import static utam.compiler.translator.DefaultTranslatorRunner.PROFILE_NOT_CONFIGURED_ERR;
 import static utam.compiler.translator.TranslatorMockUtilities.IMPL_ONLY_CLASS_NAME;
 import static utam.compiler.translator.TranslatorMockUtilities.IMPL_ONLY_URI;
@@ -29,11 +31,8 @@ import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
 
 import java.io.IOException;
 import java.util.Properties;
-import org.hamcrest.CoreMatchers;
 import org.testng.annotations.Test;
 import utam.compiler.grammar.JsonDeserializer;
-import utam.compiler.grammar.TestUtilities;
-import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorRunner;
 import utam.core.declarative.translator.UnitTestRunner;
@@ -196,30 +195,29 @@ public class DefaultTranslatorRunnerTests {
     DefaultTranslatorRunner runner = new DefaultTranslatorRunner(translatorConfig);
     runner.run();
     assertThat(
-        runner.getGeneratedObject(PAGE_OBJECT_URI).getImplementation().getProfiles().length,
-        is(equalTo(0)));
+        runner.getGeneratedObject(PAGE_OBJECT_URI).getImplementation().getProfiles(),
+        is(emptyArray()));
     assertThat(
-        runner.getGeneratedObject(INTERFACE_ONLY_URI).getImplementation().getProfiles().length,
-        is(equalTo(0)));
+        runner.getGeneratedObject(INTERFACE_ONLY_URI).getImplementation().getProfiles(),
+        is(emptyArray()));
     assertThat(
-        runner.getGeneratedObject(IMPL_ONLY_URI).getImplementation().getProfiles().length,
-        is(equalTo(0)));
+        runner.getGeneratedObject(IMPL_ONLY_URI).getImplementation().getProfiles(),
+        is(emptyArray()));
   }
 
   @Test
   public void profileConfigNotSet() {
-    final String JSON_WITH_DRIVER_PROFILE =
+    final String json =
         String.format(
             "{ \"implements\" : \"%s\", \"profile\" : [{\"driver\" : \"chrome\"}] }", TEST_URI);
 
-    JsonDeserializer deserializer =
-        TestUtilities.getJsonStringDeserializer(JSON_WITH_DRIVER_PROFILE);
+    JsonDeserializer deserializer = getJsonStringDeserializer(json);
     UtamError e =
         expectThrows(
             UtamError.class, () -> deserializer.getObject().getImplementation().getProfiles());
     assertThat(
         e.getMessage(),
-        CoreMatchers.is(CoreMatchers.equalTo(String.format(PROFILE_NOT_CONFIGURED_ERR, "driver"))));
+        is(equalTo(String.format(PROFILE_NOT_CONFIGURED_ERR, "driver"))));
   }
 
   @Test
@@ -244,19 +242,17 @@ public class DefaultTranslatorRunnerTests {
 
   @Test
   public void testProfilesOutputConfig() {
-    final String JSON_WITH_DRIVER_PROFILE =
+    final String json =
         String.format(
             "{ \"implements\" : \"%s\", \"profile\" : [{\"driver\" : \"chrome\"}] }", TEST_URI);
     DefaultSourceConfigurationTests.Mock sourceConfig =
         new DefaultSourceConfigurationTests.Mock();
-    sourceConfig.setJSONSource(TEST_URI, JSON_WITH_DRIVER_PROFILE);
+    sourceConfig.setJSONSource(TEST_URI, json);
     DefaultTargetConfigurationTests.Mock targetConfig =
         new DefaultTargetConfigurationTests.Mock();
     DefaultTranslatorConfiguration translatorConfig = new DefaultTranslatorConfiguration(
         sourceConfig, targetConfig);
-    final ProfileConfiguration
-        DRIVER_PROFILE_CONFIG = new StringValueProfileConfig("driver", "chrome");
-    translatorConfig.setConfiguredProfile(DRIVER_PROFILE_CONFIG);
+    translatorConfig.setConfiguredProfile(new StringValueProfileConfig("driver", "chrome"));
     DefaultTranslatorRunner translator = new DefaultTranslatorRunner(translatorConfig);
     translator.run();
     Properties profiles = translator.getProfileMapping(new StringValueProfile("driver", "chrome"));

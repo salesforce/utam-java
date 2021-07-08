@@ -205,8 +205,7 @@ public class DefaultTargetConfigurationTests {
 
     private static final String ERROR = "no unit test writer created in runner configuration";
 
-    UnitTestWriterNotConfigured(
-        UnitTestRunner unitTestRunnerType) {
+    UnitTestWriterNotConfigured(UnitTestRunner unitTestRunnerType) {
       super(unitTestRunnerType);
     }
 

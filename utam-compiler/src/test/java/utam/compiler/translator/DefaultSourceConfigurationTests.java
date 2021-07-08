@@ -104,7 +104,8 @@ public class DefaultSourceConfigurationTests {
   @Test
   public void testRecursiveScan() {
     ScannerConfig scannerConfig = new ScannerConfig(Collections.singletonMap("package", ".*/one"));
-    RecursiveScanner scanner = new RecursiveScanner(System.getProperty("user.dir") + "/src/test/resources/spec");
+    RecursiveScanner scanner = new RecursiveScanner(
+        System.getProperty("user.dir") + "/src/test/resources/spec");
     DefaultSourceConfiguration config = new DefaultSourceConfiguration(scannerConfig, scanner);
     config.recursiveScan();
     assertThat(config.getPageObjectFileSourcePath("package/pageObjects/first"),
