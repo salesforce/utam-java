@@ -12,6 +12,7 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
 import java.util.ArrayList;
 import java.util.List;
 import utam.compiler.helpers.MethodContext;
+import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
@@ -54,5 +55,14 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
   @Override
   public boolean isPublic() {
     return true;
+  }
+
+  @Override
+  public boolean isElementMethod() {
+    TypeProvider returnType =  getDeclaration().getReturnType();
+    if (returnType instanceof TypeUtilities.ListOf) {
+      return ((TypeUtilities.ListOf)returnType).getElementType() instanceof TypeUtilities.Element;
+    }
+    return returnType instanceof TypeUtilities.Element;
   }
 }
