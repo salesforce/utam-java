@@ -39,7 +39,8 @@ public class TranslatorGenerationCommandTests {
   @Test
   public void testJsonConfig() {
     TranslatorGenerationCommand command = new TranslatorGenerationCommand();
-    command.jsonConfig = new File("utam.config");
+    command.jsonConfig = new File(System.getProperty("user.dir")
+        + "/src/test/resources/utam.config.json");
     TranslatorConfig config = command.getTranslationConfig();
     assertThat(config, is(not(nullValue())));
   }

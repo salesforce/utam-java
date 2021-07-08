@@ -71,6 +71,6 @@ public class JsonBasedCompilerConfigTests {
   public void testNonExistingFile() {
     IOException e = expectThrows(IOException.class, () -> new JsonBasedCompilerConfig("error"));
     assertThat(e.getMessage(),
-        is(CoreMatchers.equalTo(String.format(ERR_READING_COMPILER_CONFIG, "error.json"))));
+        is(CoreMatchers.equalTo(String.format(ERR_READING_COMPILER_CONFIG, "error"))));
   }
 }

@@ -13,6 +13,7 @@ import static utam.core.declarative.translator.UnitTestRunner.validateUnitTestDi
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
@@ -36,21 +37,27 @@ import utam.core.declarative.translator.UnitTestRunner;
 class JsonBasedCompilerConfig {
 
   static final String ERR_READING_COMPILER_CONFIG = "Error reading compiler config '%s'";
-  private static final String DEFAULT_CONFIG_NAME = "utam.config";
+  private static final String DEFAULT_CONFIG_NAME = "utam.config.json";
 
   private final ModuleConfig moduleConfig;
   private final String configRoot = System.getProperty("user.dir");
 
+  // used in tests
   JsonBasedCompilerConfig(String configFileName) throws IOException {
-    String jsonFileName = configFileName + ".json";
     try {
-      URL url = getClass().getClassLoader().getResource(jsonFileName);
-      if(url == null) {
-        throw new IOException("File not found");
-      }
+      URL url = getClass().getClassLoader().getResource(configFileName);
       moduleConfig = new ObjectMapper().readValue(url, ModuleConfig.class);
+    } catch (IOException | IllegalArgumentException e) {
+      throw new IOException(String.format(ERR_READING_COMPILER_CONFIG, configFileName), e);
+    }
+  }
+
+  // used by CLI runner
+  JsonBasedCompilerConfig(File configFile) throws IOException {
+    try {
+      moduleConfig = new ObjectMapper().readValue(configFile, ModuleConfig.class);
     } catch (IOException e) {
-      throw new IOException(String.format(ERR_READING_COMPILER_CONFIG, jsonFileName), e);
+      throw new IOException(String.format(ERR_READING_COMPILER_CONFIG, configFile.toString()), e);
     }
   }
 

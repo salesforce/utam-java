@@ -10,6 +10,7 @@ package utam.compiler.translator;
 import static utam.compiler.translator.DefaultTranslatorConfiguration.getConfiguredProfiles;
 import static utam.compiler.translator.DefaultTranslatorConfiguration.getScanner;
 import static utam.compiler.translator.DefaultTranslatorConfiguration.getScannerConfig;
+import static utam.core.declarative.translator.UnitTestRunner.NONE;
 import static utam.core.declarative.translator.UnitTestRunner.validateUnitTestDirectory;
 
 import java.io.File;
@@ -49,15 +50,15 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
           + "When set, all other command line parameters will be ignored!")
   File jsonConfig;
 
-  @Option(names = {"-o", "-outputDirectory", "--outputDirectory"}, required = true,
+  @Option(names = {"-o", "-outputDirectory", "--outputDirectory"},
       description = "Output directory to which generated Page Object files will be written.")
   File outputDirectory;
 
-  @Option(names = {"-m", "-packageMappingFile", "--packageMappingFile"}, required = true,
+  @Option(names = {"-m", "-packageMappingFile", "--packageMappingFile"},
       description = "File containing mapping between directories and package names.")
   File packageMappingFile;
 
-  @Option(names = {"-r", "-unitTestRunner", "--unitTestRunner"}, defaultValue = "NONE",
+  @Option(names = {"-r", "-unitTestRunner", "--unitTestRunner"},
       description = "Unit test runner to use for generated unit tests for Page Objects. Valid values: ${COMPLETION-CANDIDATES} (default: ${DEFAULT-VALUE})")
   UnitTestRunner testRunner;
 
@@ -68,7 +69,7 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
   @Parameters(description = "Explicit list of UTAM declarative Page Object description files to generate. Cannot be used with the --inputDirectory option.")
   List<File> inputFiles;
 
-  @Option(names = {"-p", "-profileDirectory", "--profileDirectory"}, required = true,
+  @Option(names = {"-p", "-profileDirectory", "--profileDirectory"},
       description = "Destination directory to which profile information will be written.")
   private File profileDirectory;
 
@@ -85,7 +86,7 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
   private String moduleName;
 
   private Exception thrownError;
-  Integer returnCode;
+  Integer returnCode = CommandLine.ExitCode.OK;
 
   public Exception getThrownError() {
     return thrownError;
@@ -106,7 +107,7 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
       return null;
     }
     try {
-      JsonBasedCompilerConfig jsonConfig = new JsonBasedCompilerConfig(this.jsonConfig.toString());
+      JsonBasedCompilerConfig jsonConfig = new JsonBasedCompilerConfig(this.jsonConfig);
       TranslatorSourceConfig sourceConfig = jsonConfig.getSourceConfig();
       TranslatorTargetConfig targetConfig = jsonConfig.getTargetConfig();
       List<ProfileConfiguration> profiles = jsonConfig.getConfiguredProfiles();
@@ -134,7 +135,11 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
         return null;
       }
 
-      if (testRunner != UnitTestRunner.NONE && unitTestDirectory == null) {
+      if(testRunner == null) {
+        testRunner = NONE;
+      }
+
+      if (testRunner != NONE && unitTestDirectory == null) {
         // If specifying a unit test runner, you must specify a unit test directory.
         thrownError = new UnsupportedOperationException(INVALID_UNIT_TEST_CONFIG);
         returnCode = CONFIG_ERR;
