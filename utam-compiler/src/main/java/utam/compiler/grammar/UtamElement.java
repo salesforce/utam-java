@@ -282,7 +282,10 @@ public final class UtamElement {
     @Override
     final ElementContext[] traverse(
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
-      TypeProvider elementType = TypeUtilities.Element.asBasicType(name, type);
+      boolean isPublicImplementationOnlyElement =
+          isPublic() && context != null && context.isImplementationPageObject();
+      TypeProvider elementType =
+          TypeUtilities.Element.asBasicType(name, type, isPublicImplementationOnlyElement);
       UtamSelector.Context selectorContext = selector.getContext();
       List<MethodParameter> addedParameters = new ArrayList<>(selectorContext.getParameters());
       ElementField field =

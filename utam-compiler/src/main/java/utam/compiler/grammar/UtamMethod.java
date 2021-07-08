@@ -111,7 +111,9 @@ class UtamMethod {
     } else if (PrimitiveType.isPrimitiveType(returnType[0])) {
       type = PrimitiveType.fromString(returnType[0]);
     } else if (TypeUtilities.Element.isBasicType(returnType)) {
-      type = TypeUtilities.Element.asBasicType(name, returnType);
+      // If the return type is a basic element, it must be in a public method defined
+      // in an interface.
+      type = TypeUtilities.Element.asBasicType(name, returnType, false);
     } else {
       type = context.getType(returnType[0]);
     }

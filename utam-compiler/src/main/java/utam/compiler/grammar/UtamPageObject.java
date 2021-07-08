@@ -200,6 +200,9 @@ final class UtamPageObject {
     if(this.isAbstract) {
       context.setAbstract();
     }
+    if (implementsType != null) {
+      context.setIsImplementation();
+    }
     // register element to prevent names collisions
     ElementContext rootElement = setRootElementMethod(context);
     if (elements != null) {

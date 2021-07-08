@@ -294,16 +294,19 @@ public class TypeUtilitiesTests {
   @Test
   public void testGetElementType() {
     assertThat(
-        Objects.requireNonNull(asBasicType("basicType", new String[] { "actionable" })).getSimpleName(),
+        Objects.requireNonNull(asBasicType("basicType", new String[] { "actionable" }, false)).getSimpleName(),
         is(equalTo("BasicTypeElement")));
     assertThat(
-        Objects.requireNonNull(asBasicType("basicType", new String[] { "clickable" })).getSimpleName(),
+        Objects.requireNonNull(asBasicType("basicType", new String[] { "clickable" }, false)).getSimpleName(),
         is(equalTo("BasicTypeElement")));
     assertThat(
-        Objects.requireNonNull(asBasicType("basicType", new String[] { "editable" })).getSimpleName(),
+        Objects.requireNonNull(asBasicType("basicType", new String[] { "editable" }, false)).getSimpleName(),
         is(equalTo("BasicTypeElement")));
-    assertThat(asBasicType("basicType", new String[] { "unknown" }), is(nullValue()));
-    assertThat(asBasicType("basicType", null).getSimpleName(), is(equalTo("BasicTypeElement")));
+    assertThat(
+        Objects.requireNonNull(asBasicType("basicType", new String[] { "clickable" }, true)).getSimpleName(),
+        is(equalTo("GetBasicTypeElement")));
+    assertThat(asBasicType("basicType", new String[] { "unknown" }, false), is(nullValue()));
+    assertThat(asBasicType("basicType", null, false).getSimpleName(), is(equalTo("BasicTypeElement")));
   }
 
   /** The isTypesMatch static method should return true for matching lists of types */

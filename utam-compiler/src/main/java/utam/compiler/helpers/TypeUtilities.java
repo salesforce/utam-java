@@ -176,7 +176,7 @@ public final class TypeUtilities {
       return false;
     }
 
-    public static BasicElementInterface asBasicType(String jsonString) {
+    static BasicElementInterface asBasicType(String jsonString) {
       if (jsonString == null) {
         return actionable;
       }
@@ -254,12 +254,21 @@ public final class TypeUtilities {
 
   public static class Element implements TypeProvider {
     private final String name;
-    private final String containingType;
     private final List<BasicElementInterface> basicInterfaces = new ArrayList<>();
 
-    Element(String name, String[] interfaceTypes, String containingType) {
-      this.name = name.substring(0, 1).toUpperCase() + name.substring(1) + "Element";
-      this.containingType = containingType;
+    Element(String name, String[] interfaceTypes, boolean requiresPrefix) {
+      // If the basic element being defined is in an implementation-only Page Object,
+      // that is, one that has an "implements" property defined, and the element is
+      // marked as public, then there must be a method defined in the interface-only
+      // Page Object that matches the name of the exposed element. Assuming the method
+      // is named "getFoo," that method will have a generated return type of interface
+      // "GetFooElement", and the implementation Page Object must have an implementation
+      // for the element that will match that interface name. Note carefully that thi
+      // is distinct from the case where the element is normally exposed in a Page Object
+      // using the "public" property in the JSON, in which case, the "Get" prefix is
+      // omitted.
+      final String prefix = requiresPrefix ? "Get" : "";
+      this.name = prefix + name.substring(0, 1).toUpperCase() + name.substring(1) + "Element";
       for(String interfaceType : interfaceTypes) {
         if (BasicElementInterface.isBasicType(interfaceType)) {
           basicInterfaces.add(BasicElementInterface.asBasicType(interfaceType));
@@ -279,12 +288,14 @@ public final class TypeUtilities {
       return true;
     }
 
-    public static Element asBasicType(String name, String[] interfaceTypes) {
+    public static Element asBasicType(
+        String name, String[] interfaceTypes, boolean isPublicImplOnly) {
       if (interfaceTypes == null || interfaceTypes.length == 0) {
-        return new Element(name, new String[] { BasicElement.class.getSimpleName() }, "");
+        return new Element(
+            name, new String[] { BasicElement.class.getSimpleName() }, isPublicImplOnly);
       }
       if (isBasicType(interfaceTypes)) {
-        return new Element(name, interfaceTypes, "");
+        return new Element(name, interfaceTypes, isPublicImplOnly);
       }
       return null;
     }
@@ -300,8 +311,7 @@ public final class TypeUtilities {
 
     @Override
     public String getFullName() {
-      String separator = "".equals(containingType) ? "" : ".";
-      return containingType + separator + name;
+      return name;
     }
 
     @Override
@@ -311,7 +321,7 @@ public final class TypeUtilities {
 
     @Override
     public String getPackageName() {
-      return containingType;
+      return "";
     }
 
     @Override
