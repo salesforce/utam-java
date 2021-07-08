@@ -113,7 +113,7 @@ public class DefaultSourceConfigurationTests {
   }
 
   @Test
-  public void testRecursiveScanPreProcess() {
+  public void testRecursiveScanPreProcess() throws IOException {
     ScannerConfig scannerConfig = new ScannerConfig(Collections.singletonMap("utam-one", ".*/one"));
     RecursiveScanner scanner = new RecursiveScanner(null);
     DefaultSourceConfiguration config = new DefaultSourceConfiguration(scannerConfig, scanner);
@@ -124,6 +124,7 @@ public class DefaultSourceConfigurationTests {
     String expectedURI = "utam-one/pageObjects/test";
     assertThat(config.getPageObjects().iterator().next(), is(equalTo(expectedURI)));
     assertThat(config.getPageObjectFileSourcePath(expectedURI), is(notNullValue()));
+    assertThat(config.getDeclarationReader(expectedURI), is(notNullValue()));
     // duplicate throws!
     UtamError e = expectThrows(UtamError.class, () -> test.accept(pathString));
     assertThat(e.getMessage(), is(equalTo(String.format(ERR_DUPLICATE_PAGE_OBJECT, expectedURI))));

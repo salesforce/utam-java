@@ -21,9 +21,8 @@ public interface TranslatorRunner {
    * first scan all contexts and create generation order based on dependencies <br>
    * generation order is list of Page Object names<br>
    * then for each PO from list de-serialize and create representation of interface and class <br>
-   * @throws IOException if an error is encountered in translation
    */
-  void run() throws IOException;
+  void run();
 
   /**
    * can only be executed after run method to write objects to files <br>

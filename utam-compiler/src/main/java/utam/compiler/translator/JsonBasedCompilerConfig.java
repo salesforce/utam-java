@@ -36,7 +36,7 @@ import utam.core.declarative.translator.UnitTestRunner;
 class JsonBasedCompilerConfig {
 
   static final String ERR_READING_COMPILER_CONFIG = "Error reading compiler config '%s'";
-  static final String DEFAULT_CONFIG_NAME = "utam.config";
+  private static final String DEFAULT_CONFIG_NAME = "utam.config";
 
   private final ModuleConfig moduleConfig;
   private final String configRoot = System.getProperty("user.dir");

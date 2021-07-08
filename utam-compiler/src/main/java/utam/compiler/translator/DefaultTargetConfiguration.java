@@ -91,20 +91,28 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
     return resourcesHomePath;
   }
 
-  @Override
-  public Writer getClassWriter(TypeProvider pageObjectType) throws IOException {
-    String fullPath = targetPath
+  String getPageObjectClassPath(TypeProvider pageObjectType) {
+    return targetPath
         + File.separator
         + replaceWithPath(pageObjectType.getFullName()) + ".java";
+  }
+
+  @Override
+  public Writer getClassWriter(TypeProvider pageObjectType) throws IOException {
+    String fullPath = getPageObjectClassPath(pageObjectType);
     return getWriter(fullPath);
+  }
+
+  String getPageObjectTestClassPath(TypeProvider pageObjectType) {
+    return unitTestDirectory
+        + File.separator
+        + replaceWithPath(pageObjectType.getFullName())
+        + "Tests.java";
   }
 
   @Override
   public Writer getUnitTestWriter(TypeProvider pageObjectType) throws IOException {
-    String fullPath = unitTestDirectory
-        + File.separator
-        + replaceWithPath(pageObjectType.getFullName())
-        + "Tests.java";
+    String fullPath = getPageObjectTestClassPath(pageObjectType);
     if (new File(fullPath).exists()) {
       // Important: If the path exists, we do not want to overwrite existing
       // test files.

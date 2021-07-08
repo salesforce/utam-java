@@ -15,8 +15,6 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.translator.DefaultTranslatorRunner.ERR_PROFILE_PATH_DOES_NOT_EXIST;
-import static utam.compiler.translator.DefaultTranslatorRunner.ERR_PROFILE_PATH_NOT_CONFIGURED;
 import static utam.compiler.translator.TranslatorMockUtilities.IMPL_ONLY_CLASS_NAME;
 import static utam.compiler.translator.TranslatorMockUtilities.INTERFACE_ONLY_CLASS_NAME;
 import static utam.compiler.translator.TranslatorMockUtilities.PAGE_OBJECT_IMPL_CLASS_NAME;
@@ -28,34 +26,19 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import org.testng.annotations.Test;
+import utam.compiler.helpers.TypeUtilities.FromString;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorRunner;
 import utam.core.declarative.translator.TranslatorTargetConfig;
 import utam.core.declarative.translator.UnitTestRunner;
-import utam.core.framework.consumer.UtamError;
 
 public class DefaultTargetConfigurationTests {
 
   private static final String FAKE_IO_EXCEPTION_MESSAGE = "throwing fake IO exception";
 
   @Test
-  public void testProfilesOutputConfigErr() {
-    Mock targetConfig = new Mock();
-    TranslatorRunner runner = targetConfig.getRunner();
-    UtamError e = expectThrows(UtamError.class, runner::writeDependenciesConfigs);
-    assertThat(e.getMessage(), is(equalTo(ERR_PROFILE_PATH_NOT_CONFIGURED)));
-    targetConfig.setConfigPath("");
-    e = expectThrows(UtamError.class, runner::writeDependenciesConfigs);
-    assertThat(e.getMessage(), is(equalTo(ERR_PROFILE_PATH_NOT_CONFIGURED)));
-    targetConfig.setConfigPath("err.err");
-    e = expectThrows(UtamError.class, runner::writeDependenciesConfigs);
-    assertThat(
-        e.getMessage(), is(equalTo(String.format(ERR_PROFILE_PATH_DOES_NOT_EXIST, "err.err"))));
-  }
-
-  @Test
-  public void testWriteWithWriterErrorThrows() throws IOException {
+  public void testWriteWithWriterErrorThrows() {
     TranslatorRunner translator = new ClassWriterError().getRunner();
     translator.run();
     RuntimeException e = expectThrows(RuntimeException.class, translator::write);
@@ -64,7 +47,7 @@ public class DefaultTargetConfigurationTests {
   }
 
   @Test
-  public void testWriteWithUnitTestWriterErrorThrows() throws IOException {
+  public void testWriteWithUnitTestWriterErrorThrows() {
     TranslatorRunner translator = new UnitTestWriterThrowsError(UnitTestRunner.TESTNG).getRunner();
     translator.run();
     RuntimeException e = expectThrows(RuntimeException.class, translator::write);
@@ -73,7 +56,7 @@ public class DefaultTargetConfigurationTests {
   }
 
   @Test
-  public void testUnitTestsWriterWriteThrows() throws IOException {
+  public void testUnitTestsWriterWriteThrows() {
     TranslatorRunner translator = new UnitTestWriterNotConfigured(UnitTestRunner.JUNIT).getRunner();
     translator.run();
     IOException e = expectThrows(IOException.class, translator::write);
@@ -134,6 +117,23 @@ public class DefaultTargetConfigurationTests {
     assertThrows(FileNotFoundException.class, () -> DefaultTargetConfiguration.getWriter(""));
   }
 
+  @Test
+  public void testConstructor() {
+    String currentDir = System.getProperty("user.dir");
+    DefaultTargetConfiguration targetConfig = new DefaultTargetConfiguration(
+        currentDir,
+        currentDir,
+        UnitTestRunner.JUNIT,
+        currentDir
+    );
+    assertThat(targetConfig.getUnitTestRunnerType(), is(equalTo(UnitTestRunner.JUNIT)));
+    assertThat(targetConfig.getInjectionConfigRootFilePath(), is(equalTo(currentDir)));
+    String typeName = "utam/MyPage";
+    TypeProvider type = new FromString(typeName);
+    assertThat(targetConfig.getPageObjectClassPath(type), is(equalTo(currentDir + "/utam/MyPage.java")));
+    assertThat(targetConfig.getPageObjectTestClassPath(type), is(equalTo(currentDir + "/utam/MyPageTests.java")));
+  }
+
   static class Mock implements TranslatorTargetConfig {
 
     final Map<String, Writer> writers = new HashMap<>();
@@ -148,7 +148,7 @@ public class DefaultTargetConfigurationTests {
       this(UnitTestRunner.NONE);
     }
 
-    TranslatorRunner getRunner() {
+    DefaultTranslatorRunner getRunner() {
       return new DefaultTranslatorRunner(getConfig());
     }
 

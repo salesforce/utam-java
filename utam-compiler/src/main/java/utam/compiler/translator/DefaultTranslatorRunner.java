@@ -184,7 +184,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
         System.currentTimeMillis() - timer));
   }
 
-  private String getResourcesRoot() {
+  final String getResourcesRoot() {
     String profilesRoot = getTargetConfig().getInjectionConfigRootFilePath();
     if (profilesRoot == null || profilesRoot.isEmpty()) {
       throw new UtamError(ERR_PROFILE_PATH_NOT_CONFIGURED);
@@ -197,13 +197,12 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
 
   @Override
   public void writeDependenciesConfigs() {
-    String profilesRoot = getResourcesRoot();
+    String profilesRoot = getResourcesRoot() + File.separator;
     String moduleName = translatorConfig.getModuleName();
     for (Profile profile : getAllProfiles()) {
       Properties configToWrite = getProfileMapping(profile);
       if (!configToWrite.isEmpty()) {
-        String profileConfigPath = String
-            .format("%s/%s.properties", profilesRoot, profile.getConfigName(moduleName));
+        String profileConfigPath = profilesRoot + String.format("%s.properties", profile.getConfigName(moduleName));
         try {
           Writer writer = new FileWriter(profileConfigPath);
           configToWrite.store(writer, "profile configuration");
@@ -218,7 +217,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
 
   final Properties getProfileMapping(Profile profile) {
     if (!profilesMapping.containsKey(profile)) {
-      throw new UtamError(String.format(PROFILE_NOT_CONFIGURED_ERR, profile.toString()));
+      throw new UtamError(String.format(PROFILE_NOT_CONFIGURED_ERR, profile.getName()));
     }
     Properties properties = new Properties();
     profilesMapping.get(profile).forEach(properties::setProperty);
@@ -254,7 +253,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     }
   }
 
-  private void setInterfaceOnly(String typeName) {
+  final void setInterfaceOnly(String typeName) {
     Map<String, String> implMapping = profilesMapping.get(defaultProfile);
     if (implMapping.containsKey(typeName)) {
       throw new UtamError(String.format(DUPLICATE_PAGE_OBJECT_NAME, typeName));
@@ -262,7 +261,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     implMapping.put(typeName, "");
   }
 
-  private void setImplOnly(String typeName, String classTypeName) {
+  final void setImplOnly(String typeName, String classTypeName) {
     Map<String, String> implMapping = profilesMapping.get(defaultProfile);
     if (implMapping.containsKey(typeName) && !implMapping.get(typeName).isEmpty()) {
       throw new UtamError(String.format(DUPLICATE_IMPL_ERR, typeName, implMapping.get(typeName)));
@@ -270,9 +269,9 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     implMapping.put(typeName, classTypeName);
   }
 
-  void setImplOnlyForProfile(Profile profile, String typeName, String classTypeName) {
+  final void setImplOnlyForProfile(Profile profile, String typeName, String classTypeName) {
     if (!profilesMapping.containsKey(profile)) {
-      throw new UtamError(String.format(PROFILE_NOT_CONFIGURED_ERR, profile.toString()));
+      throw new UtamError(String.format(PROFILE_NOT_CONFIGURED_ERR, profile.getName()));
     }
     if (profilesMapping.get(profile).containsKey(typeName)) {
       throw new UtamError(
@@ -280,7 +279,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
               DUPLICATE_IMPL_WITH_PROFILE_ERR,
               typeName,
               profilesMapping.get(profile).get(typeName),
-              profile.toString()));
+              profile.getName()));
     }
     profilesMapping.get(profile).put(typeName, classTypeName);
   }

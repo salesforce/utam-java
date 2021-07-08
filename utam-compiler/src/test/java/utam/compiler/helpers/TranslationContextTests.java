@@ -304,4 +304,13 @@ public class TranslationContextTests {
     context.setTestableElement("name", mock(ElementUnitTestHelper.class));
     assertThat(context.getTestableElements().get("name"), is(notNullValue()));
   }
+
+  @Test
+  public void nonExistingProfile() {
+    TranslationContext translationInstantContext = getTestTranslationContext();
+    UtamError e =
+        expectThrows(
+            UtamError.class, () -> translationInstantContext.getProfile("driver", "chrome"));
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_PROFILE_NOT_CONFIGURED, "driver"))));
+  }
 }
