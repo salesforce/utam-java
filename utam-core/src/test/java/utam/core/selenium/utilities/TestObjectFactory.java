@@ -57,6 +57,13 @@ public class TestObjectFactory extends WebDriverSimulatorObjectFactory {
             .thenReturn(elementInfo.getElement());
       }
 
+      // If this is set for more than one element then only the last element would be mocked.
+      if (elementInfo.isFocused()) {
+        WebDriver.TargetLocator targetLocator = mock(WebDriver.TargetLocator.class);
+        when(driver.switchTo()).thenReturn(targetLocator);
+        when(targetLocator.activeElement()).thenReturn(elementInfo.getElement());
+      }
+
       // Get a list all of the child element info objects that are children of this element
       List<WebElementInfo> childElementInfos =
           knownElements.values().stream()

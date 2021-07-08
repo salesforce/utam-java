@@ -111,6 +111,7 @@ public class WebDriverSimulator {
     private String parentElementName;
     private boolean isInShadowDOM;
     private WebElement element;
+    private boolean isFocused;
 
     /**
      * Creates a new instance of the WebElementInfo class
@@ -244,7 +245,27 @@ public class WebDriverSimulator {
         objectFactory.setElementVisibility(element, isVisible);
         return this;
     }
-  
+
+    /**
+     * Marks the element info to be mocked as having focus when the driver is created.
+     *
+     * @param isFocused the boolean focus value
+     * @return this WebElementInfo object
+     */
+    public WebElementInfo withFocus(boolean isFocused) {
+      this.isFocused = isFocused;
+      return this;
+    }
+
+    /**
+     * Gets a value indicating whether the described element would be focused
+     *
+     * @return true if the element is going to be set to be focused.
+     */
+    public boolean isFocused() {
+      return isFocused;
+    }
+
     private void setChildElement(WebElementInfo childInfo, boolean isInShadowDOM) {
       childInfo.parentElementName = name;
       childInfo.isInShadowDOM = isInShadowDOM;
