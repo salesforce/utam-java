@@ -11,7 +11,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -123,8 +122,7 @@ public class DefaultSourceConfigurationTests {
     test.accept(pathString);
     String expectedURI = "utam-one/pageObjects/test";
     assertThat(config.getPageObjects().iterator().next(), is(equalTo(expectedURI)));
-    assertThat(config.getPageObjectFileSourcePath(expectedURI), is(notNullValue()));
-    assertThat(config.getDeclarationReader(expectedURI), is(notNullValue()));
+    assertThat(config.getPageObjectFileSourcePath(expectedURI), is(equalTo(pathString)));
     // duplicate throws!
     UtamError e = expectThrows(UtamError.class, () -> test.accept(pathString));
     assertThat(e.getMessage(), is(equalTo(String.format(ERR_DUPLICATE_PAGE_OBJECT, expectedURI))));

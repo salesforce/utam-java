@@ -96,7 +96,7 @@ public class DefaultTranslatorRunnerTests_Profiles {
     DefaultTranslatorRunner runner = getRunnerMock();
     UtamError e = expectThrows(UtamError.class, () -> runner.getProfileMapping(testProfile));
     assertThat(
-        e.getMessage(), is(equalTo(String.format(PROFILE_NOT_CONFIGURED_ERR, "test = testValue"))));
+        e.getMessage(), is(equalTo(String.format(PROFILE_NOT_CONFIGURED_ERR, "test"))));
   }
 
   @Test
@@ -157,7 +157,7 @@ public class DefaultTranslatorRunnerTests_Profiles {
                     DUPLICATE_IMPL_WITH_PROFILE_ERR,
                     "utam.test.pageobjects.test.TestInterface",
                     "utam.test.pageobjects.test.impl.TestImpl",
-                    "red = colorRed"))));
+                    "red"))));
   }
 
   @Test
