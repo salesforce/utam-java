@@ -119,7 +119,7 @@ public final class ClassSerializer {
     List<TypeProvider> privateElementTypes = source.getDeclaredElementTypes(false);
     privateElementTypes.stream()
         .map(returnType -> String.format(
-            "public interface %s extends %s {}",
+            "interface %s extends %s {}",
             returnType.getSimpleName(),
             ((TypeUtilities.Element)returnType).getBasicInterfaces().stream()
                 .map(TypeProvider::getSimpleName)

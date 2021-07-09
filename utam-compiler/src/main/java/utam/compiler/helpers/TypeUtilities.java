@@ -263,7 +263,7 @@ public final class TypeUtilities {
       // Page Object that matches the name of the exposed element. Assuming the method
       // is named "getFoo," that method will have a generated return type of interface
       // "GetFooElement", and the implementation Page Object must have an implementation
-      // for the element that will match that interface name. Note carefully that thi
+      // for the element that will match that interface name. Note carefully that this
       // is distinct from the case where the element is normally exposed in a Page Object
       // using the "public" property in the JSON, in which case, the "Get" prefix is
       // omitted.

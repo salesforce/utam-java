@@ -10,12 +10,15 @@ package utam.compiler.grammar;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
 import static utam.compiler.grammar.UtamMethod.ERR_METHOD_SHOULD_BE_ABSTRACT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
 
 /**
@@ -127,5 +130,22 @@ public class UtamMethod_AbstractTests {
     // return void
     MethodInfo methodInfo4 = new MethodInfo("returnsVoid", "void");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("returnsVoid"), methodInfo4);
+  }
+
+  @Test
+  public void testCustomBasicElementTypes() {
+    TranslationContext context = new DeserializerUtilities().getContext("customInterface");
+    assertThat(
+        context.getMethod("getPublicElement").getDeclaration().getReturnType().getSimpleName(),
+        is(equalTo("GetPublicElementElement")));
+
+    context = new DeserializerUtilities().getContext("customImplementation");
+    assertThat(
+        context.getMethod("getPublicElement").getDeclaration().getReturnType().getSimpleName(),
+        is(equalTo("GetPublicElementElement")));
+
+    assertThat(
+        context.getElement("privateElement").getType().getSimpleName(),
+        is(equalTo("PrivateElementElement")));
   }
 }

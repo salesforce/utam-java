@@ -1,0 +1,31 @@
+{
+  "implements": "utam-test/pageObjects/customInterface",
+  "methods": [
+    {
+      "name": "customMethod",
+      "compose": [
+        {
+          "element": "privateElement",
+          "apply": "click"
+        }
+      ]
+    }
+  ],
+  "elements": [
+    {
+      "name": "privateElement",
+      "type": ["clickable"],
+      "selector": {
+        "css": ".clickablePrivate"
+      }
+    },
+    {
+      "name": "publicElement",
+      "type": ["clickable"],
+      "public": true,
+      "selector": {
+        "css": ".clickablePrivate"
+      }
+    }
+  ]
+}
