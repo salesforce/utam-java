@@ -95,12 +95,13 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
 
   /**
    * Read the package mapping file, and translate the properties therein into an in-memory map
+   * public because used in downstream projects
    *
    * @param packageMapFile name of the file
    * @return configured packages for scanner
    * @throws IOException if packages config is missing
    */
-  static ScannerConfig getScannerConfig(File packageMapFile) throws IOException {
+  public static ScannerConfig getScannerConfig(File packageMapFile) throws IOException {
     FileInputStream packageInput = new FileInputStream(packageMapFile.toString());
     Properties packageProperties = new Properties();
     packageProperties.load(packageInput);
@@ -112,12 +113,13 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
 
   /**
    * read profiles config and translate into list of ProfileConfigurations
+   * public because used in downstream projects
    *
    * @param profileDefinitionsFile profiles configuration file
    * @return list of configured profiles
    * @throws IOException if properties file does not exist
    */
-  static List<ProfileConfiguration> getConfiguredProfiles(File profileDefinitionsFile)
+  public static List<ProfileConfiguration> getConfiguredProfiles(File profileDefinitionsFile)
       throws IOException {
     if (profileDefinitionsFile == null) {
       return new ArrayList<>();
