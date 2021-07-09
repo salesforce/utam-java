@@ -8,9 +8,12 @@
 package utam.core.selenium.appium;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static utam.core.selenium.appium.MobileDriverUtils.PLATFORM_PROFILE_NAME;
+import static utam.core.selenium.appium.MobileDriverUtils.getActivePlatformProfile;
 import static utam.core.selenium.appium.MobilePlatformType.ANDROID;
 import static utam.core.selenium.appium.MobilePlatformType.IOS;
 import static utam.core.selenium.appium.MobilePlatformType.WEB;
@@ -23,6 +26,7 @@ import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.annotations.Test;
+import utam.core.framework.context.Profile;
 
 /**
  * @author elizaveta.ivanova
@@ -31,7 +35,7 @@ import org.testng.annotations.Test;
 public class MobilePlatformTypeTests {
 
   @Test
-  public void testGetActivePlatformProfile() {
+  public void testGetActivePlatform() {
     assertThat(fromDriver(mock(WebDriver.class)), is(WEB));
     assertThat(fromDriver(mock(AndroidDriver.class)), is(ANDROID));
     assertThat(fromDriver(mock(IOSDriver.class)), is(IOS));
@@ -47,5 +51,12 @@ public class MobilePlatformTypeTests {
     capabilities.setPlatform(Platform.WINDOWS);
     when(driver.getCapabilities()).thenReturn(capabilities);
     assertThat(fromDriver(driver), is(WEB));
+  }
+
+  @Test
+  public void testGetActivePlatformProfile() {
+    Profile profile = getActivePlatformProfile(mock(WebDriver.class));
+    assertThat(profile.getName(), is(equalTo(PLATFORM_PROFILE_NAME)));
+    assertThat(profile.getValue(), is(equalTo("web")));
   }
 }

@@ -111,15 +111,16 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
   }
 
   /**
-   * scan files recursively to find JSON files with Page Objects
+   * scan files recursively to find JSON files with Page Objects,
+   * public because used in downstream projects
    *
    * @author elizaveta.ivanova
    */
-  static class RecursiveScanner {
+  public static class RecursiveScanner {
 
     private final String rootFolder;
 
-    RecursiveScanner(String rootFolder) {
+    public RecursiveScanner(String rootFolder) {
       this.rootFolder = rootFolder;
     }
 
@@ -142,15 +143,16 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
   }
 
   /**
-   * unlike regular scanner, accepts list of files instead traversing
+   * unlike regular scanner, accepts list of files instead traversing,
+   * public because used in downstream projects
    *
    * @author elizaveta.ivanova
    */
-  static class FilesScanner extends RecursiveScanner {
+  public static class FilesScanner extends RecursiveScanner {
 
     final List<File> inputFiles;
 
-    FilesScanner(List<File> inputFiles) {
+    public FilesScanner(List<File> inputFiles) {
       super(null);
       this.inputFiles = inputFiles;
       if (inputFiles == null) {
@@ -170,20 +172,20 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
 
   /**
    * configuration for files traversal that includes packages mapping and file mask to identify page
-   * objects
+   * objects, public because used in downstream projects
    *
    * @author elizaveta.ivanova
    */
-  static class ScannerConfig {
+  public static class ScannerConfig {
 
     private final Map<String, String> packagesMapping = new HashMap<>();
 
-    ScannerConfig(String pageObjectFileMask, Map<String, String> packagesMapping) {
+    public ScannerConfig(String pageObjectFileMask, Map<String, String> packagesMapping) {
       packagesMapping.forEach((key, value) -> this.packagesMapping
           .put(key, value + File.separator + pageObjectFileMask));
     }
 
-    ScannerConfig(Map<String, String> packagesMapping) {
+    public ScannerConfig(Map<String, String> packagesMapping) {
       this(DEFAULT_JSON_FILE_MASK_REGEX, packagesMapping);
     }
 

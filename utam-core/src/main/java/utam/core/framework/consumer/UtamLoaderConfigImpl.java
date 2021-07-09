@@ -44,7 +44,6 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
 
   public UtamLoaderConfigImpl(DriverTimeouts timeouts, String configFile) {
     this.timeouts = timeouts;
-    // if config with given name does not exist
     JsonBasedLoader config = new JsonBasedLoader(configFile);
     this.pageObjectModules = config.getModules();
     for (Profile profile : config.getConfiguredProfiles()) {

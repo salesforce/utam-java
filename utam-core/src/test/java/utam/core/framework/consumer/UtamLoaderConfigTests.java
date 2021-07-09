@@ -8,8 +8,12 @@
 package utam.core.framework.consumer;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anEmptyMap;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.assertThrows;
@@ -125,5 +129,15 @@ public class UtamLoaderConfigTests {
     config.setConfiguredProfile(null, testProfile);
     config.setProfile(testProfile);
     assertThat(config.getConfiguredProfiles().size(), is(equalTo(2)));
+  }
+
+  @Test
+  public void testNullConfig() {
+    UtamLoaderConfigImpl config = new UtamLoaderConfigImpl(DriverTimeouts.DEFAULT, null);
+    assertThat(config.getConfiguredProfiles().keySet(), hasSize(1));
+    assertThat(config.getConfiguredProfiles().keySet().iterator().next(),
+        is(equalTo(DEFAULT_PROFILE.getConfigName(null))));
+    assertThat(config.getModules(), hasSize(1));
+    assertThat(config.getModules().get(0), is(nullValue()));
   }
 }
