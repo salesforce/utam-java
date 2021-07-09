@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Actionable;
@@ -27,6 +30,7 @@ import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.consumer.ContainerElement;
+import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -66,6 +70,18 @@ public final class TypeUtilities {
   };
   public static final TypeProvider ELEMENT_FIELD = new FromClass(ElementLocation.class);
 
+  static final String CONTAINER_ELEMENT_TYPE = "container";
+  public static final String ERR_TYPE_INVALID_VALUE_TYPE =
+      "%s '%s': type must be %s, a Page Object type reference, or an array of basic element interfaces";
+  public static final String ERR_TYPE_PROPERTY_INVALID_STRING_VALUE =
+      "element '%s': invalid string value '%s'; type property string values must be either 'container' or a Page Object type reference.";
+  public static final String ERR_RETURNS_PROPERTY_INVALID_STRING_VALUE =
+      "method '%s': invalid string value '%s'; returns property string values must be either a primitive type or a Page Object type reference.";
+  public static final String ERR_TYPE_INVALID_ARRAY_TYPES =
+      "%s '%s': type array must contain only string values";
+  public static final String ERR_TYPE_INVALID_ARRAY_VALUES =
+      "%s '%s': type array contains invalid values; valid values are %s";
+
   static String getUnmatchedParametersErr(
       List<TypeProvider> expectedTypes, List<MethodParameter> providedParameters) {
     return String.format(
@@ -93,6 +109,52 @@ public final class TypeUtilities {
     return true;
   }
 
+  public static String[] processTypeNode(
+      String name, PropertyType propertyType, JsonNode typeNode) {
+    if (typeNode == null || typeNode.isNull()) {
+      return new String[]{};
+    }
+    if (typeNode.isTextual()) {
+      String value = typeNode.textValue();
+      if (propertyType == PropertyType.TYPE &&
+          !CONTAINER_ELEMENT_TYPE.equals(value) &&
+          !TranslationTypesConfigJava.isPageObjectType(value)) {
+        throw new UtamError(String.format(ERR_TYPE_PROPERTY_INVALID_STRING_VALUE, name, value));
+      }
+      if (propertyType == PropertyType.RETURNS &&
+          !PrimitiveType.isPrimitiveType(value) &&
+          !TranslationTypesConfigJava.isPageObjectType(value)) {
+        throw new UtamError(String.format(ERR_RETURNS_PROPERTY_INVALID_STRING_VALUE, name, value));
+      }
+      return new String[] {value};
+    }
+    String entityType = propertyType == PropertyType.TYPE ? "element" : "method";
+    if (typeNode.isArray()) {
+      List<String> values = new ArrayList<>();
+      for (JsonNode valueNode : typeNode) {
+        if (!valueNode.isTextual()) {
+          throw new UtamError(String.format(ERR_TYPE_INVALID_ARRAY_TYPES, entityType, name));
+        }
+        values.add(valueNode.textValue());
+      }
+      String[] res = values.toArray(String[]::new);
+      if (!TypeUtilities.Element.isBasicType(res)) {
+        throw new UtamError(String.format(ERR_TYPE_INVALID_ARRAY_VALUES, entityType, name,
+            TypeUtilities.BasicElementInterface.nameList()));
+      }
+      return res;
+    }
+    throw new UtamError(String.format(ERR_TYPE_INVALID_VALUE_TYPE,
+        entityType,
+        name,
+        propertyType == PropertyType.TYPE ? "'" + CONTAINER_ELEMENT_TYPE + "'" : "a primitive data type"));
+  }
+
+  public enum PropertyType {
+    TYPE,
+    RETURNS
+  }
+
   public enum BasicElementInterface implements TypeProvider {
     actionable(Actionable.class),
     clickable(Clickable.class),
@@ -114,7 +176,7 @@ public final class TypeUtilities {
       return false;
     }
 
-    public static BasicElementInterface asBasicType(String jsonString) {
+    static BasicElementInterface asBasicType(String jsonString) {
       if (jsonString == null) {
         return actionable;
       }
@@ -192,12 +254,21 @@ public final class TypeUtilities {
 
   public static class Element implements TypeProvider {
     private final String name;
-    private final String containingType;
     private final List<BasicElementInterface> basicInterfaces = new ArrayList<>();
 
-    Element(String name, String[] interfaceTypes, String containingType) {
-      this.name = name.substring(0, 1).toUpperCase() + name.substring(1) + "Element";
-      this.containingType = containingType;
+    Element(String name, String[] interfaceTypes, boolean requiresPrefix) {
+      // If the basic element being defined is in an implementation-only Page Object,
+      // that is, one that has an "implements" property defined, and the element is
+      // marked as public, then there must be a method defined in the interface-only
+      // Page Object that matches the name of the exposed element. Assuming the method
+      // is named "getFoo," that method will have a generated return type of interface
+      // "GetFooElement", and the implementation Page Object must have an implementation
+      // for the element that will match that interface name. Note carefully that this
+      // is distinct from the case where the element is normally exposed in a Page Object
+      // using the "public" property in the JSON, in which case, the "Get" prefix is
+      // omitted.
+      final String prefix = requiresPrefix ? "Get" : "";
+      this.name = prefix + name.substring(0, 1).toUpperCase() + name.substring(1) + "Element";
       for(String interfaceType : interfaceTypes) {
         if (BasicElementInterface.isBasicType(interfaceType)) {
           basicInterfaces.add(BasicElementInterface.asBasicType(interfaceType));
@@ -217,12 +288,14 @@ public final class TypeUtilities {
       return true;
     }
 
-    public static Element asBasicType(String name, String[] interfaceTypes) {
+    public static Element asBasicType(
+        String name, String[] interfaceTypes, boolean isPublicImplOnly) {
       if (interfaceTypes == null || interfaceTypes.length == 0) {
-        return new Element(name, new String[] { BasicElement.class.getSimpleName() }, "");
+        return new Element(
+            name, new String[] { BasicElement.class.getSimpleName() }, isPublicImplOnly);
       }
       if (isBasicType(interfaceTypes)) {
-        return new Element(name, interfaceTypes, "");
+        return new Element(name, interfaceTypes, isPublicImplOnly);
       }
       return null;
     }
@@ -238,8 +311,7 @@ public final class TypeUtilities {
 
     @Override
     public String getFullName() {
-      String separator = "".equals(containingType) ? "" : ".";
-      return containingType + separator + name;
+      return name;
     }
 
     @Override
@@ -249,7 +321,7 @@ public final class TypeUtilities {
 
     @Override
     public String getPackageName() {
-      return containingType;
+      return "";
     }
 
     @Override

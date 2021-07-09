@@ -166,7 +166,7 @@ public final class JsonDeserializer {
     @Override
     public Collection<TypeProvider> getNestedInterfaces() {
       return context.getMethods().stream()
-          .filter(method -> method.isElementMethod())
+          .filter(method -> method.isElementMethod() && method.isPublic())
           .map(method -> method.getDeclaration().getReturnType())
           .map(returnType -> {
             if (returnType instanceof TypeUtilities.ListOf) {
@@ -261,6 +261,17 @@ public final class JsonDeserializer {
     @Override
     public String getComments() {
       return utamPageObject.comments;
+    }
+
+    @Override
+    public List<TypeProvider> getDeclaredElementTypes(boolean isPublicElements) {
+      return getMethods().stream()
+          .filter(method -> method.isElementMethod() && method.isPublic() == isPublicElements)
+          .map(method -> method.getDeclaration().getReturnType())
+          .map(returnType -> returnType instanceof TypeUtilities.ListOf ?
+              ((TypeUtilities.ListOf)returnType).getElementType() :
+              returnType)
+          .collect(Collectors.toList());
     }
   }
 }

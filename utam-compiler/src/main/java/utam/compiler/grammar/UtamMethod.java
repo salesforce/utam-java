@@ -13,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MethodContext;
@@ -54,7 +56,7 @@ class UtamMethod {
   private final String comments = "";
   UtamMethodAction[] compose;
   UtamArgument[] args;
-  String returnStr;
+  String[] returnType;
   Boolean isReturnList;
   UtamMethodChainLink[] chain;
 
@@ -64,29 +66,14 @@ class UtamMethod {
       @JsonProperty(value = "compose") UtamMethodAction[] compose,
       @JsonProperty(value = "chain") UtamMethodChainLink[] chain,
       @JsonProperty(value = "args") UtamArgument[] args,
-      @JsonProperty(value = "return", defaultValue = "void") String returnStr,
+      @JsonProperty(value = "return", defaultValue = "void") JsonNode returnType,
       @JsonProperty(value = "returnAll") Boolean isReturnList) {
     this.name = name;
     this.compose = compose;
     this.args = args;
-    this.returnStr = returnStr;
+    this.returnType = TypeUtilities.processTypeNode(name, TypeUtilities.PropertyType.RETURNS, returnType);
     this.isReturnList = isReturnList;
     this.chain = chain;
-  }
-
-  // used in tests - shortcut for compose
-  UtamMethod(String name, UtamMethodAction[] compose) {
-    this(name, compose, null, null, null, null);
-  }
-
-  // used in tests - shortcut for abstract
-  UtamMethod(String name, String returns, UtamArgument[] args) {
-    this(name, null, null, args, returns, null);
-  }
-
-  // used in tests - shortcut for chain
-  UtamMethod(String name, String returns, UtamMethodChainLink[] chain) {
-    this(name, null, chain, null, returns, null);
   }
 
   PageObjectMethod getAbstractMethod(TranslationContext context) {
@@ -119,14 +106,16 @@ class UtamMethod {
 
   private TypeProvider getReturnType(TranslationContext context, TypeProvider defaultReturn) {
     TypeProvider type;
-    if (returnStr == null) {
+    if (returnType == null || returnType.length == 0) {
       type = defaultReturn;
-    } else if (PrimitiveType.isPrimitiveType(returnStr)) {
-      type = PrimitiveType.fromString(returnStr);
-    } else if (TypeUtilities.BasicElementInterface.isBasicType(returnStr)) {
-      type = TypeUtilities.BasicElementInterface.asBasicType(returnStr);
+    } else if (PrimitiveType.isPrimitiveType(returnType[0])) {
+      type = PrimitiveType.fromString(returnType[0]);
+    } else if (TypeUtilities.Element.isBasicType(returnType)) {
+      // If the return type is a basic element, it must be in a public method defined
+      // in an interface.
+      type = TypeUtilities.Element.asBasicType(name, returnType, false);
     } else {
-      type = context.getType(returnStr);
+      type = context.getType(returnType[0]);
     }
     return type;
   }
@@ -135,7 +124,7 @@ class UtamMethod {
     if (args != null) {
       throw new UtamError(String.format(ERR_ARGS_NOT_ALLOWED, name));
     }
-    if (returnStr != null) {
+    if (returnType.length != 0) {
       throw new UtamError(String.format(ERR_METHOD_RETURN_TYPE_REDUNDANT, name));
     }
     if (isReturnList != null) {

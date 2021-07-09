@@ -13,6 +13,7 @@ import utam.core.declarative.representation.*;
 import utam.core.framework.element.BasePageElement;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -94,22 +95,38 @@ public final class ClassSerializer {
     out.add(NEW_LINE);
     source.getMethods().stream()
             // if method is private and never used, do not not declare to avoid test coverage alert
-            .filter(method -> isUsedMethod(method))
+            .filter(this::isUsedMethod)
             .flatMap(method -> getMethodDeclaration(method).stream()).forEach(out::add);
     out.add(NEW_LINE);
-    addElementClassDeclarations(out);
+    addPublicElementClassDeclarations(out);
+    addPrivateElementClassDeclarations(out);
     out.add(NEW_LINE);
     out.add("}");
     return applyJavaFormatter(out);
   }
 
-  private void addElementClassDeclarations(List<String> out) {
-    source.getMethods().stream()
-        .filter(method -> isUsedMethod(method) && method.isElementMethod())
-        .map(method -> method.getDeclaration().getReturnType())
-        .map(returnType -> returnType instanceof TypeUtilities.ListOf ?
-            ((TypeUtilities.ListOf)returnType).getElementType() :
-            returnType)
+  private void addPublicElementClassDeclarations(List<String> out) {
+    source.getDeclaredElementTypes(true).stream()
+        .map(returnType -> String.format(
+            "public static class %s extends %s implements %s {}",
+            returnType.getSimpleName() + "Impl",
+            BasePageElement.class.getSimpleName(),
+            returnType.getSimpleName()))
+        .forEach(out::add);
+  }
+
+  private void addPrivateElementClassDeclarations(List<String> out) {
+    List<TypeProvider> privateElementTypes = source.getDeclaredElementTypes(false);
+    privateElementTypes.stream()
+        .map(returnType -> String.format(
+            "interface %s extends %s {}",
+            returnType.getSimpleName(),
+            ((TypeUtilities.Element)returnType).getBasicInterfaces().stream()
+                .map(TypeProvider::getSimpleName)
+                .collect(Collectors.joining(", "))))
+        .forEach(out::add);
+
+    privateElementTypes.stream()
         .map(returnType -> String.format(
             "public static class %s extends %s implements %s {}",
             returnType.getSimpleName() + "Impl",
@@ -139,6 +156,11 @@ public final class ClassSerializer {
     Set<String> res = new HashSet<>();
     res.add(getImportStatement(source.getBaseClassType()));
     res.add(getImportStatement(source.getImplementedType().getInterfaceType()));
+    source.getDeclaredElementTypes(false).stream()
+        .map(returnType -> ((TypeUtilities.Element)returnType).getBasicInterfaces())
+        .flatMap(Collection::stream)
+        .collect(Collectors.toSet())
+        .forEach(type -> res.add(getImportStatement(type)));
     annotations.stream()
         .flatMap(a -> a.getImportTypes().stream())
         .forEach(a -> res.add(getImportStatement(a)));

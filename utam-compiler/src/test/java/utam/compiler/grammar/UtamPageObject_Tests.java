@@ -152,7 +152,9 @@ public class UtamPageObject_Tests {
           new UtamMethodChainLink("first", false, TEST_URI),
           new UtamMethodChainLink("customName", false, "utam-test/pageObjects/test/SecondWrapper")
         };
-    pageObject.methods = new UtamMethod[] {new UtamMethod("testMethod", null, chainLinks)};
+    pageObject.methods = new UtamMethod[] {
+        TestUtilities.UtamEntityCreator.createUtamMethod("testMethod", null, chainLinks)
+    };
     pageObject.elements = new UtamElement[] {
         UtamEntityCreator.createUtamElement(
             "first", TEST_URI, new UtamSelector("css"))
@@ -187,8 +189,9 @@ public class UtamPageObject_Tests {
     TranslationContext context = getTestTranslationContext();
     UtamPageObject pageObject = new UtamPageObject();
     pageObject.isAbstract = true;
-    pageObject.methods =
-        new UtamMethod[] {new UtamMethod("testMethod", null, (UtamArgument[]) null)};
+    pageObject.methods = new UtamMethod[] {
+        TestUtilities.UtamEntityCreator.createUtamMethod("testMethod", (String)null, (UtamArgument[]) null)
+    };
     MethodInfo methodInfo = new MethodInfo("testMethod", "void");
 
     pageObject.compile(context);

@@ -10,12 +10,15 @@ package utam.compiler.grammar;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
 import static utam.compiler.grammar.UtamMethod.ERR_METHOD_SHOULD_BE_ABSTRACT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
 
 /**
@@ -30,7 +33,8 @@ public class UtamMethod_AbstractTests {
   @Test
   public void testGetAbstractMethod() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, "string", (UtamArgument[]) null);
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, "string", (UtamArgument[]) null);
     PageObjectValidationTestHelper.MethodInfo info =
         new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "String");
     PageObjectValidationTestHelper.validateMethod(method.getAbstractMethod(context), info);
@@ -39,7 +43,8 @@ public class UtamMethod_AbstractTests {
   @Test
   public void testGetAbstractListMethod() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, "string", (UtamArgument[]) null);
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, "string", (UtamArgument[]) null);
     method.isReturnList = true;
     PageObjectValidationTestHelper.MethodInfo info =
             new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "List<String>");
@@ -50,7 +55,8 @@ public class UtamMethod_AbstractTests {
   @Test
   public void testGetAbstractMethodWithNullReturnType() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, null, (UtamArgument[]) null);
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, (String)null, (UtamArgument[]) null);
     PageObjectValidationTestHelper.MethodInfo info =
         new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "void");
     PageObjectValidationTestHelper.validateMethod(method.getAbstractMethod(context), info);
@@ -60,9 +66,10 @@ public class UtamMethod_AbstractTests {
   @Test
   public void testGetAbstractMethodWithElementReturnType() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, "clickable", (UtamArgument[]) null);
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, new String[] {"clickable"}, (UtamArgument[]) null);
     PageObjectValidationTestHelper.MethodInfo info =
-        new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "Clickable");
+        new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "TestMethodElement");
     PageObjectValidationTestHelper.validateMethod(method.getAbstractMethod(context), info);
   }
 
@@ -70,7 +77,8 @@ public class UtamMethod_AbstractTests {
   @Test
   public void testGetAbstractMethodWithComponentReturnType() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, "utam-test/pageObjects/test/componentType", (UtamArgument[]) null);
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, "utam-test/pageObjects/test/componentType", (UtamArgument[]) null);
     PageObjectValidationTestHelper.MethodInfo info =
         new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "ComponentType");
     PageObjectValidationTestHelper.validateMethod(method.getAbstractMethod(context), info);
@@ -83,7 +91,8 @@ public class UtamMethod_AbstractTests {
   @Test
   public void testGetAbstractMethodWithComposeThrows() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, new UtamMethodAction[] {});
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, new UtamMethodAction[] {});
     UtamError e = expectThrows(UtamError.class, () -> method.getAbstractMethod(context));
     assertThat(
         e.getMessage(), containsString(String.format(ERR_METHOD_SHOULD_BE_ABSTRACT, METHOD_NAME)));
@@ -95,7 +104,8 @@ public class UtamMethod_AbstractTests {
   @Test
   public void testGetAbstractMethodWithChainThrows() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, null, (UtamArgument[]) null);
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, (String)null, (UtamArgument[]) null);
     method.chain = new UtamMethodChainLink[]{};
     UtamError e = expectThrows(UtamError.class, () -> method.getAbstractMethod(context));
     assertThat(
@@ -110,7 +120,7 @@ public class UtamMethod_AbstractTests {
     PageObjectValidationTestHelper.validateMethod(
         context.getMethod("returnsCustomType"), methodInfo1);
     // return actionable
-    MethodInfo methodInfo2 = new MethodInfo("returnsActionable", "Actionable");
+    MethodInfo methodInfo2 = new MethodInfo("returnsActionable", "ReturnsActionableElement");
     PageObjectValidationTestHelper.validateMethod(
         context.getMethod("returnsActionable"), methodInfo2);
     // return list of strings
@@ -120,5 +130,22 @@ public class UtamMethod_AbstractTests {
     // return void
     MethodInfo methodInfo4 = new MethodInfo("returnsVoid", "void");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("returnsVoid"), methodInfo4);
+  }
+
+  @Test
+  public void testCustomBasicElementTypes() {
+    TranslationContext context = new DeserializerUtilities().getContext("customInterface");
+    assertThat(
+        context.getMethod("getPublicElement").getDeclaration().getReturnType().getSimpleName(),
+        is(equalTo("GetPublicElementElement")));
+
+    context = new DeserializerUtilities().getContext("customImplementation");
+    assertThat(
+        context.getMethod("getPublicElement").getDeclaration().getReturnType().getSimpleName(),
+        is(equalTo("GetPublicElementElement")));
+
+    assertThat(
+        context.getElement("privateElement").getType().getSimpleName(),
+        is(equalTo("PrivateElementElement")));
   }
 }

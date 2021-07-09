@@ -7,7 +7,7 @@
     },
     {
       "name" : "returnsActionable",
-      "return": "actionable"
+      "return": ["actionable"]
     },
     {
       "name" : "returnsListString",

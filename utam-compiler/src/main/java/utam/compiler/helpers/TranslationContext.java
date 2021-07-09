@@ -57,6 +57,7 @@ public final class TranslationContext {
   private final TranslatorConfig translatorConfiguration;
   private final Set<String> usedPrivateMethods = new HashSet<>();
   private boolean isAbstractPageObject = false;
+  private boolean isImplementationPageObject = false;
   private final Map<String, ElementUnitTestHelper> testableElements = new HashMap<>();
 
   public TranslationContext(String pageObjectURI, TranslatorConfig translatorConfiguration) {
@@ -93,6 +94,14 @@ public final class TranslationContext {
 
   public boolean isAbstractPageObject() {
     return isAbstractPageObject;
+  }
+
+  public boolean isImplementationPageObject() {
+    return isImplementationPageObject;
+  }
+
+  public void setIsImplementation() {
+    this.isImplementationPageObject = true;
   }
 
   public TypeProvider getInterfaceType(String implementsProperty) {

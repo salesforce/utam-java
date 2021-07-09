@@ -55,7 +55,7 @@ public class UtamMethod_ChainTests {
     };
     object.compile(context);
     UtamMethod method =
-        new UtamMethod(
+        TestUtilities.UtamEntityCreator.createUtamMethod(
             METHOD_NAME,
             null,
             new UtamMethodChainLink[] {
@@ -81,7 +81,7 @@ public class UtamMethod_ChainTests {
     };
     object.compile(context);
     UtamMethod method =
-        new UtamMethod(
+        TestUtilities.UtamEntityCreator.createUtamMethod(
             METHOD_NAME,
             null,
             new UtamMethodChainLink[] {
@@ -112,7 +112,7 @@ public class UtamMethod_ChainTests {
     };
     object.compile(context);
     UtamMethod method =
-        new UtamMethod(
+        TestUtilities.UtamEntityCreator.createUtamMethod(
             METHOD_NAME,
             null,
             new UtamMethodChainLink[] {
@@ -133,8 +133,9 @@ public class UtamMethod_ChainTests {
   @Test
   public void testGetChainMethodWithReturnTypeThrows() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, null, new UtamMethodChainLink[] {});
-    method.returnStr = "invalid";
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, null, new UtamMethodChainLink[] {});
+    method.returnType = new String[] {"invalid"};
     UtamError e = expectThrows(UtamError.class, () -> method.getChainMethod(context));
     assertThat(
         e.getMessage(),
@@ -145,7 +146,8 @@ public class UtamMethod_ChainTests {
   @Test
   public void testGetChainMethodWithArgumentsThrows() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, null, new UtamMethodChainLink[] {});
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, null, new UtamMethodChainLink[] {});
     method.args = new UtamArgument[0];
     UtamError e = expectThrows(UtamError.class, () -> method.getChainMethod(context));
     assertThat(e.getMessage(), containsString(getErr(ERR_ARGS_NOT_ALLOWED)));
@@ -155,7 +157,8 @@ public class UtamMethod_ChainTests {
   @Test
   public void testGetChainMethodWithEmptyStatementListThrows() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, null, new UtamMethodChainLink[] {});
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, null, new UtamMethodChainLink[] {});
     UtamError e = expectThrows(UtamError.class, () -> method.getChainMethod(context));
     assertThat(e.getMessage(), containsString(getErr(ERR_METHOD_EMPTY_STATEMENTS)));
   }
@@ -167,7 +170,8 @@ public class UtamMethod_ChainTests {
   @Test
   public void testGetMethodForUnknownMethodTypeThrows() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, null);
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, null);
     UtamError e = expectThrows(UtamError.class, () -> method.getMethod(context));
     assertThat(e.getMessage(), containsString(getErr(ERR_METHOD_UNKNOWN_TYPE)));
   }
@@ -175,7 +179,8 @@ public class UtamMethod_ChainTests {
   @Test
   public void testChainWithListThrows() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, null, new UtamMethodChainLink[] {});
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod
+        (METHOD_NAME, null, new UtamMethodChainLink[] {});
     method.isReturnList = true;
     UtamError e = expectThrows(UtamError.class, () -> method.getMethod(context));
     assertThat(e.getMessage(), containsString(getErr(ERR_METHOD_RETURN_ALL_REDUNDANT)));
@@ -184,7 +189,8 @@ public class UtamMethod_ChainTests {
   @Test
   public void testChainRedundantCompose() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, null, new UtamMethodChainLink[] {});
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, null, new UtamMethodChainLink[] {});
     method.compose = new UtamMethodAction[0];
     UtamError e = expectThrows(UtamError.class, () -> method.getMethod(context));
     assertThat(e.getMessage(), containsString(getErr(ERR_METHOD_REDUNDANT_TYPE)));

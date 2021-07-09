@@ -9,6 +9,7 @@ package utam.compiler.grammar;
 
 import utam.compiler.helpers.ClickableActionType;
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.ComposeMethod;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.compiler.representation.PageObjectValidationTestHelper;
@@ -48,7 +49,7 @@ public class UtamMethod_ComposeTests {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     setClickableElementContext(context); // creates element in context
     UtamMethod method =
-        new UtamMethod(
+        TestUtilities.UtamEntityCreator.createUtamMethod(
             METHOD_NAME,
             new UtamMethodAction[] {new UtamMethodAction(ELEMENT_NAME, "click")});
     MethodInfo methodInfo = new MethodInfo(METHOD_NAME, "void");
@@ -62,10 +63,10 @@ public class UtamMethod_ComposeTests {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     setClickableElementContext(context); // creates element in context
     UtamMethod method =
-        new UtamMethod(
+        TestUtilities.UtamEntityCreator.createUtamMethod(
             "testMethod",
             new UtamMethodAction[] {new UtamMethodAction("testElement", "click")});
-    method.returnStr = "unsupported type";
+    method.returnType = new String[] {"unsupported type"};
     assertThrows(UtamError.class, () -> method.getComposeMethod(context));
   }
 
@@ -73,7 +74,8 @@ public class UtamMethod_ComposeTests {
   @Test
   public void testGetComposeMethodWithEmptyStatementListThrows() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod("test", new UtamMethodAction[] {});
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        "test", new UtamMethodAction[] {});
 
     UtamError e = expectThrows(UtamError.class, () -> method.getComposeMethod(context));
     assertThat(e.getMessage(), containsString(String.format(ERR_METHOD_EMPTY_STATEMENTS, "test")));
@@ -86,7 +88,7 @@ public class UtamMethod_ComposeTests {
     // traverses
     setClickableElementContext(context);
     UtamMethod method =
-        new UtamMethod(
+        TestUtilities.UtamEntityCreator.createUtamMethod(
             "testMethod",
             new UtamMethodAction[] {new UtamMethodAction(ELEMENT_NAME, "click")});
     MethodInfo methodInfo = new MethodInfo("testMethod", "void");
@@ -111,7 +113,8 @@ public class UtamMethod_ComposeTests {
     UtamMethodAction action =
         new UtamMethodAction(
             ELEMENT_NAME, ClickableActionType.click.toString());
-    UtamMethod method = new UtamMethod(METHOD_NAME, new UtamMethodAction[] { action, action });
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, new UtamMethodAction[] { action, action });
     MethodInfo methodInfo = new MethodInfo(METHOD_NAME, "void");
     methodInfo.addParameter(
         new PageObjectValidationTestHelper.MethodParameterInfo("selectorParameter", "String"));
@@ -125,9 +128,47 @@ public class UtamMethod_ComposeTests {
   @Test
   public void testComposeRedundantChain() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = new UtamMethod(METHOD_NAME, new UtamMethodAction[] {});
+    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
+        METHOD_NAME, new UtamMethodAction[] {});
     method.chain = new UtamMethodChainLink[0];
     UtamError e = expectThrows(UtamError.class, () -> method.getMethod(context));
     assertThat(e.getMessage(), containsString(getErr(ERR_METHOD_REDUNDANT_TYPE)));
+  }
+
+  @Test
+  public void testMethodReturningBasicElementTypeAsStringThrows() {
+    UtamError e = expectThrows(
+        UtamError.class,
+        () -> TestUtilities.UtamEntityCreator.createUtamMethod(
+            METHOD_NAME, "clickable", new UtamArgument[] {}));
+    assertThat(
+        e.getMessage(),
+        containsString(String.format(
+            TypeUtilities.ERR_RETURNS_PROPERTY_INVALID_STRING_VALUE, METHOD_NAME, "clickable")));
+  }
+
+  @Test
+  public void testMethodReturningTypeAsStringWithInvalidValueThrows() {
+    UtamError e = expectThrows(
+        UtamError.class,
+        () -> TestUtilities.UtamEntityCreator.createUtamMethod(
+            METHOD_NAME, "invalid", new UtamArgument[] {}));
+    assertThat(
+        e.getMessage(),
+        containsString(String.format(
+            TypeUtilities.ERR_RETURNS_PROPERTY_INVALID_STRING_VALUE, METHOD_NAME, "invalid")));
+  }
+
+  @Test
+  public void testMethodReturningBasicElementTypeArrayWithInvalidValueThrows() {
+    UtamError e = expectThrows(
+        UtamError.class,
+        () -> TestUtilities.UtamEntityCreator.createUtamMethod(
+            METHOD_NAME, new String[] {"invalid"}, new UtamArgument[] {}));
+    assertThat(
+        e.getMessage(),
+        containsString(String.format(
+            TypeUtilities.ERR_TYPE_INVALID_ARRAY_VALUES, "method", METHOD_NAME,
+            TypeUtilities.BasicElementInterface.nameList())));
   }
 }

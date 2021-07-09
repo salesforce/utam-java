@@ -10,11 +10,7 @@ package utam.compiler.grammar;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.UtamMethod.ERR_METHOD_EMPTY_STATEMENTS;
 
@@ -66,7 +62,7 @@ public class UtamMethod_ComposeDeserializeTests {
     assertThat(method.compose, is(not(nullValue())));
     assertThat(method.isReturnList, is(nullValue()));
     assertThat(method.name, is(equalTo("composeMethod")));
-    assertThat(method.returnStr, is(nullValue()));
+    assertThat(method.returnType, is(arrayWithSize(0)));
   }
 
   /** Tests that a ComposeMethodNode can be created */
