@@ -9,6 +9,7 @@ package utam.compiler.grammar;
 
 import utam.compiler.helpers.ClickableActionType;
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.ComposeMethod;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.compiler.representation.PageObjectValidationTestHelper;
@@ -22,6 +23,7 @@ import static utam.compiler.grammar.UtamMethod.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.UtamSelector_Tests.getUtamCssSelector;
 
 /**
  * Provides tests for the UtamElementFilter class
@@ -132,5 +134,42 @@ public class UtamMethod_ComposeTests {
     method.chain = new UtamMethodChainLink[0];
     UtamError e = expectThrows(UtamError.class, () -> method.getMethod(context));
     assertThat(e.getMessage(), containsString(getErr(ERR_METHOD_REDUNDANT_TYPE)));
+  }
+
+  @Test
+  public void testMethodReturningBasicElementTypeAsStringThrows() {
+    UtamError e = expectThrows(
+        UtamError.class,
+        () -> TestUtilities.UtamEntityCreator.createUtamMethod(
+            METHOD_NAME, "clickable", new UtamArgument[] {}));
+    assertThat(
+        e.getMessage(),
+        containsString(String.format(
+            TypeUtilities.ERR_RETURNS_PROPERTY_INVALID_STRING_VALUE, METHOD_NAME, "clickable")));
+  }
+
+  @Test
+  public void testMethodReturningTypeAsStringWithInvalidValueThrows() {
+    UtamError e = expectThrows(
+        UtamError.class,
+        () -> TestUtilities.UtamEntityCreator.createUtamMethod(
+            METHOD_NAME, "invalid", new UtamArgument[] {}));
+    assertThat(
+        e.getMessage(),
+        containsString(String.format(
+            TypeUtilities.ERR_RETURNS_PROPERTY_INVALID_STRING_VALUE, METHOD_NAME, "invalid")));
+  }
+
+  @Test
+  public void testMethodReturningBasicElementTypeArrayWithInvalidValueThrows() {
+    UtamError e = expectThrows(
+        UtamError.class,
+        () -> TestUtilities.UtamEntityCreator.createUtamMethod(
+            METHOD_NAME, new String[] {"invalid"}, new UtamArgument[] {}));
+    assertThat(
+        e.getMessage(),
+        containsString(String.format(
+            TypeUtilities.ERR_TYPE_INVALID_ARRAY_VALUES, "method", METHOD_NAME,
+            TypeUtilities.BasicElementInterface.nameList())));
   }
 }

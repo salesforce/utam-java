@@ -489,6 +489,18 @@ public class UtamElement_BasicTests {
   }
 
   @Test
+  public void testElementTypeAsStringWithInvalidValueThrows() {
+    UtamError e = expectThrows(
+        UtamError.class,
+        () -> TestUtilities.UtamEntityCreator.createUtamElement(
+            ELEMENT_NAME, "invalid", getUtamCssSelector()));
+    assertThat(
+        e.getMessage(),
+        containsString(String.format(
+            TypeUtilities.ERR_TYPE_PROPERTY_INVALID_STRING_VALUE, ELEMENT_NAME, "invalid")));
+  }
+
+  @Test
   public void testBasicElementTypeArrayWithInvalidValueThrows() {
     UtamError e = expectThrows(
         UtamError.class,
