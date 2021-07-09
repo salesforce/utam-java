@@ -43,14 +43,4 @@ public class PlatformTypeTests {
         () -> PlatformType.fromString("illegal"));
     assertThat(e.getMessage(), containsString("Unknown platform type 'illegal'"));
   }
-
-  /**
-   * The getName method should return valid values for known types
-   */
-  @Test
-  public void testGetName() {
-    assertThat(PlatformType.NATIVE.getName(), is(equalTo("native")));
-    assertThat(PlatformType.WEB.getName(), is(equalTo("web")));
-    assertThat(PlatformType.NONE.getName(), is(equalTo("")));
-  }
 }

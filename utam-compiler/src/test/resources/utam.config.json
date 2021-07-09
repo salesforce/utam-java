@@ -1,0 +1,23 @@
+{
+  "module": "myModule",
+  "source" : {
+    "filesRoot" : "/src/test/resources/spec",
+    "filesMask": "(.*)\\.utam\\.json$",
+    "packages" : {
+      "utam-one" : ".*/one",
+      "utam-two" : ".*/two"
+    }
+  },
+  "target": {
+    "pageObjects": "/src/test/java/pageObjects",
+    "resources": "/src/test/resources",
+    "unitTests": "/src/test/java",
+    "unitTestsRunner" : "JUNIT"
+  },
+  "profiles" : [
+    {
+      "name" : "platform",
+      "values": ["web", "ios", "android"]
+    }
+  ]
+}

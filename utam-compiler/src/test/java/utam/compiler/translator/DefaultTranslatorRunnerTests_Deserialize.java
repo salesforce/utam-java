@@ -20,6 +20,7 @@ import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_PAGE_OB
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.translator.DefaultTranslatorRunnerTests_Profiles.getRunnerMock;
 
 /**
  * created by Jim for no longer existing class PageObjectsInventory <br>
@@ -33,7 +34,7 @@ public class DefaultTranslatorRunnerTests_Deserialize {
   public void testSetGeneratedObjects() {
     String json = "{  \"implements\": \"utam-test/pageObjects/test/testInterface\" }";
     PageObjectDeclaration declaration = TestUtilities.getPageObject(json);
-    DefaultTranslatorRunnerTests.Mock runner = new DefaultTranslatorRunnerTests.Mock();
+    DefaultTranslatorRunner runner = getRunnerMock();
     runner.setPageObject("initial", declaration);
   }
 
@@ -41,7 +42,7 @@ public class DefaultTranslatorRunnerTests_Deserialize {
   public void testGetGeneratedObjects() {
     String json = "{}";
     PageObjectDeclaration declaration = TestUtilities.getPageObject(json);
-    DefaultTranslatorRunnerTests.Mock runner = new DefaultTranslatorRunnerTests.Mock();
+    DefaultTranslatorRunner runner = getRunnerMock();
     runner.setPageObject("initial", declaration);
     assertThat(
         runner.getGeneratedPageObjectsNames(),
@@ -51,7 +52,7 @@ public class DefaultTranslatorRunnerTests_Deserialize {
   @Test
   public void testSetPageObject() {
     PageObjectDeclaration declaration = TestUtilities.getPageObject("{}");
-    DefaultTranslatorRunnerTests.Mock runner = new DefaultTranslatorRunnerTests.Mock();
+    DefaultTranslatorRunner runner = getRunnerMock();
     runner.setPageObject("initial", declaration);
     assertThat(runner.getGeneratedObject("initial"), is(sameInstance(declaration)));
   }
@@ -59,7 +60,7 @@ public class DefaultTranslatorRunnerTests_Deserialize {
   @Test
   public void testSetPageObjectWithDuplicateNameThrows() {
     PageObjectDeclaration declaration = TestUtilities.getPageObject("{}");
-    DefaultTranslatorRunnerTests.Mock runner = new DefaultTranslatorRunnerTests.Mock();
+    DefaultTranslatorRunner runner = getRunnerMock();
     runner.setPageObject("initial", declaration);
     UtamError e = expectThrows(UtamError.class, () -> runner.setPageObject("initial", declaration));
     assertThat(
@@ -70,7 +71,7 @@ public class DefaultTranslatorRunnerTests_Deserialize {
   public void testSetPageObjectWithInterface() {
     String json = "{  \"interface\": true  }";
     PageObjectDeclaration declaration = TestUtilities.getPageObject(json);
-    DefaultTranslatorRunnerTests.Mock runner = new DefaultTranslatorRunnerTests.Mock();
+    DefaultTranslatorRunner runner = getRunnerMock();
     runner.setPageObject("initial", declaration);
     assertThat(runner.getGeneratedObject("initial"), is(sameInstance(declaration)));
   }
@@ -79,7 +80,7 @@ public class DefaultTranslatorRunnerTests_Deserialize {
   public void testSetPageObjectWithInterfaceWithDuplicateTypeThrows() {
     String json = "{  \"interface\": true  }";
     PageObjectDeclaration declaration = TestUtilities.getPageObject(json);
-    DefaultTranslatorRunnerTests.Mock runner = new DefaultTranslatorRunnerTests.Mock();
+    DefaultTranslatorRunner runner = getRunnerMock();
     runner.setPageObject("initial", declaration);
     String type = declaration.getInterface().getInterfaceType().getFullName();
     UtamError e = expectThrows(UtamError.class, () -> runner.setPageObject(type, declaration));
@@ -90,7 +91,7 @@ public class DefaultTranslatorRunnerTests_Deserialize {
   public void testSetPageObjectWithImplementation() {
     String json = "{ \"implements\": \"utam-test/pageObjects/test/testInterface\"}";
     PageObjectDeclaration declaration = TestUtilities.getPageObject(json);
-    DefaultTranslatorRunnerTests.Mock runner = new DefaultTranslatorRunnerTests.Mock();
+    DefaultTranslatorRunner runner = getRunnerMock();
     runner.setPageObject("initial", declaration);
     assertThat(runner.getGeneratedObject("initial"), is(sameInstance(declaration)));
   }
@@ -105,7 +106,7 @@ public class DefaultTranslatorRunnerTests_Deserialize {
     PageObjectDeclaration implDeclaration = TestUtilities.getPageObject(implementationJson);
     String implementationTypeName =
         implDeclaration.getImplementation().getClassType().getFullName();
-    DefaultTranslatorRunnerTests.Mock runner = new DefaultTranslatorRunnerTests.Mock();
+    DefaultTranslatorRunner runner = getRunnerMock();
     runner.setPageObject(interfaceTypeName, interfaceDeclaration);
     runner.setPageObject(implementationTypeName, implDeclaration);
     assertThat(
@@ -119,7 +120,7 @@ public class DefaultTranslatorRunnerTests_Deserialize {
     PageObjectDeclaration declaration =
         TestUtilities.getPageObject("{\"implements\": \"utam-test/pageObjects/test/testInterface\"}");
     String interfaceTypeName = declaration.getInterface().getInterfaceType().getFullName();
-    DefaultTranslatorRunnerTests.Mock runner = new DefaultTranslatorRunnerTests.Mock();
+    DefaultTranslatorRunner runner = getRunnerMock();
     runner.setPageObject("initial", declaration);
     UtamError e =
         expectThrows(UtamError.class, () -> runner.setPageObject(interfaceTypeName, declaration));

@@ -1,7 +1,6 @@
 package utam.core.element;
 
 import utam.core.framework.base.UtamBase;
-import utam.core.declarative.representation.TypeProvider;
 
 /**
  * interaction methods for UI element

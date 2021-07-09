@@ -9,30 +9,35 @@ package utam.core.framework.context;
 
 import utam.core.framework.consumer.UtamError;
 
+/**
+ * string based profile
+ *
+ * @author elizaveta.ivanova
+ * @since 230
+ */
 public class StringValueProfile implements Profile {
-  
-  private static final String ERR_NAME_REQUIRED = 
+
+  private static final String ERR_NAME_REQUIRED =
       "profile name must not be null or the empty string";
-  private static final String ERR_VALUES_REQUIRED = 
+  private static final String ERR_VALUES_REQUIRED =
       "profile value must not be null or the empty string";
   private static final String PROFILE_CONFIG_PATTERN = "%s_%s_config";
-
-  // profile with default implementations for interfaces
+  // profile with default implementations for interfaces in case if modules are not set
   public static final Profile DEFAULT_PROFILE = new StringValueProfile("default", "impl");
 
   private final String name;
   private final String value;
 
-  public StringValueProfile(String name, String value) {
-    if (name == null || name.isEmpty()) {
+  public StringValueProfile(String profileName, String value) {
+    if (profileName == null || profileName.isEmpty()) {
       throw new UtamError(ERR_NAME_REQUIRED);
     }
-    
+
     if (value == null || value.isEmpty()) {
       throw new UtamError(ERR_VALUES_REQUIRED);
     }
-    
-    this.name = name;
+
+    this.name = profileName;
     this.value = value;
   }
 
@@ -47,20 +52,27 @@ public class StringValueProfile implements Profile {
   }
 
   @Override
+  public String getConfigName(String moduleName) {
+    if (moduleName == null || moduleName.isEmpty()) {
+      return getKey();
+    }
+    return moduleName + "_" + getKey();
+  }
+
+  @Override
   public int hashCode() {
-    return getConfigName().hashCode();
+    return getKey().hashCode();
+  }
+
+  private String getKey() {
+    return String.format(PROFILE_CONFIG_PATTERN, getName(), getValue());
   }
 
   @Override //without this can't use Profile as a key in map inside Runner
   public boolean equals(Object obj) {
-    if(obj instanceof StringValueProfile) {
-      return ((StringValueProfile) obj).getConfigName().equals(this.getConfigName());
+    if (obj instanceof StringValueProfile) {
+      return ((StringValueProfile) obj).getKey().equals(this.getKey());
     }
     return false;
-  }
-
-  @Override
-  public String getConfigName() {
-    return String.format(PROFILE_CONFIG_PATTERN, getName(), getValue());
   }
 }

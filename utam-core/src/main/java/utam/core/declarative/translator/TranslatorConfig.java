@@ -18,32 +18,11 @@ import java.util.Collection;
 public interface TranslatorConfig {
 
   /**
-   * set profile configuration for translator
-   *
-   * @param profileConfig configuration
-   */
-  void setConfiguredProfile(ProfileConfiguration profileConfig);
-
-  /**
    * get all configured profiles for translator
    *
    * @return collection of configured profiles
    */
   Collection<ProfileConfiguration> getConfiguredProfiles();
-
-  /**
-   * get profile configuration for JSON property name
-   * @param jsonKey JSON property name
-   * @return profile configuration
-   */
-  ProfileConfiguration getProfileConfiguration(String jsonKey);
-
-  /**
-   * get configured type for unit test generator
-   *
-   * @return type of the unit tests to generate
-   */
-  UnitTestRunner getUnitTestRunnerType();
 
   /**
    * get configured mapping for Page Object URIs to be translated to Java packages
@@ -53,18 +32,11 @@ public interface TranslatorConfig {
   TranslationTypesConfig getTranslationTypesConfig();
 
   /**
-   * set configured source with JSON files
-   *
-   * @param translatorSourceConfig translator source config (one of many)
-   */
-  void setSourceConfig(TranslatorSourceConfig translatorSourceConfig);
-
-  /**
    * there could be multiple sources of configured JSON files
    *
    * @return all configured sources
    */
-  Collection<TranslatorSourceConfig> getConfiguredSources();
+  TranslatorSourceConfig getConfiguredSource();
 
   /**
    * get configured target for generated files
@@ -72,4 +44,11 @@ public interface TranslatorConfig {
    * @return configured target
    */
   TranslatorTargetConfig getConfiguredTarget();
+
+  /**
+   * name of the module for all page objects from this source
+   *
+   * @return string with module name
+   */
+  String getModuleName();
 }

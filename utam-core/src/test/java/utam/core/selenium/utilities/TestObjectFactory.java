@@ -117,12 +117,11 @@ public class TestObjectFactory extends WebDriverSimulatorObjectFactory {
 
   @Override
   public WebElement createElement(String elementName) {
-    WebElement element = mock(
+    return mock(
         WebElement.class,
         withSettings()
             .name(elementName)
             .extraInterfaces(WrapsDriver.class, SearchContext.class));
-    return element;
   }
 
   @Override

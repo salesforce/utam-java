@@ -29,10 +29,15 @@ public interface TranslatorSourceConfig {
   Reader getDeclarationReader(String pageObjectURI) throws IOException;
 
   /**
-   * get all configured JSON source files with page objects <br>
-   * each returned string is Page Object URI like utam-global/pageObjects/global/Name
+   * get all configured JSON source files with page objects as string with Page Object URI ex.
+   * utam-global/pageObjects/global/Name
    *
    * @return collection with unique Page Objects URIs
    */
   Collection<String> getPageObjects();
+
+  /**
+   * traverse and scan input folder to find all files with declarative POs
+   */
+  void recursiveScan();
 }

@@ -7,8 +7,6 @@
  */
 package utam.core.selenium.appium;
 
-import static utam.core.selenium.appium.MobileDriverUtils.isIOSPlatform;
-
 import io.appium.java_client.AppiumDriver;
 import java.time.Duration;
 import java.util.Set;
@@ -41,14 +39,53 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
         anyMatch(handle -> handle.contains(WEBVIEW_CONTEXT_HANDLE_PREFIX));
   });
 
+  private final MobilePlatformType mobilePlatform;
+
   public MobileDriverAdapter(AppiumDriver driver) {
     super(driver);
+    this.mobilePlatform = MobilePlatformType.fromDriver(driver);
   }
 
-  static Expectations<AppiumDriver> switchToWebView(AppiumDriver driver, String title) {
+  static AppiumDriver getAppiumDriver(Driver driver) {
+    return ((MobileDriverAdapter) driver).getAppiumDriver();
+  }
+
+  final boolean isIOSPlatform() {
+    return mobilePlatform == MobilePlatformType.IOS;
+  }
+
+  Expectations<AppiumDriver> getSwitchToWebViewExpectations(String title) {
     return new ExpectationsImpl<>(
         "switch to web view",
-        element -> MobileDriverUtils.switchToWebView(driver, title));
+        element -> switchToWebView(title));
+  }
+
+  private AppiumDriver switchToWebView(String title) {
+    AppiumDriver appiumDriver = getAppiumDriver();
+    Set<String> contextHandles = appiumDriver.getContextHandles();
+    for (String contextHandle : contextHandles) {
+      if (!contextHandle.equals(NATIVE_CONTEXT_HANDLE)) {
+        AppiumDriver newDriver = (AppiumDriver) appiumDriver.context(contextHandle);
+        String newTitle = newDriver.getTitle();
+        if (!newTitle.isEmpty() && newTitle.equalsIgnoreCase(title)) {
+          return newDriver;
+        }
+      }
+    }
+    // For the Appium chromedriver limitation to handle multiple WebViews,
+    // If switch to context fail to find the target WebView, then switch to
+    // use window
+    if (mobilePlatform == MobilePlatformType.ANDROID) {
+      Set<String> windowHandles = appiumDriver.getWindowHandles();
+      for (String windowHandle : windowHandles) {
+        AppiumDriver newDriver = (AppiumDriver) appiumDriver.switchTo().window(windowHandle);
+        String currentTitle = newDriver.getTitle();
+        if (!currentTitle.isEmpty() && currentTitle.equalsIgnoreCase(title)) {
+          return newDriver;
+        }
+      }
+    }
+    return null;
   }
 
   @Override
@@ -65,7 +102,7 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
       return;
     }
     waitFor(timeout, pollingInterval, WEBVIEW_AVAILABILITY);
-    AppiumDriver newDriver = waitFor(timeout, pollingInterval, switchToWebView(getAppiumDriver(), title));
+    AppiumDriver newDriver = waitFor(timeout, pollingInterval, getSwitchToWebViewExpectations(title));
     resetDriver(newDriver);
   }
 
@@ -76,10 +113,6 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
 
   AppiumDriver getAppiumDriver() {
     return (AppiumDriver) getSeleniumDriver();
-  }
-
-  static AppiumDriver getAppiumDriver(Driver driver) {
-    return ((MobileDriverAdapter) driver).getAppiumDriver();
   }
 
   @Override
@@ -94,7 +127,7 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
 
   // to mock from tests
   public final WebElement getWebViewElement() {
-    if (isIOSPlatform(getAppiumDriver())) {
+    if (isIOSPlatform()) {
       return getAppiumDriver().findElement(By.className("XCUIElementTypeWebView"));
     }
     return getAppiumDriver().findElement(By.className("android.webkit.WebView"));

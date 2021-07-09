@@ -7,19 +7,6 @@
  */
 package utam.compiler.translator;
 
-import utam.core.framework.consumer.UtamError;
-import org.testng.annotations.Test;
-import utam.core.declarative.translator.TranslatorConfig;
-import utam.core.declarative.translator.TranslatorSourceConfig;
-
-import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Paths;
-import java.util.*;
-
-import static utam.compiler.translator.DefaultSourceConfiguration.*;
-import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_PAGE_OBJECT_NAME;
-import static utam.compiler.translator.TranslatorMockUtilities.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -28,6 +15,35 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.translator.DefaultSourceConfiguration.DEFAULT_JSON_FILE_MASK_REGEX;
+import static utam.compiler.translator.DefaultSourceConfiguration.ERR_DUPLICATE_PAGE_OBJECT;
+import static utam.compiler.translator.DefaultSourceConfiguration.ERR_IO_DURING_SCAN;
+import static utam.compiler.translator.DefaultSourceConfiguration.ERR_MISSING_SOURCE_PATH;
+import static utam.compiler.translator.DefaultSourceConfiguration.ScannerConfig;
+import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_PAGE_OBJECT_NAME;
+import static utam.compiler.translator.TranslatorMockUtilities.IMPL_ONLY_URI;
+import static utam.compiler.translator.TranslatorMockUtilities.INTERFACE_ONLY_URI;
+import static utam.compiler.translator.TranslatorMockUtilities.PAGE_OBJECT_SOURCE;
+import static utam.compiler.translator.TranslatorMockUtilities.PAGE_OBJECT_URI;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import org.hamcrest.CoreMatchers;
+import org.testng.annotations.Test;
+import utam.compiler.translator.DefaultSourceConfiguration.FilesScanner;
+import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
+import utam.core.declarative.translator.TranslatorConfig;
+import utam.core.declarative.translator.TranslatorSourceConfig;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * @author elizaveta.ivanova
@@ -66,9 +82,9 @@ public class DefaultSourceConfigurationTests {
 
   @Test
   public void testRunWithDuplicatePageObjectsThrows() {
-    TranslatorConfig configuration = new AbstractTranslatorConfigurationTests.Mock();
-    configuration.setSourceConfig(new DuplicatePageObjects());
-    DefaultTranslatorRunner translator = new DefaultTranslatorRunnerTests.Mock(configuration);
+    TranslatorConfig configuration = new DefaultTranslatorConfiguration(new DuplicatePageObjects(),
+        new DefaultTargetConfiguration());
+    DefaultTranslatorRunner translator = new DefaultTranslatorRunner(configuration);
     UtamError e = expectThrows(UtamError.class, translator::run);
     assertThat(
         e.getMessage(), containsString(String.format(DUPLICATE_PAGE_OBJECT_NAME, PAGE_OBJECT_URI)));
@@ -79,42 +95,73 @@ public class DefaultSourceConfigurationTests {
     final String PAGE_OBJECT = "error";
     UtamError e =
         expectThrows(
-            UtamError.class, () -> new DefaultSourceConfiguration() {}.getSourcePath(PAGE_OBJECT));
+            UtamError.class, () -> new DefaultSourceConfiguration() {
+            }.getPageObjectFileSourcePath(PAGE_OBJECT));
     assertThat(e.getMessage(), containsString(String.format(ERR_MISSING_SOURCE_PATH, PAGE_OBJECT)));
   }
 
   @Test
   public void testRecursiveScan() {
-    final DefaultSourceConfiguration sourceConfiguration =
-        new DefaultSourceConfiguration();
-    sourceConfiguration.preProcess(null);
-    sourceConfiguration.preProcess(new PageObjectInfo("utam-error", Paths.get("folder/test"), "test"));
-    sourceConfiguration.preProcess(new PageObjectInfo("utam-error", Paths.get("folder/file"), "file"));
-    sourceConfiguration.preProcess(new PageObjectInfo("utam-error", Paths.get("folder/file.json"), "file.json"));
+    ScannerConfig scannerConfig = new ScannerConfig(Collections.singletonMap("package", ".*/one"));
+    RecursiveScanner scanner = new RecursiveScanner(
+        System.getProperty("user.dir") + "/src/test/resources/spec");
+    DefaultSourceConfiguration config = new DefaultSourceConfiguration(scannerConfig, scanner);
+    config.recursiveScan();
+    assertThat(config.getPageObjectFileSourcePath("package/pageObjects/first"),
+        is(CoreMatchers.notNullValue()));
   }
 
   @Test
-  public void testScanWithDuplicateThrows() {
-    final DefaultSourceConfiguration sourceConfiguration = new DefaultSourceConfiguration();
-    sourceConfiguration.preProcess(new PageObjectInfo("utam-error", Paths.get("folder/file.utam.json"), "file"));
-    UtamError e = expectThrows(UtamError.class,
-            () -> sourceConfiguration.preProcess(new PageObjectInfo("utam-error", Paths.get("folder/file.utam.json"), "file")));
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_DUPLICATE_PAGE_OBJECT, "utam-error/pageObjects/file"))));
+  public void testRecursiveScanPreProcess() throws IOException {
+    ScannerConfig scannerConfig = new ScannerConfig(Collections.singletonMap("utam-one", ".*/one"));
+    RecursiveScanner scanner = new RecursiveScanner(null);
+    DefaultSourceConfiguration config = new DefaultSourceConfiguration(scannerConfig, scanner);
+    String pathString = "folder/one/test.utam.json";
+    Consumer<String> test = str -> config.preProcess("utam-one", Paths.get(str),
+        ".*/one/" + DEFAULT_JSON_FILE_MASK_REGEX);
+    test.accept(pathString);
+    String expectedURI = "utam-one/pageObjects/test";
+    assertThat(config.getPageObjects().iterator().next(), is(equalTo(expectedURI)));
+    assertThat(config.getPageObjectFileSourcePath(expectedURI), is(equalTo(pathString)));
+    // duplicate throws!
+    UtamError e = expectThrows(UtamError.class, () -> test.accept(pathString));
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_DUPLICATE_PAGE_OBJECT, expectedURI))));
   }
 
-  static class Mock implements TranslatorSourceConfig {
+  @Test
+  public void testRecursiveScanThrows() {
+    ScannerConfig scannerConfig = new ScannerConfig(new HashMap<>());
+    RecursiveScanner scanner = new RecursiveScanner(null);
+    DefaultSourceConfiguration config = new DefaultSourceConfiguration(scannerConfig, scanner);
+    UtamError e = expectThrows(UtamError.class,
+        () -> scanner.scan(config, "wrongPackage", "wrongMask"));
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_IO_DURING_SCAN, "null"))));
+  }
+
+  @Test
+  public void testFileScanThrows() {
+    UtamError e = expectThrows(UtamError.class,
+        () -> new FilesScanner(null));
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_IO_DURING_SCAN, "null"))));
+  }
+
+  @Test
+  public void testFileScanner() {
+    List<File> filesToScan = new ArrayList<>();
+    filesToScan.add(
+        new File(getClass().getClassLoader().getResource("spec/one/first.utam.json").getFile()));
+    FilesScanner filesScanner = new FilesScanner(filesToScan);
+    ScannerConfig scannerConfig = new ScannerConfig(Collections.singletonMap("package", ".*/one"));
+    DefaultSourceConfiguration configuration = new DefaultSourceConfiguration(
+        scannerConfig, filesScanner);
+    configuration.recursiveScan();
+    assertThat(configuration.getPageObjectFileSourcePath("package/pageObjects/first"),
+        is(CoreMatchers.notNullValue()));
+  }
+
+  static class Mock extends DefaultSourceConfiguration implements TranslatorSourceConfig {
 
     private final Map<String, String> pageObjectsJSONString = new HashMap<>();
-
-    DefaultTranslatorRunner getRunner() {
-      return new DefaultTranslatorRunnerTests.Mock(getConfig());
-    }
-
-    AbstractTranslatorConfiguration getConfig() {
-      DefaultTargetConfigurationTests.Mock configuration =
-          new DefaultTargetConfigurationTests.Mock();
-      return new AbstractTranslatorConfigurationTests.Mock(configuration, this);
-    }
 
     @Override
     public Reader getDeclarationReader(String pageObjectURI) {
@@ -186,6 +233,7 @@ public class DefaultSourceConfigurationTests {
     }
 
     @Override
-    public void close() {}
+    public void close() {
+    }
   }
 }

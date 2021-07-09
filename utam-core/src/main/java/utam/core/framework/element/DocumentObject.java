@@ -14,7 +14,6 @@ import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.driver.Expectations;
 import utam.core.element.ElementLocation;
-import utam.core.element.FindContext.Type;
 import utam.core.element.Locator;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.RootPageObject;

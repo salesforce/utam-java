@@ -14,13 +14,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import utam.core.framework.UtamLogger;
 import utam.core.framework.base.PageObject;
-import utam.core.framework.consumer.UtamError;
 
 /**
  * creates empty profile context to use for custom overrides <br> does not read from configs
@@ -31,38 +30,39 @@ import utam.core.framework.consumer.UtamError;
 public final class DefaultProfileContext implements ProfileContext {
 
   private static final String ERR_PROFILE_FILE = "can't read profile config from file '%s'";
+
   // map with configured beans
   final Map<Class<? extends PageObject>, String> beans = new HashMap<>();
   private final Profile profile;
+  private final String moduleName;
 
-  public DefaultProfileContext(Profile profile) {
+  public DefaultProfileContext(String moduleName, Profile profile) {
     this.profile = profile;
+    this.moduleName = moduleName;
     Properties properties = getBeansFromResource();
     properties.stringPropertyNames().forEach(type -> {
       String implClassName = properties.getProperty(type);
       // default config can have empty lines
       if (!implClassName.isEmpty()) {
-        try {
-          beans.put(getClassFromName(type), implClassName);
-        } catch (ClassNotFoundException e) {
-          throw new UtamError(String.format("error configuring bean %s = %s", type, implClassName),
-              e);
-        }
+        beans.put(getClassFromName(type), implClassName);
       }
     });
   }
 
   private Properties getBeansFromResource() {
     ClassLoader classLoader = getClass().getClassLoader();
-    String configName = profile.getConfigName() + ".properties";
+    String configName = profile.getConfigName(moduleName) + ".properties";
     Properties properties = new Properties();
     try {
-      Enumeration<URL> configs = classLoader.getResources(configName);
-      if (configs != null) {
-        for (URL url : Collections.list(configs)) {
+      List<URL> configs = Collections.list(classLoader.getResources(configName));
+      if (!configs.isEmpty()) {
+        UtamLogger.info(String.format("Reading Page Objects config file(s) %s", configName));
+        for (URL url : configs) {
           InputStream in = url.openStream();
           properties.load(in);
         }
+      } else {
+        UtamLogger.warning(String.format("Page Objects config file(s) %s not found", configName));
       }
     } catch (IOException e) {
       UtamLogger.warning(String.format(ERR_PROFILE_FILE, configName));
@@ -84,9 +84,6 @@ public final class DefaultProfileContext implements ProfileContext {
 
   @Override
   public <T extends PageObject> String getBeanName(Class<T> key) {
-    if (key == null || !beans.containsKey(key)) {
-      return null;
-    }
     return beans.get(key);
   }
 }

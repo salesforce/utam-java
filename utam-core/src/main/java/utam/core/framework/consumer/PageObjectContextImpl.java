@@ -7,13 +7,12 @@
  */
 package utam.core.framework.consumer;
 
-import utam.core.framework.base.BasePageObject;
-import utam.core.framework.base.PageObject;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
-import java.util.function.Function;
+import utam.core.framework.UtamCoreError;
+import utam.core.framework.base.BasePageObject;
+import utam.core.framework.base.PageObject;
 
 /**
  * context to build page object from interface class
@@ -23,10 +22,21 @@ import java.util.function.Function;
  */
 public class PageObjectContextImpl implements PageObjectContext {
 
-  private final Map<Class<? extends PageObject>, Class<? extends PageObject>> beansOverride;
+  public static final String ERR_GET_CLASS_BY_NAME = "can't find class with name %s";
+  static final String ERR_GET_INSTANCE_BY_NAME = "can't create instance of type '%s'";
 
-  public PageObjectContextImpl(Map<Class<? extends PageObject>, Class<? extends PageObject>> overrides) {
+  private final Map<Class<? extends PageObject>, Class> beansOverride;
+
+  public PageObjectContextImpl(Map<Class<? extends PageObject>, Class> overrides) {
     this.beansOverride = overrides;
+  }
+
+  public static Class getClassFromName(String className) {
+    try {
+      return Class.forName(className);
+    } catch (ClassNotFoundException e) {
+      throw new UtamCoreError(String.format(ERR_GET_CLASS_BY_NAME, className));
+    }
   }
 
   public static String[] getDefaultImplType(String fullInterfaceName) {
@@ -35,53 +45,26 @@ public class PageObjectContextImpl implements PageObjectContext {
     return new String[] {typeName, String.format("%s.impl.%s", packageName, typeName)};
   }
 
-  @SuppressWarnings("rawtypes")
-  public static Class getClassFromName(String className) throws ClassNotFoundException {
-    return Class.forName(className);
-  }
-
-  @SuppressWarnings("rawtypes")
-  private static String getBeanErr(Class type) {
-    return String.format("bean for type '%s' is not configured", type.getName());
-  }
-
-  private static <T extends PageObject> T init(
-      Class<T> type, Function<Class<T>, Class<? extends T>> typeMapping) {
+  @Override
+  public <T extends PageObject> T getBean(Class<T> type) {
+    Class<? extends T> implementingClass;
+    if (BasePageObject.class.isAssignableFrom(type)) { // if class and not interface is passed
+      implementingClass = type;
+    } else if (beansOverride.containsKey(type)) {
+      implementingClass = beansOverride.get(type);
+    } else {
+      String className = getDefaultImplType(type.getName())[1];
+      implementingClass = getClassFromName(className);
+    }
     try {
-      Constructor<? extends T> constructor = typeMapping.apply(type).getConstructor();
+      Constructor<? extends T> constructor = implementingClass.getConstructor();
       constructor.setAccessible(true);
       return constructor.newInstance();
     } catch (NoSuchMethodException
         | IllegalAccessException
         | InstantiationException
         | InvocationTargetException e) {
-      throw new UtamError(String.format("can't create instance of type '%s'", type.getName()), e);
+      throw new UtamError(String.format(ERR_GET_INSTANCE_BY_NAME, type.getName()), e);
     }
-  }
-
-  @Override
-  public <T extends PageObject> T getBean(Class<T> type) {
-    Function<Class<T>, Class<? extends T>> getter =
-        ctype -> {
-          try {
-            return getImplementingClass(ctype);
-          } catch (ClassNotFoundException e) {
-            throw new UtamError(getBeanErr(type), e);
-          }
-        };
-    return init(type, getter);
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T extends PageObject> Class<? extends T> getImplementingClass(Class<T> type)
-      throws ClassNotFoundException {
-    if (BasePageObject.class.isAssignableFrom(type)) { // if class and not interface is passed
-      return type;
-    }
-    if (beansOverride.containsKey(type)) {
-      return (Class<? extends T>) beansOverride.get(type);
-    }
-    String className = getDefaultImplType(type.getName())[1];
-    return getClassFromName(className);
   }
 }

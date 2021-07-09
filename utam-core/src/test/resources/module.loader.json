@@ -1,0 +1,9 @@
+{
+  "modules" : [ "module1", "module2" ],
+  "profiles" : [
+    {
+      "name" : "platform",
+      "values": ["ios", "android"]
+    }
+  ]
+}

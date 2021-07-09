@@ -21,9 +21,8 @@ public interface TranslatorRunner {
    * first scan all contexts and create generation order based on dependencies <br>
    * generation order is list of Page Object names<br>
    * then for each PO from list de-serialize and create representation of interface and class <br>
-   * @throws IOException if an error is encountered in translation
    */
-  void run() throws IOException;
+  void run();
 
   /**
    * can only be executed after run method to write objects to files <br>
@@ -33,8 +32,7 @@ public interface TranslatorRunner {
   void write() throws IOException;
 
   /**
-   * after translator generated code, dependencies that do not follow default injection algorithm
-   * <br>
+   * after translator generated code, dependencies that do not follow default injection rule
    * will be written into configuration files later used by Page Objects Provider
    */
   void writeDependenciesConfigs();

@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.mock;
+import static utam.core.framework.consumer.UtamLoaderImpl.getSimulatorLoader;
 
 import io.appium.java_client.AppiumDriver;
 import java.util.function.Supplier;
@@ -25,11 +26,8 @@ import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.driver.Driver;
 import utam.core.driver.DriverTimeouts;
-import utam.core.element.ElementLocation;
-import utam.core.framework.base.PageMarker;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.RootPageObject;
-import utam.core.framework.consumer.impl.TestLoaderConfigPageObjectImpl;
 import utam.core.selenium.appium.MobileDriverAdapter;
 import utam.core.selenium.element.DriverAdapter;
 import utam.core.selenium.element.LocatorBy;
@@ -54,14 +52,14 @@ public class UtamLoaderTests {
   public void testRootPageObjectCreation() {
     UtamLoader loader = getDefaultLoader();
     RootPageObject rootPageObject = loader.create(TestLoaderConfigPageObject.class);
-    assertThat(rootPageObject, is(instanceOf(TestLoaderConfigPageObjectImpl.class)));
+    assertThat(rootPageObject, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
   }
 
   @Test
   public void testPageObjectLoad() {
     UtamLoader loader = getDefaultLoader();
     RootPageObject rootPageObject = loader.load(TestLoaderConfigPageObject.class);
-    assertThat(rootPageObject, is(instanceOf(TestLoaderConfigPageObjectImpl.class)));
+    assertThat(rootPageObject, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
   }
 
   @Test
@@ -93,8 +91,7 @@ public class UtamLoaderTests {
 
   @Test
   public void testDefaultConstructorForTests() {
-    UtamLoaderImpl loader = (UtamLoaderImpl) UtamLoaderImpl
-        .getSimulatorLoader(mock(AppiumDriver.class));
+    UtamLoaderImpl loader = (UtamLoaderImpl) getSimulatorLoader(mock(AppiumDriver.class));
     assertThat(loader.getDriver(), is(instanceOf(MobileDriverAdapter.class)));
     assertThat(loader.getConfig().getDriverContext().getTimeouts(),
         is(equalTo(DriverTimeouts.TEST)));
@@ -120,16 +117,6 @@ public class UtamLoaderTests {
     @Override
     public Supplier<SearchContext> getScope() {
       return root;
-    }
-  }
-
-  @PageMarker.Find(css = "root")
-  // has to be public for reflections to work
-  public static class TestLoaderConfigPageObjectOverride extends TestLoaderConfigPageObjectImpl {
-
-    @Override
-    public ElementLocation getRoot() {
-      return getRootLocator();
     }
   }
 }

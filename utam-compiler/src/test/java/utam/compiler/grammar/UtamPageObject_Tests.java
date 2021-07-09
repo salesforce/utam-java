@@ -17,7 +17,6 @@ import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.element.RootElement;
 import utam.core.framework.consumer.UtamError;
-import utam.core.framework.context.PlatformType;
 import utam.core.framework.context.Profile;
 import org.testng.annotations.Test;
 
@@ -93,7 +92,7 @@ public class UtamPageObject_Tests {
   @Test
   public void testGetAnnotationsWithPlatform() {
     UtamPageObject pageObject = new UtamPageObject();
-    pageObject.platform = PlatformType.WEB.getName();
+    pageObject.platform = "web";
     List<String> annotations =
         pageObject.getAnnotations().stream()
             .filter((annotation) -> !annotation.getAnnotationText().isEmpty())
@@ -268,7 +267,7 @@ public class UtamPageObject_Tests {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     UtamPageObject pageObject = new UtamPageObject(true, UtamSelector_Tests.getAccessIdSelector());
     pageObject.isRootPageObject = true;
-    pageObject.platform = PlatformType.NATIVE.getName();
+    pageObject.platform = "native";
     pageObject.compile(context);
   }
 

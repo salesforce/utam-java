@@ -29,7 +29,6 @@ import static utam.compiler.helpers.TranslationContext.*;
 import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.editable;
 import static utam.compiler.helpers.ValidationTests.ELEMENT_SELECTOR;
 import static utam.compiler.helpers.ValidationTests.ELEMENT_TYPE;
-import static utam.compiler.translator.AbstractTranslatorConfiguration.ERR_PROFILE_NOT_CONFIGURED;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -247,15 +246,6 @@ public class TranslationContextTests {
   }
 
   @Test
-  public void nonExistingProfile() {
-    TranslationContext translationInstantContext = getTestTranslationContext();
-    UtamError e =
-        expectThrows(
-            UtamError.class, () -> translationInstantContext.getProfile("driver", "chrome"));
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_PROFILE_NOT_CONFIGURED, "driver"))));
-  }
-
-  @Test
   public void setMethodWithDuplicateArguments() {
     TranslationContext context = getTestTranslationContext();
     MethodParameter parameter = getStringParameter();
@@ -313,5 +303,14 @@ public class TranslationContextTests {
     TranslationContext context = getTestTranslationContext();
     context.setTestableElement("name", mock(ElementUnitTestHelper.class));
     assertThat(context.getTestableElements().get("name"), is(notNullValue()));
+  }
+
+  @Test
+  public void nonExistingProfile() {
+    TranslationContext translationInstantContext = getTestTranslationContext();
+    UtamError e =
+        expectThrows(
+            UtamError.class, () -> translationInstantContext.getProfile("driver", "chrome"));
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_PROFILE_NOT_CONFIGURED, "driver"))));
   }
 }

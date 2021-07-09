@@ -17,12 +17,19 @@ import static org.hamcrest.Matchers.*;
 public class StringValueProfileTests {
   
   @Test
-  public void testStringValueProfile() {
+  public void testStringValueProfileNullModule() {
     StringValueProfile profile = new StringValueProfile("testName", "testValue");
     assertThat(profile.getName(), is(equalTo("testName")));
     assertThat(profile.getValue(), is(equalTo("testValue")));
-    assertThat(profile.getConfigName(), is(equalTo("testName_testValue_config")));
+    assertThat(profile.getConfigName(null), is(equalTo("testName_testValue_config")));
+    assertThat(profile.getConfigName(""), is(equalTo("testName_testValue_config")));
     assertThat(profile.hashCode(), is(equalTo("testName_testValue_config".hashCode())));
+  }
+
+  @Test
+  public void testStringValueProfile() {
+    StringValueProfile profile = new StringValueProfile("testName", "testValue");
+    assertThat(profile.getConfigName("module"), is(equalTo("module_testName_testValue_config")));
   }
   
   @Test
@@ -67,7 +74,7 @@ public class StringValueProfileTests {
 
   @Test
   public void testStringValueProfileEquality() {
-    StringValueProfile profile = new StringValueProfile("testName", "testValue");
+    StringValueProfile profile = new StringValueProfile( "testName", "testValue");
     StringValueProfile anotherProfile = new StringValueProfile("testName", "testValue");
     assertThat(profile.equals(anotherProfile), is(equalTo(true)));
   }
@@ -75,7 +82,7 @@ public class StringValueProfileTests {
   @Test
   public void testStringValueProfileInequality() {
     StringValueProfile profile = new StringValueProfile("testName", "testValue");
-    StringValueProfile anotherProfile = new StringValueProfile("testName", "unmatchedValue");
+    StringValueProfile anotherProfile = new StringValueProfile( "testName", "unmatchedValue");
     assertThat(profile.equals(anotherProfile), is(equalTo(false)));
   }
 

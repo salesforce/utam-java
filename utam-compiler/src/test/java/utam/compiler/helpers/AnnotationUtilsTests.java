@@ -11,7 +11,6 @@ import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Locator;
 import utam.core.framework.base.PageMarker;
-import utam.core.framework.context.PlatformType;
 import org.testng.annotations.Test;
 import utam.core.framework.base.ElementMarker;
 
@@ -181,14 +180,14 @@ public class AnnotationUtilsTests {
   @Test
   public void testGetPagePlatformAnnotiationWithWeb() {
     assertThat(
-        AnnotationUtils.getPagePlatformAnnotation(PlatformType.WEB.getName()).getAnnotationText(),
+        AnnotationUtils.getPagePlatformAnnotation("web").getAnnotationText(),
         is(equalTo("@PageMarker.Switch(PlatformType.WEB)")));
   }
 
   @Test
   public void testGetPagePlatformAnnotiationWithNative() {
     assertThat(
-        AnnotationUtils.getPagePlatformAnnotation(PlatformType.NATIVE.getName())
+        AnnotationUtils.getPagePlatformAnnotation("native")
             .getAnnotationText(),
         is(equalTo("@PageMarker.Switch(PlatformType.NATIVE)")));
   }

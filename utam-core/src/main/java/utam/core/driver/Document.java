@@ -41,7 +41,7 @@ public interface Document {
   /**
    * check if there is a root page object present in the DOM
    *
-   * @param pageObjectType
+   * @param pageObjectType type of root Page Object to search for
    * @return true if Page Object's root element is found
    */
   boolean containsObject(Class<? extends RootPageObject> pageObjectType);

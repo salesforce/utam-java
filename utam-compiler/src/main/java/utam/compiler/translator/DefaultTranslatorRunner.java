@@ -7,26 +7,31 @@
  */
 package utam.compiler.translator;
 
-import java.io.FileWriter;
-import utam.compiler.grammar.JsonDeserializer;
-import utam.core.declarative.representation.PageObjectClass;
-import utam.core.declarative.representation.PageObjectDeclaration;
-import utam.core.declarative.representation.PageObjectInterface;
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.UtamError;
-import utam.core.framework.context.Profile;
-import utam.core.declarative.translator.*;
+import static utam.core.framework.UtamLogger.info;
+import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import static utam.core.framework.UtamLogger.info;
-import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
+import utam.compiler.UtamCompilationError;
+import utam.compiler.grammar.JsonDeserializer;
+import utam.core.declarative.representation.PageObjectClass;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.declarative.representation.PageObjectInterface;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.translator.ProfileConfiguration;
+import utam.core.declarative.translator.TranslatorConfig;
+import utam.core.declarative.translator.TranslatorRunner;
+import utam.core.declarative.translator.TranslatorSourceConfig;
+import utam.core.declarative.translator.TranslatorTargetConfig;
+import utam.core.declarative.translator.UnitTestRunner;
+import utam.core.framework.consumer.UtamError;
+import utam.core.framework.context.Profile;
 
 /**
  * abstract runner
@@ -39,8 +44,6 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
   static final String ERR_PROFILE_PATH_DOES_NOT_EXIST =
       "can't write profiles output, profile path '%s' does not exist";
   static final String ERR_PROFILE_PATH_NOT_CONFIGURED = "profile config path is null or empty";
-  static final String ERR_JSON_SOURCES_NOT_CONFIGURED =
-      "source configurations with JSON files are not set";
   static final String DUPLICATE_PAGE_OBJECT_NAME = "declaration '%s' already generated";
   static final String DUPLICATE_IMPL_ERR =
       "default implementation for type '%s' is already set as '%s'";
@@ -52,7 +55,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
   private final Map<Profile, Map<String, String>> profilesMapping = new HashMap<>();
   private final Profile defaultProfile;
   // max number of POs to generate for generator performance measurements
-  private int maxPageObjectsCounter  = Integer.MAX_VALUE;
+  private int maxPageObjectsCounter = Integer.MAX_VALUE;
 
   public DefaultTranslatorRunner(TranslatorConfig translatorConfig) {
     this.translatorConfig = translatorConfig;
@@ -66,23 +69,18 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     profilesMapping.put(defaultProfile, new HashMap<>());
   }
 
-  private static boolean isRunnerSet(TranslatorConfig translatorConfig) {
-    return translatorConfig.getUnitTestRunnerType() != null
-        && translatorConfig.getUnitTestRunnerType() != UnitTestRunner.NONE;
-  }
-
-  protected final Collection<Profile> getAllProfiles() {
+  final Collection<Profile> getAllProfiles() {
     return profilesMapping.keySet();
   }
 
-  PageObjectDeclaration getGeneratedObject(String name) {
+  final PageObjectDeclaration getGeneratedObject(String name) {
     // As written, pageObjectURI *must* be in generated, because getObject
     // is only ever called by iterating over the keyset of generated. If
     // that ever changes, a guard will need to be placed here.
     return generated.get(name);
   }
 
-  Collection<String> getGeneratedPageObjectsNames() {
+  final Collection<String> getGeneratedPageObjectsNames() {
     return generated.keySet();
   }
 
@@ -102,7 +100,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
             String.format(
                 "write interface %s", pageObjectInterface.getInterfaceType().getFullName()));
         write(pageObjectInterface.getInterfaceType(), pageObjectInterface.getApiCode());
-        filesCounter ++;
+        filesCounter++;
       } else {
         info(
             String.format(
@@ -114,14 +112,15 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
             String.format(
                 "write class %s", object.getImplementation().getClassType().getFullName()));
         write(object.getImplementation().getClassType(), object.getImplementation().getImplCode());
-        filesCounter ++;
-        if(writeUnitTest(object.getImplementation())){
-         filesCounter ++;
+        filesCounter++;
+        if (writeUnitTest(object.getImplementation())) {
+          filesCounter++;
         }
       }
-      counter ++;
+      counter++;
     }
-    info(String.format("wrote %d files for %d page objects, took %d msec", filesCounter, counter, System.currentTimeMillis() - timer));
+    info(String.format("wrote %d files for %d page objects, took %d msec", filesCounter, counter,
+        System.currentTimeMillis() - timer));
   }
 
   // set max number of POs to generate for generator performance measurements
@@ -131,7 +130,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
 
   // returns true if new file was written
   private boolean writeUnitTest(PageObjectClass impl) throws IOException {
-    if (!isRunnerSet(translatorConfig)) {
+    if (translatorConfig.getConfiguredTarget().getUnitTestRunnerType() == UnitTestRunner.NONE) {
       return false;
     }
     TypeProvider typeProvider = impl.getClassType();
@@ -141,7 +140,8 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     if (writer != null) {
       try {
         info(String.format("generating unit test for %s", typeProvider.getFullName()));
-        writer.write(impl.getGeneratedUnitTestCode(translatorConfig.getUnitTestRunnerType()));
+        writer.write(impl.getGeneratedUnitTestCode(
+            translatorConfig.getConfiguredTarget().getUnitTestRunnerType()));
         writer.flush();
       } catch (IOException e) {
         throw new RuntimeException(e);
@@ -168,25 +168,23 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
   public void run() {
     int counter = 0;
     long timer = System.currentTimeMillis();
-    if (translatorConfig.getConfiguredSources().isEmpty()) {
-      throw new UtamError(ERR_JSON_SOURCES_NOT_CONFIGURED);
-    }
-    for (TranslatorSourceConfig sourceConfig : translatorConfig.getConfiguredSources()) {
-      for (String pageObjectURI : sourceConfig.getPageObjects()) {
-        if (counter >= maxPageObjectsCounter) {
-          break;
-        }
-        info(String.format("de-serialize Page Object %s", pageObjectURI));
-        PageObjectDeclaration object =
-              new JsonDeserializer(translatorConfig, sourceConfig, pageObjectURI).getObject();
-        setPageObject(pageObjectURI, object);
-        counter ++;
+    TranslatorSourceConfig sourceConfig = translatorConfig.getConfiguredSource();
+    sourceConfig.recursiveScan();
+    for (String pageObjectURI : sourceConfig.getPageObjects()) {
+      if (counter >= maxPageObjectsCounter) {
+        break;
       }
+      info(String.format("de-serialize Page Object %s", pageObjectURI));
+      PageObjectDeclaration object =
+          new JsonDeserializer(translatorConfig, sourceConfig, pageObjectURI).getObject();
+      setPageObject(pageObjectURI, object);
+      counter++;
     }
-    info(String.format("generated %d page objects, took %d msec", counter, System.currentTimeMillis() - timer));
+    info(String.format("generated %d page objects, took %d msec", counter,
+        System.currentTimeMillis() - timer));
   }
 
-  private String getResourcesRoot() {
+  final String getResourcesRoot() {
     String profilesRoot = getTargetConfig().getInjectionConfigRootFilePath();
     if (profilesRoot == null || profilesRoot.isEmpty()) {
       throw new UtamError(ERR_PROFILE_PATH_NOT_CONFIGURED);
@@ -199,17 +197,19 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
 
   @Override
   public void writeDependenciesConfigs() {
-    String profilesRoot = getResourcesRoot();
+    String profilesRoot = getResourcesRoot() + File.separator;
+    String moduleName = translatorConfig.getModuleName();
     for (Profile profile : getAllProfiles()) {
       Properties configToWrite = getProfileMapping(profile);
-      if(!configToWrite.isEmpty()) {
-        String profileConfigPath = String.format("%s/%s.properties", profilesRoot, profile.getConfigName());
+      if (!configToWrite.isEmpty()) {
+        String profileConfigPath = profilesRoot + String.format("%s.properties", profile.getConfigName(moduleName));
         try {
           Writer writer = new FileWriter(profileConfigPath);
-          configToWrite.store(writer, "profile override");
+          configToWrite.store(writer, "profile configuration");
         } catch (IOException e) {
-          throw new UtamError(
-              String.format("can't write profile '%s' override properties", profile.getName()), e);
+          throw new UtamCompilationError(
+              String.format("error while writing profile configuration '%s'", profileConfigPath),
+              e);
         }
       }
     }
@@ -217,14 +217,15 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
 
   final Properties getProfileMapping(Profile profile) {
     if (!profilesMapping.containsKey(profile)) {
-      throw new UtamError(String.format(PROFILE_NOT_CONFIGURED_ERR, profile.toString()));
+      throw new UtamError(String.format(PROFILE_NOT_CONFIGURED_ERR, profile.getName()));
     }
     Properties properties = new Properties();
     profilesMapping.get(profile).forEach(properties::setProperty);
     return properties;
   }
 
-  void setPageObject(String name, PageObjectDeclaration object) {
+  // used from tests and during compilation
+  final void setPageObject(String name, PageObjectDeclaration object) {
     if (generated.containsKey(name)) {
       throw new UtamError(String.format(DUPLICATE_PAGE_OBJECT_NAME, name));
     }
@@ -252,7 +253,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     }
   }
 
-  private void setInterfaceOnly(String typeName) {
+  final void setInterfaceOnly(String typeName) {
     Map<String, String> implMapping = profilesMapping.get(defaultProfile);
     if (implMapping.containsKey(typeName)) {
       throw new UtamError(String.format(DUPLICATE_PAGE_OBJECT_NAME, typeName));
@@ -260,7 +261,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     implMapping.put(typeName, "");
   }
 
-  private void setImplOnly(String typeName, String classTypeName) {
+  final void setImplOnly(String typeName, String classTypeName) {
     Map<String, String> implMapping = profilesMapping.get(defaultProfile);
     if (implMapping.containsKey(typeName) && !implMapping.get(typeName).isEmpty()) {
       throw new UtamError(String.format(DUPLICATE_IMPL_ERR, typeName, implMapping.get(typeName)));
@@ -268,9 +269,9 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     implMapping.put(typeName, classTypeName);
   }
 
-  void setImplOnlyForProfile(Profile profile, String typeName, String classTypeName) {
+  final void setImplOnlyForProfile(Profile profile, String typeName, String classTypeName) {
     if (!profilesMapping.containsKey(profile)) {
-      throw new UtamError(String.format(PROFILE_NOT_CONFIGURED_ERR, profile.toString()));
+      throw new UtamError(String.format(PROFILE_NOT_CONFIGURED_ERR, profile.getName()));
     }
     if (profilesMapping.get(profile).containsKey(typeName)) {
       throw new UtamError(
@@ -278,7 +279,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
               DUPLICATE_IMPL_WITH_PROFILE_ERR,
               typeName,
               profilesMapping.get(profile).get(typeName),
-              profile.toString()));
+              profile.getName()));
     }
     profilesMapping.get(profile).put(typeName, classTypeName);
   }

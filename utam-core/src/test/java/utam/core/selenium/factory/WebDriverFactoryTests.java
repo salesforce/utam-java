@@ -45,7 +45,7 @@ public class WebDriverFactoryTests {
     }
 
     @Test
-    public void testIsMobileDriver() {
+    public void testGetAdapter() {
         IOSDriver iosDriver = mock(IOSDriver.class);
         assertThat(WebDriverFactory.getAdapter(iosDriver), instanceOf(
             MobileDriverAdapter.class));

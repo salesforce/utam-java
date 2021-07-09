@@ -17,6 +17,12 @@ import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.Profile;
 import utam.core.framework.context.StringValueProfile;
 
+/**
+ * Profile configuration
+ *
+ * @author elizaveta.ivanova
+ * @since 230
+ */
 public class StringValueProfileConfig implements ProfileConfiguration {
 
   static final String ERR_NAME_REQUIRED =
@@ -30,38 +36,29 @@ public class StringValueProfileConfig implements ProfileConfiguration {
   private final Function<String, Profile> profileValueProvider;
   private final Set<String> values;
 
-  public StringValueProfileConfig(String name, Profile...profiles) {
-    this(name, Stream.of(profiles).map(Profile::getValue).toArray(String[]::new));
-  }
-
-  // used in tests
-  StringValueProfileConfig(String name, String value) {
-    this(name, new String[] { value } );
-  }
-
-  public StringValueProfileConfig(String name, String[] values) {
-    if (name == null || name.isEmpty()) {
+  public StringValueProfileConfig(String profileName, String[] values) {
+    if (profileName == null || profileName.isEmpty()) {
       throw new UtamError(ERR_NAME_REQUIRED);
     }
-    
+
     if (values == null || values.length == 0) {
       throw new UtamError(ERR_VALUES_REQUIRED);
     }
-    
+
     Set<String> profileValues = Stream.of(values)
         .filter(value -> value != null && !value.isEmpty())
         .collect(Collectors.toSet());
-    
+
     if (profileValues.size() == 0) {
       throw new UtamError(ERR_VALUES_REQUIRED);
     }
-    
-    this.jsonKey = name;
+
+    this.jsonKey = profileName;
     this.values = profileValues;
     this.profileValueProvider =
         string -> profileValues.stream()
             .filter(string::equals)
-            .map(value -> new StringValueProfile(name, value))
+            .map(value -> new StringValueProfile(profileName, value))
             .findAny()
             .orElseThrow(
                 () -> new UtamError(
@@ -69,6 +66,15 @@ public class StringValueProfileConfig implements ProfileConfiguration {
                         ERR_PROFILE_VALUE_INCORRECT,
                         jsonKey,
                         string)));
+  }
+
+  public StringValueProfileConfig(String name, Profile...profiles) {
+    this(name, Stream.of(profiles).map(Profile::getValue).toArray(String[]::new));
+  }
+
+  // used in tests
+  StringValueProfileConfig(String name, String value) {
+    this(name, new String[] { value } );
   }
 
   @Override
@@ -85,5 +91,4 @@ public class StringValueProfileConfig implements ProfileConfiguration {
   public Set<String> getSupportedValues() {
     return values;
   }
-
 }

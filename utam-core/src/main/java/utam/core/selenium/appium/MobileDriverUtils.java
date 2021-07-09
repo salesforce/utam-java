@@ -10,16 +10,9 @@ package utam.core.selenium.appium;
 import static utam.core.selenium.appium.MobileDriverAdapter.NATIVE_CONTEXT_HANDLE;
 
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.ios.IOSDriver;
-import java.util.Set;
 import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Platform;
 import org.openqa.selenium.Point;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import utam.core.framework.context.PlatformType;
-import utam.core.framework.context.Profile;
 
 /**
  * helper class for Appium implementation of mobile driver <br>, should be public because of public
@@ -29,7 +22,7 @@ import utam.core.framework.context.Profile;
  * @since 232
  */
 @SuppressWarnings("rawtypes")
-public abstract class MobileDriverUtils {
+abstract class MobileDriverUtils {
 
   static Point[] getFlickCoordinates(MobileDriverAdapter driverAdapter, Point nativeStartPoint,
       Point nativeEndPoint) {
@@ -37,11 +30,11 @@ public abstract class MobileDriverUtils {
     if (!driverAdapter.isNative()) {
       WebElement webViewElement = driverAdapter.getWebViewElement();
       nativeStartPoint = convertWebViewLocationToNativeCoordinates(
-          driver,
+          driverAdapter,
           webViewElement,
           nativeStartPoint);
       nativeEndPoint = convertWebViewLocationToNativeCoordinates(
-          driver,
+          driverAdapter,
           webViewElement,
           nativeEndPoint);
     }
@@ -117,16 +110,17 @@ public abstract class MobileDriverUtils {
   /**
    * Convert the location to native location
    *
-   * @param driver          Appium Driver instance
+   * @param driverAdapter   driver wrapper instance
    * @param webViewElement  WebView element
    * @param webViewLocation the coordinates within the WebView
    * @return the location of x,y target within the native context
    */
-  private static Point convertWebViewLocationToNativeCoordinates(AppiumDriver driver,
+  private static Point convertWebViewLocationToNativeCoordinates(MobileDriverAdapter driverAdapter,
       final WebElement webViewElement,
       Point webViewLocation) {
+    AppiumDriver driver = driverAdapter.getAppiumDriver();
     int x, y;
-    if (isIOSPlatform(driver)) {
+    if (driverAdapter.isIOSPlatform()) {
       // for IOS scale for WebView to Native coordinates is 1:1 so just need to convert to absolute coordinates
       x = webViewLocation.getX();
       y = webViewLocation.getY();
@@ -140,39 +134,6 @@ public abstract class MobileDriverUtils {
           webViewElementSize.getHeight(), docDimension.getHeight());
     }
     return getAbsoluteCoordinates(webViewElement, x, y);
-  }
-
-  /**
-   * detect platform profile based on driver type
-   *
-   * @param driver driver instance
-   * @return profile
-   */
-  public static Profile getActivePlatformProfile(WebDriver driver) {
-    if (driver instanceof AndroidDriver) {
-      return PlatformType.PLATFORM_ANDROID;
-    }
-    if (driver instanceof IOSDriver) {
-      return PlatformType.PLATFORM_IOS;
-    }
-    if (driver instanceof AppiumDriver) {
-      Platform platform = ((AppiumDriver) driver).getCapabilities().getPlatform();
-      if (platform == Platform.LINUX) {
-        return PlatformType.PLATFORM_ANDROID;
-      }
-      if (platform == Platform.MAC) {
-        return PlatformType.PLATFORM_IOS;
-      }
-    }
-    return PlatformType.PLATFORM_WEB;
-  }
-
-  private static boolean isAndroidPlatform(WebDriver driver) {
-    return getActivePlatformProfile(driver).equals(PlatformType.PLATFORM_ANDROID);
-  }
-
-  static boolean isIOSPlatform(WebDriver driver) {
-    return getActivePlatformProfile(driver).equals(PlatformType.PLATFORM_IOS);
   }
 
   static void setContextToNative(AppiumDriver driver) {
@@ -201,32 +162,5 @@ public abstract class MobileDriverUtils {
     int absoluteX = xWebView + webViewX;
     int absoluteY = yWebView + webViewY;
     return new Point(absoluteX, absoluteY);
-  }
-
-  static AppiumDriver switchToWebView(AppiumDriver appiumDriver, String title) {
-    Set<String> contextHandles = appiumDriver.getContextHandles();
-    for (String contextHandle : contextHandles) {
-      if (!contextHandle.equals(NATIVE_CONTEXT_HANDLE)) {
-        AppiumDriver newDriver = (AppiumDriver) appiumDriver.context(contextHandle);
-        String newTitle = newDriver.getTitle();
-        if (!newTitle.isEmpty() && newTitle.equalsIgnoreCase(title)) {
-          return newDriver;
-        }
-      }
-    }
-    // For the Appium chromedriver limitation to handle multiple WebViews,
-    // If switch to context fail to find the target WebView, then switch to
-    // use window
-    if (isAndroidPlatform(appiumDriver)) {
-      Set<String> windowHandles = appiumDriver.getWindowHandles();
-      for (String windowHandle : windowHandles) {
-        AppiumDriver newDriver = (AppiumDriver) appiumDriver.switchTo().window(windowHandle);
-        String currentTitle = newDriver.getTitle();
-        if (!currentTitle.isEmpty() && currentTitle.equalsIgnoreCase(title)) {
-          return newDriver;
-        }
-      }
-    }
-    return null;
   }
 }
