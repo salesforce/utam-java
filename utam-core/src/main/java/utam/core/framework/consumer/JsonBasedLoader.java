@@ -35,6 +35,10 @@ class JsonBasedLoader {
   private final Config config;
 
   JsonBasedLoader(String configFileName) {
+    if(configFileName == null) {
+      config = EMPTY;
+      return;
+    }
     String jsonFileName = configFileName + ".json";
     URL url = getClass().getClassLoader().getResource(jsonFileName);
     if (url == null) {

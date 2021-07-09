@@ -8,11 +8,15 @@
 package utam.core.selenium.appium;
 
 import static utam.core.selenium.appium.MobileDriverAdapter.NATIVE_CONTEXT_HANDLE;
+import static utam.core.selenium.appium.MobilePlatformType.fromDriver;
 
 import io.appium.java_client.AppiumDriver;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import utam.core.framework.context.Profile;
+import utam.core.framework.context.StringValueProfile;
 
 /**
  * helper class for Appium implementation of mobile driver <br>, should be public because of public
@@ -22,7 +26,19 @@ import org.openqa.selenium.WebElement;
  * @since 232
  */
 @SuppressWarnings("rawtypes")
-abstract class MobileDriverUtils {
+public abstract class MobileDriverUtils {
+
+  static final String PLATFORM_PROFILE_NAME = "profile";
+
+  /**
+   * this method is used in downstream projects to set proper profile
+   *
+   * @param driver selenium driver instance
+   * @return profile for current platform
+   */
+  public static Profile getActivePlatformProfile(WebDriver driver) {
+    return new StringValueProfile(PLATFORM_PROFILE_NAME, fromDriver(driver).name().toLowerCase());
+  }
 
   static Point[] getFlickCoordinates(MobileDriverAdapter driverAdapter, Point nativeStartPoint,
       Point nativeEndPoint) {
