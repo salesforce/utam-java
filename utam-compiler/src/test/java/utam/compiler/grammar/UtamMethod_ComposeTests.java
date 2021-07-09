@@ -23,7 +23,6 @@ import static utam.compiler.grammar.UtamMethod.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.UtamSelector_Tests.getUtamCssSelector;
 
 /**
  * Provides tests for the UtamElementFilter class
