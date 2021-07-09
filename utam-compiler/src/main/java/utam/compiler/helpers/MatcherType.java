@@ -25,7 +25,8 @@ public enum MatcherType {
   stringContains("{ String tmp = %s;\nreturn tmp!= null && tmp.contains(%s); }",
       "String tmp = %s;\nreturn tmp!= null && tmp.contains(%s);",
       Collections.singletonList(PrimitiveType.STRING), PrimitiveType.STRING),
-  stringEquals("%s.equals(%s)", "return %s.equals(%s);", Collections.singletonList(PrimitiveType.STRING), PrimitiveType.STRING);
+  stringEquals("%s.equals(%s)", "return %s.equals(%s);", Collections.singletonList(PrimitiveType.STRING), PrimitiveType.STRING),
+  notNull("%s != null", "return %s != null;", Collections.emptyList(), PrimitiveType.BOOLEAN);
 
   private final String methodCodeMask;
   private final String predicateCodeMask;
@@ -42,7 +43,7 @@ public enum MatcherType {
   public String getCode(boolean isInsidePredicate, List<MethodParameter> matcherParameters, String actualValue) {
     String expectedValue = getParametersValuesString(matcherParameters);
     String codeMask = isInsidePredicate? predicateCodeMask : methodCodeMask;
-    if(this == isTrue || this == isFalse) {
+    if(this == isTrue || this == isFalse || this == notNull) {
       return String.format(codeMask, actualValue);
     }
     if(this == stringContains) {

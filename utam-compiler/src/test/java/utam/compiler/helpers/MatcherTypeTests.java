@@ -86,4 +86,16 @@ public class MatcherTypeTests {
     assertThat(parameterTypes, contains(PrimitiveType.STRING));
     assertThat(matcherType.getOperandType(), is(equalTo(PrimitiveType.STRING)));
   }
+
+  @Test
+  public void notNullTest() {
+    MatcherType matcherType = MatcherType.notNull;
+    assertThat(
+        matcherType.getCode(false, EMPTY, ACTUAL_VALUE), is(equalTo(ACTUAL_VALUE + " != null")));
+    assertThat(
+        matcherType.getCode(true, EMPTY, ACTUAL_VALUE),
+        is(equalTo("return " + ACTUAL_VALUE + " != null;")));
+    assertThat(matcherType.getOperandType(), is(equalTo(PrimitiveType.BOOLEAN)));
+    assertThat(matcherType.getExpectedParametersTypes(), hasSize(0));
+  }
 }
