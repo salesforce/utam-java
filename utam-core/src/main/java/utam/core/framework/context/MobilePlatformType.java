@@ -5,7 +5,9 @@
  * For full license text, see the LICENSE file in the repo root
  * or https://opensource.org/licenses/MIT
  */
-package utam.core.selenium.appium;
+package utam.core.framework.context;
+
+import static utam.core.framework.context.StringValueProfile.getProfileConfigName;
 
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
@@ -14,16 +16,18 @@ import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 
 /**
- * type of mobile platforms, used in Mobile Driver Utilities
+ * type of a mobile platform is used to set active profile from tests
  *
  * @author elizaveta.ivanova
  * @since 234
  */
-public enum MobilePlatformType {
+public enum MobilePlatformType implements Profile {
 
   WEB,
   ANDROID,
   IOS;
+
+  public static final String PLATFORM_PROFILE_NAME = "platform";
 
   /**
    * detect profile based on driver type
@@ -31,7 +35,7 @@ public enum MobilePlatformType {
    * @param driver driver instance
    * @return profile
    */
-  static MobilePlatformType fromDriver(WebDriver driver) {
+  public static MobilePlatformType fromDriver(WebDriver driver) {
     if (driver instanceof AndroidDriver) {
       return ANDROID;
     }
@@ -52,5 +56,21 @@ public enum MobilePlatformType {
       }
     }
     return WEB;
+  }
+
+
+  @Override
+  public String getName() {
+    return PLATFORM_PROFILE_NAME;
+  }
+
+  @Override
+  public String getValue() {
+    return name().toLowerCase();
+  }
+
+  @Override
+  public String getConfigName(String moduleName) {
+    return getProfileConfigName(this, moduleName);
   }
 }

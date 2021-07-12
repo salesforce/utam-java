@@ -79,13 +79,16 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   }
 
   /**
+   * get scanner based on input directory or files
+   * public because used in downstream projects
+   *
    * @param inputDirectory the root input directory to be recursively searched for the *.utam.json
    *                       Page Object description files
    * @param inputFiles     the list of the *.utam.json Page Object description files to be
    *                       generated
    * @return instance of a source configuration
    */
-  static RecursiveScanner getScanner(File inputDirectory, List<File> inputFiles) {
+  public static RecursiveScanner getScanner(File inputDirectory, List<File> inputFiles) {
     if (inputFiles != null && inputFiles.size() > 0) {
       return new FilesScanner(inputFiles);
     } else {

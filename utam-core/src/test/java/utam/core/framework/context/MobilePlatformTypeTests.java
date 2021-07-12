@@ -5,19 +5,19 @@
  * For full license text, see the LICENSE file in the repo root
  * or https://opensource.org/licenses/MIT
  */
-package utam.core.selenium.appium;
+package utam.core.framework.context;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static utam.core.selenium.appium.MobileDriverUtils.PLATFORM_PROFILE_NAME;
+import static utam.core.framework.context.MobilePlatformType.PLATFORM_PROFILE_NAME;
 import static utam.core.selenium.appium.MobileDriverUtils.getActivePlatformProfile;
-import static utam.core.selenium.appium.MobilePlatformType.ANDROID;
-import static utam.core.selenium.appium.MobilePlatformType.IOS;
-import static utam.core.selenium.appium.MobilePlatformType.WEB;
-import static utam.core.selenium.appium.MobilePlatformType.fromDriver;
+import static utam.core.framework.context.MobilePlatformType.ANDROID;
+import static utam.core.framework.context.MobilePlatformType.IOS;
+import static utam.core.framework.context.MobilePlatformType.WEB;
+import static utam.core.framework.context.MobilePlatformType.fromDriver;
 
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
@@ -26,7 +26,6 @@ import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.annotations.Test;
-import utam.core.framework.context.Profile;
 
 /**
  * @author elizaveta.ivanova
@@ -58,5 +57,15 @@ public class MobilePlatformTypeTests {
     Profile profile = getActivePlatformProfile(mock(WebDriver.class));
     assertThat(profile.getName(), is(equalTo(PLATFORM_PROFILE_NAME)));
     assertThat(profile.getValue(), is(equalTo("web")));
+  }
+
+  @Test
+  public void testAsProfile() {
+    Profile profile = ANDROID;
+    assertThat(profile.getName(), is(equalTo(PLATFORM_PROFILE_NAME)));
+    assertThat(profile.getValue(), is(equalTo("android")));
+    assertThat(profile.getConfigName(null), is(equalTo("platform_android_config")));
+    assertThat(profile.getConfigName(""), is(equalTo("platform_android_config")));
+    assertThat(profile.getConfigName("my"), is(equalTo("my_platform_android_config")));
   }
 }

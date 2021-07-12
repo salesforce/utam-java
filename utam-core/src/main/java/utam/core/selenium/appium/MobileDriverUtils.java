@@ -7,8 +7,9 @@
  */
 package utam.core.selenium.appium;
 
+import static utam.core.framework.context.MobilePlatformType.PLATFORM_PROFILE_NAME;
 import static utam.core.selenium.appium.MobileDriverAdapter.NATIVE_CONTEXT_HANDLE;
-import static utam.core.selenium.appium.MobilePlatformType.fromDriver;
+import static utam.core.framework.context.MobilePlatformType.fromDriver;
 
 import io.appium.java_client.AppiumDriver;
 import org.openqa.selenium.Dimension;
@@ -27,8 +28,6 @@ import utam.core.framework.context.StringValueProfile;
  */
 @SuppressWarnings("rawtypes")
 public abstract class MobileDriverUtils {
-
-  static final String PLATFORM_PROFILE_NAME = "profile";
 
   /**
    * this method is used in downstream projects to set proper profile

@@ -15,6 +15,7 @@ import org.openqa.selenium.WebElement;
 import utam.core.driver.Driver;
 import utam.core.driver.Expectations;
 import utam.core.framework.consumer.UtamError;
+import utam.core.framework.context.MobilePlatformType;
 import utam.core.framework.element.ExpectationsImpl;
 import utam.core.selenium.element.DriverAdapter;
 
