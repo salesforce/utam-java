@@ -60,6 +60,17 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
     this.unitTestRunner = unitTestRunner == null ? UnitTestRunner.NONE : unitTestRunner;
   }
 
+  /**
+   * this constructor can be used for distribution repo where we do not generate unit tests
+   *
+   * @param targetPath        the root output directory where the generated Page Object source files
+   *                          will be written
+   * @param resourcesHomePath the output directory in which to write profile information
+   */
+  public DefaultTargetConfiguration(String targetPath, String resourcesHomePath) {
+    this(targetPath, resourcesHomePath, null, null);
+  }
+
   // used in tests
   DefaultTargetConfiguration() {
     this("", "", UnitTestRunner.NONE, null);

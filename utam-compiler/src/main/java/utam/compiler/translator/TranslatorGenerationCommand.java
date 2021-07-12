@@ -107,7 +107,7 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
       return null;
     }
     try {
-      JsonBasedCompilerConfig jsonConfig = new JsonBasedCompilerConfig(this.jsonConfig);
+      JsonCompilerConfig jsonConfig = new JsonCompilerConfig(this.jsonConfig);
       TranslatorSourceConfig sourceConfig = jsonConfig.getSourceConfig();
       TranslatorTargetConfig targetConfig = jsonConfig.getTargetConfig();
       List<ProfileConfiguration> profiles = jsonConfig.getConfiguredProfiles();

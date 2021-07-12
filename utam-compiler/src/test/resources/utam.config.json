@@ -1,23 +1,31 @@
 {
-  "module": "myModule",
-  "source" : {
-    "filesRoot" : "/src/test/resources/spec",
-    "filesMask": "(.*)\\.utam\\.json$",
-    "packages" : {
-      "utam-one" : ".*/one",
-      "utam-two" : ".*/two"
+  "name": "myModule",
+  "pageObjectsDirectory": "/src/test/resources/spec",
+  "filesMask": "(.*)\\.utam\\.json$",
+  "namespaces" : [
+    {
+      "typePrefix" : "utam-one",
+      "pathMatchRegex": ".*/one"
+    },
+    {
+      "typePrefix" : "utam-two",
+      "pathMatchRegex": ".*/two"
     }
-  },
+  ],
   "target": {
     "pageObjects": "/src/test/java/pageObjects",
     "resources": "/src/test/resources",
     "unitTests": "/src/test/java",
-    "unitTestsRunner" : "JUNIT"
+    "unitTestsRunner": "JUNIT"
   },
-  "profiles" : [
+  "profiles": [
     {
-      "name" : "platform",
-      "values": ["web", "ios", "android"]
+      "name": "platform",
+      "values": [
+        "web",
+        "ios",
+        "android"
+      ]
     }
   ]
 }

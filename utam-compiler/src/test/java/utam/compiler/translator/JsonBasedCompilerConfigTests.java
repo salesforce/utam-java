@@ -9,21 +9,25 @@ package utam.compiler.translator;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.translator.DefaultSourceConfiguration.DEFAULT_JSON_FILE_MASK_REGEX;
-import static utam.compiler.translator.JsonBasedCompilerConfig.ERR_READING_COMPILER_CONFIG;
+import static utam.compiler.translator.JsonCompilerConfig.ERR_READING_COMPILER_CONFIG;
+import static utam.compiler.translator.JsonCompilerConfig.ERR_TARGET_NOT_SET;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
 import org.hamcrest.CoreMatchers;
 import org.testng.annotations.Test;
-import utam.compiler.translator.JsonBasedCompilerConfig.ModuleConfig;
-import utam.compiler.translator.JsonBasedCompilerConfig.Source;
-import utam.compiler.translator.JsonBasedCompilerConfig.Target;
+import utam.compiler.UtamCompilationError;
+import utam.compiler.translator.JsonCompilerConfig.Module;
+import utam.compiler.translator.JsonCompilerConfig.Namespace;
+import utam.compiler.translator.JsonCompilerConfig.Profile;
+import utam.compiler.translator.JsonCompilerConfig.Target;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorSourceConfig;
 import utam.core.declarative.translator.UnitTestRunner;
@@ -39,7 +43,7 @@ public class JsonBasedCompilerConfigTests {
 
   @Test
   public void testValues() throws IOException {
-    JsonBasedCompilerConfig config = new JsonBasedCompilerConfig();
+    JsonCompilerConfig config = new JsonCompilerConfig();
     ProfileConfiguration profileConfiguration = config.getConfiguredProfiles().iterator().next();
     assertThat(profileConfiguration.getFromString("web"),
         is(equalTo(new StringValueProfile("platform", "web"))));
@@ -48,7 +52,7 @@ public class JsonBasedCompilerConfigTests {
 
   @Test
   public void testScanner() throws IOException {
-    JsonBasedCompilerConfig config = new JsonBasedCompilerConfig();
+    JsonCompilerConfig config = new JsonCompilerConfig();
     TranslatorSourceConfig sourceConfig = config.getSourceConfig();
     sourceConfig.recursiveScan();
     Collection<String> scannerResults = sourceConfig.getPageObjects();
@@ -58,18 +62,35 @@ public class JsonBasedCompilerConfigTests {
   }
 
   @Test
-  public void testDefaultModuleProperties() {
-    Source source = new Source(null, "root", new HashMap<>());
-    assertThat(source.filesMaskRegex, is(equalTo(DEFAULT_JSON_FILE_MASK_REGEX)));
-    Target target = new Target("path", "path", "path", null);
+  public void testDefaultTargetValues() {
+    Target target = new Target("src", "res" );
+    assertThat(target.pageObjectsPath, is(equalTo("src")));
+    assertThat(target.resourcesHomePath, is(equalTo("res")));
     assertThat(target.unitTestRunnerType, is(equalTo(UnitTestRunner.NONE)));
-    ModuleConfig config = new ModuleConfig("moduleName", source, target, null);
-    assertThat(config.profiles.length, is(0));
+    assertThat(target.unitTestDirectory, is(emptyString()));
+  }
+
+  @Test
+  public void testDefaultModuleProperties() {
+    Module module = new Module("name",
+        null,
+        "pageObjectsDirectory",
+        null,
+        new Namespace[0], new Profile[0]);
+
+    assertThat(module.pageObjectFileMask, is(equalTo(DEFAULT_JSON_FILE_MASK_REGEX)));
+    assertThat(module.moduleName, is(equalTo("name")));
+    assertThat(module.target, is(nullValue()));
+    assertThat(module.profiles.length, is(0));
+    assertThat(module.namespaces.length, is(0));
+    module.getSourceConfig("");
+    UtamCompilationError e = expectThrows(UtamCompilationError.class, () -> module.getTargetConfig(""));
+    assertThat(e.getMessage(), is(equalTo(ERR_TARGET_NOT_SET)));
   }
 
   @Test
   public void testNonExistingFile() {
-    IOException e = expectThrows(IOException.class, () -> new JsonBasedCompilerConfig("error"));
+    IOException e = expectThrows(IOException.class, () -> new JsonCompilerConfig("error"));
     assertThat(e.getMessage(),
         is(CoreMatchers.equalTo(String.format(ERR_READING_COMPILER_CONFIG, "error"))));
   }
