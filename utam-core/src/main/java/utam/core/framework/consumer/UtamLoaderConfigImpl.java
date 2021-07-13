@@ -7,8 +7,10 @@
  */
 package utam.core.framework.consumer;
 
+import static utam.core.framework.consumer.JsonLoaderConfig.loadConfig;
 import static utam.core.framework.consumer.PageObjectContextImpl.getClassFromName;
 
+import java.io.File;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +21,7 @@ import utam.core.driver.DriverContext;
 import utam.core.driver.DriverTimeouts;
 import utam.core.framework.UtamCoreError;
 import utam.core.framework.base.PageObject;
+import utam.core.framework.consumer.JsonLoaderConfig.Module;
 import utam.core.framework.context.DefaultProfileContext;
 import utam.core.framework.context.Profile;
 import utam.core.framework.context.ProfileContext;
@@ -31,34 +34,41 @@ import utam.core.framework.context.ProfileContext;
  */
 public class UtamLoaderConfigImpl implements UtamLoaderConfig {
 
-  static final String DEFAULT_LOADER_CONFIG = "utam.loader";
-  static final String ERR_PROFILE_ALREADY_SET = "duplicate profile '%s', it's already set";
+  static final String ERR_DUPLICATE_PROFILE = "Profile %s = %s is already configured";
 
   private final Map<String, ProfileContext> configuredProfilesContext = new HashMap<>();
   // profiles that were set as active
   private final List<String> activeProfiles = new ArrayList<>();
-  private final List<String> pageObjectModules;
+  private final List<String> pageObjectModules = new ArrayList<>();
   // driver
   private DriverTimeouts timeouts;
   private String bridgeAppTitle;
 
-  public UtamLoaderConfigImpl(DriverTimeouts timeouts, String configFile) {
+  public UtamLoaderConfigImpl(DriverTimeouts timeouts, JsonLoaderConfig config) {
     this.timeouts = timeouts;
-    JsonBasedLoader config = new JsonBasedLoader(configFile);
-    this.pageObjectModules = config.getModules();
-    for (Profile profile : config.getConfiguredProfiles()) {
-      for (String module : pageObjectModules) {
-        setConfiguredProfile(module, profile);
+    for (Module module : config.getModules()) {
+      String moduleName = module.getName();
+      pageObjectModules.add(moduleName);
+      for(Profile profile : module.getModuleProfiles(config.profiles)) {
+        setConfiguredProfile(moduleName, profile);
       }
     }
   }
 
-  public UtamLoaderConfigImpl(String configFile) {
-    this(DriverTimeouts.DEFAULT, configFile);
+  public UtamLoaderConfigImpl(String resourceWithConfig) {
+    this(DriverTimeouts.DEFAULT, loadConfig(resourceWithConfig));
+  }
+
+  public UtamLoaderConfigImpl(File fileWithConfig) {
+    this(DriverTimeouts.DEFAULT, loadConfig(fileWithConfig));
+  }
+
+  public UtamLoaderConfigImpl(DriverTimeouts timeouts) {
+    this(timeouts, new JsonLoaderConfig());
   }
 
   public UtamLoaderConfigImpl() {
-    this(DriverTimeouts.DEFAULT, DEFAULT_LOADER_CONFIG);
+    this(DriverTimeouts.DEFAULT);
   }
 
   private static Map<Class<? extends PageObject>, Class<? extends PageObject>> getConfiguredBeans(
@@ -76,7 +86,7 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
   public void setConfiguredProfile(String module, Profile profile) {
     String key = profile.getConfigName(module);
     if (configuredProfilesContext.containsKey(key)) {
-      throw new UtamCoreError(String.format(ERR_PROFILE_ALREADY_SET, key));
+      throw new UtamCoreError(String.format(ERR_DUPLICATE_PROFILE, profile.getName(), profile.getValue()));
     }
     configuredProfilesContext.put(key, new DefaultProfileContext(module, profile));
   }
@@ -86,7 +96,7 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
     for (String module : pageObjectModules) {
       String key = profile.getConfigName(module);
       if (activeProfiles.contains(key)) {
-        throw new UtamCoreError(String.format(ERR_PROFILE_ALREADY_SET, key));
+        throw new UtamCoreError(String.format(ERR_DUPLICATE_PROFILE, profile.getName(), profile.getValue()));
       }
       if (!configuredProfilesContext.containsKey(key)) {
         setConfiguredProfile(module, profile);

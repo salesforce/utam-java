@@ -8,7 +8,6 @@
 package utam.core.framework.consumer;
 
 import static utam.core.element.FindContext.Type.EXISTING;
-import static utam.core.framework.consumer.UtamLoaderConfigImpl.DEFAULT_LOADER_CONFIG;
 import static utam.core.selenium.factory.WebDriverFactory.getAdapter;
 
 import org.openqa.selenium.WebDriver;
@@ -53,7 +52,7 @@ public class UtamLoaderImpl implements UtamLoader {
    * @return loader instance
    */
   public static UtamLoader getSimulatorLoader(WebDriver driver) {
-    UtamLoaderConfig config = new UtamLoaderConfigImpl(DriverTimeouts.TEST, DEFAULT_LOADER_CONFIG);
+    UtamLoaderConfig config = new UtamLoaderConfigImpl(DriverTimeouts.TEST, new JsonLoaderConfig());
     return new UtamLoaderImpl(config, getAdapter(driver));
   }
 

@@ -1,9 +1,22 @@
 {
-  "modules" : [ "module1", "module2" ],
+  "modules" : [
+    {
+      "name" : "module1",
+      "profiles" : [
+        {
+          "name" : "custom",
+          "values": ["one", "two"]
+        }
+      ]
+    },
+    {
+      "name" : "module2"
+    }
+  ],
   "profiles" : [
     {
       "name" : "platform",
-      "values": ["ios", "android"]
+      "values": ["ios"]
     }
   ]
 }

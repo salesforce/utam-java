@@ -15,6 +15,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static utam.compiler.translator.TranslatorGenerationCommand.CONFIG_ERR;
+import static utam.compiler.translator.TranslatorGenerationCommand.ERR_COMPILER_CONFIG_NEEDS_ROOT;
 import static utam.compiler.translator.TranslatorGenerationCommand.INVALID_UNIT_TEST_CONFIG;
 import static utam.compiler.translator.TranslatorGenerationCommand.MISSING_INPUT;
 import static utam.compiler.translator.TranslatorGenerationCommand.OUTPUT_DIRECTORY_MISSING;
@@ -41,6 +42,7 @@ public class TranslatorGenerationCommandTests {
     TranslatorGenerationCommand command = new TranslatorGenerationCommand();
     command.jsonConfig = new File(System.getProperty("user.dir")
         + "/src/test/resources/utam.config.json");
+    command.compilerRoot = new File(System.getProperty("user.dir"));
     TranslatorConfig config = command.getTranslationConfig();
     assertThat(config, is(not(nullValue())));
   }
@@ -60,6 +62,10 @@ public class TranslatorGenerationCommandTests {
   public void testJsonConfigNotExistingThrows() {
     TranslatorGenerationCommand command = new TranslatorGenerationCommand();
     command.jsonConfig = new File("error.config");
+    assertThat(command.getTranslationConfig(), is(nullValue()));
+    assertThat(command.returnCode, is(equalTo(CONFIG_ERR)));
+    assertThat(command.getThrownError().getMessage(), containsString(ERR_COMPILER_CONFIG_NEEDS_ROOT));
+    command.compilerRoot = new File(System.getProperty("user.dir"));
     TranslatorConfig config = command.getTranslationConfig();
     assertThat(command.returnCode, is(equalTo(RUNTIME_ERR)));
     assertThat(command.getThrownError(), is(instanceOf(IOException.class)));

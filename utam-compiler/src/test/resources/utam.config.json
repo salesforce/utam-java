@@ -1,7 +1,7 @@
 {
   "name": "myModule",
   "pageObjectsDirectory": "/src/test/resources/spec",
-  "filesMask": "(.*)\\.utam\\.json$",
+  "pageObjectsFilesMask": "(.*)\\.utam\\.json$",
   "namespaces" : [
     {
       "typePrefix" : "utam-one",
