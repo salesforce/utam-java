@@ -9,6 +9,7 @@ package utam.compiler.grammar;
 
 import utam.compiler.helpers.PrimitiveType;
 import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
@@ -183,5 +184,10 @@ public class UtamSelector_Tests {
   public void testNullSelectorString() {
     UtamError e = expectThrows(UtamError.class, () -> new UtamSelector(null));
     assertThat(e.getMessage(), is(equalTo(ERR_SELECTOR_MISSING)));
+  }
+
+  @Test
+  public void testArgsNumber() {
+    assertThat(getParametersTypes("%s"), hasSize(1));
   }
 }

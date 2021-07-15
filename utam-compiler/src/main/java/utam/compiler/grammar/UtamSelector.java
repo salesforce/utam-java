@@ -135,9 +135,9 @@ public class UtamSelector {
   }
 
   // parse selector string to find parameters %s or %d
-  private static List<TypeProvider> getParametersTypes(String str) {
+  static List<TypeProvider> getParametersTypes(String str) {
     List<TypeProvider> res = new ArrayList<>();
-    while (str.indexOf("%") > 0) {
+    while (str.indexOf("%") >= 0) {
       int index = str.indexOf("%");
       if (str.indexOf(SELECTOR_INTEGER_PARAMETER) == index) {
         res.add(PrimitiveType.NUMBER);
