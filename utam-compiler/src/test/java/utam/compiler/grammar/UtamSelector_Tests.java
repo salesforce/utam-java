@@ -9,7 +9,6 @@ package utam.compiler.grammar;
 
 import utam.compiler.helpers.PrimitiveType;
 import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
