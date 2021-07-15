@@ -184,4 +184,9 @@ public class UtamSelector_Tests {
     UtamError e = expectThrows(UtamError.class, () -> new UtamSelector(null));
     assertThat(e.getMessage(), is(equalTo(ERR_SELECTOR_MISSING)));
   }
+
+  @Test
+  public void testArgsNumber() {
+    assertThat(getParametersTypes("%s"), hasSize(1));
+  }
 }
