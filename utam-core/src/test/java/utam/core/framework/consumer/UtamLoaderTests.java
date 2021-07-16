@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.mock;
+import static utam.core.framework.consumer.UtamLoaderConfigTests.getDefaultConfig;
 import static utam.core.framework.consumer.UtamLoaderImpl.getSimulatorLoader;
 
 import io.appium.java_client.AppiumDriver;
@@ -41,7 +42,7 @@ public class UtamLoaderTests {
   private static UtamLoaderImpl getDefaultLoader(boolean isMobile) {
     Driver driver = new MockUtilities(isMobile ? AppiumDriver.class : WebDriver.class)
         .getDriverAdapter();
-    return new UtamLoaderImpl(new UtamLoaderConfigImpl(), driver);
+    return new UtamLoaderImpl(getDefaultConfig(), driver);
   }
 
   private static UtamLoaderImpl getDefaultLoader() {
@@ -74,7 +75,7 @@ public class UtamLoaderTests {
 
   @Test
   public void testDefaultConstructor() {
-    UtamLoaderImpl loader = new UtamLoaderImpl(new UtamLoaderConfigImpl(),
+    UtamLoaderImpl loader = new UtamLoaderImpl(getDefaultConfig(),
         new DriverAdapter(mock(WebDriver.class)));
     assertThat(loader.getConfig().getDriverContext().getTimeouts(),
         is(equalTo(DriverTimeouts.DEFAULT)));

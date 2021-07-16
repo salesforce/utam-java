@@ -8,31 +8,26 @@
 package utam.core.framework.consumer;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anEmptyMap;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
-import static utam.core.framework.consumer.JsonBasedLoader.ERR_READING_LOADER_CONFIG;
-import static utam.core.framework.consumer.UtamLoaderConfigImpl.ERR_PROFILE_ALREADY_SET;
+import static utam.core.framework.consumer.UtamLoaderConfigImpl.ERR_DUPLICATE_PROFILE;
 import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
 
+import java.io.File;
 import java.time.Duration;
 import org.testng.annotations.Test;
 import utam.core.driver.DriverTimeouts;
-import utam.core.framework.UtamCoreError;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.context.Profile;
 import utam.core.framework.context.StringValueProfile;
 
 public class UtamLoaderConfigTests {
 
-  private static UtamLoaderConfigImpl getDefaultConfig() {
+  static UtamLoaderConfigImpl getDefaultConfig() {
     return new UtamLoaderConfigImpl();
   }
 
@@ -55,14 +50,8 @@ public class UtamLoaderConfigTests {
   }
 
   @Test
-  public void testEmptyConfigOverrideThrows() {
-    UtamLoaderConfig config = getDefaultConfig();
-    assertThrows(() -> config.setProfile(null));
-  }
-
-  @Test
-  public void testDefaultJsonConfigMissing() {
-    UtamLoaderConfigImpl config = new UtamLoaderConfigImpl();
+  public void testDefaultJsonConfig() {
+    UtamLoaderConfigImpl config = getDefaultConfig();
     assertThat(config.getModules().iterator().next(), is(nullValue()));
     assertThat(config.getConfiguredProfiles().size(), is(equalTo(1)));
     assertThat(config.getConfiguredProfiles().keySet().iterator().next(),
@@ -72,14 +61,8 @@ public class UtamLoaderConfigTests {
   }
 
   @Test
-  public void testJsonConfigMissingThrows() {
-    UtamCoreError e = expectThrows(UtamCoreError.class, () -> new UtamLoaderConfigImpl("missing"));
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_READING_LOADER_CONFIG, "missing.json"))));
-  }
-
-  @Test
   public void testSettingActiveProfile() {
-    UtamLoaderConfigImpl config = new UtamLoaderConfigImpl();
+    UtamLoaderConfigImpl config = getDefaultConfig();
     Profile testProfile = new StringValueProfile("test", "profiles");
     config.setProfile(testProfile);
     PageObject pageObject = config.getPageContext().getBean(
@@ -89,7 +72,16 @@ public class UtamLoaderConfigTests {
 
   @Test
   public void testCustomJSONConfig() {
-    UtamLoaderConfig config = new UtamLoaderConfigImpl("module.loader");
+    UtamLoaderConfig config = new UtamLoaderConfigImpl("module.loader.json");
+    PageObject pageObject = config.getPageContext().getBean(TestLoaderConfigPageObject.class);
+    // from default_impl_config
+    assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
+  }
+
+  @Test
+  public void testCustomJSONConfigFromFile() {
+    File file = new File(this.getClass().getClassLoader().getResource("module.loader.json").getFile());
+    UtamLoaderConfig config = new UtamLoaderConfigImpl(file);
     PageObject pageObject = config.getPageContext().getBean(TestLoaderConfigPageObject.class);
     // from default_impl_config
     assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
@@ -97,7 +89,7 @@ public class UtamLoaderConfigTests {
 
   @Test
   public void testCustomJSONConfigSetProfile() {
-    UtamLoaderConfig config = new UtamLoaderConfigImpl("module.loader");
+    UtamLoaderConfig config = new UtamLoaderConfigImpl("module.loader.json");
     Profile testProfile = new StringValueProfile("test", "profiles");
     config.setProfile(testProfile);
     PageObject pageObject = config.getPageContext().getBean(TestLoaderConfigPageObject.class);
@@ -106,25 +98,28 @@ public class UtamLoaderConfigTests {
 
   @Test
   public void testSettingSameActiveProfileThrows() {
-    UtamLoaderConfigImpl config = new UtamLoaderConfigImpl();
+    UtamLoaderConfigImpl config = getDefaultConfig();
     Profile testProfile = new StringValueProfile("test", "profiles");
     config.setProfile(testProfile);
     UtamError e = expectThrows(UtamError.class, () -> config.setProfile(testProfile));
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_PROFILE_ALREADY_SET, "test_profiles_config"))));
+    assertThat(e.getMessage(),
+        is(equalTo(String.format(ERR_DUPLICATE_PROFILE, "test", "profiles"))));
   }
 
   @Test
   public void testSettingSameConfiguredProfileThrows() {
-    UtamLoaderConfigImpl config = new UtamLoaderConfigImpl();
+    UtamLoaderConfigImpl config = getDefaultConfig();
     Profile testProfile = new StringValueProfile("test", "profiles");
     config.setConfiguredProfile(null, testProfile);
-    UtamError e = expectThrows(UtamError.class, () -> config.setConfiguredProfile(null, testProfile));
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_PROFILE_ALREADY_SET, "test_profiles_config"))));
+    UtamError e = expectThrows(UtamError.class,
+        () -> config.setConfiguredProfile(null, testProfile));
+    assertThat(e.getMessage(),
+        is(equalTo(String.format(ERR_DUPLICATE_PROFILE, "test", "profiles"))));
   }
 
   @Test
   public void testConfiguredActiveProfile() {
-    UtamLoaderConfigImpl config = new UtamLoaderConfigImpl();
+    UtamLoaderConfigImpl config = getDefaultConfig();
     Profile testProfile = new StringValueProfile("test", "profiles");
     config.setConfiguredProfile(null, testProfile);
     config.setProfile(testProfile);
@@ -133,7 +128,7 @@ public class UtamLoaderConfigTests {
 
   @Test
   public void testNullConfig() {
-    UtamLoaderConfigImpl config = new UtamLoaderConfigImpl(DriverTimeouts.DEFAULT, null);
+    UtamLoaderConfigImpl config = getDefaultConfig();
     assertThat(config.getConfiguredProfiles().keySet(), hasSize(1));
     assertThat(config.getConfiguredProfiles().keySet().iterator().next(),
         is(equalTo(DEFAULT_PROFILE.getConfigName(null))));

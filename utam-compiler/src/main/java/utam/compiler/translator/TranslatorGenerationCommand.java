@@ -43,12 +43,17 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
   static final String OUTPUT_DIRECTORY_MISSING = "Output directory is not configured";
   static final String PACKAGE_CONFIG_MISSING = "Packages mapping is not configured";
   static final String REDUNDANT_CLI_ARGS = "If JSON file is set, all other arguments are ignored";
+  static final String ERR_COMPILER_CONFIG_NEEDS_ROOT = "To resolve configuration paths, set compilerRoot";
 
-  @Option(names = {"-c", "-config", "--config"},
+  @Option(names = {"-f", "-config", "--config"},
       description = "JSON file with configuration. "
           + "Path should be relative to the current module. "
           + "When set, all other command line parameters will be ignored!")
   File jsonConfig;
+
+  @Option(names = {"-c", "-compilerRoot", "--compilerRoot"},
+      description = "Root folder for compiler to resolve relative paths")
+  File compilerRoot;
 
   @Option(names = {"-o", "-outputDirectory", "--outputDirectory"},
       description = "Output directory to which generated Page Object files will be written.")
@@ -106,8 +111,13 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
       returnCode = CONFIG_ERR;
       return null;
     }
+    if (compilerRoot == null) {
+      thrownError = new NullPointerException(ERR_COMPILER_CONFIG_NEEDS_ROOT);
+      returnCode = CONFIG_ERR;
+      return null;
+    }
     try {
-      JsonBasedCompilerConfig jsonConfig = new JsonBasedCompilerConfig(this.jsonConfig);
+      JsonCompilerConfig jsonConfig = new JsonCompilerConfig(this.jsonConfig, this.compilerRoot);
       TranslatorSourceConfig sourceConfig = jsonConfig.getSourceConfig();
       TranslatorTargetConfig targetConfig = jsonConfig.getTargetConfig();
       List<ProfileConfiguration> profiles = jsonConfig.getConfiguredProfiles();

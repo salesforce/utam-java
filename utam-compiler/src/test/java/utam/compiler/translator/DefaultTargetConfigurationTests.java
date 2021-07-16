@@ -134,6 +134,21 @@ public class DefaultTargetConfigurationTests {
     assertThat(targetConfig.getPageObjectTestClassPath(type), is(equalTo(currentDir + "/utam/MyPageTests.java")));
   }
 
+  @Test
+  public void testConstructorForDistribution() {
+    String currentDir = System.getProperty("user.dir");
+    DefaultTargetConfiguration targetConfig = new DefaultTargetConfiguration(
+        currentDir,
+        currentDir
+    );
+    assertThat(targetConfig.getUnitTestRunnerType(), is(equalTo(UnitTestRunner.NONE)));
+    assertThat(targetConfig.getInjectionConfigRootFilePath(), is(equalTo(currentDir)));
+    String typeName = "utam/MyPage";
+    TypeProvider type = new FromString(typeName);
+    assertThat(targetConfig.getPageObjectClassPath(type), is(equalTo(currentDir + "/utam/MyPage.java")));
+    assertThat(targetConfig.getPageObjectTestClassPath(type), is(equalTo(currentDir + "/utam/MyPageTests.java")));
+  }
+
   static class Mock implements TranslatorTargetConfig {
 
     final Map<String, Writer> writers = new HashMap<>();

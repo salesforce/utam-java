@@ -15,12 +15,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.translator.DefaultSourceConfiguration.DEFAULT_JSON_FILE_MASK_REGEX;
 import static utam.compiler.translator.DefaultSourceConfiguration.ERR_DUPLICATE_PAGE_OBJECT;
 import static utam.compiler.translator.DefaultSourceConfiguration.ERR_IO_DURING_SCAN;
 import static utam.compiler.translator.DefaultSourceConfiguration.ERR_MISSING_SOURCE_PATH;
 import static utam.compiler.translator.DefaultSourceConfiguration.ScannerConfig;
 import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_PAGE_OBJECT_NAME;
+import static utam.compiler.translator.JsonCompilerConfig.Module.DEFAULT_JSON_FILE_MASK_REGEX;
 import static utam.compiler.translator.TranslatorMockUtilities.IMPL_ONLY_URI;
 import static utam.compiler.translator.TranslatorMockUtilities.INTERFACE_ONLY_URI;
 import static utam.compiler.translator.TranslatorMockUtilities.PAGE_OBJECT_SOURCE;
@@ -112,7 +112,7 @@ public class DefaultSourceConfigurationTests {
   }
 
   @Test
-  public void testRecursiveScanPreProcess() throws IOException {
+  public void testRecursiveScanPreProcess() {
     ScannerConfig scannerConfig = new ScannerConfig(Collections.singletonMap("utam-one", ".*/one"));
     RecursiveScanner scanner = new RecursiveScanner(null);
     DefaultSourceConfiguration config = new DefaultSourceConfiguration(scannerConfig, scanner);

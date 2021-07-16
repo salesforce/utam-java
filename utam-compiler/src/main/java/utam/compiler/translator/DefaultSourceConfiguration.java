@@ -7,6 +7,7 @@
  */
 package utam.compiler.translator;
 
+import static utam.compiler.translator.JsonCompilerConfig.Module.DEFAULT_JSON_FILE_MASK_REGEX;
 import static utam.core.framework.UtamLogger.info;
 
 import java.io.File;
@@ -43,7 +44,6 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
   static final String ERR_MISSING_SOURCE_PATH = "source path for Page Object '%s' is not configured";
   static final String ERR_DUPLICATE_PAGE_OBJECT = "source for Page Object '%s' is already configured";
   final static String ERR_IO_DURING_SCAN = "Error while scanning file(s) path %s";
-  static final String DEFAULT_JSON_FILE_MASK_REGEX = "(.*)\\.utam\\.json$";
   private final Map<String, String> sourcePath = new HashMap<>();
   private final RecursiveScanner scanner;
   private final ScannerConfig scannerConfig;

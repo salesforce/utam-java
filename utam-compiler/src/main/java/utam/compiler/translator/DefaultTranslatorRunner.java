@@ -119,7 +119,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       }
       counter++;
     }
-    info(String.format("wrote %d files for %d page objects, took %d msec", filesCounter, counter,
+    info(String.format("generated %d files for %d page objects, took %d msec", filesCounter, counter,
         System.currentTimeMillis() - timer));
   }
 

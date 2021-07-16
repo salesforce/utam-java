@@ -91,4 +91,14 @@ public class StringValueProfileConfig implements ProfileConfiguration {
   public Set<String> getSupportedValues() {
     return values;
   }
+
+  @Override //for tests
+  public boolean equals(Object obj) {
+    if(obj instanceof StringValueProfileConfig) {
+      return ((StringValueProfileConfig) obj).jsonKey.equals(jsonKey)
+          && ((StringValueProfileConfig) obj).getSupportedValues().size() == getSupportedValues().size()
+          && ((StringValueProfileConfig) obj).getSupportedValues().containsAll(getSupportedValues());
+    }
+    return super.equals(obj);
+  }
 }
