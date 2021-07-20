@@ -135,4 +135,14 @@ public class UtamLoaderConfigTests {
     assertThat(config.getModules(), hasSize(1));
     assertThat(config.getModules().get(0), is(nullValue()));
   }
+
+  @Test
+  public void testDefaultConfigLoadedFirst() {
+    UtamLoaderConfig config = new UtamLoaderConfigImpl("module.loader.json");
+    PageObjectContext context = config.getPageContext();
+    // default config with empty implementation should be loaded first
+    // then profile specific configuration should override it, because empty was not added
+    PageObject pageObject = context.getBean(TestLoaderConfigDefault.class);
+    assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
+  }
 }
