@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.mock;
+import static org.testng.Assert.expectThrows;
 import static utam.core.framework.consumer.UtamLoaderConfigTests.getDefaultConfig;
 import static utam.core.framework.consumer.UtamLoaderImpl.getSimulatorLoader;
 
@@ -29,6 +30,7 @@ import utam.core.driver.Driver;
 import utam.core.driver.DriverTimeouts;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.RootPageObject;
+import utam.core.framework.context.StringValueProfile;
 import utam.core.selenium.appium.MobileDriverAdapter;
 import utam.core.selenium.element.DriverAdapter;
 import utam.core.selenium.element.LocatorBy;
@@ -109,6 +111,19 @@ public class UtamLoaderTests {
   @Test
   public void testGetDocument() {
     assertThat(getDefaultLoader().getDocument(), is(notNullValue()));
+  }
+
+  @Test
+  public void testProfileConfigPickedUpAfterReset() {
+    UtamLoaderConfigImpl config = new UtamLoaderConfigImpl();
+    UtamLoader utamLoader = new UtamLoaderImpl(config, new DriverAdapter(mock(WebDriver.class)));
+    // only default config is loaded first
+    expectThrows(UtamError.class, () -> config.getPageContext().getBean(TestLoaderConfigDefault.class));
+    config.getModules().add("module1");
+    config.setProfile(new StringValueProfile("custom", "one"));
+    // this line reloads config and overrides previous
+    utamLoader.resetContext();
+    assertThat(utamLoader.create(TestLoaderConfigDefault.class), is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
   }
 
   private static class ContainerMock implements Container {
