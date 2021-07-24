@@ -1,28 +1,25 @@
 {
   "name": "myModule",
-  "pageObjectsDirectory": "/src/test/resources/spec",
+  "pageObjectsRootDir": "/src/test/resources/spec",
   "pageObjectsFilesMask": "(.*)\\.utam\\.json$",
+  "pageObjectsOutputDir": "/src/test/java/pageObjects",
+  "resourcesOutputDir": "/src/test/resources",
+  "unitTestsOutputDir": "/src/test/java",
+  "unitTestsRunner": "JUNIT",
   "namespaces" : [
     {
-      "typePrefix" : "utam-one",
-      "pathMatchRegex": ".*/one"
+      "typeMatch" : "utam-one",
+      "pathMatch": ".*/one"
     },
     {
-      "typePrefix" : "utam-two",
-      "pathMatchRegex": ".*/two"
+      "typeMatch" : "utam-two",
+      "pathMatch": ".*/two"
     }
   ],
-  "target": {
-    "pageObjects": "/src/test/java/pageObjects",
-    "resources": "/src/test/resources",
-    "unitTests": "/src/test/java",
-    "unitTestsRunner": "JUNIT"
-  },
   "profiles": [
     {
       "name": "platform",
       "values": [
-        "web",
         "ios",
         "android"
       ]
