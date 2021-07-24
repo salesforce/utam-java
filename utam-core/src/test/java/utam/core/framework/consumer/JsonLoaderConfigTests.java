@@ -9,6 +9,7 @@ package utam.core.framework.consumer;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.hasSize;
@@ -72,6 +73,12 @@ public class JsonLoaderConfigTests {
     assertThat(third.getModuleProfiles(config.profiles), hasItems(DEFAULT_PROFILE, sharedProfile));
 
     assertThat(config.profiles, hasSize(1));
+  }
+
+  @Test
+  public void testIncorrectJsonThrows() {
+    UtamError e = expectThrows(UtamError.class, () -> JsonLoaderConfig.loadConfig("incorrect.loader.json"));
+    assertThat(e.getMessage(), startsWith("error while reading config"));
   }
 
   @Test

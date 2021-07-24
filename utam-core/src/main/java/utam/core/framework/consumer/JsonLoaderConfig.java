@@ -75,8 +75,12 @@ public class JsonLoaderConfig {
     if (url == null) {
       throw new UtamCoreError(String.format(ERR_READING_LOADER_CONFIG, resourceName));
     }
-    File file = new File(url.getFile());
-    return loadConfig(file);
+    try {
+      return new ObjectMapper().readValue(url, JsonLoaderConfig.class);
+    } catch (IOException e) {
+      throw new UtamCoreError(String.format(ERR_READING_LOADER_CONFIG, url.toString()),
+          e);
+    }
   }
 
   /**
