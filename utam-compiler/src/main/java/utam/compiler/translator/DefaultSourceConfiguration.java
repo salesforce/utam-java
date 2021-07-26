@@ -43,7 +43,8 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
 
   static final String ERR_MISSING_SOURCE_PATH = "source path for Page Object '%s' is not configured";
   static final String ERR_DUPLICATE_PAGE_OBJECT = "source for Page Object '%s' is already configured";
-  final static String ERR_IO_DURING_SCAN = "Error while scanning file(s) path %s";
+  static final String ERR_IO_DURING_SCAN = "Error while scanning file(s) path %s";
+  private static final String PAGE_OBJECT_URI_FORMAT = "%s/pageObjects/%s";
   private final Map<String, String> sourcePath = new HashMap<>();
   private final RecursiveScanner scanner;
   private final ScannerConfig scannerConfig;
@@ -83,8 +84,8 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
     Matcher matcher = relativePattern.matcher(filePath.toString());
     // gets text inside () of the mask, usually PO file name
     final String relativePath = matcher.find() ? matcher.group(1) : "";
-    return String.format("%s/pageObjects/%s", packageName,
-            relativePath.replaceAll(Pattern.quote("."), File.separator));
+    final String relativePageObjectName = relativePath.replaceAll(Pattern.quote("."), File.separator);
+    return String.format(PAGE_OBJECT_URI_FORMAT, packageName, relativePageObjectName);
   }
 
   final String getPageObjectFileSourcePath(String pageObjectURI) {
@@ -240,7 +241,7 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
     String getPageObjectURI(String packageName, Path filePath, String fileMaskRegex) {
       // this gets filename without file extension
       String fileName = filePath.getFileName().toString().split(Pattern.quote("."))[0];
-      return String.format("%s/pageObjects/%s", DEFAULT_PACKAGE_NAME, fileName);
+      return String.format(PAGE_OBJECT_URI_FORMAT, DEFAULT_PACKAGE_NAME, fileName);
     }
   }
 }
