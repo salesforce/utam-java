@@ -114,6 +114,11 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
     }
   }
 
+  // for tests
+  Map<String, String> getSourcePath() {
+    return sourcePath;
+  }
+
   /**
    * scan files recursively to find JSON files with Page Objects,
    * public because used in downstream projects

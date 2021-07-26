@@ -9,13 +9,13 @@ package utam.compiler.translator;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static utam.compiler.translator.TranslatorGenerationCommand.CONFIG_ERR;
 import static utam.compiler.translator.TranslatorGenerationCommand.ERR_COMPILER_CONFIG_NEEDS_ROOT;
 import static utam.compiler.translator.TranslatorGenerationCommand.INVALID_UNIT_TEST_CONFIG;
@@ -28,8 +28,8 @@ import static utam.compiler.translator.TranslatorGenerationCommand.TOO_MANY_INPU
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import org.testng.annotations.Test;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorSourceConfig;
@@ -41,19 +41,26 @@ import utam.core.declarative.translator.UnitTestRunner;
  */
 public class TranslatorGenerationCommandTests {
 
+  private final String RESOURCES_PATH = "/src/test/resources";
+  private final String USER_ROOT = System.getProperty("user.dir");
+
   @Test
   public void testJsonConfig() {
     TranslatorGenerationCommand command = new TranslatorGenerationCommand();
-    command.jsonConfig = new File(System.getProperty("user.dir")
-        + "/src/test/resources/utam.config.json");
-    command.compilerRoot = new File(System.getProperty("user.dir"));
+    command.jsonConfig = new File(USER_ROOT + RESOURCES_PATH + "/utam.config.json");
+    command.compilerRoot = new File(USER_ROOT);
     TranslatorConfig config = command.getTranslationConfig();
     assertThat(config, is(not(nullValue())));
     TranslatorSourceConfig sourceConfig = config.getConfiguredSource();
     sourceConfig.recursiveScan();
-    Collection<String> foundPageObjects = sourceConfig.getPageObjects();
-    assertThat(foundPageObjects, hasSize(2));
-    assertThat(foundPageObjects, hasItems("utam-one/pageObjects/first", "utam-two/pageObjects/second"));
+    Map<String, String> foundPageObjects = ((DefaultSourceConfiguration) sourceConfig)
+        .getSourcePath();
+    assertThat(foundPageObjects.keySet(), hasSize(2));
+    assertThat(foundPageObjects.keySet(),
+        containsInAnyOrder("utam-one/pageObjects/first", "utam-two/pageObjects/second"));
+    assertThat(foundPageObjects.values(), containsInAnyOrder(
+        USER_ROOT + RESOURCES_PATH + "/spec/one/first.utam.json",
+        USER_ROOT + RESOURCES_PATH + "/spec/two/second.utam.json"));
   }
 
   @Test
@@ -73,8 +80,9 @@ public class TranslatorGenerationCommandTests {
     command.jsonConfig = new File("error.config");
     assertThat(command.getTranslationConfig(), is(nullValue()));
     assertThat(command.returnCode, is(equalTo(CONFIG_ERR)));
-    assertThat(command.getThrownError().getMessage(), containsString(ERR_COMPILER_CONFIG_NEEDS_ROOT));
-    command.compilerRoot = new File(System.getProperty("user.dir"));
+    assertThat(command.getThrownError().getMessage(),
+        containsString(ERR_COMPILER_CONFIG_NEEDS_ROOT));
+    command.compilerRoot = new File(USER_ROOT);
     TranslatorConfig config = command.getTranslationConfig();
     assertThat(command.returnCode, is(equalTo(RUNTIME_ERR)));
     assertThat(command.getThrownError(), is(instanceOf(IOException.class)));
@@ -116,15 +124,19 @@ public class TranslatorGenerationCommandTests {
   @Test
   public void testConfigWithoutNamespaces() {
     TranslatorGenerationCommand command = new TranslatorGenerationCommand();
-    command.jsonConfig = new File(System.getProperty("user.dir")
-        + "/src/test/resources/nonamespaces.config.json");
-    command.compilerRoot = new File(System.getProperty("user.dir"));
+    command.jsonConfig = new File(USER_ROOT + RESOURCES_PATH + "/nonamespaces.config.json");
+    command.compilerRoot = new File(USER_ROOT);
     TranslatorConfig config = command.getTranslationConfig();
     assertThat(config, is(not(nullValue())));
     TranslatorSourceConfig sourceConfig = config.getConfiguredSource();
     sourceConfig.recursiveScan();
-    Collection<String> foundPageObjects = sourceConfig.getPageObjects();
-    assertThat(foundPageObjects, hasSize(2));
-    assertThat(foundPageObjects, hasItems("utam/pageObjects/first", "utam/pageObjects/second"));
+    Map<String, String> foundPageObjects = ((DefaultSourceConfiguration) sourceConfig)
+        .getSourcePath();
+    assertThat(foundPageObjects.keySet(), hasSize(2));
+    assertThat(foundPageObjects.keySet(),
+        containsInAnyOrder("utam/pageObjects/first", "utam/pageObjects/second"));
+    assertThat(foundPageObjects.values(), containsInAnyOrder(
+        USER_ROOT + RESOURCES_PATH + "/spec/one/first.utam.json",
+        USER_ROOT + RESOURCES_PATH + "/spec/two/second.utam.json"));
   }
 }

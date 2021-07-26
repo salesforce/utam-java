@@ -18,6 +18,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.translator.JsonCompilerConfig.ERR_READING_COMPILER_CONFIG;
 import static utam.compiler.translator.JsonCompilerConfig.Module.DEFAULT_JSON_FILE_MASK_REGEX;
+import static utam.compiler.translator.JsonCompilerConfig.Module.ERR_DUPLICATE_PROFILE;
 import static utam.compiler.translator.JsonCompilerConfig.Namespace.ERR_DUPLICATE_MAPPING;
 import static utam.compiler.translator.JsonCompilerConfig.Profile.ERR_DUPLICATE_PROFILE_DIFF_VALUES;
 
@@ -185,5 +186,15 @@ public class JsonCompilerConfigTests {
         .readValue(PROFILE_JSON, Profile.class).getProfileConfiguration();
     assertThat(profileConfiguration,
         is(equalTo(new StringValueProfileConfig(PROFILE_NAME, new String[]{PROFILE_VALUE_1, PROFILE_VALUE_2}))));
+  }
+
+  @Test
+  public void testProfilesPerModule() {
+    Profile profile = new Profile("platform", new String[] {"ios"});
+    Module module = new Module("name", "root");
+    module.setUniqueProfiles(List.of(profile));
+    UtamError e = expectThrows(UtamError.class, () -> module.setUniqueProfiles(List.of(profile, profile)));
+    assertThat(e.getMessage(),
+        is(equalTo(String.format(ERR_DUPLICATE_PROFILE, "platform"))));
   }
 }

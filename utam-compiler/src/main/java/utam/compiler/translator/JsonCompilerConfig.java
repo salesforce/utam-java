@@ -93,7 +93,7 @@ public class JsonCompilerConfig {
   public static class Module {
 
     static final String DEFAULT_JSON_FILE_MASK_REGEX = "(.*)\\.utam\\.json$";
-    static final String ERR_DUPLICATE_PROFILE = "Profile %s is already configured";
+    static final String ERR_DUPLICATE_PROFILE = "Profile '%s' is already configured";
     private final List<Profile> profiles = new ArrayList<>();
     final List<Namespace> namespaces = new ArrayList<>();
     private final String pageObjectFileMaskRegex;
@@ -188,7 +188,7 @@ public class JsonCompilerConfig {
     }
 
     public TranslatorSourceConfig getSourceConfig(String compilerRootFolderName) {
-      if(namespaces == null || namespaces.isEmpty()) {
+      if(namespaces.isEmpty()) {
         return new SourceWithoutPackages(compilerRootFolderName + pageObjectsRootDirectory, pageObjectFileMaskRegex);
       }
       RecursiveScanner scanner = new RecursiveScanner(compilerRootFolderName + pageObjectsRootDirectory);
