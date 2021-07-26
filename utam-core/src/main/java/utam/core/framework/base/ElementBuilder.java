@@ -52,16 +52,15 @@ public class ElementBuilder {
 
   private <T extends BasicElement, R extends BasePageElement> T createInstance(
       Class<R> implType, Element element) {
-    R result = null;
     try {
-      result = implType.getConstructor().newInstance();
+      R result = implType.getConstructor().newInstance();
       result.initialize(factory, element);
+      return (T) result;
     } catch (ReflectiveOperationException e) {
       throw new UtamError(
           String.format("Unexpected error creating instance of type %s", implType.getSimpleName()),
           e);
     }
-    return (T)result;
   }
 
 

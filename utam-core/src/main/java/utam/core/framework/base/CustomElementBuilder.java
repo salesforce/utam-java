@@ -46,12 +46,12 @@ public class CustomElementBuilder {
         : new ElementLocationChain(rootLocator, finderContext);
   }
 
-  private CustomElementBuilder(PageObjectsFactory factory, ElementLocation root) {
+  CustomElementBuilder(PageObjectsFactory factory, ElementLocation root) {
     this.factory = factory;
     this.root = root;
   }
 
-  //override for external PO as need to inject its root
+  // overridden for external PO as need to inject its root
   <T extends PageObject> T getRawInstance(Class<T> type) {
     T poInstance = factory.getPageContext().getBean(type);
     if (poInstance instanceof Container || poInstance instanceof Contained) {
@@ -73,6 +73,10 @@ public class CustomElementBuilder {
   public <T extends PageObject> T build(Class<T> type) {
     T poInstance = getRawInstance(type);
     factory.bootstrap(poInstance, root);
+    BasePageObject pageObject = (BasePageObject) poInstance;
+    if(pageObject.getElement().isNull()) {
+      return null;
+    }
     return poInstance;
   }
 
@@ -88,13 +92,16 @@ public class CustomElementBuilder {
   public <T extends PageObject> T build(Class<T> type, Predicate<T> filter) {
     List<Element> found = factory.findElements(root);
     for (Element el : found) {
+      if(el.isNull()) {
+        continue;
+      }
       T instance = new CustomElementBuilder(factory, new ElementLocationChain(el)).build(type);
       if (filter.test(instance)) {
         return instance;
       }
     }
     if (root.isNullable()) {
-      return null;
+      return null; // to align with JS
     }
     throw new NotFoundException(
         String.format("can't find element [%s] that matches condition", type.getName()));
@@ -108,7 +115,14 @@ public class CustomElementBuilder {
    * @return all found instances of the Page Object of given type
    */
   public <T extends PageObject> List<T> buildList(Class<T> type) {
-    return buildList(type, po -> true);
+    // if root element is not nullable - this throws
+    List<Element> found = factory.findElements(root);
+    if(found.isEmpty() && root.isNullable()) {
+      return null; // to align with JS
+    }
+    return found.stream()
+        .map(el -> new CustomElementBuilder(factory, new ElementLocationChain(el)).build(type))
+        .collect(Collectors.toList());
   }
 
   /**
@@ -121,8 +135,10 @@ public class CustomElementBuilder {
    * @return instance of the Page Object of given type
    */
   public <T extends PageObject> List<T> buildList(Class<T> type, Predicate<T> filter) {
+    // if root element is not nullable - this throws
     List<Element> found = factory.findElements(root);
     return found.stream()
+        .filter(el -> !el.isNull())
         .map(el -> new CustomElementBuilder(factory, new ElementLocationChain(el)).build(type))
         .filter(po -> po != null && filter.test(po))
         .collect(Collectors.toList());
