@@ -1,5 +1,5 @@
 {
-  "name": "myModule",
+  "module": "myModule",
   "pageObjectsRootDir": "/src/test/resources/spec",
   "pageObjectsFilesMask": "(.*)\\.utam\\.json$",
   "pageObjectsOutputDir": "/src/test/java/pageObjects",

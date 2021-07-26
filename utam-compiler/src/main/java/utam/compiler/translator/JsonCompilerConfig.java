@@ -125,7 +125,7 @@ public class JsonCompilerConfig {
      */
     @JsonCreator
     public Module(
-        @JsonProperty(value = "name", required = true) String moduleName,
+        @JsonProperty(value = "module") String moduleName,
         @JsonProperty(value = "pageObjectsFilesMask", defaultValue = DEFAULT_JSON_FILE_MASK_REGEX) String filesMaskRegex,
         @JsonProperty(value = "pageObjectsRootDir", required = true) String pageObjectsRootDirectory,
         @JsonProperty(value = "pageObjectsOutputDir", required = true) String pageObjectsOutputDir,
@@ -135,7 +135,7 @@ public class JsonCompilerConfig {
         @JsonProperty(value = "namespaces") List<Namespace> namespaces,
         @JsonProperty(value = "profiles") List<Profile> profiles
     ) {
-      this.moduleName = moduleName;
+      this.moduleName = Objects.requireNonNullElse(moduleName, "");
       this.pageObjectsRootDirectory = pageObjectsRootDirectory;
       this.namespaces.addAll(Objects.requireNonNullElse(namespaces, new ArrayList<>()));
       setUniqueProfiles(profiles);
@@ -143,7 +143,7 @@ public class JsonCompilerConfig {
       this.pageObjectsOutputDir = pageObjectsOutputDir;
       this.resourcesOutputDir = resourcesOutputDir;
       this.unitTestsOutputDir = validateUnitTestDirectory(unitTestRunner, unitTestDirectory);
-      this.unitTestRunnerType = unitTestRunner == null ? NONE : unitTestRunner;
+      this.unitTestRunnerType = Objects.requireNonNullElse(unitTestRunner, NONE);
     }
 
     void setUniqueProfiles(List<Profile> profiles) {
