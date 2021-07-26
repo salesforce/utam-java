@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import utam.compiler.UtamCompilationError;
+import utam.compiler.translator.DefaultSourceConfiguration.SourceWithoutPackages;
 import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.ScannerConfig;
 import utam.core.declarative.translator.ProfileConfiguration;
@@ -131,7 +132,7 @@ public class JsonCompilerConfig {
         @JsonProperty(value = "resourcesOutputDir", required = true) String resourcesOutputDir,
         @JsonProperty(value = "unitTestsOutputDir") final String unitTestDirectory,
         @JsonProperty(value = "unitTestsRunner", defaultValue = "NONE") UnitTestRunner unitTestRunner,
-        @JsonProperty(value = "namespaces", required = true) List<Namespace> namespaces,
+        @JsonProperty(value = "namespaces") List<Namespace> namespaces,
         @JsonProperty(value = "profiles") List<Profile> profiles
     ) {
       this.moduleName = moduleName;
@@ -187,6 +188,9 @@ public class JsonCompilerConfig {
     }
 
     public TranslatorSourceConfig getSourceConfig(String compilerRootFolderName) {
+      if(namespaces == null || namespaces.isEmpty()) {
+        return new SourceWithoutPackages(compilerRootFolderName + pageObjectsRootDirectory, pageObjectFileMaskRegex);
+      }
       RecursiveScanner scanner = new RecursiveScanner(compilerRootFolderName + pageObjectsRootDirectory);
       return new DefaultSourceConfiguration(
           new ScannerConfig(pageObjectFileMaskRegex, getPackagesMapping()),

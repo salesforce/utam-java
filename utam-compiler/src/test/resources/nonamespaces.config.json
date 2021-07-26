@@ -1,0 +1,18 @@
+{
+  "name": "myModule",
+  "pageObjectsRootDir": "/src/test/resources/spec",
+  "pageObjectsFilesMask": "(.*)\\.utam\\.json$",
+  "pageObjectsOutputDir": "/src/test/java/pageObjects",
+  "resourcesOutputDir": "/src/test/resources",
+  "unitTestsOutputDir": "/src/test/java",
+  "unitTestsRunner": "JUNIT",
+  "profiles": [
+    {
+      "name": "platform",
+      "values": [
+        "ios",
+        "android"
+      ]
+    }
+  ]
+}
