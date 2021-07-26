@@ -7,11 +7,13 @@
  */
 package utam.compiler.translator;
 
+import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_COMMENTS;
 import static utam.core.declarative.translator.UnitTestRunner.NONE;
 import static utam.core.declarative.translator.UnitTestRunner.validateUnitTestDirectory;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
@@ -43,9 +45,17 @@ public class JsonCompilerConfig {
   private final Module moduleConfig;
   private final String filePathsRoot;
 
+  private static ObjectMapper getJsonCompilerMapper() {
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.enable(ALLOW_COMMENTS);
+    // for compatibility with possible JS options - ignore unknown properties
+    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    return mapper;
+  }
+
   public JsonCompilerConfig(File configFile, File compilerRoot) throws IOException {
     try {
-      moduleConfig = new ObjectMapper().readValue(configFile, Module.class);
+      moduleConfig = getJsonCompilerMapper().readValue(configFile, Module.class);
       filePathsRoot = compilerRoot.toString();
     } catch (IOException e) {
       throw new IOException(String.format(ERR_READING_COMPILER_CONFIG, configFile.toString()), e);
@@ -81,7 +91,7 @@ public class JsonCompilerConfig {
    */
   public static class Module {
 
-    protected static final String DEFAULT_JSON_FILE_MASK_REGEX = "(.*)\\.utam\\.json$";
+    static final String DEFAULT_JSON_FILE_MASK_REGEX = "(.*)\\.utam\\.json$";
     static final String ERR_DUPLICATE_PROFILE = "Profile %s is already configured";
     private final List<Profile> profiles = new ArrayList<>();
     final List<Namespace> namespaces = new ArrayList<>();

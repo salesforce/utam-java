@@ -6,6 +6,9 @@
   "resourcesOutputDir": "/src/test/resources",
   "unitTestsOutputDir": "/src/test/java",
   "unitTestsRunner": "JUNIT",
+  // test redundant properties
+  "extensionsFileMask" : "**/__utam__/**/*.utam.js",
+  "extensionsOutputDir" : "pageObjects/utils",
   "namespaces" : [
     {
       "typeMatch" : "utam-one",
