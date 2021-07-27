@@ -24,28 +24,22 @@ import java.util.regex.Pattern;
  */
 public class TranslationTypesConfigJava implements TranslationTypesConfig {
 
-  private static final String ERR_WRONG_TYPE =
-      "type should have format 'utam-<namespace>/%s/<package>/<name>' or 'utam-<namespace>/%s/<name>', actual was '%s'";
+  private static final String INCORRECT_PAGE_OBJECT_OR_UTILITY_TYPE =
+      "type should have format '<namespace>/<pageobjects or utils>/[< optional subPackage>/]<name>', actual was '%s'";
 
   // public because used in tests
-  static String getWrongTypeError(String pageObjectURI, Mask maskValue) {
-    return String.format(ERR_WRONG_TYPE, maskValue.name(), maskValue.name(), pageObjectURI);
+  static String getWrongTypeError(String pageObjectURI) {
+    return String.format(INCORRECT_PAGE_OBJECT_OR_UTILITY_TYPE, pageObjectURI);
   }
 
-  static TypeProvider getJavaType(String pageObjectURI, Mask maskValue) {
+  static TypeProvider getJavaType(String pageObjectURI) {
     String[] str = pageObjectURI.split(Pattern.quote("/"));
-    String mask = maskValue.name();
     if (str.length < 3) {
-      throw new UtamError(getWrongTypeError(pageObjectURI, maskValue));
-    }
-    String[] prefix = str[0].split("-");
-    if (prefix.length != 2 && !"utam".equals(prefix[0])) {
-      throw new UtamError(getWrongTypeError(pageObjectURI, maskValue));
+      throw new UtamError(getWrongTypeError(pageObjectURI));
     }
     String packageName = str[0].replaceAll("-", ".");
-    if (!mask.equals(str[1])) {
-      throw new UtamError(getWrongTypeError(pageObjectURI, maskValue));
-    }
+    // usually /pageObjects or /utils, but no longer enforced
+    String secondPackageName = str[1].toLowerCase();
     String[] relativePath = Arrays.copyOfRange(str, 2, str.length);
     for(int i = 0; i < relativePath.length; i++) {
       if (i == relativePath.length - 1) {
@@ -56,7 +50,7 @@ public class TranslationTypesConfigJava implements TranslationTypesConfig {
     }
     final String relativeTypeName = String.join(".", relativePath);
     return new TypeUtilities.FromString(
-        String.format("%s.%s.%s", packageName, maskValue.name().toLowerCase(), relativeTypeName));
+        String.format("%s.%s.%s", packageName, secondPackageName, relativeTypeName));
   }
 
   private static String capitalizeFirstLetter(String fileName) {
@@ -65,7 +59,7 @@ public class TranslationTypesConfigJava implements TranslationTypesConfig {
 
   public static boolean isPageObjectType(String typeString) {
     try {
-      getJavaType(typeString, Mask.pageObjects);
+      getJavaType(typeString);
       return true;
     } catch (UtamError e) {
       return false;
@@ -80,16 +74,11 @@ public class TranslationTypesConfigJava implements TranslationTypesConfig {
 
   @Override
   public TypeProvider getInterfaceType(String pageObjectURI) {
-    return getJavaType(pageObjectURI, Mask.pageObjects);
+    return getJavaType(pageObjectURI);
   }
 
   @Override
   public TypeProvider getUtilityType(String utilityURI) {
-    return getJavaType(utilityURI, Mask.utils);
-  }
-
-  enum Mask {
-    pageObjects,
-    utils
+    return getJavaType(utilityURI);
   }
 }

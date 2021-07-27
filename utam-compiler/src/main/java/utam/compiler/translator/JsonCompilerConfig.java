@@ -7,11 +7,13 @@
  */
 package utam.compiler.translator;
 
+import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_COMMENTS;
 import static utam.core.declarative.translator.UnitTestRunner.NONE;
 import static utam.core.declarative.translator.UnitTestRunner.validateUnitTestDirectory;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import utam.compiler.UtamCompilationError;
+import utam.compiler.translator.DefaultSourceConfiguration.SourceWithoutPackages;
 import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.ScannerConfig;
 import utam.core.declarative.translator.ProfileConfiguration;
@@ -39,14 +42,21 @@ import utam.core.declarative.translator.UnitTestRunner;
 public class JsonCompilerConfig {
 
   static final String ERR_READING_COMPILER_CONFIG = "Error reading compiler config '%s'";
-  static final String ERR_TARGET_NOT_SET = "Target configuration is not set";
 
   private final Module moduleConfig;
   private final String filePathsRoot;
 
+  private static ObjectMapper getJsonCompilerMapper() {
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.enable(ALLOW_COMMENTS);
+    // for compatibility with possible JS options - ignore unknown properties
+    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    return mapper;
+  }
+
   public JsonCompilerConfig(File configFile, File compilerRoot) throws IOException {
     try {
-      moduleConfig = new ObjectMapper().readValue(configFile, Module.class);
+      moduleConfig = getJsonCompilerMapper().readValue(configFile, Module.class);
       filePathsRoot = compilerRoot.toString();
     } catch (IOException e) {
       throw new IOException(String.format(ERR_READING_COMPILER_CONFIG, configFile.toString()), e);
@@ -69,6 +79,11 @@ public class JsonCompilerConfig {
     return moduleConfig.moduleName;
   }
 
+  // for tests
+  Module getModule() {
+    return moduleConfig;
+  }
+
   /**
    * JSON mapping that represents a Page Objects module with namespaces and profiles
    *
@@ -77,42 +92,58 @@ public class JsonCompilerConfig {
    */
   public static class Module {
 
-    protected static final String DEFAULT_JSON_FILE_MASK_REGEX = "(.*)\\.utam\\.json$";
-    static final String ERR_DUPLICATE_PROFILE = "Profile %s is already configured";
-    final Target target;
+    static final String DEFAULT_JSON_FILE_MASK_REGEX = "(.*)\\.utam\\.json$";
+    static final String ERR_DUPLICATE_PROFILE = "Profile '%s' is already configured";
     private final List<Profile> profiles = new ArrayList<>();
     final List<Namespace> namespaces = new ArrayList<>();
     private final String pageObjectFileMaskRegex;
     private final String moduleName;
-    private final String pageObjectsDirectory;
+    private final String pageObjectsRootDirectory;
+    private final String pageObjectsOutputDir;
+    private final String resourcesOutputDir;
+    private final String unitTestsOutputDir;
+    private final UnitTestRunner unitTestRunnerType;
 
     /**
      * Initializes a new instance of the Module class. Instantiated via JSON deserialization.
      *
-     * @param moduleName           the arbitrary name of the module in the source repository
-     * @param filesMaskRegex       used by scanner to distinguish JSON with page objects
-     * @param pageObjectsDirectory the directory in the source repository in which to recursively
-     *                             search for UTAM Page Object declarative description files
-     * @param namespaces           an array of Namespace objects describing the namespaces within
-     *                             the module
-     * @param profiles             an array of Profile objects representing the profiles used in
-     *                             JSON files of the module
+     * @param moduleName               the arbitrary name of the module in the source repository
+     * @param filesMaskRegex           used by scanner to distinguish JSON with page objects
+     * @param pageObjectsRootDirectory the directory in the source repository in which to
+     *                                 recursively search for UTAM Page Object declarative
+     *                                 description files
+     * @param pageObjectsOutputDir     target root folder for generated Page Objects
+     * @param resourcesOutputDir       target folder for generated resources like profiles
+     *                                 configurations
+     * @param unitTestDirectory        target root folder for generated unit tests
+     * @param unitTestRunner           type of the unit tests runner for unit tests generation,
+     *                                 default is NONE, can also be "testng" or "junit"
+     * @param namespaces               an array of Namespace objects describing the namespaces
+     *                                 within the module
+     * @param profiles                 an array of Profile objects representing the profiles used in
+     *                                 JSON files of the module
      */
     @JsonCreator
     public Module(
-        @JsonProperty(value = "name", required = true) String moduleName,
+        @JsonProperty(value = "module") String moduleName,
         @JsonProperty(value = "pageObjectsFilesMask", defaultValue = DEFAULT_JSON_FILE_MASK_REGEX) String filesMaskRegex,
-        @JsonProperty(value = "pageObjectsDirectory", required = true) String pageObjectsDirectory,
-        @JsonProperty(value = "target") Target target,
-        @JsonProperty(value = "namespaces", required = true) List<Namespace> namespaces,
+        @JsonProperty(value = "pageObjectsRootDir", required = true) String pageObjectsRootDirectory,
+        @JsonProperty(value = "pageObjectsOutputDir", required = true) String pageObjectsOutputDir,
+        @JsonProperty(value = "resourcesOutputDir", required = true) String resourcesOutputDir,
+        @JsonProperty(value = "unitTestsOutputDir") final String unitTestDirectory,
+        @JsonProperty(value = "unitTestsRunner", defaultValue = "NONE") UnitTestRunner unitTestRunner,
+        @JsonProperty(value = "namespaces") List<Namespace> namespaces,
         @JsonProperty(value = "profiles") List<Profile> profiles
     ) {
-      this.moduleName = moduleName;
-      this.pageObjectsDirectory = pageObjectsDirectory;
+      this.moduleName = Objects.requireNonNullElse(moduleName, "");
+      this.pageObjectsRootDirectory = pageObjectsRootDirectory;
       this.namespaces.addAll(Objects.requireNonNullElse(namespaces, new ArrayList<>()));
       setUniqueProfiles(profiles);
       this.pageObjectFileMaskRegex = Objects.requireNonNullElse(filesMaskRegex, DEFAULT_JSON_FILE_MASK_REGEX);
-      this.target = target;
+      this.pageObjectsOutputDir = pageObjectsOutputDir;
+      this.resourcesOutputDir = resourcesOutputDir;
+      this.unitTestsOutputDir = validateUnitTestDirectory(unitTestRunner, unitTestDirectory);
+      this.unitTestRunnerType = Objects.requireNonNullElse(unitTestRunner, NONE);
     }
 
     void setUniqueProfiles(List<Profile> profiles) {
@@ -131,34 +162,47 @@ public class JsonCompilerConfig {
     }
 
     // used in tests
-    Module(String moduleName, String filesMaskRegex, String pageObjectsDirectory, Target target) {
-      this(moduleName, filesMaskRegex, pageObjectsDirectory, target, new ArrayList<>(),
+    Module(String moduleName, String filesMaskRegex, String pageObjectsRootDirectory) {
+      this(moduleName,
+          filesMaskRegex,
+          pageObjectsRootDirectory,
+          null,
+          null,
+          null,
+          null,
+          new ArrayList<>(),
           new ArrayList<>());
     }
 
     // used in tests
-    Module(String moduleName, String pageObjectsDirectory) {
-      this(moduleName, null, pageObjectsDirectory, null, new ArrayList<>(),
+    Module(String moduleName, String pageObjectsRootDirectory) {
+      this(moduleName,
+          null,
+          pageObjectsRootDirectory,
+          null,
+          null,
+          null,
+          null,
+          new ArrayList<>(),
           new ArrayList<>());
     }
 
     public TranslatorSourceConfig getSourceConfig(String compilerRootFolderName) {
-      RecursiveScanner scanner = new RecursiveScanner(compilerRootFolderName + pageObjectsDirectory);
+      if(namespaces.isEmpty()) {
+        return new SourceWithoutPackages(compilerRootFolderName + pageObjectsRootDirectory, pageObjectFileMaskRegex);
+      }
+      RecursiveScanner scanner = new RecursiveScanner(compilerRootFolderName + pageObjectsRootDirectory);
       return new DefaultSourceConfiguration(
           new ScannerConfig(pageObjectFileMaskRegex, getPackagesMapping()),
           scanner);
     }
 
     public TranslatorTargetConfig getTargetConfig(String compilerRootFolderName) {
-      // target can be null when set from distribution repo!
-      if (target == null) {
-        throw new UtamCompilationError(ERR_TARGET_NOT_SET);
-      }
       return new DefaultTargetConfiguration(
-          compilerRootFolderName + target.pageObjectsPath,
-          compilerRootFolderName + target.resourcesHomePath,
-          target.unitTestRunnerType,
-          compilerRootFolderName + target.unitTestDirectory);
+          compilerRootFolderName + pageObjectsOutputDir,
+          compilerRootFolderName + resourcesOutputDir,
+          unitTestRunnerType,
+          compilerRootFolderName + unitTestsOutputDir);
     }
 
     public Map<String, String> getPackagesMapping() {
@@ -183,8 +227,8 @@ public class JsonCompilerConfig {
      * @return the directory in the source repository in which to recursively search for UTAM Page
      * Object declarative description files
      */
-    public String getPageObjectsDirectory() {
-      return pageObjectsDirectory;
+    public String getPageObjectsRootDirectory() {
+      return pageObjectsRootDirectory;
     }
 
     /**
@@ -214,6 +258,42 @@ public class JsonCompilerConfig {
      */
     public String getPageObjectFileMaskRegex() {
       return pageObjectFileMaskRegex;
+    }
+
+    /**
+     * target root folder for generated Page Objects
+     *
+     * @return string with file path
+     */
+    public String getPageObjectsOutputDir() {
+      return pageObjectsOutputDir;
+    }
+
+    /**
+     * target root folder for generated resources
+     *
+     * @return string with file path
+     */
+    public String getResourcesOutputDir() {
+      return resourcesOutputDir;
+    }
+
+    /**
+     * target root folder for generated Page Objects unit tests
+     *
+     * @return string with file path
+     */
+    public String getUnitTestsOutputDir() {
+      return unitTestsOutputDir;
+    }
+
+    /**
+     * type of the unit tests to generate, one of: "none", "junit", "testng"
+     *
+     * @return string with file path
+     */
+    public UnitTestRunner getUnitTestRunnerType() {
+      return unitTestRunnerType;
     }
   }
 
@@ -285,8 +365,8 @@ public class JsonCompilerConfig {
      */
     @JsonCreator
     public Namespace(
-        @JsonProperty(value = "typePrefix", required = true) String typePrefix,
-        @JsonProperty(value = "pathMatchRegex", required = true) String pathMatchRegex) {
+        @JsonProperty(value = "typeMatch", required = true) String typePrefix,
+        @JsonProperty(value = "pathMatch", required = true) String pathMatchRegex) {
       this.typePrefix = typePrefix;
       this.pathMatchRegex = pathMatchRegex;
     }
@@ -298,7 +378,7 @@ public class JsonCompilerConfig {
      * @return the mapped name used by the UTAM compiler to generate packages for the generated Page
      * Object source code
      */
-    public String getTypePrefix() {
+    public String getTypeMatch() {
       return typePrefix;
     }
 
@@ -307,7 +387,7 @@ public class JsonCompilerConfig {
      *
      * @return regex to use for scanning folders
      */
-    public String getPathMatchRegex() {
+    public String getPathMatch() {
       return pathMatchRegex;
     }
 
@@ -317,7 +397,7 @@ public class JsonCompilerConfig {
      * @return key for package mapping
      */
     protected String getPackageMappingKey() {
-      return getTypePrefix();
+      return getTypeMatch();
     }
 
     /**
@@ -326,7 +406,7 @@ public class JsonCompilerConfig {
      * @return value for package mapping
      */
     protected String getPackageMappingValue() {
-      return getPathMatchRegex();
+      return getPathMatch();
     }
 
     // setter ensures that namespaces are unique within a module
@@ -338,37 +418,6 @@ public class JsonCompilerConfig {
             String.format(ERR_DUPLICATE_MAPPING, key, packages.get(key)));
       }
       packages.put(key, value);
-    }
-  }
-
-  /**
-   * JSON mapping for compiler target: folder to put page objects, resources and unit tests
-   *
-   * @author elizaveta.ivanova
-   * @since 234
-   */
-  public static class Target {
-
-    final String pageObjectsPath;
-    final String resourcesHomePath;
-    final String unitTestDirectory;
-    final UnitTestRunner unitTestRunnerType;
-
-    public Target(
-        @JsonProperty(value = "pageObjects", required = true) String pageObjectsPath,
-        @JsonProperty(value = "resources", required = true) String resourcesHomePath,
-        @JsonProperty(value = "unitTests") final String unitTestDirectory,
-        @JsonProperty(value = "unitTestsRunner", defaultValue = "NONE") UnitTestRunner unitTestRunner
-    ) {
-      this.pageObjectsPath = pageObjectsPath;
-      this.resourcesHomePath = resourcesHomePath;
-      this.unitTestDirectory = validateUnitTestDirectory(unitTestRunner, unitTestDirectory);
-      this.unitTestRunnerType = unitTestRunner == null ? NONE : unitTestRunner;
-    }
-
-    // used in tests
-    Target(String pageObjectsPath, String resourcesHomePath) {
-      this(pageObjectsPath, resourcesHomePath, null, NONE);
     }
   }
 }

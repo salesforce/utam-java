@@ -99,6 +99,6 @@ public class StringValueProfileConfig implements ProfileConfiguration {
           && ((StringValueProfileConfig) obj).getSupportedValues().size() == getSupportedValues().size()
           && ((StringValueProfileConfig) obj).getSupportedValues().containsAll(getSupportedValues());
     }
-    return super.equals(obj);
+    return false;
   }
 }

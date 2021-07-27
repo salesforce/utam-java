@@ -125,4 +125,12 @@ public class StringValueProfileConfigTests {
         config.getSupportedValues(),
         containsInAnyOrder("testValue", "anotherTestValue"));
   }
+
+  @Test
+  public void testEqualsOverride() {
+    StringValueProfileConfig value = new StringValueProfileConfig("testName", "testValue");
+    assertThat(value.equals(1), is(false));
+    assertThat(new StringValueProfileConfig("testName", "testValue1").equals(value), is(false));
+    assertThat(value.equals(value), is(true));
+  }
 }

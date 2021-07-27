@@ -66,7 +66,7 @@ public class UtamMethod_AbstractTests {
   public void testGetAbstractMethodWithElementReturnType() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
-        METHOD_NAME, new String[] {"clickable"}, (UtamArgument[]) null);
+        METHOD_NAME, new String[] {"clickable"}, null);
     PageObjectValidationTestHelper.MethodInfo info =
         new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "TestMethodElement");
     PageObjectValidationTestHelper.validateMethod(method.getAbstractMethod(context), info);

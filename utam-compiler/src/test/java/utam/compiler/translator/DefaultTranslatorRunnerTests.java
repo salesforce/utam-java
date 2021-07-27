@@ -290,8 +290,7 @@ public class DefaultTranslatorRunnerTests {
     Properties properties = runner.getProfileMapping(DEFAULT_PROFILE);
     assertThat(
         properties.containsKey(
-            TranslationTypesConfigJava.getJavaType(
-                INTERFACE_ONLY_URI, TranslationTypesConfigJava.Mask.pageObjects)
+            TranslationTypesConfigJava.getJavaType(INTERFACE_ONLY_URI)
                 .getFullName()),
         is(true));
   }
