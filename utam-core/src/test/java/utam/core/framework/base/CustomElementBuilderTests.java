@@ -48,7 +48,7 @@ public class CustomElementBuilderTests {
   }
 
   @Test
-  public void testBuild() {
+  public void testBuildSingleElement() {
     MockAdapter mock = new MockAdapter();
     Element rootElement = mock.getElementAdapter();
     PageObjectsFactory factory = mock.getFactory();
@@ -92,7 +92,7 @@ public class CustomElementBuilderTests {
   }
 
   @Test
-  public void testBuildWithFilter() {
+  public void testBuildSingleElementWithFilter() {
     MockAdapter mock = new MockAdapter();
     Element rootElement = mock.getElementAdapter();
     PageObjectsFactory factory = mock.getFactory();
@@ -105,7 +105,7 @@ public class CustomElementBuilderTests {
     assertThat(instance, is(notNullValue()));
 
     // not null, filter returns false
-    NotFoundException e = expectThrows(NotFoundException.class,
+    Exception e = expectThrows(NullPointerException.class,
         () -> builder.build(TestPageObject.class, testPageObject -> testPageObject.isFalse()));
     assertThat(e.getMessage(), startsWith(NOTHING_FOUND_ERR));
 
@@ -139,22 +139,22 @@ public class CustomElementBuilderTests {
         .buildList(TestPageObject.class, testPageObject -> testPageObject.isFalse());
     assertThat(instances, is(emptyIterable()));
 
-    // nothing found
+    // not nullable, nothing found
     NotFoundException e = expectThrows(NotFoundException.class,
         () -> getNullBuilder(factory)
             .buildList(TestPageObject.class, testPageObject -> testPageObject != null));
     assertThat(e.getMessage(), startsWith("can't find element"));
 
-    // nullable, filter returns false
+    // nullable, nothing found
     instances = getNullableBuilder(factory)
         .buildList(TestPageObject.class, testPageObject -> testPageObject.isFalse());
-    assertThat(instances, is(emptyIterable()));
+    assertThat(instances, is(nullValue()));
   }
 
   // has to be public to construct with reflections
   public static class TestPageObject extends BasePageObject {
 
-    public boolean isFalse() {
+    boolean isFalse() {
       return false;
     }
   }

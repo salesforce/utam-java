@@ -131,8 +131,8 @@ public abstract class BasePageObject extends UtamBaseImpl implements RootPageObj
         getFactory(), scopeElement, selector, isExpandParentShadowRoot);
   }
 
-  protected final ElementBuilder element(ElementLocation element) {
-    return new ElementBuilder(getFactory(), element);
+  protected final BasicElementBuilder element(ElementLocation element) {
+    return new BasicElementBuilder(getFactory(), element);
   }
 
   protected final ContainerElement inContainer(ElementLocation element,
