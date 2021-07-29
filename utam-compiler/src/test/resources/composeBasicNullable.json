@@ -8,6 +8,13 @@
       "selector": {
         "css": "selector1"
       }
+    },
+    {
+      "name": "checkMeForNull",
+      "nullable": true,
+      "selector": {
+        "css": "button"
+      }
     }
   ],
   "methods": [
@@ -17,6 +24,28 @@
         {
           "element": "basic",
           "apply": "focus"
+        }
+      ]
+    },
+    {
+      "name" : "isPrivateNullablePresent1",
+      "compose" : [
+        {
+          "apply" : "getCheckMeForNullElement",
+          "matcher" : {
+            "type" : "notNull"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "isPrivateNullablePresent2",
+      "compose" : [
+        {
+          "element" : "checkMeForNull",
+          "matcher" : {
+            "type" : "notNull"
+          }
         }
       ]
     },

@@ -186,12 +186,12 @@ public final class TranslationContext {
   }
 
   /**
-   * temporary refactoring code: if private method was never used, we should not declare it it might
-   * happen with getter for private element if it's only used as scope and never in compose
+   * if private method was never used, we should not generate code for it to prevent tests coverage violations. It might
+   * happen with getter for private element if it's only used as scope or in compose as "apply"
    *
    * @param name method name
    */
-  void setPrivateMethodUsage(String name) {
+  public void setMethodUsage(String name) {
     usedPrivateMethods.add(name);
   }
 

@@ -16,6 +16,7 @@ import static utam.compiler.grammar.UtamMethod.ERR_METHOD_EMPTY_STATEMENTS;
 
 import java.util.Collection;
 import org.testng.annotations.Test;
+import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethod;
 import utam.compiler.representation.PageObjectValidationTestHelper;
@@ -459,5 +460,18 @@ public class UtamMethod_ComposeDeserializeTests {
     methodInfo.addCodeLine("this.someMethod(strArg)");
     TranslationContext context = new DeserializerUtilities().getContext("composeArgsReference");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("test"), methodInfo);
+  }
+
+  @Test
+  public void testNotNullMatcherForPrivateGetter() {
+    TranslationContext context = new DeserializerUtilities().getContext("composeBasicNullable");
+    MethodInfo methodInfo = new MethodInfo("isPrivateNullablePresent1", PrimitiveType.BOOLEAN.getSimpleName());
+    methodInfo.addCodeLine("this.getCheckMeForNullElement() != null");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("isPrivateNullablePresent1"), methodInfo);
+    assertThat(context.getUsedPrivateMethods().contains("getCheckMeForNullElement"), is(true));
+
+    methodInfo = new MethodInfo("isPrivateNullablePresent2", PrimitiveType.BOOLEAN.getSimpleName());
+    methodInfo.addCodeLine("this.getCheckMeForNullElement() != null");
+    PageObjectValidationTestHelper.validateMethod(context.getMethod("isPrivateNullablePresent2"), methodInfo);
   }
 }

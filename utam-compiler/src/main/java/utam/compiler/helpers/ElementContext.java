@@ -33,8 +33,8 @@ import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionab
 public abstract class ElementContext {
 
   static final String ROOT_ELEMENT_NAME = "root";
-  public static final String DOCUMENT_ELEMENT_NAME = "document";
-  static final String SELF_ELEMENT_NAME = "self";
+  static final String DOCUMENT_ELEMENT_NAME = "document";
+  public static final String SELF_ELEMENT_NAME = "self";
   static final Locator EMPTY_SELECTOR = LocatorBy.byCss("");
   private final Locator selector;
   // parameters from scope + from element itself
@@ -120,7 +120,7 @@ public abstract class ElementContext {
   }
 
   public void setElementMethodUsage(TranslationContext translationContext) {
-    translationContext.setPrivateMethodUsage(getElementGetterName());
+    translationContext.setMethodUsage(getElementGetterName());
   }
 
   public void setElementMethod(PageObjectMethod method) {
