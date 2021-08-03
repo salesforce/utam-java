@@ -7,9 +7,12 @@
  */
 package utam.core.framework.base;
 
+import static utam.core.framework.base.CustomElementBuilder.getFilteredElementNotFoundErr;
+
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.openqa.selenium.NotFoundException;
 import utam.core.element.BasicElement;
 import utam.core.element.Element;
 import utam.core.element.ElementLocation;
@@ -17,17 +20,17 @@ import utam.core.framework.consumer.UtamError;
 import utam.core.framework.element.BasePageElement;
 
 /**
- * builder for page object element
+ * builder for a basic page object element
  *
  * @author elizaveta.ivanova
  * @since 232
  */
-public class ElementBuilder {
+public class BasicElementBuilder {
 
   private final PageObjectsFactory factory;
   private final ElementLocation elementFinder;
 
-  ElementBuilder(PageObjectsFactory factory, ElementLocation elementFinder) {
+  BasicElementBuilder(PageObjectsFactory factory, ElementLocation elementFinder) {
     this.factory = factory;
     this.elementFinder = elementFinder;
   }
@@ -43,8 +46,12 @@ public class ElementBuilder {
   public <T extends BasicElement, R extends BasePageElement> T build(
       Class<T> type, Class<R> implType, Object... values) {
     ElementLocation elementLocation = this.elementFinder.setParameters(values);
+
+    // if element is not nullable - this throws an error
     Element element = factory.findElement(elementLocation);
-    if(element.isNull()) {
+
+    // if nothing is found and element is nullable - return null
+    if (element.isNull()) {
       return null;
     }
     return createInstance(implType, element);
@@ -52,16 +59,15 @@ public class ElementBuilder {
 
   private <T extends BasicElement, R extends BasePageElement> T createInstance(
       Class<R> implType, Element element) {
-    R result = null;
     try {
-      result = implType.getConstructor().newInstance();
+      R result = implType.getConstructor().newInstance();
       result.initialize(factory, element);
+      return (T) result;
     } catch (ReflectiveOperationException e) {
       throw new UtamError(
-          String.format("Unexpected error creating instance of type %s", implType.getSimpleName()),
+          String.format("Error creating instance of type '%s'", implType.getSimpleName()),
           e);
     }
-    return (T)result;
   }
 
 
@@ -76,7 +82,9 @@ public class ElementBuilder {
    */
   public <T extends BasicElement, R extends BasePageElement> T build(
       Class<T> type, Class<R> implType, Predicate<T> filter, Object... values) {
+    // if element is not nullable - this throws an error
     List<T> list = buildList(type, implType, values);
+
     if (list == null) {
       return null;
     }
@@ -85,7 +93,9 @@ public class ElementBuilder {
         return t;
       }
     }
-    throw new UtamError("can't find matching element");
+
+    // if none found that match condition - throw
+    throw new NullPointerException(getFilteredElementNotFoundErr(type));
   }
 
   /**
@@ -99,13 +109,20 @@ public class ElementBuilder {
   public <T extends BasicElement, R extends BasePageElement> List<T> buildList(
       Class<T> type, Class<R> implType, Object... parameters) {
     ElementLocation elementFinder = this.elementFinder.setParameters(parameters);
+
+    // if element is not nullable - this throws an error
     List<Element> elementsFound = factory.findElements(elementFinder);
+
+    // if nothing is found and element is nullable - return null
     if (elementsFound == null || elementsFound.isEmpty()) {
       return null;
     }
-    List<?> elementList = elementsFound.stream().map(el -> createInstance(implType, el))
+
+    List<T> elementList = elementsFound
+        .stream()
+        .map(el -> (T) createInstance(implType, el))
         .collect(Collectors.toList());
-    return (List<T>)elementList;
+    return elementList;
   }
 
   /**
@@ -119,10 +136,14 @@ public class ElementBuilder {
    */
   public <T extends BasicElement, R extends BasePageElement> List<T> buildList(
       Class<T> type, Class<R> implType, Predicate<T> filter, Object... values) {
+    // if element is not nullable - this throws an error
     List<T> list = buildList(type, implType, values);
-    if (list.isEmpty()) {
-      throw new UtamError("can't find matching element");
+
+    // if nothing is found and element is nullable - return null
+    if (list == null || list.isEmpty()) {
+      return null;
     }
+
     return list.stream().filter(filter).collect(Collectors.toList());
   }
 }

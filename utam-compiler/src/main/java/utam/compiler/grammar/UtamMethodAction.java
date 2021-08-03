@@ -9,6 +9,7 @@ package utam.compiler.grammar;
 
 import static utam.compiler.helpers.BasicElementActionType.getActionType;
 import static utam.compiler.helpers.BasicElementActionType.size;
+import static utam.compiler.helpers.ElementContext.SELF_ELEMENT_NAME;
 import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.compiler.representation.ComposeMethodStatement.WAIT_FOR;
@@ -46,8 +47,10 @@ class UtamMethodAction {
       "compose method '%s': statement should not have both 'apply' and 'applyExternal' properties";
   static final String ERR_COMPOSE_ACTION_REDUNDANT_ELEMENT =
       "compose method '%s': utility statement should not have 'element' property";
-  final String elementName;
-  final String apply;
+  // can be assigned a value "self"
+  String elementName;
+  // can be assigned a value with element getter
+  String apply;
   final UtamUtilityMethodAction applyExternal;
   private final UtamMatcher matcher;
   UtamArgument[] args;
@@ -154,12 +157,19 @@ class UtamMethodAction {
       boolean isLastPredicateStatement) {
     // either "apply" or "applyExternal" should be set
     if (apply == null && applyExternal == null) {
-      throw new UtamError(
-          String.format(
-              ERR_COMPOSE_ACTION_REQUIRED_KEYS,
-              methodContext.getName()
-          )
-      );
+      if(elementName != null) {
+        // if element name is set - use its getter as "apply"
+        String applyGetter = context.getElement(elementName).getElementMethod().getDeclaration().getName();
+        this.elementName = SELF_ELEMENT_NAME;
+        this.apply = applyGetter;
+      } else {
+        throw new UtamError(
+            String.format(
+                ERR_COMPOSE_ACTION_REQUIRED_KEYS,
+                methodContext.getName()
+            )
+        );
+      }
     }
 
     // both "apply" and "applyExternal" can't be set
@@ -187,6 +197,8 @@ class UtamMethodAction {
     if (applyExternal != null) {
       return new ComposeMethodStatement.Utility(operand, operation, isLastPredicateStatement);
     }
+    // to make sure that private method is declared because it's being called from another method
+    context.setMethodUsage(apply);
     if (operand.isList() && !isSizeAction()) {
       return
           operation.isReturnsVoid() ? new ComposeMethodStatement.VoidList(operand, operation,

@@ -13,12 +13,12 @@ import static utam.core.selenium.element.ElementAdapter.NULL_ELEMENT;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.openqa.selenium.InvalidElementStateException;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
@@ -41,7 +41,8 @@ import utam.core.selenium.appium.MobileElementAdapter;
 public class DriverAdapter implements Driver {
 
   static final String ERR_SUPPORTED_FOR_MOBILE = "method is applicable only for iOS/Android";
-
+  // used in tests to validate right message
+  public static final String ERR_ELEMENT_NOT_FOUND_PREFIX = "can't find element";
   private static final List<Class<? extends Throwable>> IGNORE_EXCEPTIONS =
       Stream.of(
           NoSuchElementException.class,
@@ -79,7 +80,7 @@ public class DriverAdapter implements Driver {
         throw new NullPointerException(getNotFoundErr(by));
       }
       return res;
-    } catch (org.openqa.selenium.NoSuchElementException e) {
+    } catch (NoSuchElementException e) {
       if (finderContext.isNullable()) {
         return null;
       }
@@ -88,7 +89,8 @@ public class DriverAdapter implements Driver {
   }
 
   static String getNotFoundErr(Locator by) {
-    return String.format("can't find element with locator '%s'", by.getValue().toString());
+    return String
+        .format("%s with locator '%s'", ERR_ELEMENT_NOT_FOUND_PREFIX, by.getValue().toString());
   }
 
   static List<WebElement> findList(SearchContext searchContext, LocatorBy by,
@@ -98,7 +100,7 @@ public class DriverAdapter implements Driver {
       if (finderContext.isNullable()) {
         return null;
       }
-      throw new org.openqa.selenium.NoSuchElementException(getNotFoundErr(by));
+      throw new NoSuchElementException(getNotFoundErr(by));
     }
     return founds;
   }
