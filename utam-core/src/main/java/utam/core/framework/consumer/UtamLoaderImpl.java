@@ -97,7 +97,7 @@ public class UtamLoaderImpl implements UtamLoader {
     // todo - abstract selenium
     WebElement webElement = (WebElement) parent.getScope().get();
     Element element =
-        driver.isMobile() ? new MobileElementAdapter(webElement) : new ElementAdapter(webElement);
+        driver.isMobile() ? new MobileElementAdapter(webElement, driver) : new ElementAdapter(webElement, driver);
     ElementLocation finder = new ElementLocationChain(element)
         .scope(locator, EXISTING);
     factory.bootstrap(instance, finder);

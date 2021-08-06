@@ -17,7 +17,7 @@ import static utam.compiler.translator.TranslationUtilities.getElementGetterMeth
 
 import java.util.ArrayList;
 import java.util.List;
-import utam.compiler.grammar.UtamSelector;
+import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ParameterUtils;
 import utam.compiler.helpers.TypeUtilities;
@@ -74,7 +74,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
   public static class WithSelectorReturnsList extends ContainerMethod {
 
     public WithSelectorReturnsList(ElementContext scopeElement, boolean isExpandScope,
-        String elementName, UtamSelector.Context selectorContext) {
+        String elementName, LocatorCodeGeneration selectorContext) {
       super(scopeElement, isExpandScope, elementName, CONTAINER_LIST_RETURN_TYPE);
       interfaceImports.add(PAGE_OBJECT);
       interfaceImports.add(LIST_IMPORT);
@@ -93,7 +93,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
   public static class WithSelector extends ContainerMethod {
 
     public WithSelector(ElementContext scopeElement, boolean isExpandScope, String elementName,
-        UtamSelector.Context selectorContext) {
+        LocatorCodeGeneration selectorContext) {
       super(scopeElement, isExpandScope, elementName, CONTAINER_RETURN_TYPE);
       interfaceImports.add(PAGE_OBJECT);
       classImports.addAll(interfaceImports);

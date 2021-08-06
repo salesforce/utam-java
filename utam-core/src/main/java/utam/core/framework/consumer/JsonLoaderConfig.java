@@ -86,7 +86,7 @@ public class JsonLoaderConfig {
   /**
    * get list of configured modules
    *
-   * @return
+   * @return list of modules from config
    */
   public List<Module> getModules() {
     return modules;
@@ -153,9 +153,7 @@ public class JsonLoaderConfig {
         List<utam.core.framework.context.Profile> list,
         utam.core.framework.context.Profile profile) {
       if (list.contains(profile)) {
-        throw new UtamCoreError(
-            String.format(String.format(ERR_DUPLICATE_PROFILE,
-                profile.getName(), profile.getValue())));
+        throw new UtamCoreError(String.format(ERR_DUPLICATE_PROFILE, profile.getName(), profile.getValue()));
       }
       list.add(profile);
     }

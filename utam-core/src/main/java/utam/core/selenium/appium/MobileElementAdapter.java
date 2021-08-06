@@ -27,20 +27,20 @@ public class MobileElementAdapter extends ElementAdapter {
 
   private static final Duration DEFAULT_FLICK_ACTION_WAIT_MILLISECONDS = Duration.ofMillis(500);
 
-  public MobileElementAdapter(WebElement element) {
-    super(element);
+  public MobileElementAdapter(WebElement element, Driver driverAdapter) {
+    super(element, driverAdapter);
   }
 
   @Override
-  public void flick(Driver driver, int xOffset, int yOffset) {
-    AppiumDriver appiumDriver = MobileDriverAdapter.getAppiumDriver(driver);
+  public void flick(int xOffset, int yOffset) {
+    AppiumDriver appiumDriver = MobileDriverAdapter.getAppiumDriver(driverAdapter);
     Point nativeStartPoint = getWebElement().getLocation().moveBy(
         getWebElement().getSize().getWidth() / 2,
         getWebElement().getSize().getHeight() / 2
     );
     Point nativeEndPoint = nativeStartPoint.moveBy(xOffset, yOffset);
-    Point[] movement = MobileDriverUtils.getFlickCoordinates((MobileDriverAdapter) driver, nativeStartPoint, nativeEndPoint);
-    driver.setPageContextToNative();
+    Point[] movement = MobileDriverUtils.getFlickCoordinates((MobileDriverAdapter) driverAdapter, nativeStartPoint, nativeEndPoint);
+    driverAdapter.setPageContextToNative();
     Point start = movement[0];
     Point end = movement[1];
     // simulate flick using touch control

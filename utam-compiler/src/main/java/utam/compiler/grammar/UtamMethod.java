@@ -8,14 +8,15 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.helpers.TypeUtilities.VOID;
+import static utam.compiler.helpers.TypeUtilities.processTypeNode;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.fasterxml.jackson.databind.JsonNode;
 import utam.compiler.UtamCompilationError;
+import utam.compiler.grammar.UtamArgument.ArgsProcessor;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.PrimitiveType;
@@ -71,7 +72,7 @@ class UtamMethod {
     this.name = name;
     this.compose = compose;
     this.args = args;
-    this.returnType = TypeUtilities.processTypeNode(name, TypeUtilities.PropertyType.RETURNS, returnType);
+    this.returnType = processTypeNode(name, TypeUtilities.PropertyType.RETURNS, returnType);
     this.isReturnList = isReturnList;
     this.chain = chain;
   }
@@ -82,9 +83,10 @@ class UtamMethod {
     }
     MethodContext methodContext = new MethodContext(name, getReturnType(context, VOID),
         isReturnsList());
+    List<MethodParameter> parameters = new ArgsProcessor(context, methodContext).getParameters(args);
     return new InterfaceMethod(
         methodContext,
-        UtamArgument.getArgsProcessor(args, name).getOrdered(),
+        parameters,
         comments, false);
   }
 
@@ -150,7 +152,8 @@ class UtamMethod {
     MethodContext methodContext = new MethodContext(name, getReturnType(context, null),
         isReturnsList());
     if (args != null) {
-      UtamArgument.getArgsProcessor(args, String.format("method '%s'", this.name)).getOrdered()
+      new ArgsProcessor(context, methodContext)
+          .getParameters(args)
           .forEach(methodContext::setMethodArg);
     }
     List<ComposeMethodStatement> statements = new ArrayList<>();
@@ -190,6 +193,11 @@ class UtamMethod {
           .getComposeAction(context, methodContext, false);
       statements.add(statement);
       methodParameters.addAll(statement.getParameters());
+      statement.getParameters().forEach(p -> {
+        if(p.getNestedParameters() != null) {
+          methodParameters.addAll(p.getNestedParameters());
+        }
+      });
       methodContext.nextStatement();
     }
     methodParameters.removeIf(MethodParameter::isLiteral);

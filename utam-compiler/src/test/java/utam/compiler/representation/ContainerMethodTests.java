@@ -10,6 +10,7 @@ package utam.compiler.representation;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
+import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_LIST_RETURN_TYPE;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_RETURN_TYPE;
 import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
@@ -62,7 +63,8 @@ public class ContainerMethodTests {
     info.addImpliedImportedTypes(PageObject.class.getName(), SELECTOR.getFullName());
     info.addParameter(FIRST_CONTAINER_PARAMETER);
     ContainerMethod method = new ContainerMethod.WithSelector(
-        getScope(), false, ELEMENT_NAME, new UtamSelector(".fakeSelector").getContext());
+        getScope(), false, ELEMENT_NAME,
+        new UtamSelector(".fakeSelector").getCodeGenerationHelper(getTestTranslationContext()));
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 
@@ -75,7 +77,8 @@ public class ContainerMethodTests {
     info.addImpliedImportedTypes(PageObject.class.getName(), SELECTOR.getFullName());
     info.addParameter(FIRST_CONTAINER_PARAMETER);
     ContainerMethod method = new ContainerMethod.WithSelectorReturnsList(
-        getScope(), false, ELEMENT_NAME, new UtamSelector(".fakeSelector").getContext());
+        getScope(), false, ELEMENT_NAME,
+        new UtamSelector(".fakeSelector").getCodeGenerationHelper(getTestTranslationContext()));
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
 }

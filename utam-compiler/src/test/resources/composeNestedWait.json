@@ -1,0 +1,84 @@
+{
+  "elements" : [
+    {
+      "name" : "elementWithArg",
+      "selector" : {
+        "css" : "foo[%s]",
+        "args" : [
+          {
+            "name" : "selectorArg",
+            "type" : "string"
+          }
+        ]
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "nestedWaitWithArgs",
+      "compose": [
+        {
+          "apply": "waitFor",
+          "args": [
+            {
+              "type": "function",
+              "predicate": [
+                {
+                  "apply": "waitFor",
+                  "args": [
+                    {
+                      "type": "function",
+                      "predicate": [
+                        {
+                          "apply": "methodWithElement",
+                          "args" : [
+                            {
+                              "value" : {
+                                "element": "elementWithArg",
+                                "args" : [
+                                  {
+                                    "value" : "string"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "apply": "methodWithSelector",
+                          "args" : [
+                            {
+                              "value" : {
+                                "css" : "css[%d]",
+                                "args" : [
+                                  {
+                                    "name" : "nested",
+                                    "type" : "number"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "value" : {
+                                "css" : "css[%d]",
+                                "args" : [
+                                  {
+                                    "value" : 1
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

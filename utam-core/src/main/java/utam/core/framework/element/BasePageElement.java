@@ -7,9 +7,13 @@
  */
 package utam.core.framework.element;
 
+import java.awt.Point;
+import java.time.Duration;
 import org.openqa.selenium.Keys;
 import utam.core.driver.Expectations;
+import utam.core.element.BasicElement;
 import utam.core.element.Element;
+import utam.core.element.Element.DragAndDropOptions;
 import utam.core.element.RootElement;
 import utam.core.element.Element.GestureDirection;
 import utam.core.element.Element.ScrollOptions;
@@ -30,6 +34,7 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
 
   public BasePageElement() {}
 
+  // used via java reflections
   public BasePageElement(PageObjectsFactory factory, Element element) {
     this.element = element;
     this.factory = factory;
@@ -115,7 +120,7 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
 
   @Override
   public boolean isFocused() {
-    return getElement().hasFocus(getDriver());
+    return getElement().hasFocus();
   }
 
   @Override
@@ -178,5 +183,47 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
   @Override
   public boolean flickItems(GestureDirection direction) {
     return getElement().flickItems(direction);
+  }
+
+  @Override
+  public void dragAndDrop(BasicElement target, int holdDurationSec) {
+    DragAndDropOptions options = new DragAndDropOptions() {
+      @Override
+      public Element getTargetElement() {
+        return ((BasePageElement)target).getElement();
+      }
+
+      @Override
+      public Duration getHoldDuration() {
+        return holdDurationSec == 0? Duration.ZERO : Duration.ofSeconds(holdDurationSec);
+      }
+    };
+    getElement().dragAndDrop(options);
+  }
+
+  @Override
+  public void dragAndDrop(BasicElement target) {
+    dragAndDrop(target, 0);
+  }
+
+  @Override
+  public void dragAndDropByOffset(int xOffset, int yOffset, int holdDurationSec) {
+    DragAndDropOptions options = new DragAndDropOptions() {
+      @Override
+      public Point getOffset() {
+        return new Point(xOffset, yOffset);
+      }
+
+      @Override
+      public Duration getHoldDuration() {
+        return holdDurationSec == 0? Duration.ZERO : Duration.ofSeconds(holdDurationSec);
+      }
+    };
+    getElement().dragAndDrop(options);
+  }
+
+  @Override
+  public void dragAndDropByOffset(int xOffset, int yOffset) {
+    dragAndDropByOffset(xOffset, yOffset, 0);
   }
 }

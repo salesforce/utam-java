@@ -7,6 +7,7 @@
  */
 package utam.compiler.representation;
 
+import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.representation.*;
 
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static utam.compiler.helpers.TypeUtilities.VOID;
 
 /**
  * Provides methods for validating Page Object structures. Note that this class is intended to be
@@ -240,6 +242,15 @@ public class PageObjectValidationTestHelper {
       this.returnType = returnTypeSimpleName;
     }
 
+    public MethodInfo(String name, TypeProvider returnType) {
+      this.name = name;
+      this.returnType = returnType.getSimpleName();
+    }
+
+    public MethodInfo(String name) {
+      this(name, VOID.getSimpleName());
+    }
+
     /**
      * Adds a parameter descriptor for the method
      *
@@ -394,6 +405,15 @@ public class PageObjectValidationTestHelper {
     public MethodParameterInfo(String name, String typeName) {
       this.name = name;
       this.typeName = typeName;
+    }
+
+    public MethodParameterInfo(String name, TypeProvider type) {
+      this.name = name;
+      this.typeName = type.getSimpleName();
+    }
+
+    public MethodParameterInfo(String name) {
+      this(name, PrimitiveType.STRING);
     }
   }
 }

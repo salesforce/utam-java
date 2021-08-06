@@ -7,7 +7,7 @@
  */
 package utam.compiler.representation;
 
-import utam.compiler.grammar.UtamSelector;
+import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -270,7 +270,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     final List<MethodParameter> selectorParameters = new ArrayList<>();
     private final String selectorCodeString;
 
-    public Root(UtamSelector.Context selectorContext) {
+    public Root(LocatorCodeGeneration selectorContext) {
       this.selectorCodeString = selectorContext.getBuilderString();
       this.selectorParameters.addAll(selectorContext.getParameters());
     }

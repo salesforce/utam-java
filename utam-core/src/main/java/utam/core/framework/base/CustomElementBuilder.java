@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import org.openqa.selenium.NotFoundException;
 import org.openqa.selenium.SearchContext;
 import utam.core.element.Element;
 import utam.core.element.ElementLocation;
@@ -153,7 +152,7 @@ public class CustomElementBuilder {
       return null;
     }
     return found.stream()
-        .filter(po -> filter.test(po))
+        .filter(filter)
         .collect(Collectors.toList());
   }
 

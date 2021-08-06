@@ -251,4 +251,13 @@ public class BasePageElementTests {
     assertThat(mock.getUtamElement().flickItems(GestureDirection.DOWN), is(false));
     verify(mock.getElementAdapter(), times(1)).flickItems(GestureDirection.DOWN);
   }
+
+  @Test
+  public void testDragAndDrop() {
+    MockUtilities mock = new MockUtilities();
+    mock.getUtamElement().dragAndDrop(mock.getUtamElement());
+    mock.getUtamElement().dragAndDrop(mock.getUtamElement(), 1);
+    mock.getUtamElement().dragAndDropByOffset(1,2);
+    mock.getUtamElement().dragAndDropByOffset(1,2, 1);
+  }
 }

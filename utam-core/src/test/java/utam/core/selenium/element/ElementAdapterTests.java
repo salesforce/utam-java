@@ -20,14 +20,18 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
+import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.element.ElementAdapter.BLUR_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.ElementAdapter.CLICK_VIA_JAVASCRIPT;
+import static utam.core.selenium.element.ElementAdapter.ERR_DRAG_AND_DROP_OPTIONS;
 import static utam.core.selenium.element.ElementAdapter.FOCUS_VIA_JAVASCRIPT;
+import static utam.core.selenium.element.ElementAdapter.NULL_ELEMENT;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_CENTER_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_TOP_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.LocatorBy.byCss;
 import static utam.core.selenium.element.ShadowRootWebElement.*;
 
+import java.awt.Point;
 import java.util.Collections;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -36,9 +40,11 @@ import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.element.Element;
+import utam.core.element.Element.DragAndDropOptions;
 import utam.core.element.Element.GestureDirection;
 import utam.core.element.Element.ScrollOptions;
 import utam.core.element.FindContext.Type;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * element tests
@@ -88,8 +94,8 @@ public class ElementAdapterTests {
 
   @Test
   public void testIsNull() {
-    assertThat(new ElementAdapter(null).isNull(), is(true));
-    assertThat(new ElementAdapter(mock(WebElement.class)).isNull(), is(false));
+    assertThat(ElementAdapter.NULL_ELEMENT.isNull(), is(true));
+    assertThat(new ElementAdapter(mock(WebElement.class), mock(WebDriver.class)).isNull(), is(false));
   }
 
   @Test
@@ -102,7 +108,7 @@ public class ElementAdapterTests {
   @Test
   public void testJavascriptClick() {
     MockUtilities mock = new MockUtilities.MockDriver();
-    mock.getElementAdapter().deprecatedClick(mock.getDriverAdapter());
+    mock.getElementAdapter().deprecatedClick();
     verify(mock.getDriverAdapter(), times(1))
         .executeScript(CLICK_VIA_JAVASCRIPT, mock.getWebElementMock());
   }
@@ -124,7 +130,7 @@ public class ElementAdapterTests {
 
   @Test
   public void testIsExisting() {
-    assertThat(new ElementAdapter(null).isExisting(), is(false));
+    assertThat(NULL_ELEMENT.isExisting(), is(false));
     MockUtilities mock = new MockUtilities();
     when(mock.getWebElementMock().isDisplayed()).thenReturn(true);
     assertThat(mock.getElementAdapter().isExisting(), is(true));
@@ -167,7 +173,7 @@ public class ElementAdapterTests {
   @Test
   public void testMoveTo() {
     MockUtilities mock = new MockUtilities.MockDriver();
-    mock.getElementAdapter().moveTo(mock.getDriverAdapter());
+    mock.getElementAdapter().moveTo();
   }
 
   @Test
@@ -185,15 +191,15 @@ public class ElementAdapterTests {
     WebDriver.TargetLocator targetLocator = mock(WebDriver.TargetLocator.class);
     when(mock.getWebDriverMock().switchTo()).thenReturn(targetLocator);
     when(targetLocator.activeElement()).thenReturn(mock(WebElement.class));
-    assertThat("element has no focus", element.hasFocus(mock.getDriverAdapter()), is(false));
+    assertThat("element has no focus", element.hasFocus(), is(false));
     when(targetLocator.activeElement()).thenReturn(mock.getWebElementMock());
-    assertThat("element has focus", element.hasFocus(mock.getDriverAdapter()), is(true));
+    assertThat("element has focus", element.hasFocus(), is(true));
   }
 
   @Test
   public void testFocus() {
     MockUtilities mock = new MockUtilities.MockDriver();
-    mock.getElementAdapter().focus(mock.getDriverAdapter());
+    mock.getElementAdapter().focus();
     verify(mock.getDriverAdapter(), times(1))
         .executeScript(FOCUS_VIA_JAVASCRIPT, mock.getWebElementMock());
   }
@@ -203,7 +209,7 @@ public class ElementAdapterTests {
     MockUtilities mock = new MockUtilities.MockDriver();
     when(mock.getElementAdapter().isDisplayed()).thenReturn(false).thenReturn(false)
         .thenReturn(false).thenReturn(true);
-    mock.getElementAdapter().scrollIntoView(mock.getDriverAdapter(), ScrollOptions.TOP);
+    mock.getElementAdapter().scrollIntoView(ScrollOptions.TOP);
     verify(mock.getDriverAdapter(), times(2))
         .executeScript(SCROLL_TOP_VIA_JAVASCRIPT, mock.getWebElementMock());
   }
@@ -211,7 +217,7 @@ public class ElementAdapterTests {
   @Test
   public void testScrollToCenter() {
     MockUtilities mock = new MockUtilities.MockDriver();
-    mock.getElementAdapter().scrollIntoView(mock.getDriverAdapter(), ScrollOptions.CENTER);
+    mock.getElementAdapter().scrollIntoView(ScrollOptions.CENTER);
     verify(mock.getDriverAdapter(), times(1))
         .executeScript(SCROLL_CENTER_VIA_JAVASCRIPT, mock.getWebElementMock());
   }
@@ -219,7 +225,7 @@ public class ElementAdapterTests {
   @Test
   public void testBlur() {
     MockUtilities mock = new MockUtilities();
-    mock.getElementAdapter().blur(mock.getDriverAdapter());
+    mock.getElementAdapter().blur();
     verify(mock.getExecutorMock(), times(1))
         .executeScript(BLUR_VIA_JAVASCRIPT, mock.getWebElementMock());
   }
@@ -246,7 +252,38 @@ public class ElementAdapterTests {
   @Test
   public void testMobileActionsThrow() {
     MockUtilities mock = new MockUtilities();
-    assertThrows(() -> mock.getElementAdapter().flick(mock.getDriverAdapter(), 0, 0));
+    assertThrows(() -> mock.getElementAdapter().flick(0, 0));
     assertThrows(() -> mock.getElementAdapter().flickItems(GestureDirection.DOWN));
+  }
+
+  @Test
+  public void testDragAndDropWithTargetElement() {
+    MockUtilities mock = new MockUtilities.MockDriver();
+    DragAndDropOptions options = new DragAndDropOptions() {
+      @Override
+      public Element getTargetElement() {
+        return mock.getElementAdapter();
+      }
+    };
+    mock.getElementAdapter().dragAndDrop(options);
+  }
+
+  @Test
+  public void testDragAndDropWithOffset() {
+    MockUtilities mock = new MockUtilities.MockDriver();
+    DragAndDropOptions options = new DragAndDropOptions() {
+      @Override
+      public Point getOffset() {
+        return new Point(0,0);
+      }
+    };
+    mock.getElementAdapter().dragAndDrop(options);
+  }
+
+  @Test
+  public void testDragAndDropWithoutTargetThrows() {
+    MockUtilities mock = new MockUtilities.MockDriver();
+    UtamError e = expectThrows(UtamError.class, () -> mock.getElementAdapter().dragAndDrop(new DragAndDropOptions() {}));
+    assertThat(e.getMessage(), is(equalTo(ERR_DRAG_AND_DROP_OPTIONS)));
   }
 }

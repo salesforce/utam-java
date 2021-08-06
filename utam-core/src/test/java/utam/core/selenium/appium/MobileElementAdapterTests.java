@@ -35,7 +35,7 @@ public class MobileElementAdapterTests {
     String title = "title";
     when(mock.getAppiumDriverMock().getTitle()).thenReturn(title);
     when(mock.getAppiumDriverMock().getContext()).thenReturn(title);
-    mock.getElementAdapter().flick(mock.getDriverAdapter(), 1, 1);
+    mock.getElementAdapter().flick(1, 1);
   }
 
   @Test
@@ -47,7 +47,7 @@ public class MobileElementAdapterTests {
     String title = "title";
     when(mock.getAppiumDriverMock().getTitle()).thenReturn(title);
     when(mock.getAppiumDriverMock().getContext()).thenReturn(title);
-    mock.getElementAdapter().flick(mock.getDriverAdapter(), 1, 1);
+    mock.getElementAdapter().flick(1, 1);
   }
 
   @Test

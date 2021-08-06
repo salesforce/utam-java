@@ -23,8 +23,7 @@ import static utam.compiler.representation.CustomElementMethod.Single;
 
 import java.util.Collections;
 import org.testng.annotations.Test;
-import utam.compiler.grammar.UtamSelector;
-import utam.compiler.grammar.UtamSelector.Context;
+import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.ParameterUtils;
@@ -50,7 +49,7 @@ public class CustomElementMethodTests {
   private static final TypeProvider TYPE =
       new TypeUtilities.FromString(TYPE_SHORT_NAME, TYPE_FULL_NAME);
   private static final Root INJECTED_ROOT =
-      new Root(new Context(getCssSelector("css")));
+      new Root(new LocatorCodeGeneration(getCssSelector("css")));
 
   private static ElementContext getBasicScope() {
     final ElementContext scope =
@@ -93,7 +92,7 @@ public class CustomElementMethodTests {
         new Single(
             true,
             ELEMENT_NAME,
-            new Root(new UtamSelector.Context(
+            new Root(new LocatorCodeGeneration(
                 getCssSelector(".fakeSelector[title='%s']"),
                 Collections.singletonList(
                     new ParameterUtils.Regular("name", PrimitiveType.STRING)))),
@@ -172,11 +171,11 @@ public class CustomElementMethodTests {
    */
   @Test
   public void testInjectedSelector() {
-    Root plain = new Root(new UtamSelector.Context(getCssSelector("css")));
+    Root plain = new Root(new LocatorCodeGeneration(getCssSelector("css")));
     assertThat(plain.getCodeString(), is(equalTo("LocatorBy.byCss(\"css\")")));
     Root wParams =
         new Root(
-            new UtamSelector.Context(getCssSelector(".fakeSelector[title='%s']"),
+            new LocatorCodeGeneration(getCssSelector(".fakeSelector[title='%s']"),
                 Collections
                     .singletonList(new ParameterUtils.Regular("name", PrimitiveType.STRING))));
     assertThat(

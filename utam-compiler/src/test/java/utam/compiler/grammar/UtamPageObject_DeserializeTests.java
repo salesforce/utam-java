@@ -14,8 +14,6 @@ import utam.core.selenium.element.LocatorBy;
 
 import static utam.compiler.grammar.TestUtilities.*;
 import static utam.compiler.grammar.UtamPageObject.*;
-import static utam.compiler.grammar.UtamSelector.ERR_ROOT_SELECTOR_ARGS;
-import static utam.compiler.grammar.UtamSelector.ERR_ROOT_SELECTOR_LIST;
 import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -171,40 +169,7 @@ public class UtamPageObject_DeserializeTests {
   public void testRootNodeWithTypeWithoutNamePropertyThrows() {
     String json = "{\"type\": \"invalid\"}";
     UtamError e = expectThrows(UtamError.class, () -> createRootElementNode(json).compile(getTestTranslationContext()));
-    assertThat(e.getCause().getMessage(), containsString(String.format(ERR_UNSUPPORTED_ROOT_ELEMENT_TYPE, "invalid")));
-  }
-
-  /** Tests that a root element with a selector specifying a list throws the proper exception */
-  @Test
-  public void testRootNodeWithListSelectorThrows() {
-    String json =
-            "{"
-                    + "  \"root\": true,"
-                    + "  \"selector\": {"
-                    + "    \"css\": \".invalidList\","
-                    + "    \"returnAll\": true"
-                    + "  }"
-                    + "}";
-    UtamError e = expectThrows(UtamError.class, () -> createRootElementNode(json));
-    assertThat(e.getCause().getMessage(), containsString(ERR_ROOT_SELECTOR_LIST));
-  }
-
-  /**
-   * Tests that a root element with a selector specifying containing parameters throws the proper
-   * exception
-   */
-  @Test
-  public void testRootNodeWithParameterizedSelectorThrows() {
-    String json =
-            "{"
-                    + "  \"root\": true,"
-                    + "  \"selector\": {"
-                    + "    \"css\": \"input[value=*(%s)]\","
-                    + "    \"args\": [ {\"name\": \"text\", \"type\":\"string\" }]"
-                    + "  }"
-                    + "}";
-    UtamError e = expectThrows(UtamError.class, () -> createRootElementNode(json));
-    assertThat(e.getCause().getMessage(), containsString(ERR_ROOT_SELECTOR_ARGS));
+    assertThat(e.getCause().getMessage(), containsString(String.format(ERR_UNSUPPORTED_ROOT_ELEMENT_TYPE, "[invalid]")));
   }
 
   /**

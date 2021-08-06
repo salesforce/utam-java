@@ -26,9 +26,8 @@ public class ParameterUtils {
 
   public static String getParametersValuesString(List<MethodParameter> parameters) {
     return parameters.stream()
-        .filter(p -> !p.isSelectorArgument())
         .map(MethodParameter::getValue)
-        .collect(Collectors.joining(","));
+        .collect(Collectors.joining(", "));
   }
 
   public static class Regular implements MethodParameter {
@@ -43,11 +42,6 @@ public class ParameterUtils {
 
     @Override
     public boolean isLiteral() {
-      return false;
-    }
-
-    @Override
-    public boolean isSelectorArgument() {
       return false;
     }
 
@@ -73,6 +67,11 @@ public class ParameterUtils {
       }
       return this.getDeclaration().equals(((MethodParameter)obj).getDeclaration());
     }
+
+    @Override
+    public List<MethodParameter> getNestedParameters() {
+      return null;
+    }
   }
 
   public static class Primitive extends Regular {
@@ -84,8 +83,15 @@ public class ParameterUtils {
 
   public static class Literal extends Regular {
 
+    private final List<MethodParameter> nestedParameters;
+
     public Literal(Object value, TypeProvider type) {
+      this(value, type, null);
+    }
+
+    public Literal(Object value, TypeProvider type, List<MethodParameter> nestedParameters) {
       super(value.toString(), type);
+      this.nestedParameters = nestedParameters;
     }
 
     @Override
@@ -105,17 +111,10 @@ public class ParameterUtils {
     public boolean isLiteral() {
       return true;
     }
-  }
-
-  public static class SelectorArgument extends Regular {
-
-    public SelectorArgument(String valueAsString, TypeProvider type) {
-      super(valueAsString, type);
-    }
 
     @Override
-    public boolean isSelectorArgument() {
-      return true;
+    public List<MethodParameter> getNestedParameters() {
+      return nestedParameters;
     }
   }
 }

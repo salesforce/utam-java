@@ -29,4 +29,8 @@ public class UtamCompilationError extends UtamError {
   public UtamCompilationError(String message, Exception e) {
     super(message, e);
   }
+
+  public UtamCompilationError(Exception e) {
+    super(e);
+  }
 }

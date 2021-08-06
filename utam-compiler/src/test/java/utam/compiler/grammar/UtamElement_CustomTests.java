@@ -21,8 +21,8 @@ import java.util.Objects;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.grammar.UtamElement.*;
 import static utam.compiler.grammar.UtamElementFilter_Tests.getInnerTextFilter;
-import static utam.compiler.grammar.UtamSelector_Tests.getListCssSelector;
-import static utam.compiler.grammar.UtamSelector_Tests.getUtamCssSelector;
+import static utam.compiler.grammar.UtamSelectorTests.getListCssSelector;
+import static utam.compiler.grammar.UtamSelectorTests.getUtamCssSelector;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -51,10 +51,9 @@ public class UtamElement_CustomTests {
     return getPublicComponentElement(getUtamCssSelector(), null);
   }
 
-  private static UtamElement.Traversal getAbstraction(UtamElement element) {
+  private static void getAbstraction(UtamElement element) {
     UtamElement.Traversal traversal = element.getAbstraction();
     assertThat(traversal, is(instanceOf(UtamElement.Custom.class)));
-    return traversal;
   }
 
   private static PageObjectMethod getElementMethod(UtamElement element) {
@@ -64,6 +63,10 @@ public class UtamElement_CustomTests {
     scope.elements = new UtamElement[] {element};
     scope.testTraverse(context);
     return context.getElement(element.name).getElementMethod();
+  }
+
+  private static String getCustomSupportedProperties() {
+    return Type.CUSTOM.getSupportedPropertiesErr(ELEMENT_NAME);
   }
 
   /** The getSimpleType method for an invalid element type should throw the proper exception */
@@ -123,7 +126,7 @@ public class UtamElement_CustomTests {
     UtamElement element = getPublicComponentElement();
     element.elements = new UtamElement[] {};
     UtamError e = expectThrows(UtamError.class, () -> getAbstraction(element));
-    assertThat(e.getMessage(), containsString(element.getSupportedPropertiesErr(Type.CUSTOM)));
+    assertThat(e.getMessage(), containsString(getCustomSupportedProperties()));
   }
 
   /**
@@ -135,7 +138,7 @@ public class UtamElement_CustomTests {
     UtamElement element = getPublicComponentElement();
     element.shadow = new UtamShadowElement(new UtamElement[] {});
     UtamError e = expectThrows(UtamError.class, () -> getAbstraction(element));
-    assertThat(e.getMessage(), containsString(element.getSupportedPropertiesErr(Type.CUSTOM)));
+    assertThat(e.getMessage(), containsString(getCustomSupportedProperties()));
   }
 
   /** The getAsComponent method should return the proper value */

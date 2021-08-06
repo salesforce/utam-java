@@ -9,13 +9,10 @@ package utam.compiler.helpers;
 
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Actionable;
-
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * this enum links element actions with translator code <br>
@@ -30,46 +27,33 @@ public enum ActionableActionType implements ActionType {
    * executes javascript `return arguments[0].blur();` <br>
    * Throws exception if element not found within timeout
    */
-  blur(null),
+  blur,
   /**
    * focus on the value <br>
    * throws exception if fails
    */
-  focus(null),
+  focus,
   /**
    * performs Actions.moveToElement from Selenium, <br>
    * which "Moves the mouse to the middle of the element. The element is scrolled into view". <br>
    * Throws exception if element not found within timeout or element could not be moved to
    */
-  moveTo(null),
+  moveTo,
   /**
    * scroll to the element <br>
    * executes javascript `return arguments[0].scrollIntoView(true);` <br>
    * Throws exception if element not found within timeout
    */
-  scrollToTop(null),
+  scrollToTop,
   /**
    * scrolls current element to the center of the screen <br>
    * executes javascript `arguments[0].scrollIntoView({block:'center'})` <br>
    * Throws exception if element not found within timeout or element could not be scrolled to center
    */
-  scrollToCenter(null);
+  scrollToCenter;
 
   static final String ERR_NOT_HTML_ELEMENT = "element '%s' is not HTML element, its type is '%s'";
   static final String ERR_UNKNOWN_ACTION = "unknown action '%s' for element '%s' with %s";
-  // return type of the action
-  private final TypeProvider returnType;
-  // parameters accepted by the action
-  private final TypeProvider[] actionParameters;
-
-  ActionableActionType(TypeProvider returnType, TypeProvider... parameters) {
-    if (parameters.length == 0) {
-      this.actionParameters = PrimitiveType.EMPTY_ARRAY;
-    } else {
-      this.actionParameters = parameters;
-    }
-    this.returnType = Objects.requireNonNullElse(returnType, VOID);
-  }
 
   // used in unit tests
   Class getElementClass() {
@@ -78,26 +62,21 @@ public enum ActionableActionType implements ActionType {
 
   // used in unit tests
   Class[] getParameterClasses() {
-    return Stream.of(actionParameters).map(TypeProvider::getClassType).toArray(Class[]::new);
+    return new Class[0];
   }
 
   @Override
   public TypeProvider getReturnType() {
-    return returnType;
+    return VOID;
   }
 
   @Override
   public List<TypeProvider> getParametersTypes() {
-    return Stream.of(actionParameters).collect(Collectors.toList());
+    return new ArrayList<>();
   }
 
   @Override
   public String getApplyString() {
     return this.name();
-  }
-
-  @Override
-  public String getInvokeMethodName() {
-    return name();
   }
 }
