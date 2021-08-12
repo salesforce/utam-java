@@ -45,7 +45,6 @@ public class UtamSelector {
           .map(Enum::name)
           .collect(Collectors.joining(","));
 
-
   static final String ERR_SELECTOR_MISSING =
       String.format("one of { %s } should be set for selector", SUPPORTED_SELECTOR_TYPES);
   static final String ERR_SELECTOR_REDUNDANT_FORMAT =

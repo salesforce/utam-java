@@ -51,4 +51,11 @@ public interface TranslatorConfig {
    * @return string with module name
    */
   String getModuleName();
+
+  /**
+   * translator is configured to set guardrails mode
+   *
+   * @return type of validations
+   */
+  GuardrailsMode getValidationMode();
 }

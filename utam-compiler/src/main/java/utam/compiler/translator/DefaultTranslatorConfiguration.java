@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import utam.compiler.translator.DefaultSourceConfiguration.FilesScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.ScannerConfig;
+import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.core.declarative.translator.TranslatorConfig;
@@ -37,11 +38,13 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   private final TranslationTypesConfig translatorTypesConfig;
   private final TranslatorTargetConfig translatorTargetConfig;
   private final String moduleName;
+  private final GuardrailsMode guardrailsMode;
 
   /**
    * Initializes a new instance of the translator configuration class
    *
    * @param moduleName         name of the module with page object sources
+   * @param guardrailsMode     type of guardrails to apply - with warning or error
    * @param typesConfig        types provider config
    * @param sourceConfig       configuration to scan for page object sources
    * @param targetConfig       information about output folders for page objects, configs and unit
@@ -50,6 +53,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
    */
   DefaultTranslatorConfiguration(
       String moduleName,
+      GuardrailsMode guardrailsMode,
       TranslationTypesConfig typesConfig,
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig,
@@ -61,21 +65,23 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
     for (ProfileConfiguration profileDefinition : profileDefinitions) {
       setConfiguredProfile(profileDefinition);
     }
+    this.guardrailsMode = guardrailsMode;
   }
 
   public DefaultTranslatorConfiguration(
       String moduleName,
+      GuardrailsMode guardrailsMode,
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig,
       List<ProfileConfiguration> profileDefinitions) {
-    this(moduleName, new TranslationTypesConfigJava(), sourceConfig, targetConfig, profileDefinitions);
+    this(moduleName, guardrailsMode, new TranslationTypesConfigJava(), sourceConfig, targetConfig, profileDefinitions);
   }
 
   // used in tests
   DefaultTranslatorConfiguration(
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig) {
-    this("", new TranslationTypesConfigJava(), sourceConfig, targetConfig, new ArrayList<>());
+    this("", GuardrailsMode.error, new TranslationTypesConfigJava(), sourceConfig, targetConfig, new ArrayList<>());
   }
 
   /**
@@ -164,5 +170,10 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   @Override
   public String getModuleName() {
     return moduleName;
+  }
+
+  @Override
+  public GuardrailsMode getValidationMode() {
+    return guardrailsMode;
   }
 }

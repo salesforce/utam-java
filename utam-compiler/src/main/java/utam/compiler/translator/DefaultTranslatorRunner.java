@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Properties;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.JsonDeserializer;
+import utam.compiler.guardrails.GlobalValidation;
 import utam.core.declarative.representation.PageObjectClass;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.PageObjectInterface;
@@ -169,17 +170,20 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     int counter = 0;
     long timer = System.currentTimeMillis();
     TranslatorSourceConfig sourceConfig = translatorConfig.getConfiguredSource();
+    GlobalValidation globalGuardrails = new GlobalValidation(translatorConfig.getValidationMode());
     sourceConfig.recursiveScan();
     for (String pageObjectURI : sourceConfig.getPageObjects()) {
       if (counter >= maxPageObjectsCounter) {
         break;
       }
       info(String.format("de-serialize Page Object %s", pageObjectURI));
-      PageObjectDeclaration object =
-          new JsonDeserializer(translatorConfig, sourceConfig, pageObjectURI).getObject();
+      JsonDeserializer deserializer = new JsonDeserializer(translatorConfig, sourceConfig, pageObjectURI);
+      PageObjectDeclaration object = deserializer.getObject();
       setPageObject(pageObjectURI, object);
+      deserializer.getPageObjectContext().setGlobalGuardrailsContext(globalGuardrails);
       counter++;
     }
+    globalGuardrails.validate();
     info(String.format("generated %d page objects, took %d msec", counter,
         System.currentTimeMillis() - timer));
   }

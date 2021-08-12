@@ -236,7 +236,7 @@ class UtamMethodAction {
       return getWaitForOperation(context, methodContext);
     }
     ElementContext element = context.getElement(elementName);
-    if (element.isCustom() || element.isDocumentElement() || element.isSelfElement()) {
+    if (element.isCustomElement() || element.isDocumentElement() || element.isSelfElement()) {
       return getCustomOperation(methodContext);
     }
     return getBasicOperation(element, methodContext);

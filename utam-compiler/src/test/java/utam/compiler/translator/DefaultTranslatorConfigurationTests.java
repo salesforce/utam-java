@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.sameInstance;
 
 import java.util.Collections;
 import org.testng.annotations.Test;
+import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.core.declarative.translator.TranslatorConfig;
@@ -35,6 +36,7 @@ public class DefaultTranslatorConfigurationTests {
     ProfileConfiguration profileConfiguration = new StringValueProfileConfig("name", "value");
     TranslatorConfig config = new DefaultTranslatorConfiguration(
         "myModule",
+        GuardrailsMode.error,
         typesConfig,
         sourceConfig,
         targetConfig,

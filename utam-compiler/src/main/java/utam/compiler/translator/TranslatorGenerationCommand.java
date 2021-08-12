@@ -10,6 +10,7 @@ package utam.compiler.translator;
 import static utam.compiler.translator.DefaultTranslatorConfiguration.getConfiguredProfiles;
 import static utam.compiler.translator.DefaultTranslatorConfiguration.getScanner;
 import static utam.compiler.translator.DefaultTranslatorConfiguration.getScannerConfig;
+import static utam.core.declarative.translator.GuardrailsMode.warning;
 import static utam.core.declarative.translator.UnitTestRunner.NONE;
 import static utam.core.declarative.translator.UnitTestRunner.validateUnitTestDirectory;
 
@@ -22,6 +23,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.ExitCode;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
+import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorRunner;
@@ -90,6 +92,10 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
       description = "Name of the current POs module, when set it's used as a prefix to profile property files.")
   private String moduleName;
 
+  @Option(names = {"-g", "-guardrails", "--guardrails"},
+      description = "Defines how strict should be guardrails violations, possible values: 'error' or 'warning'")
+  private String validationStrict;
+
   private Exception thrownError;
   Integer returnCode = CommandLine.ExitCode.OK;
 
@@ -121,7 +127,7 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
       TranslatorSourceConfig sourceConfig = jsonConfig.getSourceConfig();
       TranslatorTargetConfig targetConfig = jsonConfig.getTargetConfig();
       List<ProfileConfiguration> profiles = jsonConfig.getConfiguredProfiles();
-      return new DefaultTranslatorConfiguration(jsonConfig.getModuleName(), sourceConfig, targetConfig, profiles);
+      return new DefaultTranslatorConfiguration(jsonConfig.getModuleName(), warning, sourceConfig, targetConfig, profiles);
     } catch (IOException e) {
       thrownError = e;
       returnCode = RUNTIME_ERR;
@@ -184,8 +190,11 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
           getScannerConfig(packageMappingFile),
           getScanner(inputDirectory, inputFiles));
 
+      GuardrailsMode guardrailsMode = validationStrict == null? warning : GuardrailsMode.valueOf(validationStrict);
+
       return new DefaultTranslatorConfiguration(
           moduleName,
+          guardrailsMode,
           sourceConfig,
           targetConfig,
           getConfiguredProfiles(profileDefinitionsFile));
