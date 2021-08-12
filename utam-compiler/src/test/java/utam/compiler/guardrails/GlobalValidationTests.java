@@ -15,9 +15,9 @@ import static utam.compiler.guardrails.GlobalValidation.getErrorPrefix;
 import static utam.compiler.helpers.ElementContext.Self.SELF_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
 import org.testng.annotations.Test;
+import utam.compiler.guardrails.GlobalValidation.ValidationSubject;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.translator.GuardrailsMode;
@@ -31,7 +31,7 @@ import utam.core.framework.consumer.UtamError;
 public class GlobalValidationTests {
 
   @Test
-  public void testDuplicatesNoError() {
+  public void testValidateNoError() {
     ElementContext elementContext = SELF_ELEMENT;
     GlobalValidation globalValidation = new GlobalValidation(GuardrailsMode.error);
     globalValidation.setPageObjectElements("first", Collections.singletonList(elementContext));
@@ -40,7 +40,7 @@ public class GlobalValidationTests {
   }
 
   @Test
-  public void testDuplicatesThrow() {
+  public void testValidateThrowIfConfiguredWithErrorMode() {
     Locator selector = getCssSelector("css");
     ElementContext customElement =
         new ElementContext.Custom("name1", new TypeUtilities.FromString("test.Type"), selector);
@@ -51,12 +51,12 @@ public class GlobalValidationTests {
     globalValidation.setPageObjectElements("second", Collections.singletonList(customElement));
 
     UtamError e = expectThrows(UtamError.class, globalValidation::validate);
-    assertThat(e.getMessage(), startsWith(getErrorPrefix(new SimpleEntry<>("first", basicElement),
-        new SimpleEntry<>("second", customElement))));
+    assertThat(e.getMessage(), startsWith(getErrorPrefix(new ValidationSubject("first", basicElement),
+        new ValidationSubject("second", customElement))));
   }
 
   @Test
-  public void testDuplicatesWarning() {
+  public void testValidateWarningIfConfiguredWithWarningMode() {
     Locator selector = getCssSelector("css");
     ElementContext customElement =
         new ElementContext.Custom("name1", new TypeUtilities.FromString("test.Type"), selector);

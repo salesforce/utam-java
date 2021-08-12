@@ -85,7 +85,7 @@ public class GlobalValidation {
     }
   }
 
-  private static class ValidationSubject {
+  static class ValidationSubject {
 
     private final String pageObjectName;
     private final ElementContext elementContext;

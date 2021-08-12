@@ -76,13 +76,13 @@ public class PageObjectValidationTests {
   }
 
   @Test
-  public void testDuplicatesNoError() {
+  public void testValidateNoError() {
     ElementContext elementContext = SELF_ELEMENT;
     validatePageObject(elementContext, elementContext);
   }
 
   @Test
-  public void testDuplicatesThrow() {
+  public void testValidateThrowIfConfiguredWithErrorMode() {
     Locator selector = getCssSelector("css");
     ElementContext customElement =
         new ElementContext.Custom("name1", new TypeUtilities.FromString("test.Type"), selector);
@@ -95,7 +95,7 @@ public class PageObjectValidationTests {
   }
 
   @Test
-  public void testDuplicatesWarning() {
+  public void testValidateWarningIfConfiguredWithWarningMode() {
     Locator selector = getCssSelector("css");
     ElementContext customElement =
         new ElementContext.Custom("name1", new TypeUtilities.FromString("test.Type"), selector);
