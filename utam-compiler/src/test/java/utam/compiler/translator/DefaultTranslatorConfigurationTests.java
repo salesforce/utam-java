@@ -36,7 +36,7 @@ public class DefaultTranslatorConfigurationTests {
     ProfileConfiguration profileConfiguration = new StringValueProfileConfig("name", "value");
     TranslatorConfig config = new DefaultTranslatorConfiguration(
         "myModule",
-        GuardrailsMode.error,
+        GuardrailsMode.ERROR,
         typesConfig,
         sourceConfig,
         targetConfig,

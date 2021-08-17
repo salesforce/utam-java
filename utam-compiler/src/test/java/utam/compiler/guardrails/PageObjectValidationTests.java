@@ -40,7 +40,7 @@ public class PageObjectValidationTests {
       new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
 
   private static void validatePageObject(ElementContext... elements) {
-    PageObjectValidation validation = new PageObjectValidation(GuardrailsMode.error, PAGE_OBJECT,
+    PageObjectValidation validation = new PageObjectValidation(GuardrailsMode.ERROR, PAGE_OBJECT,
         Stream.of(elements).collect(Collectors.toList()));
     validation.validate();
   }
@@ -49,7 +49,7 @@ public class PageObjectValidationTests {
   public void testHardcodedTextInSelectorThrows() {
     ElementContext customElement = new ElementContext.Custom(
         ELEMENT_NAME, DUMMY_TYPE, getCssSelector(SELECTOR_VALUE + "[title='fakeTitle']"));
-    PageObjectValidation validation = new PageObjectValidation(GuardrailsMode.error, PAGE_OBJECT,
+    PageObjectValidation validation = new PageObjectValidation(GuardrailsMode.ERROR, PAGE_OBJECT,
         Stream.of(customElement).collect(Collectors.toList()));
     UtamError e = expectThrows(UtamError.class, () -> validation.validateSelector(customElement));
     assertThat(e.getMessage(),
@@ -70,7 +70,7 @@ public class PageObjectValidationTests {
   public void testHardcodedTextInSelectorWarning() {
     ElementContext customElement = new ElementContext.Custom(
         ELEMENT_NAME, actionable, getCssSelector(SELECTOR_VALUE + "[title='fakeTitle']"));
-    PageObjectValidation validation = new PageObjectValidation(GuardrailsMode.warning, PAGE_OBJECT, new ArrayList<>());
+    PageObjectValidation validation = new PageObjectValidation(GuardrailsMode.WARNING, PAGE_OBJECT, new ArrayList<>());
     // no error is thrown
     validation.validateSelector(customElement);
   }
@@ -87,7 +87,7 @@ public class PageObjectValidationTests {
     ElementContext customElement =
         new ElementContext.Custom("name1", new TypeUtilities.FromString("test.Type"), selector);
     ElementContext basicElement = new ElementContext.Basic("name2", actionable, selector);
-    PageObjectValidation validation = new PageObjectValidation(GuardrailsMode.error, PAGE_OBJECT,
+    PageObjectValidation validation = new PageObjectValidation(GuardrailsMode.ERROR, PAGE_OBJECT,
         Stream.of(basicElement, customElement).collect(Collectors.toList()));
 
     UtamError e = expectThrows(UtamError.class, validation::validate);
@@ -100,7 +100,7 @@ public class PageObjectValidationTests {
     ElementContext customElement =
         new ElementContext.Custom("name1", new TypeUtilities.FromString("test.Type"), selector);
     ElementContext basicElement = new ElementContext.Basic("name2", actionable, selector);
-    PageObjectValidation validation = new PageObjectValidation(GuardrailsMode.warning, PAGE_OBJECT,
+    PageObjectValidation validation = new PageObjectValidation(GuardrailsMode.WARNING, PAGE_OBJECT,
         Stream.of(basicElement, customElement).collect(Collectors.toList()));
     // warning in console
     validation.validate();

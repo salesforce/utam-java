@@ -33,7 +33,7 @@ public class GlobalValidationTests {
   @Test
   public void testValidateNoError() {
     ElementContext elementContext = SELF_ELEMENT;
-    GlobalValidation globalValidation = new GlobalValidation(GuardrailsMode.error);
+    GlobalValidation globalValidation = new GlobalValidation(GuardrailsMode.ERROR);
     globalValidation.setPageObjectElements("first", Collections.singletonList(elementContext));
     globalValidation.setPageObjectElements("second", Collections.singletonList(elementContext));
     globalValidation.validate();
@@ -46,7 +46,7 @@ public class GlobalValidationTests {
         new ElementContext.Custom("name1", new TypeUtilities.FromString("test.Type"), selector);
     ElementContext basicElement = new ElementContext.Basic("name2", actionable, selector);
 
-    GlobalValidation globalValidation = new GlobalValidation(GuardrailsMode.error);
+    GlobalValidation globalValidation = new GlobalValidation(GuardrailsMode.ERROR);
     globalValidation.setPageObjectElements("first", Collections.singletonList(basicElement));
     globalValidation.setPageObjectElements("second", Collections.singletonList(customElement));
 
@@ -62,7 +62,7 @@ public class GlobalValidationTests {
         new ElementContext.Custom("name1", new TypeUtilities.FromString("test.Type"), selector);
     ElementContext basicElement = new ElementContext.Basic("name2", actionable, selector);
 
-    GlobalValidation globalValidation = new GlobalValidation(GuardrailsMode.warning);
+    GlobalValidation globalValidation = new GlobalValidation(GuardrailsMode.WARNING);
     globalValidation.setPageObjectElements("first", Collections.singletonList(basicElement));
     globalValidation.setPageObjectElements("second", Collections.singletonList(customElement));
 

@@ -15,10 +15,10 @@ package utam.core.declarative.translator;
  */
 public enum GuardrailsMode {
 
-  warning,
-  error;
+  WARNING,
+  ERROR;
 
   public boolean isInterruptWithError() {
-    return this == error;
+    return this == ERROR;
   }
 }
