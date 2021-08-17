@@ -26,9 +26,8 @@ import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.helpers.AnnotationUtils.EMPTY_ANNOTATION;
 import static utam.compiler.helpers.TranslationContext.*;
+import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
 import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.editable;
-import static utam.compiler.helpers.ValidationTests.ELEMENT_SELECTOR;
-import static utam.compiler.helpers.ValidationTests.ELEMENT_TYPE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -169,7 +168,7 @@ public class TranslationContextTests {
     final String name = "fakeElementName";
     TranslationContext context = getTestTranslationContext();
     ElementContext element =
-        new ElementContext.Basic(name, ELEMENT_TYPE, getCssSelector(ELEMENT_SELECTOR));
+        new ElementContext.Basic(name, actionable, getCssSelector("css"));
     context.setElement(element);
     UtamError e = expectThrows(UtamError.class, () -> context.setElement(element));
     assertThat(

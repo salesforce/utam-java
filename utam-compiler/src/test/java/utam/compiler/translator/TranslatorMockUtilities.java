@@ -8,6 +8,7 @@
 package utam.compiler.translator;
 
 import java.util.ArrayList;
+import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorSourceConfig;
@@ -32,12 +33,12 @@ public abstract class TranslatorMockUtilities {
   public static DefaultTranslatorConfiguration getDefaultConfig() {
     TranslatorTargetConfig targetConfig = new DefaultTargetConfigurationTests.Mock();
     TranslatorSourceConfig sourceConfig = new DefaultSourceConfigurationTests.Mock();
-    return new DefaultTranslatorConfiguration("", sourceConfig, targetConfig, new ArrayList<>());
+    return new DefaultTranslatorConfiguration("", GuardrailsMode.ERROR, sourceConfig, targetConfig, new ArrayList<>());
   }
 
   public static TranslatorConfig getDefaultConfig(TranslationTypesConfig translationTypesConfig) {
     TranslatorTargetConfig targetConfig = new DefaultTargetConfigurationTests.Mock();
     TranslatorSourceConfig sourceConfig = new DefaultSourceConfigurationTests.Mock();
-    return new DefaultTranslatorConfiguration("", translationTypesConfig, sourceConfig, targetConfig, new ArrayList<>());
+    return new DefaultTranslatorConfiguration("", GuardrailsMode.ERROR, translationTypesConfig, sourceConfig, targetConfig, new ArrayList<>());
   }
 }

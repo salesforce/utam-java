@@ -5,14 +5,15 @@
  * For full license text, see the LICENSE file in the repo root
  * or https://opensource.org/licenses/MIT
  */
-package utam.compiler.helpers;
+package utam.compiler.guardrails;
 
 import java.util.*;
 
-import static utam.compiler.helpers.Validation.ErrorType.*;
+import static utam.compiler.guardrails.ValidationError.*;
 
 /**
- * static guardrails exclusions
+ * static guardrails exclusions.
+ * This file is LOCKED FOR CHANGES
  *
  * @author elizaveta.ivanova
  * @since 230
@@ -35,7 +36,7 @@ class ValidationExclusions {
     ELEMENT_AND_COMPONENT.put("utam-aura/pageObjects/modal", "modalFooter");
   }
 
-  static synchronized boolean isExceptionAllowed(String pageObject, String elementName, Validation.ErrorType error) {
+  static synchronized boolean isViolationAllowed(String pageObject, String elementName, ValidationError error) {
     if(error == COMPONENT_AND_ELEMENT_DUPLICATE_SELECTOR) {
       return ELEMENT_AND_COMPONENT.containsKey(pageObject)
               && ELEMENT_AND_COMPONENT.get(pageObject).equals(elementName);

@@ -7,6 +7,8 @@
  */
 package utam.compiler.helpers;
 
+import utam.compiler.guardrails.GlobalValidation;
+import utam.compiler.guardrails.PageObjectValidation;
 import utam.compiler.helpers.ElementContext.Document;
 import utam.compiler.helpers.ElementContext.Self;
 import utam.core.declarative.representation.MethodParameter;
@@ -53,7 +55,6 @@ public final class TranslationContext {
   private final Map<String, ElementContext> elementContextMap =
       Collections.synchronizedMap(new HashMap<>());
   private final String pageObjectURI;
-  private final Validation validation;
   private final TranslationTypesConfig translationTypesConfig;
   private final TranslatorConfig translatorConfiguration;
   private final Set<String> usedPrivateMethods = new HashSet<>();
@@ -63,7 +64,6 @@ public final class TranslationContext {
 
   public TranslationContext(String pageObjectURI, TranslatorConfig translatorConfiguration) {
     this.pageObjectURI = pageObjectURI;
-    this.validation = new Validation(pageObjectURI, elementContextMap);
     this.translationTypesConfig = translatorConfiguration.getTranslationTypesConfig();
     this.translatorConfiguration = translatorConfiguration;
     // register elements to prevent names collisions
@@ -87,6 +87,15 @@ public final class TranslationContext {
         }
       }
     }
+  }
+
+  public void guardrailsValidation() {
+    PageObjectValidation pageObjectValidation = new PageObjectValidation(translatorConfiguration.getValidationMode(), pageObjectURI, elementContextMap.values());
+    pageObjectValidation.validate();
+  }
+
+  public void setGlobalGuardrailsContext(GlobalValidation validation) {
+    validation.setPageObjectElements(pageObjectURI, elementContextMap.values());
   }
 
   public void setAbstract() {
@@ -128,8 +137,6 @@ public final class TranslationContext {
     if (elementContextMap.containsKey(element.getName())) {
       throw new UtamError(String.format(ERR_CONTEXT_DUPLICATE_ELEMENT_NAME, element.getName()));
     }
-    validation.testLocalDuplicates(element);
-    validation.testGlobalDuplicates(element);
     elementContextMap.put(element.getName(), element);
   }
 

@@ -43,12 +43,15 @@ public final class JsonDeserializer {
   private final TranslationContext context;
 
   JsonDeserializer(
-      String pageObjectURI, String jsonString, TranslatorConfig translatorConfiguration) {
+      String pageObjectURI,
+      String jsonString,
+      TranslatorConfig translatorConfiguration) {
     this.pageObjectURI = pageObjectURI;
     try {
       this.utamPageObject = deserialize(UtamPageObject.class, jsonString);
       this.context = new TranslationContext(pageObjectURI, translatorConfiguration);
       this.utamPageObject.compile(this.context);
+      this.context.guardrailsValidation();
     } catch (IOException e) {
       throw new UtamError(getErrorPrefix(), e);
     }
@@ -92,8 +95,7 @@ public final class JsonDeserializer {
     return getDeserializerMapper().readValue(jsonString, type);
   }
 
-  // to access from test utilities
-  final TranslationContext getContext() {
+  public final TranslationContext getPageObjectContext() {
     return context;
   }
 

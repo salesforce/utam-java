@@ -13,7 +13,6 @@ import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
 import utam.core.element.Locator;
-import utam.core.element.RootElement;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.Profile;
 import utam.compiler.representation.RootElementMethod;
@@ -26,6 +25,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static utam.compiler.helpers.AnnotationUtils.*;
+import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.MethodContext.BEFORE_LOAD_METHOD_MANE;
 import static utam.compiler.helpers.TypeUtilities.*;
 
@@ -172,9 +172,8 @@ final class UtamPageObject {
   private ElementContext setRootElementMethod(TranslationContext context) {
     TypeProvider interfaceType = context.getInterfaceType(implementsType);
     // TODO: Fix root elements to create correct base type from component interfaces
-    TypeProvider elementType = new TypeUtilities.FromClass(RootElement.class);
-
-    ElementContext rootElement = new ElementContext.Root(interfaceType, elementType, rootLocator);
+    TypeProvider elementType = ROOT_ELEMENT_TYPE;
+    ElementContext rootElement = new ElementContext.Root(interfaceType, rootLocator);
     // register root element and its method in context
     context.setElement(rootElement);
     PageObjectMethod rootElementMethod;

@@ -8,21 +8,19 @@
 package utam.compiler.helpers;
 
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
-import static utam.compiler.helpers.Validation.isLabelHardcoded;
-import static utam.compiler.helpers.Validation.isSameSelector;
+import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
+import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import utam.compiler.helpers.Validation.ErrorType;
 import utam.compiler.representation.ElementMethod;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Locator;
+import utam.core.element.RootElement;
 import utam.core.selenium.element.LocatorBy;
-
-import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
 
 /**
  * helper class to store element context
@@ -32,18 +30,19 @@ import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionab
  */
 public abstract class ElementContext {
 
+  public static final String SELF_ELEMENT_NAME = "self";
   static final String ROOT_ELEMENT_NAME = "root";
   static final String DOCUMENT_ELEMENT_NAME = "document";
-  public static final String SELF_ELEMENT_NAME = "self";
   static final Locator EMPTY_SELECTOR = LocatorBy.byCss("");
+  public static final TypeProvider ROOT_ELEMENT_TYPE = new TypeUtilities.FromClass(RootElement.class);
   private final Locator selector;
   // parameters from scope + from element itself
   private final List<MethodParameter> parameters;
   private final String name;
   private final TypeProvider type;
   private final boolean isListElement;
-  private PageObjectMethod elementGetter;
   private final boolean isNullable;
+  private PageObjectMethod elementGetter;
 
   ElementContext(
       ElementContext scopeContext,
@@ -77,17 +76,15 @@ public abstract class ElementContext {
     return parameters;
   }
 
-  abstract Validation.ErrorType validate(ElementContext element);
-
   public final boolean isList() {
     return this.isListElement;
   }
 
-  boolean isRootElement() {
+  public boolean isRootElement() {
     return false;
   }
 
-  public boolean isCustom() {
+  public boolean isCustomElement() {
     return false;
   }
 
@@ -99,7 +96,7 @@ public abstract class ElementContext {
     return false;
   }
 
-  final Locator getSelector() {
+  public final Locator getSelector() {
     return selector;
   }
 
@@ -115,20 +112,20 @@ public abstract class ElementContext {
     return this.elementGetter;
   }
 
-  public String getElementGetterName() {
-    return getElementMethod().getDeclaration().getName();
-  }
-
-  public void setElementMethodUsage(TranslationContext translationContext) {
-    translationContext.setMethodUsage(getElementGetterName());
-  }
-
   public void setElementMethod(PageObjectMethod method) {
     if (this.elementGetter != null) {
       throw new NullPointerException(
           String.format("element getter already exists for an element '%s'", getName()));
     }
     this.elementGetter = method;
+  }
+
+  public String getElementGetterName() {
+    return getElementMethod().getDeclaration().getName();
+  }
+
+  public void setElementMethodUsage(TranslationContext translationContext) {
+    translationContext.setMethodUsage(getElementGetterName());
   }
 
   public static class Basic extends ElementContext {
@@ -158,20 +155,6 @@ public abstract class ElementContext {
     public Basic(String name) {
       this(name, actionable, EMPTY_SELECTOR);
     }
-
-    @Override
-    Validation.ErrorType validate(ElementContext element) {
-      if (isLabelHardcoded(getSelector())) {
-        return Validation.ErrorType.LABEL_HARDCODED;
-      }
-      if (element.isRootElement() && isSameSelector(getSelector(), element.getSelector())) {
-        return Validation.ErrorType.DUPLICATE_WITH_ROOT_SELECTOR;
-      }
-      if (element.isCustom() && isSameSelector(getSelector(), element.getSelector())) {
-        return Validation.ErrorType.COMPONENT_AND_ELEMENT_DUPLICATE_SELECTOR;
-      }
-      return Validation.ErrorType.NONE;
-    }
   }
 
   public static class Container extends ElementContext {
@@ -180,20 +163,16 @@ public abstract class ElementContext {
       super(
           scopeContext,
           name,
-          TypeUtilities.CONTAINER_ELEMENT,
+          CONTAINER_ELEMENT,
           EMPTY_SELECTOR,
           false,
           EMPTY_PARAMETERS,
           false);
     }
 
-    Container(String name) {
+    // used in tests
+    public Container(String name) {
       this(null, name);
-    }
-
-    @Override
-    Validation.ErrorType validate(ElementContext element) {
-      return Validation.ErrorType.NONE;
     }
   }
 
@@ -201,39 +180,18 @@ public abstract class ElementContext {
 
     private final TypeProvider enclosingPageObjectType;
 
-    public Root(
-        TypeProvider enclosingPageObjectType, TypeProvider rootElementType, Locator selector) {
-      super(null, ROOT_ELEMENT_NAME, rootElementType, selector, false, EMPTY_PARAMETERS, false);
+    public Root(TypeProvider enclosingPageObjectType, Locator selector) {
+      super(null, ROOT_ELEMENT_NAME, ROOT_ELEMENT_TYPE, selector, false, EMPTY_PARAMETERS, false);
       this.enclosingPageObjectType = enclosingPageObjectType;
     }
 
     // used in tests
     public Root(TypeProvider enclosingPageObjectType) {
-      this(enclosingPageObjectType, actionable, EMPTY_SELECTOR);
+      this(enclosingPageObjectType, EMPTY_SELECTOR);
     }
 
-    boolean isSameEnclosingType(ElementContext element) {
-      if (element.isCustom() && element.getType().isSameType(this.enclosingPageObjectType)) {
-        return true;
-      }
-      if (element.isRootElement()) {
-        return this.enclosingPageObjectType.isSameType(((Root) element).enclosingPageObjectType);
-      }
-      return false;
-    }
-
-    @Override
-    Validation.ErrorType validate(ElementContext element) {
-      if (isSameEnclosingType(element)) {
-        return Validation.ErrorType.NONE;
-      }
-      if (isLabelHardcoded(getSelector())) {
-        return Validation.ErrorType.LABEL_HARDCODED;
-      }
-      if (isSameSelector(getSelector(), element.getSelector())) {
-        return Validation.ErrorType.DUPLICATE_WITH_ROOT_SELECTOR;
-      }
-      return Validation.ErrorType.NONE;
+    public TypeProvider getEnclosingPageObjectType() {
+      return enclosingPageObjectType;
     }
 
     @Override
@@ -256,44 +214,12 @@ public abstract class ElementContext {
     }
 
     // used in tests
-    Custom(String elementName, TypeProvider type, Locator selector) {
+    public Custom(String elementName, TypeProvider type, Locator selector) {
       super(null, elementName, type, selector, false, EMPTY_PARAMETERS, false);
     }
 
-    // used in tests
-    Custom(String elementName, TypeProvider type, Locator selector, boolean isList) {
-      super(null, elementName, type, selector, isList, EMPTY_PARAMETERS, false);
-    }
-
     @Override
-    final Validation.ErrorType validate(ElementContext element) {
-      // this statement should be before next because declared root element is also HTML element
-      if (element.isRootElement()) {
-        if (getType().isSameType(((Root) element).enclosingPageObjectType)) {
-          return Validation.ErrorType.NONE;
-        }
-        if (isLabelHardcoded(getSelector())) {
-          return Validation.ErrorType.LABEL_HARDCODED;
-        }
-        if (isSameSelector(getSelector(), element.getSelector())) {
-          return Validation.ErrorType.DUPLICATE_WITH_ROOT_SELECTOR;
-        }
-        return Validation.ErrorType.NONE;
-      }
-      if (element instanceof Basic && isSameSelector(getSelector(), element.getSelector())) {
-        return Validation.ErrorType.COMPONENT_AND_ELEMENT_DUPLICATE_SELECTOR;
-      }
-      // if selector same but type is different - it's error
-      if (element.isCustom()
-          && !getType().isSameType(element.getType())
-          && isSameSelector(getSelector(), element.getSelector())) {
-        return Validation.ErrorType.COMPONENTS_WITH_SAME_SELECTOR_BUT_DIFFERENT_TYPES;
-      }
-      return Validation.ErrorType.NONE;
-    }
-
-    @Override
-    public boolean isCustom() {
+    public boolean isCustomElement() {
       return true;
     }
   }
@@ -314,11 +240,6 @@ public abstract class ElementContext {
     }
 
     @Override
-    ErrorType validate(ElementContext element) {
-      return ErrorType.NONE;
-    }
-
-    @Override
     public boolean isDocumentElement() {
       return true;
     }
@@ -326,7 +247,7 @@ public abstract class ElementContext {
 
   public static class Self extends ElementContext {
 
-    static final ElementContext SELF_ELEMENT = new Self();
+    public static final ElementContext SELF_ELEMENT = new Self();
 
     private Self() {
       super(null,
@@ -342,11 +263,6 @@ public abstract class ElementContext {
     @Override
     public boolean isSelfElement() {
       return true;
-    }
-
-    @Override
-    ErrorType validate(ElementContext element) {
-      return ErrorType.NONE;
     }
   }
 }

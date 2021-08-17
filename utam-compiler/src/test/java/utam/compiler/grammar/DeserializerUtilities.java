@@ -58,7 +58,7 @@ public class DeserializerUtilities {
 
   public Result getResultFromString(String content) {
     JsonDeserializer deserializer = new JsonDeserializer(type, content, translatorConfig);
-    return new Result(deserializer.getObject(), deserializer.getContext());
+    return new Result(deserializer.getObject(), deserializer.getPageObjectContext());
   }
 
   TranslationContext getContext(String fileName) {
