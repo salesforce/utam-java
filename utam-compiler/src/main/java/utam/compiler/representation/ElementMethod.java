@@ -72,7 +72,7 @@ public abstract class ElementMethod implements PageObjectMethod {
     return "";
   }
 
-  private static String getElementMethodCode(ElementContext element, boolean isList) {
+  static String getElementMethodCode(ElementContext element, boolean isList) {
     return String.format("element(this.%s).%s(%s.class, %sImpl.class%s)",
         element.getName(),
         isList? "buildList" : "build",

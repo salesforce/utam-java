@@ -29,6 +29,7 @@ import utam.core.driver.Driver;
 import utam.core.driver.Expectations;
 import utam.core.element.Element;
 import utam.core.element.FindContext;
+import utam.core.framework.consumer.FrameElement;
 import utam.core.element.Locator;
 import utam.core.selenium.appium.MobileElementAdapter;
 
@@ -159,6 +160,21 @@ public class DriverAdapter implements Driver {
   @Override
   public <T> T waitFor(Duration timeout, Duration pollingInterval, Expectations<T> expectations) {
     return waitFor(timeout, pollingInterval, expectations, null);
+  }
+
+  @Override
+  public void enterFrame(FrameElement element) {
+    driver.switchTo().frame(((ElementAdapter)element.getFrameElement()).getWebElement());
+  }
+
+  @Override
+  public void exitToParentFrame() {
+    driver.switchTo().parentFrame();
+  }
+
+  @Override
+  public void exitFrame() {
+    driver.switchTo().defaultContent();
   }
 
   public WebDriver getSeleniumDriver() {

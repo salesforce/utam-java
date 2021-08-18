@@ -108,4 +108,25 @@ public class UtamLoaderImpl implements UtamLoader {
   public Document getDocument() {
     return new DocumentObject(factory);
   }
+
+  @Override
+  public void enterFrame(FrameElement frame) {
+    driver.enterFrame(frame);
+  }
+
+  @Override
+  public <T extends RootPageObject> T enterFrameAndLoad(FrameElement frame, Class<T> type) {
+    driver.enterFrame(frame);
+    return load(type);
+  }
+
+  @Override
+  public void exitToParentFrame() {
+    driver.exitToParentFrame();
+  }
+
+  @Override
+  public void exitFrame() {
+    driver.exitFrame();
+  }
 }
