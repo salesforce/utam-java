@@ -121,8 +121,7 @@ final class UtamPageObject {
 
   void validate() {
     if (isAbstract) {
-      if (isExposeRootElement
-          || rootElementType != null || shadow != null || elements != null || rootLocator != null || profiles != null) {
+      if (shadow != null || elements != null || rootLocator != null || profiles != null) {
         throw new UtamError(ERR_ROOT_ABSTRACT);
       }
       return;
