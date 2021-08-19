@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static utam.compiler.helpers.AnnotationUtils.*;
-import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.MethodContext.BEFORE_LOAD_METHOD_MANE;
 import static utam.compiler.helpers.TypeUtilities.*;
 
@@ -121,8 +120,7 @@ final class UtamPageObject {
 
   void validate() {
     if (isAbstract) {
-      if (isExposeRootElement
-          || rootElementType != null || shadow != null || elements != null || rootLocator != null || profiles != null) {
+      if (shadow != null || elements != null || rootLocator != null || profiles != null) {
         throw new UtamError(ERR_ROOT_ABSTRACT);
       }
       return;

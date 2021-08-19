@@ -18,7 +18,7 @@ import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.EMPTY_SELECTOR;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
-import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_TYPE;
+import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.ElementContext.SELF_ELEMENT_NAME;
 import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;

@@ -19,7 +19,6 @@ import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Locator;
-import utam.core.element.RootElement;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -34,7 +33,6 @@ public abstract class ElementContext {
   static final String ROOT_ELEMENT_NAME = "root";
   static final String DOCUMENT_ELEMENT_NAME = "document";
   static final Locator EMPTY_SELECTOR = LocatorBy.byCss("");
-  public static final TypeProvider ROOT_ELEMENT_TYPE = new TypeUtilities.FromClass(RootElement.class);
   private final Locator selector;
   // parameters from scope + from element itself
   private final List<MethodParameter> parameters;
@@ -181,7 +179,7 @@ public abstract class ElementContext {
     private final TypeProvider enclosingPageObjectType;
 
     public Root(TypeProvider enclosingPageObjectType, Locator selector) {
-      super(null, ROOT_ELEMENT_NAME, ROOT_ELEMENT_TYPE, selector, false, EMPTY_PARAMETERS, false);
+      super(null, ROOT_ELEMENT_NAME, TypeUtilities.ROOT_ELEMENT_TYPE, selector, false, EMPTY_PARAMETERS, false);
       this.enclosingPageObjectType = enclosingPageObjectType;
     }
 

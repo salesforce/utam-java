@@ -15,7 +15,6 @@ import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.element.RootElement;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.Profile;
 import org.testng.annotations.Test;
@@ -30,6 +29,7 @@ import static utam.compiler.grammar.UtamPageObject.*;
 import static utam.compiler.grammar.UtamProfile_Tests.PROFILE_KEY;
 import static utam.compiler.grammar.UtamProfile_Tests.PROFILE_VALUE;
 import static utam.compiler.grammar.UtamSelector_Tests.SELECTOR_STRING;
+import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -272,12 +272,18 @@ public class UtamPageObject_Tests {
   }
 
   @Test
-  public void testAbstractWithNonNullTypeThrows() {
+  public void testAbstractWithRootElementExposed() {
+    MethodInfo info = new MethodInfo("getRoot", "RootElement");
+    info.addCodeLine("this.getRootElement()");
+    info.addImportedTypes(ROOT_ELEMENT_TYPE.getFullName());
+    info.setIsPublic(true);
     UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.rootElementType = new String[] {"clickable"};
-    utamPageObject.isAbstract = true;
-    UtamError e = expectThrows(UtamError.class, utamPageObject::validate);
-    assertThat(e.getMessage(), containsString(ERR_ROOT_ABSTRACT));
+    utamPageObject.isExposeRootElement = true;
+    utamPageObject.rootElementType = new String[] { "clickable" };
+    TranslationContext context = getTestTranslationContext();
+    utamPageObject.compile(context);
+    PageObjectMethod rootElementMethod = context.getRootElement().getElementMethod();
+    PageObjectValidationTestHelper.validateMethod(rootElementMethod, info);
   }
 
   @Test
@@ -346,7 +352,7 @@ public class UtamPageObject_Tests {
   public void testRootElementWithActionableType() {
     MethodInfo info = new MethodInfo("getRoot", "RootElement");
     info.addCodeLine("this.getRootElement()");
-    info.addImportedTypes(RootElement.class.getName());
+    info.addImportedTypes(ROOT_ELEMENT_TYPE.getFullName());
     info.setIsPublic(false);
     UtamPageObject utamPageObject = new UtamPageObject();
     utamPageObject.rootElementType = new String[] { "actionable" };
