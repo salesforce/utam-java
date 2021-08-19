@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
@@ -114,7 +115,7 @@ public enum BasicElementActionType implements ActionType {
 
   public static ActionType getActionType(String apply, TypeProvider elementType, String elementName) {
     if (!TypeUtilities.BasicElementInterface.isBasicType(elementType)
-        && !elementType.isSameType(new TypeUtilities.FromClass(RootElement.class))) {
+        && !elementType.isSameType(ROOT_ELEMENT_TYPE)) {
       throw new UtamError(
           String.format(
               ActionableActionType.ERR_NOT_HTML_ELEMENT,

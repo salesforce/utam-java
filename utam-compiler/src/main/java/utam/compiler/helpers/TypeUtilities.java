@@ -7,6 +7,8 @@
  */
 package utam.compiler.helpers;
 
+import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_TYPE;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,7 +26,6 @@ import utam.core.element.BasicElement;
 import utam.core.element.Clickable;
 import utam.core.element.Editable;
 import utam.core.element.ElementLocation;
-import utam.core.element.RootElement;
 import utam.core.element.Touchable;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageObject;
@@ -205,7 +206,7 @@ public final class TypeUtilities {
         return ((Element)type).basicInterfaces.toArray(BasicElementInterface[]::new);
       }
 
-      if (type.isSameType(new TypeUtilities.FromClass(RootElement.class))) {
+      if (type.isSameType(ROOT_ELEMENT_TYPE)) {
         return BasicElementInterface.values();
       }
 

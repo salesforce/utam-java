@@ -18,6 +18,7 @@ import static utam.compiler.grammar.TestUtilities.*;
 import static utam.compiler.grammar.UtamPageObject.*;
 import static utam.compiler.grammar.UtamSelector.ERR_ROOT_SELECTOR_ARGS;
 import static utam.compiler.grammar.UtamSelector.ERR_ROOT_SELECTOR_LIST;
+import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -62,8 +63,7 @@ public class UtamPageObject_DeserializeTests {
     TranslationContext context = getTestTranslationContext();
     root.compile(context);
     assertThat(
-        context.getRootElement().getType().isSameType(new TypeUtilities.FromClass(
-            RootElement.class)),
+        context.getRootElement().getType().isSameType(ROOT_ELEMENT_TYPE),
         is(equalTo(true)));
   }
 

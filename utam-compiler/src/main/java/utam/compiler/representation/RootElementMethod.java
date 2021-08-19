@@ -7,6 +7,7 @@
  */
 package utam.compiler.representation;
 
+import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 
 import java.util.Collections;
@@ -31,7 +32,7 @@ public class RootElementMethod {
   public static class Protected extends Public {
 
     public Protected() {
-      super(new TypeUtilities.FromClass(RootElement.class));
+      super(ROOT_ELEMENT_TYPE);
     }
 
     @Override
