@@ -10,6 +10,7 @@ package utam.compiler.helpers;
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
+import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -171,6 +172,19 @@ public abstract class ElementContext {
     // used in tests
     public Container(String name) {
       this(null, name);
+    }
+  }
+
+  public static class Frame extends ElementContext {
+    public Frame(ElementContext scopeContext, String name, Locator selector) {
+      super(
+          scopeContext,
+          name,
+          FRAME_ELEMENT,
+          selector,
+          false,
+          EMPTY_PARAMETERS,
+          false);
     }
   }
 

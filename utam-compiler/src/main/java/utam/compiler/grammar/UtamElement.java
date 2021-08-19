@@ -23,6 +23,7 @@ import utam.compiler.representation.ContainerMethod;
 import utam.compiler.representation.CustomElementMethod;
 import utam.compiler.representation.ElementField;
 import utam.compiler.representation.ElementMethod;
+import utam.compiler.representation.FrameMethod;
 import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -38,6 +39,7 @@ import utam.core.framework.consumer.UtamError;
 public final class UtamElement {
 
   static final String CONTAINER_ELEMENT_TYPE = "container";
+  static final String FRAME_ELEMENT_TYPE = "frame";
   static final String ERR_ELEMENT_OF_UNKNOWN_TYPE = "element '%s' has unknown type";
   static final String ERR_ELEMENT_FILTER_NEEDS_LIST =
       "element '%s': filter can only be set for list";
@@ -48,12 +50,17 @@ public final class UtamElement {
   static final String ERR_ELEMENT_NESTED_ELEMENTS = "element '%s' can't have nested elements";
   static final String ERR_ELEMENT_EXTERNAL_NOT_ALLOWED =
       "element '%s': external flag is not supported";
+  static final String ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED =
+      "element '%s': frame selector cannot return all";
   static final String ERR_CONTAINER_SHOULD_BE_PUBLIC =
       "element '%s': private container is redundant, please mark element public";
+  static final String ERR_FRAME_SHOULD_BE_PUBLIC =
+      "element '%s': private frame is redundant, please mark element public";
   private static final String[] SUPPORTED_BASIC_ELEMENT_PROPERTIES = {
     "name", "public", "selector", "filter", "nullable", "shadow", "elements"
   };
   private static final String[] SUPPORTED_CONTAINER_ELEMENT_PROPERTIES = {"name", "public"};
+  private static final String[] SUPPORTED_FRAME_ELEMENT_PROPERTIES = {"name", "public", "selector"};
   private static final String[] SUPPORTED_CUSTOM_ELEMENT_PROPERTIES = {
     "name", "public", "selector", "filter", "nullable", "external"
   };
@@ -96,6 +103,8 @@ public final class UtamElement {
       SUPPORTED = String.join(",", SUPPORTED_BASIC_ELEMENT_PROPERTIES);
     } else if (elementType == Type.CUSTOM) {
       SUPPORTED = String.join(",", SUPPORTED_CUSTOM_ELEMENT_PROPERTIES);
+    } else if (elementType == Type.FRAME) {
+      SUPPORTED = String.join(",", SUPPORTED_FRAME_ELEMENT_PROPERTIES);
     } else {
       SUPPORTED = String.join(",", SUPPORTED_CONTAINER_ELEMENT_PROPERTIES);
     }
@@ -110,6 +119,8 @@ public final class UtamElement {
     Type elementType = getElementType();
     if (elementType == Type.CONTAINER) {
       traversalAbstraction = new Container();
+    } else if (elementType == Type.FRAME) {
+      traversalAbstraction = new Frame();
     } else if (elementType == Type.BASIC) {
       traversalAbstraction = new Basic();
     } else if (elementType == Type.CUSTOM) {
@@ -123,6 +134,8 @@ public final class UtamElement {
   Type getElementType() {
     if (type.length == 1 && CONTAINER_ELEMENT_TYPE.equals(type[0])) {
       return Type.CONTAINER;
+    } else if (type.length == 1 && FRAME_ELEMENT_TYPE.equals(type[0])) {
+      return Type.FRAME;
     } else if (type.length == 1 && TranslationTypesConfigJava.isPageObjectType(type[0])) {
       return Type.CUSTOM;
     } else if (TypeUtilities.Element.isBasicType(type)) {
@@ -163,7 +176,8 @@ public final class UtamElement {
     UNKNOWN,
     BASIC,
     CUSTOM,
-    CONTAINER
+    CONTAINER,
+    FRAME
   }
 
   abstract static class Traversal {
@@ -381,6 +395,45 @@ public final class UtamElement {
       context.setElement(elementContext);
       context.setMethod(method);
       return new ElementContext[]{null, elementContext};
+    }
+  }
+
+  class Frame extends Traversal {
+    private Frame() {
+      if (filter != null
+          || isNullable != null
+          || isExternal != null
+          || elements != null
+          || shadow != null) {
+        throw new UtamError(getSupportedPropertiesErr(Type.FRAME));
+      }
+      if (!isPublic()) {
+        throw new UtamError(String.format(ERR_FRAME_SHOULD_BE_PUBLIC, name));
+      }
+      if (selector == null) {
+        throw new UtamError(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, name));
+      }
+      if (selector.isReturnAll) {
+        throw new UtamError(String.format(ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED, name));
+      }
+    }
+
+    @Override
+    ElementContext[] traverse(TranslationContext context, ElementContext scopeElement,
+        boolean isExpandScopeShadowRoot) {
+      UtamSelector.Context selectorContext = selector.getContext();
+      ElementField field =
+          new ElementField(
+              name, getFindAnnotation(selectorContext.getLocator(), scopeElement,
+              isExpandScopeShadowRoot, isNullable()));
+      ElementContext elementContext = new ElementContext.Frame(
+          scopeElement, name, selectorContext.getLocator());
+      PageObjectMethod method = new FrameMethod(elementContext);
+      elementContext.setElementMethod(method);
+      context.setClassField(field);
+      context.setElement(elementContext);
+      context.setMethod(method);
+      return new ElementContext[]{elementContext};
     }
   }
 }

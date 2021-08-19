@@ -22,6 +22,7 @@ import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.ElementContext.SELF_ELEMENT_NAME;
 import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
+import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
 
 import java.util.Collections;
 import org.testng.annotations.Test;
@@ -177,5 +178,20 @@ public class ElementContextTests {
     Locator selector = SELECTOR_VALUE;
     ElementContext.Root context = new Root(DUMMY_TYPE, selector);
     assertThat(context.getSelector(), is(equalTo(selector)));
+  }
+
+  @Test
+  public void testFrameElement() {
+    ElementContext.Frame context = new ElementContext.Frame(getSingleElementContext(), ELEMENT_NAME, SELECTOR_VALUE);
+    assertThat(context.getName(), is(equalTo(ELEMENT_NAME)));
+    assertThat(context.isDocumentElement(), is(false));
+    assertThat(context.isSelfElement(), is(false));
+    assertThat(context.isNullable(), is(false));
+    assertThat(context.isRootElement(), is(false));
+    assertThat(context.getType(), is(equalTo(FRAME_ELEMENT)));
+    assertThat(context.isList(), is(false));
+    assertThat(context.isCustomElement(), is(false));
+    assertThat(context.getParameters(), is(hasSize(0)));
+    assertThat(context.getSelector(), is(equalTo(SELECTOR_VALUE)));
   }
 }

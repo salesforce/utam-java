@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.util.List;
 import utam.core.element.Element;
 import utam.core.element.FindContext;
+import utam.core.framework.consumer.FrameElement;
 import utam.core.element.Locator;
 
 /**
@@ -73,6 +74,25 @@ public interface Driver {
    * @return result of the applied expectations
    */
   <T> T waitFor(Duration timeout, Duration pollingInterval, Expectations<T> expectations);
+
+  /**
+   * enters a frame or iframe element
+   *
+   * @param element the frame element to enter
+   */
+  void enterFrame(FrameElement element);
+
+  /**
+   * exits focus from a frame or iframe to the immediate parent frame, or a no-op
+   * if already on the top-level frame
+   */
+  void exitToParentFrame();
+
+  /**
+   * exits focus from a frame or iframe to the immediate parent frame, or a no-op
+   * if already on the top-level frame
+   */
+  void exitFrame();
 
   /**
    * set active page context to NATIVE_APP

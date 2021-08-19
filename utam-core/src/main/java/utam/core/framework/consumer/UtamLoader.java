@@ -53,6 +53,33 @@ public interface UtamLoader {
       Locator locator);
 
   /**
+   * enters a frame or iframe element
+   * @param frame the frame element to enter
+   */
+  void enterFrame(FrameElement frame);
+
+  /**
+   * enters a frame or iframe element and loads the specified Page Object as loaded in the frame
+   * @param frame the frame to enter
+   * @param type type of the object
+   * @param <T> type of Root Page Object to return
+   * @return instance of the Page Object, loaded in the frame
+   */
+  <T extends RootPageObject> T enterFrameAndLoad(FrameElement frame, Class<T> type);
+
+  /**
+   * exits focus from a frame or iframe to the immediate parent frame, or a no-op
+   * if already on the top-level frame
+   */
+  void exitToParentFrame();
+
+  /**
+   * exits focus from a frame or iframe to the top-level frame in the document, or a no-op
+   * if already on the top-level frame
+   */
+  void exitFrame();
+
+  /**
    * provides access to configurable parameters
    *
    * @return instance of the config

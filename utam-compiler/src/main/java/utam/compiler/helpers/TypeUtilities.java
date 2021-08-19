@@ -30,6 +30,7 @@ import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.consumer.ContainerElement;
+import utam.core.framework.consumer.FrameElement;
 import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.LocatorBy;
 
@@ -56,6 +57,7 @@ public final class TypeUtilities {
   static final TypeProvider GENERIC_TYPE = new UnimportableType("<T> T");
   static final TypeProvider CONTAINER_ELEMENT =
       new TypeUtilities.FromClass(ContainerElement.class);
+  public static final TypeProvider FRAME_ELEMENT = new TypeUtilities.FromClass(FrameElement.class);
   private static final String ERR_PARAMETERS_TYPES_MISMATCH =
       "expected %d parameters with type {%s}, provided were {%s}";
   public static final TypeProvider CONTAINER_RETURN_TYPE =
@@ -72,10 +74,11 @@ public final class TypeUtilities {
   public static final TypeProvider ELEMENT_FIELD = new FromClass(ElementLocation.class);
 
   static final String CONTAINER_ELEMENT_TYPE = "container";
+  static final String FRAME_ELEMENT_TYPE = "frame";
   public static final String ERR_TYPE_INVALID_VALUE_TYPE =
       "%s '%s': type must be %s, a Page Object type reference, or an array of basic element interfaces";
   public static final String ERR_TYPE_PROPERTY_INVALID_STRING_VALUE =
-      "element '%s': invalid string value '%s'; type property string values must be either 'container' or a Page Object type reference.";
+      "element '%s': invalid string value '%s'; type property string values must be either 'container', 'frame', or a Page Object type reference.";
   public static final String ERR_RETURNS_PROPERTY_INVALID_STRING_VALUE =
       "method '%s': invalid string value '%s'; returns property string values must be either a primitive type or a Page Object type reference.";
   public static final String ERR_TYPE_INVALID_ARRAY_TYPES =
@@ -119,6 +122,7 @@ public final class TypeUtilities {
       String value = typeNode.textValue();
       if (propertyType == PropertyType.TYPE &&
           !CONTAINER_ELEMENT_TYPE.equals(value) &&
+          !FRAME_ELEMENT_TYPE.equals(value) &&
           !TranslationTypesConfigJava.isPageObjectType(value)) {
         throw new UtamError(String.format(ERR_TYPE_PROPERTY_INVALID_STRING_VALUE, name, value));
       }
