@@ -33,24 +33,4 @@ public class ElementLocationChainTests {
             .scope(LocatorBy.byCss("css2"), Type.EXISTING_IN_SHADOW).getLocatorChainString(),
         is(equalTo("driver > By.cssSelector: css1 >> By.cssSelector: css2")));
   }
-
-  @Test
-  public void testSetParameters() {
-  }
-
-  @Test
-  public void testGetLocatorChainString() {
-  }
-
-  @Test
-  public void testFindElement() {
-  }
-
-  @Test
-  public void testFindElements() {
-  }
-
-  @Test
-  public void testIsNullable() {
-  }
 }

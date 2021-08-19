@@ -21,8 +21,8 @@ import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_MISSING_SELECTOR_PRO
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_NESTED_ELEMENTS;
 import static utam.compiler.grammar.UtamElement.Type;
 import static utam.compiler.grammar.UtamElementFilter_Tests.getInnerTextFilter;
-import static utam.compiler.grammar.UtamSelector_Tests.getListCssSelector;
-import static utam.compiler.grammar.UtamSelector_Tests.getUtamCssSelector;
+import static utam.compiler.grammar.UtamSelectorTests.getListCssSelector;
+import static utam.compiler.grammar.UtamSelectorTests.getUtamCssSelector;
 
 import java.util.List;
 import java.util.Objects;
@@ -64,6 +64,10 @@ public class UtamElement_BasicTests {
   private static UtamElement.Traversal getElementAbstraction(String json) {
     UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
     return getAbstraction(utamElement);
+  }
+
+  private static String getBasicSupportedProperties() {
+    return Type.BASIC.getSupportedPropertiesErr(ELEMENT_NAME);
   }
 
   /**
@@ -114,7 +118,7 @@ public class UtamElement_BasicTests {
     UtamElement externalElement = getPublicHtmlElement(getUtamCssSelector(), null);
     externalElement.isExternal = true;
     UtamError e = expectThrows(UtamError.class, () -> getAbstraction(externalElement));
-    assertThat(e.getMessage(), is(equalTo(externalElement.getSupportedPropertiesErr(Type.BASIC))));
+    assertThat(e.getMessage(), is(equalTo(getBasicSupportedProperties())));
   }
 
   /**
@@ -160,7 +164,7 @@ public class UtamElement_BasicTests {
     FieldInfo createdFieldInfo = new FieldInfo(ELEMENT_NAME);
     createdFieldInfo.addAnnotations(String.format(
         "@ElementMarker.Find(css = \"%s\", scope = \"%s\")",
-        UtamSelector_Tests.SELECTOR_STRING, ELEMENT_NAME));
+        UtamSelectorTests.SELECTOR_STRING, ELEMENT_NAME));
     createdFieldInfo.validateField(context.getFields().get(0));
   }
 
@@ -177,7 +181,7 @@ public class UtamElement_BasicTests {
     assertThat(elementContext.getType().getSimpleName(), is(equalTo("TestElement")));
     assertThat(context.getFields(), hasSize(1));
     FieldInfo createdFieldInfo = new FieldInfo(ELEMENT_NAME);
-    createdFieldInfo.addAnnotations(String.format("@ElementMarker.Find(css = \"%s\")", UtamSelector_Tests.SELECTOR_STRING));
+    createdFieldInfo.addAnnotations(String.format("@ElementMarker.Find(css = \"%s\")", UtamSelectorTests.SELECTOR_STRING));
     createdFieldInfo.validateField(context.getFields().get(0));
   }
 
@@ -193,7 +197,7 @@ public class UtamElement_BasicTests {
     assertThat(elementContext.getType().getSimpleName(), is(equalTo("TestElement")));
     assertThat(context.getFields(), hasSize(1));
     FieldInfo createdFieldInfo = new FieldInfo(ELEMENT_NAME);
-    createdFieldInfo.addAnnotations(String.format("@ElementMarker.Find(css = \"%s\")", UtamSelector_Tests.SELECTOR_STRING));
+    createdFieldInfo.addAnnotations(String.format("@ElementMarker.Find(css = \"%s\")", UtamSelectorTests.SELECTOR_STRING));
     createdFieldInfo.validateField(context.getFields().get(0));
   }
 
@@ -208,7 +212,7 @@ public class UtamElement_BasicTests {
     element.testRootTraverse(context);
     assertThat(context.getFields(), hasSize(1));
     FieldInfo createdFieldInfo = new FieldInfo(ELEMENT_NAME);
-    createdFieldInfo.addAnnotations(String.format("@ElementMarker.Find(css = \"%s\")", UtamSelector_Tests.SELECTOR_STRING));
+    createdFieldInfo.addAnnotations(String.format("@ElementMarker.Find(css = \"%s\")", UtamSelectorTests.SELECTOR_STRING));
     createdFieldInfo.validateField(context.getFields().get(0));
   }
 
@@ -223,7 +227,7 @@ public class UtamElement_BasicTests {
     element.testRootTraverse(context);
     assertThat(context.getFields(), hasSize(1));
     FieldInfo createdFieldInfo = new FieldInfo(ELEMENT_NAME);
-    createdFieldInfo.addAnnotations(String.format("@ElementMarker.Find(css = \"%s\")", UtamSelector_Tests.SELECTOR_STRING));
+    createdFieldInfo.addAnnotations(String.format("@ElementMarker.Find(css = \"%s\")", UtamSelectorTests.SELECTOR_STRING));
     createdFieldInfo.validateField(context.getFields().get(0));
   }
 

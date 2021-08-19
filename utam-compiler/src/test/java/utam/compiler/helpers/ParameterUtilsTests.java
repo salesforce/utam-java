@@ -67,7 +67,7 @@ public class ParameterUtilsTests {
     assertThat(
         ParameterUtils.getParametersValuesString(
             Arrays.asList(new MockMethodParameter("first"), new MockMethodParameter("second"))),
-        is(equalTo("first,second")));
+        is(equalTo("first, second")));
   }
 
   /**

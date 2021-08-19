@@ -81,8 +81,8 @@ public class MockUtilities {
   }
 
   ElementAdapter setElementAdapter(Class<? extends WebDriver> driverType) {
-    return isMobileMock(driverType) ? new MobileElementAdapter(webElementMock)
-        : new ElementAdapter(webElementMock);
+    return isMobileMock(driverType) ? new MobileElementAdapter(webElementMock, driverAdapter)
+        : new ElementAdapter(webElementMock, driverAdapter);
   }
 
   DriverAdapter setDriverAdapter(Class<? extends WebDriver> driverType) {

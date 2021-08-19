@@ -22,6 +22,7 @@ import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Actionable;
 import utam.core.element.BasicElement;
 import utam.core.element.Clickable;
+import utam.core.element.Draggable;
 import utam.core.element.Editable;
 import utam.core.element.ElementLocation;
 import utam.core.element.RootElement;
@@ -72,9 +73,9 @@ public final class TypeUtilities {
     }
   };
   public static final TypeProvider ELEMENT_FIELD = new FromClass(ElementLocation.class);
-
-  static final String CONTAINER_ELEMENT_TYPE = "container";
-  static final String FRAME_ELEMENT_TYPE = "frame";
+  public static final TypeProvider BASIC_ELEMENT = new FromClass(BasicElement.class);
+  public static final String FRAME_ELEMENT_TYPE_NAME = "frame";
+  public static final String CONTAINER_ELEMENT_TYPE_NAME = "container";
   public static final String ERR_TYPE_INVALID_VALUE_TYPE =
       "%s '%s': type must be %s, a Page Object type reference, or an array of basic element interfaces";
   public static final String ERR_TYPE_PROPERTY_INVALID_STRING_VALUE =
@@ -121,8 +122,8 @@ public final class TypeUtilities {
     if (typeNode.isTextual()) {
       String value = typeNode.textValue();
       if (propertyType == PropertyType.TYPE &&
-          !CONTAINER_ELEMENT_TYPE.equals(value) &&
-          !FRAME_ELEMENT_TYPE.equals(value) &&
+          !CONTAINER_ELEMENT_TYPE_NAME.equals(value) &&
+          !FRAME_ELEMENT_TYPE_NAME.equals(value) &&
           !TranslationTypesConfigJava.isPageObjectType(value)) {
         throw new UtamError(String.format(ERR_TYPE_PROPERTY_INVALID_STRING_VALUE, name, value));
       }
@@ -152,7 +153,7 @@ public final class TypeUtilities {
     throw new UtamError(String.format(ERR_TYPE_INVALID_VALUE_TYPE,
         entityType,
         name,
-        propertyType == PropertyType.TYPE ? "'" + CONTAINER_ELEMENT_TYPE + "'" : "a primitive data type"));
+        propertyType == PropertyType.TYPE ? "'" + CONTAINER_ELEMENT_TYPE_NAME + "'" : "a primitive data type"));
   }
 
   public enum PropertyType {
@@ -163,6 +164,7 @@ public final class TypeUtilities {
   public enum BasicElementInterface implements TypeProvider {
     actionable(Actionable.class),
     clickable(Clickable.class),
+    draggable(Draggable.class),
     editable(Editable.class),
     touchable(Touchable.class);
 
@@ -172,7 +174,7 @@ public final class TypeUtilities {
       this.type = type;
     }
 
-    public static boolean isBasicType(String jsonString) {
+    static boolean isBasicType(String jsonString) {
       for (TypeUtilities.BasicElementInterface type : TypeUtilities.BasicElementInterface.values()) {
         if (type.name().equals(jsonString)) {
           return true;

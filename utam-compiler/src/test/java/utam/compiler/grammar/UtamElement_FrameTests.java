@@ -56,7 +56,7 @@ public class UtamElement_FrameTests {
             + "  }"
             + "}";
     UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
-    UtamError e = expectThrows(UtamError.class, () -> utamElement.getAbstraction());
+    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
     assertThat(e.getMessage(), is(equalTo(String.format(ERR_FRAME_SHOULD_BE_PUBLIC, "simpleFrameElement"))));
   }
 
@@ -73,7 +73,7 @@ public class UtamElement_FrameTests {
             + "  }"
             + "}";
     UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
-    UtamError e = expectThrows(UtamError.class, () -> utamElement.getAbstraction());
+    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
     assertThat(e.getMessage(), is(equalTo(String.format(ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED, "simpleFrameElement"))));
   }
 
@@ -86,7 +86,7 @@ public class UtamElement_FrameTests {
             + "  \"public\": true"
             + "}";
     UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
-    UtamError e = expectThrows(UtamError.class, () -> utamElement.getAbstraction());
+    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
     assertThat(e.getMessage(), is(equalTo(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, "simpleFrameElement"))));
   }
 
@@ -103,7 +103,7 @@ public class UtamElement_FrameTests {
             + "  }"
             + "}";
     UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
-    UtamError e = expectThrows(UtamError.class, () -> utamElement.getAbstraction());
+    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
     assertThat(e.getMessage(), is(equalTo("frame element 'simpleFrameElement': only properties { name,public,selector } are supported")));
   }
 
@@ -120,7 +120,7 @@ public class UtamElement_FrameTests {
             + "  }"
             + "}";
     UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
-    UtamError e = expectThrows(UtamError.class, () -> utamElement.getAbstraction());
+    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
     assertThat(e.getMessage(), is(equalTo("frame element 'simpleFrameElement': only properties { name,public,selector } are supported")));
   }
 
@@ -145,7 +145,7 @@ public class UtamElement_FrameTests {
             + "  ]"
             + "}";
     UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
-    UtamError e = expectThrows(UtamError.class, () -> utamElement.getAbstraction());
+    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
     assertThat(e.getMessage(), is(equalTo("frame element 'simpleFrameElement': only properties { name,public,selector } are supported")));
   }
 
@@ -174,7 +174,7 @@ public class UtamElement_FrameTests {
             + "  }"
             + "}";
     UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
-    UtamError e = expectThrows(UtamError.class, () -> utamElement.getAbstraction());
+    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
     assertThat(e.getMessage(), is(equalTo("frame element 'simpleFrameElement': only properties { name,public,selector } are supported")));
   }
 
@@ -201,7 +201,7 @@ public class UtamElement_FrameTests {
             + "  }"
             + "}";
     UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
-    UtamError e = expectThrows(UtamError.class, () -> utamElement.getAbstraction());
+    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
     assertThat(e.getMessage(), is(equalTo("frame element 'simpleFrameElement': only properties { name,public,selector } are supported")));
   }
 }

@@ -92,7 +92,7 @@ public abstract class ElementExpectations {
     return new ExpectationsImpl<>(
         "deprecated javascript click",
         (driver, element) -> {
-          element.deprecatedClick(driver);
+          element.deprecatedClick();
           return true;
         });
   }
@@ -107,7 +107,7 @@ public abstract class ElementExpectations {
           UtamLogger.error(
               "Error from WebElement.click(), attempting to execute javascript click instead...");
           UtamLogger.error(e);
-          element.deprecatedClick(driver);
+          element.deprecatedClick();
         } else {
           throw e;
         }
@@ -120,7 +120,7 @@ public abstract class ElementExpectations {
     return new ExpectationsImpl<>(
         "move to element",
         (driver, element) -> {
-          element.moveTo(driver);
+          element.moveTo();
           return true;
         });
   }
@@ -129,7 +129,7 @@ public abstract class ElementExpectations {
     return new ExpectationsImpl<>(
         "focus on the element",
         (driver, element) -> {
-          element.focus(driver);
+          element.focus();
           return true;
         });
   }
@@ -138,7 +138,7 @@ public abstract class ElementExpectations {
     return new ExpectationsImpl<>(
         String.format("scroll to %s", options.name().toLowerCase()),
         (driver, element) -> {
-          element.scrollIntoView(driver, options);
+          element.scrollIntoView(options);
           return true;
         });
   }
@@ -147,7 +147,7 @@ public abstract class ElementExpectations {
     return new ExpectationsImpl<>(
         "blur",
         (driver, element) -> {
-          element.blur(driver);
+          element.blur();
           return true;
         });
   }
@@ -161,7 +161,7 @@ public abstract class ElementExpectations {
     return new ExpectationsImpl<>(
         String.format("flick element at X '%d' Y '%d'", xOffset, yOffset),
         (driver, element) -> {
-          element.flick(driver, xOffset, yOffset);
+          element.flick(xOffset, yOffset);
           return true;
         });
   }

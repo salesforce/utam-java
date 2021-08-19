@@ -62,7 +62,7 @@ public final class MethodContext {
   }
 
   // used in tests
-  MethodContext(){
+  public MethodContext(){
     this("test", null, false);
   }
 
@@ -156,6 +156,10 @@ public final class MethodContext {
 
   public MethodParameter setStatementArg(MethodParameter parameter) {
     if (parameter.isLiteral()) {
+      List<MethodParameter> nested = parameter.getNestedParameters();
+      if(nested != null) {
+        nested.forEach(this::setStatementArg);
+      }
       return parameter;
     }
     String argName = parameter.getValue();

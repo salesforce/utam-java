@@ -7,26 +7,30 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.helpers.AnnotationUtils.getPageObjectAnnotation;
+import static utam.compiler.helpers.AnnotationUtils.getPagePlatformAnnotation;
+import static utam.compiler.helpers.AnnotationUtils.getShadowHostAnnotation;
+import static utam.compiler.helpers.MethodContext.BEFORE_LOAD_METHOD_MANE;
+import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
+import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
+import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
-import utam.core.element.Locator;
-import utam.core.framework.consumer.UtamError;
-import utam.core.framework.context.Profile;
 import utam.compiler.representation.RootElementMethod;
 import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-
-import static utam.compiler.helpers.AnnotationUtils.*;
-import static utam.compiler.helpers.MethodContext.BEFORE_LOAD_METHOD_MANE;
-import static utam.compiler.helpers.TypeUtilities.*;
+import utam.core.element.Locator;
+import utam.core.framework.consumer.UtamError;
+import utam.core.framework.context.Profile;
 
 /**
  * @author elizaveta.ivanova
@@ -52,7 +56,7 @@ final class UtamPageObject {
   String[] rootElementType;
   boolean isExposeRootElement; // should be nullable as it's redundant for root
   UtamElement[] elements;
-  final UtamMethod beforeLoad;
+  private final UtamMethod beforeLoad;
   final Locator rootLocator;
 
   @JsonCreator
@@ -66,7 +70,7 @@ final class UtamPageObject {
       @JsonProperty(value = "exposeRootElement", defaultValue = "false") boolean isExposeRootElement,
       // root selector
       @JsonProperty(value = "root", defaultValue = "false") boolean isRootPageObject,
-      @JsonProperty(value = "selector") UtamSelector selector,
+      @JsonProperty(value = "selector") UtamRootSelector selector,
       // nested nodes
       @JsonProperty("shadow") UtamShadowElement shadow,
       @JsonProperty("elements") UtamElement[] elements,
@@ -91,8 +95,7 @@ final class UtamPageObject {
     if(selector == null) {
       this.rootLocator = null;
     } else {
-      selector.validateRootSelector();
-      this.rootLocator = selector.getContext().getLocator();
+      this.rootLocator = selector.getLocator();
     }
     validate();
   }
@@ -104,18 +107,7 @@ final class UtamPageObject {
 
   // used in tests
   UtamPageObject() {
-    this.profiles = null;
-    this.methods = null;
-    this.isAbstract = false;
-    this.platform = null;
-    this.isRootPageObject = false;
-    this.implementsType = null;
-    this.rootLocator = null;
-    this.shadow = null;
-    this.elements = null;
-    this.isExposeRootElement = false;
-    this.rootElementType = null;
-    this.beforeLoad = null;
+    this(null, false, null, null, null, false, false, null, null, null, null, null);
   }
 
   void validate() {
@@ -136,7 +128,7 @@ final class UtamPageObject {
     }
     // check that root element type is one of actionables
     if(rootElementType != null && !TypeUtilities.Element.isBasicType(rootElementType)) {
-      throw new UtamError(String.format(ERR_UNSUPPORTED_ROOT_ELEMENT_TYPE, rootElementType));
+      throw new UtamError(String.format(ERR_UNSUPPORTED_ROOT_ELEMENT_TYPE, Arrays.toString(rootElementType)));
     }
   }
 

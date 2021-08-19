@@ -281,6 +281,7 @@ public class UtamMethodAction_Tests {
     ComposeMethodStatement actionObject = getVoidStatement(action, context);
     assertThat(actionObject, is(instanceOf(ComposeMethodStatement.Utility.class)));
     assertThat(actionObject.getReturnType().isSameType(VOID), is(true));
+    assertThat(actionObject.getParameters(), hasSize(1));
     assertThat(actionObject.getParameters().get(0).getValue(), is(equalTo("strParameter")));
     assertThat(
             getSingleCodeLine(actionObject),
@@ -356,7 +357,7 @@ public class UtamMethodAction_Tests {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     TestUtilities.UtamEntityCreator.createUtamElement(
         ELEMENT_NAME, new String[] { clickable.name() }, getListSelector(), true).testTraverse(context);
-    final String applyStr = click.getInvokeMethodName();
+    final String applyStr = click.getApplyString();
     TypeProvider returns = BOOLEAN;
     UtamMethodAction action =
         new UtamMethodAction(
@@ -375,7 +376,7 @@ public class UtamMethodAction_Tests {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     TestUtilities.UtamEntityCreator.createUtamElement(
         ELEMENT_NAME, new String[] { clickable.name() }, getListSelector(), true).testTraverse(context);
-    final String applyStr = getText.getInvokeMethodName();
+    final String applyStr = getText.getApplyString();
     UtamMethodAction action =
         new UtamMethodAction(
             ELEMENT_NAME, applyStr);

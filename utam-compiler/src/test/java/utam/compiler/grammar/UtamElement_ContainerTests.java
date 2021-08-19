@@ -8,6 +8,7 @@
 package utam.compiler.grammar;
 
 import org.openqa.selenium.By;
+import utam.compiler.grammar.UtamElement.Type;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.PageObjectValidationTestHelper;
@@ -16,8 +17,7 @@ import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
 import static utam.compiler.grammar.UtamElement.ERR_CONTAINER_SHOULD_BE_PUBLIC;
-import static utam.compiler.grammar.UtamElement.Type;
-import static utam.compiler.grammar.UtamSelector_Tests.getUtamCssSelector;
+import static utam.compiler.grammar.UtamSelectorTests.getUtamCssSelector;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_LIST_RETURN_TYPE;
 import static utam.compiler.representation.ContainerMethodTests.FIRST_CONTAINER_PARAMETER;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -41,6 +41,10 @@ public class UtamElement_ContainerTests {
     return utamElement;
   }
 
+  private static String getContainerSupportedProperties() {
+    return Type.CONTAINER.getSupportedPropertiesErr(ELEMENT_NAME);
+  }
+
   @Test
   public void testPrivateContainer() {
     UtamElement element = getPublicContainerElement();
@@ -56,7 +60,7 @@ public class UtamElement_ContainerTests {
     UtamElement element = getPublicContainerElement();
     element.filter = UtamElementFilter_Tests.getInnerTextFilter();
     UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(element.getSupportedPropertiesErr(Type.CONTAINER))));
+    assertThat(e.getMessage(), is(equalTo(getContainerSupportedProperties())));
   }
 
   @Test
@@ -64,7 +68,7 @@ public class UtamElement_ContainerTests {
     UtamElement element = getPublicContainerElement();
     element.shadow = new UtamShadowElement(new UtamElement[] {});
     UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(element.getSupportedPropertiesErr(Type.CONTAINER))));
+    assertThat(e.getMessage(), is(equalTo(getContainerSupportedProperties())));
   }
 
   @Test
@@ -72,7 +76,7 @@ public class UtamElement_ContainerTests {
     UtamElement element = getPublicContainerElement();
     element.elements = new UtamElement[] {};
     UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(element.getSupportedPropertiesErr(Type.CONTAINER))));
+    assertThat(e.getMessage(), is(equalTo(getContainerSupportedProperties())));
   }
 
   @Test
@@ -80,7 +84,7 @@ public class UtamElement_ContainerTests {
     UtamElement element = getPublicContainerElement();
     element.isExternal = true;
     UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(element.getSupportedPropertiesErr(Type.CONTAINER))));
+    assertThat(e.getMessage(), is(equalTo(getContainerSupportedProperties())));
   }
 
   @Test
@@ -88,7 +92,7 @@ public class UtamElement_ContainerTests {
     UtamElement element = getPublicContainerElement();
     element.isNullable = false;
     UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(element.getSupportedPropertiesErr(Type.CONTAINER))));
+    assertThat(e.getMessage(), is(equalTo(getContainerSupportedProperties())));
   }
 
   @Test
@@ -96,7 +100,7 @@ public class UtamElement_ContainerTests {
     UtamElement element = getPublicContainerElement();
     assertThat(element.getAbstraction(), is(instanceOf(UtamElement.Container.class)));
     assertThat(
-        element.selector.getContext().getLocator().getValue(),
+        element.selector.getLocator().getValue(),
         is(equalTo(By.cssSelector(UtamElement.Container.DEFAULT_CONTAINER_SELECTOR_CSS))));
   }
 

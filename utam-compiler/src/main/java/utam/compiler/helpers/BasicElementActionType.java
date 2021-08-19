@@ -1,5 +1,7 @@
 package utam.compiler.helpers;
 
+import utam.compiler.grammar.UtamArgument;
+import utam.compiler.helpers.TypeUtilities.BasicElementInterface;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.BasicElement;
 import utam.core.framework.consumer.UtamError;
@@ -152,6 +154,13 @@ public enum BasicElementActionType implements ActionType {
             }
           }
         }
+        if (actionableType == BasicElementInterface.draggable) {
+          for (DraggableActionType action : DraggableActionType.values()) {
+            if (action.getApplyString().equals(apply)) {
+              return action;
+            }
+          }
+        }
         for (ActionableActionType action : ActionableActionType.values()) {
           if (action.getApplyString().equals(apply)) {
             return action;
@@ -198,11 +207,15 @@ public enum BasicElementActionType implements ActionType {
   }
 
   @Override
-  public String getInvokeMethodName() {
-    if( this == getClass) {
-      return "getClassAttribute";
+  public UtamArgument[] getTransformedArgs(UtamArgument[] args) {
+    if (this == BasicElementActionType.containsElement && args.length == 1) {
+      // If the action is "containsElement", it may have one argument (a selector),
+      // or two arguments (a selector and a boolean indicating whether to search in
+      // the shadow DOM) declared in the JSON. If the second argument is omitted,
+      // it can be assumed to be false, so substitute that value here.
+      return new UtamArgument[]{args[0], new UtamArgument(Boolean.FALSE)};
     }
-    return name();
+    return args;
   }
 
   /**
@@ -212,5 +225,13 @@ public enum BasicElementActionType implements ActionType {
    */
   boolean hasMethodToTest() {
     return this != size && this != containsElement;
+  }
+
+  @Override
+  public String getInvokeMethodName() {
+    if( this == getClass) {
+      return "getClassAttribute";
+    }
+    return name();
   }
 }

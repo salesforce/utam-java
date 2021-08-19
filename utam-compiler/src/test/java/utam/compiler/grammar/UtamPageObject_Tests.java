@@ -28,8 +28,8 @@ import static utam.compiler.grammar.TestUtilities.*;
 import static utam.compiler.grammar.UtamPageObject.*;
 import static utam.compiler.grammar.UtamProfile_Tests.PROFILE_KEY;
 import static utam.compiler.grammar.UtamProfile_Tests.PROFILE_VALUE;
-import static utam.compiler.grammar.UtamSelector_Tests.SELECTOR_STRING;
 import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
+import static utam.compiler.grammar.UtamSelectorTests.SELECTOR_STRING;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -65,7 +65,7 @@ public class UtamPageObject_Tests {
   /** The getAnnotations method should return the proper value with a selector */
   @Test
   public void testGetAnnotationsWithSelector() {
-    UtamPageObject pageObject = new UtamPageObject(true, UtamSelector_Tests.getUtamCssSelector());
+    UtamPageObject pageObject = new UtamPageObject(true, UtamSelectorTests.getUtamCssSelector());
     List<String> annotations =
         pageObject.getAnnotations().stream()
             .filter((annotation) -> !annotation.getAnnotationText().isEmpty())
@@ -257,7 +257,7 @@ public class UtamPageObject_Tests {
   @Test
   public void testRootWithSelector() {
     TranslationContext context = getTestTranslationContext();
-    UtamSelector rootSelector = UtamSelector_Tests.getUtamCssSelector();
+    UtamSelector rootSelector = UtamSelectorTests.getUtamCssSelector();
     UtamPageObject pageObject = new UtamPageObject(true, rootSelector);
     pageObject.compile(context);
   }
@@ -265,7 +265,8 @@ public class UtamPageObject_Tests {
   @Test
   public void testRootWithAccessIDSelector() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamPageObject pageObject = new UtamPageObject(true, UtamSelector_Tests.getAccessIdSelector());
+    UtamSelector selector = new UtamSelector(null, "accessid", null, null);
+    UtamPageObject pageObject = new UtamPageObject(true, selector);
     pageObject.isRootPageObject = true;
     pageObject.platform = "native";
     pageObject.compile(context);
@@ -297,7 +298,7 @@ public class UtamPageObject_Tests {
 
   @Test
   public void testAbstractWithNonNullSelectorThrows() {
-    UtamPageObject utamPageObject = new UtamPageObject(true, UtamSelector_Tests.getUtamCssSelector());
+    UtamPageObject utamPageObject = new UtamPageObject(true, UtamSelectorTests.getUtamCssSelector());
     utamPageObject.isAbstract = true;
     UtamError e = expectThrows(UtamError.class, utamPageObject::validate);
     assertThat(e.getMessage(), containsString(ERR_ROOT_ABSTRACT));
@@ -322,7 +323,7 @@ public class UtamPageObject_Tests {
 
   @Test
   public void testNonRootWithNonNullSelectorThrows() {
-    UtamError e = expectThrows(UtamError.class, () -> new UtamPageObject(false, UtamSelector_Tests.getUtamCssSelector()));
+    UtamError e = expectThrows(UtamError.class, () -> new UtamPageObject(false, UtamSelectorTests.getUtamCssSelector()));
     assertThat(e.getMessage(), containsString(ERR_ROOT_REDUNDANT_SELECTOR));
   }
 

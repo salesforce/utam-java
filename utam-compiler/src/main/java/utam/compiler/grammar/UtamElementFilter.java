@@ -7,18 +7,18 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.helpers.BasicElementActionType.getActionType;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
+import utam.compiler.grammar.UtamArgument.ArgsProcessor;
+import utam.compiler.grammar.UtamArgument.ArgsProcessorBasicAction;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.MatcherType;
+import utam.compiler.helpers.TranslationContext;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.UtamError;
-
-import java.util.List;
-
-import static utam.compiler.grammar.UtamArgument.getArgsProcessor;
-import static utam.compiler.helpers.BasicElementActionType.getActionType;
 
 /**
  * @author elizaveta.ivanova
@@ -26,10 +26,9 @@ import static utam.compiler.helpers.BasicElementActionType.getActionType;
  */
 final class UtamElementFilter {
 
-  static final String ERR_INCORRECT_MATCHER_FOR_METHOD = "element '%s': matcher '%s' needs applied method to return type '%s'";
-  final UtamArgument[] applyArgs;
+  private final UtamArgument[] applyArgs;
   final String applyMethod;
-  final UtamMatcher matcher;
+  private final UtamMatcher matcher;
   private final boolean isFindFirst;
   private List<MethodParameter> matcherParameters;
   private List<MethodParameter> applyMethodParameters;
@@ -52,23 +51,17 @@ final class UtamElementFilter {
   }
 
   void setElementFilter(
-      UtamElement.Type elementNodeType, TypeProvider elementType, String elementName) {
-    List<TypeProvider> expectedParameters;
+      TranslationContext context, UtamElement.Type elementNodeType, TypeProvider elementType,
+      String elementName) {
+    String contextString = String.format("element '%s' filter", elementName);
     if (elementNodeType == UtamElement.Type.BASIC) {
       ActionType actionType = getActionType(this.applyMethod, elementType, elementName);
-      expectedParameters = actionType.getParametersTypes();
-      if(!actionType.getReturnType().equals(matcher.getMatcherOperandType())) {
-        throw new UtamError(String.format(ERR_INCORRECT_MATCHER_FOR_METHOD, elementName, matcher.matcherType,
-                matcher.getMatcherOperandType().getSimpleName()));
-      }
+      matcher.checkOperandForMatcher(actionType.getReturnType(), contextString);
+      this.applyMethodParameters = new ArgsProcessorBasicAction(context, contextString, actionType).getParameters(applyArgs);
     } else {
-      expectedParameters = null;
+      this.applyMethodParameters = new ArgsProcessor(context, contextString).getParameters(applyArgs);
     }
-    this.applyMethodParameters =
-        getArgsProcessor(
-                applyArgs, expectedParameters, String.format("element '%s' filter", elementName))
-            .getOrdered();
-    this.matcherParameters = this.matcher.getParameters(elementName);
+    this.matcherParameters = this.matcher.getParameters(context, elementName);
   }
 
   List<MethodParameter> getApplyMethodParameters() {
@@ -80,7 +73,7 @@ final class UtamElementFilter {
   }
 
   MatcherType getMatcherType() {
-    return this.matcher.matcherType;
+    return this.matcher.getMatcherType();
   }
 
   boolean getFindFirst() {

@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.TextNode;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.TranslationContext;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.TypeProvider;
@@ -18,7 +19,6 @@ import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.element.Locator;
-import utam.core.framework.consumer.UtamError;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -38,16 +38,17 @@ public class TestUtilities {
       "Cannot deserialize value of type `%s` from String \"%s\"";
   private static final TranslationTypesConfig TYPES_CONFIG = new TranslationTypesConfigJava();
   public static final TypeProvider TEST_PAGE_OBJECT = TYPES_CONFIG.getInterfaceType(TEST_URI);
+  static final String JSON_MAPPING_ERROR = "Unrecognized field";
 
   public static TranslationContext getTestTranslationContext() {
     return new TranslationContext(TEST_URI, getDefaultConfig());
   }
 
-  static <T> T getDeserializedObject(String json, Class<T> tClass) {
+  public static <T> T getDeserializedObject(String json, Class<T> tClass) {
     try {
       return JsonDeserializer.deserialize(tClass, json);
     } catch (IOException e) {
-      throw new UtamError("error", e);
+      throw new UtamCompilationError(e);
     }
   }
 

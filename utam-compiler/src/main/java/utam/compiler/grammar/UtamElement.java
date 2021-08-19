@@ -8,6 +8,8 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.helpers.AnnotationUtils.getFindAnnotation;
+import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT_TYPE_NAME;
+import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT_TYPE_NAME;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,6 +17,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementUnitTestHelper;
 import utam.compiler.helpers.TranslationContext;
@@ -38,8 +41,6 @@ import utam.core.framework.consumer.UtamError;
  */
 public final class UtamElement {
 
-  static final String CONTAINER_ELEMENT_TYPE = "container";
-  static final String FRAME_ELEMENT_TYPE = "frame";
   static final String ERR_ELEMENT_OF_UNKNOWN_TYPE = "element '%s' has unknown type";
   static final String ERR_ELEMENT_FILTER_NEEDS_LIST =
       "element '%s': filter can only be set for list";
@@ -97,26 +98,11 @@ public final class UtamElement {
     this.isExternal = isExternal;
   }
 
-  String getSupportedPropertiesErr(Type elementType) {
-    final String SUPPORTED;
-    if (elementType == Type.BASIC) {
-      SUPPORTED = String.join(",", SUPPORTED_BASIC_ELEMENT_PROPERTIES);
-    } else if (elementType == Type.CUSTOM) {
-      SUPPORTED = String.join(",", SUPPORTED_CUSTOM_ELEMENT_PROPERTIES);
-    } else if (elementType == Type.FRAME) {
-      SUPPORTED = String.join(",", SUPPORTED_FRAME_ELEMENT_PROPERTIES);
-    } else {
-      SUPPORTED = String.join(",", SUPPORTED_CONTAINER_ELEMENT_PROPERTIES);
-    }
-    return String.format(
-        ERR_ELEMENT_REDUNDANT_PROPERTIES, elementType.name().toLowerCase(), name, SUPPORTED);
-  }
-
   final Traversal getAbstraction() {
     if (traversalAbstraction != null) {
       return traversalAbstraction;
     }
-    Type elementType = getElementType();
+    Type elementType = Type.getElementType(type);
     if (elementType == Type.CONTAINER) {
       traversalAbstraction = new Container();
     } else if (elementType == Type.FRAME) {
@@ -129,19 +115,6 @@ public final class UtamElement {
       throw new UtamError(String.format(ERR_ELEMENT_OF_UNKNOWN_TYPE, name));
     }
     return traversalAbstraction;
-  }
-
-  Type getElementType() {
-    if (type.length == 1 && CONTAINER_ELEMENT_TYPE.equals(type[0])) {
-      return Type.CONTAINER;
-    } else if (type.length == 1 && FRAME_ELEMENT_TYPE.equals(type[0])) {
-      return Type.FRAME;
-    } else if (type.length == 1 && TranslationTypesConfigJava.isPageObjectType(type[0])) {
-      return Type.CUSTOM;
-    } else if (TypeUtilities.Element.isBasicType(type)) {
-      return Type.BASIC;
-    }
-    return Type.UNKNOWN;
   }
 
   private boolean isPublic() {
@@ -177,7 +150,35 @@ public final class UtamElement {
     BASIC,
     CUSTOM,
     CONTAINER,
-    FRAME
+    FRAME;
+
+    static Type getElementType(String[] type) {
+      if (type.length == 1 && CONTAINER_ELEMENT_TYPE_NAME.equals(type[0])) {
+        return Type.CONTAINER;
+      } else if (type.length == 1 && FRAME_ELEMENT_TYPE_NAME.equals(type[0])) {
+          return Type.FRAME;
+      } else if (type.length == 1 && TranslationTypesConfigJava.isPageObjectType(type[0])) {
+        return Type.CUSTOM;
+      } else if (TypeUtilities.Element.isBasicType(type)) {
+        return Type.BASIC;
+      }
+      return Type.UNKNOWN;
+    }
+
+    String getSupportedPropertiesErr(String elementName) {
+      final String SUPPORTED;
+      if (this == Type.BASIC) {
+        SUPPORTED = String.join(",", SUPPORTED_BASIC_ELEMENT_PROPERTIES);
+      } else if (this == Type.CUSTOM) {
+        SUPPORTED = String.join(",", SUPPORTED_CUSTOM_ELEMENT_PROPERTIES);
+      } else if (this == Type.FRAME) {
+        SUPPORTED = String.join(",", SUPPORTED_FRAME_ELEMENT_PROPERTIES);
+      } else {
+        SUPPORTED = String.join(",", SUPPORTED_CONTAINER_ELEMENT_PROPERTIES);
+      }
+      return String.format(
+          ERR_ELEMENT_REDUNDANT_PROPERTIES, name().toLowerCase(), elementName, SUPPORTED);
+    }
   }
 
   abstract static class Traversal {
@@ -199,13 +200,13 @@ public final class UtamElement {
       if (selector == null) {
         throw new UtamError(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, name));
       }
-      if (filter != null && !selector.isReturnAll) {
+      if (filter != null && !selector.isReturnAll()) {
         throw new UtamError(String.format(ERR_ELEMENT_FILTER_NEEDS_LIST, name));
       }
       if (elements != null || shadow != null) {
-        throw new UtamError(getSupportedPropertiesErr(Type.CUSTOM));
+        throw new UtamError(Type.CUSTOM.getSupportedPropertiesErr(name));
       }
-      if (isExternal != null && selector.isReturnAll) {
+      if (isExternal != null && selector.isReturnAll()) {
         throw new UtamError(String.format(ERR_ELEMENT_EXTERNAL_NOT_ALLOWED, name));
       }
     }
@@ -215,14 +216,14 @@ public final class UtamElement {
         TranslationContext translatorContext,
         ElementContext scopeElement,
         boolean isExpandScopeShadowRoot) {
-      boolean isReturnList = selector.isReturnAll && (filter == null || !filter.getFindFirst());
-      UtamSelector.Context selectorContext = selector.getContext();
+      boolean isReturnList = selector.isReturnAll() && (filter == null || !filter.getFindFirst());
+      LocatorCodeGeneration selectorContext = selector.getCodeGenerationHelper(translatorContext);
       List<MethodParameter> addedParameters = new ArrayList<>(selectorContext.getParameters());
       TypeProvider elementType = translatorContext.getType(type[0]);
       // addedParameters should only include selector parameters!
       CustomElementMethod.Root root = new CustomElementMethod.Root(selectorContext);
       if (filter != null) {
-        filter.setElementFilter(Type.CUSTOM, elementType, name);
+        filter.setElementFilter(translatorContext, Type.CUSTOM, elementType, name);
         addedParameters.addAll(filter.getApplyMethodParameters());
         addedParameters.addAll(filter.getMatcherParameters());
       }
@@ -252,7 +253,7 @@ public final class UtamElement {
                 filter.getMatcherType(),
                 filter.getMatcherParameters(),
                 filter.getFindFirst());
-      } else if (selector.isReturnAll) {
+      } else if (selector.isReturnAll()) {
         method =
             new CustomElementMethod.Multiple(
                 isPublic(), name, root, scopeElement, elementType, isNullable(), isExpandScopeShadowRoot);
@@ -282,13 +283,13 @@ public final class UtamElement {
       if (selector == null) {
         throw new UtamError(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, name));
       }
-      if (filter != null && !selector.isReturnAll) {
+      if (filter != null && !selector.isReturnAll()) {
         throw new UtamError(String.format(ERR_ELEMENT_FILTER_NEEDS_LIST, name));
       }
       if (isExternal != null) {
-        throw new UtamError(getSupportedPropertiesErr(Type.BASIC));
+        throw new UtamError(Type.BASIC.getSupportedPropertiesErr(name));
       }
-      if (selector.isReturnAll && (elements != null || shadow != null)) {
+      if (selector.isReturnAll() && (elements != null || shadow != null)) {
         throw new UtamError(String.format(ERR_ELEMENT_NESTED_ELEMENTS, name));
       }
     }
@@ -296,32 +297,31 @@ public final class UtamElement {
     @Override
     final ElementContext[] traverse(
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
-      boolean isPublicImplementationOnlyElement =
-          isPublic() && context != null && context.isImplementationPageObject();
+      boolean isPublicImplementationOnlyElement = isPublic() && context.isImplementationPageObject();
       TypeProvider elementType =
           TypeUtilities.Element.asBasicType(name, type, isPublicImplementationOnlyElement);
-      UtamSelector.Context selectorContext = selector.getContext();
-      List<MethodParameter> addedParameters = new ArrayList<>(selectorContext.getParameters());
+      LocatorCodeGeneration locatorHelper = selector.getCodeGenerationHelper(context);
+      List<MethodParameter> addedParameters = new ArrayList<>(locatorHelper.getParameters());
       ElementField field =
           new ElementField(
-              name, getFindAnnotation(selectorContext.getLocator(), scopeElement,
+              name, getFindAnnotation(locatorHelper.getLocator(), scopeElement,
               isExpandScopeShadowRoot, isNullable()));
       if (filter != null) {
-        filter.setElementFilter(Type.BASIC, elementType, name);
+        filter.setElementFilter(context, Type.BASIC, elementType, name);
         addedParameters.addAll(filter.getApplyMethodParameters());
         addedParameters.addAll(filter.getMatcherParameters());
       }
-      boolean isList = selector.isReturnAll && (filter == null || !filter.getFindFirst());
+      boolean isList = selector.isReturnAll() && (filter == null || !filter.getFindFirst());
       ElementContext elementContext =
           new ElementContext.Basic(
-              scopeElement, name, elementType, selectorContext.getLocator(), isList,
+              scopeElement, name, elementType, locatorHelper.getLocator(), isList,
               addedParameters, isNullable());
       final PageObjectMethod method;
       if (filter != null) {
         // element parameters do not include filter or matcher parameters
         List<MethodParameter> elementParameters =  new ArrayList<>(
             scopeElement == null ? Collections.emptyList() : scopeElement.getParameters());
-        elementParameters.addAll(selectorContext.getParameters());
+        elementParameters.addAll(locatorHelper.getParameters());
         method =
             new ElementMethod.Filtered(
                 name,
@@ -343,7 +343,7 @@ public final class UtamElement {
       context.setMethod(method);
       elementContext.setElementMethod(method);
       context.setTestableElement(name, new ElementUnitTestHelper(
-              selectorContext.getLocator().getStringValue(),
+              locatorHelper.getLocator().getStringValue(),
               scopeElement == null? null : scopeElement.getName(),
               isExpandScopeShadowRoot,
               isList
@@ -362,7 +362,7 @@ public final class UtamElement {
           || isExternal != null
           || elements != null
           || shadow != null) {
-        throw new UtamError(getSupportedPropertiesErr(Type.CONTAINER));
+        throw new UtamError(Type.CONTAINER.getSupportedPropertiesErr(name));
       }
       if (!isPublic()) {
         throw new UtamError(String.format(ERR_CONTAINER_SHOULD_BE_PUBLIC, name));
@@ -381,10 +381,10 @@ public final class UtamElement {
     @Override
     ElementContext[] traverse(
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
-      UtamSelector.Context selectorContext = selector.getContext();
+      LocatorCodeGeneration selectorContext = selector.getCodeGenerationHelper(context);
       ElementContext elementContext = new ElementContext.Container(scopeElement, name);
       PageObjectMethod method;
-      if (selector.isReturnAll) {
+      if (selector.isReturnAll()) {
         method = new ContainerMethod.WithSelectorReturnsList(
             scopeElement, isExpandScopeShadowRoot, name, selectorContext);
       } else {
@@ -405,7 +405,7 @@ public final class UtamElement {
           || isExternal != null
           || elements != null
           || shadow != null) {
-        throw new UtamError(getSupportedPropertiesErr(Type.FRAME));
+        throw new UtamError(Type.FRAME.getSupportedPropertiesErr(name));
       }
       if (!isPublic()) {
         throw new UtamError(String.format(ERR_FRAME_SHOULD_BE_PUBLIC, name));
@@ -413,7 +413,7 @@ public final class UtamElement {
       if (selector == null) {
         throw new UtamError(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, name));
       }
-      if (selector.isReturnAll) {
+      if (selector.isReturnAll()) {
         throw new UtamError(String.format(ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED, name));
       }
     }
@@ -421,7 +421,7 @@ public final class UtamElement {
     @Override
     ElementContext[] traverse(TranslationContext context, ElementContext scopeElement,
         boolean isExpandScopeShadowRoot) {
-      UtamSelector.Context selectorContext = selector.getContext();
+      LocatorCodeGeneration selectorContext = selector.getCodeGenerationHelper(context);
       ElementField field =
           new ElementField(
               name, getFindAnnotation(selectorContext.getLocator(), scopeElement,

@@ -27,4 +27,8 @@ public class UtamError extends RuntimeException {
   public UtamError(String message, Throwable cause) {
     super(message, cause);
   }
+
+  public UtamError(Exception e) {
+    super(e);
+  }
 }

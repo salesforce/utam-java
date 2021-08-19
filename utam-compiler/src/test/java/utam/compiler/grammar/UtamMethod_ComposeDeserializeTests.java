@@ -26,6 +26,8 @@ import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.PageObjectMethod;
 import static utam.compiler.grammar.TestUtilities.*;
+import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
+
 import utam.core.framework.consumer.UtamError;
 
 /**
@@ -91,7 +93,7 @@ public class UtamMethod_ComposeDeserializeTests {
             + "    }"
             + "  ]"
             + "}";
-    MethodInfo methodInfo = new MethodInfo("composeMethod", "void");
+    MethodInfo methodInfo = new MethodInfo("composeMethod");
     methodInfo.addCodeLine(getElementPrivateMethodCalled("element1") + "().click()");
     PageObjectMethod method = getMethodObject(json, rootNodeJson);
     assertThat(method, is(instanceOf(ComposeMethod.class)));
@@ -139,7 +141,7 @@ public class UtamMethod_ComposeDeserializeTests {
             + "    }"
             + "  ]"
             + "}";
-    MethodInfo methodInfo = new MethodInfo("composeMethod", "void");
+    MethodInfo methodInfo = new MethodInfo("composeMethod");
     methodInfo.addCodeLine(
         getElementPrivateMethodCalled("element1") + "().forEach(element -> element.click())");
 
@@ -317,7 +319,7 @@ public class UtamMethod_ComposeDeserializeTests {
   public void testComposeWithCustomElement() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "List<String>");
     methodInfo.addParameter(new MethodParameterInfo("strArg", "String"));
-    methodInfo.addCodeLine("this.getCustomElement().someMethod(strArg,true)");
+    methodInfo.addCodeLine("this.getCustomElement().someMethod(strArg, true)");
     TranslationContext context = new DeserializerUtilities().getContext("composeCustom");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
 
@@ -343,7 +345,7 @@ public class UtamMethod_ComposeDeserializeTests {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
     methodInfo.addCodeLine("this.waitFor(() -> {\n"
         + "this.getRootElement().getText();\n"
-        + "return Boolean.FALSE.equals(this.getRootElement().containsElement(LocatorBy.byCss(\".css\"),false));\n"
+        + "return Boolean.FALSE.equals(this.getRootElement().containsElement(LocatorBy.byClassChain(\"selector\"), false));\n"
         + "})");
     TranslationContext context = new DeserializerUtilities().getContext("composeWaitForSelector");
     PageObjectMethod method = context.getMethod("testCompose");
@@ -377,16 +379,17 @@ public class UtamMethod_ComposeDeserializeTests {
   @Test
   public void testComposeMethodWithContainsElementAndParameterizedSelector() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
-    methodInfo.addCodeLine("this.getRootElement().containsElement(LocatorBy.byCss(String.format(\".foo[title='%s']\", title)),false)");
+    methodInfo.addCodeLine("this.getRootElement().containsElement(LocatorBy.byCss(String.format(\".foo[title='%s']\", title)), false)");
     methodInfo.addParameter(new MethodParameterInfo("title", "String"));
-    TranslationContext context = new DeserializerUtilities().getContext("customContainsElement");
-    PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
+    TranslationContext context = new DeserializerUtilities().getContext("containsElement");
+    PageObjectMethod method = context.getMethod("testCompose");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 
   @Test
   public void testComposeMethodWithContainsElementInShadowDom() {
     MethodInfo methodInfo = new MethodInfo("testCompose", "Boolean");
-    methodInfo.addCodeLine("this.getRootElement().containsElement(LocatorBy.byCss(\".foo\"),true)");
+    methodInfo.addCodeLine("this.getRootElement().containsElement(LocatorBy.byCss(\".foo\"), true)");
     TranslationContext context = new DeserializerUtilities().getContext("containsElementShadow");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("testCompose"), methodInfo);
   }
@@ -401,7 +404,8 @@ public class UtamMethod_ComposeDeserializeTests {
     methodInfo.addCodeLine("CustomExtensionUtils.getFieldValue(new UtamUtilitiesContext(this), fieldType)");
     methodInfo.addParameter(new MethodParameterInfo("fieldType", "String"));
     TranslationContext context = new DeserializerUtilities().getContext("customExtensionReturnType");
-    PageObjectValidationTestHelper.validateMethod(context.getMethod("testExtension"), methodInfo);
+    PageObjectMethod method = context.getMethod("testExtension");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 
   @Test
@@ -437,7 +441,7 @@ public class UtamMethod_ComposeDeserializeTests {
   @Test
   public void testNullableBasicElement() {
     TranslationContext context = new DeserializerUtilities().getContext("composeBasicNullable");
-    MethodInfo methodInfo = new MethodInfo("testCompose", "void");
+    MethodInfo methodInfo = new MethodInfo("testCompose");
     methodInfo.addCodeLine("BasicElement basic = this.getBasic()");
     methodInfo.addCodeLine("if (basic == null) { return; }");
     methodInfo.addCodeLine("basic.focus()");
@@ -455,7 +459,7 @@ public class UtamMethod_ComposeDeserializeTests {
 
   @Test
   public void testComposeWithReferenceArgsReplacesWithMethodLevelPrimitive() {
-    MethodInfo methodInfo = new MethodInfo("test", "void");
+    MethodInfo methodInfo = new MethodInfo("test");
     methodInfo.addParameter(new MethodParameterInfo("strArg", "String"));
     methodInfo.addCodeLine("this.someMethod(strArg)");
     TranslationContext context = new DeserializerUtilities().getContext("composeArgsReference");
@@ -473,5 +477,70 @@ public class UtamMethod_ComposeDeserializeTests {
     methodInfo = new MethodInfo("isPrivateNullablePresent2", PrimitiveType.BOOLEAN.getSimpleName());
     methodInfo.addCodeLine("this.getCheckMeForNullElement() != null");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("isPrivateNullablePresent2"), methodInfo);
+  }
+
+  @Test
+  public void testDragAndDropWithElementNonLiteral() {
+    TranslationContext context = new DeserializerUtilities().getContext("composeDragAndDrop");
+    final String methodName = "composeDragAndDropElement";
+    MethodInfo methodInfo = new MethodInfo(methodName);
+    methodInfo.addImportedTypes(BASIC_ELEMENT.getFullName());
+    methodInfo.addImpliedImportedTypes(BASIC_ELEMENT.getFullName());
+    methodInfo.addParameter(new MethodParameterInfo("selectorArg1"));
+    methodInfo.addParameter(new MethodParameterInfo("elementArg", BASIC_ELEMENT));
+    methodInfo.addCodeLine("this.getFirstElement(selectorArg1).dragAndDrop(elementArg, 0)");
+    PageObjectMethod method = context.getMethod(methodName);
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
+  public void testDragAndDropWithElementLiteralDuration() {
+    TranslationContext context = new DeserializerUtilities().getContext("composeDragAndDrop");
+    final String methodName = "composeDragAndDropElementLiteralWithDuration";
+    MethodInfo methodInfo = new MethodInfo(methodName);
+    methodInfo.addParameter(new MethodParameterInfo("selectorArg1"));
+    methodInfo.addParameter(new MethodParameterInfo("selectorArg2"));
+    methodInfo.addCodeLine("this.getFirstElement(selectorArg1).dragAndDrop(this.getSecond(selectorArg2), 2)");
+    PageObjectMethod method = context.getMethod(methodName);
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
+  public void testDragAndDropWithOffset() {
+    TranslationContext context = new DeserializerUtilities().getContext("composeDragAndDrop");
+    final String methodName = "composeDragAndDropWithOffset";
+    PageObjectMethod method = context.getMethod(methodName);
+    MethodInfo methodInfo = new MethodInfo(methodName);
+    methodInfo.addParameter(new MethodParameterInfo("x", PrimitiveType.NUMBER));
+    methodInfo.addParameter(new MethodParameterInfo("y", PrimitiveType.NUMBER));
+    methodInfo.addCodeLine("this.getSimplePublic().dragAndDropByOffset(x, y, 0)");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
+  public void testDragAndDropWithOffsetDuration() {
+    TranslationContext context = new DeserializerUtilities().getContext("composeDragAndDrop");
+    final String methodName = "composeDragAndDropWithOffsetDuration";
+    PageObjectMethod method = context.getMethod(methodName);
+    MethodInfo methodInfo = new MethodInfo(methodName);
+    methodInfo.addParameter(new MethodParameterInfo("duration", PrimitiveType.NUMBER));
+    methodInfo.addCodeLine("this.getSimplePublic().dragAndDropByOffset(1, 2, duration)");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
+  public void testNestedWaitArgsProcessing() {
+    TranslationContext context = new DeserializerUtilities().getContext("composeNestedWait");
+    PageObjectMethod method = context.getMethod("nestedWaitWithArgs");
+    MethodInfo methodInfo = new MethodInfo("nestedWaitWithArgs", PrimitiveType.BOOLEAN);
+    methodInfo.addParameter(new MethodParameterInfo("nested", PrimitiveType.NUMBER));
+    methodInfo.addCodeLine("this.waitFor(() -> {\n"
+        + "return this.waitFor(() -> {\n"
+        + "this.methodWithElement(this.getElementWithArgElement(\"string\"));\n"
+        + "this.methodWithSelector(LocatorBy.byCss(String.format(\"css[%d]\", nested)), LocatorBy.byCss(String.format(\"css[%d]\", 1)));\n"
+        + "return true;\n"
+        + "});\n"
+        + "})");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 }

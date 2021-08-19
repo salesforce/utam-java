@@ -13,7 +13,6 @@ import org.testng.annotations.Test;
 import utam.core.element.Actionable;
 
 import java.lang.reflect.Method;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -82,12 +81,8 @@ public class ActionableActionTypeTests {
   @Test
   public void checkSupportedActions() {
     for (Method method : Actionable.class.getDeclaredMethods()) {
-      checkTranslatorValue(method, ActionableActionType::valueOf);
+      ActionableActionType.valueOf(method.getName());
     }
-  }
-
-  private void checkTranslatorValue(Method method, Consumer<String> consumer) {
-    consumer.accept(method.getName());
   }
 
   @Test

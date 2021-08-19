@@ -12,7 +12,6 @@ import static utam.core.framework.base.CustomElementBuilder.getFilteredElementNo
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import org.openqa.selenium.NotFoundException;
 import utam.core.element.BasicElement;
 import utam.core.element.Element;
 import utam.core.element.ElementLocation;
@@ -118,11 +117,10 @@ public class BasicElementBuilder {
       return null;
     }
 
-    List<T> elementList = elementsFound
+    return elementsFound
         .stream()
         .map(el -> (T) createInstance(implType, el))
         .collect(Collectors.toList());
-    return elementList;
   }
 
   /**

@@ -18,7 +18,7 @@
                   "apply" : "containsElement",
                   "args" : [
                     {
-                      "value" : { "css" :  ".css"}
+                      "value" : { "classchain" :  "selector"}
                     }
                   ],
                   "matcher" : {

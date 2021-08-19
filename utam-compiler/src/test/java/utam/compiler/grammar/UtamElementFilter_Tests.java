@@ -7,18 +7,6 @@
  */
 package utam.compiler.grammar;
 
-import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.PageObjectMethod;
-import utam.compiler.representation.PageObjectValidationTestHelper;
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.UtamError;
-import org.testng.annotations.Test;
-
-import java.util.List;
-
-import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_FILTER_NEEDS_LIST;
-import static utam.compiler.grammar.UtamElementFilter.ERR_INCORRECT_MATCHER_FOR_METHOD;
-import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -27,12 +15,22 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
+import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_FILTER_NEEDS_LIST;
+import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
 
+import java.util.List;
+import org.testng.annotations.Test;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.ParameterUtils;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.representation.PageObjectValidationTestHelper;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * Provides tests of UtamElementFilter for basic and custom elements
@@ -45,13 +43,18 @@ public class UtamElementFilter_Tests {
   private static final String ELEMENT_NAME = "test";
   private static final TypeProvider ACTIONABLE_TYPE = actionable;
   private static final UtamArgument[] ONE_STRING_ARGS =
-      new UtamArgument[] {new UtamArgument("text", "string")};
+      new UtamArgument[]{new UtamArgument("text", "string")};
   private static final UtamArgument[] ONE_BOOLEAN_ARGS =
-      new UtamArgument[] {new UtamArgument("bool", "boolean")};
+      new UtamArgument[]{new UtamArgument("bool", "boolean")};
 
   static UtamElementFilter getInnerTextFilter() {
     return new UtamElementFilter(
         "getText", new UtamMatcher(MatcherType.stringContains, ONE_STRING_ARGS));
+  }
+
+  private static void setElementFilter(UtamElementFilter filter, UtamElement.Type elementNodeType) {
+    filter.setElementFilter(getTestTranslationContext(), elementNodeType, ACTIONABLE_TYPE,
+        ELEMENT_NAME);
   }
 
   @Test
@@ -59,7 +62,7 @@ public class UtamElementFilter_Tests {
     UtamElementFilter filter =
         new UtamElementFilter(
             "getText", new UtamMatcher(MatcherType.stringContains, ONE_STRING_ARGS));
-    filter.setElementFilter(UtamElement.Type.BASIC, ACTIONABLE_TYPE, ELEMENT_NAME);
+    setElementFilter(filter, UtamElement.Type.BASIC);
     List<MethodParameter> applyMethodParams = filter.getApplyMethodParameters();
     assertThat(applyMethodParams, is(empty()));
     assertThat(filter.getMatcherType(), is(equalTo(MatcherType.stringContains)));
@@ -78,7 +81,7 @@ public class UtamElementFilter_Tests {
             new UtamMatcher(MatcherType.stringContains, ONE_STRING_ARGS),
             false);
     assertThrows(
-        () -> filter.setElementFilter(UtamElement.Type.BASIC, ACTIONABLE_TYPE, ELEMENT_NAME));
+        () -> setElementFilter(filter, UtamElement.Type.BASIC));
   }
 
   @Test
@@ -92,28 +95,8 @@ public class UtamElementFilter_Tests {
     UtamError e =
         expectThrows(
             UtamError.class,
-            () -> filter.setElementFilter(UtamElement.Type.BASIC, ACTIONABLE_TYPE, ELEMENT_NAME));
+            () -> setElementFilter(filter, UtamElement.Type.BASIC));
     assertThat(e.getMessage(), containsString("wrongMethod"));
-  }
-
-  @Test
-  public void testBasicElementIncompatibleFilterThrows() {
-    UtamElementFilter filter =
-        new UtamElementFilter(
-            "focus", ONE_STRING_ARGS, new UtamMatcher(MatcherType.isFalse, null), false);
-    UtamError e =
-        expectThrows(
-            UtamError.class,
-            () -> filter.setElementFilter(UtamElement.Type.BASIC, ACTIONABLE_TYPE, ELEMENT_NAME));
-    assertThat(
-        e.getMessage(),
-        is(
-            equalTo(
-                String.format(
-                    ERR_INCORRECT_MATCHER_FOR_METHOD,
-                    ELEMENT_NAME,
-                    MatcherType.isFalse,
-                    "Boolean"))));
   }
 
   @Test
@@ -124,7 +107,7 @@ public class UtamElementFilter_Tests {
             ONE_STRING_ARGS,
             new UtamMatcher(MatcherType.stringEquals, ONE_STRING_ARGS),
             false);
-    filter.setElementFilter(UtamElement.Type.CUSTOM, ACTIONABLE_TYPE, ELEMENT_NAME);
+    setElementFilter(filter, UtamElement.Type.CUSTOM);
     List<MethodParameter> applyMethodParams = filter.getApplyMethodParameters();
     assertThat(
         applyMethodParams,
@@ -141,7 +124,7 @@ public class UtamElementFilter_Tests {
             new UtamMatcher(MatcherType.isTrue, ONE_STRING_ARGS),
             false);
     assertThrows(
-        () -> filter.setElementFilter(UtamElement.Type.CUSTOM, ACTIONABLE_TYPE, ELEMENT_NAME));
+        () -> setElementFilter(filter, UtamElement.Type.CUSTOM));
   }
 
   @Test
@@ -152,8 +135,7 @@ public class UtamElementFilter_Tests {
             null,
             new UtamMatcher(MatcherType.stringContains, ONE_BOOLEAN_ARGS),
             false);
-    assertThrows(
-        () -> filter.setElementFilter(UtamElement.Type.CUSTOM, ACTIONABLE_TYPE, ELEMENT_NAME));
+    assertThrows(() -> setElementFilter(filter, UtamElement.Type.CUSTOM));
   }
 
   @Test
@@ -169,7 +151,7 @@ public class UtamElementFilter_Tests {
   @Test
   public void testCustomFilterWithoutListThrows() {
     UtamElement utamElement = TestUtilities.UtamEntityCreator.createUtamElement("element");
-    utamElement.type = new String[] {TestUtilities.TEST_URI};
+    utamElement.type = new String[]{TestUtilities.TEST_URI};
     utamElement.selector = new UtamSelector("css");
     utamElement.filter = getInnerTextFilter();
     UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
@@ -223,7 +205,7 @@ public class UtamElementFilter_Tests {
     methodInfo.addParameter(
         new PageObjectValidationTestHelper.MethodParameterInfo("arg2", "String"));
     methodInfo.addCodeLines(
-        "element(this.element).build(ElementElement.class, ElementElementImpl.class, elm -> Boolean.FALSE.equals(elm.isVisible()), arg1,arg2)");
+        "element(this.element).build(ElementElement.class, ElementElementImpl.class, elm -> Boolean.FALSE.equals(elm.isVisible()), arg1, arg2)");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 
@@ -243,7 +225,8 @@ public class UtamElementFilter_Tests {
 
   @Test
   public void testCustomNestedFilterFindFirst() {
-    UtamElement object = DeserializerUtilities.getObjectFromFile("customFilterNested", UtamElement.class);
+    UtamElement object = DeserializerUtilities
+        .getObjectFromFile("customFilterNested", UtamElement.class);
     TranslationContext context = TestUtilities.getTestTranslationContext();
     object.testTraverse(context);
     ElementContext elementContext = context.getElement("nested");

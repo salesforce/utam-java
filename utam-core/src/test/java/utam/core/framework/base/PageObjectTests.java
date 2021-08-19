@@ -83,7 +83,7 @@ public class PageObjectTests {
 
   static class TestPageImpl extends BasePageObject {
 
-    MockUtilities mockUtilities = new MockUtilities();
+    final MockUtilities mockUtilities = new MockUtilities();
 
     TestPageImpl() {
       setBootstrap(new ElementLocationChain(mockUtilities.getElementAdapter()),
