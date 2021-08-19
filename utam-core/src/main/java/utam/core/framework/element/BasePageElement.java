@@ -7,16 +7,18 @@
  */
 package utam.core.framework.element;
 
-import java.awt.Point;
+import static utam.core.selenium.element.ElementAdapter.ERR_DRAG_AND_DROP_NULL_ELEMENT;
+
 import java.time.Duration;
 import org.openqa.selenium.Keys;
 import utam.core.driver.Expectations;
 import utam.core.element.BasicElement;
 import utam.core.element.Element;
-import utam.core.element.Element.DragAndDropOptions;
+import utam.core.element.DragAndDropOptions;
 import utam.core.element.RootElement;
 import utam.core.element.Element.GestureDirection;
 import utam.core.element.Element.ScrollOptions;
+import utam.core.framework.UtamCoreError;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.UtamBaseImpl;
 
@@ -187,17 +189,10 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
 
   @Override
   public void dragAndDrop(BasicElement target, int holdDurationSec) {
-    DragAndDropOptions options = new DragAndDropOptions() {
-      @Override
-      public Element getTargetElement() {
-        return ((BasePageElement)target).getElement();
-      }
-
-      @Override
-      public Duration getHoldDuration() {
-        return holdDurationSec == 0? Duration.ZERO : Duration.ofSeconds(holdDurationSec);
-      }
-    };
+    if(target == null) {
+      throw new UtamCoreError(ERR_DRAG_AND_DROP_NULL_ELEMENT);
+    }
+    DragAndDropOptions options = new DragAndDropOptions.ByElement(((BasePageElement)target).getElement(), holdDurationSec);
     getElement().dragAndDrop(options);
   }
 
@@ -208,17 +203,7 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
 
   @Override
   public void dragAndDropByOffset(int xOffset, int yOffset, int holdDurationSec) {
-    DragAndDropOptions options = new DragAndDropOptions() {
-      @Override
-      public Point getOffset() {
-        return new Point(xOffset, yOffset);
-      }
-
-      @Override
-      public Duration getHoldDuration() {
-        return holdDurationSec == 0? Duration.ZERO : Duration.ofSeconds(holdDurationSec);
-      }
-    };
+    DragAndDropOptions options = new DragAndDropOptions.ByOffset(xOffset, yOffset, holdDurationSec);
     getElement().dragAndDrop(options);
   }
 

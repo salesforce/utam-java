@@ -24,6 +24,7 @@ import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.element.ElementAdapter.BLUR_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.ElementAdapter.CLICK_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.ElementAdapter.ERR_DRAG_AND_DROP_OPTIONS;
+import static utam.core.selenium.element.ElementAdapter.ERR_NULL_ELEMENT;
 import static utam.core.selenium.element.ElementAdapter.FOCUS_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.ElementAdapter.NULL_ELEMENT;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_CENTER_VIA_JAVASCRIPT;
@@ -31,7 +32,7 @@ import static utam.core.selenium.element.ElementAdapter.SCROLL_TOP_VIA_JAVASCRIP
 import static utam.core.selenium.element.LocatorBy.byCss;
 import static utam.core.selenium.element.ShadowRootWebElement.*;
 
-import java.awt.Point;
+import java.time.Duration;
 import java.util.Collections;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -40,7 +41,7 @@ import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.element.Element;
-import utam.core.element.Element.DragAndDropOptions;
+import utam.core.element.DragAndDropOptions;
 import utam.core.element.Element.GestureDirection;
 import utam.core.element.Element.ScrollOptions;
 import utam.core.element.FindContext.Type;
@@ -95,6 +96,8 @@ public class ElementAdapterTests {
   @Test
   public void testIsNull() {
     assertThat(ElementAdapter.NULL_ELEMENT.isNull(), is(true));
+    NullPointerException e = expectThrows(NullPointerException.class, () -> ElementAdapter.NULL_ELEMENT.getWebElement());
+    assertThat(e.getMessage(), is(equalTo(ERR_NULL_ELEMENT)));
     assertThat(new ElementAdapter(mock(WebElement.class), mock(WebDriver.class)).isNull(), is(false));
   }
 
@@ -259,31 +262,42 @@ public class ElementAdapterTests {
   @Test
   public void testDragAndDropWithTargetElement() {
     MockUtilities mock = new MockUtilities.MockDriver();
-    DragAndDropOptions options = new DragAndDropOptions() {
-      @Override
-      public Element getTargetElement() {
-        return mock.getElementAdapter();
-      }
-    };
-    mock.getElementAdapter().dragAndDrop(options);
+    mock.getElementAdapter().dragAndDrop(new DragAndDropOptions.ByElement(mock.getElementAdapter()));
+    mock.getElementAdapter().dragAndDrop(new DragAndDropOptions.ByElement(mock.getElementAdapter(), 1));
   }
 
   @Test
   public void testDragAndDropWithOffset() {
     MockUtilities mock = new MockUtilities.MockDriver();
-    DragAndDropOptions options = new DragAndDropOptions() {
-      @Override
-      public Point getOffset() {
-        return new Point(0,0);
-      }
-    };
-    mock.getElementAdapter().dragAndDrop(options);
+    mock.getElementAdapter().dragAndDrop(new DragAndDropOptions.ByOffset(1,1));
+    mock.getElementAdapter().dragAndDrop(new DragAndDropOptions.ByOffset(1,1,1));
   }
 
   @Test
   public void testDragAndDropWithoutTargetThrows() {
     MockUtilities mock = new MockUtilities.MockDriver();
-    UtamError e = expectThrows(UtamError.class, () -> mock.getElementAdapter().dragAndDrop(new DragAndDropOptions() {}));
+    DragAndDropOptions options = new DragAndDropOptions() {
+      @Override
+      public Duration getHoldDuration() {
+        return null;
+      }
+
+      @Override
+      public Element getTargetElement() {
+        return null;
+      }
+
+      @Override
+      public Integer getXOffset() {
+        return null;
+      }
+
+      @Override
+      public Integer getYOffset() {
+        return null;
+      }
+    };
+    UtamError e = expectThrows(UtamError.class, () -> mock.getElementAdapter().dragAndDrop(options));
     assertThat(e.getMessage(), is(equalTo(ERR_DRAG_AND_DROP_OPTIONS)));
   }
 }

@@ -8,7 +8,8 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.helpers.AnnotationUtils.getFindAnnotation;
-import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT_TYPE;
+import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT_TYPE_NAME;
+import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT_TYPE_NAME;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -40,7 +41,6 @@ import utam.core.framework.consumer.UtamError;
  */
 public final class UtamElement {
 
-  static final String FRAME_ELEMENT_TYPE = "frame";
   static final String ERR_ELEMENT_OF_UNKNOWN_TYPE = "element '%s' has unknown type";
   static final String ERR_ELEMENT_FILTER_NEEDS_LIST =
       "element '%s': filter can only be set for list";
@@ -153,9 +153,9 @@ public final class UtamElement {
     FRAME;
 
     static Type getElementType(String[] type) {
-      if (type.length == 1 && CONTAINER_ELEMENT_TYPE.equals(type[0])) {
+      if (type.length == 1 && CONTAINER_ELEMENT_TYPE_NAME.equals(type[0])) {
         return Type.CONTAINER;
-      } else if (type.length == 1 && FRAME_ELEMENT_TYPE.equals(type[0])) {
+      } else if (type.length == 1 && FRAME_ELEMENT_TYPE_NAME.equals(type[0])) {
           return Type.FRAME;
       } else if (type.length == 1 && TranslationTypesConfigJava.isPageObjectType(type[0])) {
         return Type.CUSTOM;

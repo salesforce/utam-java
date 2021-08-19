@@ -7,8 +7,6 @@
  */
 package utam.core.element;
 
-import java.awt.Point;
-import java.time.Duration;
 import java.util.List;
 
 /**
@@ -186,39 +184,4 @@ public interface Element {
     RIGHT
   }
 
-  /**
-   * options for a drag and drop actions: element, offset and duration.
-   *
-   * @since 236
-   */
-  interface DragAndDropOptions {
-
-    /**
-     * Duration of hold
-     *
-     * @return null by default
-     */
-    default Duration getHoldDuration() {
-      return null;
-    }
-
-    /**
-     * Target position for drop, as an element
-     *
-     * @return null by default
-     */
-    default Element getTargetElement() {
-      return null;
-    }
-
-    /**
-     * Target position for drop, as offset coordinates
-     *
-     * @return null by default
-     */
-    default Point getOffset() {
-      return null;
-    }
-
-  }
 }

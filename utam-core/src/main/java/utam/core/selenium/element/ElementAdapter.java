@@ -13,7 +13,6 @@ import static utam.core.selenium.element.DriverAdapter.findList;
 import static utam.core.selenium.element.DriverAdapter.getNotFoundErr;
 import static utam.core.selenium.element.DriverAdapter.getSeleniumDriver;
 
-import java.awt.Point;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -24,9 +23,9 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 import utam.core.driver.Driver;
+import utam.core.element.DragAndDropOptions;
 import utam.core.element.Element;
 import utam.core.element.FindContext;
 import utam.core.element.Locator;
@@ -41,7 +40,7 @@ import utam.core.selenium.appium.MobileElementAdapter;
  */
 public class ElementAdapter implements Element {
 
-  public static final Element NULL_ELEMENT = new ElementAdapter(null, (WebDriver) null);
+  public static final ElementAdapter NULL_ELEMENT = new ElementAdapter(null, (WebDriver) null);
   public static final String SCROLL_TOP_VIA_JAVASCRIPT =
       "return arguments[0].scrollIntoView(true);";
   public static final String SCROLL_INTO_VIEW_JS =
@@ -57,11 +56,13 @@ public class ElementAdapter implements Element {
   static final String FOCUS_VIA_JAVASCRIPT = "arguments[0].focus();";
   static final String SCROLL_CENTER_VIA_JAVASCRIPT = "arguments[0].scrollIntoView({block:'center'});";
   static final String BLUR_VIA_JAVASCRIPT = "arguments[0].blur();";
-  static final String SCROLL_INTO_VIEW_ERR =
+  private static final String SCROLL_INTO_VIEW_ERR =
       "element is still not visible or clickable after scroll into view";
   private static final String SCROLL_TO_DOCUMENT_ORIGIN_JS =
       "window.scrollTo(0,0);";
-  static final String ERR_DRAG_AND_DROP_OPTIONS = "Either target element of offset should be set for drag and drop";
+  static final String ERR_DRAG_AND_DROP_OPTIONS = "Error in dragAndDrop: Either target element of offset should be set, both were null";
+  public static final String ERR_DRAG_AND_DROP_NULL_ELEMENT = "Error in dragAndDrop: target elements must be present, currently null";
+  static final String ERR_NULL_ELEMENT = "Action can't be applied to an element that was not found; please check for null first";
   private final WebElement webElement;
   private final WebDriver driver;
   protected final Driver driverAdapter;
@@ -87,7 +88,7 @@ public class ElementAdapter implements Element {
 
   public WebElement getWebElement() {
     if (webElement == null) {
-      throw new NullPointerException("WebElement is null");
+      throw new NullPointerException(ERR_NULL_ELEMENT);
     }
     return webElement;
   }
@@ -274,26 +275,38 @@ public class ElementAdapter implements Element {
     throw new IllegalStateException(ERR_SUPPORTED_FOR_MOBILE);
   }
 
+  private void dragAndDropWithElement(Actions builder, ElementAdapter targetElement) {
+    if(targetElement.isNull()) {
+      // we're not supposed to be in this state from generated code, but just in case it's used directly
+      throw new UtamCoreError(ERR_DRAG_AND_DROP_NULL_ELEMENT);
+    }
+    WebElement to = targetElement.getWebElement();
+    builder.moveToElement(to).release(to);
+  }
+
   @Override
   public void dragAndDrop(DragAndDropOptions options) {
     WebElement from = getWebElement();
+
     // create an object of Actions class to build composite actions
     Actions builder = new Actions(driver).clickAndHold(from);
+
+    // if duration is set - pause
     if(options.getHoldDuration() != null && !options.getHoldDuration().isZero()) {
       builder.pause(options.getHoldDuration());
     }
+
     if(options.getTargetElement() != null) {
-      WebElement to = ((ElementAdapter) options.getTargetElement()).getWebElement();
-      builder.moveToElement(to).release(to);
-    } else if(options.getOffset() != null) {
-      Point offset = options.getOffset();
-      builder.moveByOffset((int) offset.getX(), (int) offset.getY()).release();
+      // target is set as an element
+      dragAndDropWithElement(builder, (ElementAdapter) options.getTargetElement());
+    } else if(options.getXOffset() != null && options.getYOffset() != null) {
+      // OR target is set as offset
+      builder.moveByOffset(options.getXOffset(), options.getYOffset()).release();
     } else {
       throw new UtamCoreError(ERR_DRAG_AND_DROP_OPTIONS);
     }
-    // build a drag and drop action
-    Action dragAndDrop = builder.build();
+
     // perform the drag and drop action
-    dragAndDrop.perform();
+    builder.build().perform();
   }
 }

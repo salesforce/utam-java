@@ -74,8 +74,8 @@ public final class TypeUtilities {
   };
   public static final TypeProvider ELEMENT_FIELD = new FromClass(ElementLocation.class);
   public static final TypeProvider BASIC_ELEMENT = new FromClass(BasicElement.class);
-  static final String FRAME_ELEMENT_TYPE = "frame";
-  public static final String CONTAINER_ELEMENT_TYPE = "container";
+  public static final String FRAME_ELEMENT_TYPE_NAME = "frame";
+  public static final String CONTAINER_ELEMENT_TYPE_NAME = "container";
   public static final String ERR_TYPE_INVALID_VALUE_TYPE =
       "%s '%s': type must be %s, a Page Object type reference, or an array of basic element interfaces";
   public static final String ERR_TYPE_PROPERTY_INVALID_STRING_VALUE =
@@ -122,8 +122,8 @@ public final class TypeUtilities {
     if (typeNode.isTextual()) {
       String value = typeNode.textValue();
       if (propertyType == PropertyType.TYPE &&
-          !CONTAINER_ELEMENT_TYPE.equals(value) &&
-          !FRAME_ELEMENT_TYPE.equals(value) &&
+          !CONTAINER_ELEMENT_TYPE_NAME.equals(value) &&
+          !FRAME_ELEMENT_TYPE_NAME.equals(value) &&
           !TranslationTypesConfigJava.isPageObjectType(value)) {
         throw new UtamError(String.format(ERR_TYPE_PROPERTY_INVALID_STRING_VALUE, name, value));
       }
@@ -153,7 +153,7 @@ public final class TypeUtilities {
     throw new UtamError(String.format(ERR_TYPE_INVALID_VALUE_TYPE,
         entityType,
         name,
-        propertyType == PropertyType.TYPE ? "'" + CONTAINER_ELEMENT_TYPE + "'" : "a primitive data type"));
+        propertyType == PropertyType.TYPE ? "'" + CONTAINER_ELEMENT_TYPE_NAME + "'" : "a primitive data type"));
   }
 
   public enum PropertyType {
