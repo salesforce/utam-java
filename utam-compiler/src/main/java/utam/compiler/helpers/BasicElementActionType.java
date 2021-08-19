@@ -2,7 +2,6 @@ package utam.compiler.helpers;
 
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.BasicElement;
-import utam.core.element.RootElement;
 import utam.core.framework.consumer.UtamError;
 
 import java.util.Arrays;
@@ -11,7 +10,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_TYPE;
+import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 

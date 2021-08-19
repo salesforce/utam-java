@@ -7,7 +7,7 @@
  */
 package utam.compiler.representation;
 
-import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_TYPE;
+import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
 
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.compiler.helpers.TypeUtilities;

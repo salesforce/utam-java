@@ -7,8 +7,6 @@
  */
 package utam.compiler.helpers;
 
-import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_TYPE;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,6 +24,7 @@ import utam.core.element.BasicElement;
 import utam.core.element.Clickable;
 import utam.core.element.Editable;
 import utam.core.element.ElementLocation;
+import utam.core.element.RootElement;
 import utam.core.element.Touchable;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageObject;
@@ -53,6 +52,7 @@ public final class TypeUtilities {
   public static final TypeProvider VOID = new UnimportableType("void");
   public static final TypeProvider REFERENCE = new UnimportableType("reference");
   public static final TypeProvider BOUNDED_CLASS = new UnimportableType("Class<T>");
+  public static final TypeProvider ROOT_ELEMENT_TYPE = new FromClass(RootElement.class);
   static final TypeProvider GENERIC_TYPE = new UnimportableType("<T> T");
   static final TypeProvider CONTAINER_ELEMENT =
       new TypeUtilities.FromClass(ContainerElement.class);

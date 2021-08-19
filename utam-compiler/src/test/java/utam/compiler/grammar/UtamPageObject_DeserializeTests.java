@@ -8,8 +8,6 @@
 package utam.compiler.grammar;
 
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.helpers.TypeUtilities;
-import utam.core.element.RootElement;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 import utam.core.selenium.element.LocatorBy;
@@ -18,7 +16,7 @@ import static utam.compiler.grammar.TestUtilities.*;
 import static utam.compiler.grammar.UtamPageObject.*;
 import static utam.compiler.grammar.UtamSelector.ERR_ROOT_SELECTOR_ARGS;
 import static utam.compiler.grammar.UtamSelector.ERR_ROOT_SELECTOR_LIST;
-import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_TYPE;
+import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;

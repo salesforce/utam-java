@@ -11,7 +11,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_TYPE;
+import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
 
 import org.testng.annotations.Test;
 import utam.compiler.helpers.TranslationContext;
