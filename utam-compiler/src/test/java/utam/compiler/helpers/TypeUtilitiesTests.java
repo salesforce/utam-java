@@ -420,46 +420,6 @@ public class TypeUtilitiesTests {
   }
 
   @Test
-  public void testBoundedClassType() {
-    TypeProvider typeProvider = BOUNDED_CLASS;
-    assertThat(typeProvider.getFullName(), is(emptyString()));
-    assertThat(typeProvider.getPackageName(), is(emptyString()));
-    assertThat(typeProvider.getClassType(), is(nullValue()));
-    assertThat(typeProvider.getSimpleName(), is(equalTo("Class<T>")));
-    assertThat(typeProvider.isSameType(BOUNDED_CLASS), is(true));
-  }
-
-  @Test
-  public void testGenericType() {
-    TypeProvider typeProvider = GENERIC_TYPE;
-    assertThat(typeProvider.getFullName(), is(emptyString()));
-    assertThat(typeProvider.getPackageName(), is(emptyString()));
-    assertThat(typeProvider.getClassType(), is(nullValue()));
-    assertThat(typeProvider.getSimpleName(), is(equalTo("<T> T")));
-    assertThat(typeProvider.isSameType(GENERIC_TYPE), is(true));
-  }
-
-  @Test
-  public void testContainerListType() {
-    TypeProvider typeProvider = CONTAINER_LIST_RETURN_TYPE;
-    assertThat(typeProvider.getFullName(), is(emptyString()));
-    assertThat(typeProvider.getPackageName(), is(emptyString()));
-    assertThat(typeProvider.getClassType(), is(nullValue()));
-    assertThat(typeProvider.getSimpleName(), is(equalTo("<T extends PageObject> List<T>")));
-    assertThat(typeProvider.isSameType(CONTAINER_LIST_RETURN_TYPE), is(true));
-  }
-
-  @Test
-  public void testContainerReturnType() {
-    TypeProvider typeProvider = CONTAINER_RETURN_TYPE;
-    assertThat(typeProvider.getFullName(), is(emptyString()));
-    assertThat(typeProvider.getPackageName(), is(emptyString()));
-    assertThat(typeProvider.getClassType(), is(nullValue()));
-    assertThat(typeProvider.getSimpleName(), is(equalTo("<T extends PageObject> T")));
-    assertThat(typeProvider.isSameType(CONTAINER_RETURN_TYPE), is(true));
-  }
-
-  @Test
   public void testFunctionType() {
     TypeProvider selectorType = FUNCTION;
     assertThat(selectorType.getSimpleName(), is(equalTo("Supplier<T>")));
@@ -480,5 +440,24 @@ public class TypeUtilitiesTests {
   public void testGetBasicType() {
     assertThat(BasicElementInterface.getBasicElementType(actionable), is(actionable));
     assertThat(BasicElementInterface.getBasicElementType(SELECTOR), is(nullValue()));
+  }
+
+  @Test
+  public void testBoundedClassWithWildcard() {
+    BoundedClass type = new BoundedClass(PrimitiveType.STRING, null);
+    assertThat(type.isSameType(type), is(true));
+    assertThat(type.isSameType(PrimitiveType.STRING), is(false));
+    assertThat(type.getBoundTypes().size(), is(1));
+    assertThat(type.getBoundTypes().get(0).isSameType(PrimitiveType.STRING), is(true));
+    assertThat(type.getSimpleName(), is(equalTo("Class<? extends String>")));
+  }
+
+  @Test
+  public void testBoundedClassWithBound() {
+    BoundedClass type = new BoundedClass(PrimitiveType.STRING, "T");
+    assertThat(type.isSameType(new BoundedClass(PrimitiveType.STRING, null)), is(false));
+    assertThat(type.getBoundTypes().size(), is(1));
+    assertThat(type.getBoundTypes().get(0).isSameType(PrimitiveType.STRING), is(true));
+    assertThat(type.getSimpleName(), is(equalTo("Class<T>")));
   }
 }

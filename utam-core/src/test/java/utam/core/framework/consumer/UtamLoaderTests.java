@@ -126,6 +126,32 @@ public class UtamLoaderTests {
     assertThat(utamLoader.create(TestLoaderConfigDefault.class), is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
   }
 
+  @Test
+  public void testEnterFrame() {
+    UtamLoader loader = getDefaultLoader();
+    FrameElement frameElement = new MockUtilities().getFrameElement();
+    loader.enterFrame(frameElement);
+  }
+
+  @Test
+  public void testEnterFrameAndLoad() {
+    UtamLoader loader = getDefaultLoader();
+    FrameElement frameElement = new MockUtilities().getFrameElement();
+    loader.enterFrameAndLoad(frameElement, TestLoaderConfigPageObject.class);
+  }
+
+  @Test
+  public void testExitToParentFrame() {
+    UtamLoader loader = getDefaultLoader();
+    loader.exitToParentFrame();
+  }
+
+  @Test
+  public void testExitFrame() {
+    UtamLoader loader = getDefaultLoader();
+    loader.exitFrame();
+  }
+
   private static class ContainerMock implements Container {
 
     final Supplier<SearchContext> root = () -> mock(WebElement.class);

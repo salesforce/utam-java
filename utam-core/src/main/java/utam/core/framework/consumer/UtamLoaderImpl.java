@@ -38,11 +38,13 @@ public class UtamLoaderImpl implements UtamLoader {
   private final Driver driver;
   private final UtamLoaderConfig loaderConfig;
   private PageObjectsFactory factory;
+  private Document document;
 
   public UtamLoaderImpl(UtamLoaderConfig loaderConfig, Driver driver) {
     this.loaderConfig = loaderConfig;
     this.driver = driver;
     this.factory = new PageObjectsFactoryImpl(loaderConfig, driver);
+    this.document = new DocumentObject(factory);
   }
 
   /**
@@ -68,6 +70,7 @@ public class UtamLoaderImpl implements UtamLoader {
   public final void resetContext() {
     // new factory instance resets page context
     this.factory = new PageObjectsFactoryImpl(loaderConfig, driver);
+    this.document = new DocumentObject(factory);
   }
 
   @Override
@@ -106,27 +109,26 @@ public class UtamLoaderImpl implements UtamLoader {
 
   @Override
   public Document getDocument() {
-    return new DocumentObject(factory);
+    return document;
   }
 
   @Override
   public void enterFrame(FrameElement frame) {
-    driver.enterFrame(frame);
+    document.enterFrame(frame);
   }
 
   @Override
   public <T extends RootPageObject> T enterFrameAndLoad(FrameElement frame, Class<T> type) {
-    driver.enterFrame(frame);
-    return load(type);
+    return document.enterFrameAndLoad(frame, type);
   }
 
   @Override
   public void exitToParentFrame() {
-    driver.exitToParentFrame();
+    document.exitToParentFrame();
   }
 
   @Override
   public void exitFrame() {
-    driver.exitFrame();
+    document.exitFrame();
   }
 }

@@ -100,7 +100,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
         info(
             String.format(
                 "write interface %s", pageObjectInterface.getInterfaceType().getFullName()));
-        write(pageObjectInterface.getInterfaceType(), pageObjectInterface.getApiCode());
+        write(pageObjectInterface.getInterfaceType(), pageObjectInterface.getGeneratedCode());
         filesCounter++;
       } else {
         info(
@@ -112,7 +112,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
         info(
             String.format(
                 "write class %s", object.getImplementation().getClassType().getFullName()));
-        write(object.getImplementation().getClassType(), object.getImplementation().getImplCode());
+        write(object.getImplementation().getClassType(), object.getImplementation().getGeneratedCode());
         filesCounter++;
         if (writeUnitTest(object.getImplementation())) {
           filesCounter++;

@@ -8,13 +8,13 @@
 package utam.compiler.representation;
 
 import utam.compiler.helpers.LocatorCodeGeneration;
+import utam.compiler.helpers.TypeUtilities.ListOf;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MatcherType;
-import utam.compiler.helpers.TypeUtilities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -167,7 +167,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
         MatcherType matcherType,
         List<MethodParameter> matcherParameters,
         boolean isFindFirst) {
-      this.returnListType = isFindFirst ? null : new TypeUtilities.ListOf(returnType);
+      this.returnListType = isFindFirst ? null : new ListOf(returnType);
       this.interfaceImports.add(returnType);
       this.classImports.add(returnType);
       this.isPublic = isPublic;
@@ -200,7 +200,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     @Override
     public MethodDeclaration getDeclaration() {
       TypeProvider returns =
-          returnListType != null ? new TypeUtilities.ListOf(returnType) : returnType;
+          returnListType != null ? new ListOf(returnType) : returnType;
       return new MethodDeclarationImpl(methodName, methodParameters, returns, interfaceImports);
     }
 
@@ -228,7 +228,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
         TypeProvider returnType,
         boolean isNullable,
         boolean isExpandParentShadow) {
-      this.listType = new TypeUtilities.ListOf(returnType);
+      this.listType = new ListOf(returnType);
       String builderPrefix = getBuilderPrefix(scopeElement, root, isNullable, isExpandParentShadow);
       String builderSuffix = getBuilderSuffix(returnType, true);
       codeLines.add(String.format("%s.%s", builderPrefix, builderSuffix));

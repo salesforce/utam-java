@@ -7,16 +7,29 @@
  */
 package utam.compiler.representation;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static utam.compiler.helpers.TypeUtilities.VOID;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TypeUtilities;
-import utam.core.declarative.representation.*;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static utam.compiler.helpers.TypeUtilities.VOID;
+import utam.core.declarative.representation.AnnotationProvider;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageClassField;
+import utam.core.declarative.representation.PageObjectClass;
+import utam.core.declarative.representation.PageObjectInterface;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 
 /**
  * Provides methods for validating Page Object structures. Note that this class is intended to be
@@ -126,15 +139,18 @@ public class PageObjectValidationTestHelper {
    */
   public static void validateMethod(PageObjectMethod method, MethodInfo info) {
     validateDeclaration(method.getDeclaration(), info);
-    assertThat(method.isPublic(), is(equalTo(info.getIsPublic())));
+    assertThat(String.format("method is %s", (method.isPublic() ? "public" : "private")),
+        method.isPublic(), is(equalTo(info.getIsPublic())));
     assertThat(
         "method " + info.name + " code lines", method.getCodeLines(), is(equalTo(info.codeLines)));
     if (info.importedTypes.size() > 0 || info.impliedImportedTypes.size() > 0) {
+      Set<String> actualImports = getAllImports(method.getClassImports());
+      String imports = actualImports.isEmpty()? "empty" : String.join(", ", actualImports);
+      String assertionStr = String.format("method '%s' class imports are: %s", info.name, imports);
       assertThat(
-          "method " + info.name + " class imports",
+          assertionStr,
           info.allImportedTypes(),
-          containsInAnyOrder(method.getClassImports().stream()
-                  .map(TypeProvider::getFullName).distinct().toArray()));
+          containsInAnyOrder(actualImports.toArray()));
     }
   }
 
@@ -185,12 +201,23 @@ public class PageObjectValidationTestHelper {
 
     // If the user has decided to validate the imports of a declaration, we will do that here.
     if (expected.importedTypes.size() > 0) {
-      Set<String> actualImports =
-          actual.getImports().stream()
-              .map(TypeProvider::getFullName)
-              .collect(Collectors.toSet());
-      assertThat(actualImports, is(containsInAnyOrder(expected.importedTypes.toArray())));
+      Set<String> actualImports = getAllImports(actual.getImports());
+      String imports = actualImports.isEmpty()? "empty" : String.join(", ", actualImports);
+      String assertionStr = String.format("method '%s' imports are: %s", actual.getName(), imports);
+      assertThat(
+          assertionStr,
+          actualImports,
+          is(containsInAnyOrder(expected.importedTypes.toArray())));
     }
+  }
+
+  static Set<String> getAllImports(List<TypeProvider> imports) {
+    Set<String> res = new HashSet<>();
+    imports.forEach(i -> {
+      res.add(i.getFullName());
+      i.getBoundTypes().forEach(t -> res.add(t.getFullName()));
+    });
+    return res;
   }
 
   /**
@@ -327,12 +354,22 @@ public class PageObjectValidationTestHelper {
       this.isPublic = isPublic;
     }
 
+    public MethodInfo setNotPublic() {
+      this.setIsPublic(false);
+      return this;
+    }
+
     public void test(PageObjectMethod method) {
       validateDeclaration(method.getDeclaration(), this);
       assertThat(method.getCodeLines(), is(equalTo(codeLines)));
-      // test against all imported types to make sure declaration is covered as well
-      assertThat(allImportedTypes(), containsInAnyOrder(method.getClassImports().stream()
-                      .map(TypeProvider::getFullName).distinct().toArray()));
+      Set<String> classImports = getAllImports(method.getClassImports());
+      Set<String> expectedImports = allImportedTypes();
+      String imports = classImports.isEmpty()? "empty" : String.join(", ", classImports);
+      String assertionStr = String.format("method '%s' imports are: %s", method.getDeclaration().getName(), imports);
+      assertThat(
+          assertionStr,
+          expectedImports,
+          is(containsInAnyOrder(classImports.toArray())));
     }
   }
 

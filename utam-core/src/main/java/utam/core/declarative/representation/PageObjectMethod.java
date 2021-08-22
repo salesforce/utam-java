@@ -17,15 +17,42 @@ import java.util.List;
  */
 public interface PageObjectMethod {
 
+  /**
+   * get method declaration
+   *
+   * @return object
+   */
   MethodDeclaration getDeclaration();
 
+  /**
+   * get generated code lines, statements without ";" att he end
+   *
+   * @return list
+   */
   List<String> getCodeLines();
 
+  /**
+   * get types to be imported for a class. imports for declaration in an interface are part of
+   * MethodDeclaration
+   *
+   * @return list of types to import
+   */
   List<TypeProvider> getClassImports();
 
+  /**
+   * check if method is declared as public
+   *
+   * @return true if public
+   */
   boolean isPublic();
 
-  default boolean isElementMethod() {
+  /**
+   * check if method is a getter for a basic element type or union types. For such methods generated
+   * code requires additional interfaces declaration
+   *
+   * @return true for element methods
+   */
+  default boolean isBasicElementGetterMethod() {
     return false;
   }
 }

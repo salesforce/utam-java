@@ -22,6 +22,8 @@ import utam.core.driver.Document;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageMarker;
 import utam.core.framework.base.RootPageObject;
+import utam.core.framework.consumer.FrameElement;
+import utam.core.framework.consumer.TestLoaderConfigPageObject;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -37,7 +39,7 @@ public class DocumentObjectTests {
   public void testGetUrl() {
     MockUtilities mock = new MockUtilities();
     when(mock.getWebDriverMock().getCurrentUrl()).thenReturn(TEST_URL);
-    Document document = new DocumentObject(mock.getFactory());
+    Document document = mock.getDocument();
     assertThat(document.getUrl(), is(equalTo(TEST_URL)));
   }
 
@@ -45,14 +47,14 @@ public class DocumentObjectTests {
   public void testWaitForDocumentReady() {
     MockUtilities mock = new MockUtilities();
     when(mock.getExecutorMock().executeScript(DocumentObject.DOM_READY_JAVASCRIPT)).thenReturn(true);
-    Document document = new DocumentObject(mock.getFactory());
+    Document document = mock.getDocument();
     document.waitForDocumentReady();
   }
 
   @Test
   public void testContainsElement() {
     MockUtilities mock = new MockUtilities();
-    Document document = new DocumentObject(mock.getFactory());
+    Document document = mock.getDocument();
     when(mock.getWebDriverMock().findElements(By.cssSelector("existing")))
         .thenReturn(Collections.singletonList(mock(WebElement.class)));
     assertThat(document.containsElement(LocatorBy.byCss("existing")), is(true));
@@ -62,11 +64,41 @@ public class DocumentObjectTests {
   @Test
   public void testContainsObject() {
     MockUtilities mock = new MockUtilities();
-    Document document = new DocumentObject(mock.getFactory());
+    Document document = mock.getDocument();
     when(mock.getWebDriverMock().findElements(By.cssSelector("found")))
         .thenReturn(Collections.singletonList(mock(WebElement.class)));
     assertThat(document.containsObject(TestContains.class), is(true));
     assertThat(document.containsObject(TestNotContains.class), is(false));
+  }
+
+  @Test
+  public void testEnterFrame() {
+    MockUtilities mock = new MockUtilities();
+    Document document = mock.getDocument();
+    FrameElement frameElement = mock.getFrameElement();
+    document.enterFrame(frameElement);
+  }
+
+  @Test
+  public void testExitToParentFrame() {
+    MockUtilities mock = new MockUtilities();
+    Document document = mock.getDocument();
+    document.exitToParentFrame();
+  }
+
+  @Test
+  public void exitFrame() {
+    MockUtilities mock = new MockUtilities();
+    Document document = mock.getDocument();
+    document.exitFrame();
+  }
+
+  @Test
+  public void testEnterFrameAndLoad() {
+    MockUtilities mock = new MockUtilities();
+    Document document = mock.getDocument();
+    FrameElement frameElement = new MockUtilities().getFrameElement();
+    document.enterFrameAndLoad(frameElement, TestLoaderConfigPageObject.class);
   }
 
   @PageMarker.Find(css = "notfound")

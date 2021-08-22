@@ -7,19 +7,18 @@
  */
 package utam.compiler.representation;
 
+import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.base.FrameElementImpl;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
 /**
  * generate code of getter method for frame element
@@ -31,11 +30,19 @@ public class FrameMethod extends ElementMethod {
   private final String methodName;
   private final String methodCode;
   private final List<MethodParameter> parameters;
+  private final boolean isPublic;
 
-  public FrameMethod(ElementContext element) {
+  /**
+   * construct frame
+   *
+   * @param element  element context
+   * @param isPublic frame can be private if used only in compose
+   */
+  public FrameMethod(ElementContext element, boolean isPublic) {
     this.methodCode = getElementMethodCode(element, false);
-    this.methodName = getElementGetterMethodName(element.getName(), true);
+    this.methodName = getElementGetterMethodName(element.getName(), isPublic);
     this.parameters = element.getParameters();
+    this.isPublic = isPublic;
   }
 
   @Override
@@ -58,11 +65,6 @@ public class FrameMethod extends ElementMethod {
 
   @Override
   public boolean isPublic() {
-    return true;
-  }
-
-  @Override
-  public boolean isElementMethod() {
-    return false;
+    return isPublic;
   }
 }

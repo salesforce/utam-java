@@ -32,11 +32,13 @@ import utam.compiler.helpers.ElementContext.Custom;
 import utam.compiler.helpers.ElementContext.Document;
 import utam.compiler.helpers.ElementContext.Root;
 import utam.compiler.helpers.ElementContext.Self;
+import utam.compiler.helpers.LocatorCodeGeneration.SelectorType;
 import utam.compiler.helpers.ParameterUtils.Regular;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Locator;
+import utam.core.selenium.element.LocatorBy;
 
 /**
  * Provides tests for the ElementContext class
@@ -182,7 +184,11 @@ public class ElementContextTests {
 
   @Test
   public void testFrameElement() {
-    ElementContext.Frame context = new ElementContext.Frame(getSingleElementContext(), ELEMENT_NAME, SELECTOR_VALUE);
+    LocatorCodeGeneration locatorHelper = new LocatorCodeGeneration(SelectorType.css,
+        LocatorBy.byCss("css[%d]"),
+        Collections.singletonList(new Regular("arg1", PrimitiveType.NUMBER)));
+    ElementContext.Frame context = new ElementContext.Frame(getSingleElementContext(),
+        ELEMENT_NAME, locatorHelper);
     assertThat(context.getName(), is(equalTo(ELEMENT_NAME)));
     assertThat(context.isDocumentElement(), is(false));
     assertThat(context.isSelfElement(), is(false));
@@ -191,7 +197,7 @@ public class ElementContextTests {
     assertThat(context.getType(), is(equalTo(FRAME_ELEMENT)));
     assertThat(context.isList(), is(false));
     assertThat(context.isCustomElement(), is(false));
-    assertThat(context.getParameters(), is(hasSize(0)));
-    assertThat(context.getSelector(), is(equalTo(SELECTOR_VALUE)));
+    assertThat(context.getParameters(), is(hasSize(1)));
+    assertThat(context.getSelector().getStringValue(), is(equalTo("css[%d]")));
   }
 }

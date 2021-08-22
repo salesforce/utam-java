@@ -33,6 +33,7 @@ import utam.core.MockUtilities;
 import utam.core.element.Actionable;
 import utam.core.element.BasicElement;
 import utam.core.element.ElementLocation;
+import utam.core.framework.consumer.FrameElement;
 import utam.core.framework.element.BasePageElement;
 import utam.core.framework.element.ElementLocationChain;
 import utam.core.selenium.element.LocatorBy;
@@ -123,7 +124,7 @@ public class BasicElementBuilderTests {
 
     // not found
     Exception e = expectThrows(NoSuchElementException.class, () -> getBuilder(mock, location)
-        .build(Actionable.class, BasePageElement.class, el -> el.isPresent()));
+        .build(Actionable.class, BasePageElement.class, UtamBase::isPresent));
     assertThat(e.getMessage(), startsWith(ERR_ELEMENT_NOT_FOUND_PREFIX));
 
     // found but filter does not match
@@ -132,13 +133,13 @@ public class BasicElementBuilderTests {
         .thenReturn(Collections.singletonList(mockElement));
     e = expectThrows(NullPointerException.class,
         () -> getBuilder(mock, location)
-            .build(Actionable.class, BasePageElement.class, el -> el.isVisible()));
+            .build(Actionable.class, BasePageElement.class, UtamBase::isVisible));
     assertThat(e.getMessage(), is(equalTo(ERR_FOR_FILTER)));
 
     // found filter match
     when(mockElement.isDisplayed()).thenReturn(true);
     test = getBuilder(mock, location)
-        .build(Actionable.class, BasePageElement.class, el -> el.isVisible());
+        .build(Actionable.class, BasePageElement.class, UtamBase::isVisible);
     assertThat(test, is(notNullValue()));
   }
 
@@ -150,7 +151,7 @@ public class BasicElementBuilderTests {
 
     // not found
     test = getBuilder(mock, location)
-        .build(Actionable.class, BasePageElement.class, el -> el.isPresent());
+        .build(Actionable.class, BasePageElement.class, UtamBase::isPresent);
     assertThat(test, is(nullValue()));
 
     // found but filter does not match
@@ -159,13 +160,13 @@ public class BasicElementBuilderTests {
         .thenReturn(Collections.singletonList(mockElement));
     Exception e = expectThrows(NullPointerException.class,
         () -> getBuilder(mock, location)
-            .build(Actionable.class, BasePageElement.class, el -> el.isVisible()));
+            .build(Actionable.class, BasePageElement.class, UtamBase::isVisible));
     assertThat(e.getMessage(), is(equalTo(ERR_FOR_FILTER)));
 
     // found filter match
     when(mockElement.isDisplayed()).thenReturn(true);
     test = getBuilder(mock, location)
-        .build(Actionable.class, BasePageElement.class, el -> el.isVisible());
+        .build(Actionable.class, BasePageElement.class, UtamBase::isVisible);
     assertThat(test, is(notNullValue()));
   }
 
@@ -216,7 +217,7 @@ public class BasicElementBuilderTests {
 
     // not found
     Exception e = expectThrows(NoSuchElementException.class, () -> getBuilder(mock, location)
-        .buildList(Actionable.class, BasePageElement.class, el -> el.isVisible()));
+        .buildList(Actionable.class, BasePageElement.class, UtamBase::isVisible));
     assertThat(e.getMessage(), startsWith(ERR_ELEMENT_NOT_FOUND_PREFIX));
 
     // found but filter does not match
@@ -224,13 +225,13 @@ public class BasicElementBuilderTests {
     when(mock.getWebDriverMock().findElements(By.cssSelector(NOT_NULLABLE_CSS)))
         .thenReturn(Collections.singletonList(mockElement));
     List<Actionable> list = getBuilder(mock, location)
-        .buildList(Actionable.class, BasePageElement.class, el -> el.isVisible());
+        .buildList(Actionable.class, BasePageElement.class, UtamBase::isVisible);
     assertThat(list, is(emptyIterable()));
 
     // found, filter matches
     when(mockElement.isDisplayed()).thenReturn(true);
     list = getBuilder(mock, location)
-        .buildList(Actionable.class, BasePageElement.class, el -> el.isVisible());
+        .buildList(Actionable.class, BasePageElement.class, UtamBase::isVisible);
     assertThat(list, is(not(emptyIterable())));
   }
 
@@ -241,7 +242,7 @@ public class BasicElementBuilderTests {
 
     // not found
     List<Actionable> list = getBuilder(mock, location)
-        .buildList(Actionable.class, BasePageElement.class, el -> el.isVisible());
+        .buildList(Actionable.class, BasePageElement.class, UtamBase::isVisible);
     assertThat(list, is(nullValue()));
 
     // found but filter does not match
@@ -249,13 +250,20 @@ public class BasicElementBuilderTests {
     when(mock.getWebDriverMock().findElements(By.cssSelector(NULLABLE_CSS)))
         .thenReturn(Collections.singletonList(mockElement));
     list = getBuilder(mock, location)
-        .buildList(Actionable.class, BasePageElement.class, el -> el.isVisible());
+        .buildList(Actionable.class, BasePageElement.class, UtamBase::isVisible);
     assertThat(list, is(emptyIterable()));
 
     // found, filter matches
     when(mockElement.isDisplayed()).thenReturn(true);
     list = getBuilder(mock, location)
-        .buildList(Actionable.class, BasePageElement.class, el -> el.isVisible());
+        .buildList(Actionable.class, BasePageElement.class, UtamBase::isVisible);
     assertThat(list, is(not(emptyIterable())));
+  }
+
+  @Test
+  public void testBuildFrameElement() {
+    MockUtilities mock = new MockUtilities();
+    FrameElement test = getBuilder(mock).build(FrameElement.class, FrameElementImpl.class);
+    assertThat(test, is(notNullValue()));
   }
 }

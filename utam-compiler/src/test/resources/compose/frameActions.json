@@ -1,0 +1,102 @@
+{
+  "elements": [
+    {
+      "name": "myFrame",
+      "type": "frame",
+      "selector": {
+        "css": "iframe"
+      }
+    },
+    {
+      "name": "myPublicFrame",
+      "public" : true,
+      "type": "frame",
+      "selector": {
+        "css": "iframe[%s]",
+        "args": [
+          {
+            "type": "string",
+            "name": "frameStr"
+          }
+        ]
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "iframeTest",
+      "compose": [
+        {
+          "element": "document",
+          "apply": "enterFrame",
+          "args": [
+            {
+              "value": {
+                "element": "myFrame"
+              }
+            }
+          ]
+        },
+        {
+          "element": "document",
+          "apply": "enterFrame",
+          "args": [
+            {
+              "value": {
+                "element": "myPublicFrame"
+              }
+            }
+          ]
+        },
+        {
+          "element": "document",
+          "apply": "exitFrame"
+        },
+        {
+          "element": "document",
+          "apply": "exitToParentFrame"
+        }
+      ]
+    },
+    {
+      "name": "testLiteralArgs",
+      "compose" : [
+        {
+          "element": "document",
+          "apply": "enterFrameAndLoad",
+          "args" : [
+            {
+              "value": {
+                "element": "myFrame"
+              }
+            },
+            {
+              "value": {
+                "type": "my/lightning/button"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "testNonLiteralArgs",
+      "compose" : [
+        {
+          "element": "document",
+          "apply": "enterFrameAndLoad",
+          "args" : [
+            {
+              "name" : "myFrame",
+              "type": "frame"
+            },
+            {
+              "name": "pageObject",
+              "type": "pageObject"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

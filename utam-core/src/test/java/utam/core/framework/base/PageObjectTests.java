@@ -46,7 +46,7 @@ public class PageObjectTests {
 
     // successfully waits for visibility
     when(mockUtilities.getElementAdapter().isDisplayed()).thenReturn(true);
-    assertThat(testPage.waitFor(() -> element.isVisible()), is(true));
+    assertThat(testPage.waitFor(element::isVisible), is(true));
 
     // throws exception when visibility times out
     when(mockUtilities.getElementAdapter().isDisplayed()).thenReturn(false);

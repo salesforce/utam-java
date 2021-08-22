@@ -96,7 +96,7 @@ public class ElementAdapterTests {
   @Test
   public void testIsNull() {
     assertThat(ElementAdapter.NULL_ELEMENT.isNull(), is(true));
-    NullPointerException e = expectThrows(NullPointerException.class, () -> ElementAdapter.NULL_ELEMENT.getWebElement());
+    NullPointerException e = expectThrows(NullPointerException.class, NULL_ELEMENT::getWebElement);
     assertThat(e.getMessage(), is(equalTo(ERR_NULL_ELEMENT)));
     assertThat(new ElementAdapter(mock(WebElement.class), mock(WebDriver.class)).isNull(), is(false));
   }

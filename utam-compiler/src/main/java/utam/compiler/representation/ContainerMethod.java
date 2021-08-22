@@ -7,20 +7,19 @@
  */
 package utam.compiler.representation;
 
-import static utam.compiler.helpers.TypeUtilities.CONTAINER_LIST_RETURN_TYPE;
-import static utam.compiler.helpers.TypeUtilities.CONTAINER_RETURN_TYPE;
-import static utam.compiler.helpers.TypeUtilities.LIST_IMPORT;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.representation.ComposeMethod.getElementLocatorString;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.ParameterUtils;
-import utam.compiler.helpers.TypeUtilities;
+import utam.compiler.helpers.LocatorCodeGeneration;
+import utam.compiler.helpers.ParameterUtils.Regular;
+import utam.compiler.helpers.TypeUtilities.BoundedClass;
+import utam.compiler.helpers.TypeUtilities.ListOf;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -35,75 +34,102 @@ import utam.core.declarative.representation.TypeProvider;
 public abstract class ContainerMethod implements PageObjectMethod {
 
   private static final String PAGE_OBJECT_TYPE_PARAMETER_NAME = "pageObjectType";
-  static final MethodParameter PAGE_OBJECT_PARAMETER =
-      new ParameterUtils.Regular(PAGE_OBJECT_TYPE_PARAMETER_NAME,
-          TypeUtilities.BOUNDED_CLASS);
-  final List<TypeProvider> classImports = new ArrayList<>();
-  final List<TypeProvider> interfaceImports = new ArrayList<>();
-  final List<String> implCodeLines = new ArrayList<>();
+  public static final MethodParameter PAGE_OBJECT_PARAMETER =
+      new Regular(PAGE_OBJECT_TYPE_PARAMETER_NAME,
+          new BoundedClass(PAGE_OBJECT, "T"));
   final List<MethodParameter> methodParameters = new ArrayList<>();
-  final String containerElement;
-  private final TypeProvider returnType;
-  private final String methodName;
+  final String codePrefix;
+  final String methodName;
+  private final boolean isPublic;
+
 
   ContainerMethod(ElementContext scopeElement, boolean isExpandScope, String elementName,
-      TypeProvider returnType) {
-    this.returnType = returnType;
-    this.methodName = getElementGetterMethodName(elementName, true);
+      boolean isPublic) {
+    this.methodName = getElementGetterMethodName(elementName, isPublic);
     this.methodParameters.addAll(scopeElement.getParameters());
-    this.containerElement = String
+    this.codePrefix = String
         .format("this.inContainer(%s, %s)", getElementLocatorString(scopeElement), isExpandScope);
+    this.isPublic = isPublic;
   }
 
-  @Override public MethodDeclaration getDeclaration() {
-    return new MethodDeclarationImpl(methodName, methodParameters, returnType, interfaceImports);
-  }
-
-  @Override public List<String> getCodeLines() {
-    return implCodeLines;
-  }
-
-  @Override public List<TypeProvider> getClassImports() {
-    return classImports;
-  }
-
-  @Override public boolean isPublic() {
-    return true;
+  @Override
+  public boolean isPublic() {
+    return isPublic;
   }
 
   public static class WithSelectorReturnsList extends ContainerMethod {
 
+    private final String selectorValue;
+
     public WithSelectorReturnsList(ElementContext scopeElement, boolean isExpandScope,
-        String elementName, LocatorCodeGeneration selectorContext) {
-      super(scopeElement, isExpandScope, elementName, CONTAINER_LIST_RETURN_TYPE);
-      interfaceImports.add(PAGE_OBJECT);
-      interfaceImports.add(LIST_IMPORT);
-      classImports.addAll(interfaceImports);
-      // because method that build selector uses Selector.Type
-      classImports.add(SELECTOR);
+        String elementName, LocatorCodeGeneration selectorContext, boolean isPublic) {
+      super(scopeElement, isExpandScope, elementName, isPublic);
       methodParameters.addAll(selectorContext.getParameters());
       methodParameters.add(PAGE_OBJECT_PARAMETER);
-      String selectorValue = selectorContext.getBuilderString();
-      implCodeLines.add(String.format("%s.loadList(%s, %s)", containerElement,
-          PAGE_OBJECT_TYPE_PARAMETER_NAME, selectorValue));
+      selectorValue = selectorContext.getBuilderString();
     }
 
+    @Override
+    public List<TypeProvider> getClassImports() {
+      List<TypeProvider> imports = new ArrayList<>(getDeclaration().getImports());
+      // because of method that builds selector
+      imports.add(SELECTOR);
+      return imports;
+    }
+
+    @Override
+    public MethodDeclaration getDeclaration() {
+      return new MethodDeclarationImpl(methodName, methodParameters, new ListOf(PAGE_OBJECT)) {
+        @Override
+        String getReturnTypeStr() {
+          return String.format("<T extends %s> List<T>", PAGE_OBJECT.getSimpleName());
+        }
+      };
+    }
+
+    @Override
+    public List<String> getCodeLines() {
+      String codeLine = String
+          .format(".loadList(%s, %s)", PAGE_OBJECT_TYPE_PARAMETER_NAME, selectorValue);
+      return Collections.singletonList(codePrefix + codeLine);
+    }
   }
 
   public static class WithSelector extends ContainerMethod {
 
+    private final String selectorValue;
+
     public WithSelector(ElementContext scopeElement, boolean isExpandScope, String elementName,
-        LocatorCodeGeneration selectorContext) {
-      super(scopeElement, isExpandScope, elementName, CONTAINER_RETURN_TYPE);
-      interfaceImports.add(PAGE_OBJECT);
-      classImports.addAll(interfaceImports);
-      // because method that build selector uses Selector.Type
-      classImports.add(SELECTOR);
-      String selectorValue = selectorContext.getBuilderString();
-      implCodeLines.add(String.format("%s.load(%s, %s)", containerElement,
-          PAGE_OBJECT_TYPE_PARAMETER_NAME, selectorValue));
+        LocatorCodeGeneration selectorContext, boolean isPublic) {
+      super(scopeElement, isExpandScope, elementName, isPublic);
+      selectorValue = selectorContext.getBuilderString();
       methodParameters.addAll(selectorContext.getParameters());
       methodParameters.add(PAGE_OBJECT_PARAMETER);
+    }
+
+    @Override
+    public List<TypeProvider> getClassImports() {
+      List<TypeProvider> imports = new ArrayList<>(getDeclaration().getImports());
+      // because of method that builds selector
+      imports.add(SELECTOR);
+      return imports;
+    }
+
+    @Override
+    public MethodDeclaration getDeclaration() {
+      return new MethodDeclarationImpl(methodName, methodParameters, PAGE_OBJECT) {
+        @Override
+        String getReturnTypeStr() {
+          return String.format("<T extends %s> T", PAGE_OBJECT.getSimpleName());
+        }
+      };
+    }
+
+    @Override
+    public List<String> getCodeLines() {
+      String codeLine = String
+          .format(".load(%s, %s)", PAGE_OBJECT_TYPE_PARAMETER_NAME, selectorValue);
+      return Collections.singletonList(codePrefix + codeLine);
     }
   }
 }

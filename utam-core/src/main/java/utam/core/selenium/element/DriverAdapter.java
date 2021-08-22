@@ -24,12 +24,12 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.FluentWait;
 import utam.core.driver.Driver;
 import utam.core.driver.Expectations;
 import utam.core.element.Element;
 import utam.core.element.FindContext;
+import utam.core.framework.UtamCoreError;
 import utam.core.framework.consumer.FrameElement;
 import utam.core.element.Locator;
 import utam.core.selenium.appium.MobileElementAdapter;
@@ -43,6 +43,7 @@ import utam.core.selenium.appium.MobileElementAdapter;
 public class DriverAdapter implements Driver {
 
   static final String ERR_SUPPORTED_FOR_MOBILE = "method is applicable only for iOS/Android";
+  static final String ERR_CANT_ENTER_NULL_FRAME = "Can't enter null iframe element";
   // used in tests to validate right message
   public static final String ERR_ELEMENT_NOT_FOUND_PREFIX = "can't find element";
   private static final List<Class<? extends Throwable>> IGNORE_EXCEPTIONS =
@@ -111,11 +112,6 @@ public class DriverAdapter implements Driver {
     return ((DriverAdapter) driver).getSeleniumDriver();
   }
 
-  static Actions getSeleniumDriverActions(Driver driver) {
-    WebDriver webDriver = getSeleniumDriver(driver);
-    return new Actions(webDriver);
-  }
-
   private Function<WebElement, Element> getElementBuilder() {
     return element -> isMobile() ? new MobileElementAdapter(element, this) : new ElementAdapter(element, this);
   }
@@ -174,7 +170,11 @@ public class DriverAdapter implements Driver {
 
   @Override
   public void enterFrame(FrameElement element) {
-    driver.switchTo().frame(((ElementAdapter)element.getFrameElement()).getWebElement());
+    if(element == null) {
+      throw new UtamCoreError(ERR_CANT_ENTER_NULL_FRAME);
+    }
+    WebElement webElement = ((ElementAdapter)element.getFrameElement()).getWebElement();
+    driver.switchTo().frame(webElement);
   }
 
   @Override

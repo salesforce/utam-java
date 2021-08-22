@@ -148,32 +148,30 @@ public final class ClassSerializer {
         source.getImplementedType().getInterfaceType().getSimpleName());
   }
 
-  private String getImportStatement(TypeProvider type) {
-    return getImportString(type, this.source.getClassType().getPackageName());
+  private List<String> getImportStatements(TypeProvider type) {
+    return getImportStrings(type, this.source.getClassType().getPackageName());
   }
 
   private Set<String> getImports(List<AnnotationProvider> annotations) {
     Set<String> res = new HashSet<>();
-    res.add(getImportStatement(source.getBaseClassType()));
-    res.add(getImportStatement(source.getImplementedType().getInterfaceType()));
+    res.addAll(getImportStatements(source.getBaseClassType()));
+    res.addAll(getImportStatements(source.getImplementedType().getInterfaceType()));
     source.getDeclaredElementTypes(false).stream()
         .map(returnType -> ((TypeUtilities.Element)returnType).getBasicInterfaces())
         .flatMap(Collection::stream)
         .collect(Collectors.toSet())
-        .forEach(type -> res.add(getImportStatement(type)));
+        .forEach(type -> res.addAll(getImportStatements(type)));
     annotations.stream()
         .flatMap(a -> a.getImportTypes().stream())
-        .forEach(a -> res.add(getImportStatement(a)));
+        .forEach(a -> res.addAll(getImportStatements(a)));
     source.getFields().stream()
-        .peek(field -> res.add(getImportStatement(field.getType())))
+        .peek(field -> res.addAll(getImportStatements(field.getType())))
         .flatMap(classField -> classField.getAnnotations().stream())
         .flatMap(a -> a.getImportTypes().stream())
-        .forEach(a -> res.add(getImportStatement(a)));
+        .forEach(a -> res.addAll(getImportStatements(a)));
     source
         .getMethods()
-        .forEach(
-            m -> m.getClassImports().forEach(importStr -> res.add(getImportStatement(importStr))));
-    res.removeIf(String::isEmpty);
+        .forEach(m -> m.getClassImports().forEach(importStr -> res.addAll(getImportStatements(importStr))));
     return res;
   }
 

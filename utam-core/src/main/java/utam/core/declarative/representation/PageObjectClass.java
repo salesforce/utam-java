@@ -43,27 +43,59 @@ public interface PageObjectClass {
   /**
    * class type
    *
-   * @return self type
+   * @return type
    */
   TypeProvider getClassType();
 
   /**
-   * PO can extend from other PO class <br>
-   * by default extending BasePageObject
+   * PO can extend from other PO class <br> by default extending BasePageObject
    *
    * @return type to extend
    */
   TypeProvider getBaseClassType();
 
-  String getImplCode();
-  
+  /**
+   * generate Java source code for a Page Object class
+   *
+   * @return string
+   */
+  String getGeneratedCode();
+
+  /**
+   * get generated unit tests
+   *
+   * @param unitTestRunner runner to use for a generation
+   * @return string
+   */
   String getGeneratedUnitTestCode(UnitTestRunner unitTestRunner);
 
+  /**
+   * type of the class this Page Object implements
+   *
+   * @return type
+   */
   PageObjectInterface getImplementedType();
 
+  /**
+   * profiles declared in the Page Object
+   *
+   * @return array
+   */
   Profile[] getProfiles();
 
+  /**
+   * comments to use in a javadoc
+   *
+   * @return string
+   */
   String getComments();
 
+  /**
+   * get all declared union types for basic elements. Some types can be declared for private
+   * elements only
+   *
+   * @param isPublicElements boolean flag
+   * @return list of types
+   */
   List<TypeProvider> getDeclaredElementTypes(boolean isPublicElements);
 }

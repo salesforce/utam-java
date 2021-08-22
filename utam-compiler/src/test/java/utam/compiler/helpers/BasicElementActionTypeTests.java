@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static utam.compiler.helpers.TypeUtilities.GENERIC_TYPE;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.core.framework.UtamLogger.info;
 
@@ -152,9 +151,6 @@ public class BasicElementActionTypeTests {
   static boolean sameType(TypeProvider actual, Class expected) {
     if(actual.isSameType(VOID)) {
       return expected.getName().toLowerCase().contains("void");
-    }
-    if(actual.isSameType(GENERIC_TYPE)) {
-      return expected.equals(Object.class);
     }
     if(expected.equals(actual.getClassType())) {
       return true;

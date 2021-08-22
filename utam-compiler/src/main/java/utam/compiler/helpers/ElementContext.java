@@ -176,15 +176,21 @@ public abstract class ElementContext {
   }
 
   public static class Frame extends ElementContext {
-    public Frame(ElementContext scopeContext, String name, Locator selector) {
+
+    public Frame(ElementContext scopeContext, String name, LocatorCodeGeneration helper) {
       super(
           scopeContext,
           name,
           FRAME_ELEMENT,
-          selector,
+          helper.getLocator(),
           false,
-          EMPTY_PARAMETERS,
+          helper.getParameters(),
           false);
+    }
+
+    // used in tests
+    public Frame(String name, String cssSelector) {
+      this(null, name, new LocatorCodeGeneration(cssSelector));
     }
   }
 

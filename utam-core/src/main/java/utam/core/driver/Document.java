@@ -9,6 +9,7 @@ package utam.core.driver;
 
 import utam.core.element.Locator;
 import utam.core.framework.base.RootPageObject;
+import utam.core.framework.consumer.FrameElement;
 
 /**
  * document object to interact with a browser
@@ -45,4 +46,31 @@ public interface Document {
    * @return true if Page Object's root element is found
    */
   boolean containsObject(Class<? extends RootPageObject> pageObjectType);
+
+  /**
+   * enters a frame or iframe element
+   * @param frame the frame element to enter
+   */
+  void enterFrame(FrameElement frame);
+
+  /**
+   * exits focus from a frame or iframe to the immediate parent frame, or a no-op
+   * if already on the top-level frame
+   */
+  void exitToParentFrame();
+
+  /**
+   * exits focus from a frame or iframe to the top-level frame in the document, or a no-op
+   * if already on the top-level frame
+   */
+  void exitFrame();
+
+  /**
+   * enters a frame or iframe element and loads the specified Page Object as loaded in the frame
+   * @param frame the frame to enter
+   * @param type type of the object
+   * @param <T> type of Root Page Object to return
+   * @return instance of the Page Object, loaded in the frame
+   */
+  <T extends RootPageObject> T enterFrameAndLoad(FrameElement frame, Class<T> type);
 }

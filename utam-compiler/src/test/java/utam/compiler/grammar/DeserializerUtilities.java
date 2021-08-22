@@ -7,19 +7,24 @@
  */
 package utam.compiler.grammar;
 
-import utam.compiler.helpers.TranslationContext;
-import utam.core.declarative.representation.PageObjectDeclaration;
-import utam.core.declarative.translator.TranslatorConfig;
-import utam.core.framework.consumer.UtamError;
+import static utam.compiler.grammar.JsonDeserializer.getDeserializerMapper;
+import static utam.compiler.grammar.TestUtilities.TEST_URI;
+import static utam.compiler.translator.TranslatorMockUtilities.getDefaultConfig;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.stream.Collectors;
-
-import static utam.compiler.grammar.TestUtilities.TEST_URI;
-import static utam.compiler.translator.TranslatorMockUtilities.getDefaultConfig;
+import utam.compiler.helpers.TranslationContext;
+import utam.compiler.translator.ClassSerializer;
+import utam.compiler.translator.InterfaceSerializer;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.declarative.translator.TranslatorConfig;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * deserialize json from resources folder
@@ -39,29 +44,35 @@ public class DeserializerUtilities {
 
   private static String readJSON(String fileName) {
     String testFileName = fileName + ".json";
-    try {
-      InputStream stream =
-          DeserializerUtilities.class.getClassLoader().getResourceAsStream(testFileName);
-      return new BufferedReader(new InputStreamReader(stream))
-          .lines()
-          .parallel()
-          .collect(Collectors.joining("\n"));
-    } catch (NullPointerException e) {
-      throw new AssertionError(String.format("Cant read file '%s'", testFileName), e);
+    InputStream stream =
+        DeserializerUtilities.class.getClassLoader().getResourceAsStream(testFileName);
+    if (stream == null) {
+      throw new AssertionError(String.format("JSON file '%s' not found", testFileName));
     }
+    return new BufferedReader(new InputStreamReader(stream))
+        .lines()
+        .parallel()
+        .collect(Collectors.joining("\n"));
   }
 
-  Result getResultFromFile(String fileName) {
+  public Result getResultFromFile(String fileName) {
     String content = readJSON(fileName);
     return getResultFromString(content);
   }
 
   public Result getResultFromString(String content) {
     JsonDeserializer deserializer = new JsonDeserializer(type, content, translatorConfig);
+    PageObjectDeclaration declaration = deserializer.getObject();
+    // to ensure that code can be generated
+    new InterfaceSerializer(declaration.getInterface()).toString();
+    if(!declaration.isInterfaceOnly()) {
+      new ClassSerializer(declaration.getImplementation(), deserializer.getPageObjectContext())
+          .toString();
+    }
     return new Result(deserializer.getObject(), deserializer.getPageObjectContext());
   }
 
-  TranslationContext getContext(String fileName) {
+  public TranslationContext getContext(String fileName) {
     return getResultFromFile(fileName).getContext();
   }
 
@@ -70,6 +81,41 @@ public class DeserializerUtilities {
       return JsonDeserializer.deserialize(tClass, readJSON(fileName));
     } catch (IOException e) {
       throw new UtamError("error", e);
+    }
+  }
+
+  /**
+   * read JSON file with array of objects and deserialize
+   * @param contentType type of objects in json
+   * @param fileName name of the file without extension
+   * @return list of deserialized objects
+   */
+  static <T> List<T> getDeserializedObjects(Class<T> contentType, String fileName) {
+    ArrayResult<T> res = new ArrayResult(contentType);
+    return res.getObjects(fileName);
+  }
+
+  static class ArrayResult<T> {
+    private final Class<T> type;
+
+    ArrayResult(Class<T> type) {
+      this.type = type;
+    }
+
+    List<T> getObjects(String fileName) {
+      try {
+        String fullFileName = fileName + ".json";
+        ObjectMapper mapper = getDeserializerMapper();
+        CollectionType collectionType = mapper.getTypeFactory()
+            .constructCollectionType(List.class, type);
+        InputStream stream = getClass().getClassLoader().getResourceAsStream(fullFileName);
+        if(stream == null) {
+          throw new AssertionError(String.format("JSON file '%s' not found", fullFileName));
+        }
+        return mapper.readValue(stream, collectionType);
+      } catch (Exception e) {
+        throw new UtamError("error in " + fileName, e);
+      }
     }
   }
 

@@ -12,7 +12,9 @@ import static utam.compiler.helpers.PrimitiveType.NUMBER;
 import static utam.compiler.helpers.PrimitiveType.STRING;
 import static utam.compiler.helpers.PrimitiveType.isPrimitiveType;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
+import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.REFERENCE;
+import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -22,14 +24,17 @@ import java.util.ArrayList;
 import java.util.List;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.UtamArgumentDeserializer.ElementReference;
+import utam.compiler.grammar.UtamArgumentDeserializer.PageObjectType;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParameterUtils.Literal;
+import utam.compiler.helpers.ParameterUtils.LiteralClass;
 import utam.compiler.helpers.ParameterUtils.Regular;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.helpers.TypeUtilities.BoundedClass;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
@@ -46,6 +51,8 @@ public class UtamArgument {
   static final String FUNCTION_TYPE_PROPERTY = "function";
   static final String SELECTOR_TYPE_PROPERTY = "locator";
   static final String ELEMENT_TYPE_PROPERTY = "element";
+  static final String PAGE_OBJECT_TYPE_PROPERTY = "pageObject";
+  static final String FRAME_ELEMENT_TYPE_PROPERTY = "frame";
   static final String ERR_ARGS_WRONG_TYPE = "%s: expected type is '%s', actual was '%s'";
   static final String ERR_ARGS_DUPLICATE_NAMES = "%s: duplicate arguments names '%s'";
   static final String ERR_ARGS_WRONG_COUNT = "%s: expected %s parameters, provided %s";
@@ -89,6 +96,11 @@ public class UtamArgument {
       ElementReference elementReference = (ElementReference) value;
       return elementReference.getElementGetterAsLiteralArg(translationContext);
     }
+    if (value instanceof PageObjectType) {
+      PageObjectType pageObjectType = (PageObjectType) value;
+      TypeProvider literalType = pageObjectType.getLiteralType(translationContext);
+      return new LiteralClass(literalType);
+    }
     if (value instanceof Boolean) {
       return new Literal(value.toString(), BOOLEAN);
     }
@@ -113,6 +125,12 @@ public class UtamArgument {
     }
     if (ELEMENT_TYPE_PROPERTY.equals(type)) {
       return new Regular(name, BASIC_ELEMENT);
+    }
+    if (FRAME_ELEMENT_TYPE_PROPERTY.equals(type)) {
+      return new Regular(name, FRAME_ELEMENT);
+    }
+    if (PAGE_OBJECT_TYPE_PROPERTY.equals(type)) {
+      return new Regular(name, new BoundedClass(ROOT_PAGE_OBJECT, null));
     }
     throw new UtamCompilationError(ERR_WHILE_PARSING);
   }

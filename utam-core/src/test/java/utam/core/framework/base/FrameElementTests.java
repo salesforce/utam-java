@@ -14,7 +14,10 @@ import utam.core.framework.consumer.FrameElement;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
+import static utam.core.framework.base.FrameElementImpl.createFrameInstance;
+import static utam.core.selenium.element.ElementAdapter.NULL_ELEMENT;
 
 public class FrameElementTests {
 
@@ -22,8 +25,14 @@ public class FrameElementTests {
   public void testGetElement() {
     MockUtilities mock = new MockUtilities();
     Element mockElement = mock.getElementAdapter();
-    FrameElement frame = new FrameElementImpl();
-    ((FrameElementImpl)frame).initialize(mock.getFactory(), mockElement);
+    FrameElement frame = mock.getFrameElement();
     assertThat(frame.getFrameElement(), is(sameInstance(mockElement)));
+  }
+
+  @Test
+  public void testGetElementNull() {
+    MockUtilities mock = new MockUtilities();
+    FrameElement element = createFrameInstance(NULL_ELEMENT, mock.getFactory());
+    assertThat(element, is(nullValue()));
   }
 }

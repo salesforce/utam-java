@@ -19,6 +19,7 @@ import static utam.core.element.FindContext.Type.EXISTING;
 import static utam.core.element.FindContext.Type.NULLABLE;
 
 import java.util.List;
+import java.util.Objects;
 import org.openqa.selenium.NotFoundException;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities.MockAdapter;
@@ -101,23 +102,23 @@ public class CustomElementBuilderTests {
     // not null, filter returns true
     CustomElementBuilder builder = new CustomElementBuilder(factory, root);
     TestPageObject instance = builder
-        .build(TestPageObject.class, testPageObject -> testPageObject != null);
+        .build(TestPageObject.class, Objects::nonNull);
     assertThat(instance, is(notNullValue()));
 
     // not null, filter returns false
     Exception e = expectThrows(NullPointerException.class,
-        () -> builder.build(TestPageObject.class, testPageObject -> testPageObject.isFalse()));
+        () -> builder.build(TestPageObject.class, TestPageObject::isFalse));
     assertThat(e.getMessage(), startsWith(NOTHING_FOUND_ERR));
 
     // nothing found
     e = expectThrows(NotFoundException.class,
         () -> getNullBuilder(factory)
-            .build(TestPageObject.class, testPageObject -> testPageObject != null));
+            .build(TestPageObject.class, Objects::nonNull));
     assertThat(e.getMessage(), startsWith(NOTHING_FOUND_ERR));
 
     // nullable, filter returns false
     instance = getNullableBuilder(factory)
-        .build(TestPageObject.class, testPageObject -> testPageObject.isFalse());
+        .build(TestPageObject.class, TestPageObject::isFalse);
     assertThat(instance, is(nullValue()));
   }
 
@@ -131,23 +132,23 @@ public class CustomElementBuilderTests {
     // not null, filter returns true
     CustomElementBuilder builder = new CustomElementBuilder(factory, root);
     List<TestPageObject> instances = builder
-        .buildList(TestPageObject.class, testPageObject -> testPageObject != null);
+        .buildList(TestPageObject.class, Objects::nonNull);
     assertThat(instances, is(not(emptyIterable())));
 
     // not null, filter returns false
     instances = builder
-        .buildList(TestPageObject.class, testPageObject -> testPageObject.isFalse());
+        .buildList(TestPageObject.class, TestPageObject::isFalse);
     assertThat(instances, is(emptyIterable()));
 
     // not nullable, nothing found
     NotFoundException e = expectThrows(NotFoundException.class,
         () -> getNullBuilder(factory)
-            .buildList(TestPageObject.class, testPageObject -> testPageObject != null));
+            .buildList(TestPageObject.class, Objects::nonNull));
     assertThat(e.getMessage(), startsWith("can't find element"));
 
     // nullable, nothing found
     instances = getNullableBuilder(factory)
-        .buildList(TestPageObject.class, testPageObject -> testPageObject.isFalse());
+        .buildList(TestPageObject.class, TestPageObject::isFalse);
     assertThat(instances, is(nullValue()));
   }
 

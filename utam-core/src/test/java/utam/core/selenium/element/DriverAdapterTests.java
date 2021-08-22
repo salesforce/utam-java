@@ -19,7 +19,9 @@ import static org.mockito.Mockito.contains;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
+import static org.testng.Assert.expectThrows;
 import static utam.core.driver.DriverTimeouts.TEST;
+import static utam.core.selenium.element.DriverAdapter.ERR_CANT_ENTER_NULL_FRAME;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -28,9 +30,12 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
+import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.driver.Expectations;
 import utam.core.element.FindContext.Type;
+import utam.core.framework.consumer.FrameElement;
+import utam.core.framework.consumer.UtamError;
 import utam.core.framework.element.ExpectationsImpl;
 
 
@@ -124,5 +129,32 @@ public class DriverAdapterTests {
     MockUtilities mock = new MockUtilities();
     when(mock.getWebDriverMock().getCurrentUrl()).thenReturn(url);
     assertThat(mock.getDriverAdapter().getUrl(), is(equalTo(url)));
+  }
+
+  @Test
+  public void testEnterFrame() {
+    MockUtilities mock = new MockUtilities();
+    FrameElement element = mock.getFrameElement();
+    mock.getDriverAdapter().enterFrame(element);
+  }
+
+  @Test
+  public void testEnterNullFrameThrows() {
+    MockUtilities mock = new MockUtilities();
+    Document document = mock.getDocument();
+    Exception e = expectThrows(UtamError.class, () -> document.enterFrame(null));
+    assertThat(e.getMessage(), is(equalTo(ERR_CANT_ENTER_NULL_FRAME)));
+  }
+
+  @Test
+  public void testExitToParentFrame() {
+    MockUtilities mock = new MockUtilities();
+    mock.getDriverAdapter().exitToParentFrame();
+  }
+
+  @Test
+  public void exitFrame() {
+    MockUtilities mock = new MockUtilities();
+    mock.getDriverAdapter().exitFrame();
   }
 }

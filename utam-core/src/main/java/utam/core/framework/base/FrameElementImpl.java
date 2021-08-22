@@ -19,8 +19,10 @@ import utam.core.framework.element.BasePageElement;
  */
 public class FrameElementImpl extends BasePageElement implements FrameElement {
 
-  public FrameElementImpl() {
-    super();
+  public FrameElementImpl() {}
+
+  public static FrameElement createFrameInstance(Element element, PageObjectsFactory factory) {
+    return createInstance(FrameElementImpl.class, element, factory);
   }
 
   @Override

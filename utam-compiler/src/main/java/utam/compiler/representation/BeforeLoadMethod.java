@@ -9,7 +9,6 @@ package utam.compiler.representation;
 
 import utam.compiler.helpers.MethodContext;
 import utam.core.declarative.representation.MethodDeclaration;
-import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 
@@ -28,16 +27,13 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
 public class BeforeLoadMethod implements PageObjectMethod {
 
     private final String name;
-    private final List<MethodParameter> parameters;
     private final List<String> code = new ArrayList<>();
     private final List<TypeProvider> classImports = new ArrayList<>();
     private final List<TypeProvider> imports = new ArrayList<>();
     private final String comments;
 
-    public BeforeLoadMethod(MethodContext methodContext, List<ComposeMethodStatement> statements,
-                         List<MethodParameter> parameters, String comments) {
+    public BeforeLoadMethod(MethodContext methodContext, List<ComposeMethodStatement> statements, String comments) {
         this.name = methodContext.getName();
-        this.parameters = new ArrayList<>(parameters);
         statements.forEach(
                 statement -> {
                     code.addAll(statement.getCodeLines());
@@ -49,7 +45,7 @@ public class BeforeLoadMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-        return new MethodDeclarationImpl(name, parameters, VOID, imports, comments, false);
+        return new MethodDeclarationImpl(name, new ArrayList<>(), VOID, imports, comments);
     }
 
     @Override

@@ -87,7 +87,7 @@ class UtamMethod {
     return new InterfaceMethod(
         methodContext,
         parameters,
-        comments, false);
+        comments);
   }
 
   PageObjectMethod getMethod(TranslationContext context) {
@@ -141,7 +141,7 @@ class UtamMethod {
       ElementContext firstElement = i == 0 ? context.getElement(chain[0].elementName) : null;
       statements.add(chain[i].getChainStatement(context, firstElement));
     }
-    return new ChainMethod(name, statements, comments);
+    return new ChainMethod(name, statements);
   }
 
   private boolean isReturnsList() {
@@ -178,7 +178,6 @@ class UtamMethod {
     return new BeforeLoadMethod(
         methodContext,
         statements,
-        methodParameters,
         comments);
   }
 
