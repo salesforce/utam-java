@@ -7,10 +7,10 @@
  */
 package utam.compiler.representation;
 
-import static utam.compiler.helpers.ParameterUtils.getParametersDeclarationString;
 import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import utam.compiler.helpers.ParameterUtils;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
@@ -93,5 +93,12 @@ class MethodDeclarationImpl implements MethodDeclaration {
   @Override
   public String getComments() {
     return comments;
+  }
+
+  private static String getParametersDeclarationString(List<MethodParameter> parameters) {
+    return parameters.stream()
+        .map(MethodParameter::getDeclaration)
+        .filter(str -> !str.isEmpty()) // hardcoded values passed as empty string
+        .collect(Collectors.joining(", "));
   }
 }

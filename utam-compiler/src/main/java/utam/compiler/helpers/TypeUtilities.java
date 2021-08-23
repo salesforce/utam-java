@@ -491,6 +491,9 @@ public final class TypeUtilities {
     }
   }
 
+  /**
+   * types like Class<T> or Class<? extends Page Object>
+   */
   public static class BoundedClass extends FromClass {
 
     private final TypeProvider boundType;

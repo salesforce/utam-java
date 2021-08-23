@@ -130,12 +130,23 @@ public class ParameterUtils {
     }
   }
 
+  /**
+   * translates method parameters and returns into a list of types to import
+   * @param parameters method parameters
+   * @param returnType return type
+   * @return list of types to import
+   */
   public static List<TypeProvider> getDeclarationImports(List<MethodParameter> parameters, TypeProvider returnType) {
     List<TypeProvider> imports = getDeclarationImports(parameters);
     imports.add(returnType);
     return imports;
   }
 
+  /**
+   * translates method parameters into a list of types to import
+   * @param parameters method parameters
+   * @return list of types to import
+   */
   public static List<TypeProvider> getDeclarationImports(List<MethodParameter> parameters) {
     return parameters
         .stream()
@@ -144,6 +155,11 @@ public class ParameterUtils {
         .collect(Collectors.toList());
   }
 
+  /**
+   * translates method parameters into a list of types to import in class
+   * @param parameters method parameters
+   * @return list of types to import
+   */
   public static List<TypeProvider> getImplementationImports(List<MethodParameter> parameters) {
     return parameters
         .stream()
@@ -173,12 +189,5 @@ public class ParameterUtils {
       return null;
     }
     return parameter.getType();
-  }
-
-  public static String getParametersDeclarationString(List<MethodParameter> parameters) {
-    return parameters.stream()
-            .map(MethodParameter::getDeclaration)
-            .filter(str -> !str.isEmpty()) // hardcoded values passed as empty string
-            .collect(Collectors.joining(", "));
   }
 }

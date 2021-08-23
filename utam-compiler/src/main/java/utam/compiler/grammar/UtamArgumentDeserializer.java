@@ -251,7 +251,7 @@ class UtamArgumentDeserializer extends
 
   /**
    * Literal argument type to pass a hardcoded Page Object type, for example when composing container invocation,
-   * format: { "pageObject": "my/object/type" }
+   * format: { "type": "my/object/type" }
    * @since 236
    */
   static class PageObjectType {
