@@ -15,6 +15,7 @@ import utam.core.selenium.element.LocatorBy;
 public class LocatorUIAutomator extends LocatorBy {
 
   public static final String UI_AUTOMATOR_SELECTOR_PREFIX = "new UiSelector().";
+  public static final String UI_AUTOMATOR_SCROLLABLE_PREFIX = "new UiScrollable";
   private static final String SUPPORTED_UIAUTOMATOR_METHODS =
       Stream.of(LocatorUIAutomator.Method.values())
           .map(method -> method.name().toLowerCase())
@@ -29,6 +30,9 @@ public class LocatorUIAutomator extends LocatorBy {
 
   private static String getSelectorWithPrefix(String selectorString) {
     if (selectorString.startsWith(UI_AUTOMATOR_SELECTOR_PREFIX)) {
+      return selectorString;
+    }
+    if (selectorString.startsWith(UI_AUTOMATOR_SCROLLABLE_PREFIX)) {
       return selectorString;
     }
     return UI_AUTOMATOR_SELECTOR_PREFIX + selectorString;
@@ -66,7 +70,9 @@ public class LocatorUIAutomator extends LocatorBy {
     DESCRIPTIONSTARTSWITH("descriptionStartsWith"),
     ENABLED("enabled"),
     SELECTED("selected"),
-    RESOURCEID("resourceId");
+    RESOURCEID("resourceId"),
+    UISCROLLABLE("new UiScrollable"),
+    SCROLLABLE("scrollable");
 
     final String value;
 

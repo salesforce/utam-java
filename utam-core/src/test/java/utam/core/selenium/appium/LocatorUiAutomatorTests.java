@@ -13,6 +13,7 @@ import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.appium.LocatorUIAutomator.ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD;
 import static utam.core.selenium.appium.LocatorUIAutomator.UI_AUTOMATOR_SELECTOR_PREFIX;
+import static utam.core.selenium.appium.LocatorUIAutomator.UI_AUTOMATOR_SCROLLABLE_PREFIX;
 
 import io.appium.java_client.MobileBy;
 import org.openqa.selenium.By;
@@ -63,8 +64,14 @@ public class LocatorUiAutomatorTests {
   public void testSupportedMethods() {
     for (Method method : Method.values()) {
       Locator locator = new LocatorUIAutomator(method.value + "()");
-      assertThat(locator.getStringValue(),
-          is(equalTo(UI_AUTOMATOR_SELECTOR_PREFIX + method.value + "()")));
+      if (method.value.startsWith(UI_AUTOMATOR_SCROLLABLE_PREFIX)) {
+        assertThat(locator.getStringValue(),
+            is(equalTo(method.value + "()")));;
+      }
+      else {
+        assertThat(locator.getStringValue(),
+            is(equalTo(UI_AUTOMATOR_SELECTOR_PREFIX + method.value + "()")));
+      }
     }
   }
 }
