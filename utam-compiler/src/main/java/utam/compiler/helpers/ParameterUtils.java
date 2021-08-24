@@ -8,7 +8,9 @@
 package utam.compiler.helpers;
 
 import static utam.compiler.helpers.AnnotationUtils.getWrappedString;
+import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 
+import java.util.Objects;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
@@ -116,5 +118,76 @@ public class ParameterUtils {
     public List<MethodParameter> getNestedParameters() {
       return nestedParameters;
     }
+  }
+
+  /**
+   * a literal class, for example MyButton.class
+   */
+  public static class LiteralClass extends Literal {
+
+    public LiteralClass(TypeProvider type) {
+      super(String.format("%s.class", type.getSimpleName()), type);
+    }
+  }
+
+  /**
+   * translates method parameters and returns into a list of types to import
+   * @param parameters method parameters
+   * @param returnType return type
+   * @return list of types to import
+   */
+  public static List<TypeProvider> getDeclarationImports(List<MethodParameter> parameters, TypeProvider returnType) {
+    List<TypeProvider> imports = getDeclarationImports(parameters);
+    imports.add(returnType);
+    return imports;
+  }
+
+  /**
+   * translates method parameters into a list of types to import
+   * @param parameters method parameters
+   * @return list of types to import
+   */
+  public static List<TypeProvider> getDeclarationImports(List<MethodParameter> parameters) {
+    return parameters
+        .stream()
+        .map(ParameterUtils::getDeclarationImport)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * translates method parameters into a list of types to import in class
+   * @param parameters method parameters
+   * @return list of types to import
+   */
+  public static List<TypeProvider> getImplementationImports(List<MethodParameter> parameters) {
+    return parameters
+        .stream()
+        .map(ParameterUtils::getImplementationImport)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+  }
+
+  private static TypeProvider getDeclarationImport(MethodParameter parameter) {
+    if (parameter == null || parameter.isLiteral()) {
+      return null;
+    }
+    return parameter.getType();
+  }
+
+  private static TypeProvider getImplementationImport(MethodParameter parameter) {
+    if(parameter == null) {
+      return null;
+    }
+    // some literals require imports
+    if(parameter.isLiteral()) {
+      if(SELECTOR.isSameType(parameter.getType())) {
+        return SELECTOR;
+      } else if(parameter instanceof LiteralClass) {
+        return parameter.getType();
+      }
+      return null;
+    }
+    return parameter.getType();
   }
 }

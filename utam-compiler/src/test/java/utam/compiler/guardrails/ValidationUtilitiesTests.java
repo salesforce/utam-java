@@ -242,4 +242,11 @@ public class ValidationUtilitiesTests {
 
     assertThat(getValidationError(first, first), is(nullValue()));
   }
+
+  @Test
+  public void testValidateBasicElementsAndFrameSameSelectors() {
+    ElementContext first = new ElementContext.Basic(ELEMENT_NAME, ELEMENT_TYPE, getCssSelector(ELEMENT_SELECTOR));
+    ElementContext frame = new ElementContext.Frame(ELEMENT_NAME, ELEMENT_SELECTOR);
+    assertThat(getValidationError(first, frame), is(nullValue()));
+  }
 }

@@ -8,6 +8,7 @@
 package utam.core.framework.base;
 
 import static utam.core.framework.base.CustomElementBuilder.getFilteredElementNotFoundErr;
+import static utam.core.framework.element.BasePageElement.createInstance;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -15,7 +16,6 @@ import java.util.stream.Collectors;
 import utam.core.element.BasicElement;
 import utam.core.element.Element;
 import utam.core.element.ElementLocation;
-import utam.core.framework.consumer.UtamError;
 import utam.core.framework.element.BasePageElement;
 
 /**
@@ -53,22 +53,9 @@ public class BasicElementBuilder {
     if (element.isNull()) {
       return null;
     }
-    return createInstance(implType, element);
-  }
 
-  private <T extends BasicElement, R extends BasePageElement> T createInstance(
-      Class<R> implType, Element element) {
-    try {
-      R result = implType.getConstructor().newInstance();
-      result.initialize(factory, element);
-      return (T) result;
-    } catch (ReflectiveOperationException e) {
-      throw new UtamError(
-          String.format("Error creating instance of type '%s'", implType.getSimpleName()),
-          e);
-    }
+    return createInstance(implType, element, factory);
   }
-
 
   /**
    * set parameters in actionable, then find it and apply filter to return first match
@@ -119,7 +106,7 @@ public class BasicElementBuilder {
 
     return elementsFound
         .stream()
-        .map(el -> (T) createInstance(implType, el))
+        .map(el -> (T) createInstance(implType, el, factory))
         .collect(Collectors.toList());
   }
 

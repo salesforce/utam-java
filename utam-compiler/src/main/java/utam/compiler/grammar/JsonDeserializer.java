@@ -80,7 +80,7 @@ public final class JsonDeserializer {
     return String.format("Error in the page object '%s'", pageObjectURI);
   }
 
-  private static ObjectMapper getDeserializerMapper() {
+  static ObjectMapper getDeserializerMapper() {
     ObjectMapper mapper = new ObjectMapper();
     mapper.enable(ALLOW_COMMENTS);
     mapper.enable(ACCEPT_SINGLE_VALUE_AS_ARRAY);
@@ -168,14 +168,9 @@ public final class JsonDeserializer {
     @Override
     public Collection<TypeProvider> getNestedInterfaces() {
       return context.getMethods().stream()
-          .filter(method -> method.isElementMethod() && method.isPublic())
+          .filter(method -> method.isBasicElementGetterMethod() && method.isPublic())
           .map(method -> method.getDeclaration().getReturnType())
-          .map(returnType -> {
-            if (returnType instanceof TypeUtilities.ListOf) {
-              return ((TypeUtilities.ListOf)returnType).getElementType();
-            }
-            return returnType;
-          })
+          .map(TypeUtilities::getElementType)
           .collect(Collectors.toList());
     }
 
@@ -190,7 +185,7 @@ public final class JsonDeserializer {
     }
 
     @Override
-    public String getApiCode() {
+    public String getGeneratedCode() {
       return new InterfaceSerializer(this).toString();
     }
 
@@ -241,7 +236,7 @@ public final class JsonDeserializer {
     }
 
     @Override
-    public String getImplCode() {
+    public String getGeneratedCode() {
       return new ClassSerializer(this, this.context).toString();
     }
 
@@ -268,11 +263,9 @@ public final class JsonDeserializer {
     @Override
     public List<TypeProvider> getDeclaredElementTypes(boolean isPublicElements) {
       return getMethods().stream()
-          .filter(method -> method.isElementMethod() && method.isPublic() == isPublicElements)
+          .filter(method -> method.isBasicElementGetterMethod() && method.isPublic() == isPublicElements)
           .map(method -> method.getDeclaration().getReturnType())
-          .map(returnType -> returnType instanceof TypeUtilities.ListOf ?
-              ((TypeUtilities.ListOf)returnType).getElementType() :
-              returnType)
+          .map(TypeUtilities::getElementType)
           .collect(Collectors.toList());
     }
   }

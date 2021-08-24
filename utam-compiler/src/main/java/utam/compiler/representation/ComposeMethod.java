@@ -33,14 +33,12 @@ public class ComposeMethod implements PageObjectMethod {
   private final List<TypeProvider> imports = new ArrayList<>();
   private final String comments;
   private final TypeProvider returns;
-  private final boolean hasMethodLevelArgs;
 
   public ComposeMethod(MethodContext methodContext, List<ComposeMethodStatement> statements,
       List<MethodParameter> parameters, String comments) {
     this.name = methodContext.getName();
     //if return type not set in JSON, get one from last statement
     this.returns = methodContext.getReturnType(statements, VOID);
-    this.parameters = new ArrayList<>(parameters);
     statements.forEach(
         statement -> {
           code.addAll(statement.getCodeLines());
@@ -48,7 +46,17 @@ public class ComposeMethod implements PageObjectMethod {
           classImports.addAll(statement.getClassImports());
         });
     this.comments = comments;
-    this.hasMethodLevelArgs = methodContext.hasMethodArgs();
+    if(methodContext.hasMethodArgs()) {
+      List<MethodParameter> distinctParams = new ArrayList<>();
+      for (MethodParameter param : parameters) {
+        if (!distinctParams.contains(param)) {
+          distinctParams.add(param);
+        }
+      }
+      this.parameters = new ArrayList<>(parameters);
+    } else {
+      this.parameters = new ArrayList<>(parameters);
+    }
   }
 
   static String getElementLocatorString(ElementContext elementContext) {
@@ -61,7 +69,7 @@ public class ComposeMethod implements PageObjectMethod {
 
   @Override
   public MethodDeclarationImpl getDeclaration() {
-    return new MethodDeclarationImpl(name, parameters, returns, imports, comments, hasMethodLevelArgs);
+    return new MethodDeclarationImpl(name, parameters, returns, imports, comments);
   }
 
   @Override

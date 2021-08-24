@@ -8,6 +8,7 @@
 package utam.core.framework.consumer;
 
 import utam.core.driver.Document;
+import utam.core.element.FrameElement;
 import utam.core.element.Locator;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.RootPageObject;

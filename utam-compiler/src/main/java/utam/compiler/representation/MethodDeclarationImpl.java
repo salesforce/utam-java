@@ -7,15 +7,20 @@
  */
 package utam.compiler.representation;
 
+import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import utam.compiler.helpers.ParameterUtils;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
-
+/**
+ * helper class to build method declaration
+ *
+ * @since 230
+ */
 class MethodDeclarationImpl implements MethodDeclaration {
 
   private final String methodName;
@@ -28,43 +33,35 @@ class MethodDeclarationImpl implements MethodDeclaration {
 
   private final String comments;
 
-  private final boolean hasMethodLevelArgs;
+  MethodDeclarationImpl(String methodName, List<MethodParameter> parameters,
+      TypeProvider returnType) {
+    this(methodName, parameters, returnType,
+        ParameterUtils.getDeclarationImports(parameters, returnType));
+  }
 
   MethodDeclarationImpl(
       String methodName,
       List<MethodParameter> parameters,
       TypeProvider returnType,
       List<TypeProvider> imports,
-      String comments, boolean hasMethodLevelArgs) {
+      String comments) {
     this.methodName = methodName;
     this.imports = imports;
     this.returnType = returnType;
     this.parameters = parameters;
     this.comments = comments;
-    this.hasMethodLevelArgs = hasMethodLevelArgs;
   }
 
   MethodDeclarationImpl(
-          String methodName,
-          List<MethodParameter> parameters,
-          TypeProvider returnType,
-          List<TypeProvider> imports) {
-    this(methodName, parameters, returnType, imports, EMPTY_COMMENTS, false);
+      String methodName,
+      List<MethodParameter> parameters,
+      TypeProvider returnType,
+      List<TypeProvider> imports) {
+    this(methodName, parameters, returnType, imports, EMPTY_COMMENTS);
   }
 
   @Override
   public final List<MethodParameter> getParameters() {
-    if (hasMethodLevelArgs) {
-      // Check parameters and remove duplicates if needed
-      List<MethodParameter> distinctParams = new ArrayList<>();
-      for (MethodParameter param : parameters) {
-        if (!distinctParams.contains(param)) {
-          distinctParams.add(param);
-        }
-      }
-      parameters.clear();
-      parameters.addAll(distinctParams);
-    }
     return parameters;
   }
 
@@ -84,20 +81,24 @@ class MethodDeclarationImpl implements MethodDeclaration {
 
   @Override
   public final String getCodeLine() {
-    return getCode(getName(), getReturnType(), getParameters());
+    String parametersStr = getParametersDeclarationString(parameters);
+    return String.format("%s %s(%s)", getReturnTypeStr(), methodName, parametersStr);
   }
 
-  private static String getCode(String methodName, TypeProvider returns, List<MethodParameter> parameters) {
-    String params =
-            parameters.stream()
-                    .map(MethodParameter::getDeclaration)
-                    .filter(str -> !str.isEmpty()) // hardcoded values passed as empty string
-                    .collect(Collectors.joining(", "));
-    return String.format("%s %s(%s)", returns.getSimpleName(), methodName, params);
+  // method can be overridden if return type is a bounded generic
+  String getReturnTypeStr() {
+    return getReturnType().getSimpleName();
   }
 
   @Override
   public String getComments() {
     return comments;
+  }
+
+  private static String getParametersDeclarationString(List<MethodParameter> parameters) {
+    return parameters.stream()
+        .map(MethodParameter::getDeclaration)
+        .filter(str -> !str.isEmpty()) // hardcoded values passed as empty string
+        .collect(Collectors.joining(", "));
   }
 }

@@ -11,9 +11,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static utam.compiler.grammar.TestUtilities.getAllClassImports;
 import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
 
 import java.util.Collections;
+import java.util.List;
 import org.testng.annotations.Test;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParameterUtils;
@@ -42,7 +44,7 @@ public class InterfaceMethodTests {
     MethodInfo info = new MethodInfo("testMethod", "Actionable");
     TypeProvider returnType = new TypeUtilities.FromClass(Actionable.class);
     InterfaceMethod method =
-        new InterfaceMethod(getMethodContext(returnType, false), Collections.emptyList(), "", false);
+        new InterfaceMethod(getMethodContext(returnType, false), Collections.emptyList(), "");
     PageObjectValidationTestHelper.validateMethod(method, info);
     assertThat(method.getClassImports(), hasSize(1));
   }
@@ -51,11 +53,12 @@ public class InterfaceMethodTests {
   public void testInterfaceMethodReturnsList() {
     TypeProvider returnType = new TypeUtilities.FromString("SomeReturnType");
     InterfaceMethod method = new InterfaceMethod(getMethodContext(returnType, true),
-        Collections.emptyList(), "", false);
+        Collections.emptyList(), "");
     assertThat(method.getCodeLines().isEmpty(), is(true));
-    assertThat(method.getClassImports(), hasSize(2));
-    assertThat(method.getClassImports().get(0).getSimpleName(), is(equalTo("List")));
-    assertThat(method.getClassImports().get(1).getSimpleName(), is(equalTo("SomeReturnType")));
+    List<TypeProvider> imports = getAllClassImports(method);
+    assertThat(imports, hasSize(2));
+    assertThat(imports.get(0).getSimpleName(), is(equalTo("List<SomeReturnType>")));
+    assertThat(imports.get(1).getSimpleName(), is(equalTo("SomeReturnType")));
     assertThat(method.getDeclaration().getCodeLine(),
         is(equalTo("List<SomeReturnType> testMethod()")));
   }
@@ -66,7 +69,7 @@ public class InterfaceMethodTests {
     InterfaceMethod method = new InterfaceMethod(getMethodContext(returnType, false),
         Collections.singletonList(
             new ParameterUtils.Regular("name", new TypeUtilities.FromString("Type"))),
-        EMPTY_COMMENTS, false);
+        EMPTY_COMMENTS);
     assertThat(method.getCodeLines().isEmpty(), is(true));
     assertThat(method.getClassImports(), hasSize(2));
     assertThat(method.getClassImports().get(0).getSimpleName(), is(equalTo("Type")));

@@ -93,7 +93,7 @@ public class TranslationUtilitiesTests {
   public void testGetImportString() {
     TypeProvider classProvider =
         new TypeUtilities.FromString("testPageObject", "test.testPageObject");
-    assertThat(getImportString(classProvider, "current.package"),
+    assertThat(getSingleImportString(classProvider, "current.package"),
         is(equalTo("import test.testPageObject;")));
   }
 
@@ -101,27 +101,27 @@ public class TranslationUtilitiesTests {
   public void testGetImportStringWithEmptyFullName() {
     TypeProvider classProvider =
         new TypeUtilities.FromString("testPageObject", "");
-    assertThat(getImportString(classProvider, "current.package"), is(emptyString()));
+    assertThat(getSingleImportString(classProvider, "current.package"), is(emptyString()));
   }
 
   @Test
   public void testGetImportStringWithEmptyPackage() {
     TypeProvider classProvider =
         new TypeUtilities.FromString("TestPageObject", "TestPageObject");
-    assertThat(getImportString(classProvider, "current.package"), is(emptyString()));
+    assertThat(getSingleImportString(classProvider, "current.package"), is(emptyString()));
   }
 
   @Test
   public void testGetImportStringWithJavaPackage() {
     TypeProvider importedProvider = new TypeUtilities.FromString("String", "java.lang.String");
-    assertThat(getImportString(importedProvider, "current.package"), is(emptyString()));
+    assertThat(getSingleImportString(importedProvider, "current.package"), is(emptyString()));
   }
 
   @Test
   public void testGetImportStringWithSamePackage() {
     TypeProvider classProvider =
         new TypeUtilities.FromString("testPageObject", "test.testPageObject");
-    assertThat(getImportString(classProvider, "test"), is(emptyString()));
+    assertThat(getSingleImportString(classProvider, "test"), is(emptyString()));
   }
 
   @Test

@@ -96,7 +96,7 @@ public class UtamMethod_ChainTests {
     PageObjectMethod methodObject = method.getMethod(context);
     PageObjectValidationTestHelper.validateMethod(methodObject, methodInfo);
     PageObjectValidationTestHelper.validateMethod(method.getChainMethod(context), methodInfo);
-    assertThat(methodObject.getClassImports(), hasSize(3));
+    assertThat(getAllClassImports(methodObject), hasSize(3));
     assertThat(
         methodObject.getDeclaration().getCodeLine(),
         is(equalTo("List<SecondWrapper> testMethod()")));

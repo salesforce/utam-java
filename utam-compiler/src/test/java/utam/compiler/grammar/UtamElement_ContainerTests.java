@@ -7,24 +7,27 @@
  */
 package utam.compiler.grammar;
 
-import org.openqa.selenium.By;
-import utam.compiler.grammar.UtamElement.Type;
-import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.TranslationContext;
-import utam.compiler.representation.PageObjectValidationTestHelper;
-import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.framework.consumer.UtamError;
-import org.testng.annotations.Test;
-
-import static utam.compiler.grammar.UtamElement.ERR_CONTAINER_SHOULD_BE_PUBLIC;
-import static utam.compiler.grammar.UtamSelectorTests.getUtamCssSelector;
-import static utam.compiler.helpers.TypeUtilities.CONTAINER_LIST_RETURN_TYPE;
-import static utam.compiler.representation.ContainerMethodTests.FIRST_CONTAINER_PARAMETER;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.UtamElement.Container.DEFAULT_CONTAINER_SELECTOR_CSS;
+import static utam.compiler.grammar.UtamElement.Type.CONTAINER;
+import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
+import static utam.compiler.representation.ContainerMethod.PAGE_OBJECT_PARAMETER;
+import static utam.compiler.representation.PageObjectValidationTestHelper.validateMethod;
+
+import java.util.List;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.TranslationContext;
+import utam.compiler.representation.PageObjectValidationTestHelper;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * @author elizaveta.ivanova
@@ -32,133 +35,110 @@ import static org.testng.Assert.expectThrows;
  */
 public class UtamElement_ContainerTests {
 
-  private static final String ELEMENT_NAME = "test";
+  private TranslationContext context;
+  private List<UtamElement> containers;
+  private static final MethodParameterInfo FIRST_CONTAINER_PARAMETER =
+      new PageObjectValidationTestHelper.MethodParameterInfo(
+          PAGE_OBJECT_PARAMETER.getValue(), PAGE_OBJECT_PARAMETER.getType().getSimpleName());
 
-  private static UtamElement getPublicContainerElement() {
-    UtamElement utamElement = TestUtilities.UtamEntityCreator.createUtamElement(ELEMENT_NAME);
-    utamElement.type = new String[] {"container"};
-    utamElement.isPublic = true;
-    return utamElement;
-  }
-
-  private static String getContainerSupportedProperties() {
-    return Type.CONTAINER.getSupportedPropertiesErr(ELEMENT_NAME);
-  }
-
-  @Test
-  public void testPrivateContainer() {
-    UtamElement element = getPublicContainerElement();
-    element.selector = getUtamCssSelector();
-    element.isPublic = false;
-    UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(
-        e.getMessage(), is(equalTo(String.format(ERR_CONTAINER_SHOULD_BE_PUBLIC, ELEMENT_NAME))));
+  @BeforeClass
+  private void prepareData() {
+    context = new DeserializerUtilities().getContext("element/testContainer");
+    containers = DeserializerUtilities
+        .getDeserializedObjects(UtamElement.class, "element/containers");
   }
 
   @Test
   public void testNotAllowedFilter() {
-    UtamElement element = getPublicContainerElement();
-    element.filter = UtamElementFilter_Tests.getInnerTextFilter();
+    UtamElement element = containers.get(0);
     UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(getContainerSupportedProperties())));
+    assertThat(e.getMessage(), is(equalTo(CONTAINER.getSupportedPropertiesErr("filterThrows"))));
   }
 
   @Test
   public void testNotAllowedShadow() {
-    UtamElement element = getPublicContainerElement();
-    element.shadow = new UtamShadowElement(new UtamElement[] {});
+    UtamElement element = containers.get(1);
     UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(getContainerSupportedProperties())));
+    assertThat(e.getMessage(), is(CONTAINER.getSupportedPropertiesErr("shadowThrows")));
   }
 
   @Test
   public void testNotAllowedNestedElements() {
-    UtamElement element = getPublicContainerElement();
-    element.elements = new UtamElement[] {};
+    UtamElement element = containers.get(2);
     UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(getContainerSupportedProperties())));
+    assertThat(e.getMessage(), is(CONTAINER.getSupportedPropertiesErr("elementsThrows")));
   }
 
   @Test
   public void testNotAllowedExternal() {
-    UtamElement element = getPublicContainerElement();
-    element.isExternal = true;
+    UtamElement element = containers.get(3);
     UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(getContainerSupportedProperties())));
+    assertThat(e.getMessage(), is(CONTAINER.getSupportedPropertiesErr("externalThrows")));
   }
 
   @Test
   public void testNotAllowedLoad() {
-    UtamElement element = getPublicContainerElement();
-    element.isNullable = false;
+    UtamElement element = containers.get(4);
     UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(getContainerSupportedProperties())));
+    assertThat(e.getMessage(), is(CONTAINER.getSupportedPropertiesErr("nullableThrows")));
   }
 
   @Test
-  public void testPublicAbstraction() {
-    UtamElement element = getPublicContainerElement();
+  public void testPrivateWithoutSelector() {
+    UtamElement element = containers.get(5);
     assertThat(element.getAbstraction(), is(instanceOf(UtamElement.Container.class)));
-    assertThat(
-        element.selector.getLocator().getValue(),
-        is(equalTo(By.cssSelector(UtamElement.Container.DEFAULT_CONTAINER_SELECTOR_CSS))));
+    assertThat(element.getLocatorString(), is(equalTo(DEFAULT_CONTAINER_SELECTOR_CSS)));
   }
 
-  /** The getDeclaredMethod method should return null for a non-public container */
+  @Test
+  public void testPublicWithSelector() {
+    UtamElement element = containers.get(6);
+    assertThat(element.getAbstraction(), is(instanceOf(UtamElement.Container.class)));
+    assertThat(element.getLocatorString(), is(equalTo("injected")));
+  }
+
   @Test
   public void testGetDeclaredMethodWithNoSelector() {
-    TranslationContext context = new DeserializerUtilities().getContext("containerElement");
     ElementContext element = context.getElement("containerInsideRoot");
     PageObjectMethod method = element.getElementMethod();
-    assertThat(element.getType().getSimpleName(), is(equalTo("ContainerElement")));
-    PageObjectValidationTestHelper.MethodInfo expectedMethod =
-        new PageObjectValidationTestHelper.MethodInfo(
-            "getContainerInsideRoot", "<T extends PageObject> T");
+    assertThat(element.getType().isSameType(CONTAINER_ELEMENT), is(true));
+    MethodInfo expectedMethod = new MethodInfo(
+        "getContainerInsideRoot", "PageObject");
     expectedMethod.addParameter(FIRST_CONTAINER_PARAMETER);
     expectedMethod.addCodeLines(
         "this.inContainer(this.root, true)"
             + ".load(pageObjectType, LocatorBy.byCss(\":scope > *:first-child\"))");
-    PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
+    validateMethod(method, expectedMethod);
   }
 
-  /** The getDeclaredMethods method should return the proper value for a container */
   @Test
   public void testNestedContainerElement() {
-    TranslationContext context = new DeserializerUtilities().getContext("containerElement");
     ElementContext element = context.getElement("nestedContainer");
     assertThat(element.isList(), is(false));
     PageObjectMethod method = element.getElementMethod();
-    assertThat(element.getType().getSimpleName(), is(equalTo("ContainerElement")));
-    PageObjectValidationTestHelper.MethodInfo expectedMethod =
-        new PageObjectValidationTestHelper.MethodInfo(
-            "getNestedContainer", "<T extends PageObject> T");
-    expectedMethod.addParameter(
-        new PageObjectValidationTestHelper.MethodParameterInfo("scopeArg", "String"));
+    assertThat(element.getType().isSameType(CONTAINER_ELEMENT), is(true));
+    MethodInfo expectedMethod = new MethodInfo("getNestedContainer", "PageObject");
+    expectedMethod.addParameter(new MethodParameterInfo("scopeArg", "String"));
     expectedMethod.addParameter(FIRST_CONTAINER_PARAMETER);
-
     expectedMethod.addCodeLines(
         "this.inContainer(this.scope.setParameters(scopeArg), true)"
             + ".load(pageObjectType, LocatorBy.byCss(\":scope > *:first-child\"))");
-    PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
+    validateMethod(method, expectedMethod);
   }
 
   @Test
   public void testContainerWithSelector() {
-    TranslationContext context = new DeserializerUtilities().getContext("containerElement");
     ElementContext element = context.getElement("containerWithSelector");
     PageObjectMethod method = element.getElementMethod();
-    assertThat(element.getType().getSimpleName(), is(equalTo("ContainerElement")));
-    PageObjectValidationTestHelper.MethodInfo expectedMethod =
-        new PageObjectValidationTestHelper.MethodInfo(
-            "getContainerWithSelector", CONTAINER_LIST_RETURN_TYPE.getSimpleName());
-    expectedMethod.addParameter(
-        new PageObjectValidationTestHelper.MethodParameterInfo("scopeArg", "String"));
-    expectedMethod.addParameter(
-        new PageObjectValidationTestHelper.MethodParameterInfo("selectorArg", "String"));
+    assertThat(element.getType().isSameType(CONTAINER_ELEMENT), is(true));
+    MethodInfo expectedMethod = new MethodInfo("getContainerWithSelector",
+        "List<PageObject>");
+    expectedMethod.addParameter(new MethodParameterInfo("scopeArg", "String"));
+    expectedMethod.addParameter(new MethodParameterInfo("selectorArg", "String"));
     expectedMethod.addParameter(FIRST_CONTAINER_PARAMETER);
     expectedMethod.addCodeLines(
         "this.inContainer(this.scope.setParameters(scopeArg), false)"
             + ".loadList(pageObjectType, LocatorBy.byCss(String.format(\".css%s\", selectorArg)))");
-    PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
+    validateMethod(method, expectedMethod);
   }
 }

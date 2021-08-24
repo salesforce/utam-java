@@ -48,10 +48,9 @@ public enum DraggableActionType implements ActionType {
 
     // with offset
     final List<TypeProvider> OFFSET_PARAMETERS = new ArrayList<>();
-    final List<TypeProvider> OFFSET_WITH_DURATION_PARAMETERS = new ArrayList<>();
     OFFSET_PARAMETERS.add(PrimitiveType.NUMBER);
     OFFSET_PARAMETERS.add(PrimitiveType.NUMBER);
-    OFFSET_WITH_DURATION_PARAMETERS.addAll(OFFSET_PARAMETERS);
+    final List<TypeProvider> OFFSET_WITH_DURATION_PARAMETERS = new ArrayList<>(OFFSET_PARAMETERS);
     OFFSET_WITH_DURATION_PARAMETERS.add(PrimitiveType.NUMBER);
     POSSIBLE_DRAG_AND_DROP_OFFSET_PARAMETERS.add(OFFSET_PARAMETERS);
     POSSIBLE_DRAG_AND_DROP_OFFSET_PARAMETERS.add(OFFSET_WITH_DURATION_PARAMETERS);

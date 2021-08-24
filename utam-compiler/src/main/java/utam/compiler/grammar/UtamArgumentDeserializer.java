@@ -8,7 +8,9 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.grammar.UtamArgument.ELEMENT_TYPE_PROPERTY;
+import static utam.compiler.grammar.UtamArgument.FRAME_ELEMENT_TYPE_PROPERTY;
 import static utam.compiler.grammar.UtamArgument.FUNCTION_TYPE_PROPERTY;
+import static utam.compiler.grammar.UtamArgument.PAGE_OBJECT_TYPE_PROPERTY;
 import static utam.compiler.grammar.UtamArgument.SELECTOR_TYPE_PROPERTY;
 import static utam.compiler.helpers.LocatorCodeGeneration.SUPPORTED_SELECTOR_TYPES;
 import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
@@ -71,6 +73,8 @@ class UtamArgumentDeserializer extends
     supported.add(FUNCTION_TYPE_PROPERTY);
     supported.add(REFERENCE.getSimpleName());
     supported.add(ELEMENT_TYPE_PROPERTY);
+    supported.add(PAGE_OBJECT_TYPE_PROPERTY);
+    supported.add(FRAME_ELEMENT_TYPE_PROPERTY);
     return supported;
   }
 
@@ -149,7 +153,10 @@ class UtamArgumentDeserializer extends
         object = mapper.treeToValue(valueNode, ElementReference.class);
       } else if (isLiteralSelector(valueNode)) {
         object = mapper.treeToValue(valueNode, UtamSelector.class);
-      } else {
+      } else if (PageObjectType.isLiteralPageObject(valueNode)) {
+        object = mapper.treeToValue(valueNode, PageObjectType.class);
+      }
+      else {
         throw new UtamCompilationError(
             ERR_ARGS_UNKNOWN_LITERAL_OBJECT + valueNode.toPrettyString());
       }
@@ -239,6 +246,29 @@ class UtamArgumentDeserializer extends
           new ArgsProcessorWithExpectedTypes(translationContext,
               String.format("element '%s' reference", elementName), expectedElementArgs);
       return argsProcessor.getParameters(args);
+    }
+  }
+
+  /**
+   * Literal argument type to pass a hardcoded Page Object type, for example when composing container invocation,
+   * format: { "type": "my/object/type" }
+   * @since 236
+   */
+  static class PageObjectType {
+
+    private final String pageObjectType;
+
+    @JsonCreator
+    PageObjectType(@JsonProperty(value = "type") String pageObjectType) {
+      this.pageObjectType = pageObjectType;
+    }
+
+    private static boolean isLiteralPageObject(JsonNode valueNode) {
+      return valueNode.has("type");
+    }
+
+    TypeProvider getLiteralType(TranslationContext translationContext) {
+      return translationContext.getType(pageObjectType);
     }
   }
 }

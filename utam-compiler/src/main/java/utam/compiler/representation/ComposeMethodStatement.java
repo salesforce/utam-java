@@ -7,10 +7,10 @@
  */
 package utam.compiler.representation;
 
+import static utam.compiler.helpers.ParameterUtils.getDeclarationImports;
+import static utam.compiler.helpers.ParameterUtils.getImplementationImports;
 import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
 import static utam.compiler.helpers.TypeUtilities.COLLECTOR_IMPORT;
-import static utam.compiler.helpers.TypeUtilities.LIST_IMPORT;
-import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import java.util.ArrayList;
@@ -42,8 +42,8 @@ public abstract class ComposeMethodStatement {
   public static final Operand SELF_OPERAND = new SelfOperand();
   public static final Operand DOCUMENT_OPERAND = new DocumentOperand();
   public static final String WAIT_FOR = "waitFor";
-  final List<TypeProvider> classImports = new ArrayList<>();
-  final List<TypeProvider> imports = new ArrayList<>();
+  private final List<TypeProvider> classImports = new ArrayList<>();
+  private final List<TypeProvider> imports = new ArrayList<>();
   private final List<String> codeLines = new ArrayList<>();
   private final List<MethodParameter> parameters = new ArrayList<>();
   private final TypeProvider returns;
@@ -56,8 +56,11 @@ public abstract class ComposeMethodStatement {
       List<MethodParameter> matcherParameters,
       boolean isLastPredicateStatement) {
     TypeProvider actionReturns = matcher != null ? PrimitiveType.BOOLEAN : returnType;
-    this.imports.addAll(operation.getImports());
-    this.classImports.addAll(operation.getClassImports());
+    this.imports.addAll(getDeclarationImports(operation.getActionParameters()));
+    this.imports.addAll(operation.getAddedImports());
+    this.classImports.addAll(getImplementationImports(operation.getActionParameters()));
+    this.classImports.addAll(operation.getAddedClassImports());
+    this.classImports.addAll(operand.getAddedClassImports());
     setParameters(operand.getElementParameters());
     setParameters(operation.getActionParameters());
     String elementValue = operand.getOperandCode(codeLines,
@@ -77,7 +80,6 @@ public abstract class ComposeMethodStatement {
       }
     }
     codeLines.add(invocationStr);
-    classImports.addAll(operand.getAddedClassImports());
     this.returns = isLastPredicateStatement && MethodContext.isNullOrVoid(actionReturns)
         ? PrimitiveType.BOOLEAN
         : actionReturns;
@@ -91,9 +93,6 @@ public abstract class ComposeMethodStatement {
       boolean isLastPredicateStatement) {
     this(operand, operation, returnType, null, null, isLastPredicateStatement);
   }
-
-  // for nullable element we need to check if getter returned null and exit
-
 
   public List<MethodParameter> getParameters() {
     return parameters;
@@ -173,7 +172,7 @@ public abstract class ComposeMethodStatement {
     public Utility(Operand operand, Operation operation, boolean isLastPredicateStatement) {
       super(operand, operation, operation.getReturnType(), isLastPredicateStatement);
       TypeProvider utilitiesContextType = new TypeUtilities.FromClass(UtamUtilitiesContext.class);
-      classImports.add(utilitiesContextType);
+      getClassImports().add(utilitiesContextType);
     }
 
     /**
@@ -230,12 +229,12 @@ public abstract class ComposeMethodStatement {
   public static final class ReturnsList extends ComposeMethodStatement {
 
     public ReturnsList(Operand operand, Operation operation, boolean isLastPredicateStatement) {
-      super(operand, operation, new TypeUtilities.ListOf(operation.getReturnType()),
+      super(operand, operation, new ListOf(operation.getReturnType()),
           isLastPredicateStatement);
-      imports.add(LIST_IMPORT);
-      imports.add(operation.action.getReturnType());
-      classImports.addAll(imports);
-      classImports.add(COLLECTOR_IMPORT);
+      TypeProvider additionalImport = getReturnType();
+      getImports().add(additionalImport);
+      getClassImports().add(COLLECTOR_IMPORT);
+      getClassImports().add(additionalImport);
     }
 
     @Override
@@ -435,29 +434,6 @@ public abstract class ComposeMethodStatement {
       return String.format(invocationPattern, elementGetter, methodInvocation);
     }
 
-    List<TypeProvider> getImports() {
-      // parameters can be non primitive like Selector
-      return actionParameters
-          .stream()
-          .filter(p -> p != null && !p.isLiteral())
-          .map(MethodParameter::getType)
-          .collect(Collectors.toList());
-    }
-
-    List<TypeProvider> getClassImports() {
-      // parameters can be non primitive like Selector
-      List<TypeProvider> res = new ArrayList<>(getImports());
-      actionParameters
-          .stream()
-          .filter(p -> p != null && p.isLiteral())
-          .forEach(p -> {
-            if (SELECTOR.isSameType(p.getType())) {
-              res.add(p.getType());
-            }
-          });
-      return res;
-    }
-
     public boolean isReturnsVoid() {
       return VOID.isSameType(getReturnType());
     }
@@ -468,6 +444,14 @@ public abstract class ComposeMethodStatement {
 
     final ActionType getAction() {
       return action;
+    }
+
+    List<TypeProvider> getAddedClassImports() {
+      return new ArrayList<>();
+    }
+
+    List<TypeProvider> getAddedImports() {
+      return new ArrayList<>();
     }
   }
 
@@ -484,26 +468,24 @@ public abstract class ComposeMethodStatement {
     public UtilityOperation(ActionType action, TypeProvider returnType,
         List<MethodParameter> actionParameters) {
       super(action, returnType, actionParameters);
+
     }
 
-    void setReturnTypeImport(List<TypeProvider> res) {
+    @Override
+    List<TypeProvider> getAddedClassImports() {
+      return getReturnTypeImportAsList();
+    }
+
+    @Override
+    List<TypeProvider> getAddedImports() {
+      return getReturnTypeImportAsList();
+    }
+
+    private List<TypeProvider> getReturnTypeImportAsList() {
       if (!(getReturnType() instanceof PrimitiveType)) {
-        res.add(getReturnType());
+        return Collections.singletonList(getReturnType());
       }
-    }
-
-    @Override
-    List<TypeProvider> getImports() {
-      List<TypeProvider> res = new ArrayList<>(super.getImports());
-      setReturnTypeImport(res);
-      return res;
-    }
-
-    @Override
-    List<TypeProvider> getClassImports() {
-      List<TypeProvider> res = new ArrayList<>(super.getClassImports());
-      setReturnTypeImport(res);
-      return res;
+      return new ArrayList<>();
     }
 
     /**
@@ -540,8 +522,8 @@ public abstract class ComposeMethodStatement {
   public static class OperationWithPredicate extends Operation {
 
     final List<String> predicateCode = new ArrayList<>();
-    final List<TypeProvider> classImports = new ArrayList<>();
-    final List<TypeProvider> imports = new ArrayList<>();
+    private final List<TypeProvider> classImports = new ArrayList<>();
+    private final List<TypeProvider> imports = new ArrayList<>();
 
     public OperationWithPredicate(ActionType action, TypeProvider returnType,
         List<ComposeMethodStatement> predicate) {
@@ -562,17 +544,13 @@ public abstract class ComposeMethodStatement {
     }
 
     @Override
-    List<TypeProvider> getImports() {
-      List<TypeProvider> res = new ArrayList<>(super.getImports());
-      res.addAll(this.imports); // add accumulated parameters from prev statements
-      return res;
+    List<TypeProvider> getAddedClassImports() {
+      return classImports;
     }
 
     @Override
-    List<TypeProvider> getClassImports() {
-      List<TypeProvider> res = new ArrayList<>(super.getClassImports());
-      res.addAll(this.classImports); // add accumulated parameters from prev statements
-      return res;
+    List<TypeProvider> getAddedImports() {
+      return imports;
     }
   }
 }

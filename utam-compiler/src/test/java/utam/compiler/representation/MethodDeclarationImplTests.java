@@ -7,8 +7,6 @@
  */
 package utam.compiler.representation;
 
-import utam.compiler.helpers.ParameterUtils;
-import utam.compiler.helpers.PrimitiveType;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.compiler.helpers.TypeUtilities;
@@ -24,7 +22,6 @@ import java.util.stream.Stream;
 import static org.mockito.Mockito.*;
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.VOID;
-import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
@@ -45,8 +42,7 @@ public class MethodDeclarationImplTests {
             "fakeMethod",
             EMPTY_PARAMETERS,
             returnType,
-            Stream.of(returnType).collect(Collectors.toList()),
-            EMPTY_COMMENTS, false);
+            Stream.of(returnType).collect(Collectors.toList()));
     assertThat(declaration.getName(), is(equalTo("fakeMethod")));
     assertThat(declaration.getReturnType(), is(equalTo(returnType)));
     assertThat(declaration.getParameters(), hasSize(0));
@@ -70,8 +66,7 @@ public class MethodDeclarationImplTests {
             "fakeMethod",
             parameters,
             returnType,
-            Stream.of(returnType).collect(Collectors.toList()),
-            EMPTY_COMMENTS, false);
+            Stream.of(returnType).collect(Collectors.toList()));
     assertThat(declaration.getName(), is(equalTo("fakeMethod")));
     assertThat(declaration.getReturnType(), is(equalTo(returnType)));
     assertThat(declaration.getParameters(), is(equalTo(parameters)));
@@ -98,8 +93,7 @@ public class MethodDeclarationImplTests {
             "fakeMethod",
             parameters,
             returnType,
-            Stream.of(returnType, importType).collect(Collectors.toList()),
-            EMPTY_COMMENTS, false);
+            Stream.of(returnType, importType).collect(Collectors.toList()));
     assertThat(declaration.getName(), is(equalTo("fakeMethod")));
     assertThat(declaration.getReturnType(), is(equalTo(returnType)));
     assertThat(declaration.getParameters(), is(equalTo(parameters)));
@@ -109,42 +103,19 @@ public class MethodDeclarationImplTests {
         is(equalTo("ReturnType fakeMethod(String param1, String param2)")));
   }
 
-  @Test
-  public void testMethodDeclarationDuplicatedParamsRemovedIfRootLevelArgsTrue() {
-    TypeProvider returnType = new TypeUtilities.FromString("void", "");
-    List<MethodParameter> parameters = new ArrayList<>(Arrays.asList(getStringParameter(), getStringParameter()));
-    List<MethodParameter> expectedParameters = Collections.singletonList(getStringParameter());
-
-    MethodDeclarationImpl declaration =
-            new MethodDeclarationImpl(
-                    "fakeMethod",
-                    parameters,
-                    returnType,
-                    Stream.of(returnType).collect(Collectors.toList()),
-                    EMPTY_COMMENTS, true);
-    assertThat(declaration.getName(), is(equalTo("fakeMethod")));
-    assertThat(declaration.getReturnType(), is(equalTo(returnType)));
-    assertThat(declaration.getParameters(), is(equalTo(expectedParameters)));
-    assertThat(declaration.getImports(), is(equalTo(Collections.singletonList(returnType))));
-    assertThat(declaration.getCodeLine(), is(equalTo("void fakeMethod(String text)")));
-  }
-
   /** this class is used from translator utilities tests */
   public static class TestHelper extends MethodDeclarationImpl {
 
     public TestHelper(String methodName, List<MethodParameter> parameters, TypeProvider returns) {
-      super(methodName, parameters, returns, new ArrayList<>(), "", false);
+      super(methodName, parameters, returns, new ArrayList<>());
     }
 
     public TestHelper(String methodName) {
-      super(methodName, EMPTY_PARAMETERS, VOID, new ArrayList<>(), "", false);
+      super(methodName, EMPTY_PARAMETERS, VOID, new ArrayList<>());
     }
 
     public TestHelper(String methodName, String comments) {
-      super(methodName, EMPTY_PARAMETERS, VOID, new ArrayList<>(), comments, false);
+      super(methodName, EMPTY_PARAMETERS, VOID, new ArrayList<>(), comments);
     }
-  }
-  private static MethodParameter getStringParameter() {
-    return new ParameterUtils.Regular("text", PrimitiveType.STRING);
   }
 }

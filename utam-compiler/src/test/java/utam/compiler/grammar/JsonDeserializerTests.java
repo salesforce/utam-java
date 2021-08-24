@@ -327,7 +327,7 @@ public class JsonDeserializerTests {
     String json = "{}";
 
     PageObjectClass node = createRootNode(json).getImplementation();
-    String implCode = node.getImplCode();
+    String implCode = node.getGeneratedCode();
     assertThat(implCode, containsString("package " + IMPL_PACKAGE_NAME));
     assertThat(implCode, containsString("import utam.core.framework.base.BasePageObject"));
     assertThat(implCode, containsString("import " + INTERFACE_FULL_NAME));
@@ -476,7 +476,7 @@ public class JsonDeserializerTests {
     String json = "{}";
 
     PageObjectInterface node = createRootNode(json).getInterface();
-    String apiCode = node.getApiCode();
+    String apiCode = node.getGeneratedCode();
     assertThat(apiCode, containsString("package " + INTERFACE_PACKAGE_NAME));
     assertThat(apiCode, containsString("import utam.core.framework.base.PageObject"));
     assertThat(

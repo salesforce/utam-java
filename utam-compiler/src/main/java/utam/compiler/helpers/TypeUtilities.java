@@ -10,6 +10,7 @@ package utam.compiler.helpers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -31,7 +32,7 @@ import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.consumer.ContainerElement;
-import utam.core.framework.consumer.FrameElement;
+import utam.core.element.FrameElement;
 import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.LocatorBy;
 
@@ -44,7 +45,6 @@ import utam.core.selenium.element.LocatorBy;
 @SuppressWarnings("rawtypes")
 public final class TypeUtilities {
 
-  public static final TypeProvider LIST_IMPORT = new TypeUtilities.FromClass(List.class);
   public static final TypeProvider COLLECTOR_IMPORT = new TypeUtilities.FromClass(Collectors.class);
   public static final TypeProvider PAGE_OBJECT = new TypeUtilities.FromClass(PageObject.class);
   public static final TypeProvider BASE_PAGE_OBJECT =
@@ -53,18 +53,13 @@ public final class TypeUtilities {
       new TypeUtilities.FromClass(RootPageObject.class);
   public static final TypeProvider VOID = new UnimportableType("void");
   public static final TypeProvider REFERENCE = new UnimportableType("reference");
-  public static final TypeProvider BOUNDED_CLASS = new UnimportableType("Class<T>");
   public static final TypeProvider ROOT_ELEMENT_TYPE = new FromClass(RootElement.class);
-  static final TypeProvider GENERIC_TYPE = new UnimportableType("<T> T");
-  static final TypeProvider CONTAINER_ELEMENT =
+  public static final TypeProvider CONTAINER_ELEMENT =
       new TypeUtilities.FromClass(ContainerElement.class);
   public static final TypeProvider FRAME_ELEMENT = new TypeUtilities.FromClass(FrameElement.class);
   private static final String ERR_PARAMETERS_TYPES_MISMATCH =
       "expected %d parameters with type {%s}, provided were {%s}";
-  public static final TypeProvider CONTAINER_RETURN_TYPE =
-      new TypeUtilities.UnimportableType(String.format("<T extends %s> T", PAGE_OBJECT.getSimpleName()));
-  public static final TypeProvider CONTAINER_LIST_RETURN_TYPE = new TypeUtilities.UnimportableType(
-      String.format("<T extends %s> List<T>", PAGE_OBJECT.getSimpleName()));
+
   public static final TypeProvider SELECTOR = new FromClass(LocatorBy.class);
   public static final TypeProvider FUNCTION = new FromClass(Supplier.class) {
     @Override
@@ -217,6 +212,7 @@ public final class TypeUtilities {
       }
 
       BasicElementInterface basicInterface = getBasicElementType(type);
+
       if (basicInterface != null) {
         return new BasicElementInterface[] { basicInterface };
       }
@@ -257,6 +253,23 @@ public final class TypeUtilities {
     public Class getClassType() {
       return type;
     }
+  }
+
+  public static boolean isElementReturned(TypeProvider returnType) {
+    if(returnType instanceof Element) {
+      return true;
+    }
+    if(returnType instanceof ListOf) {
+      return returnType.getBoundTypes().get(0) instanceof Element;
+    }
+    return false;
+  }
+
+  public static TypeProvider getElementType(TypeProvider type) {
+    if (type instanceof ListOf) {
+      return type.getBoundTypes().get(0);
+    }
+    return type;
   }
 
   public static class Element implements TypeProvider {
@@ -438,31 +451,18 @@ public final class TypeUtilities {
     }
   }
 
-  public static final class ListOf implements TypeProvider {
+  public static final class ListOf extends FromClass {
 
     private final TypeProvider elementType;
 
     public ListOf(TypeProvider elementType) {
+      super(List.class);
       this.elementType = elementType;
-    }
-
-    public TypeProvider getElementType() {
-      return elementType;
-    }
-
-    @Override
-    public String getFullName() {
-      return List.class.getName();
     }
 
     @Override
     public String getSimpleName() {
       return String.format("List<%s>", elementType.getSimpleName());
-    }
-
-    @Override
-    public String getPackageName() {
-      return List.class.getPackage().getName();
     }
 
     @Override
@@ -479,8 +479,8 @@ public final class TypeUtilities {
     }
 
     @Override
-    public Class getClassType() {
-      return List.class;
+    public List<TypeProvider> getBoundTypes() {
+      return Collections.singletonList(elementType);
     }
   }
 
@@ -488,6 +488,41 @@ public final class TypeUtilities {
 
     UnimportableType(String name) {
       super(name, "");
+    }
+  }
+
+  /**
+   * types like Class<T> or Class<? extends Page Object>
+   */
+  public static class BoundedClass extends FromClass {
+
+    private final TypeProvider boundType;
+    private final String typeNameStr;
+
+    public BoundedClass(TypeProvider boundType, String boundStr) {
+      super(Class.class);
+      this.boundType = boundType;
+      this.typeNameStr = boundStr == null?
+          String.format("Class<? extends %s>", boundType.getSimpleName())
+          : "Class<T>";
+    }
+
+    @Override
+    public String getSimpleName() {
+      return typeNameStr;
+    }
+
+    @Override
+    public List<TypeProvider> getBoundTypes() {
+      return Collections.singletonList(boundType);
+    }
+
+    @Override
+    public boolean isSameType(TypeProvider anotherType) {
+      if (!(anotherType instanceof BoundedClass)) {
+        return false;
+      }
+      return this.getSimpleName().equals(anotherType.getSimpleName());
     }
   }
 }

@@ -137,7 +137,7 @@ public final class UnitTestSerializer {
 
     methodContent.add(testStatement);
 
-    if (returnType.isSameType(new TypeUtilities.ListOf(PrimitiveType.STRING))) {
+    if (returnType.isSameType(new ListOf(PrimitiveType.STRING))) {
       methodContent.add(String.format(STRING_LIST_ASSERT_TEMPLATE, methodName, methodArgs));
     }
 

@@ -77,20 +77,18 @@ public final class InterfaceSerializer {
             .collect(Collectors.joining(", ")));
   }
 
-  private String getImportStatement(TypeProvider type) {
-    return getImportString(type, source.getInterfaceType().getPackageName());
+  private List<String> getImportStatements(TypeProvider type) {
+    return getImportStrings(type, source.getInterfaceType().getPackageName());
   }
 
   private Set<String> getImports(Collection<MethodDeclaration> declaredApi) {
-    Set<String> res = new HashSet<>();
-    res.add(getImportStatement(source.getBaseInterfaceType()));
+    Set<String> res = new HashSet<>(getImportStatements(source.getBaseInterfaceType()));
     source.getNestedInterfaces().stream()
         .flatMap(nested -> ((TypeUtilities.Element)nested).getBasicInterfaces().stream())
-        .forEach(basicInterface -> res.add(getImportStatement(basicInterface)));
+        .forEach(basicInterface -> res.addAll(getImportStatements(basicInterface)));
     declaredApi.stream()
         .flatMap(method -> method.getImports().stream())
-        .forEach(importStr -> res.add(getImportStatement(importStr)));
-    res.removeIf(String::isEmpty);
+        .forEach(importStr -> res.addAll(getImportStatements(importStr)));
     return res;
   }
 }

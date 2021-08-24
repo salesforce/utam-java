@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import utam.compiler.helpers.ParameterUtils.Literal;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.element.Locator;
+import utam.core.selenium.element.LocatorBy;
 
 /**
  * helper class to generate code for selector
@@ -45,13 +46,13 @@ public class LocatorCodeGeneration {
   }
 
   // used in tests
-  public LocatorCodeGeneration(Locator locator) {
-    this(locator, Collections.emptyList());
+  public LocatorCodeGeneration(String locatorCss) {
+    this(locatorCss, Collections.emptyList());
   }
 
   // used in tests
-  public LocatorCodeGeneration(Locator locator, List<MethodParameter> parameters) {
-    this(SelectorType.css, locator, parameters);
+  public LocatorCodeGeneration(String locatorCss, List<MethodParameter> parameters) {
+    this(SelectorType.css, LocatorBy.byCss(locatorCss), parameters);
   }
 
   private static String getSelectorAsString(SelectorType type, String valueStr,

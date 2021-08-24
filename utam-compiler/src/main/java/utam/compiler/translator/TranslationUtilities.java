@@ -9,6 +9,7 @@ package utam.compiler.translator;
 
 import com.google.googlejavaformat.java.Formatter;
 import com.google.googlejavaformat.java.FormatterException;
+import java.util.stream.Collectors;
 import utam.core.framework.consumer.UtamError;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
@@ -102,7 +103,17 @@ public class TranslationUtilities {
     return classJavadoc;
   }
 
-  static String getImportString(TypeProvider type, String currentPackage) {
+  static List<String> getImportStrings(TypeProvider typeToImport, String currentPackage) {
+    List<TypeProvider> allTypes = new ArrayList<>(typeToImport.getBoundTypes());
+    allTypes.add(typeToImport);
+    return allTypes
+        .stream()
+        .map(type -> getSingleImportString(type, currentPackage))
+        .filter(str -> !str.isEmpty())
+        .collect(Collectors.toList());
+  }
+
+  static String getSingleImportString(TypeProvider type, String currentPackage) {
     if (type.getFullName().isEmpty()
         || type.getPackageName().isEmpty()
         || type.getFullName().startsWith("java.lang")
@@ -142,7 +153,7 @@ public class TranslationUtilities {
 
   static String getLastStatement(PageObjectMethod m) {
     if (m.getCodeLines() == null || m.getCodeLines().isEmpty()) {
-      throw new UtamError(ERR_METHOD_IS_EMPTY);
+      throw new UtamError(String.format(ERR_METHOD_IS_EMPTY, m.getDeclaration().getName()));
     }
     String string = m.getCodeLines().get(m.getCodeLines().size() - 1);
     if (!m.getDeclaration().getReturnType().isSameType(VOID)) {

@@ -1,0 +1,82 @@
+[
+  {
+    "name": "simpleFrameElement",
+    "type": "frame",
+    "selector": {
+      "css": "iframe"
+    }
+  },
+  {
+    "name": "returnAllThrows",
+    "type": "frame",
+    "selector": {
+      "css": "iframe",
+      "returnAll": true
+    }
+  },
+  {
+    "name": "noSelectorThrows",
+    "type": "frame"
+  },
+  {
+    "name": "nullableThrows",
+    "type": "frame",
+    "selector": {
+      "css": "iframe"
+    },
+    "nullable": true
+  },
+  {
+    "name": "externalThrows",
+    "type": "frame",
+    "selector": {
+      "css": "iframe"
+    },
+    "external": true
+  },
+  {
+    "name": "elementsThrows",
+    "type": "frame",
+    "selector": {
+      "css": "iframe"
+    },
+    "elements": []
+  },
+  {
+    "name": "shadowThrows",
+    "type": "frame",
+    "selector": {
+      "css": "iframe"
+    },
+    "shadow": {
+      "elements" : []
+    }
+  },
+  {
+    "name": "filterThrows",
+    "type": "frame",
+    "selector": {
+      "css": "iframe"
+    },
+    "filter" : {
+      "apply" : "isPresent",
+      "matcher": {
+        "type" : "isTrue"
+      }
+    }
+  },
+  {
+    "name": "myPublicFrame",
+    "public" : true,
+    "type": "frame",
+    "selector": {
+      "css": "iframe[%s]",
+      "args": [
+        {
+          "type": "string",
+          "name": "frameStr"
+        }
+      ]
+    }
+  }
+]

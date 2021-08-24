@@ -17,9 +17,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementUnitTestHelper;
+import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.ContainerMethod;
@@ -46,25 +46,12 @@ public final class UtamElement {
       "element '%s': filter can only be set for list";
   static final String ERR_ELEMENT_MISSING_SELECTOR_PROPERTY =
       "element '%s': missing 'selector' property";
-  private static final String ERR_ELEMENT_REDUNDANT_PROPERTIES =
-      "%s element '%s': only properties { %s } are supported";
   static final String ERR_ELEMENT_NESTED_ELEMENTS = "element '%s' can't have nested elements";
   static final String ERR_ELEMENT_EXTERNAL_NOT_ALLOWED =
       "element '%s': external flag is not supported";
   static final String ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED =
       "element '%s': frame selector cannot return all";
-  static final String ERR_CONTAINER_SHOULD_BE_PUBLIC =
-      "element '%s': private container is redundant, please mark element public";
-  static final String ERR_FRAME_SHOULD_BE_PUBLIC =
-      "element '%s': private frame is redundant, please mark element public";
-  private static final String[] SUPPORTED_BASIC_ELEMENT_PROPERTIES = {
-    "name", "public", "selector", "filter", "nullable", "shadow", "elements"
-  };
-  private static final String[] SUPPORTED_CONTAINER_ELEMENT_PROPERTIES = {"name", "public"};
-  private static final String[] SUPPORTED_FRAME_ELEMENT_PROPERTIES = {"name", "public", "selector"};
-  private static final String[] SUPPORTED_CUSTOM_ELEMENT_PROPERTIES = {
-    "name", "public", "selector", "filter", "nullable", "external"
-  };
+
   final String name;
   UtamSelector selector;
   UtamShadowElement shadow;
@@ -72,7 +59,7 @@ public final class UtamElement {
   Boolean isPublic; // should be nullable as it's redundant for root
   UtamElement[] elements;
   UtamElementFilter filter;
-  Boolean isNullable;
+  private final Boolean isNullable;
   Boolean isExternal;
   private Traversal traversalAbstraction;
 
@@ -141,22 +128,36 @@ public final class UtamElement {
     }
   }
 
+  // used in tests
+  String getLocatorString() {
+    return selector.getLocator().getStringValue();
+  }
+
   public void testTraverse(TranslationContext context) {
     traverse(context, null, false);
   }
 
   public enum Type {
-    UNKNOWN,
-    BASIC,
-    CUSTOM,
-    CONTAINER,
-    FRAME;
+    UNKNOWN(""),
+    BASIC(String.join(", ",
+        "name", "public", "selector", "type", "filter", "nullable", "shadow", "elements")),
+    CUSTOM(String.join(", ",
+        "name", "public", "selector", "type", "filter", "nullable", "external")),
+    CONTAINER(String.join(", ", "name", "public", "selector", "type")),
+    FRAME(String.join(", ",
+        "name", "public", "selector", "type"));
+
+    private final String supportedProperties;
+
+    Type(String supportedProperties) {
+      this.supportedProperties = supportedProperties;
+    }
 
     static Type getElementType(String[] type) {
       if (type.length == 1 && CONTAINER_ELEMENT_TYPE_NAME.equals(type[0])) {
         return Type.CONTAINER;
       } else if (type.length == 1 && FRAME_ELEMENT_TYPE_NAME.equals(type[0])) {
-          return Type.FRAME;
+        return Type.FRAME;
       } else if (type.length == 1 && TranslationTypesConfigJava.isPageObjectType(type[0])) {
         return Type.CUSTOM;
       } else if (TypeUtilities.Element.isBasicType(type)) {
@@ -166,18 +167,9 @@ public final class UtamElement {
     }
 
     String getSupportedPropertiesErr(String elementName) {
-      final String SUPPORTED;
-      if (this == Type.BASIC) {
-        SUPPORTED = String.join(",", SUPPORTED_BASIC_ELEMENT_PROPERTIES);
-      } else if (this == Type.CUSTOM) {
-        SUPPORTED = String.join(",", SUPPORTED_CUSTOM_ELEMENT_PROPERTIES);
-      } else if (this == Type.FRAME) {
-        SUPPORTED = String.join(",", SUPPORTED_FRAME_ELEMENT_PROPERTIES);
-      } else {
-        SUPPORTED = String.join(",", SUPPORTED_CONTAINER_ELEMENT_PROPERTIES);
-      }
-      return String.format(
-          ERR_ELEMENT_REDUNDANT_PROPERTIES, name().toLowerCase(), elementName, SUPPORTED);
+      return String
+          .format("%s element '%s': only properties { %s } are supported", name().toLowerCase(),
+              elementName, supportedProperties);
     }
   }
 
@@ -364,9 +356,6 @@ public final class UtamElement {
           || shadow != null) {
         throw new UtamError(Type.CONTAINER.getSupportedPropertiesErr(name));
       }
-      if (!isPublic()) {
-        throw new UtamError(String.format(ERR_CONTAINER_SHOULD_BE_PUBLIC, name));
-      }
       if (selector == null) {
         selector = new UtamSelector(
             DEFAULT_CONTAINER_SELECTOR_CSS,
@@ -386,10 +375,10 @@ public final class UtamElement {
       PageObjectMethod method;
       if (selector.isReturnAll()) {
         method = new ContainerMethod.WithSelectorReturnsList(
-            scopeElement, isExpandScopeShadowRoot, name, selectorContext);
+            scopeElement, isExpandScopeShadowRoot, name, selectorContext, isPublic());
       } else {
         method = new ContainerMethod.WithSelector(
-            scopeElement, isExpandScopeShadowRoot, name, selectorContext);
+            scopeElement, isExpandScopeShadowRoot, name, selectorContext, isPublic());
       }
       elementContext.setElementMethod(method);
       context.setElement(elementContext);
@@ -407,9 +396,6 @@ public final class UtamElement {
           || shadow != null) {
         throw new UtamError(Type.FRAME.getSupportedPropertiesErr(name));
       }
-      if (!isPublic()) {
-        throw new UtamError(String.format(ERR_FRAME_SHOULD_BE_PUBLIC, name));
-      }
       if (selector == null) {
         throw new UtamError(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, name));
       }
@@ -426,9 +412,8 @@ public final class UtamElement {
           new ElementField(
               name, getFindAnnotation(selectorContext.getLocator(), scopeElement,
               isExpandScopeShadowRoot, isNullable()));
-      ElementContext elementContext = new ElementContext.Frame(
-          scopeElement, name, selectorContext.getLocator());
-      PageObjectMethod method = new FrameMethod(elementContext);
+      ElementContext elementContext = new ElementContext.Frame(scopeElement, name, selectorContext);
+      PageObjectMethod method = new FrameMethod(elementContext, isPublic());
       elementContext.setElementMethod(method);
       context.setClassField(field);
       context.setElement(elementContext);

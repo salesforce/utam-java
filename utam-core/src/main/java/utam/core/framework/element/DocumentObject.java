@@ -7,16 +7,20 @@
  */
 package utam.core.framework.element;
 
+import static utam.core.element.FindContext.Type.EXISTING;
 import static utam.core.element.FindContext.Type.NULLABLE;
 
 import java.time.Duration;
+import java.util.function.Supplier;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.driver.Expectations;
 import utam.core.element.ElementLocation;
 import utam.core.element.Locator;
+import utam.core.framework.UtamCoreError;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.RootPageObject;
+import utam.core.element.FrameElement;
 
 /**
  * implementation of the document object
@@ -27,11 +31,8 @@ import utam.core.framework.base.RootPageObject;
 public class DocumentObject implements Document {
 
   static final String DOM_READY_JAVASCRIPT = "document.readyState === 'complete'";
+  static final String ERR_CANT_ENTER_NULL_FRAME = "Can't enter null frame element";
 
-  private static final Expectations<Boolean> isDOMReady =
-      new ExpectationsImpl<>("wait for document ready state", driver ->
-          (Boolean) driver.executeScript(DOM_READY_JAVASCRIPT)
-      );
   private final Driver driver;
   private final Duration timeout;
   private final Duration interval;
@@ -51,7 +52,7 @@ public class DocumentObject implements Document {
 
   @Override
   public void waitForDocumentReady() {
-    driver.waitFor(timeout, interval, isDOMReady);
+    waitFor(() -> (Boolean) driver.executeScript(DOM_READY_JAVASCRIPT));
   }
 
   @Override
@@ -64,5 +65,39 @@ public class DocumentObject implements Document {
     RootPageObject instance = factory.getPageContext().getBean(pageObjectType);
     ElementLocation finder = instance.setRootLocator(NULLABLE);
     return !finder.findElements(driver).isEmpty();
+  }
+
+  @Override
+  public void enterFrame(FrameElement frame) {
+    if(frame == null) {
+      throw new UtamCoreError(ERR_CANT_ENTER_NULL_FRAME);
+    }
+    driver.enterFrame(frame.getFrameElement());
+  }
+
+  @Override
+  public void exitToParentFrame() {
+    driver.exitToParentFrame();
+  }
+
+  @Override
+  public void exitFrame() {
+    driver.exitFrame();
+  }
+
+  @Override
+  public <T extends RootPageObject> T enterFrameAndLoad(FrameElement frame, Class<T> type) {
+    T instance = factory.getPageContext().getBean(type);
+    ElementLocation finder = instance.setRootLocator(EXISTING);
+    factory.bootstrap(instance, finder);
+    instance.load();
+    return instance;
+  }
+
+  @Override
+  public final <T> T waitFor(Supplier<T> condition) {
+    Expectations<T> expectations =
+        new ExpectationsImpl<>("wait for condition", (driver) -> condition.get());
+    return driver.waitFor(timeout, interval, expectations);
   }
 }

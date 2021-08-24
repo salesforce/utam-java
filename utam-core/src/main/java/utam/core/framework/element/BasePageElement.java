@@ -9,18 +9,18 @@ package utam.core.framework.element;
 
 import static utam.core.selenium.element.ElementAdapter.ERR_DRAG_AND_DROP_NULL_ELEMENT;
 
-import java.time.Duration;
 import org.openqa.selenium.Keys;
 import utam.core.driver.Expectations;
 import utam.core.element.BasicElement;
-import utam.core.element.Element;
 import utam.core.element.DragAndDropOptions;
-import utam.core.element.RootElement;
+import utam.core.element.Element;
 import utam.core.element.Element.GestureDirection;
 import utam.core.element.Element.ScrollOptions;
+import utam.core.element.RootElement;
 import utam.core.framework.UtamCoreError;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.UtamBaseImpl;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * base element that wraps Element implementation with Driver waits, instantiated on the FOUND
@@ -34,12 +34,33 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
   private Element element;
   private PageObjectsFactory factory;
 
-  public BasePageElement() {}
+  // empty constructor is needed for union types to work
+  public BasePageElement() {
+  }
 
-  // used via java reflections
-  public BasePageElement(PageObjectsFactory factory, Element element) {
-    this.element = element;
+  public static <T extends BasicElement, R extends BasePageElement> T createInstance(Class<R> implType, Element element, PageObjectsFactory factory) {
+    if(element.isNull()) {
+      return null;
+    }
+    try {
+      R instance =  implType.getConstructor().newInstance();
+      instance.initialize(factory, element);
+      return (T)instance;
+    } catch (ReflectiveOperationException e) {
+      throw new UtamError(
+          String.format("Error creating instance of type '%s'", implType.getSimpleName()),
+          e);
+    }
+  }
+
+  public static BasePageElement createElementInstance(Element element, PageObjectsFactory factory) {
+    return createInstance(BasePageElement.class, element, factory);
+  }
+
+  // called from method that uses reflection to build an instance
+  void initialize(PageObjectsFactory factory, Element element) {
     this.factory = factory;
+    this.element = element;
   }
 
   @Override
@@ -57,11 +78,6 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
     return getDriver()
         .waitFor(getDriverTimeouts().getFluentWaitTimeout(), getDriverTimeouts().getPollingInterval(), expectations,
             getElement());
-  }
-
-  public void initialize(PageObjectsFactory factory, Element element) {
-    this.factory = factory;
-    this.element = element;
   }
 
   @Override

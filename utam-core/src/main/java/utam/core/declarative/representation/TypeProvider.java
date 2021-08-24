@@ -7,6 +7,9 @@
  */
 package utam.core.declarative.representation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * type of utam objects for imports and declarations
  *
@@ -55,5 +58,13 @@ public interface TypeProvider {
    */
   default String getFalsyValue() {
     return "null";
+  }
+
+  /**
+   * some types require more than one import because they set bound, for example List<PageObject>
+   * @return list of bound types, by default empty
+   */
+  default List<TypeProvider> getBoundTypes() {
+    return new ArrayList<>();
   }
 }

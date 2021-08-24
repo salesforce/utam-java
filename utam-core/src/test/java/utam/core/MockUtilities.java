@@ -10,6 +10,8 @@ package utam.core;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
+import static utam.core.framework.base.FrameElementImpl.createFrameInstance;
+import static utam.core.framework.element.BasePageElement.createElementInstance;
 import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR;
 import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR_ALL;
 
@@ -20,16 +22,20 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsDriver;
+import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.driver.DriverContext;
 import utam.core.element.Element;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.PageObjectsFactoryImpl;
+import utam.core.element.FrameElement;
 import utam.core.framework.consumer.PageObjectContext;
 import utam.core.framework.consumer.PageObjectContextImpl;
 import utam.core.framework.element.BasePageElement;
+import utam.core.framework.element.DocumentObject;
 import utam.core.selenium.appium.MobileDriverAdapter;
 import utam.core.selenium.appium.MobileElementAdapter;
 import utam.core.selenium.element.DriverAdapter;
@@ -49,6 +55,7 @@ public class MockUtilities {
   private final WebElement webElementMock;
   private final ElementAdapter elementAdapter;
   private final BasePageElement utamElement;
+  private final FrameElement frameElement;
 
   public MockUtilities(Class<? extends WebDriver> driverType) {
     webDriverMock = mock(driverType, withSettings().extraInterfaces(
@@ -61,11 +68,13 @@ public class MockUtilities {
     PageObjectContext pageObjectContext = new PageObjectContextImpl(Collections.emptyMap());
     factory = new PageObjectsFactoryImpl(pageObjectContext, driverContext, driverAdapter);
     elementAdapter = setElementAdapter(driverType);
-    utamElement = new BasePageElement();
-    utamElement.initialize(factory, elementAdapter);
+    utamElement = createElementInstance(elementAdapter, factory);
+    frameElement = createFrameInstance(elementAdapter, factory);
     if (isMobileMock(driverType)) {
       setMobilePlatform(Platform.LINUX);
     }
+    TargetLocator targetLocator = mock(TargetLocator.class);
+    when(webDriverMock.switchTo()).thenReturn(targetLocator);
   }
 
   public MockUtilities() {
@@ -136,6 +145,14 @@ public class MockUtilities {
 
   public Element getElementAdapter() {
     return elementAdapter;
+  }
+
+  public FrameElement getFrameElement() {
+    return frameElement;
+  }
+
+  public Document getDocument() {
+    return new DocumentObject(getFactory());
   }
 
   public BasePageElement getUtamElement() {

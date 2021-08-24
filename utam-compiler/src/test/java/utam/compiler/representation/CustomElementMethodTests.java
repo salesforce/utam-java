@@ -49,7 +49,7 @@ public class CustomElementMethodTests {
   private static final TypeProvider TYPE =
       new TypeUtilities.FromString(TYPE_SHORT_NAME, TYPE_FULL_NAME);
   private static final Root INJECTED_ROOT =
-      new Root(new LocatorCodeGeneration(getCssSelector("css")));
+      new Root(new LocatorCodeGeneration("css"));
 
   private static ElementContext getBasicScope() {
     final ElementContext scope =
@@ -92,8 +92,7 @@ public class CustomElementMethodTests {
         new Single(
             true,
             ELEMENT_NAME,
-            new Root(new LocatorCodeGeneration(
-                getCssSelector(".fakeSelector[title='%s']"),
+            new Root(new LocatorCodeGeneration(".fakeSelector[title='%s']",
                 Collections.singletonList(
                     new ParameterUtils.Regular("name", PrimitiveType.STRING)))),
             getBasicScope(),
@@ -171,11 +170,11 @@ public class CustomElementMethodTests {
    */
   @Test
   public void testInjectedSelector() {
-    Root plain = new Root(new LocatorCodeGeneration(getCssSelector("css")));
+    Root plain = new Root(new LocatorCodeGeneration("css"));
     assertThat(plain.getCodeString(), is(equalTo("LocatorBy.byCss(\"css\")")));
     Root wParams =
         new Root(
-            new LocatorCodeGeneration(getCssSelector(".fakeSelector[title='%s']"),
+            new LocatorCodeGeneration(".fakeSelector[title='%s']",
                 Collections
                     .singletonList(new ParameterUtils.Regular("name", PrimitiveType.STRING))));
     assertThat(

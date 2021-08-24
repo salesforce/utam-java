@@ -7,10 +7,10 @@
  */
 package utam.compiler.representation;
 
+import utam.compiler.helpers.TypeUtilities.ListOf;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.TypeUtilities;
 import utam.core.framework.consumer.UtamError;
 
 import java.util.ArrayList;
@@ -20,8 +20,6 @@ import java.util.stream.Stream;
 
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.COLLECTOR_IMPORT;
-import static utam.compiler.helpers.TypeUtilities.LIST_IMPORT;
-import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
 /**
@@ -35,15 +33,12 @@ public class ChainMethod implements PageObjectMethod {
   static final String ERR_CHAIN_LINK_ARGS_NOT_SUPPORTED =
       "Element '%s' cannot be used in chain - selector arguments are not supported";
   private final String codeLine;
-  private final List<TypeProvider> imports;
-  private final List<TypeProvider> classImports;
+  private final List<TypeProvider> addedClassImports = new ArrayList<>();
   private final String name;
   private final TypeProvider returns;
-  private final String comments;
 
-  public ChainMethod(String methodName, List<Link> chain, String comments) {
+  public ChainMethod(String methodName, List<Link> chain) {
     this.name = methodName;
-    this.comments = comments;
     StringBuilder builder = new StringBuilder();
     Cardinality returnCardinality = null;
     for (Link link : chain) {
@@ -54,25 +49,14 @@ public class ChainMethod implements PageObjectMethod {
     }
     this.codeLine = builder.toString();
     this.returns = chain.get(chain.size() - 1).getReturn(returnCardinality);
-    imports = new ArrayList<>();
-    imports.add(chain.get(chain.size() - 1).returns);
-    if (returnCardinality.isList()) {
-      imports.add(LIST_IMPORT);
-    }
-    classImports = new ArrayList<>(imports);
     if (returnCardinality == Cardinality.COLLECTED_LIST) {
-      classImports.add(COLLECTOR_IMPORT);
+      addedClassImports.add(COLLECTOR_IMPORT);
     }
-  }
-
-  // used in tests
-  ChainMethod(String methodName, List<Link> chain) {
-    this(methodName, chain, EMPTY_COMMENTS);
   }
 
   @Override
   public MethodDeclarationImpl getDeclaration() {
-    return new MethodDeclarationImpl(name, EMPTY_PARAMETERS, returns, imports, comments, false);
+    return new MethodDeclarationImpl(name, EMPTY_PARAMETERS, returns);
   }
 
   @Override
@@ -82,7 +66,9 @@ public class ChainMethod implements PageObjectMethod {
 
   @Override
   public List<TypeProvider> getClassImports() {
-    return classImports;
+    List<TypeProvider> imports = getDeclaration().getImports();
+    imports.addAll(addedClassImports); //collector import
+    return imports;
   }
 
   @Override
@@ -129,7 +115,7 @@ public class ChainMethod implements PageObjectMethod {
 
     TypeProvider getReturn(Cardinality cardinality) {
       if (cardinality.isList()) {
-        return new TypeUtilities.ListOf(returns);
+        return new ListOf(returns);
       }
       return returns;
     }

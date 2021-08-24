@@ -10,23 +10,28 @@ package utam.compiler.representation;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.helpers.ActionableActionType.focus;
 import static utam.compiler.helpers.PrimitiveType.BOOLEAN;
-import static utam.compiler.helpers.TypeUtilities.FUNCTION;
+import static utam.compiler.helpers.PrimitiveType.NUMBER;
+import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.representation.ComposeMethodStatement.Utility.ERR_NULLABLE_NOT_SUPPORTED;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import org.testng.annotations.Test;
 import utam.compiler.UtamCompilationError;
-import utam.compiler.helpers.ActionableActionType;
+import utam.compiler.helpers.ParameterUtils.Regular;
+import utam.compiler.helpers.PrimitiveType;
+import utam.compiler.representation.ComposeMethodStatement.BasicElementOperation;
 import utam.compiler.representation.ComposeMethodStatement.Operand;
 import utam.compiler.representation.ComposeMethodStatement.Operation;
+import utam.compiler.representation.ComposeMethodStatement.OperationWithPredicate;
+import utam.compiler.representation.ComposeMethodStatement.SelfOperand;
 import utam.compiler.representation.ComposeMethodStatement.Utility;
 import utam.compiler.representation.ComposeMethodStatement.UtilityOperation;
+import utam.compiler.representation.ComposeMethodStatement.VoidList;
 import utam.core.declarative.representation.TypeProvider;
 
 /**
@@ -44,13 +49,41 @@ public class ComposeMethodStatementTests {
   }
 
   @Test
-  public void testUtilityOperation() {
-    List<TypeProvider> imports = new ArrayList<>();
-    UtilityOperation utilityOperation = new UtilityOperation(ActionableActionType.focus, BOOLEAN, new ArrayList<>());
-    utilityOperation.setReturnTypeImport(imports);
-    assertThat(imports, is(Collections.emptyList()));
-    utilityOperation = new UtilityOperation(ActionableActionType.focus, FUNCTION, new ArrayList<>());
-    utilityOperation.setReturnTypeImport(imports);
-    assertThat(imports, is(not(Collections.emptyList())));
+  public void testUtilityOperationNoAddedImports() {
+    UtilityOperation utilityOperation = new UtilityOperation(focus, BOOLEAN, new ArrayList<>());
+    assertThat(utilityOperation.getAddedImports().isEmpty(), is(true));
+    assertThat(utilityOperation.getAddedClassImports().isEmpty(), is(true));
+  }
+
+  @Test
+  public void testUtilityOperationWithAddedImports() {
+    UtilityOperation utilityOperation = new UtilityOperation(focus, SELECTOR, new ArrayList<>());
+    assertThat(utilityOperation.getAddedImports().size(), is(1));
+    TypeProvider importType = utilityOperation.getAddedImports().get(0);
+    assertThat(importType.isSameType(SELECTOR), is(true));
+    assertThat(utilityOperation.getAddedClassImports().size(), is(1));
+    importType = utilityOperation.getAddedClassImports().get(0);
+    assertThat(importType.isSameType(SELECTOR), is(true));
+  }
+
+  @Test
+  public void testBasicOperationAddedImports() {
+    Operation operation = new BasicElementOperation(focus, new ArrayList<>());
+    assertThat(operation.getAddedImports().isEmpty(), is(true));
+    assertThat(operation.getAddedClassImports().isEmpty(), is(true));
+  }
+
+  @Test
+  public void testPredicateOperationAddedImports() {
+    Operation operation = new BasicElementOperation(focus,
+        Collections.singletonList(new Regular("x",
+            PrimitiveType.NUMBER)));
+    Operand operand = new SelfOperand();
+    ComposeMethodStatement predicate = new VoidList(operand, operation, true);
+    Operation test = new OperationWithPredicate(focus, SELECTOR,
+        Collections.singletonList(predicate));
+    assertThat(test.getAddedImports().get(0).isSameType(NUMBER), is(true));
+    assertThat(test.getAddedClassImports().size(), is(1));
+    assertThat(test.getAddedClassImports().get(0).isSameType(NUMBER), is(true));
   }
 }

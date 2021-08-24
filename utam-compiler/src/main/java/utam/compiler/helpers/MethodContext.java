@@ -7,7 +7,6 @@
  */
 package utam.compiler.helpers;
 
-import static utam.compiler.helpers.TypeUtilities.LIST_IMPORT;
 import static utam.compiler.helpers.TypeUtilities.REFERENCE;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
@@ -15,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.TypeUtilities.ListOf;
 import utam.compiler.representation.ComposeMethodStatement;
@@ -42,8 +40,6 @@ public final class MethodContext {
   // to keep track of element usages
   private final Map<String, ElementContext> elementNames = new HashMap<>();
   private final TypeProvider methodReturnType;
-  private final boolean isReturnsList;
-  private final TypeProvider listType;
   private final String validationContext;
   private final Map<String, MethodParameter> methodArgs = new HashMap<>();
   private final List<Map<String, MethodParameter>> statementsArgs = new ArrayList<>();
@@ -56,9 +52,7 @@ public final class MethodContext {
       throw new UtamCompilationError(
           String.format(ERR_LIST_OF_VOID_NOT_ALLOWED, validationContext));
     }
-    this.listType = returns;
     this.methodReturnType = isReturnsList ? new ListOf(returns) : returns;
-    this.isReturnsList = isReturnsList;
   }
 
   // used in tests
@@ -107,16 +101,6 @@ public final class MethodContext {
 
   public void setElementUsage(ElementContext context) {
     elementNames.put(context.getName(), context);
-  }
-
-  public List<TypeProvider> getReturnTypeImports(List<MethodParameter> methodParameters) {
-    List<TypeProvider> imports = methodParameters.stream().map(MethodParameter::getType).collect(
-        Collectors.toList());
-    if (isReturnsList) {
-      imports.add(LIST_IMPORT);
-    }
-    imports.add(listType);
-    return imports;
   }
 
   /**

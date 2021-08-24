@@ -28,6 +28,7 @@ import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.driver.Driver;
 import utam.core.driver.DriverTimeouts;
+import utam.core.element.FrameElement;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.context.StringValueProfile;
@@ -124,6 +125,32 @@ public class UtamLoaderTests {
     // this line reloads config and overrides previous
     utamLoader.resetContext();
     assertThat(utamLoader.create(TestLoaderConfigDefault.class), is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
+  }
+
+  @Test
+  public void testEnterFrame() {
+    UtamLoader loader = getDefaultLoader();
+    FrameElement frameElement = new MockUtilities().getFrameElement();
+    loader.enterFrame(frameElement);
+  }
+
+  @Test
+  public void testEnterFrameAndLoad() {
+    UtamLoader loader = getDefaultLoader();
+    FrameElement frameElement = new MockUtilities().getFrameElement();
+    loader.enterFrameAndLoad(frameElement, TestLoaderConfigPageObject.class);
+  }
+
+  @Test
+  public void testExitToParentFrame() {
+    UtamLoader loader = getDefaultLoader();
+    loader.exitToParentFrame();
+  }
+
+  @Test
+  public void testExitFrame() {
+    UtamLoader loader = getDefaultLoader();
+    loader.exitFrame();
   }
 
   private static class ContainerMock implements Container {

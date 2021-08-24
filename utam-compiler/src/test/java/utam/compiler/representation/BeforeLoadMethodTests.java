@@ -17,7 +17,6 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static utam.compiler.helpers.MethodContext.BEFORE_LOAD_METHOD_MANE;
-import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
@@ -42,7 +41,6 @@ public class BeforeLoadMethodTests {
         BeforeLoadMethod method = new BeforeLoadMethod(
             new MethodContext(BEFORE_LOAD_METHOD_MANE, VOID, false),
             Collections.singletonList(methodAction),
-            EMPTY_PARAMETERS,
             EMPTY_COMMENTS);
         PageObjectValidationTestHelper.validateMethod(method, info);
         assertThat(method.getClassImports(), hasSize(0));

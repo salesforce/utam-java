@@ -7,201 +7,127 @@
  */
 package utam.compiler.grammar;
 
-import org.testng.annotations.Test;
-import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.TypeUtilities;
-import utam.core.framework.consumer.FrameElement;
-import utam.core.framework.consumer.UtamError;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.TestUtilities.getDeserializedObject;
-import static utam.compiler.grammar.UtamElement.*;
+import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
+import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_MISSING_SELECTOR_PROPERTY;
+import static utam.compiler.grammar.UtamElement.ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED;
+import static utam.compiler.grammar.UtamElement.Type;
+import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
+import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
+import java.util.List;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.TranslationContext;
+import utam.compiler.helpers.TypeUtilities;
+import utam.compiler.representation.PageObjectValidationTestHelper;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.element.FrameElement;
+import utam.core.framework.consumer.UtamError;
+
+/**
+ * test reads JSON file with declared frames
+ *
+ * @since 236
+ */
 public class UtamElement_FrameTests {
 
-  @Test
-  public void testValidFrameElementNode() {
-    String json =
-        "{"
-            + "  \"name\": \"simpleFrameElement\","
-            + "  \"type\": \"frame\","
-            + "  \"public\": true,"
-            + "  \"selector\": {"
-            + "    \"css\": \"customSelector\""
-            + "  }"
-            + "}";
-    UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
-    UtamElement.Traversal abstraction = utamElement.getAbstraction();
-    assertThat(abstraction.getClass(), is(equalTo(UtamElement.Frame.class)));
-    ElementContext elementContext =
-        abstraction.testRootTraverse(TestUtilities.getTestTranslationContext());
-    assertThat(
-        elementContext.getElementMethod().getDeclaration().getName(),
-        is(equalTo("getSimpleFrameElement")));
-    assertThat(elementContext.getElementMethod().isPublic(), is(true));
-    assertThat(elementContext.getType().isSameType(new TypeUtilities.FromClass(FrameElement.class)), is(equalTo(true)));
+  private List<UtamElement> frames;
+
+  @BeforeClass
+  public void prepareData() {
+    frames = DeserializerUtilities.getDeserializedObjects(UtamElement.class, "element/frames");
   }
 
   @Test
-  public void testPrivateFrameElementThrows() {
-    String json =
-        "{"
-            + "  \"name\": \"simpleFrameElement\","
-            + "  \"type\": \"frame\","
-            + "  \"selector\": {"
-            + "    \"css\": \"customSelector\""
-            + "  }"
-            + "}";
-    UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
-    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_FRAME_SHOULD_BE_PUBLIC, "simpleFrameElement"))));
+  public void testValidFrameElementNode() {
+    UtamElement utamElement = frames.get(0);
+    UtamElement.Traversal abstraction = utamElement.getAbstraction();
+    TranslationContext context = getTestTranslationContext();
+    assertThat(abstraction.getClass(), is(equalTo(UtamElement.Frame.class)));
+    ElementContext elementContext = abstraction.testRootTraverse(context);
+    assertThat(elementContext.getType().isSameType(new TypeUtilities.FromClass(FrameElement.class)),
+        is(equalTo(true)));
+
+    final String methodName = getElementGetterMethodName("simpleFrameElement", false);
+    PageObjectMethod method = elementContext.getElementMethod();
+    assertThat(method.getDeclaration().getName(), is(equalTo(methodName)));
+
+    method = context.getMethod(methodName);
+    MethodInfo expected = new MethodInfo(methodName, FRAME_ELEMENT).setNotPublic();
+    expected.addCodeLine("element(this.simpleFrameElement).build(FrameElement.class, FrameElementImpl.class)");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
+
+  @Test
+  public void testPublicFrameElementGetterWithParameters() {
+    UtamElement utamElement = frames.get(8);
+    TranslationContext context = getTestTranslationContext();
+    UtamElement.Traversal abstraction = utamElement.getAbstraction();
+    abstraction.testRootTraverse(context);
+    final String methodName = getElementGetterMethodName("myPublicFrame", true);
+    PageObjectMethod method = context.getMethod(methodName);
+    MethodInfo expected = new MethodInfo(methodName, FRAME_ELEMENT);
+    expected.addParameter(new MethodParameterInfo("frameStr"));
+    expected.addCodeLine(
+        "element(this.myPublicFrame).build(FrameElement.class, FrameElementImpl.class, frameStr)");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 
   @Test
   public void testFrameElementWithReturnAllSelectorThrows() {
-    String json =
-        "{"
-            + "  \"name\": \"simpleFrameElement\","
-            + "  \"type\": \"frame\","
-            + "  \"public\": true,"
-            + "  \"selector\": {"
-            + "    \"css\": \"customSelector\","
-            + "    \"returnAll\": true"
-            + "  }"
-            + "}";
-    UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
+    UtamElement utamElement = frames.get(1);
     UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED, "simpleFrameElement"))));
+    assertThat(e.getMessage(),
+        is(equalTo(String.format(ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED, "returnAllThrows"))));
   }
 
   @Test
   public void testFrameElementWithNoSelectorThrows() {
-    String json =
-        "{"
-            + "  \"name\": \"simpleFrameElement\","
-            + "  \"type\": \"frame\","
-            + "  \"public\": true"
-            + "}";
-    UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
+    UtamElement utamElement = frames.get(2);
     UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, "simpleFrameElement"))));
+    assertThat(e.getMessage(),
+        is(equalTo(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, "noSelectorThrows"))));
   }
 
   @Test
   public void testFrameElementWithNullableThrows() {
-    String json =
-        "{"
-            + "  \"name\": \"simpleFrameElement\","
-            + "  \"type\": \"frame\","
-            + "  \"public\": true,"
-            + "  \"nullable\": true,"
-            + "  \"selector\": {"
-            + "    \"css\": \"customSelector\""
-            + "  }"
-            + "}";
-    UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
+    UtamElement utamElement = frames.get(3);
     UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo("frame element 'simpleFrameElement': only properties { name,public,selector } are supported")));
+    assertThat(e.getMessage(), is(equalTo(Type.FRAME.getSupportedPropertiesErr("nullableThrows"))));
   }
 
   @Test
   public void testFrameElementWithExternalThrows() {
-    String json =
-        "{"
-            + "  \"name\": \"simpleFrameElement\","
-            + "  \"type\": \"frame\","
-            + "  \"public\": true,"
-            + "  \"external\": true,"
-            + "  \"selector\": {"
-            + "    \"css\": \"customSelector\""
-            + "  }"
-            + "}";
-    UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
+    UtamElement utamElement = frames.get(4);
     UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo("frame element 'simpleFrameElement': only properties { name,public,selector } are supported")));
+    assertThat(e.getMessage(), is(equalTo(Type.FRAME.getSupportedPropertiesErr("externalThrows"))));
   }
 
   @Test
   public void testFrameElementWithElementsThrows() {
-    String json =
-        "{"
-            + "  \"name\": \"simpleFrameElement\","
-            + "  \"type\": \"frame\","
-            + "  \"public\": true,"
-            + "  \"selector\": {"
-            + "    \"css\": \"customSelector\""
-            + "  },"
-            + "  \"elements\": ["
-            + "    {"
-            + "      \"name\": \"elementInFrame\","
-            + "      \"public\": true,"
-            + "      \"selector\": {"
-            + "        \"css\": \".inner\""
-            + "      }"
-            + "    }"
-            + "  ]"
-            + "}";
-    UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
+    UtamElement utamElement = frames.get(5);
     UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo("frame element 'simpleFrameElement': only properties { name,public,selector } are supported")));
+    assertThat(e.getMessage(), is(equalTo(Type.FRAME.getSupportedPropertiesErr("elementsThrows"))));
   }
 
   @Test
   public void testFrameElementWithFilterThrows() {
-    String json =
-        "{"
-            + "  \"name\": \"simpleFrameElement\","
-            + "  \"type\": \"frame\","
-            + "  \"public\": true,"
-            + "  \"selector\": {"
-            + "    \"css\": \"customSelector\""
-            + "  },"
-            + "  \"filter\": {"
-            + "    \"apply\": \"getItemText\","
-            + "    \"findFirst\": true,"
-            + "    \"matcher\": {"
-            + "      \"type\": \"stringContains\","
-            + "      \"args\": ["
-            + "        {"
-            + "          \"name\": \"itemText\","
-            + "          \"type\": \"string\""
-            + "        }"
-            + "      ]"
-            + "    }"
-            + "  }"
-            + "}";
-    UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
+    UtamElement utamElement = frames.get(7);
     UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo("frame element 'simpleFrameElement': only properties { name,public,selector } are supported")));
+    assertThat(e.getMessage(), is(equalTo(Type.FRAME.getSupportedPropertiesErr("filterThrows"))));
   }
 
   @Test
   public void testFrameElementWithShadowThrows() {
-    String json =
-        "{"
-            + "  \"name\": \"simpleFrameElement\","
-            + "  \"type\": \"frame\","
-            + "  \"public\": true,"
-            + "  \"selector\": {"
-            + "    \"css\": \"customSelector\""
-            + "  },"
-            + "  \"shadow\": {"
-            + "    \"elements\": ["
-            + "      {"
-            + "        \"name\": \"elementInFrame\","
-            + "        \"public\": true,"
-            + "        \"selector\": {"
-            + "          \"css\": \".inner\""
-            + "        }"
-            + "      }"
-            + "    ]"
-            + "  }"
-            + "}";
-    UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
+    UtamElement utamElement = frames.get(6);
     UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo("frame element 'simpleFrameElement': only properties { name,public,selector } are supported")));
+    assertThat(e.getMessage(), is(equalTo(Type.FRAME.getSupportedPropertiesErr("shadowThrows"))));
   }
 }

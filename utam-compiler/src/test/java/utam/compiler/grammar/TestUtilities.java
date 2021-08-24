@@ -11,9 +11,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.TextNode;
+import java.util.ArrayList;
+import java.util.List;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.TranslationContext;
 import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.compiler.translator.TranslationTypesConfigJava;
@@ -121,21 +124,21 @@ public class TestUtilities {
           null, null, null);
     }
 
-    public static UtamMethod createUtamMethod(String name, UtamMethodAction[] compose) {
+    static UtamMethod createUtamMethod(String name, UtamMethodAction[] compose) {
       return new UtamMethod(name, compose, null, null, null, null);
     }
 
-    public static UtamMethod createUtamMethod(String name, String returns, UtamArgument[] args) {
+    static UtamMethod createUtamMethod(String name, String returns, UtamArgument[] args) {
       return new UtamMethod(
           name, null, null, args, createStringTypeNode(returns), null);
     }
 
-    public static UtamMethod createUtamMethod(String name, String[] returns, UtamArgument[] args) {
+    static UtamMethod createUtamMethod(String name, String[] returns, UtamArgument[] args) {
       return new UtamMethod(
           name, null, null, args, createArrayTypeNode(returns), null);
     }
 
-    public static UtamMethod createUtamMethod(
+    static UtamMethod createUtamMethod(
         String name, String returns, UtamMethodChainLink[] chain) {
       return new UtamMethod(
           name, null, chain, null, createStringTypeNode(returns), null);
@@ -156,5 +159,14 @@ public class TestUtilities {
       Arrays.stream(type).forEach(node::add);
       return node;
     }
+  }
+
+  public static List<TypeProvider> getAllClassImports(PageObjectMethod method) {
+    List<TypeProvider> all = new ArrayList<>();
+    method.getClassImports().forEach(i -> {
+      all.add(i);
+      all.addAll(i.getBoundTypes());
+    });
+    return all;
   }
 }
