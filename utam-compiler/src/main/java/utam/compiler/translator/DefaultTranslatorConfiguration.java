@@ -77,11 +77,19 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
     this(moduleName, guardrailsMode, new TranslationTypesConfigJava(), sourceConfig, targetConfig, profileDefinitions);
   }
 
+  public DefaultTranslatorConfiguration(
+      String moduleName,
+      TranslatorSourceConfig sourceConfig,
+      TranslatorTargetConfig targetConfig,
+      List<ProfileConfiguration> profileDefinitions) {
+    this(moduleName, GuardrailsMode.WARNING, new TranslationTypesConfigJava(), sourceConfig, targetConfig, profileDefinitions);
+  }
+
   // used in tests
   DefaultTranslatorConfiguration(
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig) {
-    this("", GuardrailsMode.ERROR, new TranslationTypesConfigJava(), sourceConfig, targetConfig, new ArrayList<>());
+    this("", sourceConfig, targetConfig, new ArrayList<>());
   }
 
   /**
