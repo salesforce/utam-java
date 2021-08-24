@@ -14,11 +14,4 @@ package utam.core.element;
  * @since 236
  */
 public interface FrameElement extends BasicElement {
-
-  /**
-   * gets the underlying Element object representing the frame
-   *
-   * @return the frame Element object
-   */
-  Element getFrameElement();
 }
