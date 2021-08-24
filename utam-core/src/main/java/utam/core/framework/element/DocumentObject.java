@@ -16,9 +16,10 @@ import utam.core.driver.Driver;
 import utam.core.driver.Expectations;
 import utam.core.element.ElementLocation;
 import utam.core.element.Locator;
+import utam.core.framework.UtamCoreError;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.RootPageObject;
-import utam.core.framework.consumer.FrameElement;
+import utam.core.element.FrameElement;
 
 /**
  * implementation of the document object
@@ -29,6 +30,7 @@ import utam.core.framework.consumer.FrameElement;
 public class DocumentObject implements Document {
 
   static final String DOM_READY_JAVASCRIPT = "document.readyState === 'complete'";
+  static final String ERR_CANT_ENTER_NULL_FRAME = "Can't enter null frame element";
 
   private static final Expectations<Boolean> isDOMReady =
       new ExpectationsImpl<>("wait for document ready state", driver ->
@@ -70,7 +72,10 @@ public class DocumentObject implements Document {
 
   @Override
   public void enterFrame(FrameElement frame) {
-    driver.enterFrame(frame);
+    if(frame == null) {
+      throw new UtamCoreError(ERR_CANT_ENTER_NULL_FRAME);
+    }
+    driver.enterFrame(frame.getFrameElement());
   }
 
   @Override

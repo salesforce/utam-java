@@ -28,6 +28,7 @@ import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.driver.Driver;
 import utam.core.driver.DriverTimeouts;
+import utam.core.element.FrameElement;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.context.StringValueProfile;

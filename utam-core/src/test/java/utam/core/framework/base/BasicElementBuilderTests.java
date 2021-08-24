@@ -33,7 +33,7 @@ import utam.core.MockUtilities;
 import utam.core.element.Actionable;
 import utam.core.element.BasicElement;
 import utam.core.element.ElementLocation;
-import utam.core.framework.consumer.FrameElement;
+import utam.core.element.FrameElement;
 import utam.core.framework.element.BasePageElement;
 import utam.core.framework.element.ElementLocationChain;
 import utam.core.selenium.element.LocatorBy;

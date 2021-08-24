@@ -11,7 +11,7 @@ import java.time.Duration;
 import java.util.List;
 import utam.core.element.Element;
 import utam.core.element.FindContext;
-import utam.core.framework.consumer.FrameElement;
+import utam.core.element.FrameElement;
 import utam.core.element.Locator;
 
 /**
@@ -80,7 +80,7 @@ public interface Driver {
    *
    * @param element the frame element to enter
    */
-  void enterFrame(FrameElement element);
+  void enterFrame(Element element);
 
   /**
    * exits focus from a frame or iframe to the immediate parent frame, or a no-op

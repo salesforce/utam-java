@@ -5,10 +5,7 @@
  * For full license text, see the LICENSE file in the repo root
  * or https://opensource.org/licenses/MIT
  */
-package utam.core.framework.consumer;
-
-import utam.core.element.BasicElement;
-import utam.core.element.Element;
+package utam.core.element;
 
 /**
  * page object element that represents a frame or iframe

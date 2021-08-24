@@ -17,6 +17,7 @@ import utam.core.driver.Driver;
 import utam.core.driver.DriverTimeouts;
 import utam.core.element.Element;
 import utam.core.element.ElementLocation;
+import utam.core.element.FrameElement;
 import utam.core.element.Locator;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.PageObjectsFactory;

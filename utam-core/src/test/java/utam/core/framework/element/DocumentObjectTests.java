@@ -22,7 +22,7 @@ import utam.core.driver.Document;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageMarker;
 import utam.core.framework.base.RootPageObject;
-import utam.core.framework.consumer.FrameElement;
+import utam.core.element.FrameElement;
 import utam.core.framework.consumer.TestLoaderConfigPageObject;
 import utam.core.selenium.element.LocatorBy;
 

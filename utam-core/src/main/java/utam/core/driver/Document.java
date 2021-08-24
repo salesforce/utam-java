@@ -9,7 +9,7 @@ package utam.core.driver;
 
 import utam.core.element.Locator;
 import utam.core.framework.base.RootPageObject;
-import utam.core.framework.consumer.FrameElement;
+import utam.core.element.FrameElement;
 
 /**
  * document object to interact with a browser

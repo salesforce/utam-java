@@ -30,7 +30,7 @@ import utam.core.driver.Expectations;
 import utam.core.element.Element;
 import utam.core.element.FindContext;
 import utam.core.framework.UtamCoreError;
-import utam.core.framework.consumer.FrameElement;
+import utam.core.element.FrameElement;
 import utam.core.element.Locator;
 import utam.core.selenium.appium.MobileElementAdapter;
 
@@ -43,7 +43,7 @@ import utam.core.selenium.appium.MobileElementAdapter;
 public class DriverAdapter implements Driver {
 
   static final String ERR_SUPPORTED_FOR_MOBILE = "method is applicable only for iOS/Android";
-  static final String ERR_CANT_ENTER_NULL_FRAME = "Can't enter null iframe element";
+  static final String ERR_CANT_ENTER_NULL_FRAME = "Can't enter null frame element";
   // used in tests to validate right message
   public static final String ERR_ELEMENT_NOT_FOUND_PREFIX = "can't find element";
   private static final List<Class<? extends Throwable>> IGNORE_EXCEPTIONS =
@@ -169,11 +169,11 @@ public class DriverAdapter implements Driver {
   }
 
   @Override
-  public void enterFrame(FrameElement element) {
+  public void enterFrame(Element element) {
     if(element == null) {
       throw new UtamCoreError(ERR_CANT_ENTER_NULL_FRAME);
     }
-    WebElement webElement = ((ElementAdapter)element.getFrameElement()).getWebElement();
+    WebElement webElement = ((ElementAdapter)element).getWebElement();
     driver.switchTo().frame(webElement);
   }
 

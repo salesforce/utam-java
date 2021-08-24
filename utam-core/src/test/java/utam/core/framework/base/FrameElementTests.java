@@ -10,7 +10,7 @@ package utam.core.framework.base;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.element.Element;
-import utam.core.framework.consumer.FrameElement;
+import utam.core.element.FrameElement;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;

@@ -31,7 +31,7 @@ import utam.core.driver.DriverContext;
 import utam.core.element.Element;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.PageObjectsFactoryImpl;
-import utam.core.framework.consumer.FrameElement;
+import utam.core.element.FrameElement;
 import utam.core.framework.consumer.PageObjectContext;
 import utam.core.framework.consumer.PageObjectContextImpl;
 import utam.core.framework.element.BasePageElement;
