@@ -33,8 +33,8 @@ import utam.core.MockUtilities;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.driver.Expectations;
+import utam.core.element.Element;
 import utam.core.element.FindContext.Type;
-import utam.core.element.FrameElement;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.element.ExpectationsImpl;
 
@@ -134,8 +134,8 @@ public class DriverAdapterTests {
   @Test
   public void testEnterFrame() {
     MockUtilities mock = new MockUtilities();
-    FrameElement element = mock.getFrameElement();
-    mock.getDriverAdapter().enterFrame(element.getFrameElement());
+    Element element = mock.getElementAdapter();
+    mock.getDriverAdapter().enterFrame(element);
   }
 
   @Test

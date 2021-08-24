@@ -9,6 +9,7 @@ package utam.core.framework.element;
 
 import static utam.core.element.FindContext.Type.EXISTING;
 import static utam.core.element.FindContext.Type.NULLABLE;
+import static utam.core.framework.base.FrameElementImpl.getUnwrappedElement;
 
 import java.time.Duration;
 import java.util.function.Supplier;
@@ -72,7 +73,7 @@ public class DocumentObject implements Document {
     if(frame == null) {
       throw new UtamCoreError(ERR_CANT_ENTER_NULL_FRAME);
     }
-    driver.enterFrame(frame.getFrameElement());
+    driver.enterFrame(getUnwrappedElement(frame));
   }
 
   @Override

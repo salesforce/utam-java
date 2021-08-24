@@ -25,8 +25,7 @@ public class FrameElementImpl extends BasePageElement implements FrameElement {
     return createInstance(FrameElementImpl.class, element, factory);
   }
 
-  @Override
-  public Element getFrameElement() {
-    return getElement();
+  public static Element getUnwrappedElement(FrameElement frameElement) {
+    return ((FrameElementImpl)frameElement).getElement();
   }
 }
