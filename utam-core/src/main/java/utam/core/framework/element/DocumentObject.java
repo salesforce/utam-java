@@ -88,6 +88,7 @@ public class DocumentObject implements Document {
 
   @Override
   public <T extends RootPageObject> T enterFrameAndLoad(FrameElement frame, Class<T> type) {
+    enterFrame(frame);
     T instance = factory.getPageContext().getBean(type);
     ElementLocation finder = instance.setRootLocator(EXISTING);
     factory.bootstrap(instance, finder);
