@@ -11,6 +11,7 @@ import static utam.core.element.FindContext.Type.EXISTING;
 import static utam.core.element.FindContext.Type.NULLABLE;
 
 import java.time.Duration;
+import java.util.function.Supplier;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.driver.Expectations;
@@ -32,10 +33,6 @@ public class DocumentObject implements Document {
   static final String DOM_READY_JAVASCRIPT = "document.readyState === 'complete'";
   static final String ERR_CANT_ENTER_NULL_FRAME = "Can't enter null frame element";
 
-  private static final Expectations<Boolean> isDOMReady =
-      new ExpectationsImpl<>("wait for document ready state", driver ->
-          (Boolean) driver.executeScript(DOM_READY_JAVASCRIPT)
-      );
   private final Driver driver;
   private final Duration timeout;
   private final Duration interval;
@@ -55,7 +52,7 @@ public class DocumentObject implements Document {
 
   @Override
   public void waitForDocumentReady() {
-    driver.waitFor(timeout, interval, isDOMReady);
+    waitFor(() -> (Boolean) driver.executeScript(DOM_READY_JAVASCRIPT));
   }
 
   @Override
@@ -95,5 +92,12 @@ public class DocumentObject implements Document {
     factory.bootstrap(instance, finder);
     instance.load();
     return instance;
+  }
+
+  @Override
+  public final <T> T waitFor(Supplier<T> condition) {
+    Expectations<T> expectations =
+        new ExpectationsImpl<>("wait for condition", (driver) -> condition.get());
+    return driver.waitFor(timeout, interval, expectations);
   }
 }

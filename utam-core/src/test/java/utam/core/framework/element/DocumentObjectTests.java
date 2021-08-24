@@ -12,6 +12,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.expectThrows;
+import static utam.core.framework.element.DocumentObject.ERR_CANT_ENTER_NULL_FRAME;
 
 import java.util.Collections;
 import org.openqa.selenium.By;
@@ -24,6 +26,7 @@ import utam.core.framework.base.PageMarker;
 import utam.core.framework.base.RootPageObject;
 import utam.core.element.FrameElement;
 import utam.core.framework.consumer.TestLoaderConfigPageObject;
+import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -33,7 +36,6 @@ import utam.core.selenium.element.LocatorBy;
 public class DocumentObjectTests {
 
   private static final String TEST_URL = "https://utam.dev/rocks/";
-
 
   @Test
   public void testGetUrl() {
@@ -80,6 +82,14 @@ public class DocumentObjectTests {
   }
 
   @Test
+  public void testEnterFrameNull() {
+    MockUtilities mock = new MockUtilities();
+    Document document = mock.getDocument();
+    UtamError e = expectThrows(UtamError.class, () -> document.enterFrame(null));
+    assertThat(e.getMessage(), is(equalTo(ERR_CANT_ENTER_NULL_FRAME)));
+  }
+
+  @Test
   public void testExitToParentFrame() {
     MockUtilities mock = new MockUtilities();
     Document document = mock.getDocument();
@@ -99,6 +109,14 @@ public class DocumentObjectTests {
     Document document = mock.getDocument();
     FrameElement frameElement = new MockUtilities().getFrameElement();
     document.enterFrameAndLoad(frameElement, TestLoaderConfigPageObject.class);
+  }
+
+  @Test
+  public void testWaitFor() {
+    MockUtilities mock = new MockUtilities();
+    Document document = mock.getDocument();
+    Object value = document.waitFor(() -> true);
+    assertThat(value, is(equalTo(true)));
   }
 
   @PageMarker.Find(css = "notfound")

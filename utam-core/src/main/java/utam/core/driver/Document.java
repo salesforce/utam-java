@@ -7,6 +7,7 @@
  */
 package utam.core.driver;
 
+import java.util.function.Supplier;
 import utam.core.element.Locator;
 import utam.core.framework.base.RootPageObject;
 import utam.core.element.FrameElement;
@@ -73,4 +74,14 @@ public interface Document {
    * @return instance of the Page Object, loaded in the frame
    */
   <T extends RootPageObject> T enterFrameAndLoad(FrameElement frame, Class<T> type);
+
+  /**
+   * polling wait that repeatedly applies expectations until truthy value is return (not null or
+   * boolean true)
+   *
+   * @param condition condition to wait for
+   * @param <T>       return type
+   * @return result of the applied expectations
+   */
+  <T> T waitFor(Supplier<T> condition);
 }
