@@ -71,6 +71,7 @@ public class LocatorUIAutomator extends LocatorBy {
     ENABLED("enabled"),
     SELECTED("selected"),
     RESOURCEID("resourceId"),
+    RESOURCEIDMATCHES("resourceIdMatches"),
     UISCROLLABLE("new UiScrollable"),
     SCROLLABLE("scrollable");
 
