@@ -61,7 +61,7 @@ public interface TypeProvider {
   }
 
   /**
-   * some types require more than one import because they set bound, for example List<PageObject>
+   * some types require more than one import because they set bound, for example List&lt;PageObject&gt;
    * @return list of bound types, by default empty
    */
   default List<TypeProvider> getBoundTypes() {

@@ -166,8 +166,10 @@ public abstract class ComposeMethodStatement {
     static final String ERR_NULLABLE_NOT_SUPPORTED = "Nullable path is not supported for utility";
 
     /**
-     * @param operand   - Represent the imperative extension class
-     * @param operation - Represent the static method being called on the imperative extension
+     * @param operand represents the imperative extension class
+     * @param operation represents the static method being called on the imperative extension
+     * @param isLastPredicateStatement a value representing whether this statement is the last
+     *                                 statement of a predicate
      */
     public Utility(Operand operand, Operation operation, boolean isLastPredicateStatement) {
       super(operand, operation, operation.getReturnType(), isLastPredicateStatement);

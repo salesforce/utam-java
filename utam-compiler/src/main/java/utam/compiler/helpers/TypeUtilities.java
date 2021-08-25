@@ -492,7 +492,7 @@ public final class TypeUtilities {
   }
 
   /**
-   * types like Class<T> or Class<? extends Page Object>
+   * types like Class&lt;T&gt; or Class&lt;? extends Page Object&gt;
    */
   public static class BoundedClass extends FromClass {
 
