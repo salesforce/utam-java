@@ -66,7 +66,7 @@ public class LocatorUiAutomatorTests {
       Locator locator = new LocatorUIAutomator(method.value + "()");
       if (method.value.startsWith(UI_AUTOMATOR_SCROLLABLE_PREFIX)) {
         assertThat(locator.getStringValue(),
-            is(equalTo(method.value + "()")));;
+            is(equalTo(method.value + "()")));
       }
       else {
         assertThat(locator.getStringValue(),
