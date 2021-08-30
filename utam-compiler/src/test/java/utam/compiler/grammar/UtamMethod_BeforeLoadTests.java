@@ -18,6 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
+import static utam.compiler.grammar.UtamArgumentTests.getNonLiteralArg;
 import static utam.compiler.grammar.UtamMethod.ERR_BEFORE_LOAD_HAS_NO_ARGS;
 import static utam.compiler.grammar.UtamMethod.ERR_METHOD_EMPTY_STATEMENTS;
 import static utam.compiler.helpers.MethodContext.BEFORE_LOAD_METHOD_MANE;
@@ -72,7 +73,7 @@ public class UtamMethod_BeforeLoadTests {
                 new UtamMethodAction("self", "isPresent")
             });
         method.compose[0].args = new UtamArgument[] {
-            new UtamArgument("str", "string")
+            getNonLiteralArg("str", "string")
         };
         UtamError e = expectThrows(UtamError.class, () -> method.getBeforeLoadMethod(context));
         assertThat(e.getMessage(), containsString(ERR_BEFORE_LOAD_HAS_NO_ARGS));

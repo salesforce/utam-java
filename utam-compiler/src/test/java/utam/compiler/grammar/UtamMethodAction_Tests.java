@@ -17,6 +17,7 @@ import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.TEST_PAGE_OBJECT;
 import static utam.compiler.grammar.TestUtilities.TEST_URI;
 import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
+import static utam.compiler.grammar.UtamArgumentTests.getNonLiteralArg;
 import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REDUNDANT_ELEMENT;
 import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REDUNDANT_KEYS;
 import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REQUIRED_KEYS;
@@ -234,7 +235,7 @@ public class UtamMethodAction_Tests {
     setupRoot(context, utamElement);
     UtamMethodAction action = new UtamMethodAction(ELEMENT_NAME, "myMethod");
     action.args = new UtamArgument[]{
-        new UtamArgument("strParameter", "string")
+        getNonLiteralArg("strParameter", "string")
     };
     MethodContext methodContext = getMethodContext(PrimitiveType.STRING);
     ComposeMethodStatement actionObject =
@@ -274,7 +275,7 @@ public class UtamMethodAction_Tests {
             null
     );
     applyExternal.args = new UtamArgument[]{
-            new UtamArgument("strParameter", "string")
+        getNonLiteralArg("strParameter", "string")
     };
     UtamMethodAction action = new UtamMethodAction(applyExternal);
     TypeProvider type = context.getUtilityType(applyExternal.getExternalClassPath());

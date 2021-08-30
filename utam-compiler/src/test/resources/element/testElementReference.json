@@ -1,0 +1,15 @@
+[
+  {
+    "name" : "testNoArgs",
+    "type" : "elementReference"
+  },
+  {
+    "name" : "testWithArgs",
+    "type" : "elementReference",
+    "args" : [
+      {
+        "value" : "elementArgValue"
+      }
+    ]
+  }
+]

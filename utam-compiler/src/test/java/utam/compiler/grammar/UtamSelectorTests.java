@@ -54,7 +54,8 @@ public class UtamSelectorTests {
   @Test
   public void testSelectorNonLiteralParameters() {
     UtamSelector selector = new UtamSelector("str[%s] num[%d]", new UtamArgument[]{
-        new UtamArgument("strArg", "string"), new UtamArgument("numArg", "number")
+        new UtamArgument.UtamArgumentNonLiteral("strArg", "string"),
+        new UtamArgument.UtamArgumentNonLiteral("numArg", "number")
     });
     LocatorCodeGeneration context = getLocatorContext(selector);
     List<MethodParameter> parameters = context.getParameters();
@@ -70,7 +71,10 @@ public class UtamSelectorTests {
   @Test
   public void testSelectorLiteralParameters() {
     UtamSelector selector = new UtamSelector("str[%s] num[%d]",
-        new UtamArgument[]{new UtamArgument("\"literal\""), new UtamArgument(1)});
+        new UtamArgument[]{
+            new UtamArgument.UtamArgumentLiteral("\"literal\""),
+            new UtamArgument.UtamArgumentLiteral(1)
+    });
     LocatorCodeGeneration context = getLocatorContext(selector);
     List<MethodParameter> parameters = context.getParameters();
     assertThat(parameters, hasSize(2));
@@ -94,7 +98,9 @@ public class UtamSelectorTests {
   @Test
   public void testWrongArgTypeProvided() {
     UtamSelector selector = new UtamSelector("selector[%d]",
-        new UtamArgument[]{new UtamArgument("name", "string")});
+        new UtamArgument[]{
+            new UtamArgument.UtamArgumentNonLiteral("name", "string")
+    });
     UtamError e = expectThrows(UtamError.class, () -> getLocatorContext(selector));
     assertThat(
         e.getMessage(),
