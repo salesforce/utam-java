@@ -78,13 +78,18 @@ public class CustomElementBuilder {
   public <T extends PageObject> T build(Class<T> type) {
     T poInstance = getRawInstance(type);
     factory.bootstrap(poInstance, root);
-
     BasePageObject pageObject = (BasePageObject) poInstance;
-
     // if nothing is found and element is nullable - return null
     if (pageObject.getElement().isNull()) {
       return null;
     }
+    return poInstance;
+  }
+
+  // for internal tests
+  <T extends PageObject> T test(Class<T> type) {
+    T poInstance = getRawInstance(type);
+    factory.bootstrap(poInstance, root);
     return poInstance;
   }
 

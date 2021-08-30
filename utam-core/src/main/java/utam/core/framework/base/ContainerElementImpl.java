@@ -15,6 +15,7 @@ import utam.core.element.FindContext;
 import utam.core.element.Locator;
 import utam.core.framework.consumer.Contained;
 import utam.core.framework.consumer.ContainerElement;
+import utam.core.framework.element.ElementLocationChain;
 import utam.core.selenium.element.ElementAdapter;
 import utam.core.selenium.element.LocatorBy;
 
@@ -26,9 +27,9 @@ import utam.core.selenium.element.LocatorBy;
  */
 final class ContainerElementImpl implements ContainerElement {
 
-  private final PageObjectsFactory factory;
-  private final ElementLocation containerRoot;
-  private final FindContext finderContext;
+  final PageObjectsFactory factory;
+  final ElementLocation containerRoot;
+  final FindContext finderContext;
 
   ContainerElementImpl(PageObjectsFactory factory, ElementLocation containerRoot,
       FindContext finderContext) {
@@ -50,14 +51,22 @@ final class ContainerElementImpl implements ContainerElement {
     return load(utamType, LocatorBy.byCss(injectCss));
   }
 
-  private ContainerElementPageObject getContainerElementPageObject() {
-    return new ContainerElementPageObject(this);
+  private ContainerElementPageObject getContainerElementPageObject(Locator locator) {
+    ElementLocation location =
+        containerRoot == null ? new ElementLocationChain(locator, finderContext) :
+            containerRoot.scope(locator, finderContext);
+    ContainerElement containerElement = new ContainerElementImpl(factory, location, finderContext);
+    return new ContainerElementPageObject(containerElement);
+  }
+
+  private boolean isCompatibilityMode(Class type) {
+    return ContainerElementPageObject.class.equals(type);
   }
 
   @Override
   public <T extends PageObject> T load(Class<T> type, Locator locator) {
-    if (type.equals(ContainerElementPageObject.class)) {
-      return (T) getContainerElementPageObject();
+    if (isCompatibilityMode(type)) {
+      return (T) getContainerElementPageObject(locator);
     }
     T instance = new CustomElementBuilder(factory, containerRoot, locator, finderContext)
         .build(type);
@@ -67,8 +76,8 @@ final class ContainerElementImpl implements ContainerElement {
 
   @Override
   public <T extends PageObject> List<T> loadList(Class<T> type, Locator locator) {
-    if (type.equals(ContainerElementPageObject.class)) {
-      return Collections.singletonList((T) getContainerElementPageObject());
+    if (isCompatibilityMode(type)) {
+      return Collections.singletonList((T) getContainerElementPageObject(locator));
     }
     return new CustomElementBuilder(factory, containerRoot, locator, finderContext).buildList(type);
   }
