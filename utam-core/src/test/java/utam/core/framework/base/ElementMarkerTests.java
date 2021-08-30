@@ -14,7 +14,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 import static utam.core.framework.base.ElementMarker.getLocator;
-import static utam.core.selenium.appium.LocatorUIAutomator.UI_AUTOMATOR_SELECTOR_PREFIX;
 
 import java.lang.reflect.Field;
 import org.openqa.selenium.By;
@@ -49,7 +48,7 @@ public class ElementMarkerTests {
     assertThat(getLocator(annotation), is(equalTo(LocatorBy.byClassChain("test"))));
 
     when(annotation.classchain()).thenReturn("");
-    when(annotation.uiautomator()).thenReturn(UI_AUTOMATOR_SELECTOR_PREFIX + "checkable()");
+    when(annotation.uiautomator()).thenReturn("checkable()");
     assertThat(getLocator(annotation), is(equalTo(LocatorBy.byUiAutomator("checkable()"))));
   }
 

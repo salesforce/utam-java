@@ -14,37 +14,55 @@ import utam.core.selenium.element.LocatorBy;
  */
 public class LocatorUIAutomator extends LocatorBy {
 
-  public static final String UI_AUTOMATOR_SELECTOR_PREFIX = "new UiSelector().";
-  public static final String UI_AUTOMATOR_SCROLLABLE_PREFIX = "new UiScrollable";
   private static final String SUPPORTED_UIAUTOMATOR_METHODS =
       Stream.of(LocatorUIAutomator.Method.values())
           .map(method -> method.name().toLowerCase())
           .collect(Collectors.joining(", "));
   static final String ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD =
       "unsupported UiSelector method '%s', supported are: " + SUPPORTED_UIAUTOMATOR_METHODS;
+  static final String ERR_SELECTOR_UIAUTOMATOR_UISCROLLABLE_UNSUPPORTED_METHOD =
+      "unsupported UiSelector method '%s', supported method is : scrollable";
 
   public LocatorUIAutomator(String selectorString) {
-    super(getSelectorWithPrefix(selectorString));
+    super(selectorString);
     validateUIAutomatorSelector(this.stringValue);
-  }
-
-  private static String getSelectorWithPrefix(String selectorString) {
-    if (selectorString.startsWith(UI_AUTOMATOR_SELECTOR_PREFIX)) {
-      return selectorString;
-    }
-    if (selectorString.startsWith(UI_AUTOMATOR_SCROLLABLE_PREFIX)) {
-      return selectorString;
-    }
-    return UI_AUTOMATOR_SELECTOR_PREFIX + selectorString;
   }
 
   private static void validateUIAutomatorSelector(String uiautomator) {
     try {
-      String match = uiautomator
-          .substring(uiautomator.indexOf(".") + 1, uiautomator.indexOf("(", uiautomator.indexOf(".") + 1));
-      if (Stream.of(LocatorUIAutomator.Method.values())
-          .noneMatch(method -> method.value.equals(match))) {
-        throw new UtamError(String.format(ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD, match));
+      if (uiautomator.startsWith("new UiScrollable")) {
+        // Examples
+        // 1. new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().resourceId("com.salesforce.chatter:id/app_launcher_menu_item"))
+        // 2. new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(resourceId("com.salesforce.chatter:id/app_launcher_menu_item"))
+        String match1 = uiautomator
+            .substring(uiautomator.indexOf(".") + 1, uiautomator.indexOf("(", uiautomator.indexOf(".") + 1));
+        if (!match1.equals("scrollable")) {
+          throw new UtamError(String.format(ERR_SELECTOR_UIAUTOMATOR_UISCROLLABLE_UNSUPPORTED_METHOD, match1));
+        }
+        // Extract input to first method
+        String match2 = uiautomator.substring(uiautomator.indexOf("))") + 2);
+        // Extract inner locator
+        String match3 = match2.substring(match2.indexOf("(") + 1, match2.indexOf("))") + 1);
+        // continue validating inner method
+        uiautomator = match3;
+      }
+      if (uiautomator.startsWith("new UiSelector")) {
+        // Example - new UiSelector().resourceId("com.salesforce.chatter:id/app_launcher_menu_item")
+        String match = uiautomator
+            .substring(uiautomator.indexOf(".") + 1, uiautomator.indexOf("(", uiautomator.indexOf(".") + 1));
+        if (Stream.of(LocatorUIAutomator.Method.values())
+            .noneMatch(method -> method.value.equals(match))) {
+          throw new UtamError(String.format(ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD, match));
+        }
+      }
+      else {
+        // Example - resourceId("com.salesforce.chatter:id/app_launcher_menu_item")
+        String match = uiautomator
+            .substring(0, uiautomator.indexOf("("));
+        if (Stream.of(LocatorUIAutomator.Method.values())
+            .noneMatch(method -> method.value.equals(match))) {
+          throw new UtamError(String.format(ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD, match));
+        }
       }
     } catch (StringIndexOutOfBoundsException e) {
       throw new UtamError(String.format("incorrect UIAutomator selector format '%s'", uiautomator));
@@ -71,9 +89,7 @@ public class LocatorUIAutomator extends LocatorBy {
     ENABLED("enabled"),
     SELECTED("selected"),
     RESOURCEID("resourceId"),
-    RESOURCEIDMATCHES("resourceIdMatches"),
-    UISCROLLABLE("new UiScrollable"),
-    SCROLLABLE("scrollable");
+    RESOURCEIDMATCHES("resourceIdMatches");
 
     final String value;
 
