@@ -83,11 +83,11 @@ public enum DraggableActionType implements ActionType {
   public UtamArgument[] getTransformedArgs(UtamArgument[] args) {
     if (this == dragAndDrop && args.length == 1) {
       // add default duration as 0
-      return new UtamArgument[]{args[0], new UtamArgument(0)};
+      return new UtamArgument[]{args[0], new UtamArgument.UtamArgumentLiteral(0)};
     }
     if (this == dragAndDropByOffset && args.length == 2) {
       // add default duration as 0
-      return new UtamArgument[]{args[0], args[1], new UtamArgument(0)};
+      return new UtamArgument[]{args[0], args[1], new UtamArgument.UtamArgumentLiteral(0)};
     }
     return args;
   }

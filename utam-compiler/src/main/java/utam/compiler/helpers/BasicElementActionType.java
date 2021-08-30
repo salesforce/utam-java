@@ -213,7 +213,7 @@ public enum BasicElementActionType implements ActionType {
       // or two arguments (a selector and a boolean indicating whether to search in
       // the shadow DOM) declared in the JSON. If the second argument is omitted,
       // it can be assumed to be false, so substitute that value here.
-      return new UtamArgument[]{args[0], new UtamArgument(Boolean.FALSE)};
+      return new UtamArgument[]{args[0], new UtamArgument.UtamArgumentLiteral(Boolean.FALSE)};
     }
     return args;
   }

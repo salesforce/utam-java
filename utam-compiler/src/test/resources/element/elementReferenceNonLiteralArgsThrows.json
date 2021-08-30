@@ -1,0 +1,12 @@
+[
+  {
+    "name" : "testWithArgs",
+    "type" : "elementReference",
+    "args" : [
+      {
+        "name" : "elementArgValue",
+        "type" : "string"
+      }
+    ]
+  }
+]

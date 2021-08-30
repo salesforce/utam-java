@@ -1,13 +1,13 @@
 {
-  "elements" : [
+  "elements": [
     {
-      "name" : "elementWithArg",
-      "selector" : {
-        "css" : "foo[%s]",
-        "args" : [
+      "name": "elementWithArg",
+      "selector": {
+        "css": "foo[%s]",
+        "args": [
           {
-            "name" : "selectorArg",
-            "type" : "string"
+            "name": "selectorArg",
+            "type": "string"
           }
         ]
       }
@@ -31,39 +31,38 @@
                       "predicate": [
                         {
                           "apply": "methodWithElement",
-                          "args" : [
+                          "args": [
                             {
-                              "value" : {
-                                "element": "elementWithArg",
-                                "args" : [
-                                  {
-                                    "value" : "string"
-                                  }
-                                ]
-                              }
+                              "name": "elementWithArg",
+                              "type": "elementReference",
+                              "args": [
+                                {
+                                  "value": "string"
+                                }
+                              ]
                             }
                           ]
                         },
                         {
                           "apply": "methodWithSelector",
-                          "args" : [
+                          "args": [
                             {
-                              "value" : {
-                                "css" : "css[%d]",
-                                "args" : [
+                              "value": {
+                                "css": "css[%d]",
+                                "args": [
                                   {
-                                    "name" : "nested",
-                                    "type" : "number"
+                                    "name": "nested",
+                                    "type": "number"
                                   }
                                 ]
                               }
                             },
                             {
-                              "value" : {
-                                "css" : "css[%d]",
-                                "args" : [
+                              "value": {
+                                "css": "css[%d]",
+                                "args": [
                                   {
-                                    "value" : 1
+                                    "value": 1
                                   }
                                 ]
                               }

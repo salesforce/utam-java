@@ -15,6 +15,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
+import static utam.compiler.grammar.UtamArgumentTests.getLiteralArg;
+import static utam.compiler.grammar.UtamArgumentTests.getNonLiteralArg;
 import static utam.compiler.grammar.UtamMatcher.ERR_INCORRECT_MATCHER_FOR_METHOD;
 import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
 
@@ -48,14 +50,14 @@ public class UtamMatcherTests {
 
   @Test
   public void testMethodStatementActionWrongArgsNumberThrows() {
-    UtamMatcher matcher = new UtamMatcher(MatcherType.isTrue, new UtamArgument[] { new UtamArgument(true)});
+    UtamMatcher matcher = new UtamMatcher(MatcherType.isTrue, new UtamArgument[] { getLiteralArg(true)});
     UtamError e = expectThrows(UtamError.class, () -> matcher.getParameters(getTestTranslationContext(), new MethodContext()));
     assertThat(e.getMessage(), is(endsWith("expected 0 parameters, provided 1")));
   }
 
   @Test
   public void testElementFilterWrongArgsTypeThrows() {
-    UtamMatcher matcher = new UtamMatcher(MatcherType.stringContains, new UtamArgument[] { new UtamArgument(true)});
+    UtamMatcher matcher = new UtamMatcher(MatcherType.stringContains, new UtamArgument[] { getLiteralArg(true)});
     UtamError e = expectThrows(UtamError.class, () -> matcher.getParameters(getTestTranslationContext(), "element"));
     assertThat(e.getMessage(), is(containsString("expected type is")));
   }
@@ -71,7 +73,7 @@ public class UtamMatcherTests {
     when(declaration.getName()).thenReturn("getElement()");
     elementContext.setElementMethod(method);
     UtamMethodAction action = new UtamMethodAction("element", "isPresent", null, new UtamMatcher(
-        MatcherType.stringContains, new UtamArgument[] { new UtamArgument("expected")}), null);
+        MatcherType.stringContains, new UtamArgument[] { getLiteralArg("expected")}), null);
 
     UtamError e = expectThrows(UtamError.class, () -> action.getComposeAction(context, new MethodContext(), false));
     assertThat(
@@ -85,7 +87,9 @@ public class UtamMatcherTests {
     UtamElementFilter filter =
         new UtamElementFilter(
             "focus",
-            new UtamArgument[]{new UtamArgument("text", "string")},
+            new UtamArgument[]{
+                getNonLiteralArg("text", "string")
+            },
             new UtamMatcher(MatcherType.isFalse, null), false);
     UtamError e = expectThrows(UtamError.class, () ->
         filter.setElementFilter(getTestTranslationContext(), UtamElement.Type.BASIC, actionable,

@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
+import static utam.compiler.grammar.UtamArgumentTests.getNonLiteralArg;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_FILTER_NEEDS_LIST;
 import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
 
@@ -43,9 +44,13 @@ public class UtamElementFilter_Tests {
   private static final String ELEMENT_NAME = "test";
   private static final TypeProvider ACTIONABLE_TYPE = actionable;
   private static final UtamArgument[] ONE_STRING_ARGS =
-      new UtamArgument[]{new UtamArgument("text", "string")};
+      new UtamArgument[]{
+          getNonLiteralArg("text", "string")
+  };
   private static final UtamArgument[] ONE_BOOLEAN_ARGS =
-      new UtamArgument[]{new UtamArgument("bool", "boolean")};
+      new UtamArgument[]{
+          getNonLiteralArg("bool", "boolean")
+  };
 
   static UtamElementFilter getInnerTextFilter() {
     return new UtamElementFilter(

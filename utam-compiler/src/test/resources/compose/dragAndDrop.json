@@ -59,9 +59,8 @@
           "apply": "dragAndDrop",
           "args": [
             {
-              "value": {
-                "element" : "second"
-              }
+              "name" : "second",
+              "type" : "elementReference"
             },
             {
               "value": 2

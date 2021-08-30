@@ -31,9 +31,8 @@
           "apply": "enterFrame",
           "args": [
             {
-              "value": {
-                "element": "myFrame"
-              }
+              "name": "myFrame",
+              "type" : "elementReference"
             }
           ]
         },
@@ -42,9 +41,8 @@
           "apply": "enterFrame",
           "args": [
             {
-              "value": {
-                "element": "myPublicFrame"
-              }
+              "name": "myPublicFrame",
+              "type" : "elementReference"
             }
           ]
         },
@@ -66,9 +64,8 @@
           "apply": "enterFrameAndLoad",
           "args" : [
             {
-              "value": {
-                "element": "myFrame"
-              }
+              "name": "myFrame",
+              "type" : "elementReference"
             },
             {
               "value": {

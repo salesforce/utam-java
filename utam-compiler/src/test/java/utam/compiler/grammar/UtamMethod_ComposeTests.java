@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertThrows;
 import static utam.compiler.grammar.TestUtilities.getElementPrivateMethodCalled;
+import static utam.compiler.grammar.UtamArgumentTests.getNonLiteralArg;
 import static utam.compiler.grammar.UtamMethod.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -108,7 +109,9 @@ public class UtamMethod_ComposeTests {
             new String[] {"clickable"},
             new UtamSelector(
                 ".fakeSelector[%s]",
-                new UtamArgument[] {new UtamArgument("selectorParameter", "string")}));
+                new UtamArgument[] {
+                    getNonLiteralArg("selectorParameter", "string")
+                }));
     scopeElement.testTraverse(context);
     UtamMethodAction action =
         new UtamMethodAction(

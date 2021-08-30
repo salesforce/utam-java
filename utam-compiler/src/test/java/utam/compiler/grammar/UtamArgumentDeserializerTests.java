@@ -9,9 +9,11 @@ package utam.compiler.grammar;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.DeserializerUtilities.getDeserializedObjects;
 import static utam.compiler.grammar.TestUtilities.JSON_MAPPING_ERROR;
 import static utam.compiler.grammar.TestUtilities.getDeserializedObject;
 import static utam.compiler.grammar.UtamArgumentDeserializer.ERR_ARGS_LITERAL_TYPE_NOT_SUPPORTED;
@@ -22,9 +24,26 @@ import static utam.compiler.grammar.UtamArgumentDeserializer.ERR_PREDICATE_MANDA
 import static utam.compiler.grammar.UtamArgumentDeserializer.ERR_PREDICATE_REDUNDANT;
 import static utam.compiler.grammar.UtamArgumentDeserializer.getRedundantForValueErr;
 import static utam.compiler.grammar.UtamArgumentDeserializer.getUnsupportedTypeErr;
+import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.testng.annotations.Test;
-import utam.compiler.grammar.UtamArgumentDeserializer.ElementReference;
+import utam.compiler.grammar.UtamArgument.ArgsProcessor;
+import utam.compiler.grammar.UtamArgument.ArgsProcessorWithExpectedTypes;
+import utam.compiler.grammar.UtamArgumentDeserializer.PageObjectType;
+import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.ElementContext.Basic;
+import utam.compiler.helpers.ParameterUtils.Regular;
+import utam.compiler.helpers.PrimitiveType;
+import utam.compiler.helpers.TranslationContext;
+import utam.compiler.representation.ElementMethod.Single;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
 
 /**
@@ -33,6 +52,10 @@ import utam.core.framework.consumer.UtamError;
  * @author james.evans
  */
 public class UtamArgumentDeserializerTests {
+
+  private final TranslationContext containers = new DeserializerUtilities()
+      .getContext("element/testContainer");
+  private final List<UtamArgument> elementReferences = getDeserializedObjects(UtamArgument.class, "element/testElementReference");
 
   private static UtamArgument deserialize(String json) {
     return getDeserializedObject(json, UtamArgument.class);
@@ -55,7 +78,7 @@ public class UtamArgumentDeserializerTests {
     json = "{  \"name\" :  \"argName\",  \"type\" : \"function\", \"predicate\" : [] }";
     deserialize(json);
 
-    json = "{  \"name\" :  \"argName\",  \"type\" : \"element\" }";
+    json = "{  \"name\" :  \"argName\",  \"type\" : \"elementReference\" }";
     deserialize(json);
   }
 
@@ -70,9 +93,9 @@ public class UtamArgumentDeserializerTests {
     json = "{  \"value\": true }";
     deserialize(json);
 
-    json = "{  \"value\" : { \"element\" : \"elementRef\" } }";
+    json = "{  \"value\" : { \"type\" : \"my/po/type\" } }";
     UtamArgument argument = deserialize(json);
-    assertThat(argument.value, is(instanceOf(ElementReference.class)));
+    assertThat(argument.value, is(instanceOf(PageObjectType.class)));
 
     json = "{  \"value\" : { \"css\" : \"css\" } }";
     argument = deserialize(json);
@@ -157,13 +180,6 @@ public class UtamArgumentDeserializerTests {
   }
 
   @Test
-  public void testElementArgByValueWithErrorThrows() {
-    String json = "{  \"value\" : { \"element\" : \"elementRef\", \"extra\" : true } }";
-    UtamError e = expectThrows(UtamError.class, () -> deserialize(json));
-    assertThat(e.getMessage(), containsString(JSON_MAPPING_ERROR));
-  }
-
-  @Test
   public void testArgByValueUnknownObjectThrows() {
     String json = "{  \"value\" : { \"extra\" : true } }";
     UtamError e = expectThrows(UtamError.class, () -> deserialize(json));
@@ -175,5 +191,98 @@ public class UtamArgumentDeserializerTests {
     String json = "{ \"type\" : \"function\", \"predicate\" : [{ \"error\": true }] }";
     UtamError e = expectThrows(UtamError.class, () -> deserialize(json));
     assertThat(e.getMessage(), containsString(JSON_MAPPING_ERROR));
+  }
+
+  @Test
+  public void testElementReferencePublicNoArgs() {
+    ArgsProcessor argsProcessor = new ArgsProcessor(containers, "test");
+    ElementContext elementContext = new Basic("testNoArgs");
+    containers.setElement(elementContext);
+    PageObjectMethod getter = new Single(elementContext, true);
+    elementContext.setElementMethod(getter);
+    UtamArgument argument = elementReferences.get(0);
+    MethodParameter parameter = argument.asParameter(containers);
+    assertThat(parameter.isLiteral(), is(true));
+    assertThat(parameter.getValue(), is(equalTo("this.getTestNoArgs()")));
+    assertThat(parameter.getType().isSameType(BASIC_ELEMENT), is(true));
+    argsProcessor.getParameters(new UtamArgument[]{argument});
+  }
+
+  @Test
+  public void testElementReferencePrivateWithArgsAndExpectedTypes() {
+    List<TypeProvider> expectedTypes = Collections.singletonList(BASIC_ELEMENT);
+    List<MethodParameter> selectorParameters = Collections
+        .singletonList(new Regular("par", PrimitiveType.STRING));
+    ArgsProcessor argsProcessor = new ArgsProcessorWithExpectedTypes(containers, "test",
+        expectedTypes);
+    ElementContext elementContext = new Basic("testWithArgs", selectorParameters);
+    containers.setElement(elementContext);
+    PageObjectMethod getter = new Single(elementContext, false);
+    elementContext.setElementMethod(getter);
+    UtamArgument argument = elementReferences.get(1);
+    MethodParameter parameter = argument.asParameter(containers);
+    assertThat(parameter.isLiteral(), is(true));
+    assertThat(parameter.getValue(),
+        is(equalTo("this.getTestWithArgsElement(\"elementArgValue\")")));
+    assertThat(parameter.getType().isSameType(BASIC_ELEMENT), is(true));
+    argsProcessor.getParameters(new UtamArgument[]{argument});
+  }
+
+  @Test
+  public void testElementReferenceRedundantPredicate() {
+    JsonStringBuilder helper = new JsonStringBuilder().setType("elementReference").setName("name").setValue("predicate", "[]");
+    String json = helper.asString();
+    UtamError e = expectThrows(UtamError.class, () -> deserialize(json));
+    assertThat(e.getMessage(), is(equalTo(ERR_PREDICATE_REDUNDANT)));
+  }
+
+  @Test
+  public void testElementReferenceNameMandatory() {
+    JsonStringBuilder helper = new JsonStringBuilder().setType("elementReference");
+    String json = helper.asString();
+    UtamError e = expectThrows(UtamError.class, () -> deserialize(json));
+    assertThat(e.getMessage(), is(equalTo(ERR_ARGS_NAME_MANDATORY)));
+  }
+
+  @Test
+  public void testOnlyLiteralsAllowedInsideReference() {
+    UtamError e = expectThrows(UtamError.class, () ->
+        getDeserializedObjects(UtamArgument.class, "element/elementReferenceNonLiteralArgsThrows"));
+    assertThat(e.getCause().getMessage(), containsString(JSON_MAPPING_ERROR));
+  }
+
+  private static class JsonStringBuilder {
+
+    private final Map<String, String> keys = new HashMap<>();
+
+    private JsonStringBuilder() {
+      keys.put("\"name\"", null);
+      keys.put("\"type\"", null);
+    }
+
+    JsonStringBuilder setName(String value) {
+      setValue("name", String.format("\"%s\"", value));
+      return this;
+    }
+
+    JsonStringBuilder setType(String value) {
+      setValue("type", String.format("\"%s\"", value));
+      return this;
+    }
+
+    JsonStringBuilder setValue(String key, String value) {
+      keys.put(String.format("\"%s\"", key), value);
+      return this;
+    }
+
+    String asString() {
+      String content = keys
+          .entrySet()
+          .stream()
+          .filter(entry -> entry.getValue() != null)
+          .map(entry -> String.format("%s : %s", entry.getKey(), entry.getValue()))
+          .collect(Collectors.joining(", "));
+      return String.format("{ %s }", content);
+    }
   }
 }

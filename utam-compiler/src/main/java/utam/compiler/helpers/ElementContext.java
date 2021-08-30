@@ -154,6 +154,11 @@ public abstract class ElementContext {
     public Basic(String name) {
       this(name, actionable, EMPTY_SELECTOR);
     }
+
+    // used in tests
+    public Basic(String name, List<MethodParameter> parameters) {
+      super(null, name, actionable, EMPTY_SELECTOR, false, parameters, false);
+    }
   }
 
   public static class Container extends ElementContext {
