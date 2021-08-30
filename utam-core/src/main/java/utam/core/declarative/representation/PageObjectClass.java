@@ -81,7 +81,7 @@ public interface PageObjectClass {
    *
    * @return array
    */
-  Profile[] getProfiles();
+  List<Profile> getProfiles();
 
   /**
    * comments to use in a javadoc

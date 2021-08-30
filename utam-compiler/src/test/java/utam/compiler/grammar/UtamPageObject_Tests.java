@@ -16,7 +16,6 @@ import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.framework.consumer.UtamError;
-import utam.core.framework.context.Profile;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -200,14 +199,6 @@ public class UtamPageObject_Tests {
         Collections.singletonList(methodInfo));
   }
 
-  /** The getProfiles method should return an empty profile array with null profile */
-  @Test
-  public void testGetProfilesWithNullProfile() {
-    TranslationContext context = getTestTranslationContext();
-    UtamPageObject pageObject = new UtamPageObject();
-    assertThat(pageObject.getProfiles(context), is(arrayWithSize(0)));
-  }
-
   @Test
   public void testAbstractPageObjectWithProfile() {
     UtamPageObject utamPageObject = new UtamPageObject();
@@ -223,18 +214,6 @@ public class UtamPageObject_Tests {
     utamPageObject.profiles = MOCK_PROFILES;
     UtamError e = expectThrows(UtamError.class, utamPageObject::validate);
     assertThat(e.getMessage(), containsString(ERR_ROOT_PROFILE_HAS_NO_INTERFACE));
-  }
-
-  /** The getProfiles method should return a matched profile */
-  @Test
-  public void testGetProfilesFromPageObject() {
-    UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.profiles = MOCK_PROFILES;
-    utamPageObject.implementsType = TEST_URI;
-    Profile[] profiles = utamPageObject.getProfiles(UtamProfile_Tests.getContextWithProfile());
-    assertThat(profiles.length, is(equalTo(1)));
-    assertThat(profiles[0].getName(), is(equalTo(PROFILE_KEY)));
-    assertThat(profiles[0].getValue(), is(equalTo(PROFILE_VALUE)));
   }
 
   @Test
@@ -339,7 +318,6 @@ public class UtamPageObject_Tests {
   public void testRootElementWithType() {
     MethodInfo info = new MethodInfo("getRoot", "RootElement");
     info.addCodeLine("this.getRootElement()");
-    //info.addImportedTypes(Clickable.class.getName());
     info.setIsPublic(false);
     UtamPageObject utamPageObject = new UtamPageObject();
     utamPageObject.rootElementType = new String[] { "clickable" };
@@ -367,7 +345,6 @@ public class UtamPageObject_Tests {
   public void testPublicRootElementWithType() {
     MethodInfo info = new MethodInfo("getRoot", "RootElement");
     info.addCodeLine("this.getRootElement()");
-    //info.addImportedTypes(Clickable.class.getName());
     UtamPageObject utamPageObject = new UtamPageObject();
     utamPageObject.rootElementType = new String[] { "clickable" };
     utamPageObject.isExposeRootElement = true;

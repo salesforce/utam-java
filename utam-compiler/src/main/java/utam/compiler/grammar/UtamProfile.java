@@ -10,43 +10,91 @@ package utam.compiler.grammar;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import utam.compiler.grammar.UtamProfile.Deserializer;
 import utam.compiler.helpers.TranslationContext;
+import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.Profile;
 
-import java.io.IOException;
-
 /**
- * profile is used in root object
+ * Profile marks a Page Object to be applicable to a profile. Assigned profile can be one or
+ * multiple as an array, ex: "platform":"android" or "device": ["phone", "tablet"]
+ *
  * @author elizaveta.ivanova
  * @since 228
  */
-class UtamProfile {
+@JsonDeserialize(using = Deserializer.class)
+final class UtamProfile {
 
-    private final String name;
-    private final String value;
+  static final String ERR_INVALID_ARRAY_TYPES =
+      "Profile '%s': array of profile values must contain only string values";
+  static final String ERR_DUPLICATE_PROFILE_VALUE =
+      "Profile '%s': value '%s' already added";
+  static final String ERR_PROFILE_VALUE_WRONG_FORMAT =
+      "Profile '%s': value can only be string or string array";
 
-    UtamProfile(String name, String value) {
-        this.name = name;
-        this.value = value;
+  private final String name;
+  private final List<String> values;
+
+  UtamProfile(String name, String value) {
+    this.name = name;
+    this.values = Collections.singletonList(value);
+  }
+
+  UtamProfile(String name, List<String> values) {
+    this.name = name;
+    this.values = values;
+  }
+
+  static List<Profile> getPageObjectProfiles(UtamProfile[] profiles, TranslationContext context) {
+    if (profiles == null) {
+      return new ArrayList<>();
     }
+    return Stream.of(profiles)
+        .flatMap(profile -> profile.getProfiles(context).stream())
+        .collect(Collectors.toList());
+  }
 
-    Profile getProfile(TranslationContext translationInstantContext) {
-        return translationInstantContext.getProfile(name, value);
-    }
+  List<Profile> getProfiles(TranslationContext translationContext) {
+    return values
+        .stream()
+        .map(value -> translationContext.getProfile(name, value))
+        .collect(Collectors.toList());
+  }
 
-    static class Deserializer extends StdDeserializer<UtamProfile> {
+  static class Deserializer extends
+      com.fasterxml.jackson.databind.JsonDeserializer<UtamProfile> {
 
-        Deserializer() {
-            super(UtamProfile.class);
+    @Override
+    public UtamProfile deserialize(JsonParser jp, DeserializationContext deserializationContext)
+        throws IOException {
+      JsonNode node = jp.getCodec().readTree(jp);
+      String key = node.fieldNames().next();
+      JsonNode valuesNode = node.get(key);
+      if (valuesNode.isArray()) {
+        List<String> values = new ArrayList<>();
+        for (JsonNode valueNode : valuesNode) {
+          if (!valueNode.isTextual()) {
+            throw new UtamError(String.format(ERR_INVALID_ARRAY_TYPES, key));
+          }
+          String textValue = valueNode.textValue();
+          if (values.contains(textValue)) {
+            throw new UtamError(String.format(ERR_DUPLICATE_PROFILE_VALUE, key, textValue));
+          }
+          values.add(textValue);
         }
-
-        @Override
-        public UtamProfile deserialize(JsonParser jp, DeserializationContext deserializationContext) throws IOException {
-            JsonNode node = jp.getCodec().readTree(jp);
-            String key = node.fieldNames().next();
-            String value = node.get(key).asText();
-            return new UtamProfile(key, value);
-        }
+        return new UtamProfile(key, values);
+      } else if (valuesNode.isTextual()) {
+        return new UtamProfile(key, valuesNode.asText());
+      } else {
+        throw new UtamError(String.format(ERR_PROFILE_VALUE_WRONG_FORMAT, key));
+      }
     }
+  }
 }

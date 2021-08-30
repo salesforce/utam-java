@@ -11,7 +11,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyArray;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
@@ -199,13 +199,13 @@ public class DefaultTranslatorRunnerTests {
     runner.run();
     assertThat(
         runner.getGeneratedObject(PAGE_OBJECT_URI).getImplementation().getProfiles(),
-        is(emptyArray()));
+        is(empty()));
     assertThat(
         runner.getGeneratedObject(INTERFACE_ONLY_URI).getImplementation().getProfiles(),
-        is(emptyArray()));
+        is(empty()));
     assertThat(
         runner.getGeneratedObject(IMPL_ONLY_URI).getImplementation().getProfiles(),
-        is(emptyArray()));
+        is(empty()));
   }
 
   @Test

@@ -131,7 +131,7 @@ public final class JsonDeserializer {
 
     @Override
     public boolean isClassWithProfiles() {
-      return pageObjectClass.getProfiles().length > 0;
+      return !pageObjectClass.getProfiles().isEmpty();
     }
 
     @Override
@@ -251,8 +251,8 @@ public final class JsonDeserializer {
     }
 
     @Override
-    public Profile[] getProfiles() {
-      return utamPageObject.getProfiles(context);
+    public List<Profile> getProfiles() {
+      return UtamProfile.getPageObjectProfiles(utamPageObject.profiles, context);
     }
 
     @Override

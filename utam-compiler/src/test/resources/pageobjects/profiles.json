@@ -1,0 +1,14 @@
+{
+  "implements": "utam-test/pageObjects/customInterface",
+  "profile": [
+    {
+      "platform": "android"
+    },
+    {
+      "device": [
+        "phone",
+        "tablet"
+      ]
+    }
+  ]
+}

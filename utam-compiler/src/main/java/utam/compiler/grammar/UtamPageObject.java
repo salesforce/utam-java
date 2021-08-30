@@ -30,7 +30,6 @@ import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Locator;
 import utam.core.framework.consumer.UtamError;
-import utam.core.framework.context.Profile;
 
 /**
  * @author elizaveta.ivanova
@@ -50,7 +49,7 @@ final class UtamPageObject {
   UtamMethod[] methods;
   String platform;
   UtamProfile[] profiles;
-  String implementsType;
+  final String implementsType;
   final String comments = "";
   UtamShadowElement shadow;
   String[] rootElementType;
@@ -148,15 +147,6 @@ final class UtamPageObject {
 
   TypeProvider getBaseType() {
     return isRootPageObject ? ROOT_PAGE_OBJECT : PAGE_OBJECT;
-  }
-
-  Profile[] getProfiles(TranslationContext context) {
-    if (this.profiles == null) {
-      return new Profile[0];
-    }
-    return Stream.of(profiles)
-        .map(profile -> profile.getProfile(context))
-        .toArray(Profile[]::new);
   }
 
   private ElementContext setRootElementMethod(TranslationContext context) {

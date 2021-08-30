@@ -88,9 +88,10 @@ public abstract class UtamArgument {
     throw new IllegalStateException(ERR_GET_PREDICATE_NEEDS_PREDICATE_ARG);
   }
 
-  public static class UtamArgumentNonLiteral extends UtamArgument {
+  static class UtamArgumentNonLiteral extends UtamArgument {
+
     @JsonCreator
-    public UtamArgumentNonLiteral(
+    UtamArgumentNonLiteral(
         @JsonProperty(value = "name") String name,
         @JsonProperty(value = "type") String type) {
       super(null, name, type, null, null);
