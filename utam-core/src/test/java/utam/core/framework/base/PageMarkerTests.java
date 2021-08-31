@@ -12,7 +12,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static utam.core.selenium.appium.LocatorUIAutomator.UI_AUTOMATOR_SELECTOR_PREFIX;
 
 import org.testng.annotations.Test;
 import utam.core.selenium.element.LocatorBy;
@@ -35,7 +34,7 @@ public class PageMarkerTests {
     assertThat(PageMarker.getRootLocator(annotation), is(equalTo(LocatorBy.byClassChain("test"))));
 
     when(annotation.classchain()).thenReturn("");
-    when(annotation.uiautomator()).thenReturn(UI_AUTOMATOR_SELECTOR_PREFIX + "enabled(true)");
+    when(annotation.uiautomator()).thenReturn("enabled(true)");
     assertThat(PageMarker.getRootLocator(annotation),
         is(equalTo(LocatorBy.byUiAutomator("enabled(true)"))));
   }
