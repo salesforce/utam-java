@@ -11,7 +11,6 @@ import java.time.Duration;
 import java.util.List;
 import utam.core.element.Element;
 import utam.core.element.FindContext;
-import utam.core.element.FrameElement;
 import utam.core.element.Locator;
 
 /**

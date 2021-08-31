@@ -24,7 +24,6 @@ import picocli.CommandLine.ExitCode;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import utam.core.declarative.translator.GuardrailsMode;
-import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorRunner;
 import utam.core.declarative.translator.TranslatorSourceConfig;
@@ -124,10 +123,7 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
     }
     try {
       JsonCompilerConfig jsonConfig = new JsonCompilerConfig(this.jsonConfig, this.compilerRoot);
-      TranslatorSourceConfig sourceConfig = jsonConfig.getSourceConfig();
-      TranslatorTargetConfig targetConfig = jsonConfig.getTargetConfig();
-      List<ProfileConfiguration> profiles = jsonConfig.getConfiguredProfiles();
-      return new DefaultTranslatorConfiguration(jsonConfig.getModuleName(), WARNING, sourceConfig, targetConfig, profiles);
+      return jsonConfig.getTranslatorConfig(WARNING);
     } catch (IOException e) {
       thrownError = e;
       returnCode = RUNTIME_ERR;

@@ -49,7 +49,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
   static final String DUPLICATE_IMPL_ERR =
       "default implementation for type '%s' is already set as '%s'";
   static final String DUPLICATE_IMPL_WITH_PROFILE_ERR =
-      "default implementation for type '%s' is already set as '%s' for profile '%s'";
+      "can't set dependency as '%s' for type '%s', it was already set as '%s' for profile %s";
   static final String PROFILE_NOT_CONFIGURED_ERR = "profile '%s' is not configured";
   private final TranslatorConfig translatorConfig;
   private final Map<String, PageObjectDeclaration> generated = new HashMap<>();
@@ -201,21 +201,26 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
 
   @Override
   public void writeDependenciesConfigs() {
-    String profilesRoot = getResourcesRoot() + File.separator;
-    String moduleName = translatorConfig.getModuleName();
     for (Profile profile : getAllProfiles()) {
       Properties configToWrite = getProfileMapping(profile);
       if (!configToWrite.isEmpty()) {
-        String profileConfigPath = profilesRoot + String.format("%s.properties", profile.getConfigName(moduleName));
-        try {
-          Writer writer = new FileWriter(profileConfigPath);
-          configToWrite.store(writer, "profile configuration");
-        } catch (IOException e) {
-          throw new UtamCompilationError(
-              String.format("error while writing profile configuration '%s'", profileConfigPath),
-              e);
-        }
+        writeDependenciesConfig(profile, configToWrite);
       }
+    }
+  }
+
+  // possible override in tests classes
+  protected void writeDependenciesConfig(Profile profile, Properties configToWrite) {
+    String moduleName = translatorConfig.getModuleName();
+    String profileConfigPath = getResourcesRoot() + File.separator + String
+        .format("%s.properties", profile.getConfigName(moduleName));
+    try {
+      Writer writer = new FileWriter(profileConfigPath);
+      configToWrite.store(writer, "profile configuration");
+    } catch (IOException e) {
+      throw new UtamCompilationError(
+          String.format("error while writing profile configuration '%s'", profileConfigPath),
+          e);
     }
   }
 
@@ -237,7 +242,6 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     String typeName = object.getInterface().getInterfaceType().getFullName();
     // interface only
     if (object.isInterfaceOnly()) {
-      setInterfaceOnly(typeName);
       return;
     }
     String classTypeName = object.getImplementation().getClassType().getFullName();
@@ -257,14 +261,6 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     }
   }
 
-  final void setInterfaceOnly(String typeName) {
-    Map<String, String> implMapping = profilesMapping.get(defaultProfile);
-    if (implMapping.containsKey(typeName)) {
-      throw new UtamError(String.format(DUPLICATE_PAGE_OBJECT_NAME, typeName));
-    }
-    implMapping.put(typeName, "");
-  }
-
   final void setImplOnly(String typeName, String classTypeName) {
     Map<String, String> implMapping = profilesMapping.get(defaultProfile);
     if (implMapping.containsKey(typeName) && !implMapping.get(typeName).isEmpty()) {
@@ -278,12 +274,15 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       throw new UtamError(String.format(PROFILE_NOT_CONFIGURED_ERR, profile.getName()));
     }
     if (profilesMapping.get(profile).containsKey(typeName)) {
-      throw new UtamError(
+      String profileValue = String.format("{ %s : %s }", profile.getName(), profile.getValue());
+      String implType = profilesMapping.get(profile).get(typeName);
+      throw new UtamCompilationError(
           String.format(
               DUPLICATE_IMPL_WITH_PROFILE_ERR,
+              classTypeName,
               typeName,
-              profilesMapping.get(profile).get(typeName),
-              profile.getName()));
+              implType,
+              profileValue));
     }
     profilesMapping.get(profile).put(typeName, classTypeName);
   }

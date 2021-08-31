@@ -25,10 +25,10 @@ public class PageObjectContextImpl implements PageObjectContext {
   public static final String ERR_GET_CLASS_BY_NAME = "can't find class with name %s";
   static final String ERR_GET_INSTANCE_BY_NAME = "can't create instance of type '%s'";
 
-  private final Map<Class<? extends PageObject>, Class> beansOverride;
+  private final Map<Class<? extends PageObject>, Class> activeBeans;
 
-  public PageObjectContextImpl(Map<Class<? extends PageObject>, Class> overrides) {
-    this.beansOverride = overrides;
+  public PageObjectContextImpl(Map<Class<? extends PageObject>, Class> activeBeans) {
+    this.activeBeans = activeBeans;
   }
 
   public static Class getClassFromName(String className) {
@@ -50,8 +50,8 @@ public class PageObjectContextImpl implements PageObjectContext {
     Class<? extends T> implementingClass;
     if (BasePageObject.class.isAssignableFrom(type)) { // if class and not interface is passed
       implementingClass = type;
-    } else if (beansOverride.containsKey(type)) {
-      implementingClass = beansOverride.get(type);
+    } else if (activeBeans.containsKey(type)) {
+      implementingClass = activeBeans.get(type);
     } else {
       String className = getDefaultImplType(type.getName())[1];
       implementingClass = getClassFromName(className);

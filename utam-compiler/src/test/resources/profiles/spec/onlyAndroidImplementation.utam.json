@@ -1,0 +1,10 @@
+{
+  "implements": "utam-profiles/pageObjects/onlyAndroidInterface",
+  "profile": [
+    {
+      "platform": [
+        "android"
+      ]
+    }
+  ]
+}

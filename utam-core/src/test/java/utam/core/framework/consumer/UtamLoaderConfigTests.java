@@ -10,6 +10,7 @@ package utam.core.framework.consumer;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -54,8 +55,7 @@ public class UtamLoaderConfigTests {
     UtamLoaderConfigImpl config = getDefaultConfig();
     assertThat(config.getModules().iterator().next(), is(nullValue()));
     assertThat(config.getConfiguredProfiles().size(), is(equalTo(1)));
-    assertThat(config.getConfiguredProfiles().keySet().iterator().next(),
-        is(equalTo(DEFAULT_PROFILE.getConfigName(null))));
+    assertThat(config.getConfiguredProfiles().iterator().next(), is(equalTo(DEFAULT_PROFILE)));
     PageObject pageObject = config.getPageContext().getBean(TestLoaderConfigPageObject.class);
     assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
   }
@@ -129,20 +129,18 @@ public class UtamLoaderConfigTests {
   @Test
   public void testNullConfig() {
     UtamLoaderConfigImpl config = getDefaultConfig();
-    assertThat(config.getConfiguredProfiles().keySet(), hasSize(1));
-    assertThat(config.getConfiguredProfiles().keySet().iterator().next(),
-        is(equalTo(DEFAULT_PROFILE.getConfigName(null))));
+    assertThat(config.getConfiguredProfiles(), hasSize(1));
+    assertThat(config.getConfiguredProfiles().iterator().next(), is(equalTo(DEFAULT_PROFILE)));
     assertThat(config.getModules(), hasSize(1));
     assertThat(config.getModules().get(0), is(nullValue()));
   }
 
   @Test
-  public void testDefaultConfigLoadedFirst() {
+  public void testDefaultConfigMissingThrows() {
     UtamLoaderConfig config = new UtamLoaderConfigImpl("module.loader.json");
     PageObjectContext context = config.getPageContext();
-    // default config with empty implementation should be loaded first
-    // then profile specific configuration should override it, because empty was not added
-    PageObject pageObject = context.getBean(TestLoaderConfigDefault.class);
-    assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
+    UtamError e = expectThrows(UtamError.class,
+        () -> context.getBean(TestLoaderConfigDefault.class));
+    assertThat(e.getMessage(), containsString("can't find class"));
   }
 }

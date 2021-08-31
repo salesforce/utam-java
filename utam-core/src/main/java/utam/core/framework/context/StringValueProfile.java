@@ -18,7 +18,12 @@ import utam.core.framework.consumer.UtamError;
 public class StringValueProfile implements Profile {
 
   // profile with default implementations for interfaces in case if modules are not set
-  public static final Profile DEFAULT_PROFILE = new StringValueProfile("default", "impl");
+  public static final Profile DEFAULT_PROFILE = new StringValueProfile("default", "impl") {
+    @Override
+    public boolean isDefault() {
+      return true;
+    }
+  };
   private static final String ERR_NAME_REQUIRED =
       "profile name must not be null or the empty string";
   private static final String ERR_VALUES_REQUIRED =

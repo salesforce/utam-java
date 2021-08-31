@@ -1,0 +1,8 @@
+{
+  "implements": "utam-profiles/pageObjects/deviceInterface",
+  "profile": [
+    {
+      "platform": "ios_phone"
+    }
+  ]
+}
