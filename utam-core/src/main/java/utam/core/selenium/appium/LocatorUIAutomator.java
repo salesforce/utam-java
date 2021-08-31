@@ -48,21 +48,17 @@ public class LocatorUIAutomator extends LocatorBy {
       }
       if (uiautomator.startsWith("new UiSelector")) {
         // Example - new UiSelector().resourceId("com.salesforce.chatter:id/app_launcher_menu_item")
-        String match = uiautomator
-            .substring(uiautomator.indexOf(".") + 1, uiautomator.indexOf("(", uiautomator.indexOf(".") + 1));
-        if (Stream.of(LocatorUIAutomator.Method.values())
-            .noneMatch(method -> method.value.equals(match))) {
-          throw new UtamError(String.format(ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD, match));
-        }
+        // extract method
+        String match = uiautomator.substring(uiautomator.indexOf(".") + 1);
+        // continue validating method
+        uiautomator = match;
       }
-      else {
-        // Example - resourceId("com.salesforce.chatter:id/app_launcher_menu_item")
-        String match = uiautomator
-            .substring(0, uiautomator.indexOf("("));
-        if (Stream.of(LocatorUIAutomator.Method.values())
-            .noneMatch(method -> method.value.equals(match))) {
-          throw new UtamError(String.format(ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD, match));
-        }
+      // Example - resourceId("com.salesforce.chatter:id/app_launcher_menu_item")
+      String match = uiautomator
+          .substring(0, uiautomator.indexOf("("));
+      if (Stream.of(LocatorUIAutomator.Method.values())
+          .noneMatch(method -> method.value.equals(match))) {
+        throw new UtamError(String.format(ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD, match));
       }
     } catch (StringIndexOutOfBoundsException e) {
       throw new UtamError(String.format("incorrect UIAutomator selector format '%s'", uiautomator));
