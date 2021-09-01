@@ -25,9 +25,21 @@ public enum MobilePlatformType implements Profile {
 
   WEB,
   ANDROID,
-  IOS;
+  ANDROID_TABLET,
+  ANDROID_PHONE,
+  IOS,
+  IOS_TABLET,
+  IOS_PHONE;
 
   public static final String PLATFORM_PROFILE_NAME = "platform";
+
+  public boolean isIOS() {
+    return this == IOS || this == IOS_PHONE || this == IOS_TABLET;
+  }
+
+  public boolean isAndroid() {
+    return this == ANDROID || this == ANDROID_PHONE || this == ANDROID_TABLET;
+  }
 
   /**
    * detect profile based on driver type
@@ -73,4 +85,5 @@ public enum MobilePlatformType implements Profile {
   public String getConfigName(String moduleName) {
     return getProfileConfigName(this, moduleName);
   }
+
 }

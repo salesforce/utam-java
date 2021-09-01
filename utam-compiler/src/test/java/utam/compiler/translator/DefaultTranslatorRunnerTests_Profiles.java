@@ -149,15 +149,17 @@ public class DefaultTranslatorRunnerTests_Profiles {
     runner.setPageObject("initial", declaration);
     UtamError e =
         expectThrows(UtamError.class, () -> runner.setPageObject(interfaceTypeName, declaration));
+    String implName = "utam.test.pageobjects.test.impl.TestImpl";
     assertThat(
         e.getMessage(),
         is(
             equalTo(
                 String.format(
                     DUPLICATE_IMPL_WITH_PROFILE_ERR,
+                    implName,
                     "utam.test.pageobjects.test.TestInterface",
-                    "utam.test.pageobjects.test.impl.TestImpl",
-                    "red"))));
+                    implName,
+                    "{ red : colorRed }"))));
   }
 
   @Test

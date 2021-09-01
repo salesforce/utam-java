@@ -73,7 +73,7 @@ public class StringValueProfileConfig implements ProfileConfiguration {
   }
 
   // used in tests
-  StringValueProfileConfig(String name, String value) {
+  public StringValueProfileConfig(String name, String value) {
     this(name, new String[] { value } );
   }
 

@@ -11,14 +11,13 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyArray;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getJsonStringDeserializer;
 import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_IMPL_ERR;
 import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_IMPL_WITH_PROFILE_ERR;
-import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_PAGE_OBJECT_NAME;
 import static utam.compiler.translator.DefaultTranslatorRunner.ERR_PROFILE_PATH_DOES_NOT_EXIST;
 import static utam.compiler.translator.DefaultTranslatorRunner.ERR_PROFILE_PATH_NOT_CONFIGURED;
 import static utam.compiler.translator.DefaultTranslatorRunner.PROFILE_NOT_CONFIGURED_ERR;
@@ -199,13 +198,13 @@ public class DefaultTranslatorRunnerTests {
     runner.run();
     assertThat(
         runner.getGeneratedObject(PAGE_OBJECT_URI).getImplementation().getProfiles(),
-        is(emptyArray()));
+        is(empty()));
     assertThat(
         runner.getGeneratedObject(INTERFACE_ONLY_URI).getImplementation().getProfiles(),
-        is(emptyArray()));
+        is(empty()));
     assertThat(
         runner.getGeneratedObject(IMPL_ONLY_URI).getImplementation().getProfiles(),
-        is(emptyArray()));
+        is(empty()));
   }
 
   @Test
@@ -254,7 +253,7 @@ public class DefaultTranslatorRunnerTests {
         UtamError.class, () -> runner.setImplOnlyForProfile(profile, "type", "typeImpl2"));
     assertThat(
         e.getMessage(),
-        is(equalTo(String.format(DUPLICATE_IMPL_WITH_PROFILE_ERR, "type", "typeImpl1", "default"))));
+        is(equalTo(String.format(DUPLICATE_IMPL_WITH_PROFILE_ERR, "typeImpl2", "type", "typeImpl1", "{ default : impl }"))));
   }
 
   @Test
@@ -268,19 +267,6 @@ public class DefaultTranslatorRunnerTests {
     assertThat(
         e.getMessage(),
         is(equalTo(String.format(DUPLICATE_IMPL_ERR, "type", "typeImpl1"))));
-  }
-
-  @Test
-  public void testSetInterfaceOnly() {
-    DefaultTranslatorRunner runner = getRunner();
-    runner.setInterfaceOnly("type");
-    Properties properties = runner.getProfileMapping(DEFAULT_PROFILE);
-    assertThat(properties.getProperty("type"), is(equalTo("")));
-    UtamError e = expectThrows(
-        UtamError.class, () -> runner.setInterfaceOnly("type"));
-    assertThat(
-        e.getMessage(),
-        is(equalTo(String.format(DUPLICATE_PAGE_OBJECT_NAME, "type"))));
   }
 
   @Test

@@ -30,7 +30,6 @@ import utam.core.driver.Expectations;
 import utam.core.element.Element;
 import utam.core.element.FindContext;
 import utam.core.framework.UtamCoreError;
-import utam.core.element.FrameElement;
 import utam.core.element.Locator;
 import utam.core.selenium.appium.MobileElementAdapter;
 

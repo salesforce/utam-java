@@ -1,0 +1,11 @@
+{
+  "implements": "utam-profiles/pageObjects/deviceInterface",
+  "profile": [
+    {
+      "platform": [
+        "ios",
+        "ios_tablet"
+      ]
+    }
+  ]
+}

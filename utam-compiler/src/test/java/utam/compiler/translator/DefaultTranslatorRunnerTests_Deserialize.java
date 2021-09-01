@@ -81,8 +81,8 @@ public class DefaultTranslatorRunnerTests_Deserialize {
     String json = "{  \"interface\": true  }";
     PageObjectDeclaration declaration = TestUtilities.getPageObject(json);
     DefaultTranslatorRunner runner = getRunnerMock();
-    runner.setPageObject("initial", declaration);
-    String type = declaration.getInterface().getInterfaceType().getFullName();
+    String type = "type";
+    runner.setPageObject(type, declaration);
     UtamError e = expectThrows(UtamError.class, () -> runner.setPageObject(type, declaration));
     assertThat(e.getMessage(), containsString(String.format(DUPLICATE_PAGE_OBJECT_NAME, type)));
   }

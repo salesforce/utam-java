@@ -87,6 +87,11 @@ public class UtamLoaderImpl implements UtamLoader {
     return instance;
   }
 
+  // for tests
+  protected PageObject getBean(Class type) {
+    return factory.getPageContext().getBean(type);
+  }
+
   @Override
   public <T extends RootPageObject> T load(Class<T> type) {
     T instance = create(type);

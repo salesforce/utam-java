@@ -55,7 +55,11 @@ public class DeserializerUtilities {
         .collect(Collectors.joining("\n"));
   }
 
-  public Result getResultFromFile(String fileName) {
+  TranslatorConfig getTranslatorConfig() {
+    return translatorConfig;
+  }
+
+  Result getResultFromFile(String fileName) {
     String content = readJSON(fileName);
     return getResultFromString(content);
   }

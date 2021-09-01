@@ -28,7 +28,9 @@ import utam.compiler.UtamCompilationError;
 import utam.compiler.translator.DefaultSourceConfiguration.SourceWithoutPackages;
 import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.ScannerConfig;
+import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.declarative.translator.ProfileConfiguration;
+import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorSourceConfig;
 import utam.core.declarative.translator.TranslatorTargetConfig;
 import utam.core.declarative.translator.UnitTestRunner;
@@ -82,6 +84,13 @@ public class JsonCompilerConfig {
   // for tests
   Module getModule() {
     return moduleConfig;
+  }
+
+  public TranslatorConfig getTranslatorConfig(GuardrailsMode guardrailsMode) {
+    TranslatorSourceConfig sourceConfig = getSourceConfig();
+    TranslatorTargetConfig targetConfig = getTargetConfig();
+    List<ProfileConfiguration> profiles = getConfiguredProfiles();
+    return new DefaultTranslatorConfiguration(getModuleName(), guardrailsMode, sourceConfig, targetConfig, profiles);
   }
 
   /**

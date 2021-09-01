@@ -27,7 +27,7 @@ import utam.core.framework.base.PageObject;
  * @author elizaveta.ivanova
  * @since 232
  */
-public final class DefaultProfileContext implements ProfileContext {
+public class DefaultProfileContext implements ProfileContext {
 
   private static final String ERR_PROFILE_FILE = "can't read profile config from file '%s'";
 
@@ -40,6 +40,19 @@ public final class DefaultProfileContext implements ProfileContext {
     this.profile = profile;
     this.moduleName = moduleName;
     Properties properties = getBeansFromResource();
+    properties.stringPropertyNames().forEach(type -> {
+      String implClassName = properties.getProperty(type);
+      // default config can have empty lines
+      if (!implClassName.isEmpty()) {
+        beans.put(getClassFromName(type), implClassName);
+      }
+    });
+  }
+
+  // used in tests
+  protected DefaultProfileContext(String moduleName, Profile profile, Properties properties) {
+    this.profile = profile;
+    this.moduleName = moduleName;
     properties.stringPropertyNames().forEach(type -> {
       String implClassName = properties.getProperty(type);
       // default config can have empty lines
