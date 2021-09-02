@@ -38,7 +38,7 @@ public class LocatorClassChain extends LocatorBy {
 
   public LocatorClassChain(String selectorString) {
     super(selectorString);
-    Stream.of(selectorString.split("/"))
+    Stream.of(selectorString.split("/XCUIElement"))
         .forEach(LocatorClassChain::validateSubClassChainSelector);
   }
 
