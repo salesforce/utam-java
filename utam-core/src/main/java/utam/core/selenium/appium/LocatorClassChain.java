@@ -38,6 +38,8 @@ public class LocatorClassChain extends LocatorBy {
 
   public LocatorClassChain(String selectorString) {
     super(selectorString);
+    // To avoid to split the string based on the / in attribute part, for example:
+    // **/XCUIElementTypeStaticText[`text == 'https://q3lex.lightning.force.com/lightning/r/Account/sdf/view'`]
     Stream.of(selectorString.split("/XCUIElement"))
         .forEach(LocatorClassChain::validateSubClassChainSelector);
   }
