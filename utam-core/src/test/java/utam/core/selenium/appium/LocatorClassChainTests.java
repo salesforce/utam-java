@@ -173,6 +173,14 @@ public class LocatorClassChainTests {
   }
 
   @Test
+  public void testValidateClassChainSelectorWithSlashInAttribut() {
+    String locator = "**/XCUIElementTypeStaticText[`text == 'https://q3lex.lightning.force.com/lightning/r/Account/0019A00000K9wzfQAB/view'`]";
+    Locator locatorValue = LocatorBy.byClassChain(locator);
+    assertThat(locatorValue.getValue(), is(equalTo(MobileBy.iOSClassChain(locator))));
+    assertThat(locatorValue.getStringValue(), is(equalTo(locator)));
+  }
+
+  @Test
   public void testValidateClassChainSelectorUnsupportOperatorThrows() {
     UtamError e = expectThrows(UtamError.class,
         () -> LocatorBy
