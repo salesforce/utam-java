@@ -1,0 +1,22 @@
+{
+  "elements" : [
+    {
+      "name" : "element",
+      "selector" : {
+        "css" : "css"
+      },
+      "type" : [ "actionable" ]
+    }
+  ],
+  "methods" : [
+    {
+      "name" : "test",
+      "compose" : [
+        {
+          "returnType" : "string",
+          "element" : "element"
+        }
+      ]
+    }
+  ]
+}

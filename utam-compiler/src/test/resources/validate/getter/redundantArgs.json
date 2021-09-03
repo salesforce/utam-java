@@ -1,0 +1,25 @@
+{
+  "elements" : [
+    {
+      "name" : "test",
+      "selector" : {
+        "css" : "css"
+      }
+    }
+  ],
+  "methods" : [
+    {
+      "name" : "test",
+      "compose" : [
+        {
+          "element" : "test",
+          "args" : [
+            {
+              "value" : "str"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -7,15 +7,13 @@
  */
 package utam.compiler.representation;
 
+import java.util.ArrayList;
+import java.util.List;
 import utam.compiler.helpers.MethodContext;
+import utam.compiler.helpers.TypeUtilities.UnimportableType;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static utam.compiler.helpers.TypeUtilities.VOID;
 
 /**
  * Represents beforeLoad method that is used to set additional criteria to be satisfied,
@@ -26,13 +24,14 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
  */
 public class BeforeLoadMethod implements PageObjectMethod {
 
+    private static final TypeProvider OBJECT_RETURN_TYPE = new UnimportableType("Object");
+
     private final String name;
     private final List<String> code = new ArrayList<>();
     private final List<TypeProvider> classImports = new ArrayList<>();
     private final List<TypeProvider> imports = new ArrayList<>();
-    private final String comments;
 
-    public BeforeLoadMethod(MethodContext methodContext, List<ComposeMethodStatement> statements, String comments) {
+    public BeforeLoadMethod(MethodContext methodContext, List<ComposeMethodStatement> statements) {
         this.name = methodContext.getName();
         statements.forEach(
                 statement -> {
@@ -40,12 +39,15 @@ public class BeforeLoadMethod implements PageObjectMethod {
                     imports.addAll(statement.getImports());
                     classImports.addAll(statement.getClassImports());
                 });
-        this.comments = comments;
+        // load method always return Object, so if statements did not, we add it explicitly
+        if(!code.get(code.size() - 1).startsWith("return")) {
+            code.add("return this");
+        }
     }
 
     @Override
     public MethodDeclaration getDeclaration() {
-        return new MethodDeclarationImpl(name, new ArrayList<>(), VOID, imports, comments);
+        return new MethodDeclarationImpl(name, new ArrayList<>(), OBJECT_RETURN_TYPE, imports);
     }
 
     @Override

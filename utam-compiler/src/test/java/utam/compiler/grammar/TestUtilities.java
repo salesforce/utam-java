@@ -11,12 +11,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.TextNode;
-import java.util.ArrayList;
-import java.util.List;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.TranslationContext;
 import utam.core.declarative.representation.PageObjectDeclaration;
-import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.compiler.translator.TranslationTypesConfigJava;
@@ -28,14 +25,11 @@ import java.util.Arrays;
 
 import utam.core.selenium.element.LocatorBy;
 
-import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 import static utam.compiler.translator.TranslatorMockUtilities.getDefaultConfig;
 
 public class TestUtilities {
 
-  public static final String TEST_URI = "utam-test/pageObjects/test/test";
-  private static final TranslationTypesConfig TRANSLATION_TYPES_CONFIG = new TranslationTypesConfigJava();
-  static final String TEST_URI_PROCESSED = TRANSLATION_TYPES_CONFIG.getInterfaceType(TEST_URI).getFullName();
+  static final String TEST_URI = "utam-test/pageObjects/test/test";
   static final String JACKSON_MISSING_REQUIRED_PROPERTY_ERROR = "Missing required creator property";
   static final String JACKSON_WRONG_PROPERTY_TYPE =
       "Cannot deserialize value of type `%s` from String \"%s\"";
@@ -73,75 +67,34 @@ public class TestUtilities {
         getDeserializedObject(json, UtamPageObject.class), getTestTranslationContext());
   }
 
-  public static String getElementPrivateMethodCalled(String name) {
-    return "this." + getElementGetterMethodName(name, false);
-  }
+  static class UtamEntityCreator {
 
-  static String getElementPrivateMethod(String name) {
-    return getElementGetterMethodName(name, false);
-  }
-
-  static String getURIasTypeName(String pageObjectURI) {
-    return TRANSLATION_TYPES_CONFIG.getInterfaceType(pageObjectURI).getFullName();
-  }
-
-  public static void compile(UtamElement utamElement, TranslationContext context) {
-    UtamPageObject pageObject = new UtamPageObject();
-    pageObject.elements = new UtamElement[] { utamElement };
-    pageObject.compile(context);
-  }
-
-  public static class UtamEntityCreator {
-    public static UtamElement createUtamElement(String name) {
+    static UtamElement createUtamElement(String name) {
       return createUtamElement(name, null);
     }
 
-    public static UtamElement createUtamElement(String name, UtamSelector selector) {
+    static UtamElement createUtamElement(String name, UtamSelector selector) {
       return createUtamElement(name, (String)null, selector);
     }
 
-    public static UtamElement createUtamElement(
-        String name, String type, UtamSelector selector) {
-      return createUtamElement(name, type, selector, null);
-    }
-
-    public static UtamElement createUtamElement(
-        String name, String type, UtamSelector selector, Boolean isNullable) {
+    static UtamElement createUtamElement(String name, String type, UtamSelector selector) {
       return new UtamElement(
-          createStringTypeNode(type), name, false, isNullable, null, selector,
+          createStringTypeNode(type), name, false, null, null, selector,
           null, null, null);
     }
 
-    public static UtamElement createUtamElement(
-        String name, String[] type, UtamSelector selector) {
-      return createUtamElement(name, type, selector, null);
-    }
-
-    public static UtamElement createUtamElement(
-        String name, String[] type, UtamSelector selector, Boolean isNullable) {
+    static UtamElement createUtamElement(String name, String[] type, UtamSelector selector) {
       return new UtamElement(
-          createArrayTypeNode(type), name, false, isNullable, null, selector,
+          createArrayTypeNode(type), name, false, null, null, selector,
           null, null, null);
     }
 
     static UtamMethod createUtamMethod(String name, UtamMethodAction[] compose) {
-      return new UtamMethod(name, compose, null, null, null, null);
+      return new UtamMethod(name, compose, null, null, null);
     }
 
     static UtamMethod createUtamMethod(String name, String returns, UtamArgument[] args) {
-      return new UtamMethod(
-          name, null, null, args, createStringTypeNode(returns), null);
-    }
-
-    static UtamMethod createUtamMethod(String name, String[] returns, UtamArgument[] args) {
-      return new UtamMethod(
-          name, null, null, args, createArrayTypeNode(returns), null);
-    }
-
-    static UtamMethod createUtamMethod(
-        String name, String returns, UtamMethodChainLink[] chain) {
-      return new UtamMethod(
-          name, null, chain, null, createStringTypeNode(returns), null);
+      return new UtamMethod(name, null, args, createStringTypeNode(returns), null);
     }
 
     private static JsonNode createStringTypeNode(String type) {
@@ -159,14 +112,5 @@ public class TestUtilities {
       Arrays.stream(type).forEach(node::add);
       return node;
     }
-  }
-
-  public static List<TypeProvider> getAllClassImports(PageObjectMethod method) {
-    List<TypeProvider> all = new ArrayList<>();
-    method.getClassImports().forEach(i -> {
-      all.add(i);
-      all.addAll(i.getBoundTypes());
-    });
-    return all;
   }
 }

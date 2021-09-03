@@ -13,8 +13,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
-import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
-import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.clickable;
+import static utam.compiler.helpers.BasicElementInterface.actionable;
+import static utam.compiler.helpers.BasicElementInterface.clickable;
 import static utam.compiler.representation.ElementMethod.DOCUMENT_GETTER;
 
 import java.util.Collections;
@@ -44,7 +44,7 @@ public class ElementMethodTests {
   @Test
   public void testSingleElementGetterMethodCreated() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, ACTIONABLE_TYPE.getSimpleName());
-    info.addCodeLine("element(this.test).build(Actionable.class, ActionableImpl.class)");
+    info.addCodeLine("return element(this.test).build(Actionable.class, ActionableImpl.class)");
     info.addImportedTypes(ACTIONABLE_TYPE.getFullName());
     info.addImpliedImportedTypes(BASE_ELEMENT_TYPE);
 
@@ -57,7 +57,7 @@ public class ElementMethodTests {
   @Test
   public void testSingleElementWithParametersGetterMethodCreated() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, CLICKABLE_TYPE.getSimpleName());
-    info.addCodeLine("element(this.test).build(Clickable.class, ClickableImpl.class, selectorArg)");
+    info.addCodeLine("return element(this.test).build(Clickable.class, ClickableImpl.class, selectorArg)");
     info.addImportedTypes(CLICKABLE_TYPE.getFullName());
     info.addImpliedImportedTypes(BASE_ELEMENT_TYPE);
     info.addParameter(new MethodParameterInfo("selectorArg", "String"));
@@ -67,7 +67,6 @@ public class ElementMethodTests {
             ELEMENT_NAME,
             CLICKABLE_TYPE,
             getCssSelector(".css[%s]"),
-            false,
             Collections.singletonList(
                 new ParameterUtils.Regular("selectorArg", PrimitiveType.STRING)), false);
     PageObjectMethod method = new ElementMethod.Single(element, true);
@@ -77,11 +76,11 @@ public class ElementMethodTests {
   @Test
   public void testListElementMethodCreation() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, "List<Actionable>");
-    info.addCodeLine("element(this.test).buildList(Actionable.class, ActionableImpl.class)");
+    info.addCodeLine("return element(this.test).buildList(Actionable.class, ActionableImpl.class)");
     info.addImportedTypes("java.util.List", ACTIONABLE_TYPE.getFullName());
     info.addImpliedImportedTypes(BASE_ELEMENT_TYPE);
     ElementContext element =
-        new ElementContext.Basic(ELEMENT_NAME, ACTIONABLE_TYPE, getCssSelector("css"), true);
+        new ElementContext.BasicReturnsAll(ACTIONABLE_TYPE, getCssSelector("css"));
     PageObjectMethod method = new ElementMethod.Multiple(element, true);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }
@@ -90,17 +89,16 @@ public class ElementMethodTests {
   @Test
   public void testListElementMethodWithParametersGetterMethodCreated() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME,"List<Clickable>");
-    info.addCodeLine("element(this.test).buildList(Clickable.class, ClickableImpl.class, selectorArg)");
+    info.addCodeLine("return element(this.test).buildList(Clickable.class, ClickableImpl.class, selectorArg)");
     info.addImportedTypes("java.util.List", CLICKABLE_TYPE.getFullName());
     info.addImpliedImportedTypes(BASE_ELEMENT_TYPE);
     info.addParameter(new MethodParameterInfo("selectorArg", "String"));
     ElementContext element =
-        new ElementContext.Basic(
+        new ElementContext.BasicReturnsAll(
             null,
             ELEMENT_NAME,
             CLICKABLE_TYPE,
             getCssSelector(".css[%s]"),
-            false,
             Collections.singletonList(
                 new ParameterUtils.Regular("selectorArg", PrimitiveType.STRING)), false);
     PageObjectMethod method = new ElementMethod.Multiple(element, true);
@@ -111,10 +109,9 @@ public class ElementMethodTests {
   public void testFilteredElementMethodCreation() {
     MethodInfo info = new MethodInfo(ELEMENT_METHOD_NAME, "Actionable");
     info.addParameter(new MethodParameterInfo("test", "String"));
-    info.addCodeLine("element(this.test)"
+    info.addCodeLine("return element(this.test)"
         + ".build(Actionable.class, ActionableImpl.class, "
-        + "elm -> { String tmp = elm.getText();\n"
-        + "return tmp!= null && tmp.contains(test); })");
+        + "elm -> (elm.getText()!= null && elm.getText().contains(test)))");
     info.addImportedTypes(ACTIONABLE_TYPE.getFullName(), BASE_ELEMENT_TYPE);
     PageObjectMethod method = new ElementMethod.Filtered(
         ELEMENT_NAME,
@@ -124,7 +121,7 @@ public class ElementMethodTests {
         "getText",
         EMPTY_PARAMETERS,
         MatcherType.stringContains,
-        Collections.singletonList(new ParameterUtils.Primitive("test", PrimitiveType.STRING)),
+        Collections.singletonList(new ParameterUtils.Regular("test", PrimitiveType.STRING)),
         true);
     PageObjectValidationTestHelper.validateMethod(method, info);
   }

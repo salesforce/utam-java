@@ -1,0 +1,49 @@
+{
+  "elements": [
+    {
+      "name" : "custom",
+      "type" : "utam-test/pageObjects/custom",
+      "selector" : {
+        "css" : ".css"
+      },
+      "nullable" : true
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element" : "custom",
+          "apply": "waitFor",
+          "args": [
+            {
+              "type" : "function",
+              "predicate": [
+                {
+                  "element" : "custom",
+                  "apply" : "returnsString",
+                  "args" : [
+                    {
+                      "name" : "selectorArg",
+                      "type" : "locator"
+                    }
+                  ],
+                  "matcher" : {
+                    "type" : "stringContains",
+                    "args" : [
+                      {
+                        "name" : "matcherArg",
+                        "type" : "string"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

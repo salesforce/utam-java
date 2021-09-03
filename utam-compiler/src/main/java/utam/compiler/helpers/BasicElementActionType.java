@@ -1,7 +1,14 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
 package utam.compiler.helpers;
 
 import utam.compiler.grammar.UtamArgument;
-import utam.compiler.helpers.TypeUtilities.BasicElementInterface;
+import utam.compiler.grammar.UtamArgument.UtamArgumentLiteralPrimitive;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.BasicElement;
 import utam.core.framework.consumer.UtamError;
@@ -115,7 +122,7 @@ public enum BasicElementActionType implements ActionType {
   }
 
   public static ActionType getActionType(String apply, TypeProvider elementType, String elementName) {
-    if (!TypeUtilities.BasicElementInterface.isBasicType(elementType)
+    if (!BasicElementInterface.isBasicType(elementType)
         && !elementType.isSameType(ROOT_ELEMENT_TYPE)) {
       throw new UtamError(
           String.format(
@@ -129,25 +136,25 @@ public enum BasicElementActionType implements ActionType {
         return action;
       }
     }
-    TypeUtilities.BasicElementInterface[] actionableTypes =
-        TypeUtilities.BasicElementInterface.getBasicElementTypes(elementType);
+    BasicElementInterface[] actionableTypes =
+        BasicElementInterface.getBasicElementTypes(elementType);
     if (actionableTypes != null) {
-      for (TypeUtilities.BasicElementInterface actionableType : actionableTypes) {
-        if (actionableType == TypeUtilities.BasicElementInterface.editable) {
+      for (BasicElementInterface actionableType : actionableTypes) {
+        if (actionableType == BasicElementInterface.editable) {
           for (EditableActionType action : EditableActionType.values()) {
             if (action.getApplyString().equals(apply)) {
               return action;
             }
           }
         }
-        if (actionableType == TypeUtilities.BasicElementInterface.touchable) {
+        if (actionableType == BasicElementInterface.touchable) {
           for (TouchableActionType action : TouchableActionType.values()) {
             if (action.getApplyString().equals(apply)) {
               return action;
             }
           }
         }
-        if (actionableType == TypeUtilities.BasicElementInterface.clickable) {
+        if (actionableType == BasicElementInterface.clickable) {
           for (ClickableActionType action : ClickableActionType.values()) {
             if (action.getApplyString().equals(apply)) {
               return action;
@@ -170,7 +177,7 @@ public enum BasicElementActionType implements ActionType {
     }
     String actionableTypeNames =
         actionableTypes == null || actionableTypes.length == 0 ?
-            "no declared interfaces" :
+            "basic type" :
             "declared interfaces " + Arrays.stream(actionableTypes)
                 .map(Enum::name)
                 .collect(Collectors.joining(","));
@@ -213,7 +220,7 @@ public enum BasicElementActionType implements ActionType {
       // or two arguments (a selector and a boolean indicating whether to search in
       // the shadow DOM) declared in the JSON. If the second argument is omitted,
       // it can be assumed to be false, so substitute that value here.
-      return new UtamArgument[]{args[0], new UtamArgument.UtamArgumentLiteral(Boolean.FALSE)};
+      return new UtamArgument[]{args[0], new UtamArgumentLiteralPrimitive(Boolean.FALSE)};
     }
     return args;
   }

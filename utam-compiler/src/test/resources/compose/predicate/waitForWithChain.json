@@ -1,0 +1,41 @@
+{
+  "elements" : [
+    {
+      "name" : "custom",
+      "type" : "utam-test/pageObjects/custom",
+      "selector" : {
+        "css" : ".css"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "apply": "waitFor",
+          "args": [
+            {
+              "type" : "function",
+              "predicate": [
+                {
+                  "element" : "custom"
+                },
+                {
+                  "chain" : true,
+                  "apply" : "method1",
+                  "returnType" : "utam-test/pageObjects/custom"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "chain" : true,
+          "apply" : "method2",
+          "returnType" : "utam-test/pageObjects/custom"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "elements" : [
+    {
+      "name" : "element",
+      "type" : "container"
+    }
+  ],
+  "methods" : [
+    {
+      "name" : "test",
+      "compose" : [
+        {
+          "element" : "element"
+        }
+      ]
+    }
+  ]
+}

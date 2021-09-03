@@ -1,0 +1,22 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "document",
+          "apply": "getUrl",
+          "matcher" : {
+            "type" : "stringEquals",
+            "args" : [
+              {
+                "value" : "url"
+              }
+            ]
+          },
+          "returnType" : "boolean"
+        }
+      ]
+    }
+  ]
+}

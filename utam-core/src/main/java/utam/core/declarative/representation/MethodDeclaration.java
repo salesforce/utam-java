@@ -10,6 +10,8 @@ package utam.core.declarative.representation;
 import java.util.List;
 
 /**
+ * method declaration signature
+ *
  * @author elizaveta.ivanova
  * @since 228
  */

@@ -21,6 +21,7 @@ import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_IMPL_WI
 import static utam.compiler.translator.DefaultTranslatorRunner.ERR_PROFILE_PATH_DOES_NOT_EXIST;
 import static utam.compiler.translator.DefaultTranslatorRunner.ERR_PROFILE_PATH_NOT_CONFIGURED;
 import static utam.compiler.translator.DefaultTranslatorRunner.PROFILE_NOT_CONFIGURED_ERR;
+import static utam.compiler.translator.TranslationTypesConfigJava.getJavaTypeName;
 import static utam.compiler.translator.TranslatorMockUtilities.IMPL_ONLY_CLASS_NAME;
 import static utam.compiler.translator.TranslatorMockUtilities.IMPL_ONLY_URI;
 import static utam.compiler.translator.TranslatorMockUtilities.INTERFACE_ONLY_CLASS_NAME;
@@ -274,10 +275,7 @@ public class DefaultTranslatorRunnerTests {
     DefaultTranslatorRunner runner = getRunner();
     runner.run();
     Properties properties = runner.getProfileMapping(DEFAULT_PROFILE);
-    assertThat(
-        properties.containsKey(
-            TranslationTypesConfigJava.getJavaType(INTERFACE_ONLY_URI)
-                .getFullName()),
+    assertThat(properties.containsKey(getJavaTypeName(INTERFACE_ONLY_URI)),
         is(true));
   }
 

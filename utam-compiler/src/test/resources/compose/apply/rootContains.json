@@ -1,0 +1,27 @@
+{
+  "methods": [
+    {
+      "name" : "test",
+      "compose": [
+        {
+          "element" : "root",
+          "apply": "containsElement",
+          "args": [
+            {
+              "type" : "locator",
+              "value": {
+                "css": ".foo[title='%s']",
+                "args": [
+                  {
+                    "name": "title",
+                    "type": "string"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

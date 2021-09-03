@@ -10,14 +10,12 @@ package utam.compiler.grammar;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-import utam.compiler.UtamCompilationError;
-import utam.compiler.grammar.UtamArgument.ArgsProcessor;
-import utam.compiler.grammar.UtamArgument.ArgsProcessorWithExpectedTypes;
+import utam.compiler.grammar.ArgsProcessor.ArgsProcessorWithExpectedTypes;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.MethodContext;
+import utam.compiler.helpers.StatementContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.TypeProvider;
 
 /**
  * result matcher is used in compose statements or in element filter
@@ -27,7 +25,6 @@ import utam.core.declarative.representation.TypeProvider;
  */
 class UtamMatcher {
 
-  static final String ERR_INCORRECT_MATCHER_FOR_METHOD = ": matcher '%s' requires applied method to return type '%s'";
   private final UtamArgument[] args;
   private final MatcherType matcherType;
 
@@ -46,25 +43,16 @@ class UtamMatcher {
     return argsProcessor.getParameters(args);
   }
 
-  // get parameters for a matcher inside method
-  List<MethodParameter> getParameters(TranslationContext context, MethodContext methodContext) {
+  // get parameters for a matcher inside method statement
+  List<MethodParameter> getParameters(TranslationContext context, MethodContext methodContext,
+      StatementContext statementContext) {
     String argsContextString = String.format("method '%s'", methodContext.getName());
-    ArgsProcessor argsProcessor = new ArgsProcessorWithExpectedTypes(context, argsContextString, matcherType);
+    ArgsProcessor argsProcessor = new ArgsProcessorWithExpectedTypes(context, argsContextString,
+        matcherType, p -> methodContext.setStatementParameter(p, statementContext));
     return argsProcessor.getParameters(args);
   }
 
   MatcherType getMatcherType() {
     return this.matcherType;
-  }
-
-  // check that type provided as result to match is correct
-  void checkOperandForMatcher(TypeProvider operandType, String validationContext) {
-    TypeProvider expectedType = getMatcherType().getOperandType();
-    if (!operandType.isSameType(expectedType)) {
-      throw new UtamCompilationError(validationContext
-          + String.format(ERR_INCORRECT_MATCHER_FOR_METHOD,
-          getMatcherType().name(),
-          expectedType.getSimpleName()));
-    }
   }
 }

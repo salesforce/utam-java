@@ -7,14 +7,27 @@
  */
 package utam.compiler.translator;
 
-import utam.compiler.grammar.TestUtilities;
-import utam.compiler.helpers.ParameterUtils;
-import utam.compiler.helpers.PrimitiveType;
-import utam.compiler.helpers.TypeUtilities;
-import utam.core.framework.consumer.UtamError;
-import org.testng.annotations.Test;
-import utam.compiler.representation.MethodDeclarationImplTests;
-import utam.core.declarative.representation.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.testng.Assert.expectThrows;
+import static utam.compiler.helpers.TypeUtilities.VOID;
+import static utam.compiler.translator.TranslationUtilities.JAVADOC_CLOSE_LINE;
+import static utam.compiler.translator.TranslationUtilities.JAVADOC_LINE_PATTERN;
+import static utam.compiler.translator.TranslationUtilities.JAVADOC_OPEN_LINE;
+import static utam.compiler.translator.TranslationUtilities.METHOD_JAVADOC_PARAMETER_LINE;
+import static utam.compiler.translator.TranslationUtilities.METHOD_JAVADOC_RETURNS_LINE;
+import static utam.compiler.translator.TranslationUtilities.applyJavaFormatter;
+import static utam.compiler.translator.TranslationUtilities.getClassJavadoc;
+import static utam.compiler.translator.TranslationUtilities.getMethodJavadoc;
+import static utam.compiler.translator.TranslationUtilities.getPackageDeclaration;
+import static utam.compiler.translator.TranslationUtilities.getStatement;
+import static utam.compiler.translator.TranslationUtilities.getWrappedJavadoc;
+import static utam.compiler.translator.TranslationUtilities.handleSpecialChars;
+import static utam.compiler.translator.TranslationUtilities.isImportableType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,15 +35,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static utam.compiler.helpers.TypeUtilities.VOID;
-import static utam.compiler.translator.TranslationUtilities.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertThrows;
-import static org.testng.Assert.expectThrows;
+import org.testng.annotations.Test;
+import utam.compiler.grammar.TestUtilities;
+import utam.compiler.helpers.ParameterUtils;
+import utam.compiler.helpers.PrimitiveType;
+import utam.compiler.helpers.TypeUtilities;
+import utam.compiler.representation.MethodDeclarationImplTests;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectInterface;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * Provides tests for the InterfaceSerializer class
@@ -45,7 +60,9 @@ public class TranslationUtilitiesTests {
     return new InterfaceSerializer(pageObject).toString();
   }
 
-  /** The format static method should format a list of statements */
+  /**
+   * The format static method should format a list of statements
+   */
   @Test
   public void testFormat() {
     assertThat(
@@ -53,7 +70,9 @@ public class TranslationUtilitiesTests {
         is(equalTo("class TestClass {}\n")));
   }
 
-  /** The format static method should throw the proper exception with invalid syntax */
+  /**
+   * The format static method should throw the proper exception with invalid syntax
+   */
   @Test
   public void testFormatWithInvalidSyntaxThrows() {
     UtamError e =
@@ -66,13 +85,17 @@ public class TranslationUtilitiesTests {
     assertThat(e.getMessage(), containsString("0 > String x;"));
   }
 
-  /** The format static method should return the proper value for a statement */
+  /**
+   * The format static method should return the proper value for a statement
+   */
   @Test
   public void testGetStatement() {
     assertThat(getStatement("String x"), is(equalTo("String x;")));
   }
 
-  /** The format static method should return the proper value for an empty statement */
+  /**
+   * The format static method should return the proper value for an empty statement
+   */
   @Test
   public void testGetStatementWithEmptyStatement() {
     assertThat(getStatement(""), is(emptyString()));
@@ -93,35 +116,34 @@ public class TranslationUtilitiesTests {
   public void testGetImportString() {
     TypeProvider classProvider =
         new TypeUtilities.FromString("testPageObject", "test.testPageObject");
-    assertThat(getSingleImportString(classProvider, "current.package"),
-        is(equalTo("import test.testPageObject;")));
+    assertThat(isImportableType(classProvider, "current.package"), is(true));
   }
 
   @Test
   public void testGetImportStringWithEmptyFullName() {
     TypeProvider classProvider =
         new TypeUtilities.FromString("testPageObject", "");
-    assertThat(getSingleImportString(classProvider, "current.package"), is(emptyString()));
+    assertThat(isImportableType(classProvider, "current.package"), is(false));
   }
 
   @Test
   public void testGetImportStringWithEmptyPackage() {
     TypeProvider classProvider =
         new TypeUtilities.FromString("TestPageObject", "TestPageObject");
-    assertThat(getSingleImportString(classProvider, "current.package"), is(emptyString()));
+    assertThat(isImportableType(classProvider, "current.package"), is(false));
   }
 
   @Test
   public void testGetImportStringWithJavaPackage() {
     TypeProvider importedProvider = new TypeUtilities.FromString("String", "java.lang.String");
-    assertThat(getSingleImportString(importedProvider, "current.package"), is(emptyString()));
+    assertThat(isImportableType(importedProvider, "current.package"), is(false));
   }
 
   @Test
   public void testGetImportStringWithSamePackage() {
     TypeProvider classProvider =
         new TypeUtilities.FromString("testPageObject", "test.testPageObject");
-    assertThat(getSingleImportString(classProvider, "test"), is(emptyString()));
+    assertThat(isImportableType(classProvider, "test"), is(false));
   }
 
   @Test
@@ -164,22 +186,23 @@ public class TranslationUtilitiesTests {
     List<String> comments = getMethodJavadoc(declaration);
     assertThat(comments, containsInRelativeOrder("method name"));
     assertThat(getWrappedJavadoc(comments), containsInRelativeOrder(
-            JAVADOC_OPEN_LINE,
-            String.format(JAVADOC_LINE_PATTERN, ""),
-            String.format(JAVADOC_LINE_PATTERN, "method name"),
-            JAVADOC_CLOSE_LINE));
+        JAVADOC_OPEN_LINE,
+        String.format(JAVADOC_LINE_PATTERN, ""),
+        String.format(JAVADOC_LINE_PATTERN, "method name"),
+        JAVADOC_CLOSE_LINE));
   }
 
   @Test
   public void testDefaultMethodWithCommentsVoidNoParameters() {
-    MethodDeclaration declaration = new MethodDeclarationImplTests.TestHelper("name", "method comments");
+    MethodDeclaration declaration = new MethodDeclarationImplTests.TestHelper("name",
+        "method comments");
     List<String> comments = getMethodJavadoc(declaration);
     assertThat(comments, containsInRelativeOrder("method comments"));
     assertThat(getWrappedJavadoc(comments), containsInRelativeOrder(
-            JAVADOC_OPEN_LINE,
-            String.format(JAVADOC_LINE_PATTERN, ""),
-            String.format(JAVADOC_LINE_PATTERN, "method comments"),
-            JAVADOC_CLOSE_LINE));
+        JAVADOC_OPEN_LINE,
+        String.format(JAVADOC_LINE_PATTERN, ""),
+        String.format(JAVADOC_LINE_PATTERN, "method comments"),
+        JAVADOC_CLOSE_LINE));
   }
 
   @Test
@@ -187,21 +210,24 @@ public class TranslationUtilitiesTests {
     List<MethodParameter> parameters = new ArrayList<>();
     parameters.add(new ParameterUtils.Regular("param1", PrimitiveType.STRING));
     parameters.add(new ParameterUtils.Regular("param2", PrimitiveType.NUMBER));
-    MethodDeclaration declaration = new MethodDeclarationImplTests.TestHelper("name", parameters, PrimitiveType.BOOLEAN);
+    MethodDeclaration declaration = new MethodDeclarationImplTests.TestHelper("name", parameters,
+        PrimitiveType.BOOLEAN);
     List<String> comments = getMethodJavadoc(declaration);
     assertThat(comments, containsInRelativeOrder(
-            "method name",
-            String.format(METHOD_JAVADOC_RETURNS_LINE, "Boolean"),
-            String.format(METHOD_JAVADOC_PARAMETER_LINE, "param1", "String"),
-            String.format(METHOD_JAVADOC_PARAMETER_LINE, "param2", "Integer")
+        "method name",
+        String.format(METHOD_JAVADOC_RETURNS_LINE, "Boolean"),
+        String.format(METHOD_JAVADOC_PARAMETER_LINE, "param1", "String"),
+        String.format(METHOD_JAVADOC_PARAMETER_LINE, "param2", "Integer")
     ));
     assertThat(getWrappedJavadoc(comments), containsInRelativeOrder(
-            JAVADOC_OPEN_LINE,
-            String.format(JAVADOC_LINE_PATTERN, "method name"),
-            String.format(JAVADOC_LINE_PATTERN, String.format(METHOD_JAVADOC_RETURNS_LINE, "Boolean")),
-            String.format(JAVADOC_LINE_PATTERN, String.format(METHOD_JAVADOC_PARAMETER_LINE, "param1", "String")),
-            String.format(JAVADOC_LINE_PATTERN, String.format(METHOD_JAVADOC_PARAMETER_LINE, "param2", "Integer")),
-            JAVADOC_CLOSE_LINE));
+        JAVADOC_OPEN_LINE,
+        String.format(JAVADOC_LINE_PATTERN, "method name"),
+        String.format(JAVADOC_LINE_PATTERN, String.format(METHOD_JAVADOC_RETURNS_LINE, "Boolean")),
+        String.format(JAVADOC_LINE_PATTERN,
+            String.format(METHOD_JAVADOC_PARAMETER_LINE, "param1", "String")),
+        String.format(JAVADOC_LINE_PATTERN,
+            String.format(METHOD_JAVADOC_PARAMETER_LINE, "param2", "Integer")),
+        JAVADOC_CLOSE_LINE));
   }
 
   @Test
@@ -209,19 +235,22 @@ public class TranslationUtilitiesTests {
     List<MethodParameter> parameters = new ArrayList<>();
     parameters.add(new ParameterUtils.Regular("param1", PrimitiveType.STRING));
     parameters.add(new ParameterUtils.Regular("param2", PrimitiveType.NUMBER));
-    MethodDeclaration declaration = new MethodDeclarationImplTests.TestHelper("name", parameters, VOID);
+    MethodDeclaration declaration = new MethodDeclarationImplTests.TestHelper("name", parameters,
+        VOID);
     List<String> comments = getMethodJavadoc(declaration);
     assertThat(comments, containsInRelativeOrder(
-            "method name",
-            String.format(METHOD_JAVADOC_PARAMETER_LINE, "param1", "String"),
-            String.format(METHOD_JAVADOC_PARAMETER_LINE, "param2", "Integer")
+        "method name",
+        String.format(METHOD_JAVADOC_PARAMETER_LINE, "param1", "String"),
+        String.format(METHOD_JAVADOC_PARAMETER_LINE, "param2", "Integer")
     ));
     assertThat(getWrappedJavadoc(comments), containsInRelativeOrder(
-            JAVADOC_OPEN_LINE,
-            String.format(JAVADOC_LINE_PATTERN, "method name"),
-            String.format(JAVADOC_LINE_PATTERN, String.format(METHOD_JAVADOC_PARAMETER_LINE, "param1", "String")),
-            String.format(JAVADOC_LINE_PATTERN, String.format(METHOD_JAVADOC_PARAMETER_LINE, "param2", "Integer")),
-            JAVADOC_CLOSE_LINE));
+        JAVADOC_OPEN_LINE,
+        String.format(JAVADOC_LINE_PATTERN, "method name"),
+        String.format(JAVADOC_LINE_PATTERN,
+            String.format(METHOD_JAVADOC_PARAMETER_LINE, "param1", "String")),
+        String.format(JAVADOC_LINE_PATTERN,
+            String.format(METHOD_JAVADOC_PARAMETER_LINE, "param2", "Integer")),
+        JAVADOC_CLOSE_LINE));
   }
 
   @Test
@@ -236,29 +265,14 @@ public class TranslationUtilitiesTests {
     assertThat(javadoc.get(1), containsString("@author UTAM"));
     assertThat(getWrappedJavadoc(javadoc).size(), is(equalTo(4)));
   }
-  
+
   @Test
   public void testHandleSpecialChars() {
-   String splCharStr = "**/XCUIElementTypeButton[1]";
-   String expSplCharStr = "\\*\\*\\/XCUIElementTypeButton[1]";
-   String noSplCharStr = "//XCUIElementTypeButton[1]";
-   assertThat(handleSpecialChars(splCharStr),is (equalTo(expSplCharStr)));
-   assertThat(handleSpecialChars(noSplCharStr),is (equalTo(noSplCharStr)));
-  }
-  @Test
-  public void testGetLastStatement() {
-    PageObjectMethod mock = mock(PageObjectMethod.class);
-    MethodDeclaration declarationMock = mock(MethodDeclaration.class);
-    when(mock.getDeclaration()).thenReturn(declarationMock);
-    when(mock.getCodeLines()).thenReturn(null);
-    assertThrows(UtamError.class, () -> getLastStatement(mock));
-    when(mock.getCodeLines()).thenReturn(Collections.emptyList());
-    assertThrows(UtamError.class, () -> getLastStatement(mock));
-    when(mock.getCodeLines()).thenReturn(Collections.singletonList("last statement"));
-    when(declarationMock.getReturnType()).thenReturn(VOID);
-    assertThat(getLastStatement(mock), is(equalTo("last statement;")));
-    when(declarationMock.getReturnType()).thenReturn(PrimitiveType.STRING);
-    assertThat(getLastStatement(mock), is(equalTo("return last statement;")));
+    String splCharStr = "**/XCUIElementTypeButton[1]";
+    String expSplCharStr = "\\*\\*\\/XCUIElementTypeButton[1]";
+    String noSplCharStr = "//XCUIElementTypeButton[1]";
+    assertThat(handleSpecialChars(splCharStr), is(equalTo(expSplCharStr)));
+    assertThat(handleSpecialChars(noSplCharStr), is(equalTo(noSplCharStr)));
   }
 
   @Test

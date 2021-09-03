@@ -1,0 +1,27 @@
+{
+  "methods" : [
+    {
+      "name" : "test",
+      "compose" : [
+        {
+          "apply" : "something",
+          "args" : [
+            {
+              "name" : "arg1",
+              "type" : "string"
+            }
+          ]
+        },
+        {
+          "apply" : "somethingElse",
+          "args" : [
+            {
+              "name" : "arg1",
+              "type" : "string"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

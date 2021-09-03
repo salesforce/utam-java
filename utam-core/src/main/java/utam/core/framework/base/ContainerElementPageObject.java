@@ -63,9 +63,10 @@ public final class ContainerElementPageObject implements PageObject, ContainerEl
   }
 
   @Override
-  public void load() {
+  public Object load() {
     // instead of throwing, do nothing
     // for compatibility with already existing POs
+    return this;
   }
 
   @Override

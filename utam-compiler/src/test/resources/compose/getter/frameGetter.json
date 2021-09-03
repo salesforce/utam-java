@@ -1,0 +1,27 @@
+{
+  "elements": [
+    {
+      "name": "frame",
+      "type" : "frame",
+      "selector": {
+        "css": "css[%s]",
+        "args" : [
+          {
+            "type" : "string",
+            "name": "selectorArgs"
+          }
+        ]
+      }
+    }
+  ],
+  "methods" : [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "frame"
+        }
+      ]
+    }
+  ]
+}

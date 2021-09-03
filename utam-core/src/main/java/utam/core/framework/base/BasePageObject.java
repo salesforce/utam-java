@@ -98,7 +98,7 @@ public abstract class BasePageObject extends UtamBaseImpl implements RootPageObj
   }
 
   @Override
-  public void load() {
+  public Object load() {
     log("find page object root element");
     // find if was not already
     Element element = getElement();
@@ -108,6 +108,7 @@ public abstract class BasePageObject extends UtamBaseImpl implements RootPageObj
           .format("root element not found with locator '%s'",
               getRootLocator().getLocatorChainString())));
     }
+    return this;
   }
 
   @Override

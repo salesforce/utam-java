@@ -1,0 +1,43 @@
+{
+  "elements": [
+    {
+      "name": "content",
+      "type": "my/pageObject/foo",
+      "selector": {
+        "css": ".inject"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "content",
+          "returnType" : "my/pageObject/foo"
+        },
+        {
+          "chain" : true,
+          "returnType" : "my/pageObject/foo",
+          "element" : "next",
+          "args" : [
+            {
+              "type" : "string",
+              "name" : "selectorArgName"
+            }
+          ]
+        },
+        {
+          "chain" : true,
+          "returnType" : "my/pageObject/foo",
+          "element" : "next",
+          "args" : [
+            {
+              "value" : "selectorArgValue"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

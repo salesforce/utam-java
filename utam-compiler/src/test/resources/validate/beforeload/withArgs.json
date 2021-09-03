@@ -1,0 +1,14 @@
+{
+  "beforeLoad": [
+    {
+      "element" : "root",
+      "apply" : "getAttribute",
+      "args" : [
+        {
+          "type" : "string",
+          "name" : "str"
+         }
+      ]
+    }
+  ]
+}

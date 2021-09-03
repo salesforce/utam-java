@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 
 import static utam.compiler.grammar.TestUtilities.*;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
+import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 import static utam.compiler.translator.TranslatorMockUtilities.getDefaultConfig;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -183,18 +184,19 @@ public class JsonDeserializerTests {
 
     PageObjectValidationTestHelper.MethodInfo rootElementMethod =
             new PageObjectValidationTestHelper.MethodInfo("getRoot", "RootElement");
-    rootElementMethod.addCodeLine("this.getRootElement()");
+    rootElementMethod.addCodeLine("return this.getRootElement()");
     rootElementMethod.setIsPublic(false);
 
     PageObjectValidationTestHelper.MethodInfo childElementGetter =
         new PageObjectValidationTestHelper.MethodInfo(
-            getElementPrivateMethod("childElement"), "ChildElementElement");
-    childElementGetter.addCodeLine("element(this.childElement).build(ChildElementElement.class, ChildElementElementImpl.class)");
+            getElementGetterMethodName("childElement", false), "ChildElementElement");
+    childElementGetter.addCodeLine("return element(this.childElement).build(ChildElementElement.class, ChildElementElementImpl.class)");
     childElementGetter.setIsPublic(false);
 
     PageObjectValidationTestHelper.MethodInfo composeMethod =
         new PageObjectValidationTestHelper.MethodInfo("clickElement", "void");
-    composeMethod.addCodeLine(getElementPrivateMethodCalled("childElement") + "().click()");
+    composeMethod.addCodeLine("ChildElementElement childElement0 = this.getChildElementElement()");
+    composeMethod.addCodeLine("childElement0.click()");
 
     PageObjectClass classObject = createRootNode(json).getImplementation();
     PageObjectInterface interfaceObject = classObject.getImplementedType();
@@ -256,7 +258,7 @@ public class JsonDeserializerTests {
             + "  \"methods\": ["
             + "    {"
             + "      \"name\": \"testMethod\","
-            + "      \"return\": \"string\""
+            + "      \"returnType\": \"string\""
             + "    }"
             + "  ],"
             + "  \"root\": true"

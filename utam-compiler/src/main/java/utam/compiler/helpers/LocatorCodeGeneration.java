@@ -29,7 +29,7 @@ import utam.core.selenium.element.LocatorBy;
  */
 public class LocatorCodeGeneration {
 
-  public static final Set<String> SUPPORTED_SELECTOR_TYPES = Stream.of(SelectorType.values())
+  private static final Set<String> SUPPORTED_SELECTOR_TYPES = Stream.of(SelectorType.values())
       .map(Enum::name).collect(Collectors.toSet());
   public static final String SUPPORTED_SELECTOR_TYPES_STRING =
       String.join(",", SUPPORTED_SELECTOR_TYPES);

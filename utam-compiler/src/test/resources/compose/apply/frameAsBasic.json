@@ -1,0 +1,23 @@
+{
+  "elements": [
+    {
+      "name": "myFrame",
+      "type": "frame",
+      "selector": {
+        "css": "iframe"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose" : [
+        {
+          "element": "myFrame",
+          "apply": "getText",
+          "returnType": "string"
+        }
+      ]
+    }
+  ]
+}

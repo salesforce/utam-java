@@ -1,0 +1,42 @@
+{
+  "elements": [
+    {
+      "name": "findFirst",
+      "type": "my/pageObject/foo",
+      "selector": {
+        "css": "css",
+        "returnAll": true
+      },
+      "nullable" : true,
+      "filter": {
+        "apply": "customMethod",
+        "matcher": {
+          "type": "stringEquals",
+          "args": [
+            {
+              "name": "filterArg",
+              "type": "string"
+            }
+          ]
+        },
+        "findFirst": true
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "findFirst"
+        },
+        {
+          "element": "findFirst",
+          "matcher": {
+            "type": "notNull"
+          }
+        }
+      ]
+    }
+  ]
+}

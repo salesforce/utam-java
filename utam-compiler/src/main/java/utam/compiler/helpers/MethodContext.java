@@ -7,19 +7,18 @@
  */
 package utam.compiler.helpers;
 
-import static utam.compiler.helpers.TypeUtilities.REFERENCE;
+import static utam.compiler.helpers.TypeUtilities.PARAMETER_REFERENCE;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import utam.compiler.UtamCompilationError;
-import utam.compiler.helpers.TypeUtilities.ListOf;
-import utam.compiler.representation.ComposeMethodStatement;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.UtamError;
 
 /**
  * context of the method, keeps track of elements
@@ -29,159 +28,172 @@ import utam.core.framework.consumer.UtamError;
  */
 public final class MethodContext {
 
+  public static final String ERR_ARG_DUPLICATE_NAME = "%s: parameter with name '%s' already declared";
+  public static final String BEFORE_LOAD_METHOD_NAME = "load";
   static final String ERR_METHOD_REFERENCE_ARGS = "%s: method level argument '%s' can't have reference type";
   static final String ERR_REFERENCE_MISSING = "%s: statement declares a reference to '%s', but there’s no matching method parameter";
   static final String ERR_ARG_TYPE_MISMATCH = "%s: statement declares an argument '%s' with type '%s', but the type does not match method parameter";
-  static final String ERR_ARG_DUPLICATE_NAME = "%s: argument with name '%s' already declared";
-  static final String ERR_LIST_OF_VOID_NOT_ALLOWED = "%s: cannot return list of null or void";
   static final String ERR_LITERAL_PARAMETER_NOT_ALLOWED = "%s: literal parameter '%s' not allowed at the method level";
-  public static final String BEFORE_LOAD_METHOD_MANE = "load";
+  public static final String ERR_PARAMETER_NEVER_USED = "%s: declared parameter '%s' is never used";
   private final String methodName;
   // to keep track of element usages
-  private final Map<String, ElementContext> elementNames = new HashMap<>();
-  private final TypeProvider methodReturnType;
+  private final Map<String, Entry<String, ElementContext>> elementVariables = new HashMap<>();
+  private final ReturnType methodReturnType;
   private final String validationContext;
-  private final Map<String, MethodParameter> methodArgs = new HashMap<>();
-  private final List<Map<String, MethodParameter>> statementsArgs = new ArrayList<>();
-  private int statementIndex = 0;
+  private final Map<String, Entry<Boolean, MethodParameter>> declaredMethodLevelParameters = new HashMap<>();
+  private final Map<String, MethodParameter> accumulatedStatementsParameters = new HashMap<>();
+  private final List<MethodParameter> usedMethodParameters = new ArrayList<>();
 
-  public MethodContext(String methodName, TypeProvider returns, boolean isReturnsList) {
+  public MethodContext(String methodName, ReturnType declaredReturnType) {
     this.methodName = methodName;
     this.validationContext = String.format("method '%s'", methodName);
-    if (isNullOrVoid(returns) && isReturnsList) {
-      throw new UtamCompilationError(
-          String.format(ERR_LIST_OF_VOID_NOT_ALLOWED, validationContext));
-    }
-    this.methodReturnType = isReturnsList ? new ListOf(returns) : returns;
+    this.methodReturnType = declaredReturnType;
   }
 
   // used in tests
-  public MethodContext(){
-    this("test", null, false);
+  public MethodContext() {
+    this("test", new ReturnType(null, null, "test"));
   }
 
   public static boolean isNullOrVoid(TypeProvider returnType) {
     return returnType == null || returnType.isSameType(VOID);
   }
 
+  public ReturnType getDeclaredReturnType() {
+    return methodReturnType;
+  }
+
   public String getName() {
     return methodName;
   }
 
-  public TypeProvider getReturnType(TypeProvider defaultReturn) {
-    return methodReturnType == null ? defaultReturn : methodReturnType;
-  }
-
-  public TypeProvider getReturnType(List<ComposeMethodStatement> statements,
-      TypeProvider defaultReturn) {
-    //if return type not set in JSON, get one from last statement
-    ComposeMethodStatement lastStatement = statements.get(statements.size() - 1);
-    TypeProvider lastStatementReturns = lastStatement.getReturnType();
-    if (lastStatementReturns != null
-        && methodReturnType != null
-        && !lastStatementReturns.isSameType(methodReturnType)
-        // Exclude load() method from this check, since it is always VOID type
-        && !methodName.equals(BEFORE_LOAD_METHOD_MANE)) {
-      throw new UtamError(String.format("method '%s' return type mismatch: "
-              + "last statement returns '%s', method returns '%s'", methodName,
-          lastStatementReturns.getSimpleName(), methodReturnType.getSimpleName()));
-    }
-    if (methodReturnType == null) {
-      return lastStatement.getReturnType();
-    }
-    if (lastStatement.isUtilityMethodStatement()) {
-      return methodReturnType;
-    }
-    return getReturnType(defaultReturn);
-  }
-
-  public boolean hasElement(String name) {
-    return elementNames.containsKey(name);
-  }
-
-  public void setElementUsage(ElementContext context) {
-    elementNames.put(context.getName(), context);
+  /**
+   * check if element has been used in previous statements
+   *
+   * @param name name of the element from compose statement
+   * @return true if element was already used
+   */
+  public boolean isReusedElement(String name) {
+    return elementVariables.containsKey(name);
   }
 
   /**
-   * register method level args to make sure it's used
+   * for an element that has been used in previous statements, return variable name
    *
-   * @param parameter parameter
+   * @param name name of the element from compose statement
+   * @return variable name string
    */
-  public void setMethodArg(MethodParameter parameter) {
+  public String getReusedElementVariable(String name) {
+    return elementVariables.get(name).getKey();
+  }
+
+  /**
+   * track reusing of a same element
+   *
+   * @param elementVariable variable name for the element
+   * @param context         element
+   */
+  public void setElementUsage(String elementVariable, ElementContext context) {
+    elementVariables.put(context.getName(), new SimpleEntry<>(elementVariable, context));
+  }
+
+  /**
+   * set parameter declared at the method level
+   *
+   * @param parameter value
+   */
+  public void setDeclaredParameter(MethodParameter parameter) {
     if (parameter.isLiteral()) {
       throw new UtamCompilationError(
-          String.format(ERR_LITERAL_PARAMETER_NOT_ALLOWED, validationContext, parameter.getValue()));
+          String
+              .format(ERR_LITERAL_PARAMETER_NOT_ALLOWED, validationContext, parameter.getValue()));
     }
     String argName = parameter.getValue();
     TypeProvider argType = parameter.getType();
-    if (methodArgs.containsKey(argName)) {
+    if (declaredMethodLevelParameters.containsKey(argName)) {
       throw new UtamCompilationError(
-          String.format(
-              ERR_ARG_DUPLICATE_NAME, validationContext, argName));
+          String.format(ERR_ARG_DUPLICATE_NAME, validationContext, argName));
     }
-    if (REFERENCE.isSameType(argType)) {
+    if (PARAMETER_REFERENCE.isSameType(argType)) {
       throw new UtamCompilationError(
           String.format(ERR_METHOD_REFERENCE_ARGS, validationContext, argName));
     }
-    methodArgs.put(argName, parameter);
+    // parameter is not yet used, so set false
+    declaredMethodLevelParameters.put(argName, new SimpleEntry<>(false, parameter));
+    usedMethodParameters.add(parameter);
   }
 
-  public boolean hasMethodArgs() {
-    return methodArgs.size() > 0;
+  public List<MethodParameter> getMethodParameters() {
+    return usedMethodParameters;
   }
 
-  /**
-   * iterate to next statement to add args
-   */
-  public void nextStatement() {
-    statementIndex++;
+  public void checkAllParametersWereUsed() {
+    if(declaredMethodLevelParameters.isEmpty()) {
+      return;
+    }
+    usedMethodParameters.forEach(p -> {
+      String parameterName = p.getValue();
+      if(!declaredMethodLevelParameters.get(parameterName).getKey()) {
+        throw new UtamCompilationError(
+            String.format(ERR_PARAMETER_NEVER_USED, validationContext, parameterName));
+      }
+    });
   }
 
-  public MethodParameter setStatementArg(MethodParameter parameter) {
-    if (parameter.isLiteral()) {
-      List<MethodParameter> nested = parameter.getNestedParameters();
-      if(nested != null) {
-        nested.forEach(this::setStatementArg);
-      }
-      return parameter;
+  public MethodParameter setStatementParameter(MethodParameter parameter,
+      StatementContext statementContext) {
+    if (parameter == null) { //predicate
+      return null;
     }
-    String argName = parameter.getValue();
-    TypeProvider argType = parameter.getType();
-    while (statementsArgs.size() <= statementIndex) {
-      statementsArgs.add(new HashMap<>());
-    }
-    Map<String, MethodParameter> statementArgs = statementsArgs.get(statementIndex);
-    if (statementArgs.containsKey(argName)) {
-      throw new UtamCompilationError(
-          String.format(
-              ERR_ARG_DUPLICATE_NAME, validationContext, argName));
-    }
-    if (REFERENCE.isSameType(argType)) {
-      // find referenced arg or throw
-      if (!methodArgs.containsKey(argName)) {
+    Map<String, MethodParameter> statementArgs = statementContext.getStatementArgsMap();
+    if (!parameter.isLiteral()) {
+      String parameterName = parameter.getValue();
+      TypeProvider argType = parameter.getType();
+      if (statementArgs.containsKey(parameterName)) {
         throw new UtamCompilationError(
             String.format(
-                ERR_REFERENCE_MISSING, validationContext, argName));
+                ERR_ARG_DUPLICATE_NAME, validationContext, parameterName));
       }
-      statementArgs.put(argName, methodArgs.get(argName));
-      return methodArgs.get(argName);
+      // find referenced parameter
+      if (PARAMETER_REFERENCE.isSameType(argType)) {
+        if (!declaredMethodLevelParameters.containsKey(parameterName)) {
+          throw new UtamCompilationError(
+              String.format(ERR_REFERENCE_MISSING, validationContext, parameterName));
+        }
+        MethodParameter referencedParameter = declaredMethodLevelParameters.get(parameterName).getValue();
+        // mark as used
+        declaredMethodLevelParameters.put(parameterName, new SimpleEntry<>(true, referencedParameter));
+        statementArgs.put(parameterName, referencedParameter);
+        return referencedParameter;
+      }
+      // if method level args were provided, find referenced arg and check type matches
+      if (!declaredMethodLevelParameters.isEmpty()) {
+        if (!declaredMethodLevelParameters.containsKey(parameterName)) {
+          throw new UtamCompilationError(
+              String.format(
+                  ERR_REFERENCE_MISSING, validationContext, parameterName));
+        }
+        TypeProvider declaredType = declaredMethodLevelParameters.get(parameterName).getValue().getType();
+        if (!argType.isSameType(declaredType)) {
+          throw new UtamCompilationError(
+              String.format(
+                  ERR_ARG_TYPE_MISMATCH, validationContext, parameterName,
+                  argType.getSimpleName()));
+        }
+      } else {
+        if (accumulatedStatementsParameters.containsKey(parameterName)) {
+          throw new UtamCompilationError(
+              String.format(ERR_ARG_DUPLICATE_NAME, validationContext, parameterName));
+        }
+        accumulatedStatementsParameters.put(parameterName, parameter);
+      }
+      statementArgs.put(parameterName, parameter);
+      usedMethodParameters.add(parameter);
     }
-    if (!methodArgs.isEmpty()) {
-      // if method level args were provided, find referenced arg or throw
-      if (!methodArgs.containsKey(argName)) {
-        throw new UtamCompilationError(
-            String.format(
-                ERR_REFERENCE_MISSING, validationContext, argName));
-      }
-      TypeProvider declaredType = methodArgs.get(argName).getType();
-      if (!argType.isSameType(declaredType)) {
-        throw new UtamCompilationError(
-            String.format(
-                ERR_ARG_TYPE_MISMATCH, validationContext, argName, argType.getSimpleName()));
-      }
+    List<MethodParameter> nested = parameter.getNestedParameters();
+    if (nested != null) {
+      nested.forEach(p -> setStatementParameter(p, statementContext));
     }
-    statementArgs.put(argName, parameter);
     return parameter;
   }
 }

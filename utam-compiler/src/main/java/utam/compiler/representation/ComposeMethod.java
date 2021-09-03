@@ -13,7 +13,7 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
 import java.util.ArrayList;
 import java.util.List;
 import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.MethodContext;
+import utam.compiler.helpers.ParameterUtils;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
@@ -31,31 +31,24 @@ public class ComposeMethod implements PageObjectMethod {
   private final List<String> code = new ArrayList<>();
   private final List<TypeProvider> classImports = new ArrayList<>();
   private final List<TypeProvider> imports = new ArrayList<>();
-  private final String comments;
   private final TypeProvider returns;
 
-  public ComposeMethod(MethodContext methodContext, List<ComposeMethodStatement> statements,
-      List<MethodParameter> parameters, String comments) {
-    this.name = methodContext.getName();
-    //if return type not set in JSON, get one from last statement
-    this.returns = methodContext.getReturnType(statements, VOID);
+  public ComposeMethod(String methodName,
+      TypeProvider returnType,
+      List<MethodParameter> parameters,
+      List<ComposeMethodStatement> statements) {
+    this.name = methodName;
+    this.returns = returnType;
     statements.forEach(
         statement -> {
           code.addAll(statement.getCodeLines());
-          imports.addAll(statement.getImports());
-          classImports.addAll(statement.getClassImports());
+          ParameterUtils.setImports(imports, statement.getImports());
+          ParameterUtils.setImports(classImports, statement.getClassImports());
         });
-    this.comments = comments;
-    if(methodContext.hasMethodArgs()) {
-      List<MethodParameter> distinctParams = new ArrayList<>();
-      for (MethodParameter param : parameters) {
-        if (!distinctParams.contains(param)) {
-          distinctParams.add(param);
-        }
-      }
-      this.parameters = new ArrayList<>(parameters);
-    } else {
-      this.parameters = new ArrayList<>(parameters);
+    this.parameters = new ArrayList<>(parameters);
+    if(!returnType.isSameType(VOID)) {
+      ParameterUtils.setImport(imports, returnType);
+      ParameterUtils.setImport(classImports, returnType);
     }
   }
 
@@ -69,7 +62,7 @@ public class ComposeMethod implements PageObjectMethod {
 
   @Override
   public MethodDeclarationImpl getDeclaration() {
-    return new MethodDeclarationImpl(name, parameters, returns, imports, comments);
+    return new MethodDeclarationImpl(name, parameters, returns, imports);
   }
 
   @Override

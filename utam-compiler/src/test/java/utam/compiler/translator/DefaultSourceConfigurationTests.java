@@ -58,7 +58,7 @@ public class DefaultSourceConfigurationTests {
           + "  \"methods\": [\n"
           + "    {\n"
           + "      \"name\" : \"testMethod\",\n"
-          + "      \"return\" : \"string\"\n"
+          + "      \"returnType\" : \"string\"\n"
           + "    }"
           + "  ]\n"
           + "}";

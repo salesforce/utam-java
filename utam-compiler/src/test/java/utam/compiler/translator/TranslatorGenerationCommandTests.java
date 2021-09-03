@@ -42,12 +42,12 @@ import utam.core.declarative.translator.UnitTestRunner;
 public class TranslatorGenerationCommandTests {
 
   private static final String RESOURCES_PATH = "/src/test/resources";
-  static final String USER_ROOT = System.getProperty("user.dir");
+  private static final String USER_ROOT = System.getProperty("user.dir");
 
   @Test
   public void testJsonConfig() {
     TranslatorGenerationCommand command = new TranslatorGenerationCommand();
-    command.jsonConfig = new File(USER_ROOT + RESOURCES_PATH + "/utam.config.json");
+    command.jsonConfig = new File(USER_ROOT + RESOURCES_PATH + "/config/utam.config.json");
     command.compilerRoot = new File(USER_ROOT);
     TranslatorConfig config = command.getTranslationConfig();
     assertThat(config, is(not(nullValue())));
@@ -124,7 +124,7 @@ public class TranslatorGenerationCommandTests {
   @Test
   public void testConfigWithoutNamespaces() {
     TranslatorGenerationCommand command = new TranslatorGenerationCommand();
-    command.jsonConfig = new File(USER_ROOT + RESOURCES_PATH + "/nonamespaces.config.json");
+    command.jsonConfig = new File(USER_ROOT + RESOURCES_PATH + "/config/nonamespaces.config.json");
     command.compilerRoot = new File(USER_ROOT);
     TranslatorConfig config = command.getTranslationConfig();
     assertThat(config, is(not(nullValue())));

@@ -9,8 +9,9 @@ package utam.compiler.helpers;
 
 import static utam.compiler.helpers.AnnotationUtils.getWrappedString;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
+import static utam.compiler.helpers.TypeUtilities.VOID;
 
-import java.util.Objects;
+import utam.compiler.translator.TranslationUtilities;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
@@ -76,13 +77,6 @@ public class ParameterUtils {
     }
   }
 
-  public static class Primitive extends Regular {
-
-    public Primitive(String value, PrimitiveType type) {
-      super(value, type);
-    }
-  }
-
   public static class Literal extends Regular {
 
     private final List<MethodParameter> nestedParameters;
@@ -121,69 +115,87 @@ public class ParameterUtils {
   }
 
   /**
-   * a literal class, for example MyButton.class
+   * a literal class, for example utam.pageobjects.MyButton.class
    */
-  public static class LiteralClass extends Literal {
+  public static class LiteralPageObjectClass extends Literal {
 
-    public LiteralClass(TypeProvider type) {
+    public LiteralPageObjectClass(TypeProvider type) {
       super(String.format("%s.class", type.getSimpleName()), type);
     }
   }
 
   /**
-   * translates method parameters and returns into a list of types to import
-   * @param parameters method parameters
-   * @param returnType return type
-   * @return list of types to import
+   * translates method parameters into a list of types to import in interface
+   * @param imports list of existing imports
+   * @param parameter method parameter
    */
-  public static List<TypeProvider> getDeclarationImports(List<MethodParameter> parameters, TypeProvider returnType) {
-    List<TypeProvider> imports = getDeclarationImports(parameters);
-    imports.add(returnType);
-    return imports;
+  public static void setDeclarationImport(List<TypeProvider> imports, MethodParameter parameter) {
+    TypeProvider type = getDeclarationImport(parameter);
+    if(type != null) {
+      setImport(imports, type);
+    }
   }
 
   /**
-   * translates method parameters into a list of types to import
+   * translates method parameters into a list of types to import in interface
+   * @param imports list of existing imports
    * @param parameters method parameters
-   * @return list of types to import
    */
-  public static List<TypeProvider> getDeclarationImports(List<MethodParameter> parameters) {
-    return parameters
-        .stream()
-        .map(ParameterUtils::getDeclarationImport)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList());
+  public static void setDeclarationImports(List<TypeProvider> imports, List<MethodParameter> parameters) {
+    parameters.forEach(p -> setDeclarationImport(imports, p));
   }
 
   /**
    * translates method parameters into a list of types to import in class
-   * @param parameters method parameters
-   * @return list of types to import
+   * @param imports list of existing imports
+   * @param parameter method parameter
    */
-  public static List<TypeProvider> getImplementationImports(List<MethodParameter> parameters) {
-    return parameters
+  private static void setImplementationImport(List<TypeProvider> imports, MethodParameter parameter) {
+    TypeProvider type = getImplementationImport(parameter);
+    if(type != null) {
+      setImport(imports, type);
+    }
+  }
+
+  /**
+   * translates method parameters into a list of types to import in class
+   * @param imports list of existing imports
+   * @param parameters method parameters
+   */
+  public static void setImplementationImports(List<TypeProvider> imports, List<MethodParameter> parameters) {
+    parameters.forEach(p -> setImplementationImport(imports, p));
+  }
+
+  public static void setImport(List<TypeProvider> imports, TypeProvider type) {
+    if(type == null || type.isSameType(VOID)) {
+      return;
+    }
+    type.getImportableTypes()
         .stream()
-        .map(ParameterUtils::getImplementationImport)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList());
+        // only if importable
+        .filter(TranslationUtilities::isImportableType)
+        // and was not already added
+        .filter(t -> imports.stream().map(TypeProvider::getFullName).noneMatch(iStr -> iStr.equals(t.getFullName())))
+        .forEach(imports::add);
+  }
+
+  public static void setImports(List<TypeProvider> imports, List<TypeProvider> types) {
+    types.forEach(t -> setImport(imports, t));
   }
 
   private static TypeProvider getDeclarationImport(MethodParameter parameter) {
-    if (parameter == null || parameter.isLiteral()) {
+    if (parameter.isLiteral()) {
       return null;
     }
     return parameter.getType();
   }
 
   private static TypeProvider getImplementationImport(MethodParameter parameter) {
-    if(parameter == null) {
-      return null;
-    }
-    // some literals require imports
+    // selector literal requires imports
     if(parameter.isLiteral()) {
       if(SELECTOR.isSameType(parameter.getType())) {
         return SELECTOR;
-      } else if(parameter instanceof LiteralClass) {
+      } else if(parameter instanceof LiteralPageObjectClass) {
         return parameter.getType();
       }
       return null;

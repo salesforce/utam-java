@@ -1,0 +1,35 @@
+{
+  "elements": [
+    {
+      "name": "custom",
+      "type": "org-lwr/pageObjects/custom",
+      "selector": {
+        "css": ".css"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "args": [
+        {
+          "name": "strArg",
+          "type": "string"
+        }
+      ],
+      "compose": [
+        {
+          "element" : "custom",
+          "returnType" : "org-lwr/pageObjects/custom",
+          "apply": "someMethod",
+          "args": [
+            {
+              "name": "strArg",
+              "type": "argumentReference"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

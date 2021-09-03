@@ -1,0 +1,24 @@
+{
+  "elements": [
+    {
+      "name": "noTypePrivate",
+      "selector": {
+        "css": "css"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "returnType" : "boolean",
+          "element": "noTypePrivate",
+          "matcher": {
+            "type": "notNull"
+          }
+        }
+      ]
+    }
+  ]
+}

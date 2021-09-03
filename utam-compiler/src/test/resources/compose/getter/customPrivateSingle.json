@@ -1,0 +1,23 @@
+{
+  "elements": [
+    {
+      "name": "private",
+      "type": "my/pageObject/foo",
+      "selector": {
+        "css": "css"
+      },
+      "nullable": true
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "returnType": "my/pageObject/foo",
+          "element": "private"
+        }
+      ]
+    }
+  ]
+}

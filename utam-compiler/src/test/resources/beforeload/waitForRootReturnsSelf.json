@@ -1,0 +1,19 @@
+{
+  "beforeLoad" : [
+    {
+      "apply" : "waitFor",
+      "args" : [
+        {
+          "type" : "function",
+          "predicate" : [
+            {
+              "element" : "root",
+              "apply" : "isPresent",
+              "returnType" : "self"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

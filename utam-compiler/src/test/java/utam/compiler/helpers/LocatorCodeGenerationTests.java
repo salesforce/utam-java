@@ -50,18 +50,6 @@ public class LocatorCodeGenerationTests {
   }
 
   @Test
-  public void testWithStringArgsByValue() {
-    String json = "{ \"css\" : \"stringArgSelector[%s]\" , \"args\" : [{ \"value\" : \"str\"}] }";
-    UtamSelector selector = getDeserializedObject(json, UtamSelector.class);
-    LocatorCodeGeneration context = selector.getCodeGenerationHelper(getTestTranslationContext());
-    assertThat(context.getLocator(), is(equalTo(LocatorBy.byCss("stringArgSelector[%s]"))));
-    assertThat(context.getBuilderString(), is(equalTo("LocatorBy.byCss(String.format(\"stringArgSelector[%s]\", \"str\"))")));
-    List<MethodParameter> parameters = context.getParameters();
-    assertThat(parameters, hasSize(1));
-    assertThat(parameters.get(0).getValue(), is(equalTo("\"str\"")));
-  }
-
-  @Test
   public void testWithNumberArgsByName() {
     String json = "{ \"css\" : \"selector[%d]\" , \"args\" : [{ \"name\" : \"num1\", \"type\" : \"number\"}] }";
     UtamSelector selector = getDeserializedObject(json, UtamSelector.class);

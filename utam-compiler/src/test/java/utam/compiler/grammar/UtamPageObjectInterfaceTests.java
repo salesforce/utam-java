@@ -26,7 +26,7 @@ public class UtamPageObjectInterfaceTests {
 
   @Test
   public void testNotNullMatcherForPrivateGetter() {
-    TranslationContext context = new DeserializerUtilities().getContext("interfaceExposeRoot");
+    TranslationContext context = new DeserializerUtilities().getContext("interface/exposeRoot");
     String methodName = "getRoot";
     PageObjectMethod method = context.getMethod(methodName);
     MethodDeclaration declaration = method.getDeclaration();

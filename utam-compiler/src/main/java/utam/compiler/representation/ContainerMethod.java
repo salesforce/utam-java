@@ -7,8 +7,10 @@
  */
 package utam.compiler.representation;
 
+import static utam.compiler.helpers.TypeUtilities.BOUNDED_PAGE_OBJECT_PARAMETER;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
+import static utam.compiler.helpers.TypeUtilities.wrapAsList;
 import static utam.compiler.representation.ComposeMethod.getElementLocatorString;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
@@ -18,8 +20,6 @@ import java.util.List;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.ParameterUtils.Regular;
-import utam.compiler.helpers.TypeUtilities.BoundedClass;
-import utam.compiler.helpers.TypeUtilities.ListOf;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -35,8 +35,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
 
   private static final String PAGE_OBJECT_TYPE_PARAMETER_NAME = "pageObjectType";
   public static final MethodParameter PAGE_OBJECT_PARAMETER =
-      new Regular(PAGE_OBJECT_TYPE_PARAMETER_NAME,
-          new BoundedClass(PAGE_OBJECT, "T"));
+      new Regular(PAGE_OBJECT_TYPE_PARAMETER_NAME, BOUNDED_PAGE_OBJECT_PARAMETER);
   final List<MethodParameter> methodParameters = new ArrayList<>();
   final String codePrefix;
   final String methodName;
@@ -48,7 +47,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
     this.methodName = getElementGetterMethodName(elementName, isPublic);
     this.methodParameters.addAll(scopeElement.getParameters());
     this.codePrefix = String
-        .format("this.inContainer(%s, %s)", getElementLocatorString(scopeElement), isExpandScope);
+        .format("return this.inContainer(%s, %s)", getElementLocatorString(scopeElement), isExpandScope);
     this.isPublic = isPublic;
   }
 
@@ -79,7 +78,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, methodParameters, new ListOf(PAGE_OBJECT)) {
+      return new MethodDeclarationImpl(methodName, methodParameters, wrapAsList(PAGE_OBJECT)) {
         @Override
         String getReturnTypeStr() {
           return String.format("<T extends %s> List<T>", PAGE_OBJECT.getSimpleName());

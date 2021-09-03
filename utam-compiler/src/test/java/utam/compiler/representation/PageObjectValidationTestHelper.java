@@ -174,7 +174,7 @@ public class PageObjectValidationTestHelper {
     assertThat(actualAnnotationTextList, is(equalTo(expectedAnnotationTextList)));
   }
 
-  public static void validateDeclaration(MethodDeclaration actual, MethodInfo expected) {
+  static void validateDeclaration(MethodDeclaration actual, MethodInfo expected) {
     List<MethodParameter> actualParameters = actual.getParameters();
     assertThat(actual.getName(), is(equalTo(expected.name)));
     assertThat(
@@ -203,7 +203,7 @@ public class PageObjectValidationTestHelper {
     if (expected.importedTypes.size() > 0) {
       Set<String> actualImports = getAllImports(actual.getImports());
       String imports = actualImports.isEmpty()? "empty" : String.join(", ", actualImports);
-      String assertionStr = String.format("method '%s' imports are: %s", actual.getName(), imports);
+      String assertionStr = String.format("method '%s' interface imports are: %s", actual.getName(), imports);
       assertThat(
           assertionStr,
           actualImports,
@@ -346,7 +346,7 @@ public class PageObjectValidationTestHelper {
       return allImports;
     }
 
-    public boolean getIsPublic() {
+    boolean getIsPublic() {
       return isPublic;
     }
 
@@ -357,19 +357,6 @@ public class PageObjectValidationTestHelper {
     public MethodInfo setNotPublic() {
       this.setIsPublic(false);
       return this;
-    }
-
-    public void test(PageObjectMethod method) {
-      validateDeclaration(method.getDeclaration(), this);
-      assertThat(method.getCodeLines(), is(equalTo(codeLines)));
-      Set<String> classImports = getAllImports(method.getClassImports());
-      Set<String> expectedImports = allImportedTypes();
-      String imports = classImports.isEmpty()? "empty" : String.join(", ", classImports);
-      String assertionStr = String.format("method '%s' imports are: %s", method.getDeclaration().getName(), imports);
-      assertThat(
-          assertionStr,
-          expectedImports,
-          is(containsInAnyOrder(classImports.toArray())));
     }
   }
 

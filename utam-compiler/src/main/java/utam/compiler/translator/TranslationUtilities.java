@@ -9,11 +9,11 @@ package utam.compiler.translator;
 
 import com.google.googlejavaformat.java.Formatter;
 import com.google.googlejavaformat.java.FormatterException;
+import java.util.Set;
 import java.util.stream.Collectors;
 import utam.core.framework.consumer.UtamError;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 
 import java.time.LocalDateTime;
@@ -38,7 +38,6 @@ public class TranslationUtilities {
   static final String JAVADOC_CLOSE_LINE = "   */";
   static final String METHOD_JAVADOC_RETURNS_LINE = "@return %s";
   static final String METHOD_JAVADOC_PARAMETER_LINE = "@param %s %s";
-  private static final String ERR_METHOD_IS_EMPTY = "method '%s': implementation code is empty";
   private static final List<String> EMPTY_JAVADOC_LIST = new ArrayList<>();
 
   static List<String> getWrappedJavadoc(List<String> comments) {
@@ -103,24 +102,22 @@ public class TranslationUtilities {
     return classJavadoc;
   }
 
-  static List<String> getImportStrings(TypeProvider typeToImport, String currentPackage) {
-    List<TypeProvider> allTypes = new ArrayList<>(typeToImport.getBoundTypes());
-    allTypes.add(typeToImport);
-    return allTypes
+  static Set<String> getImportStrings(TypeProvider typeToImport, String currentPackage) {
+    return typeToImport.getImportableTypes()
         .stream()
-        .map(type -> getSingleImportString(type, currentPackage))
-        .filter(str -> !str.isEmpty())
-        .collect(Collectors.toList());
+        .filter(type -> isImportableType(type, currentPackage))
+        .map(type -> getStatement(String.format("import %s", type.getFullName())))
+        .collect(Collectors.toSet());
   }
 
-  static String getSingleImportString(TypeProvider type, String currentPackage) {
-    if (type.getFullName().isEmpty()
-        || type.getPackageName().isEmpty()
-        || type.getFullName().startsWith("java.lang")
-        || type.getPackageName().equals(currentPackage)) {
-      return "";
-    }
-    return getStatement(String.format("import %s", type.getFullName()));
+  static boolean isImportableType(TypeProvider type, String currentPackage) {
+    return isImportableType(type) && !type.getPackageName().equals(currentPackage);
+  }
+
+  public static boolean isImportableType(TypeProvider type) {
+    return !type.getFullName().isEmpty()
+        && !type.getPackageName().isEmpty()
+        && !type.getFullName().startsWith("java.lang");
   }
 
   static String getStatement(String string) {
@@ -149,17 +146,6 @@ public class TranslationUtilities {
 
   static String getPackageDeclaration(String packageName) {
     return getStatement("package " + packageName);
-  }
-
-  static String getLastStatement(PageObjectMethod m) {
-    if (m.getCodeLines() == null || m.getCodeLines().isEmpty()) {
-      throw new UtamError(String.format(ERR_METHOD_IS_EMPTY, m.getDeclaration().getName()));
-    }
-    String string = m.getCodeLines().get(m.getCodeLines().size() - 1);
-    if (!m.getDeclaration().getReturnType().isSameType(VOID)) {
-      return getStatement(String.format("return %s", string));
-    }
-    return getStatement(string);
   }
 
   public static String getElementGetterMethodName(String elementName, boolean isPublic) {

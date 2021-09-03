@@ -7,7 +7,7 @@
  */
 package utam.compiler.translator;
 
-import utam.compiler.helpers.TypeUtilities;
+import utam.compiler.helpers.BasicElementUnionType;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.PageObjectInterface;
 import utam.core.declarative.representation.TypeProvider;
@@ -72,19 +72,19 @@ public final class InterfaceSerializer {
   private String getNestedInterfaceDeclaration(TypeProvider type) {
     return String.format("interface %s extends %s {}",
         type.getSimpleName(),
-        ((TypeUtilities.Element)type).getBasicInterfaces().stream()
+        ((BasicElementUnionType)type).getBasicInterfaces().stream()
             .map(TypeProvider::getSimpleName)
             .collect(Collectors.joining(", ")));
   }
 
-  private List<String> getImportStatements(TypeProvider type) {
+  private Set<String> getImportStatements(TypeProvider type) {
     return getImportStrings(type, source.getInterfaceType().getPackageName());
   }
 
   private Set<String> getImports(Collection<MethodDeclaration> declaredApi) {
     Set<String> res = new HashSet<>(getImportStatements(source.getBaseInterfaceType()));
     source.getNestedInterfaces().stream()
-        .flatMap(nested -> ((TypeUtilities.Element)nested).getBasicInterfaces().stream())
+        .flatMap(nested -> ((BasicElementUnionType)nested).getBasicInterfaces().stream())
         .forEach(basicInterface -> res.addAll(getImportStatements(basicInterface)));
     declaredApi.stream()
         .flatMap(method -> method.getImports().stream())

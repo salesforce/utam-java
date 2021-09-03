@@ -52,7 +52,7 @@ public interface PageObjectMethod {
    *
    * @return true for element methods
    */
-  default boolean isBasicElementGetterMethod() {
+  default boolean isReturnsBasicElement() {
     return false;
   }
 }

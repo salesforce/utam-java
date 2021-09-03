@@ -1,0 +1,33 @@
+{
+  "elements": [
+    {
+      "name" : "simplePublic",
+      "public": true,
+      "type" : ["draggable"],
+      "selector": {
+        "css": ".foo"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element" : "simplePublic",
+          "apply": "dragAndDropByOffset",
+          "args": [
+            {
+              "type": "number",
+              "name": "x"
+            },
+            {
+              "type": "number",
+              "name": "y"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

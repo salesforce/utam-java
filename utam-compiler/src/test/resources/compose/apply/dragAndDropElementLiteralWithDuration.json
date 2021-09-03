@@ -1,0 +1,50 @@
+{
+  "elements": [
+    {
+      "name": "first",
+      "selector": {
+        "css": ".foo[%s]",
+        "args": [
+          {
+            "type" : "string",
+            "name" : "selectorArg1"
+          }
+        ]
+      },
+      "type" : ["draggable"]
+    },
+    {
+      "name": "second",
+      "public": true,
+      "selector": {
+        "css": ".foo[%s]",
+        "args": [
+          {
+            "type" : "string",
+            "name" : "selectorArg2"
+          }
+        ]
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element" : "first",
+          "apply": "dragAndDrop",
+          "args": [
+            {
+              "value" : "second",
+              "type" : "elementReference"
+            },
+            {
+              "value": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

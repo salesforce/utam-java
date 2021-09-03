@@ -1,0 +1,28 @@
+{
+  "elements": [
+    {
+      "name": "content",
+      "type": "container",
+      "selector": {
+        "css": ".inject"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "content",
+          "returnType" : "my/pageObject/foo",
+          "args": [
+            {
+              "name": "pageObjectType",
+              "type" : "pageObject"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

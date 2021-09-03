@@ -1,0 +1,16 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "returnType": "self",
+          "applyExternal": {
+            "type": "utam-extension/utils/customExtensionUtils",
+            "invoke": "getFieldValue"
+          }
+        }
+      ]
+    }
+  ]
+}

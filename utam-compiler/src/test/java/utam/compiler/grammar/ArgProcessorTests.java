@@ -12,11 +12,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
-import static utam.compiler.grammar.UtamArgument.ArgsProcessorBasicAction.ERR_MATCHING_TYPES_NOT_FOUND;
+import static utam.compiler.grammar.ArgsProcessor.ArgsProcessorBasicAction.ERR_MATCHING_TYPES_NOT_FOUND;
 
 import org.testng.annotations.Test;
-import utam.compiler.grammar.UtamArgument.ArgsProcessor;
-import utam.compiler.grammar.UtamArgument.ArgsProcessorBasicAction;
+import utam.compiler.grammar.ArgsProcessor.ArgsProcessorBasicAction;
 import utam.compiler.helpers.DraggableActionType;
 import utam.core.framework.consumer.UtamError;
 

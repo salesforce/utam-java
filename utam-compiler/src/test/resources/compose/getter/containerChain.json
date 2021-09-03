@@ -1,0 +1,53 @@
+{
+  "elements": [
+    {
+      "name": "content",
+      "type": "container",
+      "selector": {
+        "css": ".inject"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "content",
+          "returnType" : "my/pageObject/foo",
+          "args": [
+            {
+              "value": "my/pageObject/foo",
+              "type" : "pageObject"
+            }
+          ]
+        },
+        {
+          "chain" : true,
+          "returnType" : "my/pageObject/foo",
+          "apply" : "getSelf",
+          "args" : [
+            {
+              "type" : "string",
+              "name" : "arg1"
+            }
+          ]
+        },
+        {
+          "chain" : true,
+          "apply" : "getString",
+          "returnType": "boolean",
+          "matcher" : {
+            "type" : "stringEquals",
+            "args" : [
+              {
+                "type" : "string",
+                "name" : "arg2"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

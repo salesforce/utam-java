@@ -1,0 +1,40 @@
+{
+  "elements": [
+    {
+      "name": "findAll",
+      "type": "my/pageObject/foo",
+      "selector": {
+        "css": "css[%s]",
+        "returnAll": true,
+        "args" : [
+          {
+            "name": "selectorArg",
+            "type": "string"
+          }
+        ]
+      },
+      "nullable" : true,
+      "filter": {
+        "apply": "isVisible",
+        "matcher": {
+          "type": "isTrue"
+        }
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "findAll",
+          "args": [
+            {
+              "value" : "hardcoded"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

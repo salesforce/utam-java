@@ -14,8 +14,8 @@ import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.helpers.BasicElementActionType.getActionType;
 import static utam.compiler.helpers.DraggableActionType.ERR_MULTIPLE_EXPECTED_ARGS_TYPES;
+import static utam.compiler.helpers.BasicElementInterface.draggable;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
-import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.draggable;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import java.lang.reflect.Method;

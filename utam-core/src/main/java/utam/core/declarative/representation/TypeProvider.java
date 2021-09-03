@@ -61,10 +61,23 @@ public interface TypeProvider {
   }
 
   /**
-   * some types require more than one import because they set bound, for example List&lt;PageObject&gt;
+   * some types require more than one import because they set bound, for example
+   * List&lt;PageObject&gt;
+   *
    * @return list of bound types, by default empty
    */
   default List<TypeProvider> getBoundTypes() {
     return new ArrayList<>();
+  }
+
+  /**
+   * because of bound types, we might need to import more than type itself
+   *
+   * @return list of all types to import
+   */
+  default List<TypeProvider> getImportableTypes() {
+    List<TypeProvider> typesToImport = new ArrayList<>(getBoundTypes());
+    typesToImport.add(this);
+    return typesToImport;
   }
 }

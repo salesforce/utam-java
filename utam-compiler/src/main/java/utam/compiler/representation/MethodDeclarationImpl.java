@@ -7,8 +7,10 @@
  */
 package utam.compiler.representation;
 
+import static utam.compiler.helpers.ParameterUtils.setImport;
 import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import utam.compiler.helpers.ParameterUtils;
@@ -33,10 +35,11 @@ class MethodDeclarationImpl implements MethodDeclaration {
 
   private final String comments;
 
-  MethodDeclarationImpl(String methodName, List<MethodParameter> parameters,
+  MethodDeclarationImpl(
+      String methodName,
+      List<MethodParameter> parameters,
       TypeProvider returnType) {
-    this(methodName, parameters, returnType,
-        ParameterUtils.getDeclarationImports(parameters, returnType));
+    this(methodName, parameters, returnType, buildImports(returnType, parameters));
   }
 
   MethodDeclarationImpl(
@@ -58,6 +61,15 @@ class MethodDeclarationImpl implements MethodDeclaration {
       TypeProvider returnType,
       List<TypeProvider> imports) {
     this(methodName, parameters, returnType, imports, EMPTY_COMMENTS);
+  }
+
+  private static List<TypeProvider> buildImports(
+      TypeProvider returnType,
+      List<MethodParameter> methodParameters) {
+    List<TypeProvider> imports = new ArrayList<>();
+    methodParameters.forEach(p -> ParameterUtils.setDeclarationImport(imports, p));
+    setImport(imports, returnType);
+    return imports;
   }
 
   @Override
