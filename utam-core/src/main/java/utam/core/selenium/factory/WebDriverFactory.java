@@ -120,7 +120,6 @@ public class WebDriverFactory {
     caps.setPlatform(Platform.IOS);
     caps.setCapability(AppiumCustomCapabilityType.AUTOMATION_NAME, "XCUITest");
     caps.setCapability(AppiumCustomCapabilityType.NATIVE_WEB_TAP, true);
-    caps.setCapability(AppiumCustomCapabilityType.FULL_RESET, true);
     caps.setCapability(AppiumCustomCapabilityType.DEVICE_NAME, SystemProperties.getIOSDeviceName());
     caps.setCapability(AppiumCustomCapabilityType.APP, SystemProperties.getIOSAppPath());
     return caps;
@@ -139,8 +138,6 @@ public class WebDriverFactory {
 
   private static AppiumDriver ios(AppiumDriverLocalService service,
       AppiumCapabilityProvider desiredCapabilities) {
-    SystemProperties.setNodeJSPath();
-    SystemProperties.setAppiumPath();
     if (service == null) {
       throw new NullPointerException(ERR_APPIUM_LOCAL_SERVER);
     }
@@ -151,8 +148,6 @@ public class WebDriverFactory {
 
   private static AppiumDriver android(AppiumDriverLocalService service,
       AppiumCapabilityProvider desiredCapabilities) {
-    SystemProperties.setNodeJSPath();
-    SystemProperties.setAppiumPath();
     if (service == null) {
       throw new NullPointerException(ERR_APPIUM_LOCAL_SERVER);
     }

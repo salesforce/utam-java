@@ -7,13 +7,14 @@
  */
 package utam.core.selenium.factory;
 
+import java.io.File;
+
 import static utam.core.selenium.factory.SystemProperties.getAppiumPath;
 import static utam.core.selenium.factory.SystemProperties.getNodeJSPath;
 
 import io.appium.java_client.service.local.AppiumDriverLocalService;
 import io.appium.java_client.service.local.AppiumServiceBuilder;
-
-import java.io.File;
+import io.appium.java_client.service.local.flags.GeneralServerFlag;
 
 /**
  * The factory for AppiumDriverLocalService
@@ -21,15 +22,21 @@ import java.io.File;
  * @author qren
  * @since 230
  */
-@SuppressWarnings({"WeakerAccess", "unused"})
 public class AppiumServerFactory {
 
   public static AppiumDriverLocalService getAppiumServer() {
+    SystemProperties.setNodeJSPath();
+    SystemProperties.setAppiumPath();
+
     AppiumServiceBuilder serviceBuilder = new AppiumServiceBuilder();
-    serviceBuilder.usingAnyFreePort();
     serviceBuilder.usingDriverExecutable(new File(getNodeJSPath()));
     serviceBuilder.withAppiumJS(new File(getAppiumPath()));
-    return serviceBuilder.build();
+    serviceBuilder.withArgument(GeneralServerFlag.SESSION_OVERRIDE);
+    serviceBuilder.usingAnyFreePort();
+    AppiumDriverLocalService service = AppiumDriverLocalService
+            .buildService(serviceBuilder);
+    service.clearOutPutStreams();
+    service.enableDefaultSlf4jLoggingOfOutputData();
+    return service;
   }
-
 }
