@@ -53,22 +53,18 @@ public class SystemProperties {
   }
 
   // Appium test related
-  static String getAndroidAppPath() {
-    return System.getProperty(ANDROID_APP_PATH);
-  }
-
   static void setAndroidAppPath() {
     if (System.getProperty(ANDROID_APP_PATH) == null) {
       System.setProperty(ANDROID_APP_PATH, getUserHomePath() + "SApp.apk");
     }
   }
 
-  static String getAndroidDeviceName() {
-    return System.getProperty(ANDROID_DEVICE_NAME);
+  static String getAndroidAppPath() {
+    return System.getProperty(ANDROID_APP_PATH);
   }
 
-  static String getAppiumPath() {
-    return System.getProperty(APPIUM_PATH);
+  static String getAndroidDeviceName() {
+    return System.getProperty(ANDROID_DEVICE_NAME);
   }
 
   static void setAppiumPath() {
@@ -77,8 +73,8 @@ public class SystemProperties {
     }
   }
 
-  static String getAppActivity() {
-    return System.getProperty(APP_ACTIVITY);
+  static String getAppiumPath() {
+    return System.getProperty(APPIUM_PATH);
   }
 
   static void setAppActivity() {
@@ -87,8 +83,8 @@ public class SystemProperties {
     }
   }
 
-  static String getAppBundleID() {
-    return System.getProperty(APP_BUNDLE_ID);
+  static String getAppActivity() {
+    return System.getProperty(APP_ACTIVITY);
   }
 
   static void setAppBundleID() {
@@ -97,8 +93,8 @@ public class SystemProperties {
     }
   }
 
-  static String getIOSAppPath() {
-    return System.getProperty(IOS_APP_PATH);
+  static String getAppBundleID() {
+    return System.getProperty(APP_BUNDLE_ID);
   }
 
   static void setIOSAppPath() {
@@ -107,14 +103,18 @@ public class SystemProperties {
     }
   }
 
-  static String getIOSDeviceName() {
-    return System.getProperty(IOS_DEVICE_NAME);
+  static String getIOSAppPath() {
+    return System.getProperty(IOS_APP_PATH);
   }
 
-  public static void setIOSDeviceName() {
+  static void setIOSDeviceName() {
     if (System.getProperty(IOS_DEVICE_NAME) == null) {
       System.setProperty(IOS_DEVICE_NAME, "iPhone 8 Plus");
     }
+  }
+
+  static String getIOSDeviceName() {
+    return System.getProperty(IOS_DEVICE_NAME);
   }
 
   static void setNodeJSPath() {
