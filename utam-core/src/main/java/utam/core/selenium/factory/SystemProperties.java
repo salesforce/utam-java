@@ -20,7 +20,7 @@ package utam.core.selenium.factory;
  * @author elizaveta.ivanova
  * @since 216
  */
-public class SystemProperties {
+class SystemProperties {
 
   static final String FILE_PATH_SEPARATOR = System.getProperty("file.separator");
   static final String CHROME_DRIVER_PATH = "webdriver.chrome.driver";
