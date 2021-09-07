@@ -116,6 +116,9 @@ public class WebDriverFactory {
   }
 
   private static DesiredCapabilities iOSOptions() {
+    SystemProperties.setIOSDeviceName();
+    SystemProperties.setIOSAppPath();
+ 
     DesiredCapabilities caps = new DesiredCapabilities();
     caps.setPlatform(Platform.IOS);
     caps.setCapability(AppiumCustomCapabilityType.AUTOMATION_NAME, "XCUITest");
@@ -126,10 +129,14 @@ public class WebDriverFactory {
   }
 
   private static DesiredCapabilities androidOptions() {
+    SystemProperties.setAppBundleID();
+    SystemProperties.setAndroidAppPath();
+    SystemProperties.setAppActivity();
+    SystemProperties.setAndroidAppPath();
+
     DesiredCapabilities caps = new DesiredCapabilities();
     caps.setPlatform(Platform.ANDROID);
     caps.setCapability(AppiumCustomCapabilityType.AUTOMATION_NAME, "UIAutomator2");
-    caps.setCapability(AppiumCustomCapabilityType.DEVICE_NAME, SystemProperties.getIOSDeviceName());
     caps.setCapability(AppiumCustomCapabilityType.APP_PACKAGE, SystemProperties.getAppBundleID());
     caps.setCapability(AppiumCustomCapabilityType.APP_ACTIVITY, SystemProperties.getAppActivity());
     caps.setCapability(AppiumCustomCapabilityType.APP, SystemProperties.getAndroidAppPath());
