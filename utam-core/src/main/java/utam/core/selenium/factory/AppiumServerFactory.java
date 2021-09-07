@@ -7,14 +7,14 @@
  */
 package utam.core.selenium.factory;
 
-import java.io.File;
-
 import static utam.core.selenium.factory.SystemProperties.getAppiumPath;
 import static utam.core.selenium.factory.SystemProperties.getNodeJSPath;
 
 import io.appium.java_client.service.local.AppiumDriverLocalService;
 import io.appium.java_client.service.local.AppiumServiceBuilder;
 import io.appium.java_client.service.local.flags.GeneralServerFlag;
+
+import java.io.File;
 
 /**
  * The factory for AppiumDriverLocalService
