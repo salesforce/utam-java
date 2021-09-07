@@ -132,7 +132,6 @@ public class WebDriverFactory {
     SystemProperties.setAppBundleID();
     SystemProperties.setAndroidAppPath();
     SystemProperties.setAppActivity();
-    SystemProperties.setAndroidAppPath();
 
     DesiredCapabilities caps = new DesiredCapabilities();
     caps.setPlatform(Platform.ANDROID);
