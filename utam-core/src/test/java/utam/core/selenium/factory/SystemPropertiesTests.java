@@ -64,32 +64,12 @@ public class SystemPropertiesTests {
     assertThat(
         System.getProperty(SystemProperties.ANDROID_APP_PATH),
         is(equalTo(SystemProperties.getAndroidAppPath())));
-    
+
     // Test that subsequent calls to the same method succeed
     SystemProperties.setAndroidAppPath();
     assertThat(
         System.getProperty(SystemProperties.ANDROID_APP_PATH),
         is(equalTo(SystemProperties.getAndroidAppPath())));
-  }
-
-  /**
-   * The static setAndroidDeviceName method should set the android.device system
-   * property to the proper value, and
-   * the static getAndroidDeviceName method should return the proper value
-   */
-  @Test
-  public void testSetAndroidDeviceName() {
-    assertThat(System.getProperty(SystemProperties.ANDROID_DEVICE_NAME), is(nullValue()));
-    SystemProperties.setAndroidDeviceName();
-    assertThat(
-        System.getProperty(SystemProperties.ANDROID_DEVICE_NAME),
-        is(equalTo(SystemProperties.getAndroidDeviceName())));
-    
-    // Test that subsequent calls to the same method succeed
-    SystemProperties.setAndroidDeviceName();
-    assertThat(
-        System.getProperty(SystemProperties.ANDROID_DEVICE_NAME),
-        is(equalTo(SystemProperties.getAndroidDeviceName())));
   }
 
   /**
@@ -124,7 +104,7 @@ public class SystemPropertiesTests {
     assertThat(
         System.getProperty(SystemProperties.APP_ACTIVITY),
         is(equalTo(SystemProperties.getAppActivity())));
-    
+
     // Test that subsequent calls to the same method succeed
     SystemProperties.setAppActivity();
     assertThat(
@@ -144,7 +124,7 @@ public class SystemPropertiesTests {
     assertThat(
         System.getProperty(SystemProperties.APP_BUNDLE_ID),
         is(equalTo(SystemProperties.getAppBundleID())));
-    
+
     // Test that subsequent calls to the same method succeed
     SystemProperties.setAppBundleID();
     assertThat(
@@ -164,7 +144,7 @@ public class SystemPropertiesTests {
     assertThat(
         System.getProperty(SystemProperties.IOS_APP_PATH),
         is(equalTo(SystemProperties.getIOSAppPath())));
-    
+
     // Test that subsequent calls to the same method succeed
     SystemProperties.setIOSAppPath();
     assertThat(
@@ -184,7 +164,7 @@ public class SystemPropertiesTests {
     assertThat(
         System.getProperty(SystemProperties.IOS_DEVICE_NAME),
         is(equalTo(SystemProperties.getIOSDeviceName())));
-    
+
     // Test that subsequent calls to the same method succeed
     SystemProperties.setIOSDeviceName();
     assertThat(

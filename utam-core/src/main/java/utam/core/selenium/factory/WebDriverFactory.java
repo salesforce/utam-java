@@ -116,21 +116,26 @@ public class WebDriverFactory {
   }
 
   private static DesiredCapabilities iOSOptions() {
+    SystemProperties.setIOSDeviceName();
+    SystemProperties.setIOSAppPath();
+ 
     DesiredCapabilities caps = new DesiredCapabilities();
     caps.setPlatform(Platform.IOS);
     caps.setCapability(AppiumCustomCapabilityType.AUTOMATION_NAME, "XCUITest");
     caps.setCapability(AppiumCustomCapabilityType.NATIVE_WEB_TAP, true);
-    caps.setCapability(AppiumCustomCapabilityType.FULL_RESET, true);
     caps.setCapability(AppiumCustomCapabilityType.DEVICE_NAME, SystemProperties.getIOSDeviceName());
     caps.setCapability(AppiumCustomCapabilityType.APP, SystemProperties.getIOSAppPath());
     return caps;
   }
 
   private static DesiredCapabilities androidOptions() {
+    SystemProperties.setAppBundleID();
+    SystemProperties.setAndroidAppPath();
+    SystemProperties.setAppActivity();
+
     DesiredCapabilities caps = new DesiredCapabilities();
     caps.setPlatform(Platform.ANDROID);
     caps.setCapability(AppiumCustomCapabilityType.AUTOMATION_NAME, "UIAutomator2");
-    caps.setCapability(AppiumCustomCapabilityType.DEVICE_NAME, SystemProperties.getIOSDeviceName());
     caps.setCapability(AppiumCustomCapabilityType.APP_PACKAGE, SystemProperties.getAppBundleID());
     caps.setCapability(AppiumCustomCapabilityType.APP_ACTIVITY, SystemProperties.getAppActivity());
     caps.setCapability(AppiumCustomCapabilityType.APP, SystemProperties.getAndroidAppPath());
@@ -139,8 +144,6 @@ public class WebDriverFactory {
 
   private static AppiumDriver ios(AppiumDriverLocalService service,
       AppiumCapabilityProvider desiredCapabilities) {
-    SystemProperties.setNodeJSPath();
-    SystemProperties.setAppiumPath();
     if (service == null) {
       throw new NullPointerException(ERR_APPIUM_LOCAL_SERVER);
     }
@@ -151,8 +154,6 @@ public class WebDriverFactory {
 
   private static AppiumDriver android(AppiumDriverLocalService service,
       AppiumCapabilityProvider desiredCapabilities) {
-    SystemProperties.setNodeJSPath();
-    SystemProperties.setAppiumPath();
     if (service == null) {
       throw new NullPointerException(ERR_APPIUM_LOCAL_SERVER);
     }

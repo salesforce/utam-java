@@ -63,12 +63,6 @@ class SystemProperties {
     return System.getProperty(ANDROID_APP_PATH);
   }
 
-  static void setAndroidDeviceName() {
-    if (System.getProperty(ANDROID_DEVICE_NAME) == null) {
-      System.setProperty(ANDROID_DEVICE_NAME, "emulator-5544");
-    }
-  }
-
   static String getAndroidDeviceName() {
     return System.getProperty(ANDROID_DEVICE_NAME);
   }
