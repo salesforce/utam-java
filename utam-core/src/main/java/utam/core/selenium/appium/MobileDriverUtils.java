@@ -60,10 +60,12 @@ public abstract class MobileDriverUtils {
 
   private static int getBoundedCoordinate(int c, int dimension) {
     if (c <= 0) {
-      return 5;
+      // beyond the lower bounds, adjust to 10% of dimension to avoid over scroll
+      return (int) (dimension * .1);
     }
     if (dimension <= c) {
-      return dimension - 5;
+      // beyond the upper bounds, adjust to 90% of dimension to avoid over scroll
+      return (int) (dimension * .9);
     }
     return c;
   }
@@ -76,11 +78,13 @@ public abstract class MobileDriverUtils {
    */
   private static Point boundCoordinates(AppiumDriver driver, Point location) {
     int width, height;
+    Dimension dimension;
     if (isNative(driver)) {
-      width = driver.manage().window().getSize().getWidth();
-      height = driver.manage().window().getSize().getHeight();
+      dimension = driver.manage().window().getSize();
+      width = dimension.getWidth();
+      height = dimension.getHeight();
     } else {
-      Dimension dimension = getWebViewDocumentSize(driver);
+      dimension = getWebViewDocumentSize(driver);
       width = dimension.getWidth();
       height = dimension.getHeight();
     }
@@ -172,8 +176,9 @@ public abstract class MobileDriverUtils {
   private static Point getAbsoluteCoordinates(WebElement webView, int xWebView,
       int yWebView) {
     // The dimensions are all relative to the WebView, so calculate absolute coordinates
-    int webViewX = webView.getLocation().getX();
-    int webViewY = webView.getLocation().getY();
+    Point location = webView.getLocation();
+    int webViewX = location.getX();
+    int webViewY = location.getY();
     int absoluteX = xWebView + webViewX;
     int absoluteY = yWebView + webViewY;
     return new Point(absoluteX, absoluteY);

@@ -46,6 +46,7 @@ import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Point;
+import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
@@ -290,6 +291,7 @@ public class ExpectationsImplTests {
     MockUtilities mock = new MockUtilities(AndroidDriver.class);
     when(mock.getMobileDriverAdapter().getWebViewElement()).thenReturn(mock.getWebElementMock());
     when(mock.getWebElementMock().getLocation()).thenReturn(new Point(125,125));
+    when(mock.getWebElementMock().getRect()).thenReturn(new Rectangle(125,125, 5, 5));
     when(mock.getWebElementMock().getSize()).thenReturn(new Dimension(5,5));
     Expectations expectations = flick(1,1);
     assertThat(expectations.apply(mock.getDriverAdapter(), mock.getElementAdapter()),

@@ -16,6 +16,7 @@ import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
+import org.openqa.selenium.Rectangle;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.element.Element.GestureDirection;
@@ -31,6 +32,7 @@ public class MobileElementAdapterTests {
     MockUtilities mock = new MockUtilities(IOSDriver.class);
     when(mock.getMobileDriverAdapter().getWebViewElement()).thenReturn(mock.getWebElementMock());
     when(mock.getWebElementMock().getLocation()).thenReturn(new Point(1,2));
+    when(mock.getWebElementMock().getRect()).thenReturn(new Rectangle(1,2, 10, 20));
     when(mock.getWebElementMock().getSize()).thenReturn(new Dimension(10, 20));
     String title = "title";
     when(mock.getAppiumDriverMock().getTitle()).thenReturn(title);
@@ -43,6 +45,7 @@ public class MobileElementAdapterTests {
     MockUtilities mock = new MockUtilities(AndroidDriver.class);
     when(mock.getMobileDriverAdapter().getWebViewElement()).thenReturn(mock.getWebElementMock());
     when(mock.getWebElementMock().getLocation()).thenReturn(new Point(1,2));
+    when(mock.getWebElementMock().getRect()).thenReturn(new Rectangle(1,2, 10, 20));
     when(mock.getWebElementMock().getSize()).thenReturn(new Dimension(10, 20));
     String title = "title";
     when(mock.getAppiumDriverMock().getTitle()).thenReturn(title);

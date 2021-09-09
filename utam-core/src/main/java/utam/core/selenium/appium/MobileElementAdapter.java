@@ -13,6 +13,7 @@ import io.appium.java_client.touch.WaitOptions;
 import io.appium.java_client.touch.offset.PointOption;
 import java.time.Duration;
 import org.openqa.selenium.Point;
+import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebElement;
 import utam.core.driver.Driver;
 import utam.core.selenium.element.ElementAdapter;
@@ -34,9 +35,10 @@ public class MobileElementAdapter extends ElementAdapter {
   @Override
   public void flick(int xOffset, int yOffset) {
     AppiumDriver appiumDriver = MobileDriverAdapter.getAppiumDriver(driverAdapter);
-    Point nativeStartPoint = getWebElement().getLocation().moveBy(
-        getWebElement().getSize().getWidth() / 2,
-        getWebElement().getSize().getHeight() / 2
+    Rectangle rect = getWebElement().getRect();
+    Point nativeStartPoint = rect.getPoint().moveBy(
+        rect.getWidth() / 2,
+        rect.getHeight() / 2
     );
     Point nativeEndPoint = nativeStartPoint.moveBy(xOffset, yOffset);
     Point[] movement = MobileDriverUtils.getFlickCoordinates((MobileDriverAdapter) driverAdapter, nativeStartPoint, nativeEndPoint);
