@@ -7,11 +7,8 @@
  */
 package utam.core.selenium.appium;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
-import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 import org.openqa.selenium.Dimension;
@@ -19,7 +16,6 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
-import utam.core.element.Element.GestureDirection;
 
 /**
  * @author elizaveta.ivanova
@@ -51,11 +47,5 @@ public class MobileElementAdapterTests {
     when(mock.getAppiumDriverMock().getTitle()).thenReturn(title);
     when(mock.getAppiumDriverMock().getContext()).thenReturn(title);
     mock.getElementAdapter().flick(1, 1);
-  }
-
-  @Test
-  public void testFlickItems() {
-    MockUtilities mock = new MockUtilities.MockAdapter(AppiumDriver.class);
-    assertThat(mock.getElementAdapter().flickItems(GestureDirection.DOWN), is(false));
   }
 }

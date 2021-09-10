@@ -7,8 +7,6 @@
  */
 package utam.core.element;
 
-import utam.core.element.Element.GestureDirection;
-
 /**
  * interaction methods for touchable element
  * @author r.rajasekaran
@@ -27,18 +25,5 @@ public interface Touchable extends BasicElement {
    * @param yOffset Offset for y
   */
   void flick(int xOffset, int yOffset);
-    
-  /**
-   * Flicks a list of web elements in the desired direction repeatedly until the end of the list is reached.
-   * <p>
-   * This method will compare the original element's text and position to the updated element after the flick.  If
-   * the text and position are the same as before the flick, then the end of the list is reached.
-   * 
-   * </p>
-   *
-   * @param direction The direction of the flick gesture. Allowed values are DOWN, UP, LEFT, RIGHT.
-   * @return True if the list was scrolled as part of the flick, false if the list could not be scrolled.
-   */
-  boolean flickItems(GestureDirection direction);
 
 }

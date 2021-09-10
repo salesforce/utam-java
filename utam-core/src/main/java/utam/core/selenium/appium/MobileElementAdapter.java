@@ -53,10 +53,4 @@ public class MobileElementAdapter extends ElementAdapter {
         .release()
         .perform();
   }
-
-  @Override
-  public boolean flickItems(GestureDirection direction) {
-    // todo
-    return false;
-  }
 }

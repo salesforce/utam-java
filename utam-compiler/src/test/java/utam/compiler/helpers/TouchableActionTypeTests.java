@@ -62,15 +62,6 @@ public class TouchableActionTypeTests {
             Collections.unmodifiableList(List.of("Integer", "Integer")));
   }
 
-  /** The flickItems member should return the proper value */
-  @Test
-  public void testFlickItems() {
-    validateAction(
-        TouchableActionType.flickItems,
-            BOOLEAN_TYPE_NAME,
-            Collections.singletonList("String"));
-  }
-
   private void validateAction(
           ActionType action, String returnType, List<String> parameterTypes) {
     List<String> parameterTypeStrings =

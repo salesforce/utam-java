@@ -14,7 +14,6 @@ import utam.core.driver.Expectations;
 import utam.core.element.BasicElement;
 import utam.core.element.DragAndDropOptions;
 import utam.core.element.Element;
-import utam.core.element.Element.GestureDirection;
 import utam.core.element.Element.ScrollOptions;
 import utam.core.element.RootElement;
 import utam.core.framework.UtamCoreError;
@@ -196,11 +195,6 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
         getDriver().setPageContextToWebView(originalContext, getDriverTimeouts().getWaitForTimeout(), getDriverTimeouts().getPollingInterval());
       }
     }
-  }
-
-  @Override
-  public boolean flickItems(GestureDirection direction) {
-    return getElement().flickItems(direction);
   }
 
   @Override

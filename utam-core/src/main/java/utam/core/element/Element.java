@@ -151,14 +151,6 @@ public interface Element {
   void flick(int xOffset, int yOffset);
 
   /**
-   * only for mobile elements - flick action based on direction
-   *
-   * @param direction direction of the flick
-   * @return boolean
-   */
-  boolean flickItems(GestureDirection direction);
-
-  /**
    * drag and drop an element to the target location
    *
    * @param options location where to drop as element or coordinates offset and optional hold
@@ -173,15 +165,4 @@ public interface Element {
     TOP,
     CENTER
   }
-
-  /**
-   * Enumeration of gesture directions.
-   */
-  enum GestureDirection {
-    DOWN,
-    UP,
-    LEFT,
-    RIGHT
-  }
-
 }
