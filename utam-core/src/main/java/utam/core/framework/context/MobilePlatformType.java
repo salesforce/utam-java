@@ -87,17 +87,22 @@ public enum MobilePlatformType implements Profile {
   }
 
   private static boolean isIPad(WebDriver driver) {
-    return "iPad".equalsIgnoreCase(((AppiumDriver) driver).getSessionDetail("device").toString());
+    Object deviceObject = ((AppiumDriver) driver).getSessionDetail("device");
+    if (deviceObject != null) {
+        return "iPad".equalsIgnoreCase(deviceObject.toString());
+    }
+    return false;
   }
 
   private static boolean isTablet(WebDriver driver) {
-    String[] deviceScreenSize = ((AppiumDriver)driver).getSessionDetail("deviceScreenSize").toString().split("[xX]");
-    String deviceScreenDensity = ((AppiumDriver)driver).getSessionDetail("deviceScreenDensity").toString();
+    Object deviceScreenSizeObject = ((AppiumDriver)driver).getSessionDetail("deviceScreenSize");
+    Object deviceScreenDensityObject = ((AppiumDriver)driver).getSessionDetail("deviceScreenDensity");
 
     // For android, based on https://developer.android.com/training/multiscreen/screensizes
     // when device's dp is equal or bigger than 600, will be treated as tablet, otherwise will be phone
-    if (deviceScreenSize.length > 0 && !deviceScreenDensity.isEmpty()) {
-        int dp = Integer.valueOf(deviceScreenSize[0]) * 160 / Integer.valueOf(deviceScreenDensity);
+    if (deviceScreenSizeObject != null && deviceScreenDensityObject != null) {
+        int dp = Integer.valueOf(deviceScreenSizeObject.toString().split("[xX]")[0]) 
+                * 160 / Integer.valueOf(deviceScreenDensityObject.toString());
         return dp >= 600;
     }
     return false;
