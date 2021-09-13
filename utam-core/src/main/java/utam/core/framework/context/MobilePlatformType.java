@@ -52,7 +52,7 @@ public enum MobilePlatformType implements Profile {
       return isTablet(driver) ? ANDROID_TABLET : ANDROID_PHONE;
     }
     if (driver instanceof IOSDriver) {
-        return isIPad(driver) ? IOS_TABLET : IOS_PHONE;
+      return isIPad(driver) ? IOS_TABLET : IOS_PHONE;
     }
     if (driver instanceof AppiumDriver) {
       // mock passed from test
