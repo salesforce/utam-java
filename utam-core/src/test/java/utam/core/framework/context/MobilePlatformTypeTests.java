@@ -89,8 +89,6 @@ public class MobilePlatformTypeTests {
     Profile profile = ANDROID_TABLET;
     assertThat(profile.getName(), is(equalTo(PLATFORM_PROFILE_NAME)));
     assertThat(profile.getValue(), is(equalTo("android_tablet")));
-    assertThat(profile.getConfigName(null), is(equalTo("platform_android_tablet_config")));
-    assertThat(profile.getConfigName(""), is(equalTo("platform_android_tablet_config")));
     assertThat(profile.getConfigName("my"), is(equalTo("my_platform_android_tablet_config")));
   }
 
@@ -99,8 +97,6 @@ public class MobilePlatformTypeTests {
     Profile profile = IOS_PHONE;
     assertThat(profile.getName(), is(equalTo(PLATFORM_PROFILE_NAME)));
     assertThat(profile.getValue(), is(equalTo("ios_phone")));
-    assertThat(profile.getConfigName(null), is(equalTo("platform_ios_phone_config")));
-    assertThat(profile.getConfigName(""), is(equalTo("platform_ios_phone_config")));
     assertThat(profile.getConfigName("my"), is(equalTo("my_platform_ios_phone_config")));
   }
 
@@ -109,8 +105,6 @@ public class MobilePlatformTypeTests {
     Profile profile = IOS_TABLET;
     assertThat(profile.getName(), is(equalTo(PLATFORM_PROFILE_NAME)));
     assertThat(profile.getValue(), is(equalTo("ios_tablet")));
-    assertThat(profile.getConfigName(null), is(equalTo("platform_ios_tablet_config")));
-    assertThat(profile.getConfigName(""), is(equalTo("platform_ios_tablet_config")));
     assertThat(profile.getConfigName("my"), is(equalTo("my_platform_ios_tablet_config")));
   }
 }

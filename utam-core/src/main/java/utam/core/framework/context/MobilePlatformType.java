@@ -49,10 +49,10 @@ public enum MobilePlatformType implements Profile {
    */
   public static MobilePlatformType fromDriver(WebDriver driver) {
     if (driver instanceof AndroidDriver) {
-      return isTablet(driver) == true ? ANDROID_TABLET : ANDROID_PHONE;
+      return isTablet(driver) ? ANDROID_TABLET : ANDROID_PHONE;
     }
     if (driver instanceof IOSDriver) {
-        return isiPad(driver) == true ? IOS_TABLET : IOS_PHONE;
+        return isIPad(driver) ? IOS_TABLET : IOS_PHONE;
     }
     if (driver instanceof AppiumDriver) {
       // mock passed from test
@@ -61,10 +61,10 @@ public enum MobilePlatformType implements Profile {
       }
       Platform platform = ((AppiumDriver) driver).getCapabilities().getPlatform();
       if (platform == Platform.LINUX) {
-        return isTablet(driver) == true ? ANDROID_TABLET : ANDROID_PHONE;
+        return isTablet(driver) ? ANDROID_TABLET : ANDROID_PHONE;
       }
       if (platform == Platform.MAC) {
-        return isiPad(driver) == true ? IOS_TABLET : IOS_PHONE;
+        return isIPad(driver) ? IOS_TABLET : IOS_PHONE;
       }
     }
     return WEB;
@@ -86,12 +86,8 @@ public enum MobilePlatformType implements Profile {
     return getProfileConfigName(this, moduleName);
   }
 
-  private static boolean isiPad(WebDriver driver) {
-    String device =  ((AppiumDriver) driver).getSessionDetail("device").toString();
-    if (device != null && !device.isEmpty()) {
-      return ((AppiumDriver)driver).getSessionDetail("device").toString().equalsIgnoreCase("iPad");
-    }
-    return false;
+  private static boolean isIPad(WebDriver driver) {
+    return "iPad".equalsIgnoreCase(((AppiumDriver) driver).getSessionDetail("device").toString());
   }
 
   private static boolean isTablet(WebDriver driver) {
@@ -100,8 +96,7 @@ public enum MobilePlatformType implements Profile {
 
     // For android, based on https://developer.android.com/training/multiscreen/screensizes
     // when device's dp is equal or bigger than 600, will be treated as tablet, otherwise will be phone
-    if (deviceScreenSize != null && !deviceScreenSize[0].isEmpty() 
-            && deviceScreenDensity != null && !deviceScreenDensity.isEmpty()) {
+    if (deviceScreenSize.length > 0 && !deviceScreenDensity.isEmpty()) {
         int dp = Integer.valueOf(deviceScreenSize[0]) * 160 / Integer.valueOf(deviceScreenDensity);
         return dp >= 600;
     }
