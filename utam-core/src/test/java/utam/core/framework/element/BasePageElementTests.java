@@ -29,7 +29,6 @@ import org.openqa.selenium.WebDriver;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.element.Element;
-import utam.core.element.Element.GestureDirection;
 import utam.core.element.Locator;
 import utam.core.selenium.element.LocatorBy;
 
@@ -237,19 +236,6 @@ public class BasePageElementTests {
     MockUtilities mock = new MockUtilities.MockDriver(AppiumDriver.class);
     when(mock.getMobileDriverAdapter().isNative()).thenReturn(false);
     mock.getUtamElement().flick(1, 1);
-  }
-
-  @Test
-  public void testFlickItems() {
-    MockUtilities mock = new MockUtilities();
-    assertThrows(() -> mock.getUtamElement().flickItems(GestureDirection.DOWN));
-  }
-
-  @Test
-  public void testFlickItemsMobile() {
-    MockUtilities mock = new MockUtilities.MockAdapter(AppiumDriver.class);
-    assertThat(mock.getUtamElement().flickItems(GestureDirection.DOWN), is(false));
-    verify(mock.getElementAdapter(), times(1)).flickItems(GestureDirection.DOWN);
   }
 
   @Test

@@ -266,11 +266,6 @@ public class ElementAdapter implements Element {
   }
 
   @Override
-  public boolean flickItems(GestureDirection direction) {
-    throw new IllegalStateException(ERR_SUPPORTED_FOR_MOBILE);
-  }
-
-  @Override
   public void flick(int xOffset, int yOffset) {
     throw new IllegalStateException(ERR_SUPPORTED_FOR_MOBILE);
   }

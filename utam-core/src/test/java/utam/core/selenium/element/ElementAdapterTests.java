@@ -42,7 +42,6 @@ import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.element.Element;
 import utam.core.element.DragAndDropOptions;
-import utam.core.element.Element.GestureDirection;
 import utam.core.element.Element.ScrollOptions;
 import utam.core.element.FindContext.Type;
 import utam.core.framework.consumer.UtamError;
@@ -256,7 +255,6 @@ public class ElementAdapterTests {
   public void testMobileActionsThrow() {
     MockUtilities mock = new MockUtilities();
     assertThrows(() -> mock.getElementAdapter().flick(0, 0));
-    assertThrows(() -> mock.getElementAdapter().flickItems(GestureDirection.DOWN));
   }
 
   @Test
