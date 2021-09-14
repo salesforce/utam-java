@@ -52,7 +52,9 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
   }
 
   final boolean isIOSPlatform() {
-    return mobilePlatform == MobilePlatformType.IOS;
+    return mobilePlatform == MobilePlatformType.IOS ||
+            mobilePlatform == MobilePlatformType.IOS_PHONE ||
+            mobilePlatform == MobilePlatformType.IOS_TABLET;
   }
 
   Expectations<AppiumDriver> getSwitchToWebViewExpectations(String title) {
@@ -76,7 +78,9 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
     // For the Appium chromedriver limitation to handle multiple WebViews,
     // If switch to context fail to find the target WebView, then switch to
     // use window
-    if (mobilePlatform == MobilePlatformType.ANDROID) {
+    if (mobilePlatform == MobilePlatformType.ANDROID ||
+        mobilePlatform == MobilePlatformType.ANDROID_PHONE ||
+        mobilePlatform == MobilePlatformType.ANDROID_TABLET) {
       Set<String> windowHandles = appiumDriver.getWindowHandles();
       for (String windowHandle : windowHandles) {
         AppiumDriver newDriver = (AppiumDriver) appiumDriver.switchTo().window(windowHandle);

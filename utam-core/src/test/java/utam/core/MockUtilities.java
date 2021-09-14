@@ -16,6 +16,9 @@ import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QU
 import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR_ALL;
 
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.ios.IOSDriver;
+
 import java.util.Collections;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.JavascriptExecutor;
@@ -98,6 +101,10 @@ public class MockUtilities {
     WebDriver driver = getWebDriverMock();
     if(driverType.equals(AppiumDriver.class)) {
       setMobilePlatform(Platform.LINUX);
+    } else if(driverType.equals(IOSDriver.class)) {
+        setMobilePlatform(Platform.IOS);
+    } else if (driverType.equals(AndroidDriver.class)) {
+        setMobilePlatform(Platform.ANDROID);
     }
     return (DriverAdapter) WebDriverFactory.getAdapter(driver);
   }
@@ -107,6 +114,9 @@ public class MockUtilities {
     Capabilities capabilities = mock(Capabilities.class);
     when(capabilities.getPlatform()).thenReturn(platform);
     when(driver.getCapabilities()).thenReturn(capabilities);
+    when(driver.getSessionDetail("device")).thenReturn("iphone");
+    when(driver.getSessionDetail("deviceScreenSize")).thenReturn("1080x1920");
+    when(driver.getSessionDetail("deviceScreenDensity")).thenReturn("480");
   }
 
   public void setShadowMock(WebElement element, String cssSelector) {

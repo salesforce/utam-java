@@ -49,10 +49,10 @@ public enum MobilePlatformType implements Profile {
    */
   public static MobilePlatformType fromDriver(WebDriver driver) {
     if (driver instanceof AndroidDriver) {
-      return ANDROID;
+      return isTablet(driver) ? ANDROID_TABLET : ANDROID_PHONE;
     }
     if (driver instanceof IOSDriver) {
-      return IOS;
+      return isIPad(driver) ? IOS_TABLET : IOS_PHONE;
     }
     if (driver instanceof AppiumDriver) {
       // mock passed from test
@@ -61,10 +61,10 @@ public enum MobilePlatformType implements Profile {
       }
       Platform platform = ((AppiumDriver) driver).getCapabilities().getPlatform();
       if (platform == Platform.LINUX) {
-        return ANDROID;
+        return isTablet(driver) ? ANDROID_TABLET : ANDROID_PHONE;
       }
       if (platform == Platform.MAC) {
-        return IOS;
+        return isIPad(driver) ? IOS_TABLET : IOS_PHONE;
       }
     }
     return WEB;
@@ -86,4 +86,25 @@ public enum MobilePlatformType implements Profile {
     return getProfileConfigName(this, moduleName);
   }
 
+  private static boolean isIPad(WebDriver driver) {
+    Object deviceObject = ((AppiumDriver) driver).getSessionDetail("device");
+    if (deviceObject != null) {
+        return "iPad".equalsIgnoreCase(deviceObject.toString());
+    }
+    return false;
+  }
+
+  private static boolean isTablet(WebDriver driver) {
+    Object deviceScreenSizeObject = ((AppiumDriver)driver).getSessionDetail("deviceScreenSize");
+    Object deviceScreenDensityObject = ((AppiumDriver)driver).getSessionDetail("deviceScreenDensity");
+
+    // For android, based on https://developer.android.com/training/multiscreen/screensizes
+    // when device's dp is equal or bigger than 600, will be treated as tablet, otherwise will be phone
+    if (deviceScreenSizeObject != null && deviceScreenDensityObject != null) {
+        int dp = Integer.valueOf(deviceScreenSizeObject.toString().split("[xX]")[0]) 
+                * 160 / Integer.valueOf(deviceScreenDensityObject.toString());
+        return dp >= 600;
+    }
+    return false;
+  }
 }
