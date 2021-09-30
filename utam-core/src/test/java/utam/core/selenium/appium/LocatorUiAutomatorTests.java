@@ -117,9 +117,25 @@ public class LocatorUiAutomatorTests {
   }
   
   @Test
+  public void testUiScrollableWithResourceId() {
+    String selector = "new UiScrollable(new UiSelector().resourceId(\"com.salesforce.fieldservice.app:id/work_view\")).scrollIntoView(new UiSelector().resourceId(\"com.salesforce.chatter:id/app_launcher_menu_item\"))";
+    Locator<By> locator = new LocatorUIAutomator(selector);
+    By by = MobileBy.AndroidUIAutomator(selector);
+    assertThat(locator.getValue(), is(equalTo(by)));
+    assertThat(locator.getStringValue(), is(equalTo(selector)));
+  }
+  
+  @Test
   public void testInvalidUiScrollableMethod() {
     UtamError e = expectThrows(UtamError.class, () -> LocatorBy.byUiAutomator("new UiScrollable(new UiSelector().clickable(true)).scrollIntoView(resourceId(\"com.salesforce.chatter:id/app_launcher_menu_item\"))"));
     assertThat(e.getMessage(),
         is(equalTo(String.format(ERR_SELECTOR_UIAUTOMATOR_UISCROLLABLE_UNSUPPORTED_METHOD, "clickable"))));
+  }
+  
+  @Test
+  public void testUiScrollableUnsupportedMethod() {
+    UtamError e = expectThrows(UtamError.class, () -> LocatorBy.byUiAutomator("new UiScrollable(new UiSelector().unsupported(\"com.salesforce.chatter:id/app_launcher_menu_item\")).scrollIntoView(resourceId(\"com.salesforce.chatter:id/app_launcher_menu_item\"))"));
+    assertThat(e.getMessage(),
+        is(equalTo(String.format(ERR_SELECTOR_UIAUTOMATOR_UISCROLLABLE_UNSUPPORTED_METHOD, "unsupported"))));
   }
 }

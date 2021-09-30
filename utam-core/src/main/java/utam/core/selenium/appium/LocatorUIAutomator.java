@@ -21,7 +21,7 @@ public class LocatorUIAutomator extends LocatorBy {
   static final String ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD =
       "unsupported UiSelector method '%s', supported are: " + SUPPORTED_UIAUTOMATOR_METHODS;
   static final String ERR_SELECTOR_UIAUTOMATOR_UISCROLLABLE_UNSUPPORTED_METHOD =
-      "unsupported UiSelector method '%s', supported method is : scrollable";
+      "unsupported UiSelector method '%s', supported method are: scrollable, " + SUPPORTED_UIAUTOMATOR_METHODS;
 
   public LocatorUIAutomator(String selectorString) {
     super(selectorString);
@@ -37,7 +37,10 @@ public class LocatorUIAutomator extends LocatorBy {
         String match1 = uiautomator
             .substring(uiautomator.indexOf(".") + 1, uiautomator.indexOf("(", uiautomator.indexOf(".") + 1));
         if (!match1.equals("scrollable")) {
-          throw new UtamError(String.format(ERR_SELECTOR_UIAUTOMATOR_UISCROLLABLE_UNSUPPORTED_METHOD, match1));
+          if (Stream.of(LocatorUIAutomator.Method.values())
+              .noneMatch(method -> method.value.equals(match1))) {
+            throw new UtamError(String.format(ERR_SELECTOR_UIAUTOMATOR_UISCROLLABLE_UNSUPPORTED_METHOD, match1));
+          }
         }
         // Extract input to first method
         String match2 = uiautomator.substring(uiautomator.indexOf("))") + 2);
