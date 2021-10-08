@@ -103,9 +103,6 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
     if (title == null) {
       throw new UtamError(ERR_BRIDGE_TITLE_NULL);
     }
-    if (!isNative() && title.equalsIgnoreCase(getAppiumDriver().getTitle())) {
-      return;
-    }
     waitFor(timeout, pollingInterval, WEBVIEW_AVAILABILITY);
     AppiumDriver newDriver = waitFor(timeout, pollingInterval, getSwitchToWebViewExpectations(title));
     resetDriver(newDriver);
