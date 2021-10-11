@@ -198,11 +198,16 @@ public class MobileDriverAdapterTests {
     MobileDriverAdapter provider = mock.getMobileDriverAdapter();
     when(driver.getContextHandles()).thenReturn(contextHandles);
     when(driver.getTitle()).thenReturn(DEFAULT_WEBVIEW_TITLE);
+    when(driver.context(anyString())).then((arg) -> {
+        tracker.currentContext = arg.getArgument(0);
+        return driver;
+    });
     when(driver.getContext()).thenReturn(tracker.currentContext);
 
     provider.setPageContextToWebView(DEFAULT_WEBVIEW_TITLE, TEST.getWaitForTimeout(),
         TEST.getPollingInterval());
-    verify(driver, times(0)).context(anyString());
+    verify(driver, times(2)).getContextHandles();
+    verify(driver, times(1)).context(anyString());
     assertThat(provider.getAppiumDriver(), is(sameInstance(driver)));
     assertThat(
         tracker.currentContext,
