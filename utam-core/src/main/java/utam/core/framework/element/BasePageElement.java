@@ -17,6 +17,7 @@ import utam.core.element.Element;
 import utam.core.element.Element.ScrollOptions;
 import utam.core.element.RootElement;
 import utam.core.framework.UtamCoreError;
+import utam.core.framework.UtamLogger;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.UtamBaseImpl;
 import utam.core.framework.consumer.UtamError;
@@ -72,13 +73,6 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
     return element;
   }
 
-  private <T> T apply(Expectations<T> expectations) {
-    log(expectations.getLogMessage());
-    return getDriver()
-        .waitFor(getDriverTimeouts().getFluentWaitTimeout(), getDriverTimeouts().getPollingInterval(), expectations,
-            getElement());
-  }
-
   @Override
   public boolean isEnabled() {
     return getElement().isEnabled();
@@ -86,8 +80,8 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
 
   @Override
   public String getAttribute(String attribute) {
-    Expectations<String> expectations = ElementExpectations.getAttribute(attribute);
-    return apply(expectations);
+    log(String.format("get attribute '%s'", attribute));
+    return getElement().getAttribute(attribute);
   }
 
   @Override
@@ -97,14 +91,14 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
 
   @Override
   public String getText() {
-    Expectations<String> expectations = ElementExpectations.getText();
-    return apply(expectations);
+    log("get element text");
+    return getElement().getText();
   }
 
   @Override
   public void setText(String text) {
-    Expectations<Boolean> expectations = ElementExpectations.setText(text);
-    apply(expectations);
+    log(String.format("set element text to '%s'", text));
+    getElement().setText(text);
   }
 
   @Override
@@ -119,20 +113,20 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
 
   @Override
   public void moveTo() {
-    Expectations<Boolean> expectations = ElementExpectations.moveTo();
-    apply(expectations);
+    log("move to element");
+    getElement().moveTo();
   }
 
   @Override
   public void scrollToCenter() {
-    Expectations<Boolean> expectations = ElementExpectations.scrollTo(ScrollOptions.CENTER);
-    apply(expectations);
+    log("scroll to center");
+    getElement().scrollIntoView(ScrollOptions.CENTER);
   }
 
   @Override
   public void scrollToTop() {
-    Expectations<Boolean> expectations = ElementExpectations.scrollTo(ScrollOptions.TOP);
-    apply(expectations);
+    log("scroll to top");
+    getElement().scrollIntoView(ScrollOptions.TOP);
   }
 
   @Override
@@ -142,54 +136,65 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
 
   @Override
   public void focus() {
-    Expectations<Boolean> expectations = ElementExpectations.focus();
-    apply(expectations);
+    log("focus on the element");
+    getElement().focus();
   }
 
   @Override
   public void blur() {
-    Expectations<Boolean> expectations = ElementExpectations.blur();
-    apply(expectations);
+    log("blur the element");
+    getElement().blur();
   }
 
   @Override
   public void clear() {
-    Expectations<Boolean> expectations = ElementExpectations.clear();
-    apply(expectations);
+    log("clear content of the element");
+    getElement().clear();
   }
 
   @Override
   public void clearAndType(String text) {
-    Expectations<Boolean> expectations = ElementExpectations.clearAndType(text);
-    apply(expectations);
+    getElement().clear();
+    getElement().setText(text);
   }
 
   @Override
   public void press(CharSequence key) {
     Keys keyToPress = Keys.valueOf(key.toString().toUpperCase());
     log(String.format("press keyboard key '%s'", keyToPress.name()));
-    Expectations<Boolean> expectation = ElementExpectations.setText(keyToPress.toString());
-    apply(expectation);
+    getElement().setText(keyToPress.toString());
   }
 
   @Override
   public void click() {
-    Expectations<Boolean> expectations = ElementExpectations.click();
-    apply(expectations);
+    log("click on the element");
+    try {
+      getElement().click();
+    } catch (Exception e) {
+      if (e.getMessage()
+          .contains("javascript error: Cannot read property 'defaultView' of undefined")) {
+        UtamLogger.error(
+            "Error from WebElement.click(), attempting to execute javascript click instead...");
+        UtamLogger.error(e);
+        getElement().deprecatedClick();
+      } else {
+        throw e;
+      }
+    }
   }
 
   @Override
   public void javascriptClick() {
-    Expectations<Boolean> expectations = ElementExpectations.javascriptClick();
-    apply(expectations);
+    log("deprecated javascript click");
+    getElement().deprecatedClick();
   }
 
   @Override
   public void flick(int xOffset, int yOffset) {
-    Expectations<Boolean> expectations = ElementExpectations.flick(xOffset, yOffset);
+    log(String.format("flick element at X '%d' Y '%d'", xOffset, yOffset));
     String originalContext = getDriver().getContext();
     try {
-      apply(expectations);
+      getElement().flick(xOffset, yOffset);
     } finally {
       if (!getDriver().isNative()) {
         getDriver().setPageContextToWebView(originalContext, getDriverTimeouts().getWaitForTimeout(), getDriverTimeouts().getPollingInterval());

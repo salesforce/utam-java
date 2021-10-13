@@ -17,7 +17,6 @@ import utam.core.driver.Expectations;
 import utam.core.element.Element;
 import utam.core.element.Locator;
 import utam.core.framework.UtamLogger;
-import utam.core.framework.element.ElementExpectations;
 import utam.core.framework.element.ExpectationsImpl;
 
 /**
@@ -66,25 +65,33 @@ public abstract class UtamBaseImpl implements UtamBase {
 
   private <T> T waitFor(Expectations<T> expectations) {
     log(expectations.getLogMessage());
-    return getDriver().waitFor(getDriverTimeouts().getWaitForTimeout(), getDriverTimeouts().getPollingInterval(), expectations,
+    return getDriver().waitFor(
+        getDriverTimeouts().getWaitForTimeout(),
+        getDriverTimeouts().getPollingInterval(),
+        expectations,
         getElement());
   }
 
   @Override
   public final void waitForAbsence() {
-    Expectations<Boolean> expectations = ElementExpectations.absence();
+    Expectations<Boolean> expectations = new ExpectationsImpl<>(
+        "wait for absence", (driver, element) -> !element.isExisting());
     waitFor(expectations);
   }
 
   @Override
   public final void waitForVisible() {
-    Expectations<Boolean> expectations = ElementExpectations.visibility(true);
+    Expectations<Boolean> expectations = new ExpectationsImpl<>(
+        "wait for element visibility",
+        (driver, element) -> element.isDisplayed());
     waitFor(expectations);
   }
 
   @Override
   public final void waitForInvisible() {
-    Expectations<Boolean> expectations = ElementExpectations.visibility(false);
+    Expectations<Boolean> expectations = new ExpectationsImpl<>(
+        "wait for element invisibility",
+        (driver, element) -> !element.isDisplayed());
     waitFor(expectations);
   }
 
