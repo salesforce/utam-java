@@ -10,7 +10,6 @@ package utam.core.framework.element;
 import static utam.core.selenium.element.ElementAdapter.ERR_DRAG_AND_DROP_NULL_ELEMENT;
 
 import org.openqa.selenium.Keys;
-import utam.core.driver.Expectations;
 import utam.core.element.BasicElement;
 import utam.core.element.DragAndDropOptions;
 import utam.core.element.Element;

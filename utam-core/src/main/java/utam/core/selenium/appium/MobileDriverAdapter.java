@@ -29,7 +29,7 @@ import utam.core.selenium.element.DriverAdapter;
 public class MobileDriverAdapter extends DriverAdapter implements Driver {
 
   static final String WEBVIEW_CONTEXT_HANDLE_PREFIX = "WEBVIEW";
-  public static final String NATIVE_CONTEXT_HANDLE = "NATIVE_APP";
+  static final String NATIVE_CONTEXT_HANDLE = "NATIVE_APP";
   static final String ERR_BRIDGE_TITLE_NULL =
       "Bridge application title is null, please configure";
 
