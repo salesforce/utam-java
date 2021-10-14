@@ -41,9 +41,9 @@ import utam.core.selenium.appium.MobileElementAdapter;
 public class ElementAdapter implements Element {
 
   public static final ElementAdapter NULL_ELEMENT = new ElementAdapter(null, (WebDriver) null);
-  static final String SCROLL_TOP_VIA_JAVASCRIPT =
+  public static final String SCROLL_TOP_VIA_JAVASCRIPT =
       "return arguments[0].scrollIntoView(true);";
-  static final String SCROLL_INTO_VIEW_JS =
+  public static final String SCROLL_INTO_VIEW_JS =
       "if (document.documentElement"
           + " && document.documentElement.style"
           + " && 'scrollBehavior' in document.documentElement.style) {"
