@@ -127,7 +127,7 @@ public class ActionableActionTypeTests {
 
   @Test
   public void testGetClass() {
-    validateAction(BasicElementActionType.getClass, STRING_TYPE_NAME);
+    validateAction(BasicElementActionType.getClassAttribute, STRING_TYPE_NAME);
   }
 
   @Test
@@ -140,7 +140,7 @@ public class ActionableActionTypeTests {
               Method method =
                   getMethod(
                       action.getElementClass(),
-                      action.getInvokeMethodName(),
+                      action.getApplyString(),
                       action.getParameterClasses());
               assertThat(
                   String.format(
@@ -170,10 +170,10 @@ public class ActionableActionTypeTests {
     elementContext = getEditableElementContext();
     assertThat(
         BasicElementActionType.getActionType(
-            BasicElementActionType.getClass.getApplyString(),
+            BasicElementActionType.getClassAttribute.getApplyString(),
             elementContext.getType(),
             elementContext.getName()),
-        is(equalTo(BasicElementActionType.getClass)));
+        is(equalTo(BasicElementActionType.getClassAttribute)));
     elementContext = getElementContext(TypeUtilities.BasicElementInterface.clickable);
     assertThat(
         BasicElementActionType.getActionType(

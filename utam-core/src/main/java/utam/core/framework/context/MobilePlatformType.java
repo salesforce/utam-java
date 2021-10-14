@@ -101,8 +101,8 @@ public enum MobilePlatformType implements Profile {
     // For android, based on https://developer.android.com/training/multiscreen/screensizes
     // when device's dp is equal or bigger than 600, will be treated as tablet, otherwise will be phone
     if (deviceScreenSizeObject != null && deviceScreenDensityObject != null) {
-        int dp = Integer.valueOf(deviceScreenSizeObject.toString().split("[xX]")[0]) 
-                * 160 / Integer.valueOf(deviceScreenDensityObject.toString());
+        int dp = Integer.parseInt(deviceScreenSizeObject.toString().split("[xX]")[0])
+                * 160 / Integer.parseInt(deviceScreenDensityObject.toString());
         return dp >= 600;
     }
     return false;

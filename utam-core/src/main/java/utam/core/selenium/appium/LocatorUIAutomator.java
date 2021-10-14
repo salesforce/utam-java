@@ -45,16 +45,14 @@ public class LocatorUIAutomator extends LocatorBy {
         // Extract input to first method
         String match2 = uiautomator.substring(uiautomator.indexOf("))") + 2);
         // Extract inner locator
-        String match3 = match2.substring(match2.indexOf("(") + 1, match2.indexOf("))") + 1);
         // continue validating inner method
-        uiautomator = match3;
+        uiautomator = match2.substring(match2.indexOf("(") + 1, match2.indexOf("))") + 1);
       }
       if (uiautomator.startsWith("new UiSelector")) {
         // Example - new UiSelector().resourceId("com.salesforce.chatter:id/app_launcher_menu_item")
         // extract method
-        String match = uiautomator.substring(uiautomator.indexOf(".") + 1);
         // continue validating method
-        uiautomator = match;
+        uiautomator = uiautomator.substring(uiautomator.indexOf(".") + 1);
       }
       // Example - resourceId("com.salesforce.chatter:id/app_launcher_menu_item")
       String match = uiautomator
