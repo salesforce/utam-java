@@ -7,25 +7,34 @@
  */
 package utam.core.framework.element;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.refEq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
+import static org.testng.Assert.expectThrows;
 import static utam.core.element.FindContext.Type.NULLABLE;
 import static utam.core.element.FindContext.Type.NULLABLE_IN_SHADOW;
+import static utam.core.selenium.element.ElementAdapter.SCROLL_INTO_VIEW_JS;
+import static utam.core.selenium.element.ElementAdapter.SCROLL_TOP_VIA_JAVASCRIPT;
 
-import io.appium.java_client.AppiumDriver;
 import java.util.Collections;
 import org.openqa.selenium.ElementNotVisibleException;
+import org.openqa.selenium.JavascriptException;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.element.Element;
@@ -68,7 +77,9 @@ public class BasePageElementTests {
     MockUtilities mock = new MockUtilities();
     when(mock.getElementAdapter().isDisplayed()).thenReturn(false);
     assertThat(mock.getUtamElement().isVisible(), is(false));
-    verify(mock.getWebElementMock(), times(1)).isDisplayed();
+    when(mock.getElementAdapter().isDisplayed()).thenReturn(true);
+    assertThat(mock.getUtamElement().isVisible(), is(true));
+    verify(mock.getWebElementMock(), times(2)).isDisplayed();
   }
 
   @Test
@@ -81,11 +92,12 @@ public class BasePageElementTests {
 
   @Test
   public void testGetAttribute() {
-    String attr = "nameAndValue";
+    String attrName = "name";
+    String attrValue = "value";
     MockUtilities mock = new MockUtilities();
-    when(mock.getElementAdapter().getAttribute(attr)).thenReturn(attr);
-    assertThat(mock.getUtamElement().getAttribute(attr), is(equalTo(attr)));
-    verify(mock.getWebElementMock(), times(1)).getAttribute(attr);
+    when(mock.getElementAdapter().getAttribute(attrName)).thenReturn(attrValue);
+    assertThat(mock.getUtamElement().getAttribute(attrName), is(equalTo(attrValue)));
+    verify(mock.getWebElementMock(), times(1)).getAttribute(attrName);
   }
 
   @Test
@@ -141,11 +153,36 @@ public class BasePageElementTests {
   }
 
   @Test
-  public void testScrollToTop() {
+  public void testScrollToTopWithElementAlreadyInView() {
     MockUtilities mock = new MockUtilities();
-    assertThrows(ElementNotVisibleException.class, () -> mock.getUtamElement().scrollToTop());
     when(mock.getElementAdapter().isDisplayed()).thenReturn(true);
     mock.getUtamElement().scrollToTop();
+  }
+
+  @Test
+  public void testScrollToTopWithElementAlignedToBottom() {
+    MockUtilities mock = new MockUtilities();
+    when(((JavascriptExecutor) mock.getWebDriverMock()).executeScript(
+        contains(SCROLL_INTO_VIEW_JS),
+        refEq(mock.getWebElementMock()))).then((invocation) -> when(
+        ((WebElement) invocation.getArgument(1)).isDisplayed()).thenReturn(true));
+    mock.getUtamElement().scrollToTop();
+  }
+
+  @Test
+  public void testScrollToTopWithElementAlignedToTop() {
+    MockUtilities mock = new MockUtilities();
+    when(((JavascriptExecutor) mock.getWebDriverMock()).executeScript(
+        contains(SCROLL_TOP_VIA_JAVASCRIPT),
+        refEq(mock.getWebElementMock()))).then((invocation) -> when(
+        ((WebElement) invocation.getArgument(1)).isDisplayed()).thenReturn(true));
+    mock.getUtamElement().scrollToTop();
+  }
+
+  @Test
+  public void testScrollIntoViewIfElementNotVisibleThrows() {
+    MockUtilities mock = new MockUtilities();
+    assertThrows(ElementNotVisibleException.class, () -> mock.getUtamElement().scrollToTop());
   }
 
   @Test
@@ -226,16 +263,23 @@ public class BasePageElementTests {
   }
 
   @Test
-  public void testFlick() {
+  public void testClickWithException() {
     MockUtilities mock = new MockUtilities();
-    assertThrows(() -> mock.getUtamElement().flick(0, 0));
+    doThrow(new JavascriptException(
+        "javascript error: Cannot read property 'defaultView' of undefined"))
+        .when(mock.getWebElementMock()).click();
+    // fall back on javascript click
+    mock.getUtamElement().click();
+    String errMessage = "javascript error: unknown JS error";
+    doThrow(new JavascriptException(errMessage)).when(mock.getWebElementMock()).click();
+    JavascriptException e = expectThrows(JavascriptException.class, () -> mock.getUtamElement().click());
+    assertThat(e.getMessage(), containsString(errMessage));
   }
 
   @Test
-  public void testFlickMobile() {
-    MockUtilities mock = new MockUtilities.MockDriver(AppiumDriver.class);
-    when(mock.getMobileDriverAdapter().isNative()).thenReturn(false);
-    mock.getUtamElement().flick(1, 1);
+  public void testFlick() {
+    MockUtilities mock = new MockUtilities();
+    assertThrows(() -> mock.getUtamElement().flick(0, 0));
   }
 
   @Test
@@ -243,7 +287,7 @@ public class BasePageElementTests {
     MockUtilities mock = new MockUtilities();
     mock.getUtamElement().dragAndDrop(mock.getUtamElement());
     mock.getUtamElement().dragAndDrop(mock.getUtamElement(), 1);
-    mock.getUtamElement().dragAndDropByOffset(1,2);
-    mock.getUtamElement().dragAndDropByOffset(1,2, 1);
+    mock.getUtamElement().dragAndDropByOffset(1, 2);
+    mock.getUtamElement().dragAndDropByOffset(1, 2, 1);
   }
 }

@@ -27,18 +27,12 @@ public class DriverTimeouts {
       DEFAULT_POLLING_INTERVAL);
   private final Duration findTimeout;
   private final Duration waitForTimeout;
-  private final Duration fluentTimeout;
   private final Duration pollingInterval;
 
-  public DriverTimeouts(Duration findTimeout, Duration fluentTimeout, Duration waitForTimeout, Duration pollingInterval) {
+  public DriverTimeouts(Duration findTimeout, Duration waitForTimeout, Duration pollingInterval) {
     this.findTimeout = findTimeout;
     this.waitForTimeout = waitForTimeout;
-    this.fluentTimeout = fluentTimeout;
     this.pollingInterval = pollingInterval;
-  }
-
-  public DriverTimeouts(Duration findTimeout, Duration waitForTimeout, Duration pollingInterval) {
-    this(findTimeout, Duration.ZERO, waitForTimeout, pollingInterval);
   }
 
   /**
@@ -69,25 +63,13 @@ public class DriverTimeouts {
     return pollingInterval;
   }
 
-  /**
-   * applied for all interactions that do not wait, like click
-   *
-   * @return duration units
-   * @deprecated should be removed when behavior transition with UTAM-JS is complete
-   */
-  @Deprecated
-  public Duration getFluentWaitTimeout() {
-    return fluentTimeout;
-  }
-
   @Override //for tests to compare timeouts
   public boolean equals(Object obj) {
     if (obj instanceof DriverTimeouts) {
       DriverTimeouts tmp = (DriverTimeouts) obj;
       return tmp.getFindTimeout().equals(getFindTimeout())
           && tmp.getPollingInterval().equals(getPollingInterval())
-          && tmp.getWaitForTimeout().equals(getWaitForTimeout())
-          && tmp.getFluentWaitTimeout().equals(getFluentWaitTimeout());
+          && tmp.getWaitForTimeout().equals(getWaitForTimeout());
     }
     return false;
   }

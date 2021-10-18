@@ -42,10 +42,4 @@ public class DriverTimeoutsTests {
     assertThat(DEFAULT.getPollingInterval(), is(equalTo(DriverTimeouts.DEFAULT_POLLING_INTERVAL)));
     assertThat(TEST_TIMEOUTS.getPollingInterval(), is(equalTo(TEST_DURATION)));
   }
-
-  @Test
-  void testGetFluentWaitTimeout() {
-    assertThat(DEFAULT.getFluentWaitTimeout(), is(equalTo(Duration.ZERO)));
-    assertThat(TEST_TIMEOUTS.getFluentWaitTimeout(), is(equalTo(Duration.ZERO)));
-  }
 }

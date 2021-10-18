@@ -59,8 +59,7 @@ public interface Driver {
    * @param <T>             return type
    * @return result of the applied expectations
    */
-  <T> T waitFor(Duration timeout, Duration pollingInterval, Expectations<T> expectations,
-      Element element);
+  <T> T waitFor(Duration timeout, Duration pollingInterval, Expectations<T> expectations, Element element);
 
   /**
    * polling wait repeatedly applies expectations until truthy value is return (not null or boolean
