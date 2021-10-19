@@ -74,7 +74,6 @@ public class TouchableActionTypeTests {
     assertThat(parameterTypeStrings, hasSize(parameterTypes.size()));
     assertThat(action.getReturnType().getSimpleName(), is(equalTo(returnType)));
     assertThat(action.getApplyString(), is(equalTo(((TouchableActionType)action).name())));
-    assertThat(action.getInvokeMethodName(), is(equalTo(action.getApplyString())));
   }
 
   @SuppressWarnings("rawtypes")

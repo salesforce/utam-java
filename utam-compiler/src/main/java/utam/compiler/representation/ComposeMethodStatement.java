@@ -431,7 +431,7 @@ public abstract class ComposeMethodStatement {
 
     String getCode(String invocationPattern, String elementGetter) {
       String methodInvocation = String.format("%s(%s)",
-          action.getInvokeMethodName(),
+          action.getApplyString(),
           getParametersValuesString(actionParameters));
       return String.format(invocationPattern, elementGetter, methodInvocation);
     }
@@ -503,7 +503,7 @@ public abstract class ComposeMethodStatement {
       String parametersValues = getParametersValuesString(actionParameters);
       String separator = parametersValues.length() > 0 ? ", " : "";
       String methodInvocation = String.format("%s(new %s(this)%s%s)",
-          super.getAction().getInvokeMethodName(),
+          super.getAction().getApplyString(),
           UtamUtilitiesContext.class.getSimpleName(),
           separator,
           getParametersValuesString(actionParameters));

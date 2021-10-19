@@ -38,7 +38,7 @@ public enum BasicElementActionType implements ActionType {
   /**
    * get value of the "class" attribute <br>
    */
-  getClass(PrimitiveType.STRING),
+  getClassAttribute(PrimitiveType.STRING),
   /**
    * get inner text of the element <br>
    */
@@ -225,13 +225,5 @@ public enum BasicElementActionType implements ActionType {
    */
   boolean hasMethodToTest() {
     return this != size && this != containsElement;
-  }
-
-  @Override
-  public String getInvokeMethodName() {
-    if( this == getClass) {
-      return "getClassAttribute";
-    }
-    return name();
   }
 }

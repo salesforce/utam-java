@@ -51,16 +51,6 @@ public interface ActionType {
   String getApplyString();
 
   /**
-   * because "getClass()" is reserved method in Java, for this method invoked method will be
-   * getClassAttribute(); in other cases method name is same as "apply" property value
-   *
-   * @return string with method name to invoke
-   */
-  default String getInvokeMethodName() {
-    return this.getApplyString();
-  }
-
-  /**
    * some actions can add default value to parameters, hence transforming originally passed args
    *
    * @param args declared args

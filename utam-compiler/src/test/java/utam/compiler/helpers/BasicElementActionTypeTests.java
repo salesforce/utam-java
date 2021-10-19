@@ -58,7 +58,7 @@ public class BasicElementActionTypeTests {
               Method method =
                   getMethod(
                       action.getElementClass(),
-                      action.getInvokeMethodName(),
+                      action.getApplyString(),
                       action.getParameterClasses());
               assertThat(
                   String.format(
@@ -80,9 +80,6 @@ public class BasicElementActionTypeTests {
   @Test
   public void checkSupportedActions() {
     for (Method method : BasicElement.class.getDeclaredMethods()) {
-      if (method.getName().equals(BasicElementActionType.getClass.getInvokeMethodName())) {
-        continue;
-      }
       checkTranslatorValue(method, BasicElementActionType::valueOf);
     }
   }

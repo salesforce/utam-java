@@ -22,7 +22,6 @@ import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REDUNDAN
 import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REDUNDANT_KEYS;
 import static utam.compiler.grammar.UtamMethodAction.ERR_COMPOSE_ACTION_REQUIRED_KEYS;
 import static utam.compiler.helpers.BasicElementActionType.getText;
-import static utam.compiler.helpers.BasicElementActionType.isPresent;
 import static utam.compiler.helpers.ClickableActionType.click;
 import static utam.compiler.helpers.PrimitiveType.BOOLEAN;
 import static utam.compiler.helpers.PrimitiveType.NUMBER;
@@ -320,11 +319,8 @@ public class UtamMethodAction_Tests {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     TestUtilities.UtamEntityCreator.createUtamElement(
         ELEMENT_NAME, (String)null, getListSelector(), true).testTraverse(context);
-    final String applyStr = isPresent.getInvokeMethodName();
     TypeProvider returns = new ListOf(BOOLEAN);
-    UtamMethodAction action =
-        new UtamMethodAction(
-            ELEMENT_NAME, applyStr);
+    UtamMethodAction action = new UtamMethodAction(ELEMENT_NAME, "isPresent");
     ComposeMethodStatement statement = action.getComposeAction(context, getMethodContext(returns), false);
     assertThat(statement, is(instanceOf(ComposeMethodStatement.ReturnsList.class)));
     assertThat(statement.getReturnType().isSameType(returns), is(true));
@@ -339,11 +335,8 @@ public class UtamMethodAction_Tests {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     TestUtilities.UtamEntityCreator.createUtamElement(
         ELEMENT_NAME, new String[] { clickable.name() }, getListSelector(), true).testTraverse(context);
-    final String applyStr = click.getInvokeMethodName();
     TypeProvider returns = VOID;
-    UtamMethodAction action =
-        new UtamMethodAction(
-            ELEMENT_NAME, applyStr);
+    UtamMethodAction action = new UtamMethodAction(ELEMENT_NAME, "click");
     ComposeMethodStatement statement = action.getComposeAction(context, getMethodContext(returns), false);
     assertThat(statement, is(instanceOf(ComposeMethodStatement.VoidList.class)));
     assertThat(statement.getReturnType().isSameType(returns), is(true));
