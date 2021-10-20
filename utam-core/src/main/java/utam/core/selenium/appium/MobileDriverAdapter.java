@@ -65,6 +65,12 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
 
   private AppiumDriver switchToWebView(String title) {
     AppiumDriver appiumDriver = getAppiumDriver();
+    if (!isIOSPlatform()) {
+        // Set current context to native to get the updated available contexts
+        // Otherwise, the closed webview that is the current context will not be dropped
+        // from the return of getContextHandles. This is Android unique. 
+        setPageContextToNative();
+    }
     Set<String> contextHandles = appiumDriver.getContextHandles();
     for (String contextHandle : contextHandles) {
       if (!contextHandle.equals(NATIVE_CONTEXT_HANDLE)) {
