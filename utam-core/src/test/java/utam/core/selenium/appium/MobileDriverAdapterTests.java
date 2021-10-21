@@ -207,7 +207,7 @@ public class MobileDriverAdapterTests {
     provider.setPageContextToWebView(DEFAULT_WEBVIEW_TITLE, TEST.getWaitForTimeout(),
         TEST.getPollingInterval());
     verify(driver, times(2)).getContextHandles();
-    verify(driver, times(1)).context(anyString());
+    verify(driver, times(2)).context(anyString());
     assertThat(provider.getAppiumDriver(), is(sameInstance(driver)));
     assertThat(
         tracker.currentContext,
