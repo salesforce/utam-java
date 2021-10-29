@@ -215,6 +215,9 @@ public enum BasicElementActionType implements ActionType {
 
   @Override
   public UtamArgument[] getTransformedArgs(UtamArgument[] args) {
+    if (args == null) {
+      return null;
+    }
     if (this == BasicElementActionType.containsElement && args.length == 1) {
       // If the action is "containsElement", it may have one argument (a selector),
       // or two arguments (a selector and a boolean indicating whether to search in
