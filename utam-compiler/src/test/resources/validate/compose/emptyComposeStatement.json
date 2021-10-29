@@ -1,0 +1,11 @@
+{
+  "methods" : [
+    {
+      "name" : "test",
+      "compose" : [
+        {
+        }
+      ]
+    }
+  ]
+}

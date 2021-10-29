@@ -7,11 +7,11 @@
  */
 package utam.compiler.translator;
 
+import utam.compiler.helpers.BasicElementInterface;
 import utam.compiler.helpers.TypeUtilities.ListOf;
 import utam.core.declarative.translator.UnitTestRunner;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectClass;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
+import static utam.compiler.helpers.TypeUtilities.wrapAsList;
 import static utam.compiler.translator.TranslationUtilities.*;
 
 /**
@@ -137,7 +138,7 @@ public final class UnitTestSerializer {
 
     methodContent.add(testStatement);
 
-    if (returnType.isSameType(new ListOf(PrimitiveType.STRING))) {
+    if (returnType.isSameType(wrapAsList(PrimitiveType.STRING))) {
       methodContent.add(String.format(STRING_LIST_ASSERT_TEMPLATE, methodName, methodArgs));
     }
 
@@ -197,7 +198,7 @@ public final class UnitTestSerializer {
     if (returnType.isSameType(PrimitiveType.BOOLEAN)) {
       return ", is(equalTo(false))";
     }
-    if(TypeUtilities.BasicElementInterface.isBasicType(returnType)) {
+    if(BasicElementInterface.isBasicType(returnType)) {
       return ".isPresent(), is(equalTo(true))";
     }
     if (returnType instanceof ListOf) {

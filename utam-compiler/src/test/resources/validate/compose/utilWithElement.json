@@ -1,0 +1,16 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element" : "test",
+          "applyExternal": {
+            "type": "utam-extension/utils/customExtensionUtils",
+            "invoke": "invoke"
+          }
+        }
+      ]
+    }
+  ]
+}

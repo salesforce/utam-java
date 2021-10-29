@@ -7,13 +7,10 @@
  */
 package utam.compiler.representation;
 
-import static utam.compiler.helpers.ParameterUtils.getDeclarationImports;
-import static utam.compiler.helpers.TypeUtilities.VOID;
-import static utam.compiler.helpers.TypeUtilities.isElementReturned;
-
 import java.util.ArrayList;
 import java.util.List;
-import utam.compiler.helpers.MethodContext;
+import utam.compiler.helpers.BasicElementUnionType;
+import utam.compiler.helpers.TypeUtilities.ListOf;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
@@ -28,14 +25,14 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
 
   private static final List<String> EMPTY_CODE = new ArrayList<>();
 
-  public InterfaceMethod(MethodContext methodContext, List<MethodParameter> methodParameters,
-      String comments) {
+  public InterfaceMethod(
+      String methodName,
+      TypeProvider returnType,
+      List<MethodParameter> methodParameters) {
     super(
-        methodContext.getName(),
+        methodName,
         methodParameters,
-        methodContext.getReturnType(VOID),
-        getDeclarationImports(methodParameters, methodContext.getReturnType(VOID)),
-        comments);
+        returnType);
   }
 
   @Override
@@ -59,8 +56,18 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
   }
 
   @Override
-  public boolean isBasicElementGetterMethod() {
+  public boolean isReturnsBasicElement() {
     TypeProvider returnType =  getDeclaration().getReturnType();
     return isElementReturned(returnType);
+  }
+
+  private static boolean isElementReturned(TypeProvider returnType) {
+    if(returnType instanceof BasicElementUnionType) {
+      return true;
+    }
+    if(returnType instanceof ListOf) {
+      return returnType.getBoundTypes().get(0) instanceof BasicElementUnionType;
+    }
+    return false;
   }
 }

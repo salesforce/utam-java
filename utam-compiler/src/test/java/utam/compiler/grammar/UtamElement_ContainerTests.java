@@ -106,7 +106,7 @@ public class UtamElement_ContainerTests {
         "getContainerInsideRoot", "PageObject");
     expectedMethod.addParameter(FIRST_CONTAINER_PARAMETER);
     expectedMethod.addCodeLines(
-        "this.inContainer(this.root, true)"
+        "return this.inContainer(this.root, true)"
             + ".load(pageObjectType, LocatorBy.byCss(\":scope > *:first-child\"))");
     validateMethod(method, expectedMethod);
   }
@@ -114,14 +114,13 @@ public class UtamElement_ContainerTests {
   @Test
   public void testNestedContainerElement() {
     ElementContext element = context.getElement("nestedContainer");
-    assertThat(element.isList(), is(false));
     PageObjectMethod method = element.getElementMethod();
     assertThat(element.getType().isSameType(CONTAINER_ELEMENT), is(true));
     MethodInfo expectedMethod = new MethodInfo("getNestedContainer", "PageObject");
     expectedMethod.addParameter(new MethodParameterInfo("scopeArg", "String"));
     expectedMethod.addParameter(FIRST_CONTAINER_PARAMETER);
     expectedMethod.addCodeLines(
-        "this.inContainer(this.scope.setParameters(scopeArg), true)"
+        "return this.inContainer(this.scope.setParameters(scopeArg), true)"
             + ".load(pageObjectType, LocatorBy.byCss(\":scope > *:first-child\"))");
     validateMethod(method, expectedMethod);
   }
@@ -137,7 +136,7 @@ public class UtamElement_ContainerTests {
     expectedMethod.addParameter(new MethodParameterInfo("selectorArg", "String"));
     expectedMethod.addParameter(FIRST_CONTAINER_PARAMETER);
     expectedMethod.addCodeLines(
-        "this.inContainer(this.scope.setParameters(scopeArg), false)"
+        "return this.inContainer(this.scope.setParameters(scopeArg), false)"
             + ".loadList(pageObjectType, LocatorBy.byCss(String.format(\".css%s\", selectorArg)))");
     validateMethod(method, expectedMethod);
   }

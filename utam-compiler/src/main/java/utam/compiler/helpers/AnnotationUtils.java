@@ -10,6 +10,7 @@ package utam.compiler.helpers;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import utam.compiler.helpers.ElementContext.ElementType;
 import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Locator;
@@ -81,7 +82,7 @@ public final class AnnotationUtils {
                 ElementMarker.Find.class.getSimpleName(),
                 getFindAnnotationParameterName(locator),
                 getWrappedString(locator.getStringValue())));
-    if (scopeElement != null && !scopeElement.isRootElement()) {
+    if (scopeElement != null && scopeElement.getElementNodeType() != ElementType.ROOT) {
       res.append(String.format(", scope = %s", getWrappedString(scopeElement.getName())));
     }
     if (isExpand) {

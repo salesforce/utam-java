@@ -1,0 +1,3 @@
+{
+  "implements": "utam-test/pageObjects/customInterface"
+}

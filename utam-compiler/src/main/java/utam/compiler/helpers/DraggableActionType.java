@@ -7,12 +7,14 @@
  */
 package utam.compiler.helpers;
 
+import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import utam.compiler.grammar.UtamArgument;
+import utam.compiler.grammar.UtamArgument.UtamArgumentLiteralPrimitive;
 import utam.core.declarative.representation.TypeProvider;
 
 /**
@@ -39,7 +41,7 @@ public enum DraggableActionType implements ActionType {
   static {
     // with element
     final List<TypeProvider> ELEMENT_PARAMETERS = Collections
-        .singletonList(TypeUtilities.BASIC_ELEMENT);
+        .singletonList(BASIC_ELEMENT);
     final List<TypeProvider> ELEMENT_WITH_DURATION_PARAMETERS = new ArrayList<>(
         ELEMENT_PARAMETERS);
     ELEMENT_WITH_DURATION_PARAMETERS.add(PrimitiveType.NUMBER);
@@ -83,11 +85,11 @@ public enum DraggableActionType implements ActionType {
   public UtamArgument[] getTransformedArgs(UtamArgument[] args) {
     if (this == dragAndDrop && args.length == 1) {
       // add default duration as 0
-      return new UtamArgument[]{args[0], new UtamArgument.UtamArgumentLiteral(0)};
+      return new UtamArgument[]{args[0], new UtamArgumentLiteralPrimitive(0)};
     }
     if (this == dragAndDropByOffset && args.length == 2) {
       // add default duration as 0
-      return new UtamArgument[]{args[0], args[1], new UtamArgument.UtamArgumentLiteral(0)};
+      return new UtamArgument[]{args[0], args[1], new UtamArgumentLiteralPrimitive(0)};
     }
     return args;
   }

@@ -12,8 +12,7 @@ import static utam.compiler.helpers.BasicElementActionType.getActionType;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-import utam.compiler.grammar.UtamArgument.ArgsProcessor;
-import utam.compiler.grammar.UtamArgument.ArgsProcessorBasicAction;
+import utam.compiler.grammar.ArgsProcessor.ArgsProcessorBasicAction;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.TranslationContext;
@@ -26,8 +25,8 @@ import utam.core.declarative.representation.TypeProvider;
  */
 final class UtamElementFilter {
 
-  private final UtamArgument[] applyArgs;
   final String applyMethod;
+  private final UtamArgument[] applyArgs;
   private final UtamMatcher matcher;
   private final boolean isFindFirst;
   private List<MethodParameter> matcherParameters;
@@ -56,10 +55,12 @@ final class UtamElementFilter {
     String contextString = String.format("element '%s' filter", elementName);
     if (elementNodeType == UtamElement.Type.BASIC) {
       ActionType actionType = getActionType(this.applyMethod, elementType, elementName);
-      matcher.checkOperandForMatcher(actionType.getReturnType(), contextString);
-      this.applyMethodParameters = new ArgsProcessorBasicAction(context, contextString, actionType).getParameters(applyArgs);
+      matcher.getMatcherType().checkOperandForMatcher(actionType.getReturnType(), contextString);
+      this.applyMethodParameters = new ArgsProcessorBasicAction(context, contextString, actionType)
+          .getParameters(applyArgs);
     } else {
-      this.applyMethodParameters = new ArgsProcessor(context, contextString).getParameters(applyArgs);
+      this.applyMethodParameters = new ArgsProcessor(context, contextString)
+          .getParameters(applyArgs);
     }
     this.matcherParameters = this.matcher.getParameters(context, elementName);
   }

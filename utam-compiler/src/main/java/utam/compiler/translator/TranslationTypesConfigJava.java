@@ -10,8 +10,8 @@ package utam.compiler.translator;
 import static utam.core.framework.consumer.PageObjectContextImpl.getDefaultImplType;
 
 import utam.compiler.helpers.TypeUtilities.FromString;
+import utam.compiler.helpers.TypeUtilities.ListOf;
 import utam.core.declarative.translator.TranslationTypesConfig;
-import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
 
@@ -32,7 +32,7 @@ public class TranslationTypesConfigJava implements TranslationTypesConfig {
     return String.format(INCORRECT_PAGE_OBJECT_OR_UTILITY_TYPE, pageObjectURI);
   }
 
-  static TypeProvider getJavaType(String pageObjectURI) {
+  static String getJavaTypeName(String pageObjectURI) {
     String[] str = pageObjectURI.split(Pattern.quote("/"));
     if (str.length < 3) {
       throw new UtamError(getWrongTypeError(pageObjectURI));
@@ -49,8 +49,7 @@ public class TranslationTypesConfigJava implements TranslationTypesConfig {
       }
     }
     final String relativeTypeName = String.join(".", relativePath);
-    return new TypeUtilities.FromString(
-        String.format("%s.%s.%s", packageName, secondPackageName, relativeTypeName));
+    return String.format("%s.%s.%s", packageName, secondPackageName, relativeTypeName);
   }
 
   private static String capitalizeFirstLetter(String fileName) {
@@ -59,7 +58,7 @@ public class TranslationTypesConfigJava implements TranslationTypesConfig {
 
   public static boolean isPageObjectType(String typeString) {
     try {
-      getJavaType(typeString);
+      getJavaTypeName(typeString);
       return true;
     } catch (UtamError e) {
       return false;
@@ -69,16 +68,40 @@ public class TranslationTypesConfigJava implements TranslationTypesConfig {
   @Override
   public TypeProvider getClassType(String pageObjectURI) {
     String[] implType = getDefaultImplType(getInterfaceType(pageObjectURI).getFullName());
-    return new FromString(implType[0], implType[1]);
+    return new CustomType(implType[0], implType[1]);
   }
 
   @Override
   public TypeProvider getInterfaceType(String pageObjectURI) {
-    return getJavaType(pageObjectURI);
+    return new CustomType(getJavaTypeName(pageObjectURI));
   }
 
   @Override
   public TypeProvider getUtilityType(String utilityURI) {
-    return getJavaType(utilityURI);
+    return new CustomType(getJavaTypeName(utilityURI));
+  }
+
+  static class CustomType extends FromString {
+
+    CustomType(String fullName) {
+      super(fullName);
+    }
+
+    CustomType(String name, String fullName) {
+      super(name, fullName);
+    }
+  }
+
+  public static boolean isCustomType(TypeProvider type) {
+    if(type == null) {
+      return false;
+    }
+    if(type instanceof CustomType) {
+      return true;
+    }
+    if(type instanceof ListOf) {
+      return type.getBoundTypes().get(0) instanceof CustomType;
+    }
+    return false;
   }
 }

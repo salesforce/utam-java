@@ -15,16 +15,14 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.grammar.UtamArgument.ERR_ARGS_DUPLICATE_NAMES;
 import static utam.compiler.grammar.UtamArgument.ERR_ARGS_WRONG_COUNT;
 import static utam.compiler.grammar.UtamArgument.ERR_ARGS_WRONG_TYPE;
 import static utam.compiler.grammar.UtamArgument.ERR_GET_PREDICATE_NEEDS_PREDICATE_ARG;
-import static utam.compiler.grammar.UtamArgument.ERR_WHILE_PARSING;
 import static utam.compiler.grammar.UtamArgument.SELECTOR_TYPE_PROPERTY;
+import static utam.compiler.grammar.UtamArgumentDeserializer.getUnsupportedTypeErr;
 import static utam.compiler.helpers.TypeUtilities.FUNCTION;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 
@@ -34,14 +32,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.testng.annotations.Test;
-import utam.compiler.grammar.UtamArgument.ArgsProcessor;
-import utam.compiler.grammar.UtamArgument.ArgsProcessorWithExpectedTypes;
+import utam.compiler.grammar.ArgsProcessor.ArgsProcessorWithExpectedTypes;
+import utam.compiler.grammar.UtamArgument.UtamArgumentLiteralPrimitive;
+import utam.compiler.grammar.UtamArgument.UtamArgumentLiteralSelector;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementContext.Basic;
-import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.representation.ComposeMethodStatement;
 import utam.compiler.representation.ElementMethod;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
@@ -63,28 +60,18 @@ public class UtamArgumentTests {
 
   private static List<MethodParameter> getOrderedArgs(UtamArgument[] args,
       List<TypeProvider> expectedTypes) {
-    ArgsProcessor argsProcessor = new ArgsProcessorWithExpectedTypes(getTestTranslationContext(), ARGS_CONTEXT,
+    ArgsProcessor argsProcessor = new ArgsProcessorWithExpectedTypes(getTestTranslationContext(),
+        ARGS_CONTEXT,
         expectedTypes);
     return argsProcessor.getParameters(args);
-  }
-
-  private static MethodParameter getParameter(UtamArgument utamArgument,
-      TypeProvider expectedType) {
-    TranslationContext translationContext = getTestTranslationContext();
-    ArgsProcessor argsProcessor = new ArgsProcessor(translationContext, ARGS_CONTEXT);
-    MethodParameter parameter = utamArgument.asParameter(translationContext);
-    if(parameter != null) {
-      argsProcessor.checkExpectedType(expectedType, parameter.getType());
-    }
-    return parameter;
   }
 
   static UtamArgument getNonLiteralArg(String name, String type) {
     return new UtamArgument.UtamArgumentNonLiteral(name, type);
   }
 
-  static UtamArgument getLiteralArg(Object value) {
-    return new UtamArgument.UtamArgumentLiteral(value);
+  static UtamArgument getLiteralArg() {
+    return new UtamArgumentLiteralPrimitive(true);
   }
 
   @Test
@@ -145,10 +132,10 @@ public class UtamArgumentTests {
     List<MethodParameter> parameters =
         processor.getParameters(
             new UtamArgument[]{
-                getLiteralArg("nameValue"),
-                getLiteralArg(1),
-                getLiteralArg(true),
-                getLiteralArg(new UtamSelector("css"))
+                new UtamArgumentLiteralPrimitive("nameValue"),
+                new UtamArgumentLiteralPrimitive(1),
+                getLiteralArg(),
+                new UtamArgumentLiteralSelector(new UtamSelector("css"), "locator")
             });
     assertThat(parameters, hasSize(4));
     assertThat(parameters.get(0).getValue(), is(equalTo("\"nameValue\"")));
@@ -171,10 +158,10 @@ public class UtamArgumentTests {
     List<MethodParameter> parameters =
         processor.getParameters(
             new UtamArgument[]{
-                getLiteralArg("nameValue"),
-                getLiteralArg(1),
-                getLiteralArg(true),
-                getLiteralArg(new UtamSelector("css"))
+                new UtamArgumentLiteralPrimitive("nameValue"),
+                new UtamArgumentLiteralPrimitive(1),
+                getLiteralArg(),
+                new UtamArgumentLiteralSelector(new UtamSelector("css"), "locator")
             });
     assertThat(parameters, hasSize(4));
     assertThat(parameters.get(0).getValue(), is(equalTo("\"nameValue\"")));
@@ -212,8 +199,8 @@ public class UtamArgumentTests {
     List<MethodParameter> parameters =
         getOrderedArgs(
             new UtamArgument[]{
-                getLiteralArg("str"),
-                getLiteralArg("str")
+                new UtamArgumentLiteralPrimitive("str"),
+                new UtamArgumentLiteralPrimitive("str")
             },
             Stream.of(
                 PrimitiveType.STRING,
@@ -259,7 +246,7 @@ public class UtamArgumentTests {
     assertThat(
         e.getMessage(),
         containsString(
-            String.format(ERR_ARGS_WRONG_TYPE, ARGS_CONTEXT, "Integer", "String")));
+            String.format(ERR_ARGS_WRONG_TYPE, ARGS_CONTEXT, "attrName", "Integer", "String")));
   }
 
   /**
@@ -274,13 +261,13 @@ public class UtamArgumentTests {
             () ->
                 getOrderedArgs(
                     new UtamArgument[]{
-                        getLiteralArg("nameValue")
+                        new UtamArgumentLiteralPrimitive("nameValue")
                     },
                     Collections.singletonList(PrimitiveType.NUMBER)));
     assertThat(
         e.getMessage(),
         containsString(
-            String.format(ERR_ARGS_WRONG_TYPE, "test", "Integer", "String")));
+            String.format(ERR_ARGS_WRONG_TYPE, "test", "\"nameValue\"", "Integer", "String")));
   }
 
   /**
@@ -315,7 +302,7 @@ public class UtamArgumentTests {
         new UtamArgument[]{
             getNonLiteralArg("title", "string")
         });
-    UtamArgument arg = getLiteralArg(selector);
+    UtamArgument arg = new UtamArgumentLiteralSelector(selector, "locator");
     List<MethodParameter> parameters = getOrderedArgs(
         new UtamArgument[]{arg}, Collections.singletonList(SELECTOR));
     assertThat(parameters, hasSize(1));
@@ -329,48 +316,25 @@ public class UtamArgumentTests {
   @Test
   public void testFunctionArgType() {
     UtamArgument utamArgument = new UtamArgument.UtamArgumentPredicate(new UtamMethodAction[0]);
-    MethodParameter parameter = getParameter(utamArgument, FUNCTION);
+    TranslationContext translationContext = getTestTranslationContext();
+    ArgsProcessor argsProcessor = new ArgsProcessor(translationContext, ARGS_CONTEXT);
+    MethodParameter parameter = utamArgument.asParameter(translationContext);
+    argsProcessor.checkParameter(parameter, FUNCTION);
     assertThat(parameter, is(nullValue()));
   }
 
   @Test
   public void testGetPredicateMethodOnNonPredicateThrows() {
-    UtamArgument utamArgument = getLiteralArg(true);
-    Exception e = expectThrows(IllegalStateException.class, () -> utamArgument.getPredicate(null, null));
+    UtamArgument utamArgument = getLiteralArg();
+    Exception e = expectThrows(IllegalStateException.class,
+        () -> utamArgument.getPredicate(null, null));
     assertThat(e.getMessage(), is(equalTo(ERR_GET_PREDICATE_NEEDS_PREDICATE_ARG)));
-  }
-
-  @Test
-  public void testGetPredicateMethod() {
-    TranslationContext context = getTestTranslationContext();
-    MethodContext methodContext = new MethodContext();
-    UtamMethodAction conditionMock = mock(UtamMethodAction.class);
-    when(conditionMock.getComposeAction(context, methodContext, false))
-        .thenReturn(mock(ComposeMethodStatement.class));
-    UtamArgument utamArgument = new UtamArgument.UtamArgumentPredicate(new UtamMethodAction[]{conditionMock});
-    List<ComposeMethodStatement> predicate = utamArgument.getPredicate(context, methodContext);
-    assertThat(predicate, is(hasSize(1)));
-  }
-
-  @Test
-  public void testGetPredicateWithEmptyArray() {
-    TranslationContext context = getTestTranslationContext();
-    MethodContext methodContext = new MethodContext();
-    UtamArgument utamArgument = new UtamArgument.UtamArgumentPredicate(new UtamMethodAction[0]);
-    utamArgument.getPredicate(context, methodContext);
-  }
-
-  @Test
-  public void testUnknownValueThrows() {
-    UtamError e = expectThrows(UtamError.class,
-        () -> getLiteralArg(new UtamError("?")).asParameter(getTestTranslationContext()));
-    assertThat(e.getMessage(), containsString(ERR_WHILE_PARSING));
   }
 
   @Test
   public void testUnknownTypeThrows() {
     UtamError e = expectThrows(UtamError.class,
         () -> getNonLiteralArg("name", "type").asParameter(getTestTranslationContext()));
-    assertThat(e.getMessage(), containsString(ERR_WHILE_PARSING));
+    assertThat(e.getMessage(), containsString(getUnsupportedTypeErr("type")));
   }
 }

@@ -24,7 +24,8 @@ public class TestLoaderConfigPageObjectOverride extends BasePageObject implement
   }
 
   @Override
-  public void load() {
+  public Object load() {
     // nothing
+    return this;
   }
 }

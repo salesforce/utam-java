@@ -1,0 +1,13 @@
+{
+  "methods" : [
+    {
+      "name" : "test",
+      "compose" : [
+        {
+          "element" : "root",
+          "applyExternal" : {}
+        }
+      ]
+    }
+  ]
+}

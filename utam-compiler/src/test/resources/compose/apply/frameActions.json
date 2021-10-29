@@ -1,0 +1,60 @@
+{
+  "elements": [
+    {
+      "name": "myFrame",
+      "type": "frame",
+      "selector": {
+        "css": "iframe"
+      }
+    },
+    {
+      "name": "myPublicFrame",
+      "public" : true,
+      "type": "frame",
+      "selector": {
+        "css": "iframe[%s]",
+        "args": [
+          {
+            "type": "string",
+            "name": "frameStr"
+          }
+        ]
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "document",
+          "apply": "enterFrame",
+          "args": [
+            {
+              "value": "myFrame",
+              "type" : "elementReference"
+            }
+          ]
+        },
+        {
+          "element": "document",
+          "apply": "enterFrame",
+          "args": [
+            {
+              "value": "myPublicFrame",
+              "type" : "elementReference"
+            }
+          ]
+        },
+        {
+          "element": "document",
+          "apply": "exitFrame"
+        },
+        {
+          "element": "document",
+          "apply": "exitToParentFrame"
+        }
+      ]
+    }
+  ]
+}

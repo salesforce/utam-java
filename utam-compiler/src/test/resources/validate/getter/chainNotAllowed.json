@@ -1,0 +1,24 @@
+{
+  "elements" : [
+    {
+      "name" : "element",
+      "selector" : {
+        "css" : "css"
+      }
+    }
+  ],
+  "methods" : [
+    {
+      "name" : "test",
+      "compose" : [
+        {
+          "element" : "element"
+        },
+        {
+          "chain" : true,
+          "element" : "element"
+        }
+      ]
+    }
+  ]
+}

@@ -8,7 +8,7 @@
 package utam.compiler.representation;
 
 import utam.compiler.helpers.LocatorCodeGeneration;
-import utam.compiler.helpers.TypeUtilities.ListOf;
+import utam.compiler.helpers.ParameterUtils;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
+import static utam.compiler.helpers.TypeUtilities.wrapAsList;
 import static utam.compiler.representation.ComposeMethod.getElementLocatorString;
 import static utam.compiler.representation.ElementMethod.getPredicateCode;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
@@ -34,15 +35,13 @@ import static utam.compiler.translator.TranslationUtilities.getElementGetterMeth
  */
 public abstract class CustomElementMethod implements PageObjectMethod {
 
-  private static final String BASE_PAGE_OBJECT_METHOD = "inScope";
   private static final String BUILDER_METHOD = "build";
   private static final String LIST_BUILDER_METHOD = "buildList";
   private static final String TMP_VARIABLE = "instance";
 
   private static String getBuilderPrefix(ElementContext scopeElement, Root root, boolean isNullable, boolean isExpandParentShadow) {
     return String.format(
-        "%s(%s, %s, %s, %s)",
-        BASE_PAGE_OBJECT_METHOD,
+        "inScope(%s, %s, %s, %s)",
         getElementLocatorString(scopeElement),
         root.getCodeString(),
         isNullable,
@@ -51,8 +50,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
   private static String getExternalBuilderPrefix(ElementContext scopeElement, Root root, boolean isExpandParentShadow) {
     return String.format(
-        "%s(%s, %s, %s)",
-        BASE_PAGE_OBJECT_METHOD,
+        "inScope(%s, %s, %s)",
         getElementLocatorString(scopeElement),
         root.getCodeString(),
         isExpandParentShadow);
@@ -112,9 +110,9 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       if (!isNullable && !isExternalImplementation) {
         codeLines.add(String.format("%s.load()", TMP_VARIABLE));
       }
-      codeLines.add(TMP_VARIABLE);
-      interfaceImports.add(returnType);
-      classImports.add(returnType);
+      codeLines.add("return " + TMP_VARIABLE);
+      ParameterUtils.setImport(interfaceImports, returnType);
+      ParameterUtils.setImport(classImports, returnType);
       this.isPublic = isPublic;
       this.methodName = getElementGetterMethodName(componentName, isPublic);
       this.methodParameters.addAll(scopeElement.getParameters());
@@ -152,7 +150,6 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     private final String methodName;
     private final List<MethodParameter> methodParameters = new ArrayList<>();
     private final TypeProvider returnType;
-    private final TypeProvider returnListType;
 
     public Filtered(
         boolean isPublic,
@@ -167,24 +164,19 @@ public abstract class CustomElementMethod implements PageObjectMethod {
         MatcherType matcherType,
         List<MethodParameter> matcherParameters,
         boolean isFindFirst) {
-      this.returnListType = isFindFirst ? null : new ListOf(returnType);
-      this.interfaceImports.add(returnType);
-      this.classImports.add(returnType);
+      this.returnType = isFindFirst ? returnType : wrapAsList(returnType);
+      ParameterUtils.setImport(interfaceImports, this.returnType);
+      ParameterUtils.setImport(classImports, this.returnType);
       this.isPublic = isPublic;
       this.methodName = getElementGetterMethodName(componentName, isPublic);
       this.methodParameters.addAll(scopeElement.getParameters());
       this.methodParameters.addAll(root.selectorParameters);
       this.methodParameters.addAll(applyParameters);
       this.methodParameters.addAll(matcherParameters);
-      this.returnType = returnType;
-      if (returnListType != null) {
-        interfaceImports.add(returnListType);
-        classImports.add(returnListType);
-      }
       String builderPrefix = getBuilderPrefix(scopeElement, root, isNullable, isExpandParentShadow);
       String predicate = getPredicateCode(applyMethod, applyParameters, matcherType, matcherParameters);
       String builderSuffix = getFilteredBuilderSuffix(returnType, predicate, !isFindFirst);
-      codeLines.add(String.format("%s.%s", builderPrefix, builderSuffix));
+      codeLines.add(String.format("return %s.%s", builderPrefix, builderSuffix));
     }
 
     @Override
@@ -199,9 +191,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      TypeProvider returns =
-          returnListType != null ? new ListOf(returnType) : returnType;
-      return new MethodDeclarationImpl(methodName, methodParameters, returns, interfaceImports);
+      return new MethodDeclarationImpl(methodName, methodParameters, returnType, interfaceImports);
     }
 
     @Override
@@ -212,7 +202,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
   public static final class Multiple implements PageObjectMethod {
 
-    private final TypeProvider listType;
+    private final TypeProvider returnType;
     private final List<String> codeLines = new ArrayList<>();
     private final List<TypeProvider> classImports = new ArrayList<>(Root.SELECTOR_IMPORTS);
     private final List<TypeProvider> interfaceImports = new ArrayList<>();
@@ -228,14 +218,13 @@ public abstract class CustomElementMethod implements PageObjectMethod {
         TypeProvider returnType,
         boolean isNullable,
         boolean isExpandParentShadow) {
-      this.listType = new ListOf(returnType);
+      this.returnType = wrapAsList(returnType);
+      ParameterUtils.setImport(interfaceImports, this.returnType);
+      ParameterUtils.setImport(classImports, this.returnType);
       String builderPrefix = getBuilderPrefix(scopeElement, root, isNullable, isExpandParentShadow);
       String builderSuffix = getBuilderSuffix(returnType, true);
-      codeLines.add(String.format("%s.%s", builderPrefix, builderSuffix));
-      interfaceImports.add(returnType);
-      interfaceImports.add(listType);
-      classImports.add(returnType);
-      classImports.add(listType);
+      codeLines.add(String.format("return %s.%s", builderPrefix, builderSuffix));
+
       this.isPublic = isPublic;
       this.methodName = getElementGetterMethodName(componentName, isPublic);
       this.methodParameters.addAll(scopeElement.getParameters());
@@ -244,7 +233,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclarationImpl getDeclaration() {
-      return new MethodDeclarationImpl(methodName, methodParameters, listType, interfaceImports);
+      return new MethodDeclarationImpl(methodName, methodParameters, returnType, interfaceImports);
     }
 
     @Override

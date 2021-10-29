@@ -50,7 +50,7 @@ public class JsonCompilerConfigTests {
 
   private static JsonCompilerConfig getTestConfig() throws IOException {
     return new JsonCompilerConfig(
-        new File(JsonCompilerConfig.class.getClassLoader().getResource("utam.config.json").getFile()),
+        new File(JsonCompilerConfig.class.getClassLoader().getResource("config/utam.config.json").getFile()),
         new File(System.getProperty("user.dir")));
   }
 

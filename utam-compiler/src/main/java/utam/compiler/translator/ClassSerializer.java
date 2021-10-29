@@ -7,8 +7,8 @@
  */
 package utam.compiler.translator;
 
+import utam.compiler.helpers.BasicElementUnionType;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.representation.*;
 import utam.core.framework.element.BasePageElement;
 
@@ -47,10 +47,9 @@ public final class ClassSerializer {
       out.add("@Override");
     }
     out.add(String.format("%sfinal %s {", (method.isPublic()? "public " : ""), declaration.getCodeLine()));
-    for (int i = 0; i < method.getCodeLines().size() - 1; i++) {
+    for (int i = 0; i < method.getCodeLines().size(); i++) {
       out.add(getStatement(method.getCodeLines().get(i)));
     }
-    out.add(getLastStatement(method));
     out.add("}");
     return out;
   }
@@ -121,7 +120,7 @@ public final class ClassSerializer {
         .map(returnType -> String.format(
             "interface %s extends %s {}",
             returnType.getSimpleName(),
-            ((TypeUtilities.Element)returnType).getBasicInterfaces().stream()
+            ((BasicElementUnionType)returnType).getBasicInterfaces().stream()
                 .map(TypeProvider::getSimpleName)
                 .collect(Collectors.joining(", "))))
         .forEach(out::add);
@@ -148,7 +147,7 @@ public final class ClassSerializer {
         source.getImplementedType().getInterfaceType().getSimpleName());
   }
 
-  private List<String> getImportStatements(TypeProvider type) {
+  private Set<String> getImportStatements(TypeProvider type) {
     return getImportStrings(type, this.source.getClassType().getPackageName());
   }
 
@@ -157,7 +156,7 @@ public final class ClassSerializer {
     res.addAll(getImportStatements(source.getBaseClassType()));
     res.addAll(getImportStatements(source.getImplementedType().getInterfaceType()));
     source.getDeclaredElementTypes(false).stream()
-        .map(returnType -> ((TypeUtilities.Element)returnType).getBasicInterfaces())
+        .map(returnType -> ((BasicElementUnionType)returnType).getBasicInterfaces())
         .flatMap(Collection::stream)
         .collect(Collectors.toSet())
         .forEach(type -> res.addAll(getImportStatements(type)));

@@ -22,7 +22,7 @@ import static utam.compiler.grammar.TestUtilities.TEST_PAGE_OBJECT;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.ElementContext.EMPTY_SELECTOR;
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
-import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
+import static utam.compiler.helpers.BasicElementInterface.actionable;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.expectThrows;
@@ -43,7 +43,6 @@ public class AnnotationUtilsTests {
         value,
         actionable,
         EMPTY_SELECTOR,
-        false,
         EMPTY_PARAMETERS,
         false);
   }

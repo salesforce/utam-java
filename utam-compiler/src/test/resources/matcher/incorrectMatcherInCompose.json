@@ -1,0 +1,16 @@
+{
+  "methods" : [
+    {
+      "name" : "matcherThrows",
+      "compose" : [
+        {
+          "element" : "root",
+          "apply" : "getText",
+          "matcher" : {
+            "type" : "isTrue"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -48,6 +48,10 @@ public class CustomElementBuilderTests {
         NULLABLE);
   }
 
+  private static CustomElementBuilder getBuilder(PageObjectsFactory factory, ElementLocation root, boolean isNullable) {
+    return new CustomElementBuilder(factory, root, isNullable);
+  }
+
   @Test
   public void testBuildSingleElement() {
     MockAdapter mock = new MockAdapter();
@@ -56,7 +60,7 @@ public class CustomElementBuilderTests {
     ElementLocation root = new ElementLocationChain(rootElement);
 
     // not null
-    CustomElementBuilder builder = new CustomElementBuilder(factory, root);
+    CustomElementBuilder builder = getBuilder(factory, root, false);
     TestPageObject instance = builder.build(TestPageObject.class);
     assertThat(instance, is(notNullValue()));
 
@@ -78,7 +82,7 @@ public class CustomElementBuilderTests {
     ElementLocation root = new ElementLocationChain(rootElement);
 
     // not null
-    CustomElementBuilder builder = new CustomElementBuilder(factory, root);
+    CustomElementBuilder builder = getBuilder(factory, root, false);
     List<TestPageObject> instances = builder.buildList(TestPageObject.class);
     assertThat(instances, is(not(emptyIterable())));
 
@@ -100,7 +104,7 @@ public class CustomElementBuilderTests {
     ElementLocation root = new ElementLocationChain(rootElement);
 
     // not null, filter returns true
-    CustomElementBuilder builder = new CustomElementBuilder(factory, root);
+    CustomElementBuilder builder = getBuilder(factory, root, false);
     TestPageObject instance = builder
         .build(TestPageObject.class, Objects::nonNull);
     assertThat(instance, is(notNullValue()));
@@ -130,7 +134,7 @@ public class CustomElementBuilderTests {
     ElementLocation root = new ElementLocationChain(rootElement);
 
     // not null, filter returns true
-    CustomElementBuilder builder = new CustomElementBuilder(factory, root);
+    CustomElementBuilder builder = getBuilder(factory, root, false);
     List<TestPageObject> instances = builder
         .buildList(TestPageObject.class, Objects::nonNull);
     assertThat(instances, is(not(emptyIterable())));

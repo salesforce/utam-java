@@ -59,7 +59,7 @@ public class DeserializerUtilities {
     return translatorConfig;
   }
 
-  Result getResultFromFile(String fileName) {
+  public Result getResultFromFile(String fileName) {
     String content = readJSON(fileName);
     return getResultFromString(content);
   }

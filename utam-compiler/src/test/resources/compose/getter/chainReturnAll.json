@@ -1,0 +1,35 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "list",
+        "type": "my/pageObject/foo",
+        "selector": {
+          "css": "css",
+          "returnAll" : true
+        }
+      }
+    ]
+  },
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "list"
+        },
+        {
+          "chain" : true,
+          "returnType": "my/pageObject/fooChild",
+          "element": "child",
+          "returnAll" : true
+        },
+        {
+          "chain" : true,
+          "element": "grandChild",
+          "returnType": "my/pageObject/fooGrandChild"
+        }
+      ]
+    }
+  ]
+}

@@ -30,7 +30,6 @@ import static org.hamcrest.Matchers.*;
 public class TouchableActionTypeTests {
 
   private static final String VOID_TYPE_NAME = "void";
-  private static final String BOOLEAN_TYPE_NAME = "Boolean";
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   private static Method getMethod(Class clazz, String methodName, Class[] parameters) {

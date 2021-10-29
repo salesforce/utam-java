@@ -1,0 +1,25 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "selector": {
+        "css": ".css",
+        "returnAll" : true
+      },
+      "nullable": true
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "returnType" : "boolean",
+          "returnAll": true,
+          "element": "test",
+          "apply": "isVisible"
+        }
+      ]
+    }
+  ]
+}

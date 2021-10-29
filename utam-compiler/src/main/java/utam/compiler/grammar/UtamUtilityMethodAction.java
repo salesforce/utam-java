@@ -22,7 +22,7 @@ class UtamUtilityMethodAction {
 
   final String externalClassPath;
   final String methodName;
-  UtamArgument[] args;
+  final UtamArgument[] args;
 
   /**
    * Creates a utility method action object by deserializing JSON utility compose statements. This
@@ -43,11 +43,6 @@ class UtamUtilityMethodAction {
     this.externalClassPath = externalClassPath;
     this.methodName = methodName;
     this.args = args;
-  }
-
-  // used in tests
-  UtamUtilityMethodAction() {
-      this(null, null, null);
   }
 
   /**

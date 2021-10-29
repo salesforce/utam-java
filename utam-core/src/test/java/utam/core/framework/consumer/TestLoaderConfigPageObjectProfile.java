@@ -23,7 +23,8 @@ public class TestLoaderConfigPageObjectProfile extends BasePageObject implements
   }
 
   @Override
-  public void load() {
+  public Object load() {
     // nothing
+    return this;
   }
 }

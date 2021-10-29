@@ -149,7 +149,6 @@ public class UtamElement_CustomTests {
     object.elements = new UtamElement[] {getPublicComponentElement()};
     object.compile(context);
     ElementContext elementContext = context.getElement(ELEMENT_NAME);
-    assertThat(elementContext.isList(), is(false));
     assertThat(elementContext.getType().getSimpleName(), is(equalTo(COMPONENT_TYPE_SHORT_NAME)));
     assertThat(elementContext.getType().getFullName(), is(equalTo(COMPONENT_TYPE_LONG_NAME)));
   }
@@ -162,7 +161,6 @@ public class UtamElement_CustomTests {
     object.elements = new UtamElement[] {getPublicComponentElement(getListCssSelector(), null)};
     object.compile(context);
     ElementContext elementContext = context.getElement(ELEMENT_NAME);
-    assertThat(elementContext.isList(), is(true));
     assertThat(elementContext.getType().getSimpleName(), is(COMPONENT_TYPE_SHORT_NAME));
   }
 
@@ -182,7 +180,6 @@ public class UtamElement_CustomTests {
         };
     object.compile(context);
     ElementContext elementContext = context.getElement(ELEMENT_NAME);
-    assertThat(elementContext.isList(), is(true));
     assertThat(elementContext.getType().getSimpleName(), is(equalTo(COMPONENT_TYPE_SHORT_NAME)));
   }
 
@@ -194,7 +191,7 @@ public class UtamElement_CustomTests {
         "ComponentName instance = inScope(this.scope, LocatorBy.byCss(\"selector\"), false, false)"
             + ".build(ComponentName.class)",
         "instance.load()",
-        "instance");
+        "return instance");
     PageObjectValidationTestHelper.validateMethod(
         Objects.requireNonNull(getElementMethod(element)), expectedMethodInfo);
   }
@@ -219,7 +216,7 @@ public class UtamElement_CustomTests {
     expectedMethod.addCodeLines(
         "ComponentName instance = "
             + "inScope(this.scope, LocatorBy.byCss(\"selector\"), false).build(ComponentName.class)",
-        "instance");
+        "return instance");
     PageObjectMethod method = getElementMethod(element);
     PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
   }
@@ -236,10 +233,9 @@ public class UtamElement_CustomTests {
 
   @Test
   public void testNestedCustomList() {
-    TranslationContext context = new DeserializerUtilities().getContext("customElement");
+    TranslationContext context = new DeserializerUtilities().getContext("element/customElement");
     ElementContext element = context.getElement("nestedList");
     assertThat(element.getName(), is(equalTo("nestedList")));
-    assertThat(element.isList(), is(equalTo(true)));
     PageObjectMethod method = element.getElementMethod();
     assertThat(element.getType().getSimpleName(), is(equalTo("Test")));
     MethodInfo expectedMethod = new MethodInfo("getNestedList", "List<Test>");
@@ -248,7 +244,7 @@ public class UtamElement_CustomTests {
     expectedMethod.addParameter(
         new PageObjectValidationTestHelper.MethodParameterInfo("arg2", "String"));
     expectedMethod.addCodeLines(
-        "inScope(this.element.setParameters(arg1), LocatorBy.byCss(String.format(\"selector2 %s\", arg2)), false, false)"
+        "return inScope(this.element.setParameters(arg1), LocatorBy.byCss(String.format(\"selector2 %s\", arg2)), false, false)"
             + ".buildList(Test.class)");
     PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
   }
@@ -257,9 +253,9 @@ public class UtamElement_CustomTests {
   public void testCustomNullableList() {
     MethodInfo methodInfo = new MethodInfo("getCustomNullableList", "List<CustomTest>");
     methodInfo.addCodeLine(
-            "inScope(this.root, LocatorBy.byCss(\"selector2\"), true, false)" +
+            "return inScope(this.root, LocatorBy.byCss(\"selector2\"), true, false)" +
                     ".buildList(CustomTest.class)");
-    TranslationContext context = new DeserializerUtilities().getContext("customElementNullable");
+    TranslationContext context = new DeserializerUtilities().getContext("element/customElementNullable");
     PageObjectMethod method = context.getMethod("getCustomNullableList");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
@@ -268,9 +264,9 @@ public class UtamElement_CustomTests {
   public void testCustomNullableListWithFilter() {
     MethodInfo methodInfo = new MethodInfo("getCustomNullableListFilter", "List<CustomTest>");
     methodInfo.addCodeLine(
-            "inScope(this.root, LocatorBy.byCss(\".css\"), true, false)" +
-                    ".buildList(CustomTest.class, elm -> elm.isVisible())");
-    TranslationContext context = new DeserializerUtilities().getContext("customElementNullable");
+            "return inScope(this.root, LocatorBy.byCss(\".css\"), true, false)" +
+                    ".buildList(CustomTest.class, elm -> Boolean.TRUE.equals(elm.isVisible()))");
+    TranslationContext context = new DeserializerUtilities().getContext("element/customElementNullable");
     PageObjectMethod method = context.getMethod("getCustomNullableListFilter");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
@@ -281,8 +277,8 @@ public class UtamElement_CustomTests {
     methodInfo.addCodeLine(
             "CustomTest instance = inScope(this.root, LocatorBy.byCss(\"selector1\"), true, false)" +
                     ".build(CustomTest.class)");
-    methodInfo.addCodeLine("instance");
-    TranslationContext context = new DeserializerUtilities().getContext("customElementNullable");
+    methodInfo.addCodeLine("return instance");
+    TranslationContext context = new DeserializerUtilities().getContext("element/customElementNullable");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("getCustomNullable"), methodInfo);
   }
 }

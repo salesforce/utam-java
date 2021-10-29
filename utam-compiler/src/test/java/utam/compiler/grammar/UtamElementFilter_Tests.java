@@ -18,7 +18,7 @@ import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.grammar.UtamArgumentTests.getNonLiteralArg;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_FILTER_NEEDS_LIST;
-import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
+import static utam.compiler.helpers.BasicElementInterface.actionable;
 
 import java.util.List;
 import org.testng.annotations.Test;
@@ -167,7 +167,7 @@ public class UtamElementFilter_Tests {
   @Test
   public void testDuplicateArgsNames() {
     UtamElement object = DeserializerUtilities
-        .getObjectFromFile("basicFilterDuplicateArgs", UtamElement.class);
+        .getObjectFromFile("filter/basicFilterDuplicateArgs", UtamElement.class);
     UtamElement.Traversal element = object.getAbstraction();
     UtamError e =
         expectThrows(UtamError.class, () -> element.testRootTraverse(
@@ -177,10 +177,9 @@ public class UtamElementFilter_Tests {
 
   @Test
   public void testFilterByGetAttribute() {
-    TranslationContext context = new DeserializerUtilities().getContext("basicFilterGetAttribute");
+    TranslationContext context = new DeserializerUtilities().getContext("filter/basicFilterGetAttribute");
     ElementContext elementContext = context.getElement("element");
     PageObjectMethod method = elementContext.getElementMethod();
-    assertThat(elementContext.isList(), is(equalTo(true)));
     PageObjectValidationTestHelper.MethodInfo methodInfo =
         new PageObjectValidationTestHelper.MethodInfo("getElementElement", "List<ElementElement>");
     for (int i = 1; i <= 3; i++) {
@@ -188,20 +187,18 @@ public class UtamElementFilter_Tests {
           new PageObjectValidationTestHelper.MethodParameterInfo("arg" + i, "String"));
     }
     methodInfo.addCodeLines(
-        "element(this.element)"
+        "return element(this.element)"
             + ".buildList(ElementElement.class, ElementElementImpl.class, "
-            + "elm -> { String tmp = elm.getAttribute(arg2);\n"
-            + "return tmp!= null && tmp.contains(arg3); }, arg1)");
+            + "elm -> (elm.getAttribute(arg2)!= null && elm.getAttribute(arg2).contains(arg3)), arg1)");
     methodInfo.setIsPublic(false);
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 
   @Test
   public void testFilterByIsVisibleFalseFindFirst() {
-    TranslationContext context = new DeserializerUtilities().getContext("basicFilterIsVisible");
+    TranslationContext context = new DeserializerUtilities().getContext("filter/basicFilterIsVisible");
     ElementContext elementContext = context.getElement("element");
     PageObjectMethod method = elementContext.getElementMethod();
-    assertThat(elementContext.isList(), is(equalTo(false)));
     PageObjectValidationTestHelper.MethodInfo methodInfo =
         new PageObjectValidationTestHelper.MethodInfo(
             "getElement", "ElementElement");
@@ -210,34 +207,31 @@ public class UtamElementFilter_Tests {
     methodInfo.addParameter(
         new PageObjectValidationTestHelper.MethodParameterInfo("arg2", "String"));
     methodInfo.addCodeLines(
-        "element(this.element).build(ElementElement.class, ElementElementImpl.class, elm -> Boolean.FALSE.equals(elm.isVisible()), arg1, arg2)");
+        "return element(this.element).build(ElementElement.class, ElementElementImpl.class, elm -> Boolean.FALSE.equals(elm.isVisible()), arg1, arg2)");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 
   @Test
   public void testCustomFilterBooleanMatcherFindAllNullable() {
-    TranslationContext context = new DeserializerUtilities().getContext("customFilterBoolean");
+    TranslationContext context = new DeserializerUtilities().getContext("filter/customFilterBoolean");
     ElementContext elementContext = context.getElement("custom");
     PageObjectMethod method = elementContext.getElementMethod();
-    assertThat(elementContext.isList(), is(equalTo(true)));
     PageObjectValidationTestHelper.MethodInfo methodInfo =
         new PageObjectValidationTestHelper.MethodInfo("getCustom", "List<Test>");
     methodInfo.addCodeLines(
-        "inScope(this.root, LocatorBy.byCss(\"selector3\"), true, true)"
-            + ".buildList(Test.class, elm -> elm.isVisible())");
+        "return inScope(this.root, LocatorBy.byCss(\"selector3\"), true, true)"
+            + ".buildList(Test.class, elm -> Boolean.TRUE.equals(elm.isVisible()))");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 
   @Test
   public void testCustomNestedFilterFindFirst() {
     UtamElement object = DeserializerUtilities
-        .getObjectFromFile("customFilterNested", UtamElement.class);
+        .getObjectFromFile("filter/customFilterNested", UtamElement.class);
     TranslationContext context = TestUtilities.getTestTranslationContext();
     object.testTraverse(context);
     ElementContext elementContext = context.getElement("nested");
     PageObjectMethod method = elementContext.getElementMethod();
-    assertThat(elementContext.isList(), is(equalTo(false)));
-
     PageObjectValidationTestHelper.MethodInfo methodInfo =
         new PageObjectValidationTestHelper.MethodInfo("getNested", "Test");
     for (int i = 1; i <= 3; i++) {
@@ -245,8 +239,8 @@ public class UtamElementFilter_Tests {
           new PageObjectValidationTestHelper.MethodParameterInfo("arg" + i, "String"));
     }
     methodInfo.addCodeLines(
-        "inScope(this.element.setParameters(arg1), LocatorBy.byCss(String.format(\"selector2 %s\", arg2)), false, false)"
-            + ".build(Test.class, elm -> elm.customMethod(arg3))");
+        "return inScope(this.element.setParameters(arg1), LocatorBy.byCss(String.format(\"selector2 %s\", arg2)), false, false)"
+            + ".build(Test.class, elm -> Boolean.TRUE.equals(elm.customMethod(arg3)))");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 }

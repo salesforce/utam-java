@@ -1,0 +1,27 @@
+{
+  "elements": [
+    {
+      "name": "basic",
+      "selector": {
+        "css": ".css",
+        "returnAll" : true
+      },
+      "nullable" : true
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "basic",
+          "apply": "getText"
+        },
+        {
+          "element": "basic",
+          "apply": "size"
+        }
+      ]
+    }
+  ]
+}

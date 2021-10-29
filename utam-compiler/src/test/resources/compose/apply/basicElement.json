@@ -1,0 +1,24 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "type": [
+        "clickable"
+      ],
+      "selector": {
+        "css": ".css"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "test",
+          "apply": "click"
+        }
+      ]
+    }
+  ]
+}

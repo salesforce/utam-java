@@ -19,6 +19,10 @@ import static utam.compiler.grammar.TestUtilities.*;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_FILTER_NEEDS_LIST;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_MISSING_SELECTOR_PROPERTY;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_NESTED_ELEMENTS;
+import static utam.compiler.grammar.UtamElement.ERR_TYPE_INVALID_ARRAY_TYPES;
+import static utam.compiler.grammar.UtamElement.ERR_TYPE_INVALID_ARRAY_VALUES;
+import static utam.compiler.grammar.UtamElement.ERR_TYPE_INVALID_STRING_VALUE;
+import static utam.compiler.grammar.UtamElement.ERR_TYPE_UNSUPPORTED_NODE;
 import static utam.compiler.grammar.UtamElement.Type;
 import static utam.compiler.grammar.UtamElementFilter_Tests.getInnerTextFilter;
 import static utam.compiler.grammar.UtamSelectorTests.getListCssSelector;
@@ -253,7 +257,7 @@ public class UtamElement_BasicTests {
   public void testTraverse() {
     UtamElement element = getPublicHtmlElement(getUtamCssSelector(), null);
     MethodInfo info = new MethodInfo(METHOD_NAME, "TestElement");
-    info.addCodeLine("element(this.test).build(TestElement.class, TestElementImpl.class)");
+    info.addCodeLine("return element(this.test).build(TestElement.class, TestElementImpl.class)");
     PageObjectValidationTestHelper.validateMethod(
         Objects.requireNonNull(getElementMethod(element)), info);
   }
@@ -280,7 +284,7 @@ public class UtamElement_BasicTests {
     element.selector = getUtamCssSelector();
     element.elements = new UtamElement[]{getPublicHtmlElement(new UtamSelector(".other"), null)};
     MethodInfo info = new MethodInfo("getOuterElement", "OuterElementElement");
-    info.addCodeLine("element(this.outerElement).build(OuterElementElement.class, OuterElementElementImpl.class)");
+    info.addCodeLine("return element(this.outerElement).build(OuterElementElement.class, OuterElementElementImpl.class)");
     PageObjectValidationTestHelper.validateMethod(
         Objects.requireNonNull(getElementMethod(element)), info);
   }
@@ -298,7 +302,7 @@ public class UtamElement_BasicTests {
         new UtamShadowElement(
             new UtamElement[]{getPublicHtmlElement(new UtamSelector(".other"), null)});
     MethodInfo info = new MethodInfo("getOuterElement", "OuterElementElement");
-    info.addCodeLine("element(this.outerElement).build(OuterElementElement.class, OuterElementElementImpl.class)");
+    info.addCodeLine("return element(this.outerElement).build(OuterElementElement.class, OuterElementElementImpl.class)");
     PageObjectValidationTestHelper.validateMethod(
         Objects.requireNonNull(getElementMethod(element)), info);
   }
@@ -311,7 +315,7 @@ public class UtamElement_BasicTests {
     UtamElement element = getPublicHtmlElement(getUtamCssSelector(), null);
     element.getAbstraction().testRootTraverse(getTestTranslationContext());
     MethodInfo info = new MethodInfo(METHOD_NAME, "TestElement");
-    info.addCodeLine("element(this.test).build(TestElement.class, TestElementImpl.class)");
+    info.addCodeLine("return element(this.test).build(TestElement.class, TestElementImpl.class)");
     PageObjectValidationTestHelper.validateMethod(
         Objects.requireNonNull(getElementMethod(element)), info);
   }
@@ -324,7 +328,7 @@ public class UtamElement_BasicTests {
   public void testGetDeclaredMethodsWithList() {
     UtamElement element = getPublicHtmlElement(getListCssSelector(), null);
     MethodInfo info = new MethodInfo(METHOD_NAME, String.format("List<%s>", "TestElement"));
-    info.addCodeLine("element(this.test).buildList(TestElement.class, TestElementImpl.class)");
+    info.addCodeLine("return element(this.test).buildList(TestElement.class, TestElementImpl.class)");
     PageObjectValidationTestHelper.validateMethod(
         Objects.requireNonNull(getElementMethod(element)), info);
   }
@@ -352,7 +356,7 @@ public class UtamElement_BasicTests {
   @Test
   public void testElementNodeWithNestedElements() {
     DeserializerUtilities.Result res = new DeserializerUtilities()
-        .getResultFromFile("nestedElements");
+        .getResultFromFile("element/nestedElements");
     TranslationContext context = res.getContext();
     ElementContext one = context.getElement("one");
     assertThat(one.getType().isSameType(new TypeUtilities.FromString("OneElement")), is(equalTo(true)));
@@ -386,7 +390,6 @@ public class UtamElement_BasicTests {
     ElementContext elementContext =
         getElementAbstraction(json).testRootTraverse(TestUtilities.getTestTranslationContext());
     assertThat(elementContext.getName(), is(equalTo("simpleElement")));
-    assertThat(elementContext.isList(), is(false));
     assertThat(
         elementContext.getElementMethod().getDeclaration().getName(),
         is(equalTo("getSimpleElementElement")));
@@ -408,7 +411,6 @@ public class UtamElement_BasicTests {
     ElementContext elementContext =
         getElementAbstraction(json).testRootTraverse(TestUtilities.getTestTranslationContext());
     assertThat(elementContext.getName(), is(equalTo("simpleElement")));
-    assertThat(elementContext.isList(), is(true));
     assertThat(
         elementContext.getElementMethod().getDeclaration().getName(),
         is(equalTo("getSimpleElementElement")));
@@ -457,8 +459,8 @@ public class UtamElement_BasicTests {
   @Test
   public void testNullableList() {
     MethodInfo methodInfo = new MethodInfo("getNullableList", "List<NullableListElement>");
-    methodInfo.addCodeLine("element(this.nullableList).buildList(NullableListElement.class, NullableListElementImpl.class)");
-    TranslationContext context = new DeserializerUtilities().getContext("basicElementNullable");
+    methodInfo.addCodeLine("return element(this.nullableList).buildList(NullableListElement.class, NullableListElementImpl.class)");
+    TranslationContext context = new DeserializerUtilities().getContext("element/basicElementNullable");
     PageObjectMethod method = context.getMethod("getNullableList");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
@@ -466,8 +468,9 @@ public class UtamElement_BasicTests {
   @Test
   public void testNullableListWithFilter() {
     MethodInfo methodInfo = new MethodInfo("getNullableFilter", "NullableFilterElement");
-    methodInfo.addCodeLine("element(this.nullableFilter).build(NullableFilterElement.class, NullableFilterElementImpl.class, elm -> elm.isVisible())");
-    TranslationContext context = new DeserializerUtilities().getContext("basicElementNullable");
+    methodInfo.addCodeLine("return element(this.nullableFilter).build(NullableFilterElement.class, "
+        + "NullableFilterElementImpl.class, elm -> Boolean.TRUE.equals(elm.isVisible()))");
+    TranslationContext context = new DeserializerUtilities().getContext("element/basicElementNullable");
     PageObjectMethod method = context.getMethod("getNullableFilter");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
@@ -475,8 +478,8 @@ public class UtamElement_BasicTests {
   @Test
   public void testNullableSingle() {
     MethodInfo methodInfo = new MethodInfo("getNullable", "NullableElement");
-    methodInfo.addCodeLine("element(this.nullable).build(NullableElement.class, NullableElementImpl.class)");
-    TranslationContext context = new DeserializerUtilities().getContext("basicElementNullable");
+    methodInfo.addCodeLine("return element(this.nullable).build(NullableElement.class, NullableElementImpl.class)");
+    TranslationContext context = new DeserializerUtilities().getContext("element/basicElementNullable");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("getNullable"), methodInfo);
   }
 
@@ -488,8 +491,7 @@ public class UtamElement_BasicTests {
             ELEMENT_NAME, "actionable", getUtamCssSelector()));
     assertThat(
         e.getMessage(),
-        containsString(String.format(
-            TypeUtilities.ERR_TYPE_PROPERTY_INVALID_STRING_VALUE, ELEMENT_NAME, "actionable")));
+        containsString(String.format(ERR_TYPE_INVALID_STRING_VALUE, ELEMENT_NAME, "actionable")));
   }
 
   @Test
@@ -500,8 +502,7 @@ public class UtamElement_BasicTests {
             ELEMENT_NAME, "invalid", getUtamCssSelector()));
     assertThat(
         e.getMessage(),
-        containsString(String.format(
-            TypeUtilities.ERR_TYPE_PROPERTY_INVALID_STRING_VALUE, ELEMENT_NAME, "invalid")));
+        containsString(String.format(ERR_TYPE_INVALID_STRING_VALUE, ELEMENT_NAME, "invalid")));
   }
 
   @Test
@@ -512,9 +513,7 @@ public class UtamElement_BasicTests {
             ELEMENT_NAME, new String[] {"invalid"}, getUtamCssSelector()));
     assertThat(
         e.getMessage(),
-        containsString(String.format(
-            TypeUtilities.ERR_TYPE_INVALID_ARRAY_VALUES, "element", ELEMENT_NAME,
-            TypeUtilities.BasicElementInterface.nameList())));
+        containsString(String.format(ERR_TYPE_INVALID_ARRAY_VALUES, ELEMENT_NAME)));
   }
 
   @Test
@@ -531,8 +530,7 @@ public class UtamElement_BasicTests {
         getElementAbstraction(json).testRootTraverse(TestUtilities.getTestTranslationContext()));
     assertThat(
         e.getCause().getMessage(),
-        containsString(String.format(
-            TypeUtilities.ERR_TYPE_INVALID_VALUE_TYPE, "element", "simpleElement", "'container'")));
+        containsString(String.format(ERR_TYPE_UNSUPPORTED_NODE, "simpleElement")));
   }
 
   @Test
@@ -549,7 +547,6 @@ public class UtamElement_BasicTests {
         getElementAbstraction(json).testRootTraverse(TestUtilities.getTestTranslationContext()));
     assertThat(
         e.getCause().getMessage(),
-        containsString(String.format(
-            TypeUtilities.ERR_TYPE_INVALID_ARRAY_TYPES, "element", "simpleElement")));
+        containsString(String.format(ERR_TYPE_INVALID_ARRAY_TYPES, "simpleElement")));
   }
 }

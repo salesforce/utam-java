@@ -1,0 +1,32 @@
+{
+  "elements": [
+    {
+      "name": "custom",
+      "type": "org-lwr/pageObjects/custom",
+      "selector": {
+        "css": ".css",
+        "returnAll" : true
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "custom",
+          "apply": "method1",
+          "returnType" : "org-lwr/pageObjects/custom",
+          "returnAll": true
+        },
+        {
+          "chain" : true,
+          "apply" : "method2",
+          "matcher" : {
+            "type" : "notNull"
+          }
+        }
+      ]
+    }
+  ]
+}

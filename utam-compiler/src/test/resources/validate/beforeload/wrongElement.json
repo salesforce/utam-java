@@ -1,0 +1,8 @@
+{
+  "beforeLoad": [
+    {
+      "element" : "test",
+      "apply" : "getAttribute"
+    }
+  ]
+}

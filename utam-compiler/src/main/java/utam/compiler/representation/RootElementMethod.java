@@ -63,7 +63,7 @@ public class RootElementMethod {
   public static class Public implements PageObjectMethod {
 
     private static final List<String> codeLines = Collections
-        .singletonList("this.getRootElement()");
+        .singletonList("return this.getRootElement()");
     final TypeProvider returnType;
 
     public Public(TypeProvider returnType) {

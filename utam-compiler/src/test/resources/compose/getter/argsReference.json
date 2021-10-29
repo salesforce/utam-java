@@ -1,0 +1,55 @@
+{
+  "elements": [
+    {
+      "name": "sections",
+      "public": true,
+      "type": "my/pageObject/foo",
+      "selector": {
+        "css": "css%s",
+        "returnAll": true,
+        "args" : [
+          {
+            "name" : "elementArg",
+            "type" : "string"
+          }
+        ]
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "args" : [
+        {
+          "name" : "elementArg",
+          "type" : "string"
+        }
+      ],
+      "compose": [
+        {
+          "element": "sections",
+          "returnType" : "my/pageObject/foo",
+          "returnAll": true,
+          "args" : [
+            {
+              "name" : "elementArg",
+              "type" : "argumentReference"
+            }
+          ]
+        },
+        {
+          "element": "rows",
+          "chain" : true,
+          "returnType" : "my/pageObject/foo",
+          "returnAll": true,
+          "args" : [
+            {
+              "name" : "elementArg",
+              "type" : "argumentReference"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -18,7 +18,7 @@ import static utam.compiler.guardrails.ValidationError.DUPLICATE_WITH_ROOT_SELEC
 import static utam.compiler.guardrails.ValidationUtilities.getValidationError;
 import static utam.compiler.guardrails.ValidationUtilities.hasHardcodedText;
 import static utam.compiler.guardrails.ValidationUtilities.isSameSelector;
-import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
+import static utam.compiler.helpers.BasicElementInterface.actionable;
 
 import java.util.List;
 import org.hamcrest.CoreMatchers;
@@ -185,8 +185,7 @@ public class ValidationUtilitiesTests {
     TypeProvider elementType =
         new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
     ElementContext list =
-        new ElementContext.Basic(
-            ELEMENT_NAME, elementType, getCssSelector(ELEMENT_SELECTOR), true);
+        new ElementContext.BasicReturnsAll(elementType, getCssSelector(ELEMENT_SELECTOR));
 
     ElementContext otherElement =
         new ElementContext.Custom(
@@ -202,12 +201,9 @@ public class ValidationUtilitiesTests {
     TypeProvider elementType =
         new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
     ElementContext list =
-        new ElementContext.Basic(
-            "fakeElementName", elementType, getCssSelector(ELEMENT_SELECTOR), true);
+        new ElementContext.BasicReturnsAll(elementType, getCssSelector(ELEMENT_SELECTOR));
 
-    ElementContext otherElement =
-        new ElementContext.Basic(
-            "fakeOtherElementName", elementType, getCssSelector(ELEMENT_SELECTOR));
+    ElementContext otherElement = new ElementContext.Basic(elementType, getCssSelector(ELEMENT_SELECTOR));
 
     assertThat(getValidationError(list, otherElement), CoreMatchers.is(nullValue()));
   }
@@ -217,8 +213,7 @@ public class ValidationUtilitiesTests {
     TypeProvider elementType =
         new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
     ElementContext element =
-        new ElementContext.Basic(
-            "fakeElementName", elementType, getCssSelector(ELEMENT_SELECTOR), true);
+        new ElementContext.BasicReturnsAll(elementType, getCssSelector(ELEMENT_SELECTOR));
 
     assertThat(getValidationError(element, element), is(nullValue()));
   }

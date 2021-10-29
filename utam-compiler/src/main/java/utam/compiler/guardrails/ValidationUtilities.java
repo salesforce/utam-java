@@ -10,6 +10,7 @@ package utam.compiler.guardrails;
 import java.util.List;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementContext.Basic;
+import utam.compiler.helpers.ElementContext.ElementType;
 import utam.compiler.helpers.ElementContext.Root;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Locator;
@@ -51,13 +52,16 @@ abstract class ValidationUtilities {
   }
 
   static ValidationError getValidationError(ElementContext first, ElementContext second) {
-    if (first.isSelfElement() || first.isDocumentElement() || first instanceof ElementContext.Container) {
+    ElementContext.ElementType elementType = first.getElementNodeType();
+    if (elementType == ElementType.SELF
+        || elementType == ElementType.DOCUMENT
+        || elementType == ElementType.CONTAINER) {
       return null;
     }
-    if (first.isRootElement()) {
+    if (elementType == ElementType.ROOT) {
       return validateRootElement((ElementContext.Root) first, second);
     }
-    if (first.isCustomElement()) {
+    if (elementType == ElementType.CUSTOM) {
       return validateCustomElement(first, second);
     }
     return validateBasicElement(first, second);
@@ -65,9 +69,10 @@ abstract class ValidationUtilities {
 
   private static ValidationError validateCustomElement(ElementContext customElement,
       ElementContext element) {
+    ElementContext.ElementType elementType = element.getElementNodeType();
     Locator customElementLocator = customElement.getSelector();
     // this statement should be before next because declared root element is also HTML element
-    if (element.isRootElement()) {
+    if (elementType == ElementType.ROOT) {
       if (customElement.getType().isSameType(((Root) element).getEnclosingPageObjectType())) {
         return null;
       }
@@ -80,7 +85,7 @@ abstract class ValidationUtilities {
       return ValidationError.COMPONENT_AND_ELEMENT_DUPLICATE_SELECTOR;
     }
     // if selector same but type is different - it's error
-    if (element.isCustomElement()
+    if (elementType == ElementType.CUSTOM
         && !customElement.getType().isSameType(element.getType())
         && isSameSelector(customElementLocator, element.getSelector())) {
       return ValidationError.COMPONENTS_WITH_SAME_SELECTOR_BUT_DIFFERENT_TYPES;
@@ -89,11 +94,12 @@ abstract class ValidationUtilities {
   }
 
   private static ValidationError validateBasicElement(ElementContext basicElement, ElementContext element) {
+    ElementContext.ElementType elementType = element.getElementNodeType();
     Locator basicElementLocator = basicElement.getSelector();
-    if (element.isRootElement() && isSameSelector(basicElementLocator, element.getSelector())) {
+    if (elementType == ElementType.ROOT && isSameSelector(basicElementLocator, element.getSelector())) {
       return ValidationError.DUPLICATE_WITH_ROOT_SELECTOR;
     }
-    if (element.isCustomElement() && isSameSelector(basicElementLocator, element.getSelector())) {
+    if (elementType == ElementType.CUSTOM && isSameSelector(basicElementLocator, element.getSelector())) {
       return ValidationError.COMPONENT_AND_ELEMENT_DUPLICATE_SELECTOR;
     }
     return null;
@@ -101,10 +107,11 @@ abstract class ValidationUtilities {
 
   private static boolean isSameEnclosingType(TypeProvider enclosingPageObjectType,
       ElementContext element) {
-    if (element.isCustomElement() && element.getType().isSameType(enclosingPageObjectType)) {
+    ElementContext.ElementType elementType = element.getElementNodeType();
+    if (elementType == ElementType.CUSTOM && element.getType().isSameType(enclosingPageObjectType)) {
       return true;
     }
-    if (element.isRootElement()) {
+    if (elementType == ElementType.ROOT) {
       return enclosingPageObjectType.isSameType(((Root) element).getEnclosingPageObjectType());
     }
     return false;

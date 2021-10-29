@@ -1,0 +1,35 @@
+{
+  "elements" : [
+    {
+      "name" : "list",
+      "selector" : {
+        "css" : "css",
+        "returnAll" : true
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "self",
+          "apply": "waitFor",
+          "args": [
+            {
+              "type" : "function",
+              "predicate": [
+                {
+                  "element" : "list",
+                  "apply" : "getText",
+                  "returnType" : "string",
+                  "returnAll": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

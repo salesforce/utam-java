@@ -17,11 +17,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import utam.compiler.UtamCompilationError;
+import utam.compiler.helpers.BasicElementInterface;
+import utam.compiler.helpers.BasicElementUnionType;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementUnitTestHelper;
 import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.ContainerMethod;
 import utam.compiler.representation.CustomElementMethod;
 import utam.compiler.representation.ElementField;
@@ -51,6 +53,17 @@ public final class UtamElement {
       "element '%s': external flag is not supported";
   static final String ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED =
       "element '%s': frame selector cannot return all";
+  static final String ERR_TYPE_INVALID_ARRAY_TYPES =
+      "element '%s': type array must contain only string values";
+  static final String ERR_TYPE_INVALID_ARRAY_VALUES =
+      "element '%s': type array contains invalid values; valid values are: " + BasicElementInterface
+          .nameList();
+  static final String ERR_TYPE_INVALID_STRING_VALUE =
+      "element '%s': invalid string value '%s'; "
+          + "type property string values must be either 'container', 'frame', or a Page Object type. "
+          + "Basic types should be declared as an array of strings.";
+  static final String ERR_TYPE_UNSUPPORTED_NODE =
+      "element '%s': type should be string or array of strings";
 
   final String name;
   UtamSelector selector;
@@ -74,8 +87,8 @@ public final class UtamElement {
       @JsonProperty(value = "filter") UtamElementFilter filter,
       @JsonProperty("shadow") UtamShadowElement shadow,
       @JsonProperty("elements") UtamElement[] elements) {
-    this.type = TypeUtilities.processTypeNode(name, TypeUtilities.PropertyType.TYPE, type);
     this.name = name;
+    this.type = processTypeNode(type);
     this.isPublic = isPublic;
     this.selector = selector;
     this.shadow = shadow;
@@ -83,6 +96,36 @@ public final class UtamElement {
     this.filter = filter;
     this.isNullable = isNullable;
     this.isExternal = isExternal;
+  }
+
+  private String[] processTypeNode(JsonNode typeNode) {
+    if (typeNode == null || typeNode.isNull()) {
+      return new String[]{};
+    }
+    if (typeNode.isTextual()) {
+      String value = typeNode.textValue();
+      if (CONTAINER_ELEMENT_TYPE_NAME.equals(value)
+          || FRAME_ELEMENT_TYPE_NAME.equals(value)
+          || TranslationTypesConfigJava.isPageObjectType(value)) {
+        return new String[] { value };
+      }
+      throw new UtamCompilationError(String.format(ERR_TYPE_INVALID_STRING_VALUE, name, value));
+    }
+    if (typeNode.isArray()) {
+      List<String> values = new ArrayList<>();
+      for (JsonNode valueNode : typeNode) {
+        if (!valueNode.isTextual()) {
+          throw new UtamError(String.format(ERR_TYPE_INVALID_ARRAY_TYPES, name));
+        }
+        String valueStr = valueNode.textValue();
+        if(!BasicElementInterface.isBasicType(valueStr)) {
+          throw new UtamCompilationError(String.format(ERR_TYPE_INVALID_ARRAY_VALUES, name));
+        }
+        values.add(valueStr);
+      }
+      return values.toArray(String[]::new);
+    }
+    throw new UtamCompilationError(String.format(ERR_TYPE_UNSUPPORTED_NODE, name));
   }
 
   final Traversal getAbstraction() {
@@ -133,7 +176,7 @@ public final class UtamElement {
     return selector.getLocator().getStringValue();
   }
 
-  public void testTraverse(TranslationContext context) {
+  void testTraverse(TranslationContext context) {
     traverse(context, null, false);
   }
 
@@ -160,7 +203,7 @@ public final class UtamElement {
         return Type.FRAME;
       } else if (type.length == 1 && TranslationTypesConfigJava.isPageObjectType(type[0])) {
         return Type.CUSTOM;
-      } else if (TypeUtilities.Element.isBasicType(type)) {
+      } else if (BasicElementUnionType.isBasicType(type)) {
         return Type.BASIC;
       }
       return Type.UNKNOWN;
@@ -220,13 +263,18 @@ public final class UtamElement {
         addedParameters.addAll(filter.getMatcherParameters());
       }
       // set element
-      ElementContext component =
+      ElementContext component = isReturnList ? new ElementContext.CustomReturnsAll(
+          scopeElement,
+          name,
+          elementType,
+          selectorContext.getLocator(),
+          addedParameters,
+          isNullable()) :
           new ElementContext.Custom(
               scopeElement,
               name,
               elementType,
               selectorContext.getLocator(),
-              isReturnList,
               addedParameters,
               isNullable());
       PageObjectMethod method;
@@ -291,7 +339,7 @@ public final class UtamElement {
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
       boolean isPublicImplementationOnlyElement = isPublic() && context.isImplementationPageObject();
       TypeProvider elementType =
-          TypeUtilities.Element.asBasicType(name, type, isPublicImplementationOnlyElement);
+          BasicElementUnionType.asBasicType(name, type, isPublicImplementationOnlyElement);
       LocatorCodeGeneration locatorHelper = selector.getCodeGenerationHelper(context);
       List<MethodParameter> addedParameters = new ArrayList<>(locatorHelper.getParameters());
       ElementField field =
@@ -304,9 +352,12 @@ public final class UtamElement {
         addedParameters.addAll(filter.getMatcherParameters());
       }
       boolean isList = selector.isReturnAll() && (filter == null || !filter.getFindFirst());
-      ElementContext elementContext =
+      ElementContext elementContext = isList ?
+          new ElementContext.BasicReturnsAll(
+              scopeElement, name, elementType, locatorHelper.getLocator(),
+              addedParameters, isNullable()) :
           new ElementContext.Basic(
-              scopeElement, name, elementType, locatorHelper.getLocator(), isList,
+              scopeElement, name, elementType, locatorHelper.getLocator(),
               addedParameters, isNullable());
       final PageObjectMethod method;
       if (filter != null) {

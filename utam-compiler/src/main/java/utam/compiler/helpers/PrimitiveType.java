@@ -61,7 +61,7 @@ public enum PrimitiveType implements TypeProvider {
 
   @Override
   public String getFalsyValue() {
-    return BOOLEAN.equals(this)? "false" : "null";
+    return BOOLEAN == this ? "false" : "null";
   }
 
   @Override

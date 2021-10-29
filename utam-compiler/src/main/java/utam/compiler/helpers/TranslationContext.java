@@ -7,6 +7,19 @@
  */
 package utam.compiler.helpers;
 
+import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
+import static utam.compiler.helpers.ElementContext.Document.DOCUMENT_ELEMENT;
+import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
+import static utam.compiler.helpers.ElementContext.SELF_ELEMENT_NAME;
+import static utam.compiler.helpers.ElementContext.Self.SELF_ELEMENT;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import utam.compiler.guardrails.GlobalValidation;
 import utam.compiler.guardrails.PageObjectValidation;
 import utam.compiler.helpers.ElementContext.Document;
@@ -21,34 +34,25 @@ import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.Profile;
 
-import java.util.*;
-
-import static utam.compiler.helpers.ElementContext.Document.DOCUMENT_ELEMENT;
-import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
-import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
-import static utam.compiler.helpers.ElementContext.Self.SELF_ELEMENT;
-import static utam.compiler.helpers.ElementContext.SELF_ELEMENT_NAME;
-
 /**
- * instance is created for every Page Object that is being translated <br>
- * contains reference to the Page Object context and translator context
+ * instance is created for every Page Object that is being translated <br> contains reference to the
+ * Page Object context and translator context
  *
  * @author elizaveta.ivanova
  * @since 228
  */
 public final class TranslationContext {
 
-  static final String ERR_CONTEXT_ELEMENT_NOT_FOUND =
+  public static final String ERR_CONTEXT_ELEMENT_NOT_FOUND =
       "referenced element '%s' not found in context";
   static final String ERR_CONTEXT_DUPLICATE_PARAMETERS =
       "duplicate parameters with name '%s' in method '%s'," +
-              " \n if the same parameter needed in multiple places, try to use 'reference' type parameter instead";
+          " \n if the same parameter needed in multiple places, try to use 'reference' type parameter instead";
   static final String ERR_CONTEXT_DUPLICATE_METHOD = "duplicate method '%s'";
   static final String ERR_CONTEXT_DUPLICATE_FIELD = "duplicate field '%s'";
   static final String ERR_CONTEXT_DUPLICATE_ELEMENT_NAME =
       "element with name '%s' already exists in same JSON";
   static final String ERR_PROFILE_NOT_CONFIGURED = "profile '%s' is not configured";
-
   private final List<PageClassField> pageObjectFields = new ArrayList<>();
   private final List<PageObjectMethod> pageObjectMethods = new ArrayList<>();
   private final Set<String> methodNames = new HashSet<>();
@@ -58,9 +62,12 @@ public final class TranslationContext {
   private final TranslationTypesConfig translationTypesConfig;
   private final TranslatorConfig translatorConfiguration;
   private final Set<String> usedPrivateMethods = new HashSet<>();
+  private final Map<String, ElementUnitTestHelper> testableElements = new HashMap<>();
   private boolean isAbstractPageObject = false;
   private boolean isImplementationPageObject = false;
-  private final Map<String, ElementUnitTestHelper> testableElements = new HashMap<>();
+  private final TypeProvider pageObjectClassType;
+  private TypeProvider pageObjectInterfaceType;
+
 
   public TranslationContext(String pageObjectURI, TranslatorConfig translatorConfiguration) {
     this.pageObjectURI = pageObjectURI;
@@ -69,6 +76,9 @@ public final class TranslationContext {
     // register elements to prevent names collisions
     setElement(Document.DOCUMENT_ELEMENT);
     setElement(Self.SELF_ELEMENT);
+    // has impl prefixes
+    this.pageObjectClassType = translationTypesConfig.getClassType(pageObjectURI);
+    this.pageObjectInterfaceType = translationTypesConfig.getInterfaceType(pageObjectURI);
   }
 
   private static void checkParameters(PageObjectMethod method) {
@@ -90,7 +100,8 @@ public final class TranslationContext {
   }
 
   public void guardrailsValidation() {
-    PageObjectValidation pageObjectValidation = new PageObjectValidation(translatorConfiguration.getValidationMode(), pageObjectURI, elementContextMap.values());
+    PageObjectValidation pageObjectValidation = new PageObjectValidation(
+        translatorConfiguration.getValidationMode(), pageObjectURI, elementContextMap.values());
     pageObjectValidation.validate();
   }
 
@@ -110,19 +121,17 @@ public final class TranslationContext {
     return isImplementationPageObject;
   }
 
-  public void setIsImplementation() {
+  public void setImplementedType(String implementsProperty) {
     this.isImplementationPageObject = true;
+    this.pageObjectInterfaceType = translationTypesConfig.getInterfaceType(implementsProperty);
   }
 
-  public TypeProvider getInterfaceType(String implementsProperty) {
-    if (implementsProperty != null) {
-      return translationTypesConfig.getInterfaceType(implementsProperty);
-    }
-    return translationTypesConfig.getInterfaceType(pageObjectURI);
+  public TypeProvider getSelfType() {
+    return pageObjectInterfaceType;
   }
 
   public TypeProvider getClassType() {
-    return translationTypesConfig.getClassType(pageObjectURI);
+    return pageObjectClassType;
   }
 
   public TypeProvider getType(String type) {
@@ -185,7 +194,8 @@ public final class TranslationContext {
   }
 
   public Profile getProfile(String jsonKey, String value) {
-    ProfileConfiguration profileConfiguration = translatorConfiguration.getConfiguredProfiles().stream()
+    ProfileConfiguration profileConfiguration = translatorConfiguration.getConfiguredProfiles()
+        .stream()
         .filter(configuration -> configuration.getPropertyKey().equals(jsonKey))
         .findAny()
         .orElseThrow(() -> new UtamError(String.format(ERR_PROFILE_NOT_CONFIGURED, jsonKey)));
@@ -193,8 +203,9 @@ public final class TranslationContext {
   }
 
   /**
-   * if private method was never used, we should not generate code for it to prevent tests coverage violations. It might
-   * happen with getter for private element if it's only used as scope or in compose as "apply"
+   * if private method was never used, we should not generate code for it to prevent tests coverage
+   * violations. It might happen with getter for private element if it's only used as scope or in
+   * compose as "apply"
    *
    * @param name method name
    */
@@ -210,12 +221,14 @@ public final class TranslationContext {
     return pageObjectMethods.stream()
         .filter(pageObjectMethod -> pageObjectMethod.getDeclaration().getName().equals(name))
         .findFirst()
-        .orElseThrow(() -> new AssertionError(String.format("method '%s' not found in JSON", name)));
+        .orElseThrow(
+            () -> new AssertionError(String.format("method '%s' not found in JSON", name)));
   }
 
   /**
-   * used from unit test deserializer to get full list of elements <br>
-   * some elements are not declared as fields
+   * used from unit test deserializer to get full list of elements <br> some elements are not
+   * declared as fields
+   *
    * @return collection of element contexts
    */
   public Map<String, ElementUnitTestHelper> getTestableElements() {
@@ -224,8 +237,9 @@ public final class TranslationContext {
 
   /**
    * remember element for unit test deserializer
+   *
    * @param elementName name of the element
-   * @param helper information used to generate unit test
+   * @param helper      information used to generate unit test
    */
   public void setTestableElement(String elementName, ElementUnitTestHelper helper) {
     this.testableElements.put(elementName, helper);

@@ -20,7 +20,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Provides tests for the Parameter class and the nested Parameter.Primitive and Parameter.Literal
+ * Provides tests for the Parameter class and the nested Parameter.Regular and Parameter.Literal
  * classes
  *
  * @author james.evans
@@ -38,10 +38,10 @@ public class ParameterUtilsTests {
     assertThat(parameter.getType(), is(equalTo(PrimitiveType.STRING)));
   }
 
-  /** A Parameter.Primitive object should be able to be created */
+  /** A Parameter.Regular object should be able to be created */
   @Test
   public void testPrimitiveParameter() {
-    ParameterUtils.Regular param = new ParameterUtils.Primitive("paramName", PrimitiveType.STRING);
+    ParameterUtils.Regular param = new ParameterUtils.Regular("paramName", PrimitiveType.STRING);
     assertThat(param.getDeclaration(), is(equalTo("String paramName")));
     assertThat(param.isLiteral(), is(equalTo(false)));
     assertThat(param.getType().getSimpleName(), is(equalTo("String")));
@@ -95,9 +95,9 @@ public class ParameterUtilsTests {
 
   @Test
   public void testEquals() {
-    ParameterUtils.Regular param = new ParameterUtils.Primitive("paramName", PrimitiveType.STRING);
-    ParameterUtils.Regular equalParam = new ParameterUtils.Primitive("paramName", PrimitiveType.STRING);
-    ParameterUtils.Regular otherParam = new ParameterUtils.Primitive("otherParamName", PrimitiveType.NUMBER);
+    ParameterUtils.Regular param = new ParameterUtils.Regular("paramName", PrimitiveType.STRING);
+    ParameterUtils.Regular equalParam = new ParameterUtils.Regular("paramName", PrimitiveType.STRING);
+    ParameterUtils.Regular otherParam = new ParameterUtils.Regular("otherParamName", PrimitiveType.NUMBER);
     assertThat(param.equals(equalParam), is(equalTo(true)));
     assertThat(param.equals(otherParam), is(equalTo(false)));
     assertThat(param.equals("notEqual"), is(equalTo(false)));

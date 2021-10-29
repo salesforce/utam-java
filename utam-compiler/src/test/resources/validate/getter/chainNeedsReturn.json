@@ -1,0 +1,25 @@
+{
+  "elements" : [
+    {
+      "name" : "element",
+      "type" : "my/pageobject/foo",
+      "selector" : {
+        "css" : "css"
+      }
+    }
+  ],
+  "methods" : [
+    {
+      "name" : "test",
+      "compose" : [
+        {
+          "element" : "element"
+        },
+        {
+          "chain" : true,
+          "element" : "element"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "methods" : [
+    {
+      "name" : "test",
+      "compose": [
+        {
+          "returnType" : "boolean",
+          "apply": "isPresent"
+        }
+      ]
+    }
+  ]
+}

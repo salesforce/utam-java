@@ -7,33 +7,24 @@
  */
 package utam.compiler.helpers;
 
+import static utam.compiler.translator.TranslationTypesConfigJava.isCustomType;
+
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.element.Actionable;
 import utam.core.element.BasicElement;
-import utam.core.element.Clickable;
-import utam.core.element.Draggable;
-import utam.core.element.Editable;
 import utam.core.element.ElementLocation;
+import utam.core.element.FrameElement;
 import utam.core.element.RootElement;
-import utam.core.element.Touchable;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.consumer.ContainerElement;
-import utam.core.element.FrameElement;
-import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -46,20 +37,18 @@ import utam.core.selenium.element.LocatorBy;
 public final class TypeUtilities {
 
   public static final TypeProvider COLLECTOR_IMPORT = new TypeUtilities.FromClass(Collectors.class);
+  public static final TypeProvider LIST_IMPORT = new TypeUtilities.FromClass(List.class);
   public static final TypeProvider PAGE_OBJECT = new TypeUtilities.FromClass(PageObject.class);
   public static final TypeProvider BASE_PAGE_OBJECT =
       new TypeUtilities.FromClass(BasePageObject.class);
   public static final TypeProvider ROOT_PAGE_OBJECT =
       new TypeUtilities.FromClass(RootPageObject.class);
   public static final TypeProvider VOID = new UnimportableType("void");
-  public static final TypeProvider REFERENCE = new UnimportableType("reference");
+  public static final TypeProvider PARAMETER_REFERENCE = new UnimportableType("argumentReference");
   public static final TypeProvider ROOT_ELEMENT_TYPE = new FromClass(RootElement.class);
   public static final TypeProvider CONTAINER_ELEMENT =
       new TypeUtilities.FromClass(ContainerElement.class);
   public static final TypeProvider FRAME_ELEMENT = new TypeUtilities.FromClass(FrameElement.class);
-  private static final String ERR_PARAMETERS_TYPES_MISMATCH =
-      "expected %d parameters with type {%s}, provided were {%s}";
-
   public static final TypeProvider SELECTOR = new FromClass(LocatorBy.class);
   public static final TypeProvider FUNCTION = new FromClass(Supplier.class) {
     @Override
@@ -71,19 +60,15 @@ public final class TypeUtilities {
   public static final TypeProvider BASIC_ELEMENT = new FromClass(BasicElement.class);
   public static final String FRAME_ELEMENT_TYPE_NAME = "frame";
   public static final String CONTAINER_ELEMENT_TYPE_NAME = "container";
-  public static final String ERR_TYPE_INVALID_VALUE_TYPE =
-      "%s '%s': type must be %s, a Page Object type reference, or an array of basic element interfaces";
-  public static final String ERR_TYPE_PROPERTY_INVALID_STRING_VALUE =
-      "element '%s': invalid string value '%s'; type property string values must be either 'container', 'frame', or a Page Object type reference.";
-  public static final String ERR_RETURNS_PROPERTY_INVALID_STRING_VALUE =
-      "method '%s': invalid string value '%s'; returns property string values must be either a primitive type or a Page Object type reference.";
-  public static final String ERR_TYPE_INVALID_ARRAY_TYPES =
-      "%s '%s': type array must contain only string values";
-  public static final String ERR_TYPE_INVALID_ARRAY_VALUES =
-      "%s '%s': type array contains invalid values; valid values are %s";
+  public static final TypeProvider PAGE_OBJECT_PARAMETER = new PageObjectClass(null);
+  public static final TypeProvider BOUNDED_PAGE_OBJECT_PARAMETER = new PageObjectClass("T");
+  public static final TypeProvider ROOT_PAGE_OBJECT_PARAMETER = new RootPageObjectClass(null);
+  static final TypeProvider JAVA_OBJECT_TYPE = new UnimportableType("Object");
+  private static final String ERR_PARAMETERS_TYPES_MISMATCH =
+      "expected %d parameters with type {%s}, provided were {%s}";
 
-  static String getUnmatchedParametersErr(
-      List<TypeProvider> expectedTypes, List<MethodParameter> providedParameters) {
+  static String getUnmatchedParametersErr(List<TypeProvider> expectedTypes,
+      List<MethodParameter> providedParameters) {
     return String.format(
         ERR_PARAMETERS_TYPES_MISMATCH,
         expectedTypes.size(),
@@ -109,162 +94,6 @@ public final class TypeUtilities {
     return true;
   }
 
-  public static String[] processTypeNode(
-      String name, PropertyType propertyType, JsonNode typeNode) {
-    if (typeNode == null || typeNode.isNull()) {
-      return new String[]{};
-    }
-    if (typeNode.isTextual()) {
-      String value = typeNode.textValue();
-      if (propertyType == PropertyType.TYPE &&
-          !CONTAINER_ELEMENT_TYPE_NAME.equals(value) &&
-          !FRAME_ELEMENT_TYPE_NAME.equals(value) &&
-          !TranslationTypesConfigJava.isPageObjectType(value)) {
-        throw new UtamError(String.format(ERR_TYPE_PROPERTY_INVALID_STRING_VALUE, name, value));
-      }
-      if (propertyType == PropertyType.RETURNS &&
-          !PrimitiveType.isPrimitiveType(value) &&
-          !TranslationTypesConfigJava.isPageObjectType(value)) {
-        throw new UtamError(String.format(ERR_RETURNS_PROPERTY_INVALID_STRING_VALUE, name, value));
-      }
-      return new String[] {value};
-    }
-    String entityType = propertyType == PropertyType.TYPE ? "element" : "method";
-    if (typeNode.isArray()) {
-      List<String> values = new ArrayList<>();
-      for (JsonNode valueNode : typeNode) {
-        if (!valueNode.isTextual()) {
-          throw new UtamError(String.format(ERR_TYPE_INVALID_ARRAY_TYPES, entityType, name));
-        }
-        values.add(valueNode.textValue());
-      }
-      String[] res = values.toArray(String[]::new);
-      if (!TypeUtilities.Element.isBasicType(res)) {
-        throw new UtamError(String.format(ERR_TYPE_INVALID_ARRAY_VALUES, entityType, name,
-            TypeUtilities.BasicElementInterface.nameList()));
-      }
-      return res;
-    }
-    throw new UtamError(String.format(ERR_TYPE_INVALID_VALUE_TYPE,
-        entityType,
-        name,
-        propertyType == PropertyType.TYPE ? "'" + CONTAINER_ELEMENT_TYPE_NAME + "'" : "a primitive data type"));
-  }
-
-  public enum PropertyType {
-    TYPE,
-    RETURNS
-  }
-
-  public enum BasicElementInterface implements TypeProvider {
-    actionable(Actionable.class),
-    clickable(Clickable.class),
-    draggable(Draggable.class),
-    editable(Editable.class),
-    touchable(Touchable.class);
-
-    private final Class type;
-
-    BasicElementInterface(Class type) {
-      this.type = type;
-    }
-
-    static boolean isBasicType(String jsonString) {
-      for (TypeUtilities.BasicElementInterface type : TypeUtilities.BasicElementInterface.values()) {
-        if (type.name().equals(jsonString)) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    static BasicElementInterface asBasicType(String jsonString) {
-      if (jsonString == null) {
-        return actionable;
-      }
-      for (TypeUtilities.BasicElementInterface type : TypeUtilities.BasicElementInterface.values()) {
-        if (jsonString.equals(type.name())) {
-          return type;
-        }
-      }
-      return null;
-    }
-
-    public static boolean isBasicType(TypeProvider type) {
-      if (type instanceof Element) {
-        return true;
-      }
-      for (TypeUtilities.BasicElementInterface basicType : TypeUtilities.BasicElementInterface.values()) {
-        if (basicType.isSameType(type)) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    public static BasicElementInterface[] getBasicElementTypes(TypeProvider type) {
-      if (type instanceof Element) {
-        return ((Element)type).basicInterfaces.toArray(BasicElementInterface[]::new);
-      }
-
-      if (type.isSameType(ROOT_ELEMENT_TYPE)) {
-        return BasicElementInterface.values();
-      }
-
-      BasicElementInterface basicInterface = getBasicElementType(type);
-
-      if (basicInterface != null) {
-        return new BasicElementInterface[] { basicInterface };
-      }
-
-      return null;
-    }
-
-    public static TypeUtilities.BasicElementInterface getBasicElementType(TypeProvider type) {
-      for (TypeUtilities.BasicElementInterface basicType : TypeUtilities.BasicElementInterface.values()) {
-        if (basicType.isSameType(type)) {
-          return basicType;
-        }
-      }
-      return null;
-    }
-
-    public static String nameList() {
-      return Arrays.stream(values())
-          .map(Enum::name).collect(Collectors.joining(","));
-    }
-
-    @Override
-    public String getFullName() {
-      return type.getName();
-    }
-
-    @Override
-    public String getSimpleName() {
-      return type.getSimpleName();
-    }
-
-    @Override
-    public String getPackageName() {
-      return type.getPackageName();
-    }
-
-    @Override
-    public Class getClassType() {
-      return type;
-    }
-  }
-
-  public static boolean isElementReturned(TypeProvider returnType) {
-    if(returnType instanceof Element) {
-      return true;
-    }
-    if(returnType instanceof ListOf) {
-      return returnType.getBoundTypes().get(0) instanceof Element;
-    }
-    return false;
-  }
-
   public static TypeProvider getElementType(TypeProvider type) {
     if (type instanceof ListOf) {
       return type.getBoundTypes().get(0);
@@ -272,82 +101,8 @@ public final class TypeUtilities {
     return type;
   }
 
-  public static class Element implements TypeProvider {
-    private final String name;
-    private final List<BasicElementInterface> basicInterfaces = new ArrayList<>();
-
-    Element(String name, String[] interfaceTypes, boolean requiresPrefix) {
-      // If the basic element being defined is in an implementation-only Page Object,
-      // that is, one that has an "implements" property defined, and the element is
-      // marked as public, then there must be a method defined in the interface-only
-      // Page Object that matches the name of the exposed element. Assuming the method
-      // is named "getFoo," that method will have a generated return type of interface
-      // "GetFooElement", and the implementation Page Object must have an implementation
-      // for the element that will match that interface name. Note carefully that this
-      // is distinct from the case where the element is normally exposed in a Page Object
-      // using the "public" property in the JSON, in which case, the "Get" prefix is
-      // omitted.
-      final String prefix = requiresPrefix ? "Get" : "";
-      this.name = prefix + name.substring(0, 1).toUpperCase() + name.substring(1) + "Element";
-      for(String interfaceType : interfaceTypes) {
-        if (BasicElementInterface.isBasicType(interfaceType)) {
-          basicInterfaces.add(BasicElementInterface.asBasicType(interfaceType));
-        }
-      }
-    }
-
-    public static boolean isBasicType(String[] interfaceTypes) {
-      if (interfaceTypes == null) {
-        return true;
-      }
-      for (String interfaceType : interfaceTypes) {
-        if (!BasicElementInterface.isBasicType(interfaceType)) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    public static Element asBasicType(
-        String name, String[] interfaceTypes, boolean isPublicImplOnly) {
-      if (interfaceTypes == null || interfaceTypes.length == 0) {
-        return new Element(
-            name, new String[] { BasicElement.class.getSimpleName() }, isPublicImplOnly);
-      }
-      if (isBasicType(interfaceTypes)) {
-        return new Element(name, interfaceTypes, isPublicImplOnly);
-      }
-      return null;
-    }
-
-    public Collection<TypeProvider> getBasicInterfaces() {
-      if (basicInterfaces.size() == 0) {
-        // If there are no basic interfaces declared, the only interface implemented by this
-        // element is BasicElement.
-        return new ArrayList<>(List.of(new TypeUtilities.FromClass(BasicElement.class)));
-      }
-      return new ArrayList<>(basicInterfaces);
-    }
-
-    @Override
-    public String getFullName() {
-      return name;
-    }
-
-    @Override
-    public String getSimpleName() {
-      return name;
-    }
-
-    @Override
-    public String getPackageName() {
-      return "";
-    }
-
-    @Override
-    public Class getClassType() {
-      return null;
-    }
+  public static TypeProvider wrapAsList(TypeProvider originalType) {
+    return originalType instanceof ListOf ? originalType : new ListOf(originalType);
   }
 
   public static class FromClass implements TypeProvider {
@@ -455,7 +210,7 @@ public final class TypeUtilities {
 
     private final TypeProvider elementType;
 
-    public ListOf(TypeProvider elementType) {
+    private ListOf(TypeProvider elementType) {
       super(List.class);
       this.elementType = elementType;
     }
@@ -482,11 +237,18 @@ public final class TypeUtilities {
     public List<TypeProvider> getBoundTypes() {
       return Collections.singletonList(elementType);
     }
+
+    @Override
+    public List<TypeProvider> getImportableTypes() {
+      List<TypeProvider> typesToImport = new ArrayList<>(getBoundTypes());
+      typesToImport.add(LIST_IMPORT);
+      return typesToImport;
+    }
   }
 
-  static class UnimportableType extends FromString {
+  public static class UnimportableType extends FromString {
 
-    UnimportableType(String name) {
+    public UnimportableType(String name) {
       super(name, "");
     }
   }
@@ -494,17 +256,16 @@ public final class TypeUtilities {
   /**
    * types like Class&lt;T&gt; or Class&lt;? extends Page Object&gt;
    */
-  public static class BoundedClass extends FromClass {
+  static class BoundedClass extends FromClass {
 
     private final TypeProvider boundType;
     private final String typeNameStr;
 
-    public BoundedClass(TypeProvider boundType, String boundStr) {
+    BoundedClass(TypeProvider boundType, String boundStr) {
       super(Class.class);
       this.boundType = boundType;
-      this.typeNameStr = boundStr == null?
-          String.format("Class<? extends %s>", boundType.getSimpleName())
-          : "Class<T>";
+      this.typeNameStr = boundStr != null ? String.format("Class<%s>", boundStr)
+          : String.format("Class<? extends %s>", boundType.getSimpleName());
     }
 
     @Override
@@ -518,11 +279,42 @@ public final class TypeUtilities {
     }
 
     @Override
+    public List<TypeProvider> getImportableTypes() {
+      return new ArrayList<>(getBoundTypes());
+    }
+
+    @Override
     public boolean isSameType(TypeProvider anotherType) {
-      if (!(anotherType instanceof BoundedClass)) {
-        return false;
+      if (anotherType instanceof BoundedClass) {
+        return this.boundType.isSameType(((BoundedClass) anotherType).boundType);
       }
-      return this.getSimpleName().equals(anotherType.getSimpleName());
+      return false;
+    }
+  }
+
+  static class PageObjectClass extends BoundedClass {
+
+    PageObjectClass(String boundStr) {
+      super(PAGE_OBJECT, boundStr);
+    }
+
+    PageObjectClass(TypeProvider boundType, String boundStr) {
+      super(boundType, boundStr);
+    }
+
+    @Override
+    public boolean isSameType(TypeProvider anotherType) {
+      if (isCustomType(anotherType)) {
+        return true;
+      }
+      return super.isSameType(anotherType);
+    }
+  }
+
+  static class RootPageObjectClass extends PageObjectClass {
+
+    RootPageObjectClass(String boundStr) {
+      super(ROOT_PAGE_OBJECT, boundStr);
     }
   }
 }

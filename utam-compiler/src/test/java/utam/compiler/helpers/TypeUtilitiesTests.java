@@ -23,13 +23,14 @@ import java.util.List;
 import java.util.Objects;
 import utam.core.selenium.element.LocatorBy;
 
+import static utam.compiler.helpers.BasicElementInterface.clickable;
 import static utam.compiler.helpers.TypeUtilities.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
-import static utam.compiler.helpers.TypeUtilities.Element.asBasicType;
+import static utam.compiler.helpers.BasicElementInterface.actionable;
+import static utam.compiler.helpers.BasicElementUnionType.asBasicType;
 
 /**
  * Provides tests for the TypeUtilities class
@@ -49,14 +50,14 @@ public class TypeUtilitiesTests {
   /** Static isElementType method should return proper values */
   @Test
   public void testIsElementType() {
-    MatcherAssert.assertThat(Element.isBasicType(new String[] { "actionable" }), is(equalTo(true)));
-    assertThat(Element.isBasicType(null), is(equalTo(true)));
-    assertThat(Element.isBasicType(new String[] { "invalid" }), is(equalTo(false)));
+    MatcherAssert.assertThat(BasicElementUnionType.isBasicType(new String[] { "actionable" }), is(equalTo(true)));
+    assertThat(BasicElementUnionType.isBasicType(null), is(equalTo(true)));
+    assertThat(BasicElementUnionType.isBasicType(new String[] { "invalid" }), is(equalTo(false)));
   }
 
   @Test
   public void testActionableGetTypeMethod() {
-    TypeProvider type = TypeUtilities.BasicElementInterface.actionable;
+    TypeProvider type = BasicElementInterface.actionable;
     assertThat(type.getClassType(), is(equalTo(Actionable.class)));
     assertThat(type.getFullName(), is(equalTo(type.getClassType().getName())));
   }
@@ -147,76 +148,18 @@ public class TypeUtilitiesTests {
     assertThat(type.hashCode(), is(equalTo(Objects.hash(type.getSimpleName(), type.getFullName()))));
   }
 
-  /** ListOf should create a valid TypeProvider */
   @Test
   public void testListOf() {
     TypeProvider baseType = new TypeUtilities.FromString("FakeType", "test.FakeType");
-    TypeProvider type = new TypeUtilities.ListOf(baseType);
+    TypeProvider type = wrapAsList(baseType);
 
     assertThat(type.getFullName(), is(equalTo("java.util.List")));
     assertThat(type.getPackageName(), is(equalTo("java.util")));
     assertThat(type.getSimpleName(), is(equalTo("List<FakeType>")));
     assertThat(type.getClassType(), is(equalTo(List.class)));
-  }
-
-  /**
-   * The ListOf.equals method should return true with a list of TypeProvider created from the same
-   * type
-   */
-  @Test
-  public void testListOfEquals() {
-    TypeProvider baseType = new TypeUtilities.FromString("FakeType", "test.FakeType");
-    TypeProvider type = new TypeUtilities.ListOf(baseType);
-    assertThat(type.isSameType(new TypeUtilities.ListOf(baseType)), is(true));
-  }
-
-  /** The ListOf.equals method should return false with a TypeProvider that is not a list */
-  @Test
-  public void testListOfEqualsWithNonListType() {
-    TypeProvider baseType = new TypeUtilities.FromString("FakeType", "test.FakeType");
-    TypeProvider type = new TypeUtilities.ListOf(baseType);
+    assertThat(type.isSameType(wrapAsList(baseType)), is(true));
     assertThat(type.isSameType(baseType), is(false));
-  }
-
-  /**
-   * The ListOf.equals method should return false with list of TypeProvider created from different
-   * class
-   */
-  @Test
-  public void testListOfEqualsWithDifferentListTypes() {
-    TypeProvider type = new TypeUtilities.FromClass(Actionable.class);
-    TypeProvider otherType = new TypeUtilities.FromClass(Clickable.class);
-    TypeProvider listType = new TypeUtilities.ListOf(type);
-
-    assertThat(listType, is(not(equalTo(new TypeUtilities.ListOf(otherType)))));
-  }
-
-  /**
-   * The ListOf.equals method should return false with list of TypeProvider created from different
-   * class having the same simple name but different package
-   */
-  @Test
-  public void testListOfEqualsWithListsOfDifferentPackages() {
-    TypeProvider type = new TypeUtilities.FromClass(Editable.class);
-    TypeProvider otherType = new TypeUtilities.FromString("Editable", "selenium.mismatch.Editable");
-    TypeProvider listType = new TypeUtilities.ListOf(type);
-
-    assertThat(listType, is(not(equalTo(new TypeUtilities.ListOf(otherType)))));
-  }
-
-  /** The ListOf.equals method should return false with an object that is not a TypeProvider */
-  @SuppressWarnings("unlikely-arg-type")
-  @Test
-  public void testListOfEqualsWithDifferentObjectTypes() {
-    TypeProvider type = new TypeUtilities.ListOf(new TypeUtilities.FromClass(Actionable.class));
-
-    assertThat(type.isSameType(new TypeUtilities.FromClass(String.class)), is(equalTo(false)));
-  }
-
-  @Test
-  public void testListOfHashCode() {
-    TypeProvider baseType = new TypeUtilities.FromClass(Actionable.class);
-    TypeProvider type = new TypeUtilities.ListOf(baseType);
+    assertThat(type.isSameType(wrapAsList(clickable)), is(false));
     assertThat(type.hashCode(), is(equalTo(Objects.hash(baseType))));
   }
 
@@ -224,7 +167,6 @@ public class TypeUtilitiesTests {
   @Test
   public void testFromClass() {
     TypeProvider type = new TypeUtilities.FromClass(Actionable.class);
-
     assertThat(type.getFullName(), is(equalTo(Actionable.class.getName())));
     assertThat(type.getPackageName(), is(equalTo(Actionable.class.getPackageName())));
     assertThat(type.getSimpleName(), is(equalTo(Actionable.class.getSimpleName())));
@@ -455,7 +397,7 @@ public class TypeUtilitiesTests {
   @Test
   public void testBoundedClassWithBound() {
     BoundedClass type = new BoundedClass(PrimitiveType.STRING, "T");
-    assertThat(type.isSameType(new BoundedClass(PrimitiveType.STRING, null)), is(false));
+    assertThat(type.isSameType(new BoundedClass(PrimitiveType.NUMBER, "T")), is(false));
     assertThat(type.getBoundTypes().size(), is(1));
     assertThat(type.getBoundTypes().get(0).isSameType(PrimitiveType.STRING), is(true));
     assertThat(type.getSimpleName(), is(equalTo("Class<T>")));

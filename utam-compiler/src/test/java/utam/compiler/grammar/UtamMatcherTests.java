@@ -11,24 +11,13 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.grammar.UtamArgumentTests.getLiteralArg;
-import static utam.compiler.grammar.UtamArgumentTests.getNonLiteralArg;
-import static utam.compiler.grammar.UtamMatcher.ERR_INCORRECT_MATCHER_FOR_METHOD;
-import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
 
-import org.hamcrest.Matchers;
 import org.testng.annotations.Test;
-import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.ElementContext.Basic;
 import utam.compiler.helpers.MatcherType;
-import utam.compiler.helpers.MethodContext;
-import utam.compiler.helpers.TranslationContext;
-import utam.core.declarative.representation.MethodDeclaration;
-import utam.core.declarative.representation.PageObjectMethod;
+import utam.compiler.helpers.PrimitiveType;
 import utam.core.framework.consumer.UtamError;
 
 /**
@@ -42,61 +31,45 @@ public class UtamMatcherTests {
   @Test
   public void testMethodStatementAction() {
     UtamMatcher matcher = new UtamMatcher(MatcherType.isFalse, null);
-    matcher.getParameters(getTestTranslationContext(), new MethodContext());
+    matcher.getParameters(getTestTranslationContext(), "element");
 
     matcher = new UtamMatcher(MatcherType.isTrue, new UtamArgument[0]);
-    matcher.getParameters(getTestTranslationContext(), new MethodContext());
+    matcher.getParameters(getTestTranslationContext(), "element");
   }
 
   @Test
   public void testMethodStatementActionWrongArgsNumberThrows() {
-    UtamMatcher matcher = new UtamMatcher(MatcherType.isTrue, new UtamArgument[] { getLiteralArg(true)});
-    UtamError e = expectThrows(UtamError.class, () -> matcher.getParameters(getTestTranslationContext(), new MethodContext()));
+    UtamMatcher matcher = new UtamMatcher(MatcherType.isTrue,
+        new UtamArgument[]{getLiteralArg()});
+    UtamError e = expectThrows(UtamError.class,
+        () -> matcher.getParameters(getTestTranslationContext(), "element"));
     assertThat(e.getMessage(), is(endsWith("expected 0 parameters, provided 1")));
   }
 
   @Test
   public void testElementFilterWrongArgsTypeThrows() {
-    UtamMatcher matcher = new UtamMatcher(MatcherType.stringContains, new UtamArgument[] { getLiteralArg(true)});
-    UtamError e = expectThrows(UtamError.class, () -> matcher.getParameters(getTestTranslationContext(), "element"));
+    UtamMatcher matcher = new UtamMatcher(MatcherType.stringContains,
+        new UtamArgument[]{getLiteralArg()});
+    UtamError e = expectThrows(UtamError.class,
+        () -> matcher.getParameters(getTestTranslationContext(), "element"));
     assertThat(e.getMessage(), is(containsString("expected type is")));
   }
 
   @Test
-  public void testIncorrectActionTypeForMatcherThrows() {
-    TranslationContext context = TestUtilities.getTestTranslationContext();
-    ElementContext elementContext = new Basic("element");
-    context.setElement(elementContext);
-    PageObjectMethod method = mock(PageObjectMethod.class);
-    MethodDeclaration declaration = mock(MethodDeclaration.class);
-    when(method.getDeclaration()).thenReturn(declaration);
-    when(declaration.getName()).thenReturn("getElement()");
-    elementContext.setElementMethod(method);
-    UtamMethodAction action = new UtamMethodAction("element", "isPresent", null, new UtamMatcher(
-        MatcherType.stringContains, new UtamArgument[] { getLiteralArg("expected")}), null);
-
-    UtamError e = expectThrows(UtamError.class, () -> action.getComposeAction(context, new MethodContext(), false));
+  public void testIncorrectMatcherTypeThrowsInCompose() {
+    UtamError e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities().getContext("matcher/incorrectMatcherInCompose"));
     assertThat(
         e.getMessage(),
-        Matchers.containsString(
-            String.format(ERR_INCORRECT_MATCHER_FOR_METHOD, MatcherType.stringContains, "String")));
+        containsString(MatcherType.isTrue.getIncorrectTypeError(PrimitiveType.STRING)));
   }
 
   @Test
-  public void testIncorrectFilterTypeForMatcherThrows() {
-    UtamElementFilter filter =
-        new UtamElementFilter(
-            "focus",
-            new UtamArgument[]{
-                getNonLiteralArg("text", "string")
-            },
-            new UtamMatcher(MatcherType.isFalse, null), false);
-    UtamError e = expectThrows(UtamError.class, () ->
-        filter.setElementFilter(getTestTranslationContext(), UtamElement.Type.BASIC, actionable,
-            "element"));
+  public void testIncorrectMatcherTypeThrowsInFilter() {
+    UtamError e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities().getContext("matcher/incorrectMatcherInFilter"));
     assertThat(
         e.getMessage(),
-        Matchers.containsString(
-            String.format(ERR_INCORRECT_MATCHER_FOR_METHOD, MatcherType.isFalse, "Boolean")));
+        containsString(MatcherType.isTrue.getIncorrectTypeError(PrimitiveType.STRING)));
   }
 }

@@ -19,6 +19,7 @@ import static utam.compiler.grammar.UtamSelector.ERR_SELECTOR_PARAM_UNKNOWN_TYPE
 
 import java.util.List;
 import org.testng.annotations.Test;
+import utam.compiler.grammar.UtamArgument.UtamArgumentLiteralPrimitive;
 import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.PrimitiveType;
 import utam.core.declarative.representation.MethodParameter;
@@ -68,22 +69,6 @@ public class UtamSelectorTests {
         is(equalTo("LocatorBy.byCss(String.format(\"str[%s] num[%d]\", strArg, numArg))")));
   }
 
-  @Test
-  public void testSelectorLiteralParameters() {
-    UtamSelector selector = new UtamSelector("str[%s] num[%d]",
-        new UtamArgument[]{
-            new UtamArgument.UtamArgumentLiteral("\"literal\""),
-            new UtamArgument.UtamArgumentLiteral(1)
-    });
-    LocatorCodeGeneration context = getLocatorContext(selector);
-    List<MethodParameter> parameters = context.getParameters();
-    assertThat(parameters, hasSize(2));
-    assertThat(parameters.get(0).getType(), is(equalTo(PrimitiveType.STRING)));
-    assertThat(parameters.get(1).getType(), is(equalTo(PrimitiveType.NUMBER)));
-    assertThat(context.getBuilderString(),
-        is(equalTo("LocatorBy.byCss(String.format(\"str[%s] num[%d]\", \"literal\", 1))")));
-  }
-
   /**
    * should throw the appropriate exception when used with an unknown format specifier
    */
@@ -105,6 +90,15 @@ public class UtamSelectorTests {
     assertThat(
         e.getMessage(),
         is(containsString(
-            String.format(ERR_ARGS_WRONG_TYPE, "selector 'selector[%d]'", "Integer", "String"))));
+            String.format(ERR_ARGS_WRONG_TYPE, "selector 'selector[%d]'",  "name", "Integer", "String"))));
+  }
+
+  @Test
+  public void testLiteralArgProvided() {
+    UtamSelector selector = new UtamSelector("selector[%d]",
+        new UtamArgument[]{
+            new UtamArgumentLiteralPrimitive(1)
+        });
+    getLocatorContext(selector);
   }
 }

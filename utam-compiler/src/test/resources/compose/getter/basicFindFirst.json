@@ -1,0 +1,34 @@
+{
+  "elements": [
+    {
+      "name": "filterFindFirst",
+      "selector": {
+        "css": "css",
+        "returnAll": true
+      },
+      "filter": {
+        "apply": "getValue",
+        "matcher": {
+          "type": "stringEquals",
+          "args": [
+            {
+              "name": "filterArg",
+              "type": "string"
+            }
+          ]
+        },
+        "findFirst": true
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "filterFindFirst"
+        }
+      ]
+    }
+  ]
+}

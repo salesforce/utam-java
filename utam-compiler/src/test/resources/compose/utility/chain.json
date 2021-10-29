@@ -1,0 +1,28 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "returnType": "utam-extension/pageObjects/customReturnType",
+          "applyExternal": {
+            "type": "utam-extension/utils/customExtensionUtils",
+            "invoke": "utilityMethod1"
+          }
+        },
+        {
+          "returnType": "utam-extension/pageObjects/customReturnType",
+          "returnAll" : true,
+          "apply" : "method1",
+          "chain" : true
+        },
+        {
+          "returnType": "string",
+          "returnAll" : true,
+          "apply" : "method2",
+          "chain" : true
+        }
+      ]
+    }
+  ]
+}

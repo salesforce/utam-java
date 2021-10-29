@@ -7,33 +7,45 @@
  */
 package utam.compiler.helpers;
 
-import utam.compiler.representation.ElementField;
-import utam.compiler.representation.ElementMethod;
-import utam.compiler.representation.PageObjectValidationTestHelper;
-import utam.compiler.representation.PageObjectValidationTestHelper.FieldInfo;
-import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
-import utam.core.declarative.representation.*;
-import utam.core.framework.consumer.UtamError;
-import org.testng.annotations.Test;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.TestUtilities.getCssSelector;
+import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
+import static utam.compiler.helpers.AnnotationUtils.EMPTY_ANNOTATION;
+import static utam.compiler.helpers.BasicElementInterface.actionable;
+import static utam.compiler.helpers.BasicElementInterface.editable;
+import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_DUPLICATE_ELEMENT_NAME;
+import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_DUPLICATE_FIELD;
+import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_DUPLICATE_METHOD;
+import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_DUPLICATE_PARAMETERS;
+import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_ELEMENT_NOT_FOUND;
+import static utam.compiler.helpers.TranslationContext.ERR_PROFILE_NOT_CONFIGURED;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static utam.compiler.grammar.TestUtilities.getCssSelector;
-import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
-import static utam.compiler.helpers.AnnotationUtils.EMPTY_ANNOTATION;
-import static utam.compiler.helpers.TranslationContext.*;
-import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
-import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.editable;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.expectThrows;
+import org.testng.annotations.Test;
+import utam.compiler.representation.ElementField;
+import utam.compiler.representation.ElementMethod;
+import utam.compiler.representation.PageObjectValidationTestHelper;
+import utam.compiler.representation.PageObjectValidationTestHelper.FieldInfo;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageClassField;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.framework.consumer.UtamError;
 
 public class TranslationContextTests {
 
@@ -45,7 +57,7 @@ public class TranslationContextTests {
 
   private static ElementContext getElementContext(String elementName, String selector) {
     return new ElementContext.Basic(
-        elementName, TypeUtilities.BasicElementInterface.clickable, getCssSelector(selector));
+        elementName, BasicElementInterface.clickable, getCssSelector(selector));
   }
 
   private static TranslationContext getContainerContext() {
@@ -107,24 +119,23 @@ public class TranslationContextTests {
 
   @Test
   public void testGetInterfaceType() {
-    assertThat(
-        getContainerContext()
-            .getInterfaceType("utam-test/pageObjects/test/testInterface")
-            .getFullName(),
+    TranslationContext context = getContainerContext();
+    context.setImplementedType("utam-test/pageObjects/test/testInterface");
+    assertThat(context.getSelfType().getFullName(),
         is(equalTo("utam.test.pageobjects.test.TestInterface")));
   }
 
   @Test
   public void testGetInterfaceTypeWithNullInterfaceTypeName() {
     assertThat(
-        getContainerContext().getInterfaceType(null).getFullName(),
+        getContainerContext().getSelfType().getFullName(),
         is(equalTo("utam.test.pageobjects.test.Test")));
   }
 
   @Test
   public void testGetMethods() {
     MethodInfo methodInfo = new MethodInfo("getTestElement", "Clickable");
-    methodInfo.addCodeLine("element(this.testElement).build(Clickable.class, ClickableImpl.class)");
+    methodInfo.addCodeLine("return element(this.testElement).build(Clickable.class, ClickableImpl.class)");
 
     PageObjectValidationTestHelper.validateMethods(
         "translator context",
@@ -182,9 +193,8 @@ public class TranslationContextTests {
         new ElementContext.Basic(
             null,
             "parameterElement",
-            TypeUtilities.BasicElementInterface.clickable,
+            BasicElementInterface.clickable,
             getCssSelector("a[title=*'%s']"),
-            false,
             Collections.singletonList(getStringParameter()),
             false);
 
@@ -200,9 +210,8 @@ public class TranslationContextTests {
         new ElementContext.Basic(
             null,
             "parameterElement",
-            TypeUtilities.BasicElementInterface.clickable,
+            BasicElementInterface.clickable,
             getCssSelector("a[title=*'%s'][alt=*'%s]"),
-            false,
             Arrays.asList(
                 getStringParameter(), new ParameterUtils.Regular("alt", PrimitiveType.STRING)), false);
 
@@ -218,9 +227,8 @@ public class TranslationContextTests {
         new ElementContext.Basic(
             null,
             "parameterElement",
-            TypeUtilities.BasicElementInterface.clickable,
+            BasicElementInterface.clickable,
             getCssSelector("a[title=*'%s']"),
-            false,
             Arrays.asList(getStringParameter(), getStringParameter()), false);
 
     UtamError e =

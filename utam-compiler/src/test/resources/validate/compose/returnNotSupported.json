@@ -1,0 +1,14 @@
+{
+  "methods" : [
+    {
+      "name" : "test",
+      "returnType" : "string",
+      "compose" : [
+        {
+          "returnType" : "boolean",
+          "apply" : "something"
+        }
+      ]
+    }
+  ]
+}

@@ -20,16 +20,18 @@ import static utam.compiler.helpers.ElementContext.EMPTY_SELECTOR;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.ElementContext.SELF_ELEMENT_NAME;
-import static utam.compiler.helpers.TypeUtilities.BasicElementInterface.actionable;
+import static utam.compiler.helpers.BasicElementInterface.actionable;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
 
 import java.util.Collections;
 import org.testng.annotations.Test;
-import utam.compiler.helpers.ElementContext.Basic;
+import utam.compiler.helpers.ElementContext.BasicReturnsAll;
 import utam.compiler.helpers.ElementContext.Container;
 import utam.compiler.helpers.ElementContext.Custom;
+import utam.compiler.helpers.ElementContext.CustomReturnsAll;
 import utam.compiler.helpers.ElementContext.Document;
+import utam.compiler.helpers.ElementContext.ElementType;
 import utam.compiler.helpers.ElementContext.Root;
 import utam.compiler.helpers.ElementContext.Self;
 import utam.compiler.helpers.LocatorCodeGeneration.SelectorType;
@@ -60,12 +62,8 @@ public class ElementContextTests {
   @Test
   public void testBasicElement() {
     ElementContext context = getSingleElementContext();
-    assertThat(context.isDocumentElement(), is(false));
-    assertThat(context.isRootElement(), is(false));
-    assertThat(context.isSelfElement(), is(false));
+    assertThat(context.getElementNodeType(), is(ElementType.BASIC));
     assertThat(context.isNullable(), is(false));
-    assertThat(context.isList(), is(false));
-    assertThat(context.isCustomElement(), is(false));
     assertThat(context.getName(), is(equalTo(ELEMENT_NAME)));
     assertThat(context.getType(), is(equalTo(BASIC_ELEMENT_TYPE)));
     assertThat(context.getParameters(), is(hasSize(0)));
@@ -73,14 +71,14 @@ public class ElementContextTests {
   }
 
   @Test
-  public void testBasicElementWithParameters() {
+  public void testBasicElementListWithParameters() {
     MethodParameter parameter = new Regular("arg", PrimitiveType.STRING);
-    ElementContext context = new Basic(null,
+    ElementContext context = new BasicReturnsAll(null,
         "name",
         BASIC_ELEMENT_TYPE,
-        SELECTOR_VALUE, true, Collections.singletonList(parameter), true);
+        SELECTOR_VALUE, Collections.singletonList(parameter), true);
+    assertThat(context.getElementNodeType(), is(ElementType.BASIC));
     assertThat(context.isNullable(), is(true));
-    assertThat(context.isList(), is(true));
     assertThat(context.getParameters(), is(hasSize(1)));
     assertThat(context.getParameters().get(0), is(equalTo(parameter)));
   }
@@ -88,15 +86,24 @@ public class ElementContextTests {
   @Test
   public void testCustomElement() {
     ElementContext context = new Custom(ELEMENT_NAME, DUMMY_TYPE, SELECTOR_VALUE);
-    assertThat(context.isDocumentElement(), is(false));
-    assertThat(context.isRootElement(), is(false));
-    assertThat(context.isSelfElement(), is(false));
+    assertThat(context.getElementNodeType(), is(ElementType.CUSTOM));
     assertThat(context.isNullable(), is(false));
-    assertThat(context.isList(), is(false));
-    assertThat(context.isCustomElement(), is(true));
     assertThat(context.getName(), is(equalTo(ELEMENT_NAME)));
     assertThat(context.getType(), is(equalTo(DUMMY_TYPE)));
     assertThat(context.getParameters(), is(hasSize(0)));
+    assertThat(context.getSelector(), is(equalTo(SELECTOR_VALUE)));
+  }
+
+  @Test
+  public void testCustomListElementWithParameters() {
+    MethodParameter parameter = new Regular("arg", PrimitiveType.STRING);
+    ElementContext context = new CustomReturnsAll(null, ELEMENT_NAME, DUMMY_TYPE,
+        SELECTOR_VALUE, Collections.singletonList(parameter), true);
+    assertThat(context.getElementNodeType(), is(ElementType.CUSTOM));
+    assertThat(context.isNullable(), is(true));
+    assertThat(context.getName(), is(equalTo(ELEMENT_NAME)));
+    assertThat(context.getType(), is(equalTo(DUMMY_TYPE)));
+    assertThat(context.getParameters(), is(hasSize(1)));
     assertThat(context.getSelector(), is(equalTo(SELECTOR_VALUE)));
   }
 
@@ -117,12 +124,8 @@ public class ElementContextTests {
   @Test
   public void testContainerElement() {
     ElementContext context = new Container(getSingleElementContext(), "container");
-    assertThat(context.isDocumentElement(), is(false));
-    assertThat(context.isRootElement(), is(false));
-    assertThat(context.isSelfElement(), is(false));
+    assertThat(context.getElementNodeType(), is(ElementType.CONTAINER));
     assertThat(context.isNullable(), is(false));
-    assertThat(context.isList(), is(false));
-    assertThat(context.isCustomElement(), is(false));
     assertThat(context.getName(), is(equalTo("container")));
     assertThat(context.getType(), is(equalTo(CONTAINER_ELEMENT)));
     assertThat(context.getParameters(), is(hasSize(0)));
@@ -132,12 +135,8 @@ public class ElementContextTests {
   @Test
   public void testDocumentElement() {
     ElementContext context = Document.DOCUMENT_ELEMENT;
-    assertThat(context.isDocumentElement(), is(true));
-    assertThat(context.isRootElement(), is(false));
-    assertThat(context.isSelfElement(), is(false));
+    assertThat(context.getElementNodeType(), is(ElementType.DOCUMENT));
     assertThat(context.isNullable(), is(false));
-    assertThat(context.isList(), is(false));
-    assertThat(context.isCustomElement(), is(false));
     assertThat(context.getName(), is(equalTo(DOCUMENT_ELEMENT_NAME)));
     assertThat(context.getType(), is(nullValue()));
     assertThat(context.getParameters(), is(hasSize(0)));
@@ -147,14 +146,10 @@ public class ElementContextTests {
   @Test
   public void testSelfElement() {
     ElementContext context = Self.SELF_ELEMENT;
-    assertThat(context.isDocumentElement(), is(false));
-    assertThat(context.isRootElement(), is(false));
-    assertThat(context.isSelfElement(), is(true));
+    assertThat(context.getElementNodeType(), is(ElementType.SELF));
     assertThat(context.isNullable(), is(false));
     assertThat(context.getName(), is(equalTo(SELF_ELEMENT_NAME)));
     assertThat(context.getType(), is(nullValue()));
-    assertThat(context.isList(), is(false));
-    assertThat(context.isCustomElement(), is(false));
     assertThat(context.getParameters(), is(hasSize(0)));
     assertThat(context.getSelector(), is(equalTo(EMPTY_SELECTOR)));
   }
@@ -163,14 +158,10 @@ public class ElementContextTests {
   public void testRootElement() {
     ElementContext.Root context = new Root(DUMMY_TYPE);
     assertThat(context.getName(), is(equalTo(ROOT_ELEMENT_NAME)));
-    assertThat(context.isDocumentElement(), is(false));
-    assertThat(context.isSelfElement(), is(false));
+    assertThat(context.getElementNodeType(), is(ElementType.ROOT));
     assertThat(context.isNullable(), is(false));
-    assertThat(context.isRootElement(), is(true));
     assertThat(context.getEnclosingPageObjectType(), is(equalTo(DUMMY_TYPE)));
     assertThat(context.getType(), is(equalTo(ROOT_ELEMENT_TYPE)));
-    assertThat(context.isList(), is(false));
-    assertThat(context.isCustomElement(), is(false));
     assertThat(context.getParameters(), is(hasSize(0)));
     assertThat(context.getSelector(), is(equalTo(EMPTY_SELECTOR)));
   }
@@ -190,13 +181,9 @@ public class ElementContextTests {
     ElementContext.Frame context = new ElementContext.Frame(getSingleElementContext(),
         ELEMENT_NAME, locatorHelper);
     assertThat(context.getName(), is(equalTo(ELEMENT_NAME)));
-    assertThat(context.isDocumentElement(), is(false));
-    assertThat(context.isSelfElement(), is(false));
+    assertThat(context.getElementNodeType(), is(ElementType.FRAME));
     assertThat(context.isNullable(), is(false));
-    assertThat(context.isRootElement(), is(false));
     assertThat(context.getType(), is(equalTo(FRAME_ELEMENT)));
-    assertThat(context.isList(), is(false));
-    assertThat(context.isCustomElement(), is(false));
     assertThat(context.getParameters(), is(hasSize(1)));
     assertThat(context.getSelector().getStringValue(), is(equalTo("css[%d]")));
   }

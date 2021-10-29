@@ -1,0 +1,25 @@
+{
+  "elements": [
+    {
+      "name": "publicList",
+      "public": true,
+      "type": "my/pageObject/foo",
+      "selector": {
+        "css": "css",
+        "returnAll": true
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "returnType": "my/pageObject/foo",
+          "returnAll" : true,
+          "element": "publicList"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "elements": [
+    {
+      "name": "content",
+      "type": "container",
+      "selector": {
+        "css": ".inject"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "apply": "getContent",
+          "returnType": "my/pageObject/section",
+          "args": [
+            {
+              "value": "my/pageObject/section",
+              "type": "pageObject"
+            }
+          ]
+        },
+        {
+          "chain" : true,
+          "returnType" : "my/pageObject/row",
+          "element" : "row",
+          "args" : [
+            {
+              "type" : "number",
+              "name" : "rowIndex"
+            }
+          ]
+        },
+        {
+          "chain" : true,
+          "returnType" : "my/pageObject/item",
+          "returnAll" : true,
+          "element" : "items"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "implements": "utam-test/pageObjects/customInterface",
+  "elements": [
+    {
+      "name": "privateElement",
+      "type": ["clickable"],
+      "selector": {
+        "css": ".clickablePrivate"
+      }
+    },
+    {
+      "name": "publicElement",
+      "type": ["clickable"],
+      "public": true,
+      "selector": {
+        "css": ".clickablePrivate"
+      }
+    }
+  ]
+}

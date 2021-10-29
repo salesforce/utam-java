@@ -59,8 +59,15 @@ public abstract class UtamBaseImpl implements UtamBase {
   @Override
   public final <T> T waitFor(Supplier<T> condition) {
     Expectations<T> expectations =
-        new ExpectationsImpl<>("wait for condition", (driver, element) -> condition.get());
-    return waitFor(expectations);
+        new ExpectationsImpl<>("wait for condition", (driver) -> {
+          try {
+            return condition.get();
+          } catch (Exception e) {
+            return null;
+          }
+        });
+    log(expectations.getLogMessage());
+    return getDriver().waitFor(getDriverTimeouts().getWaitForTimeout(), getDriverTimeouts().getPollingInterval(), expectations);
   }
 
   private <T> T waitFor(Expectations<T> expectations) {

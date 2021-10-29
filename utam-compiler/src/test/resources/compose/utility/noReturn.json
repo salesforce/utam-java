@@ -1,0 +1,39 @@
+{
+  "methods" : [
+    {
+      "name": "test",
+      "args": [
+        {
+          "name": "index",
+          "type": "number"
+        }
+      ],
+      "compose": [
+        {
+          "applyExternal": {
+            "invoke": "utils",
+            "type": "utam-extension/utils/customExtensionUtils",
+            "args": [
+              {
+                "name": "index",
+                "type": "argumentReference"
+              }
+            ]
+          }
+        },
+        {
+          "applyExternal": {
+            "invoke": "utils",
+            "type": "utam-extension/utils/customExtensionUtils",
+            "args": [
+              {
+                "name": "index",
+                "type": "argumentReference"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

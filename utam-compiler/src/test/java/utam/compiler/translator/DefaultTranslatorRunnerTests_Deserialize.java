@@ -7,6 +7,7 @@
  */
 package utam.compiler.translator;
 
+import utam.compiler.grammar.DeserializerUtilities;
 import utam.compiler.grammar.TestUtilities;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.framework.consumer.UtamError;
@@ -22,12 +23,6 @@ import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.translator.DefaultTranslatorRunnerTests_Profiles.getRunnerMock;
 
-/**
- * created by Jim for no longer existing class PageObjectsInventory <br>
- * to be revised
- *
- * @author jim.evans
- */
 public class DefaultTranslatorRunnerTests_Deserialize {
 
   @Test
@@ -117,8 +112,7 @@ public class DefaultTranslatorRunnerTests_Deserialize {
 
   @Test
   public void testSetPageObjectWithImplementationWithDuplicateTypeThrows() {
-    PageObjectDeclaration declaration =
-        TestUtilities.getPageObject("{\"implements\": \"utam-test/pageObjects/test/testInterface\"}");
+    PageObjectDeclaration declaration = new DeserializerUtilities().getResultFromFile("pageobjects/implements").getPageObject();
     String interfaceTypeName = declaration.getInterface().getInterfaceType().getFullName();
     DefaultTranslatorRunner runner = getRunnerMock();
     runner.setPageObject("initial", declaration);
@@ -130,7 +124,7 @@ public class DefaultTranslatorRunnerTests_Deserialize {
             equalTo(
                 String.format(
                     DUPLICATE_IMPL_ERR,
-                    "utam.test.pageobjects.test.TestInterface",
+                    "utam.test.pageobjects.CustomInterface",
                     "utam.test.pageobjects.test.impl.TestImpl"))));
   }
 }

@@ -84,11 +84,16 @@ public final class JsonDeserializer {
     ObjectMapper mapper = new ObjectMapper();
     mapper.enable(ALLOW_COMMENTS);
     mapper.enable(ACCEPT_SINGLE_VALUE_AS_ARRAY);
+    mapper.registerModule(registerDeserializers());
+    return mapper;
+  }
+
+  private static com.fasterxml.jackson.databind.Module registerDeserializers() {
     SimpleModule module = new SimpleModule();
     module.addDeserializer(UtamProfile.class, new UtamProfile.Deserializer());
     module.addDeserializer(UtamArgument.class, new UtamArgumentDeserializer());
-    mapper.registerModule(module);
-    return mapper;
+    module.addDeserializer(UtamMethodAction.class, new UtamMethodActionDeserializer());
+    return module;
   }
 
   static <T> T deserialize(Class<T> type, String jsonString) throws IOException {
@@ -154,7 +159,7 @@ public final class JsonDeserializer {
     Interface(TranslationContext context, UtamPageObject utamPageObject) {
       this.context = context;
       this.utamPageObject = utamPageObject;
-      this.implementedType = context.getInterfaceType(utamPageObject.implementsType);
+      this.implementedType = context.getSelfType();
     }
 
     @Override
@@ -168,7 +173,7 @@ public final class JsonDeserializer {
     @Override
     public Collection<TypeProvider> getNestedInterfaces() {
       return context.getMethods().stream()
-          .filter(method -> method.isBasicElementGetterMethod() && method.isPublic())
+          .filter(method -> method.isReturnsBasicElement() && method.isPublic())
           .map(method -> method.getDeclaration().getReturnType())
           .map(TypeUtilities::getElementType)
           .collect(Collectors.toList());
@@ -191,7 +196,7 @@ public final class JsonDeserializer {
 
     @Override
     public String getComments() {
-      return utamPageObject.comments;
+      return "";
     }
   }
 
@@ -257,13 +262,13 @@ public final class JsonDeserializer {
 
     @Override
     public String getComments() {
-      return utamPageObject.comments;
+      return "";
     }
 
     @Override
     public List<TypeProvider> getDeclaredElementTypes(boolean isPublicElements) {
       return getMethods().stream()
-          .filter(method -> method.isBasicElementGetterMethod() && method.isPublic() == isPublicElements)
+          .filter(method -> method.isReturnsBasicElement() && method.isPublic() == isPublicElements)
           .map(method -> method.getDeclaration().getReturnType())
           .map(TypeUtilities::getElementType)
           .collect(Collectors.toList());

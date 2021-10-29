@@ -1,0 +1,21 @@
+{
+  "interface" : true,
+  "methods" : [
+    {
+      "name" : "returnsCustomType",
+      "returnType": "utam-fake/pageObjects/test/FakeType"
+    },
+    {
+      "name" : "returnsActionable",
+      "returnType": ["actionable"]
+    },
+    {
+      "name" : "returnsListString",
+      "returnType": "string",
+      "returnAll": true
+    },
+    {
+      "name" : "returnsVoid"
+    }
+  ]
+}

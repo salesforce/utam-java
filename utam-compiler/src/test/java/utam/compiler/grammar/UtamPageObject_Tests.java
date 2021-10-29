@@ -7,9 +7,9 @@
  */
 package utam.compiler.grammar;
 
+import utam.compiler.helpers.BasicElementInterface;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.declarative.representation.AnnotationProvider;
@@ -138,34 +138,6 @@ public class UtamPageObject_Tests {
   }
 
   /**
-   * The setPublicMethods method should set the proper methods on the TranslatorContext with a valid
-   * method list
-   */
-  @Test
-  public void testSetPublicMethodsWithValidMethodList() {
-    TranslationContext context = getTestTranslationContext();
-    UtamPageObject pageObject = new UtamPageObject();
-    UtamMethodChainLink[] chainLinks =
-        new UtamMethodChainLink[] {
-          new UtamMethodChainLink("first", false, TEST_URI),
-          new UtamMethodChainLink("customName", false, "utam-test/pageObjects/test/SecondWrapper")
-        };
-    pageObject.methods = new UtamMethod[] {
-        TestUtilities.UtamEntityCreator.createUtamMethod("testMethod", null, chainLinks)
-    };
-    pageObject.elements = new UtamElement[] {
-        UtamEntityCreator.createUtamElement(
-            "first", TEST_URI, new UtamSelector("css"))
-    };
-    pageObject.compile(context);
-    assertThat(context.getMethods().size(), is(equalTo(2)));
-    assertThat(
-        context.getMethods().get(0).getDeclaration().getName(),
-        is(equalTo(getElementPrivateMethod("first"))));
-    assertThat(context.getMethods().get(1).getDeclaration().getName(), is(equalTo("testMethod")));
-  }
-
-  /**
    * The setPublicMethods method should set the proper methods on the TranslatorContext with the
    * abstract property true and an empty method list
    */
@@ -188,7 +160,7 @@ public class UtamPageObject_Tests {
     UtamPageObject pageObject = new UtamPageObject();
     pageObject.isAbstract = true;
     pageObject.methods = new UtamMethod[] {
-        TestUtilities.UtamEntityCreator.createUtamMethod("testMethod", (String)null, (UtamArgument[]) null)
+        TestUtilities.UtamEntityCreator.createUtamMethod("testMethod", null, null)
     };
     MethodInfo methodInfo = new MethodInfo("testMethod", "void");
 
@@ -254,7 +226,7 @@ public class UtamPageObject_Tests {
   @Test
   public void testAbstractWithRootElementExposed() {
     MethodInfo info = new MethodInfo("getRoot", "RootElement");
-    info.addCodeLine("this.getRootElement()");
+    info.addCodeLine("return this.getRootElement()");
     info.addImportedTypes(ROOT_ELEMENT_TYPE.getFullName());
     info.setIsPublic(true);
     UtamPageObject utamPageObject = new UtamPageObject();
@@ -317,7 +289,7 @@ public class UtamPageObject_Tests {
   @Test
   public void testRootElementWithType() {
     MethodInfo info = new MethodInfo("getRoot", "RootElement");
-    info.addCodeLine("this.getRootElement()");
+    info.addCodeLine("return this.getRootElement()");
     info.setIsPublic(false);
     UtamPageObject utamPageObject = new UtamPageObject();
     utamPageObject.rootElementType = new String[] { "clickable" };
@@ -330,7 +302,7 @@ public class UtamPageObject_Tests {
   @Test
   public void testRootElementWithActionableType() {
     MethodInfo info = new MethodInfo("getRoot", "RootElement");
-    info.addCodeLine("this.getRootElement()");
+    info.addCodeLine("return this.getRootElement()");
     info.addImportedTypes(ROOT_ELEMENT_TYPE.getFullName());
     info.setIsPublic(false);
     UtamPageObject utamPageObject = new UtamPageObject();
@@ -344,7 +316,7 @@ public class UtamPageObject_Tests {
   @Test
   public void testPublicRootElementWithType() {
     MethodInfo info = new MethodInfo("getRoot", "RootElement");
-    info.addCodeLine("this.getRootElement()");
+    info.addCodeLine("return this.getRootElement()");
     UtamPageObject utamPageObject = new UtamPageObject();
     utamPageObject.rootElementType = new String[] { "clickable" };
     utamPageObject.isExposeRootElement = true;
@@ -362,7 +334,7 @@ public class UtamPageObject_Tests {
     utamPageObject.compile(context);
     ElementContext notRootWithRootName =
             new ElementContext.Basic(
-                    "root", TypeUtilities.BasicElementInterface.clickable, getCssSelector("css"));
+                    "root", BasicElementInterface.clickable, getCssSelector("css"));
     expectThrows(UtamError.class, () -> context.setElement(notRootWithRootName));
   }
 }

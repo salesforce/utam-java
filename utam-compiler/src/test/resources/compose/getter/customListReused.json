@@ -1,0 +1,37 @@
+{
+  "elements": [
+    {
+      "name": "findAll",
+      "type": "my/pageObject/foo",
+      "selector": {
+        "css": "css",
+        "returnAll": true
+      },
+      "filter": {
+        "apply": "customMethod",
+        "matcher": {
+          "type": "stringEquals",
+          "args": [
+            {
+              "name": "filterArg",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "findAll"
+        },
+        {
+          "element": "findAll"
+        }
+      ]
+    }
+  ]
+}

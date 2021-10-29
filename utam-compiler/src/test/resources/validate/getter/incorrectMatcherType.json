@@ -1,0 +1,23 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "selector": {
+        "css": "css"
+      }
+    }
+  ],
+  "methods" : [
+    {
+      "name" : "test",
+      "compose" : [
+        {
+          "element" : "test",
+          "matcher": {
+            "type": "isTrue"
+          }
+        }
+      ]
+    }
+  ]
+}

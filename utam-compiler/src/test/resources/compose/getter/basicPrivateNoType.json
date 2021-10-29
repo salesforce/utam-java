@@ -1,0 +1,20 @@
+{
+  "elements": [
+    {
+      "name": "noTypePrivate",
+      "selector": {
+        "css": "css"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "noTypePrivate"
+        }
+      ]
+    }
+  ]
+}
