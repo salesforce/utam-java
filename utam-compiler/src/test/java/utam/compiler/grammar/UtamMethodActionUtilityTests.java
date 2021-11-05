@@ -83,16 +83,4 @@ public class UtamMethodActionUtilityTests {
     expected.addCodeLine("CustomExtensionUtils.utils(new UtamUtilitiesContext(this), index)");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
-
-  @Test
-  public void testImperativeExtensionReturnSelf() {
-    TranslationContext context = getContext("returnSelf");
-    PageObjectMethod method = context.getMethod(methodName);
-    MethodInfo expected = new MethodInfo(methodName, "Test");
-    setImpliedImports(expected);
-    expected.addImportedTypes("utam.test.pageobjects.test.Test");
-    expected.addCodeLine("CustomExtensionUtils.getFieldValue(new UtamUtilitiesContext(this))");
-    expected.addCodeLine("return this");
-    PageObjectValidationTestHelper.validateMethod(method, expected);
-  }
 }

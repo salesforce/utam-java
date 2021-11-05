@@ -111,7 +111,7 @@ class UtamMethodActionApply extends UtamMethodAction {
       TypeProvider expectedReturn =
           element.isReturnAll() ? wrapAsList(action.getReturnType()) : action.getReturnType();
       ReturnType declaredReturnType = getDeclaredReturnType(methodName);
-      if (declaredReturnType.isReturnTypeSet() && !declaredReturnType.isReturnSelf()) {
+      if (declaredReturnType.isReturnTypeSet()) {
         TypeProvider declaredReturn = getDeclaredReturnType(methodName)
             .getReturnTypeOrNull(context);
         checkDefinedReturnType(expectedReturn, declaredReturn, methodName);
@@ -119,9 +119,7 @@ class UtamMethodActionApply extends UtamMethodAction {
       List<MethodParameter> parameters = new ArgsProcessorBasicAction(context, validationContextStr,
           action, p -> methodContext.setStatementParameter(p, statementContext))
           .getParameters(args);
-      TypeProvider returnType =
-          declaredReturnType.isReturnSelf() ? context.getSelfType() : action.getReturnType();
-      operation = new BasicElementOperation(action, returnType, parameters);
+      operation = new BasicElementOperation(action, action.getReturnType(), parameters);
       checkMatcher(expectedReturn, validationContextStr);
     } else {
       // for self invocations make sure that private method is declared because it's being called from another method

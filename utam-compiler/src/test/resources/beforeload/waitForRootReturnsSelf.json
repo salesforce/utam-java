@@ -8,12 +8,14 @@
           "predicate" : [
             {
               "element" : "root",
-              "apply" : "isPresent",
-              "returnType" : "self"
+              "apply" : "isPresent"
             }
           ]
         }
       ]
+    },
+    {
+      "apply": "returnSelf"
     }
   ]
 }

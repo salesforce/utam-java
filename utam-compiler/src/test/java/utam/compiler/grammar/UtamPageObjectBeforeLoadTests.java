@@ -92,12 +92,12 @@ public class UtamPageObjectBeforeLoadTests {
   public void testWaitForRootPresenceReturnsSelf() {
     TranslationContext context = getContext("waitForRootReturnsSelf");
     MethodInfo methodInfo = getExpectedMethod();
-    methodInfo.addCodeLine("Test statement0 = this.waitFor(() -> {\n"
+    methodInfo.addCodeLine("this.waitFor(() -> {\n"
         + "BasePageElement proot0 = this.getRootElement();\n"
-        + "proot0.isPresent();\n"
-        + "return this;\n"
+        + "Boolean pstatement0 = proot0.isPresent();\n"
+        + "return pstatement0;\n"
         + "})");
-    methodInfo.addCodeLine("return statement0");
+    methodInfo.addCodeLine("return this");
     PageObjectValidationTestHelper.validateMethod(context.getMethod(METHOD_NAME), methodInfo);
   }
 

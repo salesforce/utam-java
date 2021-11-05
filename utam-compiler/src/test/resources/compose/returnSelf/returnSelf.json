@@ -1,0 +1,15 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "apply": "someMethod"
+        },
+        {
+          "apply": "returnSelf"
+        }
+      ]
+    }
+  ]
+}

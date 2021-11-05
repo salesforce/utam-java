@@ -6,8 +6,10 @@
     },
     {
       "element" : "root",
-      "apply": "getText",
-      "returnType" : "self"
+      "apply": "getText"
+    },
+    {
+      "apply": "returnSelf"
     }
   ]
 }

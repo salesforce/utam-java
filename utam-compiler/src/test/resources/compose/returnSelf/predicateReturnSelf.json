@@ -1,6 +1,4 @@
 {
-  "type" : ["actionable"],
-  "exposeRootElement" : true,
   "methods": [
     {
       "name": "test",
@@ -13,10 +11,10 @@
               "predicate": [
                 {
                   "element" : "root",
-                  "apply" : "focus"
+                  "apply" : "getText"
                 },
                 {
-                  "apply": "returnSelf"
+                  "apply" : "returnSelf"
                 }
               ]
             }
@@ -26,3 +24,4 @@
     }
   ]
 }
+

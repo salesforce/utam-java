@@ -14,6 +14,7 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.compiler.helpers.TypeUtilities.wrapAsList;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.MethodContext;
@@ -60,6 +61,20 @@ public abstract class ComposeMethodStatement {
     setCodeLines(matcher);
   }
 
+  /**
+   * constructor for "apply" : "returnSelf" statement
+   *
+   * @param returnType self type to return
+   */
+  ComposeMethodStatement(TypeProvider returnType) {
+    this.operand = null;
+    this.operation = null;
+    this.statementContext = null;
+    this.statementReturns = returnType;
+    this.matcherOperandType = null;
+    this.actionReturnType = null;
+  }
+
   private void setCodeLines(Matcher matcher) {
     String statementVariable = statementContext.getVariableName();
     if (matcher != null) {
@@ -80,15 +95,14 @@ public abstract class ComposeMethodStatement {
         codeLines.add(invocationStr.concat(lastStatement));
       } else {
         codeLines.add(invocationStr);
-        setRegularReturnStatement();
+        if (statementContext.isLastStatement() && isUseVariable()) {
+          codeLines.add("return " + statementContext.getVariableName());
+        }
       }
     }
   }
 
   private boolean isUseVariable() {
-    if(statementContext.isReturnSelf()) {
-      return false;
-    }
     if(!statementContext.isLastStatement()
         && !statementContext.isLastPredicateStatement()
         && !statementContext.isUsedAsChain()) {
@@ -97,18 +111,7 @@ public abstract class ComposeMethodStatement {
     return !actionReturnType.isSameType(VOID);
   }
 
-  private void setRegularReturnStatement() {
-    if(statementContext.isReturnSelf()) {
-      codeLines.add("return this");
-    } else if (statementContext.isLastStatement() && isUseVariable()) {
-      codeLines.add("return " + statementContext.getVariableName());
-    }
-  }
-
   private String getPredicateReturnStatement() {
-    if(statementContext.isReturnSelf()) {
-      return ";\nreturn this";
-    }
     if(actionReturnType.isSameType(VOID)) {
       // last statement of predicate can't return void, has to return boolean or original type
       return ";\nreturn true";
@@ -310,6 +313,41 @@ public abstract class ComposeMethodStatement {
         List<MethodParameter> matcherParameters) {
       this.matcherType = matcherType;
       this.matcherParameters = matcherParameters;
+    }
+  }
+
+  /**
+   * "apply" : "returnSelf" statement
+   */
+  public static class ReturnSelf extends ComposeMethodStatement {
+
+    public ReturnSelf(TypeProvider returnType) {
+      super(returnType);
+    }
+
+    @Override
+    public List<MethodParameter> getParameters() {
+      return new ArrayList<>();
+    }
+
+    @Override
+    public List<String> getCodeLines() {
+      return Collections.singletonList("return this");
+    }
+
+    @Override
+    public List<TypeProvider> getImports() {
+      return new ArrayList<>();
+    }
+
+    @Override
+    public List<TypeProvider> getClassImports() {
+      return new ArrayList<>();
+    }
+
+    @Override
+    String getMethodCallString(boolean useVariable) {
+      return null;
     }
   }
 }
