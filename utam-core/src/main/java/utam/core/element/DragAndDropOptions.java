@@ -7,16 +7,13 @@
  */
 package utam.core.element;
 
-import static utam.core.selenium.element.ElementAdapter.ERR_DRAG_AND_DROP_NULL_ELEMENT;
-
 import java.time.Duration;
-import utam.core.framework.UtamCoreError;
 
 /**
  * options for a drag and drop actions: element, offset and duration.
  *
- * @since 236
  * @author elizaveta.ivanova
+ * @since 236
  */
 public interface DragAndDropOptions {
 
@@ -57,10 +54,8 @@ public interface DragAndDropOptions {
     private final Duration holdDuration;
 
     public ByElement(Element targetElement, int holdDurationSec) {
-      if(targetElement == null) {
-        throw new UtamCoreError(ERR_DRAG_AND_DROP_NULL_ELEMENT);
-      }
-      this.holdDuration = holdDurationSec == 0? Duration.ZERO : Duration.ofSeconds(holdDurationSec);
+      this.holdDuration =
+          holdDurationSec == 0 ? Duration.ZERO : Duration.ofSeconds(holdDurationSec);
       this.targetElement = targetElement;
     }
 
@@ -98,7 +93,8 @@ public interface DragAndDropOptions {
     private final Duration holdDuration;
 
     public ByOffset(int xOffset, int yOffset, int holdDurationSec) {
-      this.holdDuration = holdDurationSec == 0? Duration.ZERO : Duration.ofSeconds(holdDurationSec);
+      this.holdDuration =
+          holdDurationSec == 0 ? Duration.ZERO : Duration.ofSeconds(holdDurationSec);
       this.x = xOffset;
       this.y = yOffset;
     }

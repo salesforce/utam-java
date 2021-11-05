@@ -7,15 +7,12 @@
  */
 package utam.core.framework.element;
 
-import static utam.core.selenium.element.ElementAdapter.ERR_DRAG_AND_DROP_NULL_ELEMENT;
-
 import org.openqa.selenium.Keys;
 import utam.core.element.BasicElement;
 import utam.core.element.DragAndDropOptions;
 import utam.core.element.Element;
 import utam.core.element.Element.ScrollOptions;
 import utam.core.element.RootElement;
-import utam.core.framework.UtamCoreError;
 import utam.core.framework.UtamLogger;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.UtamBaseImpl;
@@ -203,9 +200,6 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
 
   @Override
   public void dragAndDrop(BasicElement target, int holdDurationSec) {
-    if(target == null) {
-      throw new UtamCoreError(ERR_DRAG_AND_DROP_NULL_ELEMENT);
-    }
     DragAndDropOptions options = new DragAndDropOptions.ByElement(((BasePageElement)target).getElement(), holdDurationSec);
     getElement().dragAndDrop(options);
   }
