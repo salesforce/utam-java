@@ -9,6 +9,7 @@ package utam.core.framework.element;
 
 import static utam.core.element.FindContext.Type.NULLABLE;
 import static utam.core.framework.base.FrameElementImpl.getUnwrappedElement;
+import static utam.core.framework.base.PageObjectsFactoryImpl.getRootLocator;
 
 import java.time.Duration;
 import java.util.function.Supplier;
@@ -63,7 +64,7 @@ public class DocumentObject implements Document {
   @Override
   public boolean containsObject(Class<? extends RootPageObject> pageObjectType) {
     RootPageObject instance = factory.getPageContext().getBean(pageObjectType);
-    Locator rootLocator = PageMarker.getRootLocator(instance);
+    Locator rootLocator = getRootLocator(instance);
     return driver.findElements(rootLocator, NULLABLE).size() > 0;
   }
 

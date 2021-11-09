@@ -116,15 +116,26 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
   @Override
   public <T extends RootPageObject> T create(Class<T> rootPageObjectType) {
     T instance = getPageContext().getBean(rootPageObjectType);
-    Class<? extends RootPageObject> pageObjectClass = instance.getClass();
+    Locator rootLocator = getRootLocator(instance);
+    ElementLocation rootElementLocation = new ElementLocationChain(rootLocator, EXISTING);
+    bootstrap(instance, rootElementLocation);
+    return instance;
+  }
+
+  /**
+   * read annotation of class and build Locator from it
+   *
+   * @param pageObjectInstance instance of the Page Object
+   * @return locator instance
+   */
+  public static Locator getRootLocator(RootPageObject pageObjectInstance) {
+    Class<? extends RootPageObject> pageObjectClass = pageObjectInstance.getClass();
     if (!pageObjectClass.isAnnotationPresent(PageMarker.Find.class)) {
       throw new UtamError(String.format("root selector is not set for the page object instance %s",
           pageObjectClass.getName()));
     }
-    Locator rootLocator = getRootLocatorFromAnnotation(pageObjectClass.getDeclaredAnnotation(PageMarker.Find.class));
-    ElementLocation rootElementLocation = new ElementLocationChain(rootLocator, EXISTING);
-    bootstrap(instance, rootElementLocation);
-    return instance;
+    return getRootLocatorFromAnnotation(
+        pageObjectClass.getDeclaredAnnotation(PageMarker.Find.class));
   }
 
   // assign values to the fields
