@@ -12,12 +12,10 @@ import static utam.core.element.FindContext.Type.NULLABLE_IN_SHADOW;
 
 import java.util.function.Supplier;
 import utam.core.driver.Driver;
-import utam.core.driver.DriverTimeouts;
-import utam.core.driver.Expectations;
 import utam.core.element.Element;
 import utam.core.element.Locator;
+import utam.core.framework.UtamCoreError;
 import utam.core.framework.UtamLogger;
-import utam.core.framework.element.ExpectationsImpl;
 
 /**
  * abstraction base for an element and a page object
@@ -37,10 +35,6 @@ public abstract class UtamBaseImpl implements UtamBase {
     return getFactory().getDriver();
   }
 
-  protected final DriverTimeouts getDriverTimeouts() {
-    return getFactory().getDriverContext().getTimeouts();
-  }
-
   protected final void log(String message) {
     UtamLogger.info(getLogMessage(message));
   }
@@ -49,61 +43,42 @@ public abstract class UtamBaseImpl implements UtamBase {
     return message;
   }
 
-  /**
-   * wait for condition to return true or not null before the timeout
-   *
-   * @param condition condition to wait
-   * @param <T> return type
-   * @return method can only return not null or true
-   */
   @Override
   public final <T> T waitFor(Supplier<T> condition) {
-    Expectations<T> expectations =
-        new ExpectationsImpl<>("wait for condition", (driver) -> {
-          try {
-            return condition.get();
-          } catch (Exception e) {
-            return null;
-          }
-        });
-    log(expectations.getLogMessage());
-    return getDriver().waitFor(getDriverTimeouts().getWaitForTimeout(), getDriverTimeouts().getPollingInterval(), expectations);
-  }
-
-  private <T> T waitFor(Expectations<T> expectations) {
-    log(expectations.getLogMessage());
-    return getDriver().waitFor(
-        getDriverTimeouts().getWaitForTimeout(),
-        getDriverTimeouts().getPollingInterval(),
-        expectations,
-        getElement());
+    log("wait for condition");
+    return getDriver().waitFor(condition, null, null);
   }
 
   @Override
   public final void waitForAbsence() {
-    Expectations<Boolean> expectations = new ExpectationsImpl<>(
-        "wait for absence", (driver, element) -> !element.isExisting());
-    waitFor(expectations);
+    log("wait for element absence");
+    getDriver().waitFor(() -> !getElement().isExisting(), "wait for element absence", null);
   }
 
   @Override
   public final void waitForVisible() {
-    Expectations<Boolean> expectations = new ExpectationsImpl<>(
-        "wait for element visibility",
-        (driver, element) -> element.isDisplayed());
-    waitFor(expectations);
+    log("wait for element visibility");
+    if(!isPresent()) {
+      throw new UtamCoreError("Element is not present, can't wait for its visibility");
+    }
+    getDriver().waitFor(() -> getElement().isDisplayed(), "wait for element visibility", null);
   }
 
   @Override
   public final void waitForInvisible() {
-    Expectations<Boolean> expectations = new ExpectationsImpl<>(
-        "wait for element invisibility",
-        (driver, element) -> !element.isDisplayed());
-    waitFor(expectations);
+    log("wait for element invisibility");
+    if(!isPresent()) {
+      throw new UtamCoreError("Element is not present, can't wait for its invisibility");
+    }
+    getDriver().waitFor(() -> !getElement().isDisplayed(), "wait for element invisibility", null);
   }
 
   @Override
   public final boolean isVisible() {
+    log("check element visibility");
+    if(!isPresent()) {
+      throw new UtamCoreError("Element is absent, can't check its visibility");
+    }
     return getElement().isDisplayed();
   }
 

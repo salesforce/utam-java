@@ -18,7 +18,6 @@ import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QU
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
-
 import java.util.Collections;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.JavascriptExecutor;
@@ -30,11 +29,10 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsDriver;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
-import utam.core.driver.DriverContext;
 import utam.core.element.Element;
+import utam.core.element.FrameElement;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.PageObjectsFactoryImpl;
-import utam.core.element.FrameElement;
 import utam.core.framework.consumer.PageObjectContext;
 import utam.core.framework.consumer.PageObjectContextImpl;
 import utam.core.framework.element.BasePageElement;
@@ -66,10 +64,9 @@ public class MockUtilities {
         SearchContext.class));
     webElementMock = mock(WebElement.class, withSettings().extraInterfaces(WrapsDriver.class));
     when(((WrapsDriver) webElementMock).getWrappedDriver()).thenReturn(webDriverMock);
-    DriverContext driverContext = DriverContext.TEST;
     driverAdapter = setDriverAdapter(driverType);
     PageObjectContext pageObjectContext = new PageObjectContextImpl(Collections.emptyMap());
-    factory = new PageObjectsFactoryImpl(pageObjectContext, driverContext, driverAdapter);
+    factory = new PageObjectsFactoryImpl(pageObjectContext, "", driverAdapter);
     elementAdapter = setElementAdapter(driverType);
     utamElement = createElementInstance(elementAdapter, factory);
     frameElement = createFrameInstance(elementAdapter, factory);
@@ -99,14 +96,14 @@ public class MockUtilities {
 
   DriverAdapter setDriverAdapter(Class<? extends WebDriver> driverType) {
     WebDriver driver = getWebDriverMock();
-    if(driverType.equals(AppiumDriver.class)) {
+    if (driverType.equals(AppiumDriver.class)) {
       setMobilePlatform(Platform.LINUX);
-    } else if(driverType.equals(IOSDriver.class)) {
-        setMobilePlatform(Platform.IOS);
+    } else if (driverType.equals(IOSDriver.class)) {
+      setMobilePlatform(Platform.IOS);
     } else if (driverType.equals(AndroidDriver.class)) {
-        setMobilePlatform(Platform.ANDROID);
+      setMobilePlatform(Platform.ANDROID);
     }
-    return (DriverAdapter) WebDriverFactory.getAdapter(driver);
+    return (DriverAdapter) WebDriverFactory.getAdapterMock(driver);
   }
 
   public void setMobilePlatform(Platform platform) {

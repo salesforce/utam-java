@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.element.Element;
 import utam.core.element.FrameElement;
+import utam.core.selenium.element.ElementAdapter;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -18,7 +19,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static utam.core.framework.base.FrameElementImpl.createFrameInstance;
 import static utam.core.framework.base.FrameElementImpl.getUnwrappedElement;
-import static utam.core.selenium.element.ElementAdapter.NULL_ELEMENT;
+import static utam.core.selenium.element.ElementAdapter.getNullElement;
 
 public class FrameElementTests {
 
@@ -33,7 +34,8 @@ public class FrameElementTests {
   @Test
   public void testGetElementNull() {
     MockUtilities mock = new MockUtilities();
-    FrameElement element = createFrameInstance(NULL_ELEMENT, mock.getFactory());
+    ElementAdapter nullElement = getNullElement(mock.getDriverAdapter());
+    FrameElement element = createFrameInstance(nullElement, mock.getFactory());
     assertThat(element, is(nullValue()));
   }
 }

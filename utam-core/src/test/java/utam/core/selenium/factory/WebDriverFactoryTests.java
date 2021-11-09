@@ -11,6 +11,7 @@ import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 import org.openqa.selenium.WebDriver;
+import utam.core.driver.Driver;
 import utam.core.driver.DriverType;
 import org.testng.annotations.Test;
 import utam.core.selenium.appium.MobileDriverAdapter;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.factory.WebDriverFactory.ERR_UNKNOWN_DRIVER_TYPE;
+import static utam.core.selenium.factory.WebDriverFactory.getAdapter;
 
 /**
  * @author elizaveta.ivanova
@@ -45,25 +47,26 @@ public class WebDriverFactoryTests {
         assertThat(e.getMessage(), is(equalTo(String.format(ERR_UNKNOWN_DRIVER_TYPE, "null"))));
     }
 
+    private static Driver getAdapterForTest(WebDriver driver) {
+        return getAdapter(driver, null);
+    }
+
     @Test
     public void testGetAdapter() {
         IOSDriver iosDriver = mock(IOSDriver.class);
         when(iosDriver.getSessionDetail("device")).thenReturn("iphone");
-        assertThat(WebDriverFactory.getAdapter(iosDriver), instanceOf(
+        assertThat(getAdapterForTest(iosDriver), instanceOf(
             MobileDriverAdapter.class));
 
         AndroidDriver androidDriver = mock(AndroidDriver.class);
         when(androidDriver.getSessionDetail("deviceScreenSize")).thenReturn("1080x1920");
         when(androidDriver.getSessionDetail("deviceScreenDensity")).thenReturn("480");
-        assertThat(WebDriverFactory.getAdapter(androidDriver), instanceOf(
-            MobileDriverAdapter.class));
+        assertThat(getAdapterForTest(androidDriver), instanceOf(MobileDriverAdapter.class));
 
         AppiumDriver appiumDriver = mock(AppiumDriver.class);
-        assertThat(WebDriverFactory.getAdapter(appiumDriver), instanceOf(
-            MobileDriverAdapter.class));
+        assertThat(getAdapterForTest(appiumDriver), instanceOf(MobileDriverAdapter.class));
 
         WebDriver driver = mock(WebDriver.class);
-        assertThat(WebDriverFactory.getAdapter(driver), instanceOf(
-            DriverAdapter.class));
+        assertThat(getAdapterForTest(driver), instanceOf(DriverAdapter.class));
     }
 }

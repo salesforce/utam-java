@@ -11,14 +11,11 @@ import static utam.core.element.FindContext.Type.NULLABLE;
 import static utam.core.framework.base.FrameElementImpl.getUnwrappedElement;
 import static utam.core.framework.base.PageObjectsFactoryImpl.getRootLocator;
 
-import java.time.Duration;
 import java.util.function.Supplier;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
-import utam.core.driver.Expectations;
 import utam.core.element.Locator;
 import utam.core.framework.UtamCoreError;
-import utam.core.framework.base.PageMarker;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.RootPageObject;
 import utam.core.element.FrameElement;
@@ -35,14 +32,10 @@ public class DocumentObject implements Document {
   static final String ERR_CANT_ENTER_NULL_FRAME = "Can't enter null frame element";
 
   private final Driver driver;
-  private final Duration timeout;
-  private final Duration interval;
   private final PageObjectsFactory factory;
 
   public DocumentObject(PageObjectsFactory factory) {
     this.driver = factory.getDriver();
-    this.timeout = factory.getDriverContext().getTimeouts().getWaitForTimeout();
-    this.interval = factory.getDriverContext().getTimeouts().getPollingInterval();
     this.factory = factory;
   }
 
@@ -53,7 +46,7 @@ public class DocumentObject implements Document {
 
   @Override
   public void waitForDocumentReady() {
-    waitFor(() -> (Boolean) driver.executeScript(DOM_READY_JAVASCRIPT));
+    driver.waitFor(() -> (Boolean) driver.executeScript(DOM_READY_JAVASCRIPT), "wait for DOM ready state", null);
   }
 
   @Override
@@ -96,8 +89,6 @@ public class DocumentObject implements Document {
 
   @Override
   public final <T> T waitFor(Supplier<T> condition) {
-    Expectations<T> expectations =
-        new ExpectationsImpl<>("wait for condition", (driver) -> condition.get());
-    return driver.waitFor(timeout, interval, expectations);
+    return driver.waitFor(condition, "wait for condition for Document object", null);
   }
 }

@@ -9,6 +9,7 @@ package utam.core.driver;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.function.Supplier;
 import utam.core.element.Element;
 import utam.core.element.FindContext;
 import utam.core.element.Locator;
@@ -52,26 +53,14 @@ public interface Driver {
    * polling wait repeatedly applies expectations until truthy value is return (not null or boolean
    * true)
    *
-   * @param timeout         timeout after which exception is thrown if condition is not met
-   * @param pollingInterval interval between calling expectations action
-   * @param expectations    action to apply
-   * @param element         element expectations are applied to
-   * @param <T>             return type
+   * @param timeout timeout after which exception is thrown if condition is not met. If passed as null, timeout
+   *                from config is used
+   * @param isTrue  condition to apply
+   * @param message error message to throw if timeout is reached, can be null
+   * @param <T>     return type
    * @return result of the applied expectations
    */
-  <T> T waitFor(Duration timeout, Duration pollingInterval, Expectations<T> expectations, Element element);
-
-  /**
-   * polling wait repeatedly applies expectations until truthy value is return (not null or boolean
-   * true)
-   *
-   * @param timeout         timeout after which exception is thrown if condition is not met
-   * @param pollingInterval interval between calling expectations action
-   * @param expectations    action to apply
-   * @param <T>             return type
-   * @return result of the applied expectations
-   */
-  <T> T waitFor(Duration timeout, Duration pollingInterval, Expectations<T> expectations);
+  <T> T waitFor(Supplier<T> isTrue, String message, Duration timeout);
 
   /**
    * enters a frame or iframe element
@@ -102,10 +91,8 @@ public interface Driver {
    * driver is created
    *
    * @param title         title to switch to
-   * @param timeout         timeout after which exception is thrown if condition is not met
-   * @param pollingInterval interval between calling expectations action
    */
-  void setPageContextToWebView(String title, Duration timeout, Duration pollingInterval);
+  void setPageContextToWebView(String title);
 
   /**
    * check if current context is native
@@ -134,4 +121,11 @@ public interface Driver {
    * @return string with current context
    */
   String getContext();
+
+  /**
+   * get Driver configuration parameters
+   *
+   * @return driver configuration parameters
+   */
+  DriverConfig getDriverConfig();
 }

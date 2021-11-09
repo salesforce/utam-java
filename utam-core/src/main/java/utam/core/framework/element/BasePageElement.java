@@ -193,7 +193,7 @@ public class BasePageElement extends UtamBaseImpl implements RootElement {
       getElement().flick(xOffset, yOffset);
     } finally {
       if (!getDriver().isNative()) {
-        getDriver().setPageContextToWebView(originalContext, getDriverTimeouts().getWaitForTimeout(), getDriverTimeouts().getPollingInterval());
+        getDriver().setPageContextToWebView(originalContext);
       }
     }
   }

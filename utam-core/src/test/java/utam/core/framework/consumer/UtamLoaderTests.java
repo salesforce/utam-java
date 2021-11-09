@@ -27,7 +27,6 @@ import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.driver.Driver;
-import utam.core.driver.DriverTimeouts;
 import utam.core.element.FrameElement;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.RootPageObject;
@@ -78,18 +77,19 @@ public class UtamLoaderTests {
 
   @Test
   public void testDefaultConstructor() {
-    UtamLoaderImpl loader = new UtamLoaderImpl(getDefaultConfig(),
-        new DriverAdapter(mock(WebDriver.class)));
-    assertThat(loader.getConfig().getDriverContext().getTimeouts(),
-        is(equalTo(DriverTimeouts.DEFAULT)));
+    UtamLoaderImpl loader = new UtamLoaderImpl(getDefaultConfig(), new DriverAdapter(mock(WebDriver.class), null));
+    assertThat(loader.getDriver(), is(instanceOf(DriverAdapter.class)));
+  }
+
+  @Test
+  public void testConstructorWithConfigAndDriver() {
+    UtamLoaderImpl loader = new UtamLoaderImpl(getDefaultConfig(), mock(WebDriver.class));
     assertThat(loader.getDriver(), is(instanceOf(DriverAdapter.class)));
   }
 
   @Test
   public void testConstructor() {
     UtamLoaderImpl loader = getDefaultLoader(true);
-    assertThat(loader.getConfig().getDriverContext().getTimeouts(),
-        is(equalTo(DriverTimeouts.DEFAULT)));
     assertThat(loader.getDriver(), is(instanceOf(MobileDriverAdapter.class)));
   }
 
@@ -97,8 +97,6 @@ public class UtamLoaderTests {
   public void testDefaultConstructorForTests() {
     UtamLoaderImpl loader = (UtamLoaderImpl) getSimulatorLoader(mock(AppiumDriver.class));
     assertThat(loader.getDriver(), is(instanceOf(MobileDriverAdapter.class)));
-    assertThat(loader.getConfig().getDriverContext().getTimeouts(),
-        is(equalTo(DriverTimeouts.TEST)));
   }
 
   @Test
@@ -117,7 +115,7 @@ public class UtamLoaderTests {
   @Test
   public void testProfileConfigPickedUpAfterReset() {
     UtamLoaderConfigImpl config = new UtamLoaderConfigImpl();
-    UtamLoader utamLoader = new UtamLoaderImpl(config, new DriverAdapter(mock(WebDriver.class)));
+    UtamLoader utamLoader = new UtamLoaderImpl(config, new DriverAdapter(mock(WebDriver.class), null));
     // only default config is loaded first
     expectThrows(UtamError.class, () -> config.getPageContext().getBean(TestLoaderConfigDefault.class));
     config.getModules().add("module1");

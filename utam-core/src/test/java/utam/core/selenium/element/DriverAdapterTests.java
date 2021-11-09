@@ -20,9 +20,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
-import static utam.core.driver.DriverTimeouts.TEST;
 import static utam.core.selenium.element.DriverAdapter.ERR_CANT_ENTER_NULL_FRAME;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Objects;
 import org.openqa.selenium.By;
@@ -32,11 +32,9 @@ import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
-import utam.core.driver.Expectations;
 import utam.core.element.Element;
 import utam.core.element.FindContext.Type;
 import utam.core.framework.consumer.UtamError;
-import utam.core.framework.element.ExpectationsImpl;
 
 
 public class DriverAdapterTests {
@@ -111,16 +109,11 @@ public class DriverAdapterTests {
   @Test
   public void testWaitFor() {
     Driver driver = new MockUtilities().getDriverAdapter();
-    Expectations<Object> expectations = new ExpectationsImpl<>("test", Objects::nonNull);
     assertThat(
-        driver.waitFor(TEST.getWaitForTimeout(), TEST.getPollingInterval(), expectations),
+        driver.waitFor(() -> Objects.nonNull(this), "test", Duration.ofSeconds(10)),
         is(true));
-    Expectations<Object> nullExpectations = new ExpectationsImpl<>("test", object -> null);
-    assertThrows(() -> driver
-        .waitFor(TEST.getWaitForTimeout(), TEST.getPollingInterval(), nullExpectations));
-    Expectations<Object> falseExpectations = new ExpectationsImpl<>("test", object -> false);
-    assertThrows(() -> driver
-        .waitFor(TEST.getWaitForTimeout(), TEST.getPollingInterval(), falseExpectations, null));
+    assertThrows(() -> driver.waitFor(() -> null, null, null));
+    assertThrows(() -> driver.waitFor(() -> false, null, null));
   }
 
   @Test

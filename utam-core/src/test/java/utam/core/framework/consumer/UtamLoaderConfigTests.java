@@ -21,7 +21,6 @@ import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
 import java.io.File;
 import java.time.Duration;
 import org.testng.annotations.Test;
-import utam.core.driver.DriverTimeouts;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.context.Profile;
 import utam.core.framework.context.StringValueProfile;
@@ -36,18 +35,18 @@ public class UtamLoaderConfigTests {
   public void testSetBridgeApp() {
     UtamLoaderConfig config = getDefaultConfig();
     config.setBridgeAppTitle("bridge");
-    assertThat(config.getDriverContext().getBridgeAppTitle(), is(equalTo("bridge")));
+    assertThat(config.getBridgeAppTitle(), is(equalTo("bridge")));
   }
 
   @Test
   public void testSetTimeout() {
     UtamLoaderConfig config = getDefaultConfig();
-    Duration test = Duration.ofSeconds(100);
-    config.setFindTimeout(test);
-    config.setWaitForTimeout(test);
-    config.setPollingInterval(test);
-    assertThat(config.getDriverContext().getTimeouts(),
-        is(equalTo(new DriverTimeouts(test, test, test))));
+    config.setImplicitTimeout(Duration.ofSeconds(1));
+    assertThat(config.getDriverConfig().getImplicitTimeout(), is(Duration.ofSeconds(1)));
+    config.setExplicitTimeout(Duration.ofSeconds(2));
+    assertThat(config.getDriverConfig().getExplicitTimeout(), is(Duration.ofSeconds(2)));
+    config.setPollingInterval(Duration.ofSeconds(3));
+    assertThat(config.getDriverConfig().getPollingInterval(), is(Duration.ofSeconds(3)));
   }
 
   @Test

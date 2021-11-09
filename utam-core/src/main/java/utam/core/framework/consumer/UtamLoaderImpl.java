@@ -7,6 +7,7 @@
  */
 package utam.core.framework.consumer;
 
+import static utam.core.driver.DriverConfig.DEFAULT_EXPLICIT_TIMEOUT_MOCK;
 import static utam.core.element.FindContext.Type.EXISTING;
 import static utam.core.selenium.factory.WebDriverFactory.getAdapter;
 
@@ -14,7 +15,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
-import utam.core.driver.DriverTimeouts;
 import utam.core.element.Element;
 import utam.core.element.ElementLocation;
 import utam.core.element.FrameElement;
@@ -27,6 +27,7 @@ import utam.core.framework.element.DocumentObject;
 import utam.core.framework.element.ElementLocationChain;
 import utam.core.selenium.appium.MobileElementAdapter;
 import utam.core.selenium.element.ElementAdapter;
+import utam.core.selenium.factory.WebDriverFactory;
 
 /**
  * implementation of UtamLoader
@@ -48,6 +49,13 @@ public class UtamLoaderImpl implements UtamLoader {
     this.document = new DocumentObject(factory);
   }
 
+  public UtamLoaderImpl(UtamLoaderConfig loaderConfig, WebDriver webDriver) {
+    this.loaderConfig = loaderConfig;
+    this.driver = WebDriverFactory.getAdapter(webDriver, loaderConfig.getDriverConfig());
+    this.factory = new PageObjectsFactoryImpl(loaderConfig, driver);
+    this.document = new DocumentObject(factory);
+  }
+
   /**
    * create instance of loader for unit tests with minimum possible timeout
    *
@@ -55,8 +63,9 @@ public class UtamLoaderImpl implements UtamLoader {
    * @return loader instance
    */
   public static UtamLoader getSimulatorLoader(WebDriver driver) {
-    UtamLoaderConfig config = new UtamLoaderConfigImpl(DriverTimeouts.TEST, new JsonLoaderConfig());
-    return new UtamLoaderImpl(config, getAdapter(driver));
+    UtamLoaderConfig config = new UtamLoaderConfigImpl(new JsonLoaderConfig());
+    config.setExplicitTimeout(DEFAULT_EXPLICIT_TIMEOUT_MOCK);
+    return new UtamLoaderImpl(config, getAdapter(driver, config.getDriverConfig()));
   }
 
   protected final PageObjectsFactory getFactory() {

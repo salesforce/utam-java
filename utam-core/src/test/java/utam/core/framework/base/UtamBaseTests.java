@@ -12,14 +12,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static utam.core.selenium.factory.WebDriverFactory.getAdapterMock;
 
 import org.openqa.selenium.WebDriver;
 import org.testng.annotations.Test;
-import utam.core.driver.DriverContext;
 import utam.core.element.Element;
 import utam.core.element.Locator;
 import utam.core.framework.consumer.PageObjectContext;
-import utam.core.selenium.element.DriverAdapter;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -84,9 +83,8 @@ public class UtamBaseTests {
 
     private final Element element = mock(Element.class);
     private final PageObjectsFactory factory = new PageObjectsFactoryImpl(
-        mock(PageObjectContext.class),
-        DriverContext.TEST,
-        new DriverAdapter(mock(WebDriver.class))
+        mock(PageObjectContext.class), "",
+        getAdapterMock(mock(WebDriver.class))
     );
 
     @Override

@@ -75,7 +75,7 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   @Override
   protected final Element getElement() {
     if(rootFound == null) {
-      rootFound = getFactory().findElement(getRootLocator());
+      rootFound = getRootLocator().findElement(getFactory().getDriver());
     }
     return rootFound;
   }

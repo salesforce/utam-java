@@ -40,9 +40,7 @@ final class ContainerElementImpl implements ContainerElement {
 
   @Override
   public void setScope(Contained pageObject) {
-    pageObject.setScope(() ->
-        ((ElementAdapter) factory.findElement(containerRoot))
-            .getWebElement());
+    pageObject.setScope(() -> ((ElementAdapter)containerRoot.findElement(factory.getDriver())).getWebElement());
   }
 
   @SuppressWarnings("unused")

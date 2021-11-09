@@ -8,15 +8,14 @@
 package utam.core.selenium.appium;
 
 import io.appium.java_client.AppiumDriver;
-import java.time.Duration;
 import java.util.Set;
+import java.util.function.Supplier;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import utam.core.driver.Driver;
-import utam.core.driver.Expectations;
+import utam.core.driver.DriverConfig;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.MobilePlatformType;
-import utam.core.framework.element.ExpectationsImpl;
 import utam.core.selenium.element.DriverAdapter;
 
 /**
@@ -33,17 +32,10 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
   static final String ERR_BRIDGE_TITLE_NULL =
       "Bridge application title is null, please configure";
 
-  static final Expectations<Boolean> WEBVIEW_AVAILABILITY = new ExpectationsImpl<>(
-      "get available web view", (driver, element) -> {
-    Set<String> contextHandles = getAppiumDriver(driver).getContextHandles();
-    return contextHandles.stream().
-        anyMatch(handle -> handle.contains(WEBVIEW_CONTEXT_HANDLE_PREFIX));
-  });
-
   private final MobilePlatformType mobilePlatform;
 
-  public MobileDriverAdapter(AppiumDriver driver) {
-    super(driver);
+  public MobileDriverAdapter(AppiumDriver driver, DriverConfig driverConfig) {
+    super(driver, driverConfig);
     this.mobilePlatform = MobilePlatformType.fromDriver(driver);
   }
 
@@ -57,13 +49,14 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
             mobilePlatform == MobilePlatformType.IOS_TABLET;
   }
 
-  Expectations<AppiumDriver> getSwitchToWebViewExpectations(String title) {
-    return new ExpectationsImpl<>(
-        "switch to web view",
-        element -> switchToWebView(title));
+  Boolean isWebViewAvailable() {
+    AppiumDriver appiumDriver = getAppiumDriver();
+    Set<String> contextHandles = appiumDriver.getContextHandles();
+    return contextHandles.stream().
+        anyMatch(handle -> handle.contains(WEBVIEW_CONTEXT_HANDLE_PREFIX));
   }
 
-  private AppiumDriver switchToWebView(String title) {
+  AppiumDriver switchToWebView(String title) {
     AppiumDriver appiumDriver = getAppiumDriver();
     if (!isIOSPlatform()) {
         // Set current context to native to get the updated available contexts
@@ -105,12 +98,12 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
   }
 
   @Override
-  public void setPageContextToWebView(String title, Duration timeout, Duration pollingInterval) {
+  public void setPageContextToWebView(String title) {
     if (title == null) {
       throw new UtamError(ERR_BRIDGE_TITLE_NULL);
     }
-    waitFor(timeout, pollingInterval, WEBVIEW_AVAILABILITY);
-    AppiumDriver newDriver = waitFor(timeout, pollingInterval, getSwitchToWebViewExpectations(title));
+    waitFor(this::isWebViewAvailable, "wait for web view", null);
+    AppiumDriver newDriver = waitFor(() -> switchToWebView(title), "switch to web view", null);
     resetDriver(newDriver);
   }
 
@@ -133,11 +126,15 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
     return getAppiumDriver().getContext();
   }
 
-  // to mock from tests
-  public final WebElement getWebViewElement() {
+  final WebElement getWebViewElement() {
     if (isIOSPlatform()) {
       return getAppiumDriver().findElement(By.className("XCUIElementTypeWebView"));
     }
     return getAppiumDriver().findElement(By.className("android.webkit.WebView"));
+  }
+
+  // for tests
+  final <T> T waitFor(Supplier<T> isTrue) {
+    return waitFor(isTrue, null, null);
   }
 }
