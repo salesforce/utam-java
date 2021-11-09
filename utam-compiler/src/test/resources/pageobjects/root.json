@@ -1,7 +1,10 @@
 {
-  "root" : true,
-  "selector" : {
-    "css" : ".css"
+  "root": true,
+  "selector": {
+    "css": ".css"
   },
-  "type" : [ "clickable", "actionable" ]
+  "type": [
+    "clickable",
+    "actionable"
+  ]
 }
