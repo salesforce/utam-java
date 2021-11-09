@@ -5,13 +5,6 @@
  * For full license text, see the LICENSE file in the repo root
  * or https://opensource.org/licenses/MIT
  */
-/*
- * @Copyright, 1999-2018, salesforce.com
- *  All Rights Reserved
- *  Company Confidential
- *  Project LPOP
- */
-
 package utam.core.framework.base;
 
 import static utam.core.framework.element.BasePageElement.createInstance;
@@ -32,7 +25,7 @@ import utam.core.framework.element.DocumentObject;
  * @author elizaveta.ivanova
  * @since 228
  */
-public abstract class BasePageObject extends UtamBaseImpl implements RootPageObject {
+public abstract class BasePageObject extends UtamBaseImpl implements PageObject {
 
   // lazy factory injected by factory
   private PageObjectsFactory factory;

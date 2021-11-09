@@ -1,0 +1,11 @@
+{
+  "elements" : [
+    {
+      "name" : "stringType",
+      "type" : "actionable",
+      "selector" : {
+        "css" : ".css"
+      }
+    }
+  ]
+}

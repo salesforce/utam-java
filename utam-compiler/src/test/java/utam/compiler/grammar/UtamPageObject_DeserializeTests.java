@@ -7,13 +7,18 @@
  */
 package utam.compiler.grammar;
 
+import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.element.RootElement;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 import utam.core.selenium.element.LocatorBy;
 
 import static utam.compiler.grammar.TestUtilities.*;
 import static utam.compiler.grammar.UtamPageObject.*;
+import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT_CLASS;
+import static utam.compiler.helpers.TypeUtilities.BASE_ROOT_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -22,6 +27,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 
 /**
  * Provides deserialization tests for the UtamPageObject class
@@ -216,5 +222,33 @@ public class UtamPageObject_DeserializeTests {
   public void testConstructorWithReaderAndInvalidJsonThrows() {
     String json = "{" + "  \"public\": true" + "}";
     assertThrows(UtamError.class, () -> createRootElementNode(json));
+  }
+
+  @Test
+  public void testRootPageObjectHasCorrectBaseClasses() {
+    PageObjectDeclaration declaration = new DeserializerUtilities().getResultFromFile("pageobjects/root").getPageObject();
+    assertThat(declaration.getImplementation().getBaseClassType().isSameType(BASE_ROOT_PAGE_OBJECT_CLASS), is(true));
+    assertThat(declaration.getInterface().getBaseInterfaceType().isSameType(ROOT_PAGE_OBJECT), is(true));
+  }
+
+  @Test
+  public void testNonRootPageObjectHasCorrectBaseClasses() {
+    PageObjectDeclaration declaration = new DeserializerUtilities().getResultFromFile("pageobjects/non_root").getPageObject();
+    assertThat(declaration.getImplementation().getBaseClassType().isSameType(BASE_PAGE_OBJECT_CLASS), is(true));
+    assertThat(declaration.getInterface().getBaseInterfaceType().isSameType(PAGE_OBJECT), is(true));
+  }
+
+  @Test
+  public void testRootElementStringType() {
+    TranslationContext context = new DeserializerUtilities().getContext("pageobjects/non_root");
+    ElementContext elementContext = context.getElement("root");
+    assertThat(elementContext.getType().getSimpleName(), is(equalTo(RootElement.class.getSimpleName())));
+  }
+
+  @Test
+  public void testRootElementArrayType() {
+    TranslationContext context = new DeserializerUtilities().getContext("pageobjects/root");
+    ElementContext elementContext = context.getElement("root");
+    assertThat(elementContext.getType().getSimpleName(), is(equalTo(RootElement.class.getSimpleName())));
   }
 }

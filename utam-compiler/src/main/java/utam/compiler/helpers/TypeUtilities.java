@@ -22,6 +22,7 @@ import utam.core.element.ElementLocation;
 import utam.core.element.FrameElement;
 import utam.core.element.RootElement;
 import utam.core.framework.base.BasePageObject;
+import utam.core.framework.base.BaseRootPageObject;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.consumer.ContainerElement;
@@ -39,10 +40,12 @@ public final class TypeUtilities {
   public static final TypeProvider COLLECTOR_IMPORT = new TypeUtilities.FromClass(Collectors.class);
   public static final TypeProvider LIST_IMPORT = new TypeUtilities.FromClass(List.class);
   public static final TypeProvider PAGE_OBJECT = new TypeUtilities.FromClass(PageObject.class);
-  public static final TypeProvider BASE_PAGE_OBJECT =
+  public static final TypeProvider BASE_PAGE_OBJECT_CLASS =
       new TypeUtilities.FromClass(BasePageObject.class);
   public static final TypeProvider ROOT_PAGE_OBJECT =
       new TypeUtilities.FromClass(RootPageObject.class);
+  public static final TypeProvider BASE_ROOT_PAGE_OBJECT_CLASS =
+      new TypeUtilities.FromClass(BaseRootPageObject.class);
   public static final TypeProvider VOID = new UnimportableType("void");
   public static final TypeProvider PARAMETER_REFERENCE = new UnimportableType("argumentReference");
   public static final TypeProvider ROOT_ELEMENT_TYPE = new FromClass(RootElement.class);

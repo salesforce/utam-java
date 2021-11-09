@@ -7,7 +7,6 @@
  */
 package utam.core.framework.element;
 
-import static utam.core.element.FindContext.Type.EXISTING;
 import static utam.core.element.FindContext.Type.NULLABLE;
 import static utam.core.framework.base.FrameElementImpl.getUnwrappedElement;
 
@@ -16,9 +15,9 @@ import java.util.function.Supplier;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.driver.Expectations;
-import utam.core.element.ElementLocation;
 import utam.core.element.Locator;
 import utam.core.framework.UtamCoreError;
+import utam.core.framework.base.PageMarker;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.RootPageObject;
 import utam.core.element.FrameElement;
@@ -64,8 +63,8 @@ public class DocumentObject implements Document {
   @Override
   public boolean containsObject(Class<? extends RootPageObject> pageObjectType) {
     RootPageObject instance = factory.getPageContext().getBean(pageObjectType);
-    ElementLocation finder = instance.setRootLocator(NULLABLE);
-    return !finder.findElements(driver).isEmpty();
+    Locator rootLocator = PageMarker.getRootLocator(instance);
+    return driver.findElements(rootLocator, NULLABLE).size() > 0;
   }
 
   @Override
@@ -89,9 +88,7 @@ public class DocumentObject implements Document {
   @Override
   public <T extends RootPageObject> T enterFrameAndLoad(FrameElement frame, Class<T> type) {
     enterFrame(frame);
-    T instance = factory.getPageContext().getBean(type);
-    ElementLocation finder = instance.setRootLocator(EXISTING);
-    factory.bootstrap(instance, finder);
+    T instance = factory.create(type);
     instance.load();
     return instance;
   }

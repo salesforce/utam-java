@@ -484,17 +484,6 @@ public class UtamElement_BasicTests {
   }
 
   @Test
-  public void testBasicElementTypeAsStringThrows() {
-    UtamError e = expectThrows(
-        UtamError.class,
-        () -> TestUtilities.UtamEntityCreator.createUtamElement(
-            ELEMENT_NAME, "actionable", getUtamCssSelector()));
-    assertThat(
-        e.getMessage(),
-        containsString(String.format(ERR_TYPE_INVALID_STRING_VALUE, ELEMENT_NAME, "actionable")));
-  }
-
-  @Test
   public void testElementTypeAsStringWithInvalidValueThrows() {
     UtamError e = expectThrows(
         UtamError.class,
@@ -548,5 +537,12 @@ public class UtamElement_BasicTests {
     assertThat(
         e.getCause().getMessage(),
         containsString(String.format(ERR_TYPE_INVALID_ARRAY_TYPES, "simpleElement")));
+  }
+
+  @Test
+  public void testBasicElementTypeAsString() {
+    TranslationContext translationContext = new DeserializerUtilities().getContext("element/basicTypes");
+    ElementContext elementContext = translationContext.getElement("stringType");
+    assertThat(elementContext.getType().getFullName(), is(equalTo("StringTypeElement")));
   }
 }

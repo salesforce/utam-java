@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_COMMENTS;
 import static com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY;
-import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT;
 
 /**
  * entry point for JSON deserialization
@@ -237,7 +236,7 @@ public final class JsonDeserializer {
 
     @Override
     public TypeProvider getBaseClassType() {
-      return BASE_PAGE_OBJECT;
+      return utamPageObject.getBaseClass();
     }
 
     @Override

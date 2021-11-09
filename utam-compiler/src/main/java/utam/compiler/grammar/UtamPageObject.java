@@ -15,6 +15,8 @@ import static utam.compiler.helpers.AnnotationUtils.getShadowHostAnnotation;
 import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.MethodContext.BEFORE_LOAD_METHOD_NAME;
+import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT_CLASS;
+import static utam.compiler.helpers.TypeUtilities.BASE_ROOT_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
@@ -160,6 +162,10 @@ final class UtamPageObject {
 
   TypeProvider getBaseType() {
     return isRootPageObject ? ROOT_PAGE_OBJECT : PAGE_OBJECT;
+  }
+
+  TypeProvider getBaseClass() {
+    return isRootPageObject ? BASE_ROOT_PAGE_OBJECT_CLASS : BASE_PAGE_OBJECT_CLASS;
   }
 
   private ElementContext setRootElementMethod(TranslationContext context) {

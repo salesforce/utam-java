@@ -7,21 +7,25 @@
  */
 package utam.core.framework.base;
 
+import static utam.core.element.FindContext.Type.EXISTING;
+import static utam.core.framework.base.PageMarker.getRootLocatorFromAnnotation;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Stream;
 import utam.core.driver.Driver;
 import utam.core.driver.DriverContext;
 import utam.core.element.Element;
 import utam.core.element.ElementLocation;
+import utam.core.element.Locator;
 import utam.core.framework.consumer.PageObjectContext;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.consumer.UtamLoaderConfig;
 import utam.core.framework.context.PlatformType;
+import utam.core.framework.element.ElementLocationChain;
 import utam.core.framework.element.ExpectationsImpl;
 
 /**
@@ -107,6 +111,20 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
     return driver.waitFor(driverContext.getTimeouts().getFindTimeout(),
         driverContext.getTimeouts().getPollingInterval(),
         new ExpectationsImpl<>("find element", location::findElements));
+  }
+
+  @Override
+  public <T extends RootPageObject> T create(Class<T> rootPageObjectType) {
+    T instance = getPageContext().getBean(rootPageObjectType);
+    Class<? extends RootPageObject> pageObjectClass = instance.getClass();
+    if (!pageObjectClass.isAnnotationPresent(PageMarker.Find.class)) {
+      throw new UtamError(String.format("root selector is not set for the page object instance %s",
+          pageObjectClass.getName()));
+    }
+    Locator rootLocator = getRootLocatorFromAnnotation(pageObjectClass.getDeclaredAnnotation(PageMarker.Find.class));
+    ElementLocation rootElementLocation = new ElementLocationChain(rootLocator, EXISTING);
+    bootstrap(instance, rootElementLocation);
+    return instance;
   }
 
   // assign values to the fields

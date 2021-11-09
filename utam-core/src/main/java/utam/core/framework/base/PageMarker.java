@@ -23,7 +23,7 @@ import utam.core.selenium.element.LocatorBy;
  */
 public abstract class PageMarker {
 
-  static Locator getRootLocator(PageMarker.Find annotation) {
+  static Locator getRootLocatorFromAnnotation(PageMarker.Find annotation) {
     if (!annotation.accessid().isEmpty()) {
       return LocatorBy.byAccessibilityId(annotation.accessid());
     } else if (!annotation.classchain().isEmpty()) {

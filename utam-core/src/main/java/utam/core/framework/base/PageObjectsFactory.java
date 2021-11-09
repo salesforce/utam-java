@@ -52,6 +52,8 @@ public interface PageObjectsFactory {
    */
   void bootstrap(PageObject instance, ElementLocation root);
 
+  <T extends RootPageObject> T create(Class<T> rootPageObjectType);
+
   Element findElement(ElementLocation location);
 
   List<Element> findElements(ElementLocation location);

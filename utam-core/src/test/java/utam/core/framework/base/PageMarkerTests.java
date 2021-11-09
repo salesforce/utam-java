@@ -26,16 +26,16 @@ public class PageMarkerTests {
   public void testGetRootLocator() {
     PageMarker.Find annotation = mock(PageMarker.Find.class);
     when(annotation.accessid()).thenReturn("test");
-    assertThat(PageMarker.getRootLocator(annotation),
+    assertThat(PageMarker.getRootLocatorFromAnnotation(annotation),
         is(equalTo(LocatorBy.byAccessibilityId("test"))));
 
     when(annotation.accessid()).thenReturn("");
     when(annotation.classchain()).thenReturn("test");
-    assertThat(PageMarker.getRootLocator(annotation), is(equalTo(LocatorBy.byClassChain("test"))));
+    assertThat(PageMarker.getRootLocatorFromAnnotation(annotation), is(equalTo(LocatorBy.byClassChain("test"))));
 
     when(annotation.classchain()).thenReturn("");
     when(annotation.uiautomator()).thenReturn("enabled(true)");
-    assertThat(PageMarker.getRootLocator(annotation),
+    assertThat(PageMarker.getRootLocatorFromAnnotation(annotation),
         is(equalTo(LocatorBy.byUiAutomator("enabled(true)"))));
   }
 }
