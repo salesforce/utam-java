@@ -8,11 +8,17 @@
 package utam.core.framework.base;
 
 /**
- * Page Object that can be loaded directly inside Driver root
+ * base class for a Root Page Objects
  *
  * @author elizaveta.ivanova
- * @since 226
+ * @since 236
  */
-public interface RootPageObject extends PageObject {
+public class BaseRootPageObject extends BasePageObject implements RootPageObject {
 
+  @Override
+  public Object load() {
+    log("wait for a root element to be found");
+    this.waitFor(() -> getElement());
+    return this;
+  }
 }

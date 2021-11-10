@@ -333,24 +333,6 @@ public class TypeUtilitiesTests {
         containsString("provided were {String}"));
   }
 
-  /** The BASE_PAGE_OBJECT constant should return the proper value */
-  @Test
-  public void testBasePageObjectConstant() {
-    assertThat(BASE_PAGE_OBJECT.getFullName(), is(equalTo("utam.core.framework.base.BasePageObject")));
-  }
-
-  /** The ROOT_PAGE_OBJECT constant should return the proper value */
-  @Test
-  public void testRootPageObjectConstant() {
-    assertThat(ROOT_PAGE_OBJECT.getFullName(), is(equalTo("utam.core.framework.base.RootPageObject")));
-  }
-
-  /** The PAGE_OBJECT constant should return the proper value */
-  @Test
-  public void testPageObjectConstant() {
-    assertThat(PAGE_OBJECT.getFullName(), is(equalTo("utam.core.framework.base.PageObject")));
-  }
-
   @Test
   public void testVoidType() {
     TypeProvider typeProvider = VOID;

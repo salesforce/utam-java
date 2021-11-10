@@ -302,24 +302,6 @@ public class JsonDeserializerTests {
     assertThat(provider.getFullName(), is(equalTo(IMPL_FULL_NAME)));
   }
 
-  /** Tests that the getBaseClassType method returns a correct TypeProvider object */
-  @Test
-  public void testGetBaseClassType() {
-    String json =
-        "{"
-            + "  \"selector\": {"
-            + "    \"css\": \"rootSelector\""
-            + "  },"
-            + "  \"root\": true"
-            + "}";
-
-    PageObjectClass node = createRootNode(json).getImplementation();
-    TypeProvider provider = node.getBaseClassType();
-    assertThat(provider.getPackageName(), is(equalTo("utam.core.framework.base")));
-    assertThat(provider.getSimpleName(), is(equalTo("BasePageObject")));
-    assertThat(provider.getFullName(), is(equalTo("utam.core.framework.base.BasePageObject")));
-  }
-
   /**
    * Tests that the getImplCode method returns the string representation of the Java code for the
    * generated Page Object root node

@@ -78,7 +78,7 @@ public final class UtamElement {
 
   @JsonCreator
   UtamElement(
-      @JsonProperty(value = "type", defaultValue = "[]") JsonNode type, // optional for actionable
+      @JsonProperty(value = "type", defaultValue = "[]") JsonNode type,
       @JsonProperty(value = "name", required = true) String name,
       @JsonProperty(value = "public") Boolean isPublic,
       @JsonProperty(value = "nullable") Boolean isNullable,
@@ -106,6 +106,7 @@ public final class UtamElement {
       String value = typeNode.textValue();
       if (CONTAINER_ELEMENT_TYPE_NAME.equals(value)
           || FRAME_ELEMENT_TYPE_NAME.equals(value)
+          || BasicElementInterface.isBasicType(value)
           || TranslationTypesConfigJava.isPageObjectType(value)) {
         return new String[] { value };
       }
