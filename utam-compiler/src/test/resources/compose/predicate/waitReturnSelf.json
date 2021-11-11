@@ -1,4 +1,6 @@
 {
+  "type" : ["actionable"],
+  "exposeRootElement" : true,
   "methods": [
     {
       "name": "test",

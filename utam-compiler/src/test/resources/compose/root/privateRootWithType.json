@@ -1,0 +1,16 @@
+{
+  "type": [
+    "clickable"
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "apply": "click",
+          "element": "root"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "implements": "utam-tests/pageObjects/root/exposeRoot",
+  "exposeRootElement": true,
+  "type": [
+    "editable",
+    "clickable"
+  ],
+  "elements": [
+    {
+      "name" : "element1",
+      "public" : true,
+      "selector" : {
+        "css" : "?"
+      },
+      "type" : ["editable", "clickable"]
+    }
+  ]
+}

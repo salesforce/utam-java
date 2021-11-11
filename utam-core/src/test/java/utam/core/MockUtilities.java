@@ -169,10 +169,6 @@ public class MockUtilities {
   //sometimes Driver Adaptor should be mocked to intercept method calls
   public static class MockDriver extends MockUtilities {
 
-    public MockDriver(Class<? extends WebDriver> driverType) {
-      super(driverType);
-    }
-
     public MockDriver() {
       super();
     }
@@ -188,10 +184,6 @@ public class MockUtilities {
 
   //sometimes Element Adaptor should be mocked to intercept method calls
   public static class MockAdapter extends MockUtilities {
-
-    public MockAdapter(Class<? extends WebDriver> driverType) {
-      super(driverType);
-    }
 
     public MockAdapter() {
       super();

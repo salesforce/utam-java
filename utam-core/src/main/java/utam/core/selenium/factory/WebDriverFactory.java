@@ -72,7 +72,7 @@ public class WebDriverFactory {
     return getAdapter(driver, TEST_SIMULATOR_DRIVER_CONFIG);
   }
 
-  private static final DriverConfig TEST_SIMULATOR_DRIVER_CONFIG = new DriverConfig(
+  static final DriverConfig TEST_SIMULATOR_DRIVER_CONFIG = new DriverConfig(
       DEFAULT_IMPLICIT_TIMEOUT,
       DEFAULT_EXPLICIT_TIMEOUT_MOCK,
       DEFAULT_POLLING_INTERVAL);

@@ -1,0 +1,11 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "type": "wrong",
+      "selector": {
+        "css": "css"
+      }
+    }
+  ]
+}

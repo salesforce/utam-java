@@ -7,7 +7,7 @@
  */
 package utam.compiler.grammar;
 
-import static utam.compiler.helpers.BasicElementActionType.getActionType;
+import static utam.compiler.helpers.BasicElementActionType.getBasicActionType;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -49,12 +49,10 @@ final class UtamElementFilter {
     this(applyMethod, null, matcher, false);
   }
 
-  void setElementFilter(
-      TranslationContext context, UtamElement.Type elementNodeType, TypeProvider elementType,
-      String elementName) {
+  void setElementFilter(TranslationContext context, UtamElement.Type elementNodeType, TypeProvider elementType, String elementName) {
     String contextString = String.format("element '%s' filter", elementName);
     if (elementNodeType == UtamElement.Type.BASIC) {
-      ActionType actionType = getActionType(this.applyMethod, elementType, elementName);
+      ActionType actionType = getBasicActionType(this.applyMethod, elementType, elementName);
       matcher.getMatcherType().checkOperandForMatcher(actionType.getReturnType(), contextString);
       this.applyMethodParameters = new ArgsProcessorBasicAction(context, contextString, actionType)
           .getParameters(applyArgs);

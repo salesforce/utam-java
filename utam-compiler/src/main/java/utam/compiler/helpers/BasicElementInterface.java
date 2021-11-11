@@ -62,8 +62,7 @@ public enum BasicElementInterface implements TypeProvider {
     if (type instanceof BasicElementUnionType) {
       return true;
     }
-    for (BasicElementInterface basicType : BasicElementInterface
-        .values()) {
+    for (BasicElementInterface basicType : BasicElementInterface.values()) {
       if (basicType.isSameType(type)) {
         return true;
       }
@@ -75,16 +74,12 @@ public enum BasicElementInterface implements TypeProvider {
     if (type instanceof BasicElementUnionType) {
       return ((BasicElementUnionType) type).getTypesArray();
     }
-    if (type.isSameType(TypeUtilities.ROOT_ELEMENT_TYPE)) {
-      return BasicElementInterface.values();
-    }
     BasicElementInterface basicInterface = getBasicElementType(type);
     if (basicInterface != null) {
       return new BasicElementInterface[]{
           basicInterface
       };
     }
-
     return null;
   }
 

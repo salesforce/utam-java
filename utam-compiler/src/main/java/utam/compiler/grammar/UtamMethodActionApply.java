@@ -7,7 +7,7 @@
  */
 package utam.compiler.grammar;
 
-import static utam.compiler.helpers.BasicElementActionType.getActionType;
+import static utam.compiler.helpers.BasicElementActionType.getBasicActionType;
 import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.compiler.helpers.TypeUtilities.wrapAsList;
@@ -107,7 +107,7 @@ class UtamMethodActionApply extends UtamMethodAction {
 
     if (isBasicElement(context)) {
       ElementContext element = ((ElementOperand) operand).elementContext;
-      ActionType action = getActionType(apply, element.getType(), element.getName());
+      ActionType action = getBasicActionType(apply, element);
       TypeProvider expectedReturn =
           element.isReturnAll() ? wrapAsList(action.getReturnType()) : action.getReturnType();
       ReturnType declaredReturnType = getDeclaredReturnType(methodName);

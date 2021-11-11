@@ -370,17 +370,6 @@ public class PageObjectValidationTestHelper {
     private final String typeName;
     private final List<String> annotationValues = new ArrayList<>();
 
-    /**
-     * Initializes a new instance of the FieldInfo class
-     *
-     * @param name the name of the field
-     * @param typeName the simple type name of the field
-     */
-    public FieldInfo(String name, String typeName) {
-      this.name = name;
-      this.typeName = typeName;
-    }
-
     public FieldInfo(String name) {
       this.name = name;
       this.typeName = TypeUtilities.ELEMENT_FIELD.getSimpleName();

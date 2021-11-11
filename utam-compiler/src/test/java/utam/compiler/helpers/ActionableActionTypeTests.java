@@ -17,10 +17,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
+import static utam.compiler.helpers.BasicElementActionType.getClassAttribute;
 import static utam.compiler.helpers.BasicElementActionTypeTests.sameType;
-import static utam.compiler.helpers.ActionableActionType.ERR_NOT_HTML_ELEMENT;
 import static utam.compiler.helpers.ActionableActionType.ERR_UNKNOWN_ACTION;
-import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
 import static utam.core.framework.UtamLogger.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -127,7 +126,7 @@ public class ActionableActionTypeTests {
 
   @Test
   public void testGetClass() {
-    validateAction(BasicElementActionType.getClassAttribute, STRING_TYPE_NAME);
+    validateAction(getClassAttribute, STRING_TYPE_NAME);
   }
 
   @Test
@@ -164,20 +163,14 @@ public class ActionableActionTypeTests {
     final ActionType waitForAbsence = BasicElementActionType.waitForAbsence;
     ElementContext elementContext = getElementContext(BasicElementInterface.actionable);
     assertThat(
-        BasicElementActionType.getActionType(
-            waitForAbsence.getApplyString(), elementContext.getType(), elementContext.getName()),
+        BasicElementActionType.getBasicActionType(waitForAbsence.getApplyString(), elementContext),
         is(equalTo(waitForAbsence)));
     elementContext = getEditableElementContext();
-    assertThat(
-        BasicElementActionType.getActionType(
-            BasicElementActionType.getClassAttribute.getApplyString(),
-            elementContext.getType(),
-            elementContext.getName()),
-        is(equalTo(BasicElementActionType.getClassAttribute)));
+    assertThat(BasicElementActionType.getBasicActionType(getClassAttribute.getApplyString(), elementContext),
+        is(equalTo(getClassAttribute)));
     elementContext = getElementContext(BasicElementInterface.clickable);
     assertThat(
-        BasicElementActionType.getActionType(
-            waitForAbsence.getApplyString(), elementContext.getType(), elementContext.getName()),
+        BasicElementActionType.getBasicActionType(waitForAbsence.getApplyString(), elementContext),
         is(equalTo(waitForAbsence)));
   }
 
@@ -185,9 +178,7 @@ public class ActionableActionTypeTests {
   public void testGetActionFromStringForClickable() {
     final ActionType ACTION = ClickableActionType.click;
     ElementContext elementContext = getElementContext(BasicElementInterface.clickable);
-    assertThat(
-        BasicElementActionType.getActionType(
-            ACTION.getApplyString(), elementContext.getType(), elementContext.getName()),
+    assertThat(BasicElementActionType.getBasicActionType(ACTION.getApplyString(), elementContext),
         is(equalTo(ACTION)));
   }
 
@@ -196,8 +187,7 @@ public class ActionableActionTypeTests {
     final ActionType ACTION = EditableActionType.clear;
     ElementContext elementContext = getEditableElementContext();
     assertThat(
-        BasicElementActionType.getActionType(
-            ACTION.getApplyString(), elementContext.getType(), elementContext.getName()),
+        BasicElementActionType.getBasicActionType(ACTION.getApplyString(), elementContext),
         is(equalTo(ACTION)));
   }
 
@@ -206,26 +196,8 @@ public class ActionableActionTypeTests {
     final ActionType ACTION = TouchableActionType.flick;
     ElementContext elementContext = getTouchableElementContext();
     assertThat(
-        BasicElementActionType.getActionType(
-            ACTION.getApplyString(), elementContext.getType(), elementContext.getName()),
+        BasicElementActionType.getBasicActionType(ACTION.getApplyString(), elementContext),
         is(equalTo(ACTION)));
-  }
-
-  @Test
-  public void testActionFromStringWrongTypeError() {
-    ElementContext elementContext = new ElementContext.Container(ELEMENT_NAME);
-    UtamError e =
-        expectThrows(
-            UtamError.class,
-            () ->
-                BasicElementActionType.getActionType(
-                    BasicElementActionType.waitForAbsence.name(),
-                    elementContext.getType(),
-                    elementContext.getName()));
-    assertThat(
-        e.getMessage(),
-        containsString(
-            String.format(ERR_NOT_HTML_ELEMENT, ELEMENT_NAME, CONTAINER_ELEMENT.getSimpleName())));
   }
 
   @Test
@@ -235,9 +207,7 @@ public class ActionableActionTypeTests {
     UtamError e =
         expectThrows(
             UtamError.class,
-            () ->
-                BasicElementActionType.getActionType(
-                    ACTION_NAME, elementContext.getType(), elementContext.getName()));
+            () -> BasicElementActionType.getBasicActionType(ACTION_NAME, elementContext));
     assertThat(
         e.getMessage(),
         containsString(
@@ -245,7 +215,7 @@ public class ActionableActionTypeTests {
                 ERR_UNKNOWN_ACTION,
                 ACTION_NAME,
                 ELEMENT_NAME,
-                "declared interfaces " + BasicElementInterface.actionable.name())));
+                "declared interfaces [ actionable ]")));
   }
 
   @Test
@@ -255,9 +225,7 @@ public class ActionableActionTypeTests {
     UtamError e =
         expectThrows(
             UtamError.class,
-            () ->
-                BasicElementActionType.getActionType(
-                    ACTION_NAME, elementContext.getType(), elementContext.getName()));
+            () -> BasicElementActionType.getBasicActionType(ACTION_NAME, elementContext));
     assertThat(
         e.getMessage(),
         containsString(
@@ -265,7 +233,7 @@ public class ActionableActionTypeTests {
                 ERR_UNKNOWN_ACTION,
                 ACTION_NAME,
                 ELEMENT_NAME,
-                "declared interfaces " + BasicElementInterface.touchable.name())));
+                "declared interfaces [ touchable ]")));
   }
 
   @Test
@@ -276,8 +244,7 @@ public class ActionableActionTypeTests {
         expectThrows(
             UtamError.class,
             () ->
-                BasicElementActionType.getActionType(
-                    ACTION_NAME, elementContext.getType(), elementContext.getName()));
+                BasicElementActionType.getBasicActionType(ACTION_NAME, elementContext));
     assertThat(
         e.getMessage(),
         containsString(
@@ -285,6 +252,6 @@ public class ActionableActionTypeTests {
                 ERR_UNKNOWN_ACTION,
                 ACTION_NAME,
                 ELEMENT_NAME,
-                "declared interfaces " + BasicElementInterface.actionable.name())));
+                "declared interfaces [ actionable ]")));
   }
 }

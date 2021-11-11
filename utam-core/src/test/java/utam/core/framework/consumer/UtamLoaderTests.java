@@ -122,7 +122,8 @@ public class UtamLoaderTests {
     config.setProfile(new StringValueProfile("custom", "one"));
     // this line reloads config and overrides previous
     utamLoader.resetContext();
-    assertThat(utamLoader.create(TestLoaderConfigDefault.class), is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
+    assertThat(utamLoader.create(TestLoaderConfigDefault.class), is(instanceOf(
+        TestLoaderConfigPageObjectProfile.class)));
   }
 
   @Test

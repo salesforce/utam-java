@@ -61,7 +61,7 @@ public class PageObjectValidationTests {
     expectThrows(UtamError.class, () -> validatePageObject(basicElement));
 
     ElementContext rootElement = new ElementContext.Root(
-        DUMMY_TYPE, getCssSelector(SELECTOR_VALUE + "[title='fakeTitle']"));
+        DUMMY_TYPE, getCssSelector(SELECTOR_VALUE + "[title='fakeTitle']"), actionable);
 
     expectThrows(UtamError.class, () -> validatePageObject(rootElement));
   }

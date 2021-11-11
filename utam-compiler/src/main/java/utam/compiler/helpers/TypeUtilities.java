@@ -20,7 +20,6 @@ import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.BasicElement;
 import utam.core.element.ElementLocation;
 import utam.core.element.FrameElement;
-import utam.core.element.RootElement;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.BaseRootPageObject;
 import utam.core.framework.base.PageObject;
@@ -48,7 +47,6 @@ public final class TypeUtilities {
       new TypeUtilities.FromClass(BaseRootPageObject.class);
   public static final TypeProvider VOID = new UnimportableType("void");
   public static final TypeProvider PARAMETER_REFERENCE = new UnimportableType("argumentReference");
-  public static final TypeProvider ROOT_ELEMENT_TYPE = new FromClass(RootElement.class);
   public static final TypeProvider CONTAINER_ELEMENT =
       new TypeUtilities.FromClass(ContainerElement.class);
   public static final TypeProvider FRAME_ELEMENT = new TypeUtilities.FromClass(FrameElement.class);

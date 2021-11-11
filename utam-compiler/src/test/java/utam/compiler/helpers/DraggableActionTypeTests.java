@@ -12,9 +12,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.helpers.BasicElementActionType.getActionType;
 import static utam.compiler.helpers.DraggableActionType.ERR_MULTIPLE_EXPECTED_ARGS_TYPES;
-import static utam.compiler.helpers.BasicElementInterface.draggable;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
@@ -77,12 +75,6 @@ public class DraggableActionTypeTests {
     assertThat(parameters.get(0).isSameType(PrimitiveType.NUMBER), is(true));
     assertThat(parameters.get(1).isSameType(PrimitiveType.NUMBER), is(true));
     assertThat(parameters.get(2).isSameType(PrimitiveType.NUMBER), is(true));
-  }
-
-  @Test
-  public void testGetActionFromString() {
-    DraggableActionType action = DraggableActionType.dragAndDrop;
-    assertThat(getActionType(action.name(), draggable, "name"), is(equalTo(action)));
   }
 
   @Test

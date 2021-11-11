@@ -17,6 +17,7 @@ import static utam.core.element.FindContext.Type.EXISTING;
 import static utam.core.framework.base.ContainerElementPageObject.ERR_UNSUPPORTED_METHOD;
 
 import org.testng.annotations.Test;
+import utam.core.MockUtilities;
 import utam.core.MockUtilities.MockDriver;
 import utam.core.element.ElementLocation;
 import utam.core.framework.UtamCoreError;
@@ -76,13 +77,13 @@ public class ContainerElementPageObjectTests {
 
   @Test
   public void testCorrectContainer() {
-    PageObjectsFactory factory = new MockDriver().getFactory();
+    MockUtilities mockUtilities = new MockDriver();
+    PageObjectsFactory factory = mockUtilities.getFactory();
     TestContainersPage page = new TestContainersPage(factory);
     ContainerElementPageObject testMe = page
         .getContainerContent(ContainerElementPageObject.class, false);
     assertThat(testMe.getRootLocationChain().getLocatorChainString(),
         is(equalTo("driver > By.cssSelector: root > By.cssSelector: :scope > *:first-child")));
-
     LoadMe test = testMe.test(LoadMe.class, "inject");
     assertThat(test.getRootLocation().getLocatorChainString(), is(equalTo(
         "driver > By.cssSelector: root > By.cssSelector: :scope > *:first-child > By.cssSelector: inject")));

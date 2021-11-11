@@ -64,6 +64,10 @@ public final class InterfaceSerializer {
           out.add(getNestedInterfaceDeclaration(nested));
         }
     );
+    source.getUnionTypes().forEach(unionType -> {
+      out.addAll(unionType.getDeclarationCode());
+      out.add(NEW_LINE);
+    });
     out.add("}");
     out.removeIf(String::isEmpty);
     return applyJavaFormatter(out);

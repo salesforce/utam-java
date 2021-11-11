@@ -66,7 +66,7 @@ public class UtamMethodActionWaitForTests {
     MethodInfo methodInfo = new MethodInfo(methodName, "Boolean");
     methodInfo.addParameter(new MethodParameterInfo("matcherArg"));
     methodInfo.addCodeLine("Boolean statement0 = this.waitFor(() -> {\n"
-        + "RootElement proot0 = this.getRootElement();\n"
+        + "BasePageElement proot0 = this.getRootElement();\n"
         + "String pstatement0 = proot0.getText();\n"
         + "Boolean pmatcher0 = matcherArg.equals(pstatement0);\n"
         + "return pmatcher0;\n"
@@ -95,7 +95,7 @@ public class UtamMethodActionWaitForTests {
     PageObjectMethod method = context.getMethod(methodName);
     MethodInfo methodInfo = new MethodInfo(methodName, "Test");
     methodInfo.addCodeLine("Test statement0 = this.waitFor(() -> {\n"
-        + "RootElement proot0 = this.getRootElement();\n"
+        + "RootElement proot0 = this.getRoot();\n"
         + "proot0.focus();\n"
         + "return this;\n"
         + "})");
@@ -109,7 +109,7 @@ public class UtamMethodActionWaitForTests {
     PageObjectMethod method = context.getMethod(methodName);
     MethodInfo methodInfo = new MethodInfo(methodName);
     methodInfo.addCodeLine("this.waitFor(() -> {\n"
-        + "RootElement proot0 = this.getRootElement();\n"
+        + "RootElement proot0 = this.getRoot();\n"
         + "proot0.focus();\n"
         + "return true;\n"
         + "})");
