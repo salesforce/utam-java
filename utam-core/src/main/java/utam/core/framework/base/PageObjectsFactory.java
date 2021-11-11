@@ -41,6 +41,13 @@ public interface PageObjectsFactory {
    */
   void bootstrap(PageObject instance, ElementLocation root);
 
+  /**
+   * create instance of a Root Page Object
+   *
+   * @param rootPageObjectType Page Object type
+   * @param <T>                bound type
+   * @return instance of the page object
+   */
   <T extends RootPageObject> T create(Class<T> rootPageObjectType);
 
 }
