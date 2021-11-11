@@ -8,11 +8,15 @@
 package utam.core.framework.element;
 
 import org.openqa.selenium.Keys;
+import utam.core.element.Actionable;
 import utam.core.element.BasicElement;
+import utam.core.element.Clickable;
 import utam.core.element.DragAndDropOptions;
+import utam.core.element.Draggable;
+import utam.core.element.Editable;
 import utam.core.element.Element;
 import utam.core.element.Element.ScrollOptions;
-import utam.core.element.RootElement;
+import utam.core.element.Touchable;
 import utam.core.framework.UtamLogger;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.UtamBaseImpl;
@@ -25,7 +29,8 @@ import utam.core.framework.consumer.UtamError;
  * @author elizaveta.ivanova
  * @since 234
  */
-public class BasePageElement extends UtamBaseImpl implements RootElement {
+public class BasePageElement extends UtamBaseImpl implements Actionable, Clickable, Editable,
+    Touchable, Draggable {
 
   private Element element;
   private PageObjectsFactory factory;

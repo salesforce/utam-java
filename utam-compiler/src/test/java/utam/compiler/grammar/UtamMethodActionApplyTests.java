@@ -14,9 +14,7 @@ import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.UtamMethodActionApply.ERR_ELEMENT_REDUNDANT_FOR_CHAIN;
 import static utam.compiler.helpers.TypeUtilities.COLLECTOR_IMPORT;
 import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
-import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
-import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 
 import java.util.List;
 import org.testng.annotations.Test;
@@ -95,6 +93,18 @@ public class UtamMethodActionApplyTests {
   }
 
   @Test
+  public void testComposeBasicElementWithFilter() {
+    TranslationContext context = getContext("basicElementWithFilter");
+    PageObjectMethod actualMethod = context.getMethod(methodName);
+    MethodInfo methodInfo = new MethodInfo(methodName, "Test");
+    methodInfo.addParameter(new MethodParameterInfo("buttonText"));
+    methodInfo.addCodeLine("TestElement test0 = this.getTest(buttonText)");
+    methodInfo.addCodeLine("test0.click()");
+    methodInfo.addCodeLine("return this");
+    PageObjectValidationTestHelper.validateMethod(actualMethod, methodInfo);
+  }
+
+  @Test
   public void testBasicActionReturnsSelf() {
     TranslationContext context = getContext("basicActionReturnsSelf");
     PageObjectMethod actualMethod = context.getMethod(methodName);
@@ -152,21 +162,6 @@ public class UtamMethodActionApplyTests {
     expected.addCodeLine(
         "List<Boolean> statement0 = test0.stream().map(element -> element.isVisible()).collect(Collectors.toList())");
     expected.addCodeLine("return statement0");
-    PageObjectValidationTestHelper.validateMethod(actualMethod, expected);
-  }
-
-  @Test
-  public void testComposeMethodWithContainsElementAndParameterizedSelector() {
-    TranslationContext context = getContext("rootContains");
-    PageObjectMethod actualMethod = context.getMethod(methodName);
-    MethodInfo expected = new MethodInfo(methodName, "Boolean");
-    expected.addImpliedImportedTypes(SELECTOR.getFullName());
-    expected.addImpliedImportedTypes(ROOT_ELEMENT_TYPE.getFullName());
-    expected.addCodeLine("RootElement root0 = this.getRootElement()");
-    expected.addCodeLine(
-        "Boolean statement0 = root0.containsElement(LocatorBy.byCss(String.format(\".foo[title='%s']\", title)), false)");
-    expected.addCodeLine("return statement0");
-    expected.addParameter(new MethodParameterInfo("title"));
     PageObjectValidationTestHelper.validateMethod(actualMethod, expected);
   }
 
@@ -323,5 +318,21 @@ public class UtamMethodActionApplyTests {
     methodInfo.addCodeLine("String statement0 = myFrame0.getText()");
     methodInfo.addCodeLine("return statement0");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
+  public void testCustomElementWithFilterFindFirst() {
+    String importStr = "my.pageobject.Foo";
+    TranslationContext context = getContext("customWithFilterFindFirst");
+    PageObjectMethod method = context.getMethod(methodName);
+    MethodInfo expected = new MethodInfo(methodName, "Foo");
+    expected.addParameter(new MethodParameterInfo("filterArg"));
+    expected.addParameter(new MethodParameterInfo("applyArg"));
+    expected.addImportedTypes(importStr);
+    expected.addImpliedImportedTypes(importStr);
+    expected.addCodeLine("Foo findFirst0 = this.getFindFirstElement(filterArg)");
+    expected.addCodeLine("Foo statement0 = findFirst0.publicMethod(applyArg)");
+    expected.addCodeLine("return statement0");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 }

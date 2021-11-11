@@ -8,8 +8,6 @@
 package utam.compiler.grammar;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.TextNode;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.TranslationContext;
@@ -21,7 +19,6 @@ import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.element.Locator;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import utam.core.selenium.element.LocatorBy;
 
@@ -74,18 +71,12 @@ public class TestUtilities {
     }
 
     static UtamElement createUtamElement(String name, UtamSelector selector) {
-      return createUtamElement(name, (String)null, selector);
+      return createUtamElement(name, null, selector);
     }
 
     static UtamElement createUtamElement(String name, String type, UtamSelector selector) {
       return new UtamElement(
           createStringTypeNode(type), name, false, null, null, selector,
-          null, null, null);
-    }
-
-    static UtamElement createUtamElement(String name, String[] type, UtamSelector selector) {
-      return new UtamElement(
-          createArrayTypeNode(type), name, false, null, null, selector,
           null, null, null);
     }
 
@@ -102,15 +93,6 @@ public class TestUtilities {
         return null;
       }
       return new TextNode(type);
-    }
-
-    private static JsonNode createArrayTypeNode(String[] type) {
-      if (type == null) {
-        return null;
-      }
-      ArrayNode node = new ArrayNode(JsonNodeFactory.instance);
-      Arrays.stream(type).forEach(node::add);
-      return node;
     }
   }
 }

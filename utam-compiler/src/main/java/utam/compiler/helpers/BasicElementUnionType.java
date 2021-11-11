@@ -10,10 +10,11 @@ package utam.compiler.helpers;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import utam.compiler.representation.UnionTypeImpl;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.representation.UnionType;
 
 /**
  * basic element union type
@@ -50,7 +51,7 @@ public class BasicElementUnionType implements TypeProvider {
     return basicInterfaces.toArray(BasicElementInterface[]::new);
   }
 
-  public static boolean isBasicType(String[] interfaceTypes) {
+  static boolean isBasicType(String[] interfaceTypes) {
     if (interfaceTypes == null) {
       return true;
     }
@@ -74,7 +75,7 @@ public class BasicElementUnionType implements TypeProvider {
     return null;
   }
 
-  public Collection<TypeProvider> getBasicInterfaces() {
+  public List<TypeProvider> getBasicInterfaces() {
     if (basicInterfaces.size() == 0) {
       // If there are no basic interfaces declared, the only interface implemented by this
       // element is BasicElement.
@@ -101,5 +102,9 @@ public class BasicElementUnionType implements TypeProvider {
   @Override
   public Class getClassType() {
     return null;
+  }
+
+  public UnionType getUnionType(boolean isPublic) {
+    return new UnionTypeImpl(isPublic, this, getBasicInterfaces());
   }
 }

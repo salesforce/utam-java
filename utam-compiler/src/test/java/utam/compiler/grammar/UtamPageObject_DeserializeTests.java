@@ -7,10 +7,8 @@
  */
 package utam.compiler.grammar;
 
-import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.core.declarative.representation.PageObjectDeclaration;
-import utam.core.element.RootElement;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 import utam.core.selenium.element.LocatorBy;
@@ -19,7 +17,6 @@ import static utam.compiler.grammar.TestUtilities.*;
 import static utam.compiler.grammar.UtamPageObject.*;
 import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.BASE_ROOT_PAGE_OBJECT_CLASS;
-import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -64,25 +61,6 @@ public class UtamPageObject_DeserializeTests {
     assertThat(root.getBaseType().getFullName(), containsString(PAGE_OBJECT.getFullName()));
     TranslationContext context = getTestTranslationContext();
     root.compile(context);
-    assertThat(
-        context.getRootElement().getType().isSameType(ROOT_ELEMENT_TYPE),
-        is(equalTo(true)));
-  }
-
-  /** A root node with a selector property should be valid */
-  @Test
-  public void testValidRootNodeWithSelector() {
-    String json =
-        "{"
-            + "  \"selector\": {"
-            + "    \"css\": \"rootSelector\""
-            + "  },"
-            + "  \"root\": true"
-            + "}";
-
-    UtamPageObject rootElementNode = createRootElementNode(json);
-    assertThat(rootElementNode.isExposeRootElement, is(false));
-    assertThat(rootElementNode.rootLocator, is(equalTo(LocatorBy.byCss("rootSelector"))));
   }
 
   /** The traverse method should traverse the JSON node */
@@ -97,6 +75,7 @@ public class UtamPageObject_DeserializeTests {
             + "}";
     UtamPageObject rootElementNode = createRootElementNode(json);
     TranslationContext context = getTestTranslationContext();
+    assertThat(rootElementNode.rootLocator, is(equalTo(LocatorBy.byCss("rootSelector"))));
     rootElementNode.compile(context);
   }
 
@@ -168,17 +147,6 @@ public class UtamPageObject_DeserializeTests {
   }
 
   /**
-   * Tests that an invalid root node with a type property, but no name property throws the proper
-   * exception
-   */
-  @Test
-  public void testRootNodeWithTypeWithoutNamePropertyThrows() {
-    String json = "{\"type\": \"invalid\"}";
-    UtamError e = expectThrows(UtamError.class, () -> createRootElementNode(json).compile(getTestTranslationContext()));
-    assertThat(e.getCause().getMessage(), containsString(String.format(ERR_UNSUPPORTED_ROOT_ELEMENT_TYPE, "[invalid]")));
-  }
-
-  /**
    * Tests that an element marked with a root selector, but without a root property throws the
    * proper exception
    */
@@ -236,19 +204,5 @@ public class UtamPageObject_DeserializeTests {
     PageObjectDeclaration declaration = new DeserializerUtilities().getResultFromFile("pageobjects/non_root").getPageObject();
     assertThat(declaration.getImplementation().getBaseClassType().isSameType(BASE_PAGE_OBJECT_CLASS), is(true));
     assertThat(declaration.getInterface().getBaseInterfaceType().isSameType(PAGE_OBJECT), is(true));
-  }
-
-  @Test
-  public void testRootElementStringType() {
-    TranslationContext context = new DeserializerUtilities().getContext("pageobjects/non_root");
-    ElementContext elementContext = context.getElement("root");
-    assertThat(elementContext.getType().getSimpleName(), is(equalTo(RootElement.class.getSimpleName())));
-  }
-
-  @Test
-  public void testRootElementArrayType() {
-    TranslationContext context = new DeserializerUtilities().getContext("pageobjects/root");
-    ElementContext elementContext = context.getElement("root");
-    assertThat(elementContext.getType().getSimpleName(), is(equalTo(RootElement.class.getSimpleName())));
   }
 }

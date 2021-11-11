@@ -7,11 +7,11 @@
  */
 package utam.compiler.helpers;
 
+import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.UtamArgument;
 import utam.compiler.grammar.UtamArgument.UtamArgumentLiteralPrimitive;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.BasicElement;
-import utam.core.framework.consumer.UtamError;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +19,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
@@ -107,6 +106,7 @@ public enum BasicElementActionType implements ActionType {
    */
   waitForVisible(null);
 
+  public static final String ERR_UNKNOWN_ACTION = "unknown action '%s' for element '%s' with %s";
   // return type of the action
   private final TypeProvider returnType;
   // parameters accepted by the action
@@ -122,14 +122,6 @@ public enum BasicElementActionType implements ActionType {
   }
 
   public static ActionType getActionType(String apply, TypeProvider elementType, String elementName) {
-    if (!BasicElementInterface.isBasicType(elementType)
-        && !elementType.isSameType(ROOT_ELEMENT_TYPE)) {
-      throw new UtamError(
-          String.format(
-              ActionableActionType.ERR_NOT_HTML_ELEMENT,
-              elementName,
-              elementType.getSimpleName()));
-    }
     // Element type is BaseElement, with no other actionable methods available.
     for (BasicElementActionType action : values()) {
       if (action.getApplyString().equals(apply)) {
@@ -178,12 +170,10 @@ public enum BasicElementActionType implements ActionType {
     String actionableTypeNames =
         actionableTypes == null || actionableTypes.length == 0 ?
             "basic type" :
-            "declared interfaces " + Arrays.stream(actionableTypes)
-                .map(Enum::name)
-                .collect(Collectors.joining(","));
-    throw new UtamError(
-        String.format(
-            ActionableActionType.ERR_UNKNOWN_ACTION, apply, elementName, actionableTypeNames));
+            String.format("declared interfaces [ %s ]",
+                Arrays.stream(actionableTypes).map(Enum::name).collect(Collectors.joining(",")));
+    throw new UtamCompilationError(
+        String.format(ERR_UNKNOWN_ACTION, apply, elementName, actionableTypeNames));
   }
 
   // used in unit tests

@@ -14,11 +14,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertThrows;
+import static utam.compiler.grammar.TestUtilities.TEST_PAGE_OBJECT;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.EMPTY_SELECTOR;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
-import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.ElementContext.SELF_ELEMENT_NAME;
 import static utam.compiler.helpers.BasicElementInterface.actionable;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
@@ -156,21 +156,14 @@ public class ElementContextTests {
 
   @Test
   public void testRootElement() {
-    ElementContext.Root context = new Root(DUMMY_TYPE);
+    ElementContext.Root context = new Root(TEST_PAGE_OBJECT, getCssSelector("css"), actionable);
     assertThat(context.getName(), is(equalTo(ROOT_ELEMENT_NAME)));
     assertThat(context.getElementNodeType(), is(ElementType.ROOT));
     assertThat(context.isNullable(), is(false));
-    assertThat(context.getEnclosingPageObjectType(), is(equalTo(DUMMY_TYPE)));
-    assertThat(context.getType(), is(equalTo(ROOT_ELEMENT_TYPE)));
+    assertThat(context.getEnclosingPageObjectType().getFullName(), is(equalTo(TEST_PAGE_OBJECT.getFullName())));
+    assertThat(context.getType().getFullName(), is(equalTo(actionable.getFullName())));
     assertThat(context.getParameters(), is(hasSize(0)));
-    assertThat(context.getSelector(), is(equalTo(EMPTY_SELECTOR)));
-  }
-
-  @Test
-  public void testRootElementWithSelector() {
-    Locator selector = SELECTOR_VALUE;
-    ElementContext.Root context = new Root(DUMMY_TYPE, selector);
-    assertThat(context.getSelector(), is(equalTo(selector)));
+    assertThat(context.getSelector(), is(equalTo(getCssSelector("css"))));
   }
 
   @Test

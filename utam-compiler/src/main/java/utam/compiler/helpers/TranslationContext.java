@@ -28,6 +28,7 @@ import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.representation.UnionType;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.core.declarative.translator.TranslatorConfig;
@@ -67,6 +68,10 @@ public final class TranslationContext {
   private boolean isImplementationPageObject = false;
   private final TypeProvider pageObjectClassType;
   private TypeProvider pageObjectInterfaceType;
+  // some union types are declared inside interface
+  private final List<UnionType> interfaceUnionTypes = new ArrayList<>();
+  // some union types are declared inside implementing class only
+  private final List<UnionType> classUnionTypes = new ArrayList<>();
 
 
   public TranslationContext(String pageObjectURI, TranslatorConfig translatorConfiguration) {
@@ -243,5 +248,29 @@ public final class TranslationContext {
    */
   public void setTestableElement(String elementName, ElementUnitTestHelper helper) {
     this.testableElements.put(elementName, helper);
+  }
+
+  /**
+   * get declared union types
+   *
+   * @param isPublic if true - should be declared in the interface, otherwise in class
+   * @return declared union types
+   */
+  public List<UnionType> getUnionTypes(boolean isPublic) {
+    return isPublic ? interfaceUnionTypes : classUnionTypes;
+  }
+
+  /**
+   * set union type to be declared
+   *
+   * @param unionType type
+   * @param isPublic  if true, should be declared in the interface
+   */
+  public void setUnionType(UnionType unionType, boolean isPublic) {
+    if (isPublic) {
+      interfaceUnionTypes.add(unionType);
+    } else {
+      classUnionTypes.add(unionType);
+    }
   }
 }

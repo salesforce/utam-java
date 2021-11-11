@@ -11,19 +11,20 @@ import static utam.compiler.grammar.UtamMethod.ERR_BEFORE_LOAD_HAS_NO_ARGS;
 import static utam.compiler.grammar.UtamMethod.getComposeStatements;
 import static utam.compiler.helpers.AnnotationUtils.getPageObjectAnnotation;
 import static utam.compiler.helpers.AnnotationUtils.getPagePlatformAnnotation;
+import static utam.compiler.helpers.BasicElementInterface.processBasicTypeNode;
+import static utam.compiler.helpers.BasicElementUnionType.asBasicType;
 import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.MethodContext.BEFORE_LOAD_METHOD_NAME;
 import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.BASE_ROOT_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
-import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,15 +35,22 @@ import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ReturnType;
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.helpers.TypeUtilities.FromClass;
 import utam.compiler.representation.BeforeLoadMethod;
 import utam.compiler.representation.ComposeMethodStatement;
-import utam.compiler.representation.RootElementMethod;
+import utam.compiler.representation.RootElementMethod.PrivateCustomType;
+import utam.compiler.representation.RootElementMethod.ProtectedDefaultType;
+import utam.compiler.representation.RootElementMethod.PublicCustomType;
+import utam.compiler.representation.RootElementMethod.PublicDefaultType;
 import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.representation.UnionType;
+import utam.core.element.BasicElement;
 import utam.core.element.Locator;
 import utam.core.framework.consumer.UtamError;
+import utam.core.framework.element.BasePageElement;
 
 /**
  * mapping for a Page Object JSON
@@ -58,7 +66,6 @@ final class UtamPageObject {
       "root page object requires default selector property";
   static final String ERR_ROOT_REDUNDANT_SELECTOR = "non root page object can't have selector";
   static final String ERR_ROOT_ABSTRACT = "interface declaration can only have 'methods' property";
-  static final String ERR_UNSUPPORTED_ROOT_ELEMENT_TYPE = "type '%s' is not supported for root element";
   static final String ERR_DISALLOWED_ELEMENT = "Only self, document or root element allowed in beforeLoad method";
   private static final Set<String> BEFORE_LOAD_ELEMENTS = Stream
       .of(DOCUMENT_ELEMENT_NAME, ROOT_ELEMENT_NAME).collect(
@@ -66,14 +73,13 @@ final class UtamPageObject {
   final String implementsType;
   final Locator rootLocator;
   private final UtamMethodAction[] beforeLoad;
+  private final RootElementHelper rootElementHelper;
   boolean isAbstract;
   boolean isRootPageObject;
   UtamMethod[] methods;
   String platform;
   UtamProfile[] profiles;
   UtamShadowElement shadow;
-  String[] rootElementType;
-  boolean isExposeRootElement;
   UtamElement[] elements;
 
   @JsonCreator
@@ -83,7 +89,7 @@ final class UtamPageObject {
       @JsonProperty(value = "platform") String platform,
       @JsonProperty(value = "profile") UtamProfile[] profiles,
       // to expose root element
-      @JsonProperty(value = "type", defaultValue = "[]") String[] type,
+      @JsonProperty(value = "type", defaultValue = "[]") JsonNode typeNode,
       @JsonProperty(value = "exposeRootElement", defaultValue = "false") boolean isExposeRootElement,
       // root selector
       @JsonProperty(value = "root", defaultValue = "false") boolean isRootPageObject,
@@ -99,16 +105,11 @@ final class UtamPageObject {
     this.platform = platform;
     this.isRootPageObject = isRootPageObject;
     this.implementsType = implementsType;
-    this.isExposeRootElement = isExposeRootElement;
     this.shadow = shadow;
     this.elements = elements;
-    this.rootElementType = type;
+    this.rootElementHelper = new RootElementHelper(typeNode, isExposeRootElement);
     this.beforeLoad = beforeLoad;
-    if (selector == null) {
-      this.rootLocator = null;
-    } else {
-      this.rootLocator = selector.getLocator();
-    }
+    this.rootLocator = selector == null ? null : selector.getLocator();
     validate();
   }
 
@@ -138,11 +139,6 @@ final class UtamPageObject {
     if (profiles != null && implementsType == null) {
       throw new UtamError(ERR_ROOT_PROFILE_HAS_NO_INTERFACE);
     }
-    // check that root element type is one of actionables
-    if (rootElementType != null && !BasicElementUnionType.isBasicType(rootElementType)) {
-      throw new UtamError(
-          String.format(ERR_UNSUPPORTED_ROOT_ELEMENT_TYPE, Arrays.toString(rootElementType)));
-    }
   }
 
   List<AnnotationProvider> getAnnotations() {
@@ -164,32 +160,6 @@ final class UtamPageObject {
     return isRootPageObject ? BASE_ROOT_PAGE_OBJECT_CLASS : BASE_PAGE_OBJECT_CLASS;
   }
 
-  private ElementContext setRootElementMethod(TranslationContext context) {
-    TypeProvider interfaceType = context.getSelfType();
-    // TODO: Fix root elements to create correct base type from component interfaces
-    TypeProvider elementType = ROOT_ELEMENT_TYPE;
-    ElementContext rootElement = new ElementContext.Root(interfaceType, rootLocator);
-    // register root element and its method in context
-    context.setElement(rootElement);
-    PageObjectMethod rootElementMethod;
-    if (this.isExposeRootElement) {
-      // if "exposeRootElement" is set - declare public method
-      rootElementMethod = new RootElementMethod.Public(elementType);
-      context.setMethod(rootElementMethod);
-    } else if (rootElementType != null && BasicElementUnionType.isBasicType(rootElementType)) {
-      // if type for root element is set and it consists of all basic type interfaces,
-      // declare private method to typecast because BasePageObject.getRootElement
-      // returns RootElement
-      rootElementMethod = new RootElementMethod.Private(elementType);
-      context.setMethod(rootElementMethod);
-    } else {
-      // BasePageObject.getRootElement should be registered in context to call from compose
-      rootElementMethod = new RootElementMethod.Protected();
-    }
-    rootElement.setElementMethod(rootElementMethod);
-    return rootElement;
-  }
-
   final void compile(TranslationContext context) {
     if (this.isAbstract) {
       context.setAbstract();
@@ -198,7 +168,7 @@ final class UtamPageObject {
       context.setImplementedType(implementsType);
     }
     // register element to prevent names collisions
-    ElementContext rootElement = setRootElementMethod(context);
+    ElementContext rootElement = rootElementHelper.setRootElementMethod(context, rootLocator);
     if (elements != null) {
       for (UtamElement nextElement : elements) {
         nextElement.traverse(context, rootElement, false);
@@ -234,5 +204,62 @@ final class UtamPageObject {
       throw new UtamCompilationError(ERR_BEFORE_LOAD_HAS_NO_ARGS);
     }
     return new BeforeLoadMethod(methodContext, statements);
+  }
+
+  /**
+   * helper class for root element declaration
+   *
+   * @author elizaveta.ivanova
+   * @since 236
+   */
+  static final class RootElementHelper {
+
+    private static final TypeProvider DEFAULT_ROOT_ELEMENT_TYPE = new FromClass(
+        BasePageElement.class);
+    private static final TypeProvider PUBLIC_DEFAULT_ROOT_ELEMENT_TYPE = new FromClass(
+        BasicElement.class);
+
+    private final String[] rootElementType;
+    private final boolean isPublic;
+
+    RootElementHelper(JsonNode typeNode, boolean isExposeRootElement) {
+      this.rootElementType = processBasicTypeNode(typeNode, ROOT_ELEMENT_NAME);
+      this.isPublic = isExposeRootElement;
+    }
+
+    /**
+     * depending on root element settings, add root getter and union type
+     *
+     * @param context     translation context
+     * @param rootLocator locator of the root element
+     * @return root element context
+     */
+    ElementContext setRootElementMethod(TranslationContext context, Locator rootLocator) {
+      TypeProvider interfaceType = context.getSelfType();
+      final TypeProvider elementType;
+      final PageObjectMethod rootElementMethod;
+      // if type is not set and element should be public - add public getter that returns basic type
+      // if type is set - add new type and public or private getter
+      // if type is not set and root element is not exposed - use protected method BasePageObject.getRootElement
+      if (rootElementType.length > 0) {
+        elementType = asBasicType(ROOT_ELEMENT_NAME, rootElementType, false);
+        UnionType unionType = ((BasicElementUnionType) elementType).getUnionType(false);
+        context.setUnionType(unionType, isPublic);
+        rootElementMethod =
+            isPublic ? new PublicCustomType(unionType) : new PrivateCustomType(unionType);
+        context.setMethod(rootElementMethod);
+      } else {
+        elementType = isPublic ? PUBLIC_DEFAULT_ROOT_ELEMENT_TYPE : DEFAULT_ROOT_ELEMENT_TYPE;
+        rootElementMethod =
+            isPublic ? new PublicDefaultType(elementType) : new ProtectedDefaultType(elementType);
+        if (isPublic) { // for default not exposed root - no need to add method
+          context.setMethod(rootElementMethod);
+        }
+      }
+      ElementContext rootElement = new ElementContext.Root(interfaceType, rootLocator, elementType);
+      context.setElement(rootElement);
+      rootElement.setElementMethod(rootElementMethod);
+      return rootElement;
+    }
   }
 }

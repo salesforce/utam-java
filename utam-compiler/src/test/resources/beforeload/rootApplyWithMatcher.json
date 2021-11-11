@@ -1,4 +1,5 @@
 {
+  "exposeRootElement" : true,
   "beforeLoad": [
     {
       "element": "root",

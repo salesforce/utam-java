@@ -31,7 +31,7 @@ import utam.core.selenium.element.LocatorBy;
  */
 public abstract class ElementContext {
 
-  public static final String SELF_ELEMENT_NAME = "self";
+  static final String SELF_ELEMENT_NAME = "self";
   public static final String ROOT_ELEMENT_NAME = "root";
   public static final String DOCUMENT_ELEMENT_NAME = "document";
   static final Locator EMPTY_SELECTOR = LocatorBy.byCss("");
@@ -210,14 +210,9 @@ public abstract class ElementContext {
 
     private final TypeProvider enclosingPageObjectType;
 
-    public Root(TypeProvider enclosingPageObjectType, Locator selector) {
-      super(ElementType.ROOT, null, ROOT_ELEMENT_NAME, TypeUtilities.ROOT_ELEMENT_TYPE, selector, EMPTY_PARAMETERS, false);
+    public Root(TypeProvider enclosingPageObjectType, Locator selector, TypeProvider rootType) {
+      super(ElementType.ROOT, null, ROOT_ELEMENT_NAME, rootType, selector, EMPTY_PARAMETERS, false);
       this.enclosingPageObjectType = enclosingPageObjectType;
-    }
-
-    // used in tests
-    public Root(TypeProvider enclosingPageObjectType) {
-      this(enclosingPageObjectType, EMPTY_SELECTOR);
     }
 
     public TypeProvider getEnclosingPageObjectType() {

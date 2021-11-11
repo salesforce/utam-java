@@ -25,10 +25,12 @@ import org.hamcrest.CoreMatchers;
 import org.testng.annotations.Test;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementContext.Document;
+import utam.compiler.helpers.ElementContext.Root;
 import utam.compiler.helpers.ElementContext.Self;
 import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Locator;
+import utam.core.selenium.element.LocatorBy;
 
 /**
  * @author elizaveta.ivanova
@@ -40,6 +42,14 @@ public class ValidationUtilitiesTests {
   private static final TypeProvider ELEMENT_TYPE =
       new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
   private static final String ELEMENT_NAME = "fakeElementName";
+
+  private static ElementContext.Root getRoot(String type, Locator selector) {
+    return new Root(new TypeUtilities.FromString(type), selector, actionable);
+  }
+
+  private static ElementContext.Root getEmptyRoot(String type) {
+    return new Root(new TypeUtilities.FromString(type), LocatorBy.byCss(""), actionable);
+  }
 
   @Test
   public void testIsSameSelector() {
@@ -84,27 +94,20 @@ public class ValidationUtilitiesTests {
 
   @Test
   public void testValidateRootWithEmptySelector() {
-    ElementContext.Root root = new ElementContext.Root(new TypeUtilities.FromString("test.Type"));
+    ElementContext.Root root = getEmptyRoot("test.Type");
     // root w same enclosing type
-    assertThat(getValidationError(root,
-        new ElementContext.Root(new TypeUtilities.FromString("test.Type"))), is(nullValue()));
+    assertThat(getValidationError(root, getEmptyRoot("test.Type")), is(nullValue()));
     // root with different enclosing type
-    assertThat(getValidationError(root,
-        new ElementContext.Root(new TypeUtilities.FromString("test.AnotherType"))),
-        is(nullValue()));
+    assertThat(getValidationError(root, getEmptyRoot("test.AnotherType")), is(nullValue()));
   }
 
   @Test
   public void testValidateRootWithNonEmptySelector() {
     Locator selector = getCssSelector(ELEMENT_SELECTOR);
-    ElementContext.Root root =
-        new ElementContext.Root(new TypeUtilities.FromString("test.Type"), selector);
-    ElementContext second = new ElementContext.Root(new TypeUtilities.FromString("test.Type"),
-        selector);
+    ElementContext.Root root = getRoot("test.Type", selector);
+    ElementContext second = getRoot("test.Type", selector);
     assertThat(getValidationError(root, second), is(nullValue()));
-    assertThat(getValidationError(root,
-        new ElementContext.Root(new TypeUtilities.FromString("test.AnotherType"),
-            selector)), is(equalTo(DUPLICATE_WITH_ROOT_SELECTOR)));
+    assertThat(getValidationError(root, getRoot("test.AnotherType", selector)), is(equalTo(DUPLICATE_WITH_ROOT_SELECTOR)));
     assertThat(getValidationError(root, new ElementContext.Custom(
             "name", new TypeUtilities.FromString("test.Type"), selector)),
         is(nullValue()));
@@ -128,12 +131,9 @@ public class ValidationUtilitiesTests {
             new ElementContext.Basic("name", actionable, getCssSelector("other"))),
         is(nullValue()));
 
-    assertThat(getValidationError(customElement,
-        new ElementContext.Root(new TypeUtilities.FromString("test.Type"), selector)),
-        is(nullValue()));
+    assertThat(getValidationError(customElement, getRoot("test.Type", selector)), is(nullValue()));
 
-    assertThat(getValidationError(customElement,
-        new ElementContext.Root(new TypeUtilities.FromString("test.AnotherType"), selector)),
+    assertThat(getValidationError(customElement, getRoot("test.AnotherType", selector)),
         is(equalTo(DUPLICATE_WITH_ROOT_SELECTOR)));
 
     assertThat(getValidationError(customElement, new ElementContext.Custom(
@@ -165,8 +165,7 @@ public class ValidationUtilitiesTests {
   public void testValidateBasicElementWithRootSameSelector() {
     Locator selector = getCssSelector(ELEMENT_SELECTOR);
     ElementContext basicElement = new ElementContext.Basic("name", actionable, selector);
-    assertThat(getValidationError(basicElement,
-        new ElementContext.Root(new TypeUtilities.FromString("test.Type"), selector)),
+    assertThat(getValidationError(basicElement, getRoot("test.Type", selector)),
         is(equalTo(DUPLICATE_WITH_ROOT_SELECTOR)));
   }
 

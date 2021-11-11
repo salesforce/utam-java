@@ -52,9 +52,6 @@ public enum ActionableActionType implements ActionType {
    */
   scrollToCenter;
 
-  static final String ERR_NOT_HTML_ELEMENT = "element '%s' is not HTML element, its type is '%s'";
-  static final String ERR_UNKNOWN_ACTION = "unknown action '%s' for element '%s' with %s";
-
   // used in unit tests
   Class getElementClass() {
     return Actionable.class;

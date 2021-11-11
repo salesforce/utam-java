@@ -49,9 +49,7 @@ final class UtamElementFilter {
     this(applyMethod, null, matcher, false);
   }
 
-  void setElementFilter(
-      TranslationContext context, UtamElement.Type elementNodeType, TypeProvider elementType,
-      String elementName) {
+  void setElementFilter(TranslationContext context, UtamElement.Type elementNodeType, TypeProvider elementType, String elementName) {
     String contextString = String.format("element '%s' filter", elementName);
     if (elementNodeType == UtamElement.Type.BASIC) {
       ActionType actionType = getActionType(this.applyMethod, elementType, elementName);

@@ -7,8 +7,12 @@
  */
 package utam.compiler.helpers;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
+import utam.compiler.UtamCompilationError;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Actionable;
 import utam.core.element.Clickable;
@@ -19,8 +23,8 @@ import utam.core.element.Touchable;
 /**
  * supported types of basic element
  *
- * @since 234
  * @author jim.evans
+ * @since 234
  */
 public enum BasicElementInterface implements TypeProvider {
   actionable(Actionable.class),
@@ -29,6 +33,8 @@ public enum BasicElementInterface implements TypeProvider {
   editable(Editable.class),
   touchable(Touchable.class);
 
+  public static final String ERR_UNSUPPORTED_ELEMENT_TYPE = "element '%s': type %s is not supported, "
+      + "valid values are: " + nameList();
   private final Class type;
 
   BasicElementInterface(Class type) {
@@ -62,8 +68,7 @@ public enum BasicElementInterface implements TypeProvider {
     if (type instanceof BasicElementUnionType) {
       return true;
     }
-    for (BasicElementInterface basicType : BasicElementInterface
-        .values()) {
+    for (BasicElementInterface basicType : BasicElementInterface.values()) {
       if (basicType.isSameType(type)) {
         return true;
       }
@@ -75,16 +80,12 @@ public enum BasicElementInterface implements TypeProvider {
     if (type instanceof BasicElementUnionType) {
       return ((BasicElementUnionType) type).getTypesArray();
     }
-    if (type.isSameType(TypeUtilities.ROOT_ELEMENT_TYPE)) {
-      return BasicElementInterface.values();
-    }
     BasicElementInterface basicInterface = getBasicElementType(type);
     if (basicInterface != null) {
       return new BasicElementInterface[]{
           basicInterface
       };
     }
-
     return null;
   }
 
@@ -101,6 +102,40 @@ public enum BasicElementInterface implements TypeProvider {
   public static String nameList() {
     return Arrays.stream(values())
         .map(Enum::name).collect(Collectors.joining(", "));
+  }
+
+  /**
+   * process Json node with basic types, applicable to root or basic elements
+   *
+   * @param typeNode    Json node
+   * @param elementName name of the element, used in error message
+   * @return string array with basic types or empty array
+   */
+  public static String[] processBasicTypeNode(JsonNode typeNode, String elementName) {
+    if (typeNode == null || typeNode.isNull()) {
+      return new String[]{};
+    }
+    final String typeNodeValueError = String
+        .format(ERR_UNSUPPORTED_ELEMENT_TYPE, elementName, typeNode.toPrettyString());
+    if (typeNode.isTextual() && BasicElementInterface.isBasicType(typeNode.textValue())) {
+      return new String[]{typeNode.textValue()};
+    }
+    if (typeNode.isArray()) {
+      List<String> values = new ArrayList<>();
+      for (JsonNode valueNode : typeNode) {
+        if (!valueNode.isTextual()) {
+          throw new UtamCompilationError(typeNodeValueError);
+        }
+        String valueStr = valueNode.textValue();
+        if (!BasicElementInterface.isBasicType(valueStr)) {
+          throw new UtamCompilationError(String
+              .format(ERR_UNSUPPORTED_ELEMENT_TYPE, elementName, "\"" + valueStr + "\""));
+        }
+        values.add(valueStr);
+      }
+      return values.toArray(String[]::new);
+    }
+    throw new UtamCompilationError(typeNodeValueError);
   }
 
   @Override
