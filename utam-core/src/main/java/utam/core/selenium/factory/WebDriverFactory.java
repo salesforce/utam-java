@@ -14,6 +14,10 @@
 
 package utam.core.selenium.factory;
 
+import static utam.core.driver.DriverConfig.DEFAULT_EXPLICIT_TIMEOUT_MOCK;
+import static utam.core.driver.DriverConfig.DEFAULT_IMPLICIT_TIMEOUT;
+import static utam.core.driver.DriverConfig.DEFAULT_POLLING_INTERVAL;
+
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
@@ -29,6 +33,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import utam.core.driver.Driver;
+import utam.core.driver.DriverConfig;
 import utam.core.driver.DriverType;
 import utam.core.selenium.appium.MobileDriverAdapter;
 import utam.core.selenium.element.DriverAdapter;
@@ -52,10 +57,25 @@ public class WebDriverFactory {
     return getWebDriver(browserType, null, null);
   }
 
-  public static Driver getAdapter(WebDriver webDriver) {
-    return webDriver instanceof AppiumDriver ? new MobileDriverAdapter((AppiumDriver) webDriver)
-        : new DriverAdapter(webDriver);
+  public static Driver getAdapter(WebDriver webDriver, DriverConfig driverConfig) {
+    return webDriver instanceof AppiumDriver ? new MobileDriverAdapter((AppiumDriver) webDriver, driverConfig)
+        : new DriverAdapter(webDriver, driverConfig);
   }
+
+  /**
+   * creates DriverAdapter for testing purposes with very low explicit wait
+   *
+   * @param driver mock of WebDriver
+   * @return instance of Driver
+   */
+  public static Driver getAdapterMock(WebDriver driver) {
+    return getAdapter(driver, TEST_SIMULATOR_DRIVER_CONFIG);
+  }
+
+  private static final DriverConfig TEST_SIMULATOR_DRIVER_CONFIG = new DriverConfig(
+      DEFAULT_IMPLICIT_TIMEOUT,
+      DEFAULT_EXPLICIT_TIMEOUT_MOCK,
+      DEFAULT_POLLING_INTERVAL);
 
   @SuppressWarnings("WeakerAccess")
   public static WebDriver getWebDriver(

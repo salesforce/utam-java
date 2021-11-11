@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import utam.core.driver.Driver;
-import utam.core.driver.DriverContext;
-import utam.core.element.Element;
 import utam.core.element.ElementLocation;
 import utam.core.element.Locator;
 import utam.core.framework.consumer.PageObjectContext;
@@ -26,7 +24,6 @@ import utam.core.framework.consumer.UtamError;
 import utam.core.framework.consumer.UtamLoaderConfig;
 import utam.core.framework.context.PlatformType;
 import utam.core.framework.element.ElementLocationChain;
-import utam.core.framework.element.ExpectationsImpl;
 
 /**
  * selenium page objects factory
@@ -38,18 +35,35 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
 
   private final PageObjectContext pageObjectContext;
   private final Driver driver;
-  private final DriverContext driverContext;
+  private final String bridgeAppTitle;
 
   public PageObjectsFactoryImpl(
-      PageObjectContext pageObjectContext, DriverContext driverContext,
+      PageObjectContext pageObjectContext,
+      String bridgeAppTitle,
       Driver driver) {
     this.pageObjectContext = pageObjectContext;
-    this.driverContext = driverContext;
     this.driver = driver;
+    this.bridgeAppTitle = bridgeAppTitle;
   }
 
   public PageObjectsFactoryImpl(UtamLoaderConfig utamLoaderConfig, Driver driver) {
-    this(utamLoaderConfig.getPageContext(), utamLoaderConfig.getDriverContext(), driver);
+    this(utamLoaderConfig.getPageContext(), utamLoaderConfig.getBridgeAppTitle(), driver);
+  }
+
+  /**
+   * read annotation of class and build Locator from it
+   *
+   * @param pageObjectInstance instance of the Page Object
+   * @return locator instance
+   */
+  public static Locator getRootLocator(RootPageObject pageObjectInstance) {
+    Class<? extends RootPageObject> pageObjectClass = pageObjectInstance.getClass();
+    if (!pageObjectClass.isAnnotationPresent(PageMarker.Find.class)) {
+      throw new UtamError(String.format("root selector is not set for the page object instance %s",
+          pageObjectClass.getName()));
+    }
+    return getRootLocatorFromAnnotation(
+        pageObjectClass.getDeclaredAnnotation(PageMarker.Find.class));
   }
 
   @Override
@@ -75,9 +89,7 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
     }
     if (getDriver().isMobile()) {
       if (pagePlatform.equals(PlatformType.WEB)) {
-        getDriver().setPageContextToWebView(getDriverContext().getBridgeAppTitle(),
-            getDriverContext().getTimeouts().getWaitForTimeout(),
-            getDriverContext().getTimeouts().getPollingInterval());
+        getDriver().setPageContextToWebView(bridgeAppTitle);
       } else {
         getDriver().setPageContextToNative();
       }
@@ -90,27 +102,8 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
   }
 
   @Override
-  public DriverContext getDriverContext() {
-    return driverContext;
-  }
-
-  @Override
   public Driver getDriver() {
     return driver;
-  }
-
-  @Override
-  public Element findElement(ElementLocation location) {
-    return driver.waitFor(driverContext.getTimeouts().getFindTimeout(),
-        driverContext.getTimeouts().getPollingInterval(),
-        new ExpectationsImpl<>("find element", location::findElement));
-  }
-
-  @Override
-  public List<Element> findElements(ElementLocation location) {
-    return driver.waitFor(driverContext.getTimeouts().getFindTimeout(),
-        driverContext.getTimeouts().getPollingInterval(),
-        new ExpectationsImpl<>("find element", location::findElements));
   }
 
   @Override
@@ -120,22 +113,6 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
     ElementLocation rootElementLocation = new ElementLocationChain(rootLocator, EXISTING);
     bootstrap(instance, rootElementLocation);
     return instance;
-  }
-
-  /**
-   * read annotation of class and build Locator from it
-   *
-   * @param pageObjectInstance instance of the Page Object
-   * @return locator instance
-   */
-  public static Locator getRootLocator(RootPageObject pageObjectInstance) {
-    Class<? extends RootPageObject> pageObjectClass = pageObjectInstance.getClass();
-    if (!pageObjectClass.isAnnotationPresent(PageMarker.Find.class)) {
-      throw new UtamError(String.format("root selector is not set for the page object instance %s",
-          pageObjectClass.getName()));
-    }
-    return getRootLocatorFromAnnotation(
-        pageObjectClass.getDeclaredAnnotation(PageMarker.Find.class));
   }
 
   // assign values to the fields

@@ -9,11 +9,12 @@ package utam.core.selenium.element;
 
 import static utam.core.framework.UtamLogger.error;
 import static utam.core.selenium.element.ElementAdapter.EMPTY_LIST;
-import static utam.core.selenium.element.ElementAdapter.NULL_ELEMENT;
+import static utam.core.selenium.element.ElementAdapter.getNullElement;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.openqa.selenium.InvalidElementStateException;
@@ -26,7 +27,7 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.FluentWait;
 import utam.core.driver.Driver;
-import utam.core.driver.Expectations;
+import utam.core.driver.DriverConfig;
 import utam.core.element.Element;
 import utam.core.element.FindContext;
 import utam.core.framework.UtamCoreError;
@@ -54,9 +55,11 @@ public class DriverAdapter implements Driver {
           .collect(Collectors.toList());
   // not final because can be reset
   private WebDriver driver;
+  private final DriverConfig driverConfig;
 
-  public DriverAdapter(WebDriver driver) {
+  public DriverAdapter(WebDriver driver, DriverConfig driverConfig) {
     this.driver = driver;
+    this.driverConfig = driverConfig;
   }
 
   /**
@@ -91,8 +94,7 @@ public class DriverAdapter implements Driver {
   }
 
   static String getNotFoundErr(Locator by) {
-    return String
-        .format("%s with locator '%s'", ERR_ELEMENT_NOT_FOUND_PREFIX, by.getValue().toString());
+    return String.format("%s with locator '%s'", ERR_ELEMENT_NOT_FOUND_PREFIX, by.getValue().toString());
   }
 
   static List<WebElement> findList(SearchContext searchContext, LocatorBy by,
@@ -125,7 +127,7 @@ public class DriverAdapter implements Driver {
   }
 
   @Override
-  public void setPageContextToWebView(String title, Duration timeout, Duration pollingInterval) {
+  public void setPageContextToWebView(String title) {
     throw new IllegalStateException(ERR_SUPPORTED_FOR_MOBILE);
   }
 
@@ -142,7 +144,7 @@ public class DriverAdapter implements Driver {
   @Override
   public Element findElement(Locator by, FindContext finderContext) {
     WebElement element = find(getSeleniumDriver(), (LocatorBy) by, finderContext);
-    return element == null ? NULL_ELEMENT : getElementBuilder().apply(element);
+    return element == null ? getNullElement(this) : getElementBuilder().apply(element);
   }
 
   @Override
@@ -153,18 +155,11 @@ public class DriverAdapter implements Driver {
   }
 
   @Override
-  public <T> T waitFor(Duration timeout, Duration pollingInterval, Expectations<T> expectations,
-      Element element) {
-    if (timeout == null || timeout.isZero()) {
-      return expectations.apply(this, element);
-    }
-    return new DriverWait(this, timeout, pollingInterval, expectations.getLogMessage())
-        .until(driver -> expectations.apply(driver, element));
-  }
-
-  @Override
-  public <T> T waitFor(Duration timeout, Duration pollingInterval, Expectations<T> expectations) {
-    return waitFor(timeout, pollingInterval, expectations, null);
+  public <T> T waitFor(Supplier<T> isTrue, String message, Duration timeout) {
+    Duration waitDuration = timeout == null? driverConfig.getExplicitTimeout() : timeout;
+    String errorMessage = message == null? "wait for condition" : message;
+    DriverWait driverWait = new DriverWait(this, waitDuration, driverConfig.getPollingInterval(), errorMessage);
+    return driverWait.until((driver) -> isTrue.get());
   }
 
   @Override
@@ -205,6 +200,11 @@ public class DriverAdapter implements Driver {
     throw new IllegalStateException(ERR_SUPPORTED_FOR_MOBILE);
   }
 
+  @Override
+  public DriverConfig getDriverConfig() {
+    return driverConfig;
+  }
+
   static class DriverWait extends FluentWait<Driver> {
 
     DriverWait(Driver input, Duration timeout, Duration pollingInterval, String message) {
@@ -212,7 +212,7 @@ public class DriverAdapter implements Driver {
       withTimeout(timeout);
       pollingEvery(pollingInterval);
       ignoreAll(IGNORE_EXCEPTIONS);
-      withMessage("waiting for " + message);
+      withMessage(message);
     }
 
     @Override

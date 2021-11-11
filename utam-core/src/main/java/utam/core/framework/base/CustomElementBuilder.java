@@ -106,7 +106,7 @@ public class CustomElementBuilder {
    */
   public <T extends PageObject> T build(Class<T> type, Predicate<T> filter) {
     // if element is not nullable - this throws an error
-    List<Element> found = factory.findElements(root);
+    List<Element> found = root.findElements(factory.getDriver());
 
     for (Element el : found) {
       T instance = new CustomElementBuilder(factory, new ElementLocationChain(el), isNullable).build(type);
@@ -131,7 +131,7 @@ public class CustomElementBuilder {
    */
   public <T extends PageObject> List<T> buildList(Class<T> type) {
     // if element is not nullable - this throws an error
-    List<Element> found = factory.findElements(root);
+    List<Element> found = root.findElements(factory.getDriver());
 
     // if nothing is found and element is nullable - return null
     if ((found == null || found.isEmpty()) && isNullable) {
@@ -185,7 +185,7 @@ public class CustomElementBuilder {
                 instance.getClass().getName()));
       }
       Supplier<SearchContext> rootSupplier = () -> {
-        ElementAdapter element = (ElementAdapter) factory.findElement(root);
+        ElementAdapter element = (ElementAdapter) root.findElement(factory.getDriver());
         return element.getWebElement();
       };
       ((Contained) instance).setRoot(rootSupplier);

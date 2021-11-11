@@ -19,8 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-import utam.core.driver.DriverContext;
-import utam.core.driver.DriverTimeouts;
+import utam.core.driver.DriverConfig;
 import utam.core.framework.UtamCoreError;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.consumer.JsonLoaderConfig.Module;
@@ -42,32 +41,35 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
   // profiles that were set as active
   private final List<Profile> activeProfiles = new ArrayList<>();
   private final List<String> pageObjectModules = new ArrayList<>();
-  // driver
-  private DriverTimeouts timeouts;
+  // driver timeouts
+  private Duration implicitTimeout = Duration.ZERO;
+  private Duration explicitTimeout = Duration.ofSeconds(20);
+  private Duration pollingInterval = Duration.ofMillis(200);
   private String bridgeAppTitle;
-  // for testing
   private final BiFunction<String, Profile, ProfileContext> profileContextProvider;
 
-  public UtamLoaderConfigImpl(DriverTimeouts timeouts, JsonLoaderConfig config) {
-    this.timeouts = timeouts;
-    this.profileContextProvider = DefaultProfileContext::new;
-    for (Module module : config.getModules()) {
-      String moduleName = module.getName();
-      pageObjectModules.add(moduleName);
-      for(Profile profile : module.getModuleProfiles(config.profiles)) {
-        setConfiguredProfile(moduleName, profile);
-      }
-    }
+  public UtamLoaderConfigImpl(JsonLoaderConfig config) {
+    this(config, DefaultProfileContext::new);
   }
 
   public UtamLoaderConfigImpl(String resourceWithConfig) {
-    this(DriverTimeouts.DEFAULT, loadConfig(resourceWithConfig));
+    this(loadConfig(resourceWithConfig));
+  }
+
+  public UtamLoaderConfigImpl(File fileWithConfig) {
+    this(loadConfig(fileWithConfig));
+  }
+
+  public UtamLoaderConfigImpl() {
+    this(new JsonLoaderConfig());
   }
 
   protected UtamLoaderConfigImpl(String resourceWithConfig, BiFunction<String, Profile, ProfileContext> profileContextProvider) {
-    this.timeouts = DriverTimeouts.DEFAULT;
+    this(loadConfig(resourceWithConfig), profileContextProvider);
+  }
+
+  private UtamLoaderConfigImpl(JsonLoaderConfig config, BiFunction<String, Profile, ProfileContext> profileContextProvider) {
     this.profileContextProvider = profileContextProvider;
-    JsonLoaderConfig config = loadConfig(resourceWithConfig);
     for (Module module : config.getModules()) {
       String moduleName = module.getName();
       pageObjectModules.add(moduleName);
@@ -75,18 +77,10 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
         setConfiguredProfile(moduleName, profile);
       }
     }
-  }
-
-  public UtamLoaderConfigImpl(File fileWithConfig) {
-    this(DriverTimeouts.DEFAULT, loadConfig(fileWithConfig));
-  }
-
-  public UtamLoaderConfigImpl(DriverTimeouts timeouts) {
-    this(timeouts, new JsonLoaderConfig());
-  }
-
-  public UtamLoaderConfigImpl() {
-    this(DriverTimeouts.DEFAULT);
+    DriverConfig driverConfig = config.driverConfig;
+    setImplicitTimeout(driverConfig.getImplicitTimeout());
+    setExplicitTimeout(driverConfig.getExplicitTimeout());
+    setPollingInterval(driverConfig.getPollingInterval());
   }
 
   private static Map<Class<? extends PageObject>, Class<? extends PageObject>> getConfiguredBeans(
@@ -155,26 +149,28 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
   }
 
   @Override
-  public DriverContext getDriverContext() {
-    return new DriverContext(timeouts, bridgeAppTitle);
+  public void setImplicitTimeout(Duration implicitTimeout) {
+    this.implicitTimeout = implicitTimeout;
   }
 
   @Override
-  public void setFindTimeout(Duration findTimeout) {
-    timeouts = new DriverTimeouts(findTimeout, timeouts.getWaitForTimeout(),
-        timeouts.getPollingInterval());
-  }
-
-  @Override
-  public void setWaitForTimeout(Duration waitForTimeout) {
-    timeouts = new DriverTimeouts(timeouts.getFindTimeout(), waitForTimeout,
-        timeouts.getPollingInterval());
+  public void setExplicitTimeout(Duration explicitTimeout) {
+    this.explicitTimeout = explicitTimeout;
   }
 
   @Override
   public void setPollingInterval(Duration pollingInterval) {
-    timeouts = new DriverTimeouts(timeouts.getFindTimeout(), timeouts.getWaitForTimeout(),
-        pollingInterval);
+    this.pollingInterval = pollingInterval;
+  }
+
+  @Override
+  public DriverConfig getDriverConfig() {
+    return new DriverConfig(implicitTimeout, explicitTimeout, pollingInterval);
+  }
+
+  @Override
+  public String getBridgeAppTitle() {
+    return bridgeAppTitle;
   }
 
   // used in tests

@@ -8,7 +8,7 @@
 package utam.core.framework.consumer;
 
 import java.time.Duration;
-import utam.core.driver.DriverContext;
+import utam.core.driver.DriverConfig;
 import utam.core.framework.context.Profile;
 
 /**
@@ -46,25 +46,25 @@ public interface UtamLoaderConfig {
   PageObjectContext getPageContext();
 
   /**
-   * builds new Driver context based on config parameters
+   * get configured Driver properties
    *
-   * @return new instance of config
+   * @return instance of driver config
    */
-  DriverContext getDriverContext();
+  DriverConfig getDriverConfig();
 
   /**
-   * set timeout to find UI element <br>
+   * set implicit wait timeout
    *
    * @param findTimeout timeout duration
    */
-  void setFindTimeout(Duration findTimeout);
+  void setImplicitTimeout(Duration findTimeout);
 
   /**
-   * set polling timeout for UI element interactions <br>
+   * set explicit wait timeout
    *
    * @param waitForTimeout timeout duration
    */
-  void setWaitForTimeout(Duration waitForTimeout);
+  void setExplicitTimeout(Duration waitForTimeout);
 
   /**
    * set polling interval for UI element interactions <br>
@@ -72,6 +72,13 @@ public interface UtamLoaderConfig {
    * @param pollingInterval timeout duration
    */
   void setPollingInterval(Duration pollingInterval);
+
+  /**
+   * get configured bridge app title
+   *
+   * @return string with bridge app title
+   */
+  String getBridgeAppTitle();
 
   /**
    * used for mobile integration: set bridge app title

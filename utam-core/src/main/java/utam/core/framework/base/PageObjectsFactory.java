@@ -7,15 +7,12 @@
  */
 package utam.core.framework.base;
 
-import java.util.List;
 import utam.core.driver.Driver;
-import utam.core.driver.DriverContext;
-import utam.core.element.Element;
 import utam.core.element.ElementLocation;
 import utam.core.framework.consumer.PageObjectContext;
 
 /**
- * Page Objects factory is used to build instance of the Page Object
+ * Page Objects factory builds instance of the Page Object and bootstraps its elements
  *
  * @author elizaveta.ivanova
  * @since 216
@@ -23,22 +20,14 @@ import utam.core.framework.consumer.PageObjectContext;
 public interface PageObjectsFactory {
 
   /**
-   * get current context <br> used to access parameter passed through context from PO - url, scope
-   * etc.
+   * Get Page Objects Context
    *
    * @return reference to PO context
    */
   PageObjectContext getPageContext();
 
   /**
-   * get driver context
-   *
-   * @return instance of context
-   */
-  DriverContext getDriverContext();
-
-  /**
-   * get driver abstraction
+   * Get Driver instance
    *
    * @return instance of the driver implementation
    */
@@ -47,14 +36,18 @@ public interface PageObjectsFactory {
   /**
    * bootstrap Page Object using provided parameters
    *
-   * @param instance   instance to bootstrap
-   * @param root scoped root locator
+   * @param instance instance to bootstrap
+   * @param root     scoped root locator
    */
   void bootstrap(PageObject instance, ElementLocation root);
 
+  /**
+   * create instance of a Root Page Object
+   *
+   * @param rootPageObjectType Page Object type
+   * @param <T>                bound type
+   * @return instance of the page object
+   */
   <T extends RootPageObject> T create(Class<T> rootPageObjectType);
 
-  Element findElement(ElementLocation location);
-
-  List<Element> findElements(ElementLocation location);
 }

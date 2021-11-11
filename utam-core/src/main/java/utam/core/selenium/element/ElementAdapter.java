@@ -39,7 +39,6 @@ import utam.core.selenium.appium.MobileElementAdapter;
  */
 public class ElementAdapter implements Element {
 
-  public static final ElementAdapter NULL_ELEMENT = new ElementAdapter(null, (WebDriver) null);
   public static final String SCROLL_TOP_VIA_JAVASCRIPT =
       "return arguments[0].scrollIntoView(true);";
   public static final String SCROLL_INTO_VIEW_JS =
@@ -64,19 +63,6 @@ public class ElementAdapter implements Element {
   private final WebElement webElement;
   private final WebDriver driver;
 
-  /**
-   * constructor
-   *
-   * @param element element instance
-   * @param driver  instance of the driver, might be needed if underlying framework does not have
-   *                implementation for some actions out of the box
-   */
-  public ElementAdapter(WebElement element, WebDriver driver) {
-    this.webElement = element;
-    this.driver = driver;
-    this.driverAdapter = driver == null ? null : new DriverAdapter(driver);
-  }
-
   public ElementAdapter(WebElement element, Driver driverAdapter) {
     this.webElement = element;
     this.driver = getSeleniumDriver(driverAdapter);
@@ -92,8 +78,11 @@ public class ElementAdapter implements Element {
 
   private Function<WebElement, Element> getElementBuilder() {
     return element -> this instanceof MobileElementAdapter ? new MobileElementAdapter(element,
-        driverAdapter)
-        : new ElementAdapter(element, driver);
+        driverAdapter) : new ElementAdapter(element, driverAdapter);
+  }
+
+  public static ElementAdapter getNullElement(Driver driverAdapter) {
+    return new ElementAdapter(null, driverAdapter);
   }
 
   @Override
@@ -104,10 +93,10 @@ public class ElementAdapter implements Element {
   @Override
   public Element findElement(Locator by, FindContext finderContext) {
     if (webElement == null && finderContext.isNullable()) {
-      return NULL_ELEMENT;
+      return getNullElement(driverAdapter);
     }
     WebElement element = find(getScope(by, finderContext), (LocatorBy) by, finderContext);
-    return element == null ? NULL_ELEMENT : getElementBuilder().apply(element);
+    return element == null ? getNullElement(driverAdapter) : getElementBuilder().apply(element);
   }
 
   private SearchContext getScope(Locator by, FindContext findContext) {

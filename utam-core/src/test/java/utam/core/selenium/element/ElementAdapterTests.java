@@ -25,9 +25,9 @@ import static utam.core.selenium.element.ElementAdapter.BLUR_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.ElementAdapter.CLICK_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.ElementAdapter.ERR_NULL_ELEMENT;
 import static utam.core.selenium.element.ElementAdapter.FOCUS_VIA_JAVASCRIPT;
-import static utam.core.selenium.element.ElementAdapter.NULL_ELEMENT;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_CENTER_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_TOP_VIA_JAVASCRIPT;
+import static utam.core.selenium.element.ElementAdapter.getNullElement;
 import static utam.core.selenium.element.LocatorBy.byCss;
 import static utam.core.selenium.element.ShadowRootWebElement.*;
 
@@ -91,10 +91,11 @@ public class ElementAdapterTests {
 
   @Test
   public void testIsNull() {
-    assertThat(ElementAdapter.NULL_ELEMENT.isNull(), is(true));
-    NullPointerException e = expectThrows(NullPointerException.class, NULL_ELEMENT::getWebElement);
+    ElementAdapter nullElement = getNullElement(new MockUtilities().getDriverAdapter());
+    assertThat(nullElement.isNull(), is(true));
+    NullPointerException e = expectThrows(NullPointerException.class, nullElement::getWebElement);
     assertThat(e.getMessage(), is(equalTo(ERR_NULL_ELEMENT)));
-    assertThat(new ElementAdapter(mock(WebElement.class), mock(WebDriver.class)).isNull(), is(false));
+    assertThat(new ElementAdapter(mock(WebElement.class), new MockUtilities().getDriverAdapter()).isNull(), is(false));
   }
 
   @Test
@@ -129,8 +130,9 @@ public class ElementAdapterTests {
 
   @Test
   public void testIsExisting() {
-    assertThat(NULL_ELEMENT.isExisting(), is(false));
     MockUtilities mock = new MockUtilities();
+    ElementAdapter nullElement = getNullElement(mock.getDriverAdapter());
+    assertThat(nullElement.isExisting(), is(false));
     when(mock.getWebElementMock().isDisplayed()).thenReturn(true);
     assertThat(mock.getElementAdapter().isExisting(), is(true));
     when(mock.getWebElementMock().isDisplayed()).thenThrow(StaleElementReferenceException.class);

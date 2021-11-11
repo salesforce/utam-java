@@ -10,10 +10,12 @@ package utam.profiles;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.expectThrows;
 import static utam.core.framework.context.MobilePlatformType.ANDROID;
 import static utam.core.framework.context.MobilePlatformType.IOS;
 import static utam.core.framework.context.MobilePlatformType.IOS_PHONE;
+import static utam.core.selenium.factory.WebDriverFactory.getAdapterMock;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.BiFunction;
+import org.openqa.selenium.WebDriver;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import utam.compiler.translator.DefaultTranslatorRunner;
@@ -36,6 +39,7 @@ import utam.core.framework.context.DefaultProfileContext;
 import utam.core.framework.context.MobilePlatformType;
 import utam.core.framework.context.Profile;
 import utam.core.framework.context.ProfileContext;
+import utam.core.selenium.element.DriverAdapter;
 import utam.profiles.pageobjects.DeviceInterface;
 import utam.profiles.pageobjects.OnlyAndroidInterface;
 import utam.profiles.pageobjects.OnlyDefault;
@@ -170,7 +174,7 @@ public class ProfilesGenerationTests {
   static class TestProfilesLoader extends UtamLoaderImpl {
 
     TestProfilesLoader(UtamLoaderConfig loaderConfig) {
-      super(loaderConfig, null);
+      super(loaderConfig, getAdapterMock(mock(WebDriver.class)));
     }
 
     Class getBeanClass(Class type) {

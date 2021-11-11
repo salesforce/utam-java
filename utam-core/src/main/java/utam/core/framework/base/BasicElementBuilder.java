@@ -47,7 +47,7 @@ public class BasicElementBuilder {
     ElementLocation elementLocation = this.elementFinder.setParameters(values);
 
     // if element is not nullable - this throws an error
-    Element element = factory.findElement(elementLocation);
+    Element element = elementLocation.findElement(factory.getDriver());
 
     // if nothing is found and element is nullable - return null
     if (element.isNull()) {
@@ -97,7 +97,7 @@ public class BasicElementBuilder {
     ElementLocation elementFinder = this.elementFinder.setParameters(parameters);
 
     // if element is not nullable - this throws an error
-    List<Element> elementsFound = factory.findElements(elementFinder);
+    List<Element> elementsFound = elementFinder.findElements(factory.getDriver());
 
     // if nothing is found and element is nullable - return null
     if (elementsFound == null || elementsFound.isEmpty()) {

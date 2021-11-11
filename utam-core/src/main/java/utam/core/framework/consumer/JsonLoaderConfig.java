@@ -1,5 +1,8 @@
 package utam.core.framework.consumer;
 
+import static utam.core.driver.DriverConfig.DEFAULT_EXPLICIT_TIMEOUT;
+import static utam.core.driver.DriverConfig.DEFAULT_IMPLICIT_TIMEOUT;
+import static utam.core.driver.DriverConfig.DEFAULT_POLLING_INTERVAL;
 import static utam.core.framework.consumer.UtamLoaderConfigImpl.ERR_DUPLICATE_PROFILE;
 import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
 
@@ -10,10 +13,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import utam.core.driver.DriverConfig;
 import utam.core.framework.UtamCoreError;
 import utam.core.framework.context.StringValueProfile;
 
@@ -26,16 +31,21 @@ import utam.core.framework.context.StringValueProfile;
 public class JsonLoaderConfig {
 
   static final String ERR_READING_LOADER_CONFIG = "error while reading config '%s' for UTAM loader";
-  private final List<Module> modules = new ArrayList<>();
   // if profile is set at the loader level, then it applies to all modules
   final List<Profile> profiles = new ArrayList<>();
+  final DriverConfig driverConfig;
+  private final List<Module> modules = new ArrayList<>();
 
   @JsonCreator
   public JsonLoaderConfig(
-      @JsonProperty(value = "modules", required = true) List<Module> modules,
+      @JsonProperty(value = "timeouts") TimeoutsJsonMapping driverConfig,
+      @JsonProperty(value = "modules") List<Module> modules,
       @JsonProperty(value = "profiles") List<Profile> profiles) {
+    this.driverConfig = driverConfig == null ? new DriverConfig() : driverConfig.getDriverConfig();
     this.modules.add(new Module(null, new ArrayList<>()));
-    this.modules.addAll(modules);
+    if (modules != null) {
+      this.modules.addAll(modules);
+    }
     if (profiles != null) {
       this.profiles.addAll(profiles);
     }
@@ -45,7 +55,7 @@ public class JsonLoaderConfig {
    * create empty loader config without JSON file
    */
   public JsonLoaderConfig() {
-    this(new ArrayList<>(), new ArrayList<>());
+    this(null, new ArrayList<>(), new ArrayList<>());
   }
 
   /**
@@ -119,6 +129,17 @@ public class JsonLoaderConfig {
       }
     }
 
+    // prevents duplicate profile definitions inside a module
+    private static void checkDuplicateProfile(
+        List<utam.core.framework.context.Profile> list,
+        utam.core.framework.context.Profile profile) {
+      if (list.contains(profile)) {
+        throw new UtamCoreError(
+            String.format(ERR_DUPLICATE_PROFILE, profile.getName(), profile.getValue()));
+      }
+      list.add(profile);
+    }
+
     /**
      * used for testing in downstream modules to check how profiles were setup. marked to ignore by
      * serializer
@@ -146,16 +167,6 @@ public class JsonLoaderConfig {
           .flatMap(profile -> profile.getProfiles().stream())
           .forEach(profile -> checkDuplicateProfile(allProfiles, profile));
       return allProfiles;
-    }
-
-    // prevents duplicate profile definitions inside a module
-    private static void checkDuplicateProfile(
-        List<utam.core.framework.context.Profile> list,
-        utam.core.framework.context.Profile profile) {
-      if (list.contains(profile)) {
-        throw new UtamCoreError(String.format(ERR_DUPLICATE_PROFILE, profile.getName(), profile.getValue()));
-      }
-      list.add(profile);
     }
 
     public String getName() {
@@ -195,6 +206,36 @@ public class JsonLoaderConfig {
     List<utam.core.framework.context.Profile> getProfiles() {
       return Stream.of(values).map(value -> new StringValueProfile(name, value))
           .collect(Collectors.toList());
+    }
+  }
+
+  /**
+   * mapping for JSON with timeouts in loader config
+   *
+   * @since 236
+   * @author elizaveta.ivanova
+   */
+  static class TimeoutsJsonMapping {
+
+    private final Duration implicitTimeout;
+    private final Duration explicitTimeout;
+    private final Duration pollingInterval;
+
+    @JsonCreator
+    TimeoutsJsonMapping(
+        @JsonProperty(value = "implicitTimeout") Integer implicitTimeoutMsec,
+        @JsonProperty(value = "explicitTimeout") Integer explicitTimeoutMsec,
+        @JsonProperty(value = "pollingInterval") Integer pollingIntervalMsec) {
+      this.implicitTimeout = implicitTimeoutMsec == null ? DEFAULT_IMPLICIT_TIMEOUT
+          : Duration.ofMillis(implicitTimeoutMsec);
+      this.explicitTimeout = explicitTimeoutMsec == null ? DEFAULT_EXPLICIT_TIMEOUT
+          : Duration.ofMillis(explicitTimeoutMsec);
+      this.pollingInterval = pollingIntervalMsec == null ? DEFAULT_POLLING_INTERVAL
+          : Duration.ofMillis(pollingIntervalMsec);
+    }
+
+    DriverConfig getDriverConfig() {
+      return new DriverConfig(implicitTimeout, explicitTimeout, pollingInterval);
     }
   }
 }

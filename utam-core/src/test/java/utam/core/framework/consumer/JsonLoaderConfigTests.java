@@ -9,6 +9,7 @@ package utam.core.framework.consumer;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyIterable;
@@ -16,6 +17,9 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.expectThrows;
+import static utam.core.driver.DriverConfig.DEFAULT_EXPLICIT_TIMEOUT;
+import static utam.core.driver.DriverConfig.DEFAULT_IMPLICIT_TIMEOUT;
+import static utam.core.driver.DriverConfig.DEFAULT_POLLING_INTERVAL;
 import static utam.core.framework.consumer.JsonLoaderConfig.ERR_READING_LOADER_CONFIG;
 import static utam.core.framework.consumer.JsonLoaderConfig.loadConfig;
 import static utam.core.framework.consumer.UtamLoaderConfigImpl.ERR_DUPLICATE_PROFILE;
@@ -26,9 +30,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.time.Duration;
 import java.util.ArrayList;
 import org.testng.annotations.Test;
-import utam.core.driver.DriverTimeouts;
+import utam.core.driver.DriverConfig;
 import utam.core.framework.consumer.JsonLoaderConfig.Module;
 import utam.core.framework.consumer.JsonLoaderConfig.Profile;
 import utam.core.framework.context.StringValueProfile;
@@ -43,7 +48,7 @@ public class JsonLoaderConfigTests {
     return new JsonLoaderConfig();
   }
 
-  static JsonLoaderConfig fromResource(String name) {
+  private static JsonLoaderConfig fromResource(String name) {
     return loadConfig(name);
   }
 
@@ -121,7 +126,7 @@ public class JsonLoaderConfigTests {
     module.profiles.add(profile);
     config.getModules().add(module);
     UtamError e = expectThrows(UtamError.class,
-        () -> new UtamLoaderConfigImpl(DriverTimeouts.TEST, config));
+        () -> new UtamLoaderConfigImpl(config));
     assertThat(e.getMessage(),
         is(equalTo(String.format(ERR_DUPLICATE_PROFILE, "same", "name"))));
   }
@@ -132,5 +137,36 @@ public class JsonLoaderConfigTests {
     Writer writer = new StringWriter();
     mapper.writeValue(writer, new Module("name", new ArrayList<>()));
     assertThat(writer.toString(), is(equalTo("{\"name\":\"name\",\"profiles\":[]}")));
+  }
+
+  @Test
+  public void testExistingJsonWithEmptyTimeouts() {
+    JsonLoaderConfig config = fromResource("empty_timeouts.loader.json");
+    assertThat(config.getModules(), hasSize(1));
+    DriverConfig driverConfig = config.driverConfig;
+    assertThat(driverConfig, is(notNullValue()));
+    assertThat(driverConfig.getImplicitTimeout(), is(DEFAULT_IMPLICIT_TIMEOUT));
+    assertThat(driverConfig.getExplicitTimeout(), is(DEFAULT_EXPLICIT_TIMEOUT));
+    assertThat(driverConfig.getPollingInterval(), is(DEFAULT_POLLING_INTERVAL));
+  }
+
+  @Test
+  public void testExistingJsonWithTimeouts() {
+    JsonLoaderConfig config = fromResource("timeouts.loader.json");
+    DriverConfig driverConfig = config.driverConfig;
+    assertThat(driverConfig, is(notNullValue()));
+    assertThat(driverConfig.getImplicitTimeout(), is(Duration.ofMillis(1)));
+    assertThat(driverConfig.getExplicitTimeout(), is(Duration.ofMillis(2)));
+    assertThat(driverConfig.getPollingInterval(), is(Duration.ofMillis(3)));
+  }
+
+  @Test
+  public void testExistingJsonDefaultTimeouts() {
+    JsonLoaderConfig config = fromResource("module.loader.json");
+    DriverConfig driverConfig = config.driverConfig;
+    assertThat(driverConfig, is(notNullValue()));
+    assertThat(driverConfig.getImplicitTimeout(), is(DEFAULT_IMPLICIT_TIMEOUT));
+    assertThat(driverConfig.getExplicitTimeout(), is(DEFAULT_EXPLICIT_TIMEOUT));
+    assertThat(driverConfig.getPollingInterval(), is(DEFAULT_POLLING_INTERVAL));
   }
 }

@@ -7,7 +7,7 @@
  */
 package utam.core.framework.element;
 
-import static utam.core.selenium.element.ElementAdapter.NULL_ELEMENT;
+import static utam.core.selenium.element.ElementAdapter.getNullElement;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 import utam.core.driver.Driver;
+import utam.core.driver.DriverConfig;
 import utam.core.element.Element;
 import utam.core.element.ElementLocation;
 import utam.core.element.FindContext;
@@ -49,24 +50,44 @@ public final class ElementLocationChain implements ElementLocation {
 
   @Override
   public List<Element> findElements(Driver driver) {
+    DriverConfig driverConfig = driver.getDriverConfig();
+    if(driverConfig.getImplicitTimeout().isZero()) {
+      return findElementsUnwrapped(driver);
+    }
+    return driver.waitFor(() -> findElementsUnwrapped(driver),
+        "find all elements with implicit wait",
+        driverConfig.getImplicitTimeout());
+  }
+
+  List<Element> findElementsUnwrapped(Driver driver) {
     if (chain.length == 1) {
       return chain[0].findElementsInsideDriver(driver);
     }
     Element current = chain[0].findElementInsideDriver(driver);
     for (int i = 1; i < chain.length - 1; i++) {
-      current = chain[i].findElementInsideElement(current);
+      current = chain[i].findElementInsideElement(driver, current);
     }
     return chain[chain.length - 1].findElementsInsideElement(current);
   }
 
   @Override
   public Element findElement(Driver driver) {
+    DriverConfig driverConfig = driver.getDriverConfig();
+    if(driverConfig.getImplicitTimeout().isZero()) {
+      return findElementUnwrapped(driver);
+    }
+    return driver.waitFor(() -> findElementUnwrapped(driver),
+        "find element with implicit wait",
+        driverConfig.getImplicitTimeout());
+  }
+
+  Element findElementUnwrapped(Driver driver) {
     Element current = chain[0].findElementInsideDriver(driver);
     for (int i = 1; i < chain.length; i++) {
-      current = chain[i].findElementInsideElement(current);
+      current = chain[i].findElementInsideElement(driver, current);
       if(current.isNull()) {
         // if intermittent element was not found, no point to continue search
-        return NULL_ELEMENT;
+        return getNullElement(driver);
       }
     }
     return current;
@@ -140,7 +161,7 @@ public final class ElementLocationChain implements ElementLocation {
       return driver.findElement(locator, findContext);
     }
 
-    Element findElementInsideElement(Element element) {
+    Element findElementInsideElement(Driver driver, Element element) {
       return element.findElement(locator, findContext);
     }
 
@@ -186,12 +207,12 @@ public final class ElementLocationChain implements ElementLocation {
 
     @Override
     Element findElementInsideDriver(Driver driver) {
-      return elements.isEmpty() ? NULL_ELEMENT : elements.get(0);
+      return elements.isEmpty() ? getNullElement(driver) : elements.get(0);
     }
 
     @Override
-    Element findElementInsideElement(Element element) {
-      return elements.isEmpty() ? NULL_ELEMENT : elements.get(0);
+    Element findElementInsideElement(Driver driver, Element element) {
+      return elements.isEmpty() ? getNullElement(driver) : elements.get(0);
     }
 
     @Override
