@@ -74,19 +74,6 @@ public class UtamPageObject_Tests {
         annotations, contains(String.format("@PageMarker.Find(css = \"%s\")", SELECTOR_STRING)));
   }
 
-  /** The getAnnotations method should return the proper value with a shadow property */
-  @Test
-  public void testGetAnnotationsWithShadow() {
-    UtamPageObject pageObject = new UtamPageObject();
-    pageObject.shadow = new UtamShadowElement(new UtamElement[] {});
-    List<String> annotations =
-        pageObject.getAnnotations().stream()
-            .filter((annotation) -> !annotation.getAnnotationText().isEmpty())
-            .map(AnnotationProvider::getAnnotationText)
-            .collect(Collectors.toList());
-    assertThat(annotations, contains("@PageMarker.isShadowHost"));
-  }
-
   /** The getAnnotations method should return the proper value with a platform property */
   @Test
   public void testGetAnnotationsWithPlatform() {

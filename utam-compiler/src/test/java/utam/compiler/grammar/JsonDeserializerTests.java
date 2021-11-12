@@ -505,33 +505,6 @@ public class JsonDeserializerTests {
 
   /**
    * Tests that the getClassAnnotations method returns the proper annotation list for the generated
-   * class with a shadow element
-   */
-  @Test
-  public void testGetClassAnnotationsWithShadowProperty() {
-    String json =
-        "{"
-            + "  \"shadow\": {"
-            + "     \"elements\": ["
-            + "      {"
-            + "        \"name\": \"shadowChild\","
-            + "        \"selector\": {"
-            + "          \"css\": \"childSelector\""
-            + "        }"
-            + "      }"
-            + "    ]"
-            + "  }"
-            + "}";
-    List<String> expectedAnnotations = new ArrayList<>();
-    expectedAnnotations.add("@PageMarker.isShadowHost");
-
-    PageObjectClass node = createRootNode(json).getImplementation();
-    PageObjectValidationTestHelper.validateAnnotationList(
-        node.getClassAnnotations(), expectedAnnotations);
-  }
-
-  /**
-   * Tests that the getClassAnnotations method returns the proper annotation list for the generated
    * class with a platform configured
    */
   @Test

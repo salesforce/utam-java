@@ -36,13 +36,6 @@ public final class AnnotationUtils {
       Stream.of(new TypeUtilities.FromClass(ElementMarker.class)).collect(Collectors.toList());
   private static final String MARKER_CLASS_STRING = PageMarker.class.getSimpleName();
 
-  public static AnnotationProvider getShadowHostAnnotation(boolean isShadowHost) {
-    if (!isShadowHost) {
-      return EMPTY_ANNOTATION;
-    }
-    return new Annotation(getShadowHostMarkerString(), MARKER_CLASS_LIST);
-  }
-
   public static AnnotationProvider getPageObjectAnnotation(Locator selector) {
     String string =
         String.format(
@@ -52,11 +45,6 @@ public final class AnnotationUtils {
             getFindAnnotationParameterName(selector),
             getWrappedString(selector.getStringValue()));
     return new Annotation(string, MARKER_CLASS_LIST);
-  }
-
-  private static String getShadowHostMarkerString() {
-    return String.format(
-        "@%s.%s", MARKER_CLASS_STRING, PageMarker.isShadowHost.class.getSimpleName());
   }
 
   private static String getFindAnnotationParameterName(Locator locator) {
