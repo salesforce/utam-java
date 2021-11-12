@@ -1,12 +1,12 @@
 {
-  "exposeRootElement" : true,
-  "methods" : [
+  "exposeRootElement": true,
+  "methods": [
     {
-      "name" : "test",
-      "compose" : [
+      "name": "test",
+      "compose": [
         {
-          "apply" : "getText",
-          "element" : "root"
+          "apply": "getText",
+          "element": "root"
         }
       ]
     }

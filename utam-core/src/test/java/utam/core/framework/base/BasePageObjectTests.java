@@ -40,7 +40,7 @@ public class BasePageObjectTests {
   public static class TestProxyPageObject extends BaseRootPageObject {
 
     public UnionType getRoot() {
-      return proxy(getRootElement(), UnionType.class);
+      return getProxy(getRootElement(), UnionType.class);
     }
   }
 }

@@ -55,7 +55,7 @@ public class UtamPageObjectInterfaceTests {
     TranslationContext context = new DeserializerUtilities().getContext("interface/exposeRootImplemented");
     PageObjectMethod actualMethod = context.getMethod(methodName);
     MethodInfo methodInfo = new MethodInfo(methodName, "RootElement");
-    methodInfo.addCodeLine("return proxy(this.getRootElement(), RootElement.class)");
+    methodInfo.addCodeLine("return getProxy(this.getRootElement(), RootElement.class)");
     PageObjectValidationTestHelper.validateMethod(actualMethod, methodInfo);
   }
 }

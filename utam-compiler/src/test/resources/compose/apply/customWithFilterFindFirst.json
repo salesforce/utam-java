@@ -28,8 +28,8 @@
       "compose": [
         {
           "element": "findFirst",
-          "apply" : "publicMethod",
-          "returnType" : "my/pageObject/foo",
+          "apply": "publicMethod",
+          "returnType": "my/pageObject/foo",
           "args": [
             {
               "name": "applyArg",

@@ -1,12 +1,14 @@
 {
-  "type" : ["editable"],
-  "methods" : [
+  "type": [
+    "editable"
+  ],
+  "methods": [
     {
-      "name" : "test",
-      "compose" : [
+      "name": "test",
+      "compose": [
         {
-          "apply" : "click",
-          "element" : "root"
+          "apply": "click",
+          "element": "root"
         }
       ]
     }

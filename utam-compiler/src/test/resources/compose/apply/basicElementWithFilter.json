@@ -32,7 +32,7 @@
         {
           "element": "test",
           "apply": "click",
-          "returnType" : "self"
+          "returnType": "self"
         }
       ]
     }

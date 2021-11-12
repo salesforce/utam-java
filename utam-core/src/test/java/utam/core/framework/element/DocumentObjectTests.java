@@ -17,7 +17,6 @@ import static utam.core.framework.element.DocumentObject.ERR_CANT_ENTER_NULL_FRA
 
 import java.util.Collections;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
@@ -109,8 +108,6 @@ public class DocumentObjectTests {
     MockUtilities mock = new MockUtilities();
     Document document = mock.getDocument();
     FrameElement frameElement = new MockUtilities().getFrameElement();
-    WebDriver webDriver = mock.getWebDriverMock();
-    when(webDriver.findElement(By.cssSelector("root"))).thenReturn(mock(WebElement.class));
     document.enterFrameAndLoad(frameElement, TestLoaderConfigPageObject.class);
   }
 

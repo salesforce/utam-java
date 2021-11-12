@@ -26,6 +26,8 @@ import utam.core.framework.consumer.UtamError;
 import utam.core.framework.element.BasePageElement;
 
 /**
+ * Tests for composing root element actions and defining root element type
+ *
  * @author elizaveta.ivanova
  * @since 236
  */
@@ -101,7 +103,7 @@ public class UtamMethodActionApplyRootTests {
 
     PageObjectMethod rootMethod = context.getMethod(ROOT_METHOD_NAME);
     MethodInfo expectedRootMethod = new MethodInfo(ROOT_METHOD_NAME, "RootElement");
-    expectedRootMethod.addCodeLine("return proxy(this.getRootElement(), RootElement.class)");
+    expectedRootMethod.addCodeLine("return getProxy(this.getRootElement(), RootElement.class)");
     PageObjectValidationTestHelper.validateMethod(rootMethod, expectedRootMethod);
   }
 
@@ -119,7 +121,7 @@ public class UtamMethodActionApplyRootTests {
     MethodInfo expectedRootMethod = new MethodInfo(ROOT_METHOD_NAME, "RootElement");
     expectedRootMethod.setNotPublic();
     expectedRootMethod.addImpliedImportedTypes(clickable.getFullName());
-    expectedRootMethod.addCodeLine("return proxy(this.getRootElement(), RootElement.class)");
+    expectedRootMethod.addCodeLine("return getProxy(this.getRootElement(), RootElement.class)");
     PageObjectValidationTestHelper.validateMethod(rootMethod, expectedRootMethod);
   }
 }

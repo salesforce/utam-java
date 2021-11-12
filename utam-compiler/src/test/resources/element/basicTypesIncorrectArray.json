@@ -1,0 +1,14 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "type": [
+        "clickable",
+        "shmlickable"
+      ],
+      "selector": {
+        "css": ".css"
+      }
+    }
+  ]
+}

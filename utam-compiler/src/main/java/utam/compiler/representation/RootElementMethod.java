@@ -103,7 +103,7 @@ public class RootElementMethod {
 
   public static class PublicCustomType implements PageObjectMethod {
 
-    static final String PROXY_CODE_LINE_TEMPLATE = "return proxy(this.getRootElement(), %s.class)";
+    static final String PROXY_CODE_LINE_TEMPLATE = "return getProxy(this.getRootElement(), %s.class)";
     private final TypeProvider returnType;
     private final List<TypeProvider> imports = new ArrayList<>();
     private final List<TypeProvider> classImports = new ArrayList<>();

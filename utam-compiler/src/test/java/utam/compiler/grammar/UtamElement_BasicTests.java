@@ -23,6 +23,7 @@ import static utam.compiler.grammar.UtamElement.Type;
 import static utam.compiler.grammar.UtamElementFilter_Tests.getInnerTextFilter;
 import static utam.compiler.grammar.UtamSelectorTests.getListCssSelector;
 import static utam.compiler.grammar.UtamSelectorTests.getUtamCssSelector;
+import static utam.compiler.helpers.BasicElementInterface.ERR_UNSUPPORTED_ELEMENT_TYPE;
 
 import java.util.List;
 import java.util.Objects;
@@ -452,11 +453,15 @@ public class UtamElement_BasicTests {
     assertThat(elementContext.getType().isSameType(new TypeUtilities.FromString("TestElement")), is(equalTo(true)));
   }
 
+  private static TranslationContext getContext(String fileName) {
+    return new DeserializerUtilities().getContext("element/" + fileName);
+  }
+
   @Test
   public void testNullableList() {
     MethodInfo methodInfo = new MethodInfo("getNullableList", "List<NullableListElement>");
     methodInfo.addCodeLine("return element(this.nullableList).buildList(NullableListElement.class, NullableListElementImpl.class)");
-    TranslationContext context = new DeserializerUtilities().getContext("element/basicElementNullable");
+    TranslationContext context = getContext("basicElementNullable");
     PageObjectMethod method = context.getMethod("getNullableList");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
@@ -466,7 +471,7 @@ public class UtamElement_BasicTests {
     MethodInfo methodInfo = new MethodInfo("getNullableFilter", "NullableFilterElement");
     methodInfo.addCodeLine("return element(this.nullableFilter).build(NullableFilterElement.class, "
         + "NullableFilterElementImpl.class, elm -> Boolean.TRUE.equals(elm.isVisible()))");
-    TranslationContext context = new DeserializerUtilities().getContext("element/basicElementNullable");
+    TranslationContext context = getContext("basicElementNullable");
     PageObjectMethod method = context.getMethod("getNullableFilter");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
@@ -475,14 +480,28 @@ public class UtamElement_BasicTests {
   public void testNullableSingle() {
     MethodInfo methodInfo = new MethodInfo("getNullable", "NullableElement");
     methodInfo.addCodeLine("return element(this.nullable).build(NullableElement.class, NullableElementImpl.class)");
-    TranslationContext context = new DeserializerUtilities().getContext("element/basicElementNullable");
+    TranslationContext context = getContext("basicElementNullable");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("getNullable"), methodInfo);
   }
 
   @Test
   public void testBasicElementTypeAsString() {
-    TranslationContext translationContext = new DeserializerUtilities().getContext("element/basicTypes");
+    TranslationContext translationContext = getContext("basicTypes");
     ElementContext elementContext = translationContext.getElement("stringType");
     assertThat(elementContext.getType().getFullName(), is(equalTo("StringTypeElement")));
+  }
+
+  @Test
+  public void testIncorrectBasicTypeStringThrows() {
+    String expectedError = String.format(ERR_UNSUPPORTED_ELEMENT_TYPE, ELEMENT_NAME, "\"shmactionable\"");
+    UtamError e = expectThrows(UtamError.class, () -> getContext("basicTypesIncorrectString"));
+    assertThat(e.getCause().getMessage(), containsString(expectedError));
+  }
+
+  @Test
+  public void testIncorrectBasicTypeArrayThrows() {
+    String expectedError = String.format(ERR_UNSUPPORTED_ELEMENT_TYPE, ELEMENT_NAME, "\"shmlickable\"");
+    UtamError e = expectThrows(UtamError.class, () -> getContext("basicTypesIncorrectArray"));
+    assertThat(e.getCause().getMessage(), containsString(expectedError));
   }
 }

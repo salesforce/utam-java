@@ -1,14 +1,14 @@
 {
   "methods": [
     {
-      "name" : "test",
+      "name": "test",
       "compose": [
         {
-          "element" : "root",
+          "element": "root",
           "apply": "containsElement",
           "args": [
             {
-              "type" : "locator",
+              "type": "locator",
               "value": {
                 "css": ".foo[title='%s']",
                 "args": [
@@ -25,3 +25,4 @@
     }
   ]
 }
+

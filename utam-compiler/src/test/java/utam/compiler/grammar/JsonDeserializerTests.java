@@ -184,7 +184,7 @@ public class JsonDeserializerTests {
 
     PageObjectValidationTestHelper.MethodInfo rootElementMethod =
             new PageObjectValidationTestHelper.MethodInfo("getRoot", "RootElement");
-    rootElementMethod.addCodeLine("return proxy(this.getRootElement(), RootElement.class)");
+    rootElementMethod.addCodeLine("return getProxy(this.getRootElement(), RootElement.class)");
     rootElementMethod.setIsPublic(false);
 
     PageObjectValidationTestHelper.MethodInfo childElementGetter =

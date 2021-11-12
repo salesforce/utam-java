@@ -250,12 +250,24 @@ public final class TranslationContext {
     this.testableElements.put(elementName, helper);
   }
 
+  /**
+   * get declared union types
+   *
+   * @param isPublic if true - should be declared in the interface, otherwise in class
+   * @return declared union types
+   */
   public List<UnionType> getUnionTypes(boolean isPublic) {
-    return isPublic? interfaceUnionTypes : classUnionTypes;
+    return isPublic ? interfaceUnionTypes : classUnionTypes;
   }
 
-  public void setUnionType(UnionType unionType, boolean isPublic) {
-    if(isPublic) {
+  /**
+   * set union type to be declared
+   *
+   * @param unionType type
+   * @param isPublic  if true, should be declared in the interface
+   */
+  void setUnionType(UnionType unionType, boolean isPublic) {
+    if (isPublic) {
       interfaceUnionTypes.add(unionType);
     } else {
       classUnionTypes.add(unionType);

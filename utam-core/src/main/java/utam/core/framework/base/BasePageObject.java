@@ -36,19 +36,21 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   // lazy document injected by factory
   private Document document;
   // lazy element injected in runtime when a Page Object is loaded
-  private Element rootFound = null;
-  private BasePageElement utamRootElement = null;
+  private Element rootFound;
+  private BasePageElement rootElement = null;
 
   protected BasePageObject() {
   }
 
   final void setBootstrap(ElementLocation root, PageObjectsFactory factory) {
-    this.factory = factory;
-    this.document = new DocumentObject(getFactory());
     this.root = root;
+    this.factory = factory;
   }
 
   protected final Document getDocument() {
+    if (document == null) {
+      document = new DocumentObject(getFactory());
+    }
     return document;
   }
 
@@ -58,20 +60,20 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
 
   // this method can be called from generated Page Objects when root element is not public
   protected final BasePageElement getRootElement() {
-    if (utamRootElement == null) {
+    if (rootElement == null) {
       if (getElement().isNull()) {
-        utamRootElement = null;
+        rootElement = null;
       } else {
-        utamRootElement = createInstance(BasePageElement.class, getElement(), getFactory());
+        rootElement = createInstance(BasePageElement.class, getElement(), getFactory());
       }
     }
-    return utamRootElement;
+    return rootElement;
   }
 
   @Override
   protected final Element getElement() {
     if (rootFound == null) {
-      this.rootFound = root.findElement(getFactory().getDriver());
+      rootFound = getRootLocator().findElement(getFactory().getDriver());
     }
     return rootFound;
   }
@@ -86,20 +88,16 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
     return String.format("Page Object '%s': %s", getClass().getSimpleName(), message);
   }
 
-  final BasePageObject findRootAndCheckNotNull(boolean isThrowIfNotFound) {
+  @Override
+  public Object load() {
+    log("find page object root element");
     getElement();
-    if (isThrowIfNotFound && (rootFound == null || rootFound.isNull())) {
+    if (rootFound == null || rootFound.isNull()) {
       throw new NullPointerException(getLogMessage(String
           .format("root element not found with locator '%s'", root.getLocatorChainString())));
     }
     getRootElement();
     return this;
-  }
-
-  @Override
-  public Object load() {
-    log("find page object root element");
-    return findRootAndCheckNotNull(true);
   }
 
   @Override
@@ -152,7 +150,7 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
    * @param <T>       type bound
    * @return instance of the proxy object
    */
-  protected final <T extends BasicElement> T proxy(BasePageElement element,
+  protected final <T extends BasicElement> T getProxy(BasePageElement element,
       Class<T> unionType) {
     return (T) Proxy.newProxyInstance(
         this.getClass().getClassLoader(),

@@ -17,7 +17,6 @@ import static utam.core.element.FindContext.Type.EXISTING;
 import static utam.core.framework.base.ContainerElementPageObject.ERR_UNSUPPORTED_METHOD;
 
 import org.testng.annotations.Test;
-import utam.core.MockUtilities;
 import utam.core.MockUtilities.MockDriver;
 import utam.core.element.ElementLocation;
 import utam.core.framework.UtamCoreError;
@@ -77,8 +76,7 @@ public class ContainerElementPageObjectTests {
 
   @Test
   public void testCorrectContainer() {
-    MockUtilities mockUtilities = new MockDriver();
-    PageObjectsFactory factory = mockUtilities.getFactory();
+    PageObjectsFactory factory = new MockDriver().getFactory();
     TestContainersPage page = new TestContainersPage(factory);
     ContainerElementPageObject testMe = page
         .getContainerContent(ContainerElementPageObject.class, false);

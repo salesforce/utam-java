@@ -18,7 +18,7 @@ public class BaseRootPageObject extends BasePageObject implements RootPageObject
   @Override
   public Object load() {
     log("wait for a root element to be found");
-    this.waitFor(() -> findRootAndCheckNotNull(true));
+    this.waitFor(() -> getElement());
     return this;
   }
 }

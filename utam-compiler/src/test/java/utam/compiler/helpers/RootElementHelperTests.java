@@ -10,7 +10,7 @@ package utam.compiler.helpers;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.helpers.RootElementHelper.ERR_UNSUPPORTED_ELEMENT_TYPE;
+import static utam.compiler.helpers.BasicElementInterface.ERR_UNSUPPORTED_ELEMENT_TYPE;
 
 import org.testng.annotations.Test;
 import utam.compiler.grammar.DeserializerUtilities;
@@ -44,7 +44,7 @@ public class RootElementHelperTests {
 
   @Test
   public void testElementNodeWithInvalidArrayElementThrows() {
-    String expectedError = String.format(ERR_UNSUPPORTED_ELEMENT_TYPE, ELEMENT_NAME, "[ \"wrong\" ]");
+    String expectedError = String.format(ERR_UNSUPPORTED_ELEMENT_TYPE, ELEMENT_NAME, "\"wrong\"");
     UtamError e = expectThrows(UtamError.class, () -> getContext("wrongBasicTypeArrayElement"));
     assertThat(e.getCause().getMessage(), containsString(expectedError));
   }

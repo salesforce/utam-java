@@ -8,7 +8,7 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.helpers.AnnotationUtils.getFindAnnotation;
-import static utam.compiler.helpers.RootElementHelper.processBasicTypeNode;
+import static utam.compiler.helpers.BasicElementInterface.processBasicTypeNode;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT_TYPE_NAME;
 import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT_TYPE_NAME;
 

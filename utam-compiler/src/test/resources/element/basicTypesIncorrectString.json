@@ -1,0 +1,11 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "type": "shmactionable",
+      "selector": {
+        "css": ".css"
+      }
+    }
+  ]
+}
