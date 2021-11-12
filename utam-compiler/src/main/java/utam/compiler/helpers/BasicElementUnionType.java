@@ -104,6 +104,12 @@ public class BasicElementUnionType implements TypeProvider {
     return null;
   }
 
+  /**
+   * get union type
+   *
+   * @param isPublic is union type public
+   * @return instance of the union type
+   */
   public UnionType getUnionType(boolean isPublic) {
     return new UnionTypeImpl(isPublic, this, getBasicInterfaces());
   }

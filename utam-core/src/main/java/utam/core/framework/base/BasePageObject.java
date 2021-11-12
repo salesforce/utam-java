@@ -157,6 +157,7 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
         (proxy, method, args) -> {
           try {
             method.setAccessible(true);
+            // NB: DURING DEBUG STEP INSIDE THIS METHOD
             return method.invoke(element, args);
           } catch (Exception e) {
             throw new UtamCoreError(String.format("Unable to invoke method '%s'", method.getName()), e);
