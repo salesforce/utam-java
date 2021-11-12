@@ -1,4 +1,8 @@
 {
   "interface" : true,
-  "exposeRootElement": true
+  "exposeRootElement": true,
+  "type": [
+    "editable",
+    "clickable"
+  ]
 }
