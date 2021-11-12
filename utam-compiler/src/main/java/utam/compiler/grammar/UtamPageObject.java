@@ -11,7 +11,6 @@ import static utam.compiler.grammar.UtamMethod.ERR_BEFORE_LOAD_HAS_NO_ARGS;
 import static utam.compiler.grammar.UtamMethod.getComposeStatements;
 import static utam.compiler.helpers.AnnotationUtils.getPageObjectAnnotation;
 import static utam.compiler.helpers.AnnotationUtils.getPagePlatformAnnotation;
-import static utam.compiler.helpers.AnnotationUtils.getShadowHostAnnotation;
 import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.MethodContext.BEFORE_LOAD_METHOD_NAME;
@@ -150,9 +149,6 @@ final class UtamPageObject {
     List<AnnotationProvider> annotations = new ArrayList<>();
     if (rootLocator != null) {
       annotations.add(getPageObjectAnnotation(rootLocator));
-    }
-    if (shadow != null) {
-      annotations.add(getShadowHostAnnotation(true));
     }
     if (platform != null) {
       annotations.add(getPagePlatformAnnotation(platform));

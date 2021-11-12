@@ -52,15 +52,6 @@ public abstract class PageMarker {
   }
 
   /**
-   * marks shadow root <br> if marked it means PO has shadow root
-   */
-  @Target(ElementType.TYPE)
-  @Retention(RetentionPolicy.RUNTIME)
-  public @interface isShadowHost {
-
-  }
-
-  /**
    * page context type annotation
    */
   @Target(ElementType.TYPE)

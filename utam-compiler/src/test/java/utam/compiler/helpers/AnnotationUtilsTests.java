@@ -47,21 +47,6 @@ public class AnnotationUtilsTests {
         false);
   }
 
-  /** The getShadowHostAnnotation method should return the proper value */
-  @Test
-  public void testGetShadowHostAnnotation() {
-    AnnotationProvider provider = AnnotationUtils.getShadowHostAnnotation(true);
-    assertThat(provider.getAnnotationText(), is(equalTo("@PageMarker.isShadowHost")));
-    assertThat(getImportedTypes(provider), containsInAnyOrder(PAGE_OBJECT_ANNOTATION_CLASS));
-  }
-
-  /** The getShadowHostAnnotation method should return the proper value with an argument of false */
-  @Test
-  public void testGetShadowHostAnnotationWithFalse() {
-    AnnotationProvider provider = AnnotationUtils.getShadowHostAnnotation(false);
-    assertThat(provider, is(equalTo(AnnotationUtils.EMPTY_ANNOTATION)));
-  }
-
   /** The getSelectorAnnotation method should return the proper value */
   @Test
   public void testGetSelectorAnnotation() {
