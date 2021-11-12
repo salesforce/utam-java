@@ -33,8 +33,10 @@ public enum BasicElementInterface implements TypeProvider {
   editable(Editable.class),
   touchable(Touchable.class);
 
-  public static final String ERR_UNSUPPORTED_ELEMENT_TYPE = "element '%s': type %s is not supported, "
-      + "valid values are: " + nameList();
+  public static final String ERR_UNSUPPORTED_ELEMENT_TYPE =
+      "element '%s': type %s is not supported, "
+          + "valid values are: " + Arrays.stream(values()).map(Enum::name)
+          .collect(Collectors.joining(", "));
   private final Class type;
 
   BasicElementInterface(Class type) {
@@ -97,11 +99,6 @@ public enum BasicElementInterface implements TypeProvider {
       }
     }
     return null;
-  }
-
-  public static String nameList() {
-    return Arrays.stream(values())
-        .map(Enum::name).collect(Collectors.joining(", "));
   }
 
   /**
