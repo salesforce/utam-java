@@ -96,11 +96,11 @@ public final class UtamElement {
       if (CONTAINER_ELEMENT_TYPE_NAME.equals(value)) {
         return new SimpleEntry<>(Container::new, new String[] {value});
       }
-      if(FRAME_ELEMENT_TYPE_NAME.equals(value)) {
-        return new SimpleEntry<>(Frame::new, new String[] {value});
+      if (FRAME_ELEMENT_TYPE_NAME.equals(value)) {
+        return new SimpleEntry<>(Frame::new, new String[]{value});
       }
-      if(TranslationTypesConfigJava.isPageObjectType(value)) {
-        return new SimpleEntry<>(Custom::new, new String[] {value});
+      if (TranslationTypesConfigJava.isPageObjectType(value)) {
+        return new SimpleEntry<>(Custom::new, new String[]{value});
       }
     }
     String[] type = processBasicTypeNode(typeNode, name);
