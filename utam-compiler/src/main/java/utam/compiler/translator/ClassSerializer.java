@@ -97,6 +97,10 @@ public final class ClassSerializer {
             .filter(this::isUsedMethod)
             .flatMap(method -> getMethodDeclaration(method).stream()).forEach(out::add);
     out.add(NEW_LINE);
+    source.getUnionTypes().forEach(unionType -> {
+      out.addAll(unionType.getDeclarationCode());
+      out.add(NEW_LINE);
+    });
     addPublicElementClassDeclarations(out);
     addPrivateElementClassDeclarations(out);
     out.add(NEW_LINE);

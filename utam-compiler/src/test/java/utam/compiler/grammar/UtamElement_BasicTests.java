@@ -19,14 +19,11 @@ import static utam.compiler.grammar.TestUtilities.*;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_FILTER_NEEDS_LIST;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_MISSING_SELECTOR_PROPERTY;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_NESTED_ELEMENTS;
-import static utam.compiler.grammar.UtamElement.ERR_TYPE_INVALID_ARRAY_TYPES;
-import static utam.compiler.grammar.UtamElement.ERR_TYPE_INVALID_ARRAY_VALUES;
-import static utam.compiler.grammar.UtamElement.ERR_TYPE_INVALID_STRING_VALUE;
-import static utam.compiler.grammar.UtamElement.ERR_TYPE_UNSUPPORTED_NODE;
 import static utam.compiler.grammar.UtamElement.Type;
 import static utam.compiler.grammar.UtamElementFilter_Tests.getInnerTextFilter;
 import static utam.compiler.grammar.UtamSelectorTests.getListCssSelector;
 import static utam.compiler.grammar.UtamSelectorTests.getUtamCssSelector;
+import static utam.compiler.helpers.BasicElementInterface.ERR_UNSUPPORTED_ELEMENT_TYPE;
 
 import java.util.List;
 import java.util.Objects;
@@ -72,6 +69,10 @@ public class UtamElement_BasicTests {
 
   private static String getBasicSupportedProperties() {
     return Type.BASIC.getSupportedPropertiesErr(ELEMENT_NAME);
+  }
+
+  private static TranslationContext getContext(String fileName) {
+    return new DeserializerUtilities().getContext("element/" + fileName);
   }
 
   /**
@@ -460,7 +461,7 @@ public class UtamElement_BasicTests {
   public void testNullableList() {
     MethodInfo methodInfo = new MethodInfo("getNullableList", "List<NullableListElement>");
     methodInfo.addCodeLine("return element(this.nullableList).buildList(NullableListElement.class, NullableListElementImpl.class)");
-    TranslationContext context = new DeserializerUtilities().getContext("element/basicElementNullable");
+    TranslationContext context = getContext("basicElementNullable");
     PageObjectMethod method = context.getMethod("getNullableList");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
@@ -470,7 +471,7 @@ public class UtamElement_BasicTests {
     MethodInfo methodInfo = new MethodInfo("getNullableFilter", "NullableFilterElement");
     methodInfo.addCodeLine("return element(this.nullableFilter).build(NullableFilterElement.class, "
         + "NullableFilterElementImpl.class, elm -> Boolean.TRUE.equals(elm.isVisible()))");
-    TranslationContext context = new DeserializerUtilities().getContext("element/basicElementNullable");
+    TranslationContext context = getContext("basicElementNullable");
     PageObjectMethod method = context.getMethod("getNullableFilter");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
@@ -479,70 +480,35 @@ public class UtamElement_BasicTests {
   public void testNullableSingle() {
     MethodInfo methodInfo = new MethodInfo("getNullable", "NullableElement");
     methodInfo.addCodeLine("return element(this.nullable).build(NullableElement.class, NullableElementImpl.class)");
-    TranslationContext context = new DeserializerUtilities().getContext("element/basicElementNullable");
+    TranslationContext context = getContext("basicElementNullable");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("getNullable"), methodInfo);
   }
 
   @Test
-  public void testElementTypeAsStringWithInvalidValueThrows() {
-    UtamError e = expectThrows(
-        UtamError.class,
-        () -> TestUtilities.UtamEntityCreator.createUtamElement(
-            ELEMENT_NAME, "invalid", getUtamCssSelector()));
-    assertThat(
-        e.getMessage(),
-        containsString(String.format(ERR_TYPE_INVALID_STRING_VALUE, ELEMENT_NAME, "invalid")));
-  }
-
-  @Test
-  public void testBasicElementTypeArrayWithInvalidValueThrows() {
-    UtamError e = expectThrows(
-        UtamError.class,
-        () -> TestUtilities.UtamEntityCreator.createUtamElement(
-            ELEMENT_NAME, new String[] {"invalid"}, getUtamCssSelector()));
-    assertThat(
-        e.getMessage(),
-        containsString(String.format(ERR_TYPE_INVALID_ARRAY_VALUES, ELEMENT_NAME)));
-  }
-
-  @Test
-  public void testElementNodeWithInvalidTypeThrows() {
-    String json =
-        "{"
-            + "  \"name\": \"simpleElement\","
-            + "  \"type\": {},"
-            + "  \"selector\": {"
-            + "    \"css\": \"simpleSelector\""
-            + "  }"
-            + "}";
-    UtamError e = expectThrows(UtamError.class, () ->
-        getElementAbstraction(json).testRootTraverse(TestUtilities.getTestTranslationContext()));
-    assertThat(
-        e.getCause().getMessage(),
-        containsString(String.format(ERR_TYPE_UNSUPPORTED_NODE, "simpleElement")));
+  public void testBasicElementTypeAsString() {
+    TranslationContext translationContext = getContext("basicTypes");
+    ElementContext elementContext = translationContext.getElement("stringType");
+    assertThat(elementContext.getType().getFullName(), is(equalTo("StringTypeElement")));
   }
 
   @Test
   public void testElementNodeWithInvalidArrayElementTypeThrows() {
-    String json =
-        "{"
-            + "  \"name\": \"simpleElement\","
-            + "  \"type\": [ true ],"
-            + "  \"selector\": {"
-            + "    \"css\": \"simpleSelector\""
-            + "  }"
-            + "}";
-    UtamError e = expectThrows(UtamError.class, () ->
-        getElementAbstraction(json).testRootTraverse(TestUtilities.getTestTranslationContext()));
-    assertThat(
-        e.getCause().getMessage(),
-        containsString(String.format(ERR_TYPE_INVALID_ARRAY_TYPES, "simpleElement")));
+    String expectedError = String.format(ERR_UNSUPPORTED_ELEMENT_TYPE, ELEMENT_NAME, "[ true ]");
+    UtamError e = expectThrows(UtamError.class, () -> getContext("wrongBasicTypeArray"));
+    assertThat(e.getCause().getMessage(), containsString(expectedError));
   }
 
   @Test
-  public void testBasicElementTypeAsString() {
-    TranslationContext translationContext = new DeserializerUtilities().getContext("element/basicTypes");
-    ElementContext elementContext = translationContext.getElement("stringType");
-    assertThat(elementContext.getType().getFullName(), is(equalTo("StringTypeElement")));
+  public void testElementTypeAsStringWithInvalidValueThrows() {
+    String expectedError = String.format(ERR_UNSUPPORTED_ELEMENT_TYPE, ELEMENT_NAME, "\"wrong\"");
+    UtamError e = expectThrows(UtamError.class, () -> getContext("wrongBasicType"));
+    assertThat(e.getCause().getMessage(), containsString(expectedError));
+  }
+
+  @Test
+  public void testElementNodeWithInvalidArrayElementThrows() {
+    String expectedError = String.format(ERR_UNSUPPORTED_ELEMENT_TYPE, ELEMENT_NAME, "\"wrong\"");
+    UtamError e = expectThrows(UtamError.class, () -> getContext("wrongBasicTypeArrayElement"));
+    assertThat(e.getCause().getMessage(), containsString(expectedError));
   }
 }

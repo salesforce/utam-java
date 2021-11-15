@@ -58,8 +58,7 @@ public class UtamElementFilter_Tests {
   }
 
   private static void setElementFilter(UtamElementFilter filter, UtamElement.Type elementNodeType) {
-    filter.setElementFilter(getTestTranslationContext(), elementNodeType, ACTIONABLE_TYPE,
-        ELEMENT_NAME);
+    filter.setElementFilter(getTestTranslationContext(), elementNodeType, ACTIONABLE_TYPE, ELEMENT_NAME);
   }
 
   @Test

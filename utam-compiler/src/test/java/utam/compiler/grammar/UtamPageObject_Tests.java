@@ -14,7 +14,6 @@ import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.PageObjectDeclaration;
-import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
@@ -27,7 +26,6 @@ import static utam.compiler.grammar.TestUtilities.*;
 import static utam.compiler.grammar.UtamPageObject.*;
 import static utam.compiler.grammar.UtamProfile_Tests.PROFILE_KEY;
 import static utam.compiler.grammar.UtamProfile_Tests.PROFILE_VALUE;
-import static utam.compiler.helpers.TypeUtilities.ROOT_ELEMENT_TYPE;
 import static utam.compiler.grammar.UtamSelectorTests.SELECTOR_STRING;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
@@ -211,21 +209,6 @@ public class UtamPageObject_Tests {
   }
 
   @Test
-  public void testAbstractWithRootElementExposed() {
-    MethodInfo info = new MethodInfo("getRoot", "RootElement");
-    info.addCodeLine("return this.getRootElement()");
-    info.addImportedTypes(ROOT_ELEMENT_TYPE.getFullName());
-    info.setIsPublic(true);
-    UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.isExposeRootElement = true;
-    utamPageObject.rootElementType = new String[] { "clickable" };
-    TranslationContext context = getTestTranslationContext();
-    utamPageObject.compile(context);
-    PageObjectMethod rootElementMethod = context.getRootElement().getElementMethod();
-    PageObjectValidationTestHelper.validateMethod(rootElementMethod, info);
-  }
-
-  @Test
   public void testAbstractWithNonNullShadowThrows() {
     UtamPageObject utamPageObject = new UtamPageObject();
     utamPageObject.isAbstract = true;
@@ -271,47 +254,6 @@ public class UtamPageObject_Tests {
     TranslationContext context = getTestTranslationContext();
     utamPageObject.compile(context);
     assertThat(context.getRootElement().getElementMethod(), is(notNullValue()));
-  }
-
-  @Test
-  public void testRootElementWithType() {
-    MethodInfo info = new MethodInfo("getRoot", "RootElement");
-    info.addCodeLine("return this.getRootElement()");
-    info.setIsPublic(false);
-    UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.rootElementType = new String[] { "clickable" };
-    TranslationContext context = getTestTranslationContext();
-    utamPageObject.compile(context);
-    PageObjectMethod rootElementMethod = context.getRootElement().getElementMethod();
-    PageObjectValidationTestHelper.validateMethod(rootElementMethod, info);
-  }
-
-  @Test
-  public void testRootElementWithActionableType() {
-    MethodInfo info = new MethodInfo("getRoot", "RootElement");
-    info.addCodeLine("return this.getRootElement()");
-    info.addImportedTypes(ROOT_ELEMENT_TYPE.getFullName());
-    info.setIsPublic(false);
-    UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.rootElementType = new String[] { "actionable" };
-    TranslationContext context = getTestTranslationContext();
-    utamPageObject.compile(context);
-    PageObjectMethod rootElementMethod = context.getRootElement().getElementMethod();
-    PageObjectValidationTestHelper.validateMethod(rootElementMethod, info);
-  }
-
-  @Test
-  public void testPublicRootElementWithType() {
-    MethodInfo info = new MethodInfo("getRoot", "RootElement");
-    info.addCodeLine("return this.getRootElement()");
-    UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.rootElementType = new String[] { "clickable" };
-    utamPageObject.isExposeRootElement = true;
-    TranslationContext context = getTestTranslationContext();
-    utamPageObject.compile(context);
-    PageObjectMethod rootElementMethod = context.getRootElement().getElementMethod();
-    PageObjectValidationTestHelper.validateMethod(rootElementMethod, info);
-    assertThat(rootElementMethod.isPublic(), is(true));
   }
 
   @Test

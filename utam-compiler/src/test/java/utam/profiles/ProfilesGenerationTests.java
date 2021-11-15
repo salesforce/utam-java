@@ -39,7 +39,6 @@ import utam.core.framework.context.DefaultProfileContext;
 import utam.core.framework.context.MobilePlatformType;
 import utam.core.framework.context.Profile;
 import utam.core.framework.context.ProfileContext;
-import utam.core.selenium.element.DriverAdapter;
 import utam.profiles.pageobjects.DeviceInterface;
 import utam.profiles.pageobjects.OnlyAndroidInterface;
 import utam.profiles.pageobjects.OnlyDefault;

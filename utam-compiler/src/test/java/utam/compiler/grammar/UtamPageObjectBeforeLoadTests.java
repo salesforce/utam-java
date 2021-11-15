@@ -22,11 +22,6 @@ import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.framework.consumer.UtamError;
 
-/**
- * Provides tests for UtamMethod class with beforeLoad method.
- *
- * @author igor.khorev
- */
 public class UtamPageObjectBeforeLoadTests {
 
   private static final String METHOD_NAME = BEFORE_LOAD_METHOD_NAME;
@@ -45,7 +40,7 @@ public class UtamPageObjectBeforeLoadTests {
     TranslationContext context = getContext("rootApplyReturnSelf");
     PageObjectMethod method = context.getMethod(METHOD_NAME);
     assertThat(method.getDeclaration().getCodeLine(), is("Object load()"));
-    methodInfo.addCodeLine("RootElement root0 = this.getRootElement()");
+    methodInfo.addCodeLine("BasePageElement root0 = this.getRootElement()");
     methodInfo.addCodeLine("root0.isPresent()");
     methodInfo.addCodeLine("root0.getText()");
     methodInfo.addCodeLine("return this");
@@ -58,7 +53,7 @@ public class UtamPageObjectBeforeLoadTests {
     TranslationContext context = getContext("rootApplyWithMatcher");
     PageObjectMethod method = context.getMethod(METHOD_NAME);
     assertThat(method.getDeclaration().getCodeLine(), is("Object load()"));
-    methodInfo.addCodeLine("RootElement root0 = this.getRootElement()");
+    methodInfo.addCodeLine("BasicElement root0 = this.getRoot()");
     methodInfo.addCodeLine("String statement0 = root0.getText()");
     methodInfo.addCodeLine("Boolean matcher0 = \"text\".equals(statement0)");
     methodInfo.addCodeLine("return matcher0");
@@ -85,7 +80,7 @@ public class UtamPageObjectBeforeLoadTests {
     TranslationContext context = getContext("waitForRootPresence");
     MethodInfo methodInfo = getExpectedMethod();
     methodInfo.addCodeLine("Boolean statement0 = this.waitFor(() -> {\n"
-        + "RootElement proot0 = this.getRootElement();\n"
+        + "BasePageElement proot0 = this.getRootElement();\n"
         + "Boolean pstatement0 = proot0.isPresent();\n"
         + "return pstatement0;\n"
         + "})");
@@ -98,7 +93,7 @@ public class UtamPageObjectBeforeLoadTests {
     TranslationContext context = getContext("waitForRootReturnsSelf");
     MethodInfo methodInfo = getExpectedMethod();
     methodInfo.addCodeLine("Test statement0 = this.waitFor(() -> {\n"
-        + "RootElement proot0 = this.getRootElement();\n"
+        + "BasePageElement proot0 = this.getRootElement();\n"
         + "proot0.isPresent();\n"
         + "return this;\n"
         + "})");

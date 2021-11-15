@@ -1,0 +1,18 @@
+{
+  "exposeRootElement": true,
+  "type": [
+    "clickable",
+    "editable"
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "apply": "click",
+          "element": "root"
+        }
+      ]
+    }
+  ]
+}

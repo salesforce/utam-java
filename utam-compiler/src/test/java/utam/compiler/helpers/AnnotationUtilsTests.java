@@ -142,7 +142,8 @@ public class AnnotationUtilsTests {
   public void testGetFindAnnotationWithEmptyElement() {
     AnnotationProvider provider =
         AnnotationUtils.getFindAnnotation(
-            getCssSelector(".fakeSelector"), new ElementContext.Root(TEST_PAGE_OBJECT), true, false);
+            getCssSelector(".fakeSelector"),
+            new ElementContext.Root(TEST_PAGE_OBJECT, null, null), true, false);
     assertThat(
         provider.getAnnotationText(),
         is(equalTo("@ElementMarker.Find(css = \".fakeSelector\", expand = true)")));

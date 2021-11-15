@@ -1,4 +1,5 @@
 {
+  "type" : "actionable",
   "methods": [
     {
       "name": "test",

@@ -37,18 +37,14 @@ public class UtamElement_CustomTests {
   private static final String COMPONENT_TYPE_LONG_NAME = "utam.test.pageobjects.test.ComponentName";
   private static final String SCOPE_ELEMENT_NAME = "scope";
 
-  private static UtamElement getPublicComponentElement(
-      UtamSelector selector, UtamElementFilter filter) {
-    UtamElement utamElement = TestUtilities.UtamEntityCreator.createUtamElement(ELEMENT_NAME);
-    utamElement.type = new String[] {COMPONENT_TYPE_URI};
+  private static UtamElement getPublicComponentElement(UtamSelector selector) {
+    UtamElement utamElement = TestUtilities.UtamEntityCreator.createUtamElement(ELEMENT_NAME, COMPONENT_TYPE_URI, selector);
     utamElement.isPublic = true;
-    utamElement.selector = selector;
-    utamElement.filter = filter;
     return utamElement;
   }
 
   private static UtamElement getPublicComponentElement() {
-    return getPublicComponentElement(getUtamCssSelector(), null);
+    return getPublicComponentElement(getUtamCssSelector());
   }
 
   private static void getAbstraction(UtamElement element) {
@@ -69,27 +65,18 @@ public class UtamElement_CustomTests {
     return Type.CUSTOM.getSupportedPropertiesErr(ELEMENT_NAME);
   }
 
-  /** The getSimpleType method for an invalid element type should throw the proper exception */
-  @Test
-  public void testGetSimpleTypeWithInvalidTypeThrows() {
-    UtamElement element = TestUtilities.UtamEntityCreator.createUtamElement(ELEMENT_NAME);
-    element.type = new String[] {"invalid"};
-    UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(
-        e.getMessage(), containsString(String.format(ERR_ELEMENT_OF_UNKNOWN_TYPE, ELEMENT_NAME)));
-  }
-
   /** The validateComponentElement method with a component should succeed */
   @Test
   public void testValidateComponentElement() {
-    UtamElement element = getPublicComponentElement(getUtamCssSelector(), null);
+    UtamElement element = getPublicComponentElement();
     getAbstraction(element);
   }
 
   /** The validateComponentElement method with a component should succeed */
   @Test
   public void testValidateComponentElementWithFilter() {
-    UtamElement element = getPublicComponentElement(getListCssSelector(), getInnerTextFilter());
+    UtamElement element = getPublicComponentElement(getListCssSelector());
+    element.filter = getInnerTextFilter();
     getAbstraction(element);
   }
 
@@ -99,7 +86,7 @@ public class UtamElement_CustomTests {
    */
   @Test
   public void testValidateComponentElementWithNullSelectorThrows() {
-    UtamElement element = getPublicComponentElement(null, null);
+    UtamElement element = getPublicComponentElement(null);
     UtamError e = expectThrows(UtamError.class, () -> getAbstraction(element));
     assertThat(
         e.getMessage(), is(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, ELEMENT_NAME)));
@@ -111,7 +98,8 @@ public class UtamElement_CustomTests {
    */
   @Test
   public void testValidateComponentWithFilterAndNonListSelectorThrows() {
-    UtamElement element = getPublicComponentElement(getUtamCssSelector(), getInnerTextFilter());
+    UtamElement element = getPublicComponentElement();
+    element.filter = getInnerTextFilter();
     UtamError e = expectThrows(UtamError.class, () -> getAbstraction(element));
     assertThat(
         e.getMessage(), containsString(String.format(ERR_ELEMENT_FILTER_NEEDS_LIST, ELEMENT_NAME)));
@@ -158,7 +146,7 @@ public class UtamElement_CustomTests {
   public void testGetAsComponentWithListSelector() {
     UtamPageObject object = new UtamPageObject();
     TranslationContext context = getTestTranslationContext();
-    object.elements = new UtamElement[] {getPublicComponentElement(getListCssSelector(), null)};
+    object.elements = new UtamElement[] {getPublicComponentElement(getListCssSelector())};
     object.compile(context);
     ElementContext elementContext = context.getElement(ELEMENT_NAME);
     assertThat(elementContext.getType().getSimpleName(), is(COMPONENT_TYPE_SHORT_NAME));
@@ -172,12 +160,9 @@ public class UtamElement_CustomTests {
   public void testGetAsComponentWithListSelectorAndFilter() {
     UtamPageObject object = new UtamPageObject();
     TranslationContext context = getTestTranslationContext();
-    object.elements =
-        new UtamElement[] {
-          getPublicComponentElement(
-              getListCssSelector(),
-              new UtamElementFilter("apply", new UtamMatcher(MatcherType.isTrue, null)))
-        };
+    UtamElement element = getPublicComponentElement(getListCssSelector());
+    element.filter = new UtamElementFilter("apply", new UtamMatcher(MatcherType.isTrue, null));
+    object.elements = new UtamElement[] { element };
     object.compile(context);
     ElementContext elementContext = context.getElement(ELEMENT_NAME);
     assertThat(elementContext.getType().getSimpleName(), is(equalTo(COMPONENT_TYPE_SHORT_NAME)));
@@ -199,7 +184,7 @@ public class UtamElement_CustomTests {
   /** The getDeclaredMethod method should return null for a non-public component */
   @Test
   public void testGetDeclaredMethodWithNonPublicComponent() {
-    UtamElement element = getPublicComponentElement(getUtamCssSelector(), null);
+    UtamElement element = getPublicComponentElement();
     element.isPublic = false;
     assertThat(getElementMethod(element), is(not(nullValue())));
   }
@@ -210,7 +195,7 @@ public class UtamElement_CustomTests {
    */
   @Test
   public void testGetDeclaredMethodWithExternalComponent() {
-    UtamElement element = getPublicComponentElement(getUtamCssSelector(), null);
+    UtamElement element = getPublicComponentElement();
     element.isExternal = true;
     MethodInfo expectedMethod = new MethodInfo(METHOD_NAME, COMPONENT_TYPE_SHORT_NAME);
     expectedMethod.addCodeLines(
@@ -223,7 +208,7 @@ public class UtamElement_CustomTests {
 
   @Test
   public void testElementWithListCantBeExternal() {
-    UtamElement element = getPublicComponentElement(getListCssSelector(), null);
+    UtamElement element = getPublicComponentElement(getListCssSelector());
     element.isExternal = true;
     UtamError e = expectThrows(UtamError.class, element::getAbstraction);
     assertThat(

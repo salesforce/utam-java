@@ -8,17 +8,19 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.helpers.AnnotationUtils.getFindAnnotation;
+import static utam.compiler.helpers.BasicElementInterface.processBasicTypeNode;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT_TYPE_NAME;
 import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT_TYPE_NAME;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import utam.compiler.UtamCompilationError;
-import utam.compiler.helpers.BasicElementInterface;
+import java.util.Map.Entry;
+import java.util.function.Supplier;
 import utam.compiler.helpers.BasicElementUnionType;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementUnitTestHelper;
@@ -43,7 +45,6 @@ import utam.core.framework.consumer.UtamError;
  */
 public final class UtamElement {
 
-  static final String ERR_ELEMENT_OF_UNKNOWN_TYPE = "element '%s' has unknown type";
   static final String ERR_ELEMENT_FILTER_NEEDS_LIST =
       "element '%s': filter can only be set for list";
   static final String ERR_ELEMENT_MISSING_SELECTOR_PROPERTY =
@@ -53,17 +54,6 @@ public final class UtamElement {
       "element '%s': external flag is not supported";
   static final String ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED =
       "element '%s': frame selector cannot return all";
-  static final String ERR_TYPE_INVALID_ARRAY_TYPES =
-      "element '%s': type array must contain only string values";
-  static final String ERR_TYPE_INVALID_ARRAY_VALUES =
-      "element '%s': type array contains invalid values; valid values are: " + BasicElementInterface
-          .nameList();
-  static final String ERR_TYPE_INVALID_STRING_VALUE =
-      "element '%s': invalid string value '%s'; "
-          + "type property string values must be either 'container', 'frame', or a Page Object type. "
-          + "Basic types should be declared as an array of strings.";
-  static final String ERR_TYPE_UNSUPPORTED_NODE =
-      "element '%s': type should be string or array of strings";
 
   final String name;
   UtamSelector selector;
@@ -74,7 +64,7 @@ public final class UtamElement {
   UtamElementFilter filter;
   private final Boolean isNullable;
   Boolean isExternal;
-  private Traversal traversalAbstraction;
+  private final Supplier<Traversal> traversalAbstraction;
 
   @JsonCreator
   UtamElement(
@@ -88,7 +78,6 @@ public final class UtamElement {
       @JsonProperty("shadow") UtamShadowElement shadow,
       @JsonProperty("elements") UtamElement[] elements) {
     this.name = name;
-    this.type = processTypeNode(type);
     this.isPublic = isPublic;
     this.selector = selector;
     this.shadow = shadow;
@@ -96,56 +85,30 @@ public final class UtamElement {
     this.filter = filter;
     this.isNullable = isNullable;
     this.isExternal = isExternal;
+    Entry<Supplier<Traversal>, String[]> elementType = processTypeNode(type);
+    this.type = elementType.getValue();
+    this.traversalAbstraction = elementType.getKey();
   }
 
-  private String[] processTypeNode(JsonNode typeNode) {
-    if (typeNode == null || typeNode.isNull()) {
-      return new String[]{};
-    }
-    if (typeNode.isTextual()) {
+  private Entry<Supplier<Traversal>, String[]> processTypeNode(JsonNode typeNode) {
+    if (typeNode != null && typeNode.isTextual()) {
       String value = typeNode.textValue();
-      if (CONTAINER_ELEMENT_TYPE_NAME.equals(value)
-          || FRAME_ELEMENT_TYPE_NAME.equals(value)
-          || BasicElementInterface.isBasicType(value)
-          || TranslationTypesConfigJava.isPageObjectType(value)) {
-        return new String[] { value };
+      if (CONTAINER_ELEMENT_TYPE_NAME.equals(value)) {
+        return new SimpleEntry<>(Container::new, new String[] {value});
       }
-      throw new UtamCompilationError(String.format(ERR_TYPE_INVALID_STRING_VALUE, name, value));
-    }
-    if (typeNode.isArray()) {
-      List<String> values = new ArrayList<>();
-      for (JsonNode valueNode : typeNode) {
-        if (!valueNode.isTextual()) {
-          throw new UtamError(String.format(ERR_TYPE_INVALID_ARRAY_TYPES, name));
-        }
-        String valueStr = valueNode.textValue();
-        if(!BasicElementInterface.isBasicType(valueStr)) {
-          throw new UtamCompilationError(String.format(ERR_TYPE_INVALID_ARRAY_VALUES, name));
-        }
-        values.add(valueStr);
+      if (FRAME_ELEMENT_TYPE_NAME.equals(value)) {
+        return new SimpleEntry<>(Frame::new, new String[]{value});
       }
-      return values.toArray(String[]::new);
+      if (TranslationTypesConfigJava.isPageObjectType(value)) {
+        return new SimpleEntry<>(Custom::new, new String[]{value});
+      }
     }
-    throw new UtamCompilationError(String.format(ERR_TYPE_UNSUPPORTED_NODE, name));
+    String[] type = processBasicTypeNode(typeNode, name);
+    return new SimpleEntry<>(Basic::new, type);
   }
 
   final Traversal getAbstraction() {
-    if (traversalAbstraction != null) {
-      return traversalAbstraction;
-    }
-    Type elementType = Type.getElementType(type);
-    if (elementType == Type.CONTAINER) {
-      traversalAbstraction = new Container();
-    } else if (elementType == Type.FRAME) {
-      traversalAbstraction = new Frame();
-    } else if (elementType == Type.BASIC) {
-      traversalAbstraction = new Basic();
-    } else if (elementType == Type.CUSTOM) {
-      traversalAbstraction = new Custom();
-    } else {
-      throw new UtamError(String.format(ERR_ELEMENT_OF_UNKNOWN_TYPE, name));
-    }
-    return traversalAbstraction;
+    return traversalAbstraction.get();
   }
 
   private boolean isPublic() {
@@ -182,7 +145,6 @@ public final class UtamElement {
   }
 
   public enum Type {
-    UNKNOWN(""),
     BASIC(String.join(", ",
         "name", "public", "selector", "type", "filter", "nullable", "shadow", "elements")),
     CUSTOM(String.join(", ",
@@ -195,19 +157,6 @@ public final class UtamElement {
 
     Type(String supportedProperties) {
       this.supportedProperties = supportedProperties;
-    }
-
-    static Type getElementType(String[] type) {
-      if (type.length == 1 && CONTAINER_ELEMENT_TYPE_NAME.equals(type[0])) {
-        return Type.CONTAINER;
-      } else if (type.length == 1 && FRAME_ELEMENT_TYPE_NAME.equals(type[0])) {
-        return Type.FRAME;
-      } else if (type.length == 1 && TranslationTypesConfigJava.isPageObjectType(type[0])) {
-        return Type.CUSTOM;
-      } else if (BasicElementUnionType.isBasicType(type)) {
-        return Type.BASIC;
-      }
-      return Type.UNKNOWN;
     }
 
     String getSupportedPropertiesErr(String elementName) {

@@ -197,6 +197,11 @@ public final class JsonDeserializer {
     public String getComments() {
       return "";
     }
+
+    @Override
+    public List<UnionType> getUnionTypes() {
+      return context.getUnionTypes(true);
+    }
   }
 
   static class Implementation implements PageObjectClass {
@@ -271,6 +276,11 @@ public final class JsonDeserializer {
           .map(method -> method.getDeclaration().getReturnType())
           .map(TypeUtilities::getElementType)
           .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UnionType> getUnionTypes() {
+      return context.getUnionTypes(false);
     }
   }
 }

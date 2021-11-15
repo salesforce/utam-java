@@ -1,0 +1,14 @@
+{
+  "exposeRootElement": true,
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "apply": "getText",
+          "element": "root"
+        }
+      ]
+    }
+  ]
+}

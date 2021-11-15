@@ -287,7 +287,7 @@ public class TranslationContextTests {
   @Test
   public void testGetRootElement() {
     TranslationContext context = getTestTranslationContext();
-    ElementContext defaultRoot = new ElementContext.Root(editable);
+    ElementContext defaultRoot = new ElementContext.Root(editable, null, editable);
     context.setElement(defaultRoot);
     assertThat(context.getRootElement().getName(), is(equalTo(ElementContext.ROOT_ELEMENT_NAME)));
   }
