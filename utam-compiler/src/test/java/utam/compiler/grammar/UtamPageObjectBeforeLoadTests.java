@@ -13,7 +13,7 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.UtamMethod.ERR_BEFORE_LOAD_HAS_NO_ARGS;
 import static utam.compiler.grammar.UtamPageObject.ERR_DISALLOWED_ELEMENT;
-import static utam.compiler.helpers.MethodContext.BEFORE_LOAD_METHOD_NAME;
+import static utam.compiler.grammar.UtamPageObject.BEFORE_LOAD_METHOD_NAME;
 
 import org.testng.annotations.Test;
 import utam.compiler.helpers.TranslationContext;

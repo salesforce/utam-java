@@ -15,7 +15,6 @@ import static utam.compiler.helpers.BasicElementInterface.processBasicTypeNode;
 import static utam.compiler.helpers.BasicElementUnionType.asBasicType;
 import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
-import static utam.compiler.helpers.MethodContext.BEFORE_LOAD_METHOD_NAME;
 import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.BASE_ROOT_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
@@ -60,6 +59,7 @@ import utam.core.framework.element.BasePageElement;
  */
 final class UtamPageObject {
 
+  static final String BEFORE_LOAD_METHOD_NAME = "load";
   static final String ERR_ROOT_PROFILE_HAS_NO_INTERFACE =
       "profile can only be set for a page object that implements an interface";
   static final String ERR_ROOT_MISSING_SELECTOR =

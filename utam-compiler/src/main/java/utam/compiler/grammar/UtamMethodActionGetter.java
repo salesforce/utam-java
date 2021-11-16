@@ -106,7 +106,7 @@ class UtamMethodActionGetter extends UtamMethodAction {
       getterParameters = new ArgsProcessorWithExpectedTypes(context, methodContext,
           expectedElementArgsTypes, p -> methodContext.setStatementParameter(p, statementContext))
           .getParameters(args);
-    } else if (methodContext.isReusedElement(elementName)) {
+    } else if (methodContext.getElementUsageTracker().isReusedElement(elementName)) {
       getterParameters = elementGetter.getParameters(); // element parameters already added
     } else {
       getterParameters = elementGetter.getParameters()
@@ -114,7 +114,7 @@ class UtamMethodActionGetter extends UtamMethodAction {
           .map(p -> methodContext.setStatementParameter(p, statementContext))
           .collect(Collectors.toList());
     }
-    methodContext.setElementUsage(statementContext.getVariableName(), element);
+    methodContext.getElementUsageTracker().setElementUsage(statementContext.getVariableName(), element);
     return new GetterInvocation(invocationStr, returnType, getterParameters);
   }
 

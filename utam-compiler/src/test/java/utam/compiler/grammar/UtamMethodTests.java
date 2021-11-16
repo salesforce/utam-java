@@ -12,9 +12,12 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.UtamMethod.ERR_METHOD_EMPTY_STATEMENTS;
 import static utam.compiler.grammar.UtamMethod.ERR_METHOD_SHOULD_BE_ABSTRACT;
+import static utam.compiler.grammar.UtamMethod.ERR_RETURN_TYPE_ABSTRACT_ONLY;
 
 import java.util.function.Function;
+import org.hamcrest.core.StringContains;
 import org.testng.annotations.Test;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities;
@@ -27,21 +30,32 @@ import utam.core.framework.consumer.UtamError;
  * @author james.evans
  * @since 228
  */
-public class UtamMethod_AbstractTests {
+public class UtamMethodTests {
 
-  private static final String METHOD_NAME = "testMethod";
+  private static final String METHOD_NAME = "test";
 
-  /** The getAbstractMethod method should return the proper value */
+  private static void test(String jsonFile, String expectedError) {
+    UtamError e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities().getContext("validate/compose/" + jsonFile));
+    assertThat(e.getMessage(), StringContains.containsString(expectedError));
+  }
+
+  /**
+   * The getAbstractMethod method should return the proper value
+   */
   @Test
   public void testGetAbstractMethod() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(METHOD_NAME, "string", null);
+    UtamMethod method = TestUtilities.UtamEntityCreator
+        .createUtamMethod(METHOD_NAME, "string", null);
     PageObjectValidationTestHelper.MethodInfo info =
         new PageObjectValidationTestHelper.MethodInfo(METHOD_NAME, "String");
     PageObjectValidationTestHelper.validateMethod(method.getAbstractMethod(context), info);
   }
 
-  /** The getAbstractMethod method with null return type should return the proper value */
+  /**
+   * The getAbstractMethod method with null return type should return the proper value
+   */
   @Test
   public void testGetAbstractMethodWithNullReturnType() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
@@ -51,7 +65,9 @@ public class UtamMethod_AbstractTests {
     PageObjectValidationTestHelper.validateMethod(method.getAbstractMethod(context), info);
   }
 
-  /** The getAbstractMethod method with a component return type should return the proper value */
+  /**
+   * The getAbstractMethod method with a component return type should return the proper value
+   */
   @Test
   public void testGetAbstractMethodWithComponentReturnType() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
@@ -70,7 +86,7 @@ public class UtamMethod_AbstractTests {
   public void testGetAbstractMethodWithComposeThrows() {
     TranslationContext context = TestUtilities.getTestTranslationContext();
     UtamMethod method = TestUtilities.UtamEntityCreator.createUtamMethod(
-        METHOD_NAME, new UtamMethodAction[] {});
+        METHOD_NAME, new UtamMethodAction[]{});
     UtamError e = expectThrows(UtamError.class, () -> method.getAbstractMethod(context));
     assertThat(
         e.getMessage(), containsString(String.format(ERR_METHOD_SHOULD_BE_ABSTRACT, METHOD_NAME)));
@@ -111,7 +127,8 @@ public class UtamMethod_AbstractTests {
   public void testCustomBasicElementTypes() {
     Function<PageObjectMethod, String> getReturnTypeName = method -> method.getDeclaration()
         .getReturnType().getSimpleName();
-    TranslationContext context = new DeserializerUtilities().getContext("interface/customInterface");
+    TranslationContext context = new DeserializerUtilities()
+        .getContext("interface/customInterface");
     assertThat(
         getReturnTypeName.apply(context.getMethod("getPublicElement")),
         is(equalTo("GetPublicElementElement")));
@@ -124,5 +141,23 @@ public class UtamMethod_AbstractTests {
     assertThat(
         context.getElement("privateElement").getType().getSimpleName(),
         is(equalTo("PrivateElementElement")));
+  }
+
+  @Test
+  public void testComposeEmptyStatementsThrows() {
+    String expectedErr = String.format(ERR_METHOD_EMPTY_STATEMENTS, METHOD_NAME);
+    test("emptyCompose", expectedErr);
+  }
+
+  @Test
+  public void testComposeNullStatementsThrows() {
+    String expectedErr = String.format(ERR_METHOD_EMPTY_STATEMENTS, METHOD_NAME);
+    test("nullCompose", expectedErr);
+  }
+
+  @Test
+  public void testComposeReturnNotMatch() {
+    String expectedErr = String.format(ERR_RETURN_TYPE_ABSTRACT_ONLY, METHOD_NAME);
+    test("returnNotSupported", expectedErr);
   }
 }
