@@ -4,27 +4,28 @@
       "name": "test",
       "compose": [
         {
-          "element" : "root",
+          "element": "root",
           "apply": "isPresent"
         },
         {
-          "apply" : "waitFor",
-          "args" : [
+          "apply": "waitFor",
+          "args": [
             {
-              "type" : "function",
-              "predicate" : [
+              "type": "function",
+              "predicate": [
                 {
-                  "element" : "root"
+                  "element": "root"
                 }
               ]
             }
           ]
         },
         {
-          "element" : "root",
+          "element": "root",
           "apply": "isPresent"
         }
       ]
     }
   ]
 }
+
