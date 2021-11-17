@@ -127,9 +127,6 @@ public abstract class ComposeMethodStatement {
     if (statementContext.isLastPredicateStatement() && MethodContext.isNullOrVoid(declaredReturnType)) {
       return VOID;
     }
-    if (declaredReturnType == null) {
-      return VOID;
-    }
     return declaredReturnType;
   }
 

@@ -21,86 +21,94 @@ import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
 /**
- * context of the method, keeps track of elements
+ * Context of the method, keeps track of elements and return type. Class is stateful because of
+ * elements usage tracker.
  *
  * @author elizaveta.ivanova
  * @since 232
  */
 public final class MethodContext {
 
-  public static final String ERR_ARG_DUPLICATE_NAME = "%s: parameter with name '%s' already declared";
-  public static final String BEFORE_LOAD_METHOD_NAME = "load";
+  static final String ERR_ARG_DUPLICATE_NAME = "%s: parameter with name '%s' already declared";
+  static final String ERR_PARAMETER_NEVER_USED = "%s: declared parameter '%s' is never used";
   static final String ERR_METHOD_REFERENCE_ARGS = "%s: method level argument '%s' can't have reference type";
   static final String ERR_REFERENCE_MISSING = "%s: statement declares a reference to '%s', but there’s no matching method parameter";
   static final String ERR_ARG_TYPE_MISMATCH = "%s: statement declares an argument '%s' with type '%s', but the type does not match method parameter";
   static final String ERR_LITERAL_PARAMETER_NOT_ALLOWED = "%s: literal parameter '%s' not allowed at the method level";
-  public static final String ERR_PARAMETER_NEVER_USED = "%s: declared parameter '%s' is never used";
   private final String methodName;
-  // to keep track of element usages
-  private final Map<String, Entry<String, ElementContext>> elementVariables = new HashMap<>();
+  // to keep track of element usages, each predicate has its own tracker
+  private final List<ElementsUsageTracker> elementsUsageTrackers = new ArrayList<>();
   private final ReturnType methodReturnType;
   private final String validationContext;
   private final Map<String, Entry<Boolean, MethodParameter>> declaredMethodLevelParameters = new HashMap<>();
   private final Map<String, MethodParameter> accumulatedStatementsParameters = new HashMap<>();
   private final List<MethodParameter> usedMethodParameters = new ArrayList<>();
+  // index of the current elements usage tracker, starting from 0 and incrementing as we get into a predicate
+  private int elementsUsageContextIndex = 0;
 
   public MethodContext(String methodName, ReturnType declaredReturnType) {
     this.methodName = methodName;
     this.validationContext = String.format("method '%s'", methodName);
     this.methodReturnType = declaredReturnType;
+    this.elementsUsageTrackers.add(new ElementsUsageTracker());
   }
 
-  // used in tests
-  public MethodContext() {
-    this("test", new ReturnType(null, null, "test"));
-  }
-
+  /**
+   * check if method returns void
+   *
+   * @param returnType return type
+   * @return true if method returns void
+   */
   public static boolean isNullOrVoid(TypeProvider returnType) {
     return returnType == null || returnType.isSameType(VOID);
   }
 
+  /**
+   * get declared return type of the method
+   *
+   * @return declared return type
+   */
   public ReturnType getDeclaredReturnType() {
     return methodReturnType;
   }
 
+  /**
+   * get method name
+   *
+   * @return string with method name
+   */
   public String getName() {
     return methodName;
   }
 
   /**
-   * check if element has been used in previous statements
+   * get current elements usage tracker
    *
-   * @param name name of the element from compose statement
-   * @return true if element was already used
+   * @return instance of the tracker
    */
-  public boolean isReusedElement(String name) {
-    return elementVariables.containsKey(name);
+  public final ElementsUsageTracker getElementUsageTracker() {
+    return elementsUsageTrackers.get(elementsUsageContextIndex);
   }
 
   /**
-   * for an element that has been used in previous statements, return variable name
-   *
-   * @param name name of the element from compose statement
-   * @return variable name string
+   * enters predicate context to track used elements separately
    */
-  public String getReusedElementVariable(String name) {
-    return elementVariables.get(name).getKey();
+  public final void enterPredicateContext() {
+    this.elementsUsageContextIndex = elementsUsageTrackers.size();
+    this.elementsUsageTrackers.add(new ElementsUsageTracker());
   }
 
   /**
-   * track reusing of a same element
-   *
-   * @param elementVariable variable name for the element
-   * @param context         element
+   * exits predicate context to track used elements separately
    */
-  public void setElementUsage(String elementVariable, ElementContext context) {
-    elementVariables.put(context.getName(), new SimpleEntry<>(elementVariable, context));
+  public final void exitPredicateContext() {
+    this.elementsUsageContextIndex--;
   }
 
   /**
    * set parameter declared at the method level
    *
-   * @param parameter value
+   * @param parameter parameter instance
    */
   public void setDeclaredParameter(MethodParameter parameter) {
     if (parameter.isLiteral()) {
@@ -123,17 +131,25 @@ public final class MethodContext {
     usedMethodParameters.add(parameter);
   }
 
+  /**
+   * get all method parameters
+   *
+   * @return list of parameters
+   */
   public List<MethodParameter> getMethodParameters() {
     return usedMethodParameters;
   }
 
+  /**
+   * check that all parameters were used, trows an error if there was not
+   */
   public void checkAllParametersWereUsed() {
-    if(declaredMethodLevelParameters.isEmpty()) {
+    if (declaredMethodLevelParameters.isEmpty()) {
       return;
     }
     usedMethodParameters.forEach(p -> {
       String parameterName = p.getValue();
-      if(!declaredMethodLevelParameters.get(parameterName).getKey()) {
+      if (!declaredMethodLevelParameters.get(parameterName).getKey()) {
         throw new UtamCompilationError(
             String.format(ERR_PARAMETER_NEVER_USED, validationContext, parameterName));
       }
@@ -160,9 +176,11 @@ public final class MethodContext {
           throw new UtamCompilationError(
               String.format(ERR_REFERENCE_MISSING, validationContext, parameterName));
         }
-        MethodParameter referencedParameter = declaredMethodLevelParameters.get(parameterName).getValue();
+        MethodParameter referencedParameter = declaredMethodLevelParameters.get(parameterName)
+            .getValue();
         // mark as used
-        declaredMethodLevelParameters.put(parameterName, new SimpleEntry<>(true, referencedParameter));
+        declaredMethodLevelParameters
+            .put(parameterName, new SimpleEntry<>(true, referencedParameter));
         statementArgs.put(parameterName, referencedParameter);
         return referencedParameter;
       }
@@ -173,7 +191,8 @@ public final class MethodContext {
               String.format(
                   ERR_REFERENCE_MISSING, validationContext, parameterName));
         }
-        TypeProvider declaredType = declaredMethodLevelParameters.get(parameterName).getValue().getType();
+        TypeProvider declaredType = declaredMethodLevelParameters.get(parameterName).getValue()
+            .getType();
         if (!argType.isSameType(declaredType)) {
           throw new UtamCompilationError(
               String.format(
@@ -195,5 +214,47 @@ public final class MethodContext {
       nested.forEach(p -> setStatementParameter(p, statementContext));
     }
     return parameter;
+  }
+
+  /**
+   * Tracker for elements used in compose methods. When same element is reused we want to store it
+   * in a variable instead calling the same getter several times.
+   *
+   * @author elizaveta.ivanova
+   * @since 236
+   */
+  public static class ElementsUsageTracker {
+
+    private final Map<String, Entry<String, ElementContext>> elementVariables = new HashMap<>();
+
+    /**
+     * check if element has been used in previous statements
+     *
+     * @param name name of the element from compose statement
+     * @return true if element was already used
+     */
+    public boolean isReusedElement(String name) {
+      return elementVariables.containsKey(name);
+    }
+
+    /**
+     * set element variable usage to track reusing of a same element
+     *
+     * @param elementVariable variable name for the element
+     * @param context         element
+     */
+    public void setElementUsage(String elementVariable, ElementContext context) {
+      elementVariables.put(context.getName(), new SimpleEntry<>(elementVariable, context));
+    }
+
+    /**
+     * for an element that has been used in previous statements, return variable name
+     *
+     * @param name name of the element from compose statement
+     * @return variable name string
+     */
+    public String getReusedElementVariable(String name) {
+      return elementVariables.get(name).getKey();
+    }
   }
 }

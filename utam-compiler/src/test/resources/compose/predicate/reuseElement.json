@@ -1,0 +1,31 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "root",
+          "apply": "isPresent"
+        },
+        {
+          "apply": "waitFor",
+          "args": [
+            {
+              "type": "function",
+              "predicate": [
+                {
+                  "element": "root"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "element": "root",
+          "apply": "isPresent"
+        }
+      ]
+    }
+  ]
+}
+

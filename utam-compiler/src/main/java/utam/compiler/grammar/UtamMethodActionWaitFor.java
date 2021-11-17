@@ -7,7 +7,6 @@
  */
 package utam.compiler.grammar;
 
-import static utam.compiler.grammar.UtamMethodActionApply.ERR_ELEMENT_REDUNDANT_FOR_CHAIN;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -78,7 +77,9 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
         .getDeclaredReturnOrDefault(context, methodContext.getDeclaredReturnType(),
             defaultReturnType);
     ActionType action = new CustomActionType(apply, declaredStatementReturnType);
+    methodContext.enterPredicateContext();
     List<ComposeMethodStatement> predicate = args[0].getPredicate(context, methodContext);
+    methodContext.exitPredicateContext();
     TypeProvider operationReturnType = predicate.get(predicate.size() - 1).getReturnType();
     Operation operation = new OperationWithPredicate(action, operationReturnType, predicate);
     checkMatcher(operationReturnType, validationContextStr);

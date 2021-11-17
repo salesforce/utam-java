@@ -133,4 +133,20 @@ public class UtamMethodActionWaitForTests {
     methodInfo.addImpliedImportedTypes(importType);
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
+
+  @Test
+  public void testSameElementReusedInsideAndOutsidePredicate() {
+    TranslationContext context = getContext("reuseElement");
+    PageObjectMethod method = context.getMethod(methodName);
+    MethodInfo methodInfo = new MethodInfo(methodName, "Boolean");
+    methodInfo.addCodeLine("BasePageElement root0 = this.getRootElement()");
+    methodInfo.addCodeLine("root0.isPresent()");
+    methodInfo.addCodeLine("this.waitFor(() -> {\n"
+        + "BasePageElement pstatement0 = this.getRootElement();\n"
+        + "return pstatement0;\n"
+        + "})");
+    methodInfo.addCodeLine("Boolean statement2 = root0.isPresent()");
+    methodInfo.addCodeLine("return statement2");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
 }

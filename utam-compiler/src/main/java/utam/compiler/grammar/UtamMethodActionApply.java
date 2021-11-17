@@ -149,20 +149,21 @@ class UtamMethodActionApply extends UtamMethodAction {
     private final List<TypeProvider> addedImports = new ArrayList<>();
     private final String elementVariableName;
 
-    ElementOperand(ElementContext elementContext, MethodContext methodContext,
+    ElementOperand(ElementContext elementContext,
+        MethodContext methodContext,
         StatementContext statementContext) {
       this.elementContext = elementContext;
       String elementName = elementContext.getName();
-      this.isElementAlreadyUsed = methodContext.isReusedElement(elementName);
+      this.isElementAlreadyUsed = methodContext.getElementUsageTracker().isReusedElement(elementName);
       if (isElementAlreadyUsed) {
-        this.elementVariableName = methodContext.getReusedElementVariable(elementName);
+        this.elementVariableName = methodContext.getElementUsageTracker().getReusedElementVariable(elementName);
         parameters = new ArrayList<>();
       } else {
         this.elementVariableName = statementContext.getElementVariableName(elementName);
         // remember that element is used to not propagate its parameters to method for second time
         // if element is already used in a previous statement, parameters were already added
         // should be done AFTER statement is created
-        methodContext.setElementUsage(elementVariableName, elementContext);
+        methodContext.getElementUsageTracker().setElementUsage(elementVariableName, elementContext);
         parameters = elementContext.getParameters()
             .stream()
             .map(p -> methodContext.setStatementParameter(p, statementContext))
