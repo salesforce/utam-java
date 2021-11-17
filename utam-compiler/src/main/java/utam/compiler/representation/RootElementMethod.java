@@ -124,7 +124,7 @@ public class RootElementMethod {
     private final List<TypeProvider> classImports = new ArrayList<>();
 
     public PublicCustomType(UnionType unionType) {
-      this.returnType = unionType.getType();
+      this.returnType = unionType;
       ParameterUtils.setImports(imports, unionType.getExtendedTypes());
       ParameterUtils.setImport(classImports, returnType);
     }
@@ -166,7 +166,7 @@ public class RootElementMethod {
     private final List<TypeProvider> classImports = new ArrayList<>();
 
     public PrivateCustomType(UnionType unionType) {
-      this.returnType = unionType.getType();
+      this.returnType = unionType;
       ParameterUtils.setImports(classImports, unionType.getExtendedTypes());
     }
 

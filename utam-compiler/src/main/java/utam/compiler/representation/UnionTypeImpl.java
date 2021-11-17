@@ -39,11 +39,6 @@ public class UnionTypeImpl implements UnionType {
   }
 
   @Override
-  public TypeProvider getType() {
-    return declaredType;
-  }
-
-  @Override
   public List<TypeProvider> getExtendedTypes() {
     return extendedTypes;
   }
@@ -53,5 +48,25 @@ public class UnionTypeImpl implements UnionType {
     String extended = extendedTypes.stream().map(TypeProvider::getSimpleName).collect(Collectors.joining(", "));
     String code = String.format("interface %s extends %s {}", declaredType.getSimpleName(), extended);
     return Collections.singletonList(code);
+  }
+
+  @Override
+  public String getFullName() {
+    return declaredType.getFullName();
+  }
+
+  @Override
+  public String getSimpleName() {
+    return declaredType.getSimpleName();
+  }
+
+  @Override
+  public String getPackageName() {
+    return declaredType.getPackageName();
+  }
+
+  @Override
+  public Class getClassType() {
+    return declaredType.getClassType();
   }
 }

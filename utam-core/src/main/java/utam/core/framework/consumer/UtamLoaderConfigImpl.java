@@ -149,13 +149,13 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
   }
 
   @Override
-  public void setImplicitTimeout(Duration implicitTimeout) {
-    this.implicitTimeout = implicitTimeout;
+  public void setImplicitTimeout(Duration timeout) {
+    this.implicitTimeout = timeout;
   }
 
   @Override
-  public void setExplicitTimeout(Duration explicitTimeout) {
-    this.explicitTimeout = explicitTimeout;
+  public void setExplicitTimeout(Duration timeout) {
+    this.explicitTimeout = timeout;
   }
 
   @Override
