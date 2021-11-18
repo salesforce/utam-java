@@ -45,14 +45,4 @@ public interface PageObjectMethod {
    * @return true if public
    */
   boolean isPublic();
-
-  /**
-   * check if method is a getter for a basic element type or union types. For such methods generated
-   * code requires additional interfaces declaration
-   *
-   * @return true for element methods
-   */
-  default boolean isReturnsBasicElement() {
-    return false;
-  }
 }

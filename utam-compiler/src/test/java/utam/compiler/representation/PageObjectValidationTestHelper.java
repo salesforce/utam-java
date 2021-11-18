@@ -174,7 +174,7 @@ public class PageObjectValidationTestHelper {
     assertThat(actualAnnotationTextList, is(equalTo(expectedAnnotationTextList)));
   }
 
-  static void validateDeclaration(MethodDeclaration actual, MethodInfo expected) {
+  private static void validateDeclaration(MethodDeclaration actual, MethodInfo expected) {
     List<MethodParameter> actualParameters = actual.getParameters();
     assertThat(actual.getName(), is(equalTo(expected.name)));
     assertThat(
@@ -211,7 +211,7 @@ public class PageObjectValidationTestHelper {
     }
   }
 
-  static Set<String> getAllImports(List<TypeProvider> imports) {
+  private static Set<String> getAllImports(List<TypeProvider> imports) {
     Set<String> res = new HashSet<>();
     imports.forEach(i -> {
       res.add(i.getFullName());
@@ -369,17 +369,6 @@ public class PageObjectValidationTestHelper {
     private final String name;
     private final String typeName;
     private final List<String> annotationValues = new ArrayList<>();
-
-    /**
-     * Initializes a new instance of the FieldInfo class
-     *
-     * @param name the name of the field
-     * @param typeName the simple type name of the field
-     */
-    public FieldInfo(String name, String typeName) {
-      this.name = name;
-      this.typeName = typeName;
-    }
 
     public FieldInfo(String name) {
       this.name = name;

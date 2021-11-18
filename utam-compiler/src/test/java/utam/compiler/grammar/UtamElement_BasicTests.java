@@ -15,7 +15,10 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.TestUtilities.*;
+import static utam.compiler.grammar.TestUtilities.JACKSON_MISSING_REQUIRED_PROPERTY_ERROR;
+import static utam.compiler.grammar.TestUtilities.UtamEntityCreator;
+import static utam.compiler.grammar.TestUtilities.getDeserializedObject;
+import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_FILTER_NEEDS_LIST;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_MISSING_SELECTOR_PROPERTY;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_NESTED_ELEMENTS;
@@ -23,24 +26,23 @@ import static utam.compiler.grammar.UtamElement.Type;
 import static utam.compiler.grammar.UtamElementFilter_Tests.getInnerTextFilter;
 import static utam.compiler.grammar.UtamSelectorTests.getListCssSelector;
 import static utam.compiler.grammar.UtamSelectorTests.getUtamCssSelector;
-import static utam.compiler.helpers.BasicElementInterface.ERR_UNSUPPORTED_ELEMENT_TYPE;
+import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
+import static utam.compiler.types.BasicElementInterface.ERR_UNSUPPORTED_ELEMENT_TYPE;
 
 import java.util.List;
-import java.util.Objects;
 import org.testng.annotations.Test;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.helpers.TypeUtilities;
-import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.FieldInfo;
-import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
-import utam.core.declarative.representation.*;
+import utam.core.declarative.representation.PageClassField;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.framework.consumer.UtamError;
 
 public class UtamElement_BasicTests {
 
   private static final String ELEMENT_NAME = "test";
-  private static final String METHOD_NAME = "getTest";
+  private static final String BASIC_TYPE_SIMPLE_NAME = BASIC_ELEMENT.getSimpleName();
 
   private static UtamElement.Traversal getAbstraction(UtamElement element) {
     UtamElement.Traversal res = element.getAbstraction();
@@ -62,17 +64,12 @@ public class UtamElement_BasicTests {
     return utamElement;
   }
 
-  private static UtamElement.Traversal getElementAbstraction(String json) {
-    UtamElement utamElement = getDeserializedObject(json, UtamElement.class);
-    return getAbstraction(utamElement);
-  }
-
   private static String getBasicSupportedProperties() {
     return Type.BASIC.getSupportedPropertiesErr(ELEMENT_NAME);
   }
 
-  private static TranslationContext getContext(String fileName) {
-    return new DeserializerUtilities().getContext("element/" + fileName);
+  private static void getContext(String fileName) {
+    new DeserializerUtilities().getContext("element/" + fileName);
   }
 
   /**
@@ -127,34 +124,6 @@ public class UtamElement_BasicTests {
   }
 
   /**
-   * The getSimpleType method should return valid values for a null type
-   */
-  @Test
-  public void testGetSimpleTypeWithNullType() {
-    assertThat(
-        getAbstraction(getPublicHtmlElement(getUtamCssSelector(), null))
-            .testRootTraverse(getTestTranslationContext())
-            .getType()
-            .getFullName(),
-        is(equalTo("TestElement")));
-  }
-
-  /**
-   * The getSimpleType method should return valid values for a valid element type
-   */
-  @Test
-  public void testGetSimpleTypeWithSimpleType() {
-    UtamElement element = getPublicHtmlElement(getUtamCssSelector(), null);
-    element.type = new String[] { "clickable" };
-    assertThat(
-        getAbstraction(element)
-            .testRootTraverse(getTestTranslationContext())
-            .getType()
-            .getFullName(),
-        is(equalTo("TestElement")));
-  }
-
-  /**
    * The getAsSimpleElement method should return the proper value
    */
   @Test
@@ -164,7 +133,7 @@ public class UtamElement_BasicTests {
     UtamElement.Traversal element =
         getAbstraction(getPublicHtmlElement(getUtamCssSelector(), null));
     ElementContext elementContext = element.traverse(context, scopeElement, false)[0];
-    assertThat(elementContext.getType().getSimpleName(), is(equalTo("TestElement")));
+    assertThat(elementContext.getType().getSimpleName(), is(equalTo(BASIC_TYPE_SIMPLE_NAME)));
     assertThat(context.getFields(), hasSize(1));
     FieldInfo createdFieldInfo = new FieldInfo(ELEMENT_NAME);
     createdFieldInfo.addAnnotations(String.format(
@@ -183,10 +152,11 @@ public class UtamElement_BasicTests {
     UtamElement.Traversal element =
         getAbstraction(getPublicHtmlElement(getUtamCssSelector(), null));
     ElementContext elementContext = element.testRootTraverse(context);
-    assertThat(elementContext.getType().getSimpleName(), is(equalTo("TestElement")));
+    assertThat(elementContext.getType().getSimpleName(), is(equalTo(BASIC_TYPE_SIMPLE_NAME)));
     assertThat(context.getFields(), hasSize(1));
     FieldInfo createdFieldInfo = new FieldInfo(ELEMENT_NAME);
-    createdFieldInfo.addAnnotations(String.format("@ElementMarker.Find(css = \"%s\")", UtamSelectorTests.SELECTOR_STRING));
+    createdFieldInfo.addAnnotations(
+        String.format("@ElementMarker.Find(css = \"%s\")", UtamSelectorTests.SELECTOR_STRING));
     createdFieldInfo.validateField(context.getFields().get(0));
   }
 
@@ -199,10 +169,11 @@ public class UtamElement_BasicTests {
     UtamElement.Traversal element =
         getAbstraction(getPublicHtmlElement(getListCssSelector(), getInnerTextFilter()));
     ElementContext elementContext = element.testRootTraverse(context);
-    assertThat(elementContext.getType().getSimpleName(), is(equalTo("TestElement")));
+    assertThat(elementContext.getType().getSimpleName(), is(equalTo(BASIC_TYPE_SIMPLE_NAME)));
     assertThat(context.getFields(), hasSize(1));
     FieldInfo createdFieldInfo = new FieldInfo(ELEMENT_NAME);
-    createdFieldInfo.addAnnotations(String.format("@ElementMarker.Find(css = \"%s\")", UtamSelectorTests.SELECTOR_STRING));
+    createdFieldInfo.addAnnotations(
+        String.format("@ElementMarker.Find(css = \"%s\")", UtamSelectorTests.SELECTOR_STRING));
     createdFieldInfo.validateField(context.getFields().get(0));
   }
 
@@ -217,7 +188,8 @@ public class UtamElement_BasicTests {
     element.testRootTraverse(context);
     assertThat(context.getFields(), hasSize(1));
     FieldInfo createdFieldInfo = new FieldInfo(ELEMENT_NAME);
-    createdFieldInfo.addAnnotations(String.format("@ElementMarker.Find(css = \"%s\")", UtamSelectorTests.SELECTOR_STRING));
+    createdFieldInfo.addAnnotations(
+        String.format("@ElementMarker.Find(css = \"%s\")", UtamSelectorTests.SELECTOR_STRING));
     createdFieldInfo.validateField(context.getFields().get(0));
   }
 
@@ -232,7 +204,8 @@ public class UtamElement_BasicTests {
     element.testRootTraverse(context);
     assertThat(context.getFields(), hasSize(1));
     FieldInfo createdFieldInfo = new FieldInfo(ELEMENT_NAME);
-    createdFieldInfo.addAnnotations(String.format("@ElementMarker.Find(css = \"%s\")", UtamSelectorTests.SELECTOR_STRING));
+    createdFieldInfo.addAnnotations(
+        String.format("@ElementMarker.Find(css = \"%s\")", UtamSelectorTests.SELECTOR_STRING));
     createdFieldInfo.validateField(context.getFields().get(0));
   }
 
@@ -248,90 +221,7 @@ public class UtamElement_BasicTests {
             .traverse(context, scopeElement, false)[0]
             .getType()
             .getSimpleName(),
-        is(equalTo("TestElement")));
-  }
-
-  /**
-   * The traverse method should add the proper methods to the element object
-   */
-  @Test
-  public void testTraverse() {
-    UtamElement element = getPublicHtmlElement(getUtamCssSelector(), null);
-    MethodInfo info = new MethodInfo(METHOD_NAME, "TestElement");
-    info.addCodeLine("return element(this.test).build(TestElement.class, TestElementImpl.class)");
-    PageObjectValidationTestHelper.validateMethod(
-        Objects.requireNonNull(getElementMethod(element)), info);
-  }
-
-  /**
-   * The traverse method should not add a method to the context object with a public and root
-   * object
-   */
-  @Test
-  public void testTraverseWithNonPublicAndNonRoot() {
-    UtamElement element = UtamEntityCreator.createUtamElement(ELEMENT_NAME);
-    element.selector = getUtamCssSelector();
-    assertThat(getElementMethod(element), is(not(nullValue())));
-  }
-
-  /**
-   * The traverse method should add the proper methods to the element object for an element with
-   * nested elements
-   */
-  @Test
-  public void testTraverseWithInnerElements() {
-    UtamElement element = UtamEntityCreator.createUtamElement("outerElement");
-    element.isPublic = true;
-    element.selector = getUtamCssSelector();
-    element.elements = new UtamElement[]{getPublicHtmlElement(new UtamSelector(".other"), null)};
-    MethodInfo info = new MethodInfo("getOuterElement", "OuterElementElement");
-    info.addCodeLine("return element(this.outerElement).build(OuterElementElement.class, OuterElementElementImpl.class)");
-    PageObjectValidationTestHelper.validateMethod(
-        Objects.requireNonNull(getElementMethod(element)), info);
-  }
-
-  /**
-   * The traverse method should add the proper methods to the element object for an element with
-   * nested shadow elements
-   */
-  @Test
-  public void testTraverseWithInnerShadowElements() {
-    UtamElement element = UtamEntityCreator.createUtamElement("outerElement");
-    element.isPublic = true;
-    element.selector = getUtamCssSelector();
-    element.shadow =
-        new UtamShadowElement(
-            new UtamElement[]{getPublicHtmlElement(new UtamSelector(".other"), null)});
-    MethodInfo info = new MethodInfo("getOuterElement", "OuterElementElement");
-    info.addCodeLine("return element(this.outerElement).build(OuterElementElement.class, OuterElementElementImpl.class)");
-    PageObjectValidationTestHelper.validateMethod(
-        Objects.requireNonNull(getElementMethod(element)), info);
-  }
-
-  /**
-   * The getDeclaredMethods method should return the proper value
-   */
-  @Test
-  public void testGetDeclaredMethods() {
-    UtamElement element = getPublicHtmlElement(getUtamCssSelector(), null);
-    element.getAbstraction().testRootTraverse(getTestTranslationContext());
-    MethodInfo info = new MethodInfo(METHOD_NAME, "TestElement");
-    info.addCodeLine("return element(this.test).build(TestElement.class, TestElementImpl.class)");
-    PageObjectValidationTestHelper.validateMethod(
-        Objects.requireNonNull(getElementMethod(element)), info);
-  }
-
-  /**
-   * The getDeclaredMethods method should return the proper value for an element with a list
-   * selector
-   */
-  @Test
-  public void testGetDeclaredMethodsWithList() {
-    UtamElement element = getPublicHtmlElement(getListCssSelector(), null);
-    MethodInfo info = new MethodInfo(METHOD_NAME, String.format("List<%s>", "TestElement"));
-    info.addCodeLine("return element(this.test).buildList(TestElement.class, TestElementImpl.class)");
-    PageObjectValidationTestHelper.validateMethod(
-        Objects.requireNonNull(getElementMethod(element)), info);
+        is(equalTo(BASIC_TYPE_SIMPLE_NAME)));
   }
 
   /**
@@ -360,11 +250,11 @@ public class UtamElement_BasicTests {
         .getResultFromFile("element/nestedElements");
     TranslationContext context = res.getContext();
     ElementContext one = context.getElement("one");
-    assertThat(one.getType().isSameType(new TypeUtilities.FromString("OneElement")), is(equalTo(true)));
+    assertThat(one.getType().getSimpleName(), is(equalTo(BASIC_TYPE_SIMPLE_NAME)));
     ElementContext nested = context.getElement("nestedCustom");
     assertThat(nested.getType().getSimpleName(), is(equalTo("ComponentType")));
     ElementContext nestedInShadow = context.getElement("nestedInsideShadow");
-    assertThat(nestedInShadow.getType().getSimpleName(), is(equalTo("NestedInsideShadowElement")));
+    assertThat(nestedInShadow.getType().getSimpleName(), is(equalTo(BASIC_TYPE_SIMPLE_NAME)));
 
     PageObjectDeclaration objectDeclaration = res.getPageObject();
     List<PageClassField> fields = objectDeclaration.getImplementation().getFields();
@@ -377,118 +267,6 @@ public class UtamElement_BasicTests {
     UtamError e =
         expectThrows(UtamError.class, () -> getDeserializedObject(json, UtamElement.class));
     assertThat(e.getCause().getMessage(), containsString(JACKSON_MISSING_REQUIRED_PROPERTY_ERROR));
-  }
-
-  @Test
-  public void testElementNodeMinimalAttributes() {
-    String json =
-        "{"
-            + "  \"name\": \"simpleElement\","
-            + "  \"selector\": {"
-            + "    \"css\": \"simpleSelector\""
-            + "  }"
-            + "}";
-    ElementContext elementContext =
-        getElementAbstraction(json).testRootTraverse(TestUtilities.getTestTranslationContext());
-    assertThat(elementContext.getName(), is(equalTo("simpleElement")));
-    assertThat(
-        elementContext.getElementMethod().getDeclaration().getName(),
-        is(equalTo("getSimpleElementElement")));
-  }
-
-  /**
-   * Test a valid element node with the list property set to true
-   */
-  @Test
-  public void testElementNodeWithList() {
-    String json =
-        "{"
-            + "  \"name\": \"simpleElement\","
-            + "  \"selector\": {"
-            + "    \"css\": \"simpleSelector\","
-            + "    \"returnAll\": true"
-            + "  }"
-            + "}";
-    ElementContext elementContext =
-        getElementAbstraction(json).testRootTraverse(TestUtilities.getTestTranslationContext());
-    assertThat(elementContext.getName(), is(equalTo("simpleElement")));
-    assertThat(
-        elementContext.getElementMethod().getDeclaration().getName(),
-        is(equalTo("getSimpleElementElement")));
-    assertThat(elementContext.getElementMethod().isPublic(), is(false));
-  }
-
-  @Test
-  public void testValidPublicElementNodeWithType() {
-    String json =
-        "{"
-            + "  \"name\": \"simpleElement\","
-            + "  \"type\": [\"clickable\"],"
-            + "  \"selector\": {"
-            + "    \"css\": \"customSelector\""
-            + "  },"
-            + "  \"public\": true"
-            + "}";
-    ElementContext elementContext =
-        getElementAbstraction(json).testRootTraverse(TestUtilities.getTestTranslationContext());
-    assertThat(
-        elementContext.getElementMethod().getDeclaration().getName(),
-        is(equalTo("getSimpleElement")));
-    assertThat(elementContext.getElementMethod().isPublic(), is(true));
-    assertThat(elementContext.getType().isSameType(new TypeUtilities.FromString("SimpleElementElement")), is(equalTo(true)));
-  }
-
-  @Test
-  public void testValidPrivateElementNode() {
-    String json =
-        "{"
-            + "  \"name\": \"test\","
-            + "  \"selector\": {"
-            + "    \"css\": \"css\""
-            + "  },"
-            + "  \"public\": false"
-            + "}";
-    ElementContext elementContext =
-        getElementAbstraction(json).testRootTraverse(TestUtilities.getTestTranslationContext());
-    assertThat(
-        elementContext.getElementMethod().getDeclaration().getName(),
-        is(equalTo("getTestElement")));
-    assertThat(elementContext.getElementMethod().isPublic(), is(false));
-    assertThat(elementContext.getType().isSameType(new TypeUtilities.FromString("TestElement")), is(equalTo(true)));
-  }
-
-  @Test
-  public void testNullableList() {
-    MethodInfo methodInfo = new MethodInfo("getNullableList", "List<NullableListElement>");
-    methodInfo.addCodeLine("return element(this.nullableList).buildList(NullableListElement.class, NullableListElementImpl.class)");
-    TranslationContext context = getContext("basicElementNullable");
-    PageObjectMethod method = context.getMethod("getNullableList");
-    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
-  }
-
-  @Test
-  public void testNullableListWithFilter() {
-    MethodInfo methodInfo = new MethodInfo("getNullableFilter", "NullableFilterElement");
-    methodInfo.addCodeLine("return element(this.nullableFilter).build(NullableFilterElement.class, "
-        + "NullableFilterElementImpl.class, elm -> Boolean.TRUE.equals(elm.isVisible()))");
-    TranslationContext context = getContext("basicElementNullable");
-    PageObjectMethod method = context.getMethod("getNullableFilter");
-    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
-  }
-
-  @Test
-  public void testNullableSingle() {
-    MethodInfo methodInfo = new MethodInfo("getNullable", "NullableElement");
-    methodInfo.addCodeLine("return element(this.nullable).build(NullableElement.class, NullableElementImpl.class)");
-    TranslationContext context = getContext("basicElementNullable");
-    PageObjectValidationTestHelper.validateMethod(context.getMethod("getNullable"), methodInfo);
-  }
-
-  @Test
-  public void testBasicElementTypeAsString() {
-    TranslationContext translationContext = getContext("basicTypes");
-    ElementContext elementContext = translationContext.getElement("stringType");
-    assertThat(elementContext.getType().getFullName(), is(equalTo("StringTypeElement")));
   }
 
   @Test

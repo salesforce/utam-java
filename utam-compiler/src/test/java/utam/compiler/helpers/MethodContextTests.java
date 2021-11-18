@@ -16,12 +16,13 @@ import static utam.compiler.helpers.MethodContext.ERR_LITERAL_PARAMETER_NOT_ALLO
 import static utam.compiler.helpers.MethodContext.ERR_METHOD_REFERENCE_ARGS;
 import static utam.compiler.helpers.MethodContext.ERR_PARAMETER_NEVER_USED;
 import static utam.compiler.helpers.MethodContext.ERR_REFERENCE_MISSING;
+import static utam.compiler.helpers.MethodContext.ERR_REFERENCE_REQUIRED;
 import static utam.compiler.helpers.PrimitiveType.BOOLEAN;
 import static utam.compiler.helpers.PrimitiveType.STRING;
 import static utam.compiler.helpers.TypeUtilities.PARAMETER_REFERENCE;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.hamcrest.core.StringContains;
-import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 import utam.compiler.grammar.DeserializerUtilities;
 import utam.compiler.helpers.ParameterUtils.Literal;
@@ -40,7 +41,7 @@ public class MethodContextTests {
   private static final String ERR_MESSAGE_PREFIX = "method 'test'";
 
   private static MethodContext getTestMethodContext() {
-    return new MethodContext("test", new ReturnType(null, null, "test"));
+    return new MethodContext("test", new ReturnType((JsonNode) null, null, "test"));
   }
 
   private static void test(String jsonFile, String expectedError) {
@@ -81,7 +82,6 @@ public class MethodContextTests {
   }
 
   @Test
-  @Ignore
   public void testArgNotReferenced() {
     MethodContext methodContext = getTestMethodContext();
     methodContext.setDeclaredParameter(new Regular("arg", STRING));
@@ -89,7 +89,7 @@ public class MethodContextTests {
     UtamError e = expectThrows(UtamError.class,
         () -> methodContext.setStatementParameter(new Regular("arg1", STRING), statementContext));
     assertThat(e.getMessage(),
-        containsString(String.format(ERR_REFERENCE_MISSING, ERR_MESSAGE_PREFIX, "arg1")));
+        containsString(String.format(ERR_REFERENCE_REQUIRED, ERR_MESSAGE_PREFIX, "arg1")));
   }
 
   @Test

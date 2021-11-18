@@ -7,13 +7,16 @@
  */
 package utam.compiler.representation;
 
+import static utam.compiler.types.BasicElementUnionType.asUnionTypeOrNull;
+
 import java.util.ArrayList;
 import java.util.List;
-import utam.compiler.helpers.BasicElementUnionType;
-import utam.compiler.helpers.TypeUtilities.ListOf;
+import utam.compiler.helpers.ParameterUtils;
+import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.representation.UnionType;
 
 /**
  * method declared inside interface
@@ -55,19 +58,55 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
     return true;
   }
 
-  @Override
-  public boolean isReturnsBasicElement() {
-    TypeProvider returnType =  getDeclaration().getReturnType();
-    return isElementReturned(returnType);
-  }
+  /**
+   * interface can declare public basic elements
+   *
+   * @author elizaveta.ivanova
+   * @since 236
+   */
+  public static class AbstractBasicElementGetter extends BasicElementGetterMethod {
 
-  private static boolean isElementReturned(TypeProvider returnType) {
-    if(returnType instanceof BasicElementUnionType) {
+    private static List<TypeProvider> getImports(TypeProvider returnType, List<MethodParameter> parameters) {
+      List<TypeProvider> imports = new ArrayList<>();
+      ParameterUtils.setImport(imports, returnType);
+      ParameterUtils.setDeclarationImports(imports, parameters);
+      return imports;
+    }
+
+    private final MethodDeclaration declaration;
+    private final UnionType unionType;
+
+    public AbstractBasicElementGetter(
+        String methodName,
+        List<MethodParameter> parameters,
+        TypeProvider returnType) {
+      declaration = new MethodDeclarationImpl(methodName, parameters, returnType, getImports(returnType, parameters));
+      this.unionType = asUnionTypeOrNull(returnType);
+    }
+
+    @Override
+    public MethodDeclaration getDeclaration() {
+      return declaration;
+    }
+
+    @Override
+    public List<String> getCodeLines() {
+      return EMPTY_CODE;
+    }
+
+    @Override
+    public List<TypeProvider> getClassImports() {
+      return new ArrayList<>();
+    }
+
+    @Override
+    public boolean isPublic() {
       return true;
     }
-    if(returnType instanceof ListOf) {
-      return returnType.getBoundTypes().get(0) instanceof BasicElementUnionType;
+
+    @Override
+    public UnionType getInterfaceUnionType() {
+      return unionType;
     }
-    return false;
   }
 }

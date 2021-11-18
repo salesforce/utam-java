@@ -29,7 +29,8 @@ import utam.core.declarative.representation.TypeProvider;
  */
 public final class MethodContext {
 
-  static final String ERR_ARG_DUPLICATE_NAME = "%s: parameter with name '%s' already declared";
+  static final String ERR_ARG_DUPLICATE_NAME = "%s: parameter with name '%s' already declared"
+      + " \n if the same parameter needed in multiple places, use 'argumentReference' type parameter instead";
   static final String ERR_PARAMETER_NEVER_USED = "%s: declared parameter '%s' is never used";
   static final String ERR_METHOD_REFERENCE_ARGS = "%s: method level argument '%s' can't have reference type";
   static final String ERR_REFERENCE_MISSING = "%s: statement declares a reference to '%s', but there’s no matching method parameter";

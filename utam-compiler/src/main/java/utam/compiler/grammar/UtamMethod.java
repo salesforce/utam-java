@@ -8,6 +8,9 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.helpers.TypeUtilities.VOID;
+import static utam.compiler.types.BasicElementInterface.isReturnBasicType;
+import static utam.compiler.types.BasicElementInterface.processBasicTypeNode;
+import static utam.compiler.types.BasicElementUnionType.asBasicOrUnionType;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,17 +18,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import utam.compiler.UtamCompilationError;
+import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ReturnType;
 import utam.compiler.helpers.StatementContext;
-import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethod;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.compiler.representation.InterfaceMethod;
+import utam.compiler.representation.InterfaceMethod.AbstractBasicElementGetter;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.UtamError;
 
 /**
  * public method declared at PO level
@@ -59,31 +62,38 @@ class UtamMethod {
     this.isReturnList = isReturnList;
   }
 
-  PageObjectMethod getMethod(TranslationContext context) {
-    if (context.isAbstractPageObject()) {
-      return getAbstractMethod(context);
-    }
-    if (compose != null && compose.length > 0) {
-      return getComposeMethod(context);
-    }
-    throw new UtamError(String.format(ERR_METHOD_EMPTY_STATEMENTS, name));
+  final PageObjectMethod getMethod(TranslationContext context) {
+    return context.isAbstractPageObject()? getAbstractMethod(context) : getComposeMethod(context);
   }
 
-  PageObjectMethod getAbstractMethod(TranslationContext context) {
+
+  private PageObjectMethod getAbstractMethod(TranslationContext context) {
     if (compose != null) {
-      throw new UtamError(String.format(ERR_METHOD_SHOULD_BE_ABSTRACT, name));
+      throw new UtamCompilationError(String.format(ERR_METHOD_SHOULD_BE_ABSTRACT, name));
     }
-    ReturnType returnTypeObject = new ReturnType.AbstractMethodReturnType(returnType, isReturnList, name);
-    TypeProvider returnType = returnTypeObject.getReturnTypeOrDefault(context, VOID);
+    boolean isReturnsBasicType = isReturnBasicType(returnType);
+    final ReturnType returnTypeObject;
+    if (isReturnsBasicType) {
+      String[] basicUnionType = processBasicTypeNode(returnType, name, true);
+      TypeProvider unionReturnType = asBasicOrUnionType(name, basicUnionType, false);
+      returnTypeObject = new ReturnType(unionReturnType, isReturnList, name);
+    } else {
+      returnTypeObject = new ReturnType(returnType, isReturnList, name);
+    }
+    TypeProvider methodReturnType = returnTypeObject.getReturnTypeOrDefault(context, VOID);
     MethodContext methodContext = new MethodContext(name, returnTypeObject);
     List<MethodParameter> parameters = new ArgsProcessor(context, methodContext).getParameters(args);
-    return new InterfaceMethod(
-        name,
-        returnType,
-        parameters);
+    return isReturnsBasicType ? new AbstractBasicElementGetter(name, parameters, methodReturnType)
+        : new InterfaceMethod(
+            name,
+            methodReturnType,
+            parameters);
   }
 
   private PageObjectMethod getComposeMethod(TranslationContext context) {
+    if(compose == null || compose.length == 0) {
+      throw new UtamCompilationError(String.format(ERR_METHOD_EMPTY_STATEMENTS, name));
+    }
     ReturnType returnTypeObject = new ReturnType(returnType, isReturnList, name);
     if(returnTypeObject.isReturnTypeSet()) {
       throw new UtamCompilationError(String.format(ERR_RETURN_TYPE_ABSTRACT_ONLY, name));

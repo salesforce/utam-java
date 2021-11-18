@@ -13,7 +13,7 @@ import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.guardrails.GlobalValidation.getErrorPrefix;
 import static utam.compiler.helpers.ElementContext.Self.SELF_ELEMENT;
-import static utam.compiler.helpers.BasicElementInterface.actionable;
+import static utam.compiler.types.BasicElementInterface.actionable;
 
 import java.util.Collections;
 import org.testng.annotations.Test;

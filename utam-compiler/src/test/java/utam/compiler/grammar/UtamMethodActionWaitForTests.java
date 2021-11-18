@@ -81,7 +81,7 @@ public class UtamMethodActionWaitForTests {
     PageObjectMethod method = context.getMethod(methodName);
     MethodInfo methodInfo = new MethodInfo(methodName, "List<String>");
     methodInfo.addCodeLine("List<String> statement0 = this.waitFor(() -> {\n"
-        + "List<ListElement> plist0 = this.getListElement();\n"
+        + "List<BasicElement> plist0 = this.getListElement();\n"
         + "List<String> pstatement0 = plist0.stream().map(element -> element.getText()).collect(Collectors.toList());\n"
         + "return pstatement0;\n"
         + "})");

@@ -1,0 +1,14 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "test",
+        "nullable": true,
+        "public": true,
+        "selector": {
+          "css": ".css"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "selector": {
+        "css": ".css",
+        "returnAll" : true
+      }
+    }
+  ]
+}

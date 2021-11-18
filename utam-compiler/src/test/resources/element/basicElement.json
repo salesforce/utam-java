@@ -1,8 +1,7 @@
 {
   "elements": [
     {
-      "name": "stringType",
-      "type": "actionable",
+      "name": "test",
       "selector": {
         "css": ".css"
       }

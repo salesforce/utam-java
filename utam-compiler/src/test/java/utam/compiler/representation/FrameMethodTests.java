@@ -7,7 +7,8 @@
  */
 package utam.compiler.representation;
 
-import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
+import static utam.compiler.representation.FrameMethod.FRAME_ELEMENT;
+import static utam.compiler.representation.FrameMethod.FRAME_IMPL_CLASS;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
 import java.util.Collections;
@@ -30,7 +31,7 @@ public class FrameMethodTests {
     String methodName = getElementGetterMethodName(ELEMENT_NAME, isPublic);
     MethodInfo info = new MethodInfo(methodName, FRAME_ELEMENT);
     info.addImportedTypes(FRAME_ELEMENT.getFullName());
-    info.addImpliedImportedTypes("utam.core.framework.base.FrameElementImpl");
+    info.addImpliedImportedTypes(FRAME_IMPL_CLASS.getFullName());
     info.setIsPublic(isPublic);
     return info;
   }

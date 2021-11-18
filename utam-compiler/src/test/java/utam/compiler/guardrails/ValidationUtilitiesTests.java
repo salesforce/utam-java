@@ -18,7 +18,7 @@ import static utam.compiler.guardrails.ValidationError.DUPLICATE_WITH_ROOT_SELEC
 import static utam.compiler.guardrails.ValidationUtilities.getValidationError;
 import static utam.compiler.guardrails.ValidationUtilities.hasHardcodedText;
 import static utam.compiler.guardrails.ValidationUtilities.isSameSelector;
-import static utam.compiler.helpers.BasicElementInterface.actionable;
+import static utam.compiler.types.BasicElementInterface.actionable;
 
 import java.util.List;
 import org.hamcrest.CoreMatchers;

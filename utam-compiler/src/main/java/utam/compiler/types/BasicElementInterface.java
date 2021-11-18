@@ -5,7 +5,9 @@
  * For full license text, see the LICENSE file in the repo root
  * or https://opensource.org/licenses/MIT
  */
-package utam.compiler.helpers;
+package utam.compiler.types;
+
+import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
@@ -14,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.representation.UnionType;
 import utam.core.element.Actionable;
 import utam.core.element.Clickable;
 import utam.core.element.Draggable;
@@ -43,9 +46,8 @@ public enum BasicElementInterface implements TypeProvider {
     this.type = type;
   }
 
-  public static boolean isBasicType(String jsonString) {
-    for (BasicElementInterface type : BasicElementInterface
-        .values()) {
+  private static boolean isBasicType(String jsonString) {
+    for (BasicElementInterface type : BasicElementInterface.values()) {
       if (type.name().equals(jsonString)) {
         return true;
       }
@@ -53,21 +55,8 @@ public enum BasicElementInterface implements TypeProvider {
     return false;
   }
 
-  static BasicElementInterface asBasicType(String jsonString) {
-    if (jsonString == null) {
-      return actionable;
-    }
-    for (BasicElementInterface type : BasicElementInterface
-        .values()) {
-      if (jsonString.equals(type.name())) {
-        return type;
-      }
-    }
-    return null;
-  }
-
   public static boolean isBasicType(TypeProvider type) {
-    if (type instanceof BasicElementUnionType) {
+    if (type instanceof UnionType || type.isSameType(BASIC_ELEMENT)) {
       return true;
     }
     for (BasicElementInterface basicType : BasicElementInterface.values()) {
@@ -78,61 +67,63 @@ public enum BasicElementInterface implements TypeProvider {
     return false;
   }
 
-  public static BasicElementInterface[] getBasicElementTypes(TypeProvider type) {
-    if (type instanceof BasicElementUnionType) {
-      return ((BasicElementUnionType) type).getTypesArray();
-    }
-    BasicElementInterface basicInterface = getBasicElementType(type);
-    if (basicInterface != null) {
-      return new BasicElementInterface[]{
-          basicInterface
-      };
-    }
-    return null;
-  }
-
-  public static BasicElementInterface getBasicElementType(TypeProvider type) {
-    for (BasicElementInterface basicType : BasicElementInterface
-        .values()) {
-      if (basicType.isSameType(type)) {
-        return basicType;
-      }
-    }
-    return null;
-  }
-
   /**
    * process Json node with basic types, applicable to root or basic elements
    *
    * @param typeNode    Json node
    * @param elementName name of the element, used in error message
+   * @param isThrowAnError if set to true, non basic type will throw an error
    * @return string array with basic types or empty array
    */
-  public static String[] processBasicTypeNode(JsonNode typeNode, String elementName) {
+  public static String[] processBasicTypeNode(JsonNode typeNode, String elementName, boolean isThrowAnError) {
     if (typeNode == null || typeNode.isNull()) {
       return new String[]{};
     }
     final String typeNodeValueError = String
         .format(ERR_UNSUPPORTED_ELEMENT_TYPE, elementName, typeNode.toPrettyString());
-    if (typeNode.isTextual() && BasicElementInterface.isBasicType(typeNode.textValue())) {
+    if (typeNode.isTextual() && isBasicType(typeNode.textValue())) {
       return new String[]{typeNode.textValue()};
     }
     if (typeNode.isArray()) {
       List<String> values = new ArrayList<>();
       for (JsonNode valueNode : typeNode) {
         if (!valueNode.isTextual()) {
-          throw new UtamCompilationError(typeNodeValueError);
+          if(isThrowAnError) {
+            throw new UtamCompilationError(typeNodeValueError);
+          } else {
+            return null;
+          }
         }
         String valueStr = valueNode.textValue();
-        if (!BasicElementInterface.isBasicType(valueStr)) {
-          throw new UtamCompilationError(String
-              .format(ERR_UNSUPPORTED_ELEMENT_TYPE, elementName, "\"" + valueStr + "\""));
+        if (!isBasicType(valueStr)) {
+          if(isThrowAnError) {
+            throw new UtamCompilationError(String
+                .format(ERR_UNSUPPORTED_ELEMENT_TYPE, elementName, "\"" + valueStr + "\""));
+          } else {
+            return null;
+          }
         }
         values.add(valueStr);
       }
       return values.toArray(String[]::new);
     }
-    throw new UtamCompilationError(typeNodeValueError);
+    if(isThrowAnError) {
+      throw new UtamCompilationError(typeNodeValueError);
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * check if "returnType" in an interface method returns basic type
+   *
+   * @return true if it is
+   */
+  public static boolean isReturnBasicType(JsonNode returnTypeNode) {
+    if (returnTypeNode == null || returnTypeNode.isNull()) {
+      return false;
+    }
+    return processBasicTypeNode(returnTypeNode, "returnType", false) != null;
   }
 
   @Override

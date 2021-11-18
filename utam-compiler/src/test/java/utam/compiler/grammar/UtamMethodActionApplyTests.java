@@ -12,8 +12,9 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.UtamMethodActionApply.ERR_ELEMENT_REDUNDANT_FOR_CHAIN;
+import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.COLLECTOR_IMPORT;
-import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
+import static utam.compiler.representation.FrameMethod.FRAME_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 
 import java.util.List;
@@ -109,7 +110,7 @@ public class UtamMethodActionApplyTests {
     TranslationContext context = getContext("basicActionReturnsSelf");
     PageObjectMethod actualMethod = context.getMethod(methodName);
     MethodInfo methodInfo = new MethodInfo(methodName, "Test");
-    methodInfo.addCodeLine("TestElement test0 = this.getTestElement()");
+    methodInfo.addCodeLine("BasicElement test0 = this.getTestElement()");
     methodInfo.addCodeLine("test0.getText()");
     methodInfo.addCodeLine("test0.getClassAttribute()");
     methodInfo.addCodeLine("return this");
@@ -155,9 +156,9 @@ public class UtamMethodActionApplyTests {
     TranslationContext context = getContext("basicListReturns");
     PageObjectMethod actualMethod = context.getMethod(methodName);
     MethodInfo expected = new MethodInfo(methodName, "List<Boolean>");
-    expected.addImpliedImportedTypes(COLLECTORS_IMPORT, LIST_IMPORT);
+    expected.addImpliedImportedTypes(COLLECTORS_IMPORT, LIST_IMPORT, BASIC_ELEMENT.getFullName());
     expected.addImportedTypes(LIST_IMPORT);
-    expected.addCodeLine("List<TestElement> test0 = this.getTestElement()");
+    expected.addCodeLine("List<BasicElement> test0 = this.getTestElement()");
     expected.addCodeLine("if (test0 == null) { return null; }");
     expected.addCodeLine(
         "List<Boolean> statement0 = test0.stream().map(element -> element.isVisible()).collect(Collectors.toList())");

@@ -7,19 +7,25 @@
  */
 package utam.compiler.translator;
 
-import utam.compiler.helpers.BasicElementUnionType;
-import utam.compiler.helpers.TranslationContext;
-import utam.core.declarative.representation.*;
-import utam.core.framework.element.BasePageElement;
+import static utam.compiler.translator.TranslationUtilities.NEW_LINE;
+import static utam.compiler.translator.TranslationUtilities.applyJavaFormatter;
+import static utam.compiler.translator.TranslationUtilities.getImportStrings;
+import static utam.compiler.translator.TranslationUtilities.getMethodWrappedJavadoc;
+import static utam.compiler.translator.TranslationUtilities.getPackageDeclaration;
+import static utam.compiler.translator.TranslationUtilities.getStatement;
+import static utam.compiler.translator.TranslationUtilities.getWrappedClassJavadoc;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static utam.compiler.translator.TranslationUtilities.*;
+import utam.core.declarative.representation.AnnotationProvider;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.PageClassField;
+import utam.core.declarative.representation.PageObjectClass;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 
 /**
  * helper to generate java code from PO class representation
@@ -30,11 +36,9 @@ import static utam.compiler.translator.TranslationUtilities.*;
 public final class ClassSerializer {
 
   private final PageObjectClass source;
-  private final TranslationContext translationContext;
 
-  public ClassSerializer(PageObjectClass pageObject, TranslationContext translationContext) {
+  public ClassSerializer(PageObjectClass pageObject) {
     this.source = pageObject;
-    this.translationContext = translationContext;
   }
 
   private static List<String> getMethodDeclaration(PageObjectMethod method) {
@@ -75,14 +79,13 @@ public final class ClassSerializer {
 
   @Override
   public String toString() {
-    List<AnnotationProvider> annotations = getClassAnnotations();
     List<String> out = new ArrayList<>();
     out.add(getPackageName());
     out.add(NEW_LINE);
-    out.addAll(getImports(annotations));
+    out.addAll(getImports());
     out.add(NEW_LINE);
     out.addAll(getWrappedClassJavadoc(source.getComments()));
-    annotations.stream()
+    getClassAnnotations().stream()
         .map(AnnotationProvider::getAnnotationText)
         .filter(s -> !s.isEmpty())
         .forEach(out::add);
@@ -92,55 +95,18 @@ public final class ClassSerializer {
     getClassFields().forEach(out::addAll);
     out.add(NEW_LINE);
     out.add(NEW_LINE);
-    source.getMethods().stream()
-            // if method is private and never used, do not not declare to avoid test coverage alert
-            .filter(this::isUsedMethod)
-            .flatMap(method -> getMethodDeclaration(method).stream()).forEach(out::add);
+    source.getMethods()
+        .stream()
+        .flatMap(method -> getMethodDeclaration(method).stream()).forEach(out::add);
     out.add(NEW_LINE);
-    source.getUnionTypes().forEach(unionType -> {
-      out.addAll(unionType.getDeclarationCode());
-      out.add(NEW_LINE);
-    });
-    addPublicElementClassDeclarations(out);
-    addPrivateElementClassDeclarations(out);
+    source.getUnionTypes()
+        .forEach(unionType -> {
+          out.addAll(unionType.getDeclarationCode());
+          out.add(NEW_LINE);
+        });
     out.add(NEW_LINE);
     out.add("}");
     return applyJavaFormatter(out);
-  }
-
-  private void addPublicElementClassDeclarations(List<String> out) {
-    source.getDeclaredElementTypes(true).stream()
-        .map(returnType -> String.format(
-            "public static class %s extends %s implements %s {}",
-            returnType.getSimpleName() + "Impl",
-            BasePageElement.class.getSimpleName(),
-            returnType.getSimpleName()))
-        .forEach(out::add);
-  }
-
-  private void addPrivateElementClassDeclarations(List<String> out) {
-    List<TypeProvider> privateElementTypes = source.getDeclaredElementTypes(false);
-    privateElementTypes.stream()
-        .map(returnType -> String.format(
-            "interface %s extends %s {}",
-            returnType.getSimpleName(),
-            ((BasicElementUnionType)returnType).getBasicInterfaces().stream()
-                .map(TypeProvider::getSimpleName)
-                .collect(Collectors.joining(", "))))
-        .forEach(out::add);
-
-    privateElementTypes.stream()
-        .map(returnType -> String.format(
-            "public static class %s extends %s implements %s {}",
-            returnType.getSimpleName() + "Impl",
-            BasePageElement.class.getSimpleName(),
-            returnType.getSimpleName()))
-        .forEach(out::add);
-  }
-
-  private boolean isUsedMethod(PageObjectMethod method) {
-    return method.isPublic() ||
-        translationContext.getUsedPrivateMethods().contains(method.getDeclaration().getName());
   }
 
   private String getDeclaration() {
@@ -155,16 +121,11 @@ public final class ClassSerializer {
     return getImportStrings(type, this.source.getClassType().getPackageName());
   }
 
-  private Set<String> getImports(List<AnnotationProvider> annotations) {
+  private Set<String> getImports() {
     Set<String> res = new HashSet<>();
     res.addAll(getImportStatements(source.getBaseClassType()));
     res.addAll(getImportStatements(source.getImplementedType().getInterfaceType()));
-    source.getDeclaredElementTypes(false).stream()
-        .map(returnType -> ((BasicElementUnionType)returnType).getBasicInterfaces())
-        .flatMap(Collection::stream)
-        .collect(Collectors.toSet())
-        .forEach(type -> res.addAll(getImportStatements(type)));
-    annotations.stream()
+    getClassAnnotations().stream()
         .flatMap(a -> a.getImportTypes().stream())
         .forEach(a -> res.addAll(getImportStatements(a)));
     source.getFields().stream()
@@ -175,6 +136,9 @@ public final class ClassSerializer {
     source
         .getMethods()
         .forEach(m -> m.getClassImports().forEach(importStr -> res.addAll(getImportStatements(importStr))));
+    source
+        .getUnionTypes()
+        .forEach(unionType -> unionType.getExtendedTypes().forEach(type -> res.addAll(getImportStatements(type))));
     return res;
   }
 

@@ -7,20 +7,20 @@
  */
 package utam.compiler.helpers;
 
-import utam.compiler.UtamCompilationError;
-import utam.compiler.grammar.UtamArgument;
-import utam.compiler.grammar.UtamArgument.UtamArgumentLiteralPrimitive;
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.element.BasicElement;
+import static utam.compiler.helpers.TypeUtilities.SELECTOR;
+import static utam.compiler.helpers.TypeUtilities.VOID;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static utam.compiler.helpers.TypeUtilities.SELECTOR;
-import static utam.compiler.helpers.TypeUtilities.VOID;
+import utam.compiler.UtamCompilationError;
+import utam.compiler.grammar.UtamArgument;
+import utam.compiler.grammar.UtamArgument.UtamArgumentLiteralPrimitive;
+import utam.compiler.types.BasicElementInterface;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.representation.UnionType;
+import utam.core.element.BasicElement;
 
 /**
  * this enum links element actions with translator code <br>
@@ -121,59 +121,61 @@ public enum BasicElementActionType implements ActionType {
     this.returnType = Objects.requireNonNullElse(returnType, VOID);
   }
 
-  public static ActionType getActionType(String apply, TypeProvider elementType, String elementName) {
+  public static ActionType getActionType(String apply, TypeProvider elementType,
+      String elementName) {
     // Element type is BaseElement, with no other actionable methods available.
     for (BasicElementActionType action : values()) {
       if (action.getApplyString().equals(apply)) {
         return action;
       }
     }
-    BasicElementInterface[] actionableTypes =
-        BasicElementInterface.getBasicElementTypes(elementType);
-    if (actionableTypes != null) {
-      for (BasicElementInterface actionableType : actionableTypes) {
-        if (actionableType == BasicElementInterface.editable) {
-          for (EditableActionType action : EditableActionType.values()) {
-            if (action.getApplyString().equals(apply)) {
-              return action;
-            }
-          }
-        }
-        if (actionableType == BasicElementInterface.touchable) {
-          for (TouchableActionType action : TouchableActionType.values()) {
-            if (action.getApplyString().equals(apply)) {
-              return action;
-            }
-          }
-        }
-        if (actionableType == BasicElementInterface.clickable) {
-          for (ClickableActionType action : ClickableActionType.values()) {
-            if (action.getApplyString().equals(apply)) {
-              return action;
-            }
-          }
-        }
-        if (actionableType == BasicElementInterface.draggable) {
-          for (DraggableActionType action : DraggableActionType.values()) {
-            if (action.getApplyString().equals(apply)) {
-              return action;
-            }
-          }
-        }
-        for (ActionableActionType action : ActionableActionType.values()) {
+    if (!(elementType instanceof UnionType)) {
+      throw new UtamCompilationError(
+          String.format(ERR_UNKNOWN_ACTION, apply, elementName, "basic type"));
+    }
+    List<TypeProvider> actionableTypes = ((UnionType) elementType).getExtendedTypes();
+    for (TypeProvider actionableType : actionableTypes) {
+      if (actionableType == BasicElementInterface.editable) {
+        for (EditableActionType action : EditableActionType.values()) {
           if (action.getApplyString().equals(apply)) {
             return action;
           }
         }
       }
+      if (actionableType == BasicElementInterface.touchable) {
+        for (TouchableActionType action : TouchableActionType.values()) {
+          if (action.getApplyString().equals(apply)) {
+            return action;
+          }
+        }
+      }
+      if (actionableType == BasicElementInterface.clickable) {
+        for (ClickableActionType action : ClickableActionType.values()) {
+          if (action.getApplyString().equals(apply)) {
+            return action;
+          }
+        }
+      }
+      if (actionableType == BasicElementInterface.draggable) {
+        for (DraggableActionType action : DraggableActionType.values()) {
+          if (action.getApplyString().equals(apply)) {
+            return action;
+          }
+        }
+      }
+      for (ActionableActionType action : ActionableActionType.values()) {
+        if (action.getApplyString().equals(apply)) {
+          return action;
+        }
+      }
     }
-    String actionableTypeNames =
-        actionableTypes == null || actionableTypes.length == 0 ?
-            "basic type" :
-            String.format("declared interfaces [ %s ]",
-                Arrays.stream(actionableTypes).map(Enum::name).collect(Collectors.joining(",")));
+    String actionableTypeNames = actionableTypes
+        .stream()
+        .map(t -> t.getSimpleName().toLowerCase())
+        .collect(Collectors.joining(","));
     throw new UtamCompilationError(
-        String.format(ERR_UNKNOWN_ACTION, apply, elementName, actionableTypeNames));
+        String.format(ERR_UNKNOWN_ACTION, apply, elementName,
+            String.format("declared interfaces [ %s ]", actionableTypeNames)));
   }
 
   // used in unit tests

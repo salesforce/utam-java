@@ -1,0 +1,23 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "parent",
+        "selector": {
+          "css": "body"
+        },
+        "elements": [
+          {
+            "name": "test",
+            "nullable": true,
+            "public": true,
+            "selector": {
+              "css": ".css",
+              "returnAll": true
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

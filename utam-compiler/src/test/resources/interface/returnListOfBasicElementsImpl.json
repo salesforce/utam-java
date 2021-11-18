@@ -1,0 +1,16 @@
+{
+  "implements": "utam-test/pageObjects/test",
+  "elements": [
+    {
+      "name": "test",
+      "type": [
+        "actionable"
+      ],
+      "public": true,
+      "selector": {
+        "css": "css",
+        "returnAll": true
+      }
+    }
+  ]
+}

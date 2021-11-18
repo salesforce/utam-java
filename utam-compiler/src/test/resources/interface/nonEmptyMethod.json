@@ -1,0 +1,14 @@
+{
+  "interface": true,
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "root",
+          "apply": "getText"
+        }
+      ]
+    }
+  ]
+}

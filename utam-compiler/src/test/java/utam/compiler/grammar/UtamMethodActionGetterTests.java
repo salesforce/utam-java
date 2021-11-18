@@ -63,7 +63,7 @@ public class UtamMethodActionGetterTests {
 
   @Test
   public void incorrectMatcherThrows() {
-    TypeProvider returnedType = new FromString("TestElement");
+    TypeProvider returnedType = new FromString("BasicElement");
     testThrows("incorrectMatcherType",
         MatcherType.isTrue.getIncorrectTypeError(returnedType));
   }
@@ -90,7 +90,7 @@ public class UtamMethodActionGetterTests {
   @Test
   public void testChainCantBeApplied() {
     String expectedError = String
-        .format(ERR_CHAIN_REQUIRES_CUSTOM_RETURN, methodName, "ElementElement");
+        .format(ERR_CHAIN_REQUIRES_CUSTOM_RETURN, methodName, "BasicElement");
     testThrows("chainNotAllowed", expectedError);
   }
 
@@ -211,8 +211,8 @@ public class UtamMethodActionGetterTests {
   public void testBasicNoTypePrivateElement() {
     TranslationContext context = getContext("basicPrivateNoType");
     PageObjectMethod method = context.getMethod(methodName);
-    MethodInfo expected = new MethodInfo(methodName, "NoTypePrivateElement");
-    expected.addCodeLine("NoTypePrivateElement statement0 = this.getNoTypePrivateElement()");
+    MethodInfo expected = new MethodInfo(methodName, "BasicElement");
+    expected.addCodeLine("BasicElement statement0 = this.getNoTypePrivateElement()");
     expected.addCodeLine("return statement0");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
@@ -221,10 +221,9 @@ public class UtamMethodActionGetterTests {
   public void testBasicElementWithFilterFindFirst() {
     TranslationContext context = getContext("basicFindFirst");
     PageObjectMethod method = context.getMethod(methodName);
-    MethodInfo expected = new MethodInfo(methodName, "FilterFindFirstElement");
+    MethodInfo expected = new MethodInfo(methodName, "BasicElement");
     expected.addParameter(new MethodParameterInfo("filterArg"));
-    expected.addCodeLine(
-        "FilterFindFirstElement statement0 = this.getFilterFindFirstElement(filterArg)");
+    expected.addCodeLine("BasicElement statement0 = this.getFilterFindFirstElement(filterArg)");
     expected.addCodeLine("return statement0");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }

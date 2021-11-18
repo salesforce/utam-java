@@ -7,7 +7,7 @@
  */
 package utam.compiler.translator;
 
-import utam.compiler.helpers.BasicElementInterface;
+import utam.compiler.types.BasicElementInterface;
 import utam.compiler.helpers.TypeUtilities.ListOf;
 import utam.core.declarative.translator.UnitTestRunner;
 import utam.compiler.helpers.PrimitiveType;

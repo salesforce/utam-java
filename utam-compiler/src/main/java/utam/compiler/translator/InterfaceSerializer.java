@@ -7,15 +7,21 @@
  */
 package utam.compiler.translator;
 
-import utam.compiler.helpers.BasicElementUnionType;
+import static utam.compiler.translator.TranslationUtilities.NEW_LINE;
+import static utam.compiler.translator.TranslationUtilities.applyJavaFormatter;
+import static utam.compiler.translator.TranslationUtilities.getImportStrings;
+import static utam.compiler.translator.TranslationUtilities.getMethodWrappedJavadoc;
+import static utam.compiler.translator.TranslationUtilities.getPackageDeclaration;
+import static utam.compiler.translator.TranslationUtilities.getStatement;
+import static utam.compiler.translator.TranslationUtilities.getWrappedClassJavadoc;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.PageObjectInterface;
 import utam.core.declarative.representation.TypeProvider;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static utam.compiler.translator.TranslationUtilities.*;
 
 /**
  * helper to generate java code from PO interface representation
@@ -41,58 +47,45 @@ public final class InterfaceSerializer {
     return getPackageDeclaration(source.getInterfaceType().getPackageName());
   }
 
+  private void addMethodDeclaration(List<String> out, MethodDeclaration declaration) {
+    out.add(NEW_LINE);
+    out.addAll(getMethodWrappedJavadoc(declaration));
+    out.add(NEW_LINE);
+    out.add(getStatement(declaration.getCodeLine()));
+  }
+
   @Override
   public String toString() {
-    Collection<MethodDeclaration> declaredApi = source.getDeclaredApi();
     List<String> out = new ArrayList<>();
     out.add(getPackageName());
     out.add(NEW_LINE);
-    out.addAll(getImports(declaredApi));
+    out.addAll(getImports());
     out.add(NEW_LINE);
     out.addAll(getWrappedClassJavadoc(source.getComments()));
     out.add(getDeclaration());
-    declaredApi.forEach(
-        declaration -> {
+    source.getDeclaredApi().forEach(declaration -> addMethodDeclaration(out, declaration));
+    source.getUnionTypes()
+        .forEach(unionType -> {
+          out.addAll(unionType.getDeclarationCode());
           out.add(NEW_LINE);
-          out.addAll(getMethodWrappedJavadoc(declaration));
-          out.add(NEW_LINE);
-          out.add(getStatement(declaration.getCodeLine()));
         });
-    source.getNestedInterfaces().forEach(
-        nested -> {
-          out.add(NEW_LINE);
-          out.add(getNestedInterfaceDeclaration(nested));
-        }
-    );
-    source.getUnionTypes().forEach(unionType -> {
-      out.addAll(unionType.getDeclarationCode());
-      out.add(NEW_LINE);
-    });
     out.add("}");
     out.removeIf(String::isEmpty);
     return applyJavaFormatter(out);
-  }
-
-  private String getNestedInterfaceDeclaration(TypeProvider type) {
-    return String.format("interface %s extends %s {}",
-        type.getSimpleName(),
-        ((BasicElementUnionType)type).getBasicInterfaces().stream()
-            .map(TypeProvider::getSimpleName)
-            .collect(Collectors.joining(", ")));
   }
 
   private Set<String> getImportStatements(TypeProvider type) {
     return getImportStrings(type, source.getInterfaceType().getPackageName());
   }
 
-  private Set<String> getImports(Collection<MethodDeclaration> declaredApi) {
+  private Set<String> getImports() {
     Set<String> res = new HashSet<>(getImportStatements(source.getBaseInterfaceType()));
-    source.getNestedInterfaces().stream()
-        .flatMap(nested -> ((BasicElementUnionType)nested).getBasicInterfaces().stream())
-        .forEach(basicInterface -> res.addAll(getImportStatements(basicInterface)));
-    declaredApi.stream()
+    source.getDeclaredApi().stream()
         .flatMap(method -> method.getImports().stream())
         .forEach(importStr -> res.addAll(getImportStatements(importStr)));
+    source.getUnionTypes()
+        .forEach(unionType -> unionType.getExtendedTypes()
+            .forEach(type -> res.addAll(getImportStatements(type))));
     return res;
   }
 }

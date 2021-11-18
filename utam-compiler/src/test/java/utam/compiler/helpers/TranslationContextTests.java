@@ -21,28 +21,20 @@ import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.helpers.AnnotationUtils.EMPTY_ANNOTATION;
-import static utam.compiler.helpers.BasicElementInterface.actionable;
-import static utam.compiler.helpers.BasicElementInterface.editable;
+import static utam.compiler.types.BasicElementInterface.actionable;
+import static utam.compiler.types.BasicElementInterface.editable;
 import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_DUPLICATE_ELEMENT_NAME;
 import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_DUPLICATE_FIELD;
 import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_DUPLICATE_METHOD;
-import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_DUPLICATE_PARAMETERS;
 import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_ELEMENT_NOT_FOUND;
 import static utam.compiler.helpers.TranslationContext.ERR_PROFILE_NOT_CONFIGURED;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.testng.annotations.Test;
 import utam.compiler.representation.ElementField;
 import utam.compiler.representation.ElementMethod;
-import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.FieldInfo;
-import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
+import utam.compiler.types.BasicElementInterface;
 import utam.core.declarative.representation.MethodDeclaration;
-import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.framework.consumer.UtamError;
@@ -68,13 +60,9 @@ public class TranslationContextTests {
         new ElementField(
             "testField",
             EMPTY_ANNOTATION));
-    context.setMethod(new ElementMethod.Single(elementContext, true));
-    context.setElement(new ElementContext.Container("containerObject"));
+    context.setMethod(new ElementMethod.Single(elementContext, true, TypeUtilities.BASIC_ELEMENT_IMPL_CLASS));
+    context.setElement(new ElementContext.Container(null, "containerObject"));
     return context;
-  }
-
-  private static MethodParameter getStringParameter() {
-    return new ParameterUtils.Regular("text", PrimitiveType.STRING);
   }
 
   @Test
@@ -133,17 +121,6 @@ public class TranslationContextTests {
   }
 
   @Test
-  public void testGetMethods() {
-    MethodInfo methodInfo = new MethodInfo("getTestElement", "Clickable");
-    methodInfo.addCodeLine("return element(this.testElement).build(Clickable.class, ClickableImpl.class)");
-
-    PageObjectValidationTestHelper.validateMethods(
-        "translator context",
-        new ArrayList<>(getContainerContext().getMethods()),
-        Collections.singletonList(methodInfo));
-  }
-
-  @Test
   public void testGetType() {
     assertThat(
         getContainerContext().getType("utam-test/pageObjects/test/testType").getFullName(),
@@ -187,92 +164,7 @@ public class TranslationContextTests {
   }
 
   @Test
-  public void testSetPublicMethod() {
-    TranslationContext context = getContainerContext();
-    ElementContext elementContext =
-        new ElementContext.Basic(
-            null,
-            "parameterElement",
-            BasicElementInterface.clickable,
-            getCssSelector("a[title=*'%s']"),
-            Collections.singletonList(getStringParameter()),
-            false);
-
-    int currentSize = context.getMethods().size();
-    context.setMethod(new ElementMethod.Single(elementContext, true));
-    assertThat(context.getMethods(), hasSize(currentSize + 1));
-  }
-
-  @Test
-  public void testSetPublicMethodWithMultipleParameters() {
-    TranslationContext context = getContainerContext();
-    ElementContext elementContext =
-        new ElementContext.Basic(
-            null,
-            "parameterElement",
-            BasicElementInterface.clickable,
-            getCssSelector("a[title=*'%s'][alt=*'%s]"),
-            Arrays.asList(
-                getStringParameter(), new ParameterUtils.Regular("alt", PrimitiveType.STRING)), false);
-
-    int currentSize = context.getMethods().size();
-    context.setMethod(new ElementMethod.Single(elementContext, true));
-    assertThat(context.getMethods(), hasSize(currentSize + 1));
-  }
-
-  @Test
-  public void testSetPublicMethodWithDuplicateParametersThrows() {
-    TranslationContext context = getContainerContext();
-    ElementContext elementContext =
-        new ElementContext.Basic(
-            null,
-            "parameterElement",
-            BasicElementInterface.clickable,
-            getCssSelector("a[title=*'%s']"),
-            Arrays.asList(getStringParameter(), getStringParameter()), false);
-
-    UtamError e =
-        expectThrows(
-            UtamError.class,
-            () -> context.setMethod(new ElementMethod.Single(elementContext, true)));
-    assertThat(
-        e.getMessage(),
-        containsString(
-            String.format(ERR_CONTEXT_DUPLICATE_PARAMETERS, "text", "getParameterElement")));
-  }
-
-  @Test
-  public void setPublicMethodWithDuplicateMethodThrows() {
-    UtamError e =
-        expectThrows(
-            UtamError.class,
-            () ->
-                getContainerContext()
-                    .setMethod(new ElementMethod.Single(getElementContext(), true)));
-    assertThat(e.getMessage(), containsString("duplicate method 'getTestElement'"));
-  }
-
-  @Test
-  public void setMethodWithDuplicateArguments() {
-    TranslationContext context = getTestTranslationContext();
-    MethodParameter parameter = getStringParameter();
-
-    MethodDeclaration declaration = mock(MethodDeclaration.class);
-    when(declaration.getName()).thenReturn("getError");
-    when(declaration.getParameters())
-        .thenReturn(Stream.of(parameter, parameter).collect(Collectors.toList()));
-
-    PageObjectMethod method = mock(PageObjectMethod.class);
-    when(method.getDeclaration()).thenReturn(declaration);
-
-    UtamError e = expectThrows(UtamError.class, () -> context.setMethod(method));
-    assertThat(
-        e.getMessage(),
-        containsString(String.format(ERR_CONTEXT_DUPLICATE_PARAMETERS, "text", "getError")));
-  }
-
-  @Test
-  public void testMethodWithDuplicateNames() {
+  public void testMethodWithDuplicateNamesThrows() {
     PageObjectMethod method = mock(PageObjectMethod.class);
     MethodDeclaration declaration = mock(MethodDeclaration.class);
     when(declaration.getName()).thenReturn("name");

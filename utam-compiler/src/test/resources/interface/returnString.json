@@ -1,0 +1,9 @@
+{
+  "interface": true,
+  "methods": [
+    {
+      "name": "getTest",
+      "returnType": "string"
+    }
+  ]
+}

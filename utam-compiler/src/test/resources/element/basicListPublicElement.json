@@ -1,0 +1,18 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "selector": {
+        "css": ".css[%s]",
+        "returnAll" : true,
+        "args" : [
+          {
+            "type" : "string",
+            "name" : "arg"
+          }
+        ]
+      },
+      "public" : true
+    }
+  ]
+}
