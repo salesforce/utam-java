@@ -1,0 +1,72 @@
+{
+  "elements": [
+    {
+      "name": "one",
+      "type": "utam-records/pageObjects/recordLayoutSection",
+      "selector": {
+        "css": "one[%d]",
+        "args" : [
+          {
+            "type" : "number",
+            "name" : "elementArg"
+          }
+        ]
+      }
+    }
+  ],
+  "methods" : [
+    {
+      "name" : "test",
+      "args" : [
+        {
+          "type" : "number",
+          "name" : "elementArg"
+        },
+        {
+          "name": "anotherArg",
+          "type": "number"
+        }
+      ],
+      "compose" : [
+        {
+          "apply": "waitFor",
+          "args": [
+            {
+              "type": "function",
+              "predicate": [
+                {
+                  "element": "one",
+                  "args" : [
+                    {
+                      "name" : "elementArg",
+                      "type" : "argumentReference"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "element" : "one",
+          "args" : [
+            {
+              "name" : "elementArg",
+              "type" : "argumentReference"
+            }
+          ]
+        },
+        {
+          "chain": true,
+          "apply": "something",
+          "args": [
+            {
+              "name": "anotherArg",
+              "type": "argumentReference"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
