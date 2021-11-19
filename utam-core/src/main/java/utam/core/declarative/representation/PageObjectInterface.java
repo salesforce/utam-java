@@ -62,7 +62,7 @@ public interface PageObjectInterface {
   String getComments();
 
   /**
-   * get all declared union types
+   * get all declared public union types
    *
    * @return list of union types
    */

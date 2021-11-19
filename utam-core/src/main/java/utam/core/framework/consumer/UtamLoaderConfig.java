@@ -55,16 +55,16 @@ public interface UtamLoaderConfig {
   /**
    * set implicit wait timeout
    *
-   * @param findTimeout timeout duration
+   * @param timeout timeout duration
    */
-  void setImplicitTimeout(Duration findTimeout);
+  void setImplicitTimeout(Duration timeout);
 
   /**
    * set explicit wait timeout
    *
-   * @param waitForTimeout timeout duration
+   * @param timeout timeout duration
    */
-  void setExplicitTimeout(Duration waitForTimeout);
+  void setExplicitTimeout(Duration timeout);
 
   /**
    * set polling interval for UI element interactions <br>

@@ -33,6 +33,7 @@ public final class MethodContext {
   static final String ERR_PARAMETER_NEVER_USED = "%s: declared parameter '%s' is never used";
   static final String ERR_METHOD_REFERENCE_ARGS = "%s: method level argument '%s' can't have reference type";
   static final String ERR_REFERENCE_MISSING = "%s: statement declares a reference to '%s', but there’s no matching method parameter";
+  static final String ERR_REFERENCE_REQUIRED = "%s: statement declares parameter '%s' that should be added to method level parameters";
   static final String ERR_ARG_TYPE_MISMATCH = "%s: statement declares an argument '%s' with type '%s', but the type does not match method parameter";
   static final String ERR_LITERAL_PARAMETER_NOT_ALLOWED = "%s: literal parameter '%s' not allowed at the method level";
   private final String methodName;
@@ -189,7 +190,7 @@ public final class MethodContext {
         if (!declaredMethodLevelParameters.containsKey(parameterName)) {
           throw new UtamCompilationError(
               String.format(
-                  ERR_REFERENCE_MISSING, validationContext, parameterName));
+                  ERR_REFERENCE_REQUIRED, validationContext, parameterName));
         }
         TypeProvider declaredType = declaredMethodLevelParameters.get(parameterName).getValue()
             .getType();

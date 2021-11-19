@@ -15,13 +15,26 @@ import java.util.List;
  * @author elizaveta.ivanova
  * @since 236
  */
-public interface UnionType {
+public interface UnionType extends TypeProvider {
 
+  /**
+   * some union types might be not public and declared only inside implementing class
+   *
+   * @return true if public
+   */
   boolean isPublic();
 
-  TypeProvider getType();
-
+  /**
+   * union type extends one or many other types
+   *
+   * @return list of extended types
+   */
   List<TypeProvider> getExtendedTypes();
 
+  /**
+   * get text of union type declaration
+   *
+   * @return lines with declaration code
+   */
   List<String> getDeclarationCode();
 }

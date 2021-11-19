@@ -21,6 +21,7 @@ import static utam.compiler.helpers.PrimitiveType.STRING;
 import static utam.compiler.helpers.TypeUtilities.PARAMETER_REFERENCE;
 
 import org.hamcrest.core.StringContains;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 import utam.compiler.grammar.DeserializerUtilities;
 import utam.compiler.helpers.ParameterUtils.Literal;
@@ -80,6 +81,7 @@ public class MethodContextTests {
   }
 
   @Test
+  @Ignore
   public void testArgNotReferenced() {
     MethodContext methodContext = getTestMethodContext();
     methodContext.setDeclaredParameter(new Regular("arg", STRING));

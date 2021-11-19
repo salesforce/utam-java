@@ -315,4 +315,20 @@ public class UtamMethodActionGetterTests {
     expected.addCodeLine("return statement1");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
+
+  @Test
+  public void testReuseSameElementWithArgInsidePredicate() {
+    TranslationContext context = getContext("reuseSameArg");
+    PageObjectMethod method = context.getMethod(methodName);
+    MethodInfo expected = new MethodInfo(methodName);
+    expected.addParameter(new MethodParameterInfo("elementArg", "Integer"));
+    expected.addParameter(new MethodParameterInfo("anotherArg", "Integer"));
+    expected.addCodeLine("this.waitFor(() -> {\n"
+        + "RecordLayoutSection pstatement0 = this.getOneElement(elementArg);\n"
+        + "return pstatement0;\n"
+        + "})");
+    expected.addCodeLine("RecordLayoutSection statement1 = this.getOneElement(elementArg)");
+    expected.addCodeLine("statement1.something(anotherArg)");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
 }
