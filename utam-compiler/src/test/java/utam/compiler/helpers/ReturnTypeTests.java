@@ -3,7 +3,6 @@ package utam.compiler.helpers;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.helpers.ReturnType.AbstractMethodReturnType.ERR_INVALID_ARRAY_VALUES;
 import static utam.compiler.helpers.ReturnType.ERR_RETURN_ALL_REDUNDANT;
 import static utam.compiler.helpers.ReturnType.ERR_RETURN_ALL_REDUNDANT_FOR_SELF;
 import static utam.compiler.helpers.ReturnType.ERR_UNSUPPORTED_RETURN_TYPE;
@@ -28,10 +27,6 @@ public class ReturnTypeTests {
 
   private static String getUnsupportedTypeError(String json) {
     return String.format(ERR_UNSUPPORTED_RETURN_TYPE, validationContextStr, json);
-  }
-
-  private static String getUnsupportedArrayTypeError(String json) {
-    return String.format(ERR_INVALID_ARRAY_VALUES, validationContextStr, json);
   }
 
   @Test
@@ -62,23 +57,5 @@ public class ReturnTypeTests {
   public void testReturnStringUnsupported() {
     String expectedErr = getUnsupportedTypeError("\"container\"");
     test("returnIncorrectString", expectedErr);
-  }
-
-  @Test
-  public void testAbstractReturnArrayNonTextual() {
-    String expectedErr = getUnsupportedArrayTypeError("[ 1, 2, 3 ]");
-    test("abstractReturnArrayNonTextual", expectedErr);
-  }
-
-  @Test
-  public void testAbstractReturnArrayEmpty() {
-    String expectedErr = getUnsupportedArrayTypeError("[ ]");
-    test("abstractReturnArrayEmpty", expectedErr);
-  }
-
-  @Test
-  public void testAbstractReturnArrayNonBasic() {
-    String expectedErr = getUnsupportedArrayTypeError("[ \"one\", \"two\" ]");
-    test("abstractReturnArrayNonBasic", expectedErr);
   }
 }

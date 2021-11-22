@@ -266,4 +266,11 @@ public class UtamElement_CustomTests {
     TranslationContext context = new DeserializerUtilities().getContext("element/customElementNullable");
     PageObjectValidationTestHelper.validateMethod(context.getMethod("getCustomNullable"), methodInfo);
   }
+
+  @Test
+  public void testDuplicateArgsNamesThrows() {
+    UtamError e =
+        expectThrows(UtamError.class, () -> new DeserializerUtilities().getResultFromFile("custom/testDuplicateArgs"));
+    assertThat(e.getMessage(), containsString("duplicate parameters"));
+  }
 }

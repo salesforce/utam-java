@@ -36,16 +36,19 @@ public abstract class ContainerMethod implements PageObjectMethod {
   private static final String PAGE_OBJECT_TYPE_PARAMETER_NAME = "pageObjectType";
   public static final MethodParameter PAGE_OBJECT_PARAMETER =
       new Regular(PAGE_OBJECT_TYPE_PARAMETER_NAME, BOUNDED_PAGE_OBJECT_PARAMETER);
-  final List<MethodParameter> methodParameters = new ArrayList<>();
   final String codePrefix;
   final String methodName;
   private final boolean isPublic;
+  final MethodParametersTracker parametersTracker;
 
 
   ContainerMethod(ElementContext scopeElement, boolean isExpandScope, String elementName,
       boolean isPublic) {
     this.methodName = getElementGetterMethodName(elementName, isPublic);
-    this.methodParameters.addAll(scopeElement.getParameters());
+    this.parametersTracker = new MethodParametersTracker(String.format("element '%s'", elementName));
+    if(scopeElement != null) {
+      parametersTracker.setMethodParameters(scopeElement.getParameters());
+    }
     this.codePrefix = String
         .format("return this.inContainer(%s, %s)", getElementLocatorString(scopeElement), isExpandScope);
     this.isPublic = isPublic;
@@ -63,8 +66,8 @@ public abstract class ContainerMethod implements PageObjectMethod {
     public WithSelectorReturnsList(ElementContext scopeElement, boolean isExpandScope,
         String elementName, LocatorCodeGeneration selectorContext, boolean isPublic) {
       super(scopeElement, isExpandScope, elementName, isPublic);
-      methodParameters.addAll(selectorContext.getParameters());
-      methodParameters.add(PAGE_OBJECT_PARAMETER);
+      parametersTracker.setMethodParameters(selectorContext.getParameters());
+      parametersTracker.setMethodParameter(PAGE_OBJECT_PARAMETER);
       selectorValue = selectorContext.getBuilderString();
     }
 
@@ -78,7 +81,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, methodParameters, wrapAsList(PAGE_OBJECT)) {
+      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), wrapAsList(PAGE_OBJECT)) {
         @Override
         String getReturnTypeStr() {
           return String.format("<T extends %s> List<T>", PAGE_OBJECT.getSimpleName());
@@ -102,8 +105,8 @@ public abstract class ContainerMethod implements PageObjectMethod {
         LocatorCodeGeneration selectorContext, boolean isPublic) {
       super(scopeElement, isExpandScope, elementName, isPublic);
       selectorValue = selectorContext.getBuilderString();
-      methodParameters.addAll(selectorContext.getParameters());
-      methodParameters.add(PAGE_OBJECT_PARAMETER);
+      parametersTracker.setMethodParameters(selectorContext.getParameters());
+      parametersTracker.setMethodParameter(PAGE_OBJECT_PARAMETER);
     }
 
     @Override
@@ -116,7 +119,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, methodParameters, PAGE_OBJECT) {
+      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), PAGE_OBJECT) {
         @Override
         String getReturnTypeStr() {
           return String.format("<T extends %s> T", PAGE_OBJECT.getSimpleName());

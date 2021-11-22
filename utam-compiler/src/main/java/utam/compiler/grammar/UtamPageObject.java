@@ -11,14 +11,15 @@ import static utam.compiler.grammar.UtamMethod.ERR_BEFORE_LOAD_HAS_NO_ARGS;
 import static utam.compiler.grammar.UtamMethod.getComposeStatements;
 import static utam.compiler.helpers.AnnotationUtils.getPageObjectAnnotation;
 import static utam.compiler.helpers.AnnotationUtils.getPagePlatformAnnotation;
-import static utam.compiler.helpers.BasicElementInterface.processBasicTypeNode;
-import static utam.compiler.helpers.BasicElementUnionType.asBasicType;
+import static utam.compiler.types.BasicElementInterface.processBasicTypeNode;
 import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.BASE_ROOT_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
+import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT_IMPL_CLASS;
+import static utam.compiler.types.BasicElementUnionType.asBasicOrUnionType;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,7 +30,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import utam.compiler.UtamCompilationError;
-import utam.compiler.helpers.BasicElementUnionType;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ReturnType;
@@ -49,7 +49,6 @@ import utam.core.declarative.representation.UnionType;
 import utam.core.element.BasicElement;
 import utam.core.element.Locator;
 import utam.core.framework.consumer.UtamError;
-import utam.core.framework.element.BasePageElement;
 
 /**
  * mapping for a Page Object JSON
@@ -214,8 +213,6 @@ final class UtamPageObject {
    */
   static final class RootElementHelper {
 
-    private static final TypeProvider DEFAULT_ROOT_ELEMENT_TYPE = new FromClass(
-        BasePageElement.class);
     private static final TypeProvider PUBLIC_DEFAULT_ROOT_ELEMENT_TYPE = new FromClass(
         BasicElement.class);
 
@@ -223,7 +220,7 @@ final class UtamPageObject {
     private final boolean isPublic;
 
     RootElementHelper(JsonNode typeNode, boolean isExposeRootElement) {
-      this.rootElementType = processBasicTypeNode(typeNode, ROOT_ELEMENT_NAME);
+      this.rootElementType = processBasicTypeNode(typeNode, ROOT_ELEMENT_NAME, true);
       this.isPublic = isExposeRootElement;
     }
 
@@ -242,14 +239,13 @@ final class UtamPageObject {
       // if type is set - add new type and public or private getter
       // if type is not set and root element is not exposed - use protected method BasePageObject.getRootElement
       if (rootElementType.length > 0) {
-        elementType = asBasicType(ROOT_ELEMENT_NAME, rootElementType, false);
-        UnionType unionType = ((BasicElementUnionType) elementType).getUnionType(false);
-        context.setUnionType(unionType, isPublic);
+        elementType = asBasicOrUnionType(ROOT_ELEMENT_NAME, rootElementType, false);
+        UnionType unionType = (UnionType) elementType;
         rootElementMethod =
             isPublic ? new PublicCustomType(unionType) : new PrivateCustomType(unionType);
         context.setMethod(rootElementMethod);
       } else {
-        elementType = isPublic ? PUBLIC_DEFAULT_ROOT_ELEMENT_TYPE : DEFAULT_ROOT_ELEMENT_TYPE;
+        elementType = isPublic ? PUBLIC_DEFAULT_ROOT_ELEMENT_TYPE : BASIC_ELEMENT_IMPL_CLASS;
         rootElementMethod =
             isPublic ? new PublicDefaultType(elementType) : new ProtectedDefaultType(elementType);
         if (isPublic) { // for default not exposed root - no need to add method

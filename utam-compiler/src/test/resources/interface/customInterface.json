@@ -1,9 +1,0 @@
-{
-  "interface" : true,
-  "methods":[
-    {
-      "name" : "getPublicElement",
-      "returnType": ["clickable"]
-    }
-  ]
-}

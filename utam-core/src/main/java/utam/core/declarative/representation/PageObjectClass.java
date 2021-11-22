@@ -91,15 +91,6 @@ public interface PageObjectClass {
   String getComments();
 
   /**
-   * get all declared union types for basic elements. Some types can be declared for private
-   * elements only
-   *
-   * @param isPublicElements boolean flag
-   * @return list of types
-   */
-  List<TypeProvider> getDeclaredElementTypes(boolean isPublicElements);
-
-  /**
    * get all declared union types inside implementing class
    *
    * @return list of union types

@@ -14,7 +14,6 @@ import static utam.compiler.translator.TranslatorMockUtilities.getDefaultConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
@@ -42,7 +41,7 @@ public class DeserializerUtilities {
     this.translatorConfig = getDefaultConfig();
   }
 
-  private static String readJSON(String fileName) {
+  static String readJSON(String fileName) {
     String testFileName = fileName + ".json";
     InputStream stream =
         DeserializerUtilities.class.getClassLoader().getResourceAsStream(testFileName);
@@ -70,22 +69,13 @@ public class DeserializerUtilities {
     // to ensure that code can be generated
     new InterfaceSerializer(declaration.getInterface()).toString();
     if(!declaration.isInterfaceOnly()) {
-      new ClassSerializer(declaration.getImplementation(), deserializer.getPageObjectContext())
-          .toString();
+      new ClassSerializer(declaration.getImplementation()).toString();
     }
     return new Result(deserializer.getObject(), deserializer.getPageObjectContext());
   }
 
   public TranslationContext getContext(String fileName) {
     return getResultFromFile(fileName).getContext();
-  }
-
-  static <T> T getObjectFromFile(String fileName, Class<T> tClass) {
-    try {
-      return JsonDeserializer.deserialize(tClass, readJSON(fileName));
-    } catch (IOException e) {
-      throw new UtamError("error", e);
-    }
   }
 
   /**

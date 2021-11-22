@@ -8,15 +8,16 @@
 package utam.compiler.grammar;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyIterable;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.helpers.BasicElementActionType.ERR_UNKNOWN_ACTION;
-import static utam.compiler.helpers.BasicElementInterface.clickable;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 
 import org.testng.annotations.Test;
-import utam.compiler.helpers.TranslationContext;
+import utam.compiler.grammar.DeserializerUtilities.Result;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
@@ -36,15 +37,23 @@ public class UtamMethodActionApplyRootTests {
   private static final String TEST_METHOD_NAME = "test";
   private static final String ROOT_METHOD_NAME = "getRoot";
 
-  private static TranslationContext getContext(String json) {
+  private static Result getResult(String json) {
     return new DeserializerUtilities()
-        .getContext("compose/root/" + json);
+        .getResultFromFile("compose/root/" + json);
+  }
+
+  private static PageObjectMethod getRootMethod(Result result) {
+    return result.getContext().getMethod(ROOT_METHOD_NAME);
+  }
+
+  private static PageObjectMethod getMethod(Result result) {
+    return result.getContext().getMethod(TEST_METHOD_NAME);
   }
 
   @Test
   public void testPrivateRootNoTypeBasicAction() {
-    TranslationContext context = getContext("rootContains");
-    PageObjectMethod actualMethod = context.getMethod(TEST_METHOD_NAME);
+    Result result = getResult("rootContains");
+    PageObjectMethod actualMethod = getMethod(result);
     MethodInfo expected = new MethodInfo(TEST_METHOD_NAME, "Boolean");
     expected.addImpliedImportedTypes(SELECTOR.getFullName());
     expected.addImpliedImportedTypes(BasePageElement.class.getName());
@@ -58,8 +67,8 @@ public class UtamMethodActionApplyRootTests {
 
   @Test
   public void testPublicRootNoTypeGetText() {
-    TranslationContext context = getContext("publicRootNoType");
-    PageObjectMethod actualMethod = context.getMethod(TEST_METHOD_NAME);
+    Result result = getResult("publicRootNoType");
+    PageObjectMethod actualMethod = getMethod(result);
     MethodInfo expected = new MethodInfo(TEST_METHOD_NAME, "String");
     Class returnType = BasicElement.class;
     expected.addImpliedImportedTypes(returnType.getName());
@@ -68,7 +77,7 @@ public class UtamMethodActionApplyRootTests {
     expected.addCodeLine("return statement0");
     PageObjectValidationTestHelper.validateMethod(actualMethod, expected);
 
-    PageObjectMethod rootMethod = context.getMethod(ROOT_METHOD_NAME);
+    PageObjectMethod rootMethod = getRootMethod(result);
     MethodInfo expectedRootMethod = new MethodInfo(ROOT_METHOD_NAME, returnType.getSimpleName());
     expectedRootMethod.addImpliedImportedTypes(returnType.getName());
     expectedRootMethod.addCodeLine("return this.getRootElement()");
@@ -79,7 +88,7 @@ public class UtamMethodActionApplyRootTests {
   public void testPublicRootNoTypeClickThrows() {
     String expectedError = String.format(ERR_UNKNOWN_ACTION, "click", "root", "basic type");
     UtamError e = expectThrows(UtamError.class,
-        () -> getContext("publicRootWrongAction"));
+        () -> getResult("publicRootWrongAction"));
     assertThat(e.getMessage(), containsString(expectedError));
   }
 
@@ -88,20 +97,20 @@ public class UtamMethodActionApplyRootTests {
     String expectedError = String
         .format(ERR_UNKNOWN_ACTION, "click", "root", "declared interfaces [ editable ]");
     UtamError e = expectThrows(UtamError.class,
-        () -> getContext("privateRootWrongAction"));
+        () -> getResult("privateRootWrongAction"));
     assertThat(e.getMessage(), containsString(expectedError));
   }
 
   @Test
   public void testPublicRootWithTypeClick() {
-    TranslationContext context = getContext("publicRootWithType");
-    PageObjectMethod actualMethod = context.getMethod(TEST_METHOD_NAME);
+    Result result = getResult("publicRootWithType");
+    PageObjectMethod actualMethod = getMethod(result);
     MethodInfo expected = new MethodInfo(TEST_METHOD_NAME);
     expected.addCodeLine("RootElement root0 = this.getRoot()");
     expected.addCodeLine("root0.click()");
     PageObjectValidationTestHelper.validateMethod(actualMethod, expected);
 
-    PageObjectMethod rootMethod = context.getMethod(ROOT_METHOD_NAME);
+    PageObjectMethod rootMethod = getRootMethod(result);
     MethodInfo expectedRootMethod = new MethodInfo(ROOT_METHOD_NAME, "RootElement");
     expectedRootMethod.addCodeLine("return getProxy(this.getRootElement(), RootElement.class)");
     PageObjectValidationTestHelper.validateMethod(rootMethod, expectedRootMethod);
@@ -109,19 +118,25 @@ public class UtamMethodActionApplyRootTests {
 
   @Test
   public void testPrivateRootWithTypeClick() {
-    TranslationContext context = getContext("privateRootWithType");
-    PageObjectMethod actualMethod = context.getMethod(TEST_METHOD_NAME);
+    Result result = getResult("privateRootWithType");
+    PageObjectMethod actualMethod = getMethod(result);
     MethodInfo expected = new MethodInfo(TEST_METHOD_NAME);
     expected.addCodeLine("RootElement root0 = this.getRoot()");
     expected.addCodeLine("root0.click()");
     PageObjectValidationTestHelper.validateMethod(actualMethod, expected);
 
-    PageObjectMethod rootMethod = context.getMethod(ROOT_METHOD_NAME);
+    PageObjectMethod rootMethod = getRootMethod(result);
     assertThat(rootMethod.isPublic(), is(false));
     MethodInfo expectedRootMethod = new MethodInfo(ROOT_METHOD_NAME, "RootElement");
     expectedRootMethod.setNotPublic();
-    expectedRootMethod.addImpliedImportedTypes(clickable.getFullName());
+    assertThat(rootMethod.getClassImports(), is(emptyIterable()));
     expectedRootMethod.addCodeLine("return getProxy(this.getRootElement(), RootElement.class)");
     PageObjectValidationTestHelper.validateMethod(rootMethod, expectedRootMethod);
+
+    assertThat(result.getContext().getInterfaceUnionTypes().size(), is(equalTo(1)));
+    assertThat(
+        result.getContext().getInterfaceUnionTypes().get(0).getDeclarationCode().get(0),
+        is(equalTo("interface RootElement extends Clickable {}")));
+    assertThat(result.getContext().getClassUnionTypes().size(), is(equalTo(0)));
   }
 }

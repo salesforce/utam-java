@@ -1,0 +1,13 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "type" : [ "editable", "clickable"],
+      "selector": {
+        "css": ".css",
+        "returnAll" : true
+      },
+      "public" : true
+    }
+  ]
+}

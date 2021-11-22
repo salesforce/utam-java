@@ -1,31 +1,35 @@
 {
-  "name" : "element",
-  "selector" : {
-    "css" : "selector %s",
-    "returnAll" : true,
-    "args" : [
-      {
-        "name" : "arg1",
-        "type" : "string"
-      }
-    ]
-  },
-  "filter" : {
-    "apply" : "getAttribute",
-    "args" : [
-      {
-        "name" : "arg1",
-        "type" : "string"
-      }
-    ],
-    "matcher" : {
-      "type" : "stringContains",
-      "args" : [
-        {
-          "name" : "arg1",
-          "type" : "string"
+  "elements": [
+    {
+      "name": "element",
+      "selector": {
+        "css": "selector %s",
+        "returnAll": true,
+        "args": [
+          {
+            "name": "arg1",
+            "type": "string"
+          }
+        ]
+      },
+      "filter": {
+        "apply": "getAttribute",
+        "args": [
+          {
+            "name": "arg1",
+            "type": "string"
+          }
+        ],
+        "matcher": {
+          "type": "stringContains",
+          "args": [
+            {
+              "name": "arg1",
+              "type": "string"
+            }
+          ]
         }
-      ]
+      }
     }
-  }
+  ]
 }

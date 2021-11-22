@@ -117,7 +117,8 @@ public class TranslationUtilities {
   public static boolean isImportableType(TypeProvider type) {
     return !type.getFullName().isEmpty()
         && !type.getPackageName().isEmpty()
-        && !type.getFullName().startsWith("java.lang");
+        && !type.getFullName().startsWith("java.lang")
+        && !type.getImportableTypes().isEmpty();
   }
 
   static String getStatement(String string) {

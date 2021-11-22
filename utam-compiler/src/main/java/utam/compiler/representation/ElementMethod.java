@@ -11,6 +11,7 @@ import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
 import static utam.compiler.helpers.TypeUtilities.wrapAsList;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
+import static utam.compiler.types.BasicElementUnionType.asUnionTypeOrNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,13 +21,12 @@ import java.util.stream.Stream;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.ParameterUtils;
-import utam.compiler.helpers.TypeUtilities;
 import utam.compiler.helpers.TypeUtilities.FromClass;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.element.BasePageElement;
+import utam.core.declarative.representation.UnionType;
 import utam.core.driver.Document;
 
 /**
@@ -35,10 +35,9 @@ import utam.core.driver.Document;
  * @author elizaveta.ivanova
  * @since 226
  */
-public abstract class ElementMethod implements PageObjectMethod {
+public abstract class ElementMethod {
 
   private static final TypeProvider DOCUMENT_TYPE = new FromClass(Document.class);
-  private static final TypeProvider BASE_PAGE_ELEMENT_TYPE = new TypeUtilities.FromClass(BasePageElement.class);
   private static final MethodDeclaration DOCUMENT_GETTER_DECLARATION = new MethodDeclarationImpl(
       "getDocument",
       EMPTY_PARAMETERS,
@@ -74,27 +73,28 @@ public abstract class ElementMethod implements PageObjectMethod {
     return "";
   }
 
-  static String getElementMethodCode(ElementContext element, boolean isList) {
-    return String.format("element(this.%s).%s(%s.class, %sImpl.class%s)",
+  static String getElementMethodCode(ElementContext element, TypeProvider implClass, boolean isList) {
+    return String.format("element(this.%s).%s(%s.class, %s.class%s)",
         element.getName(),
         isList? "buildList" : "build",
         element.getType().getSimpleName(),
-        element.getType().getSimpleName(),
+        implClass.getSimpleName(),
         getParametersVararg(element.getParameters()));
   }
 
   private static String getElementFilteredListMethodCode(
       String elementName,
       TypeProvider elementType,
+      TypeProvider implClass,
       List<MethodParameter> elementParameters,
       String predicateCode,
       boolean isReturnFirstMatch) {
     return String.format(
-        "element(this.%s).%s(%s.class, %sImpl.class, %s%s)",
+        "element(this.%s).%s(%s.class, %s.class, %s%s)",
         elementName,
         isReturnFirstMatch ? "build" : "buildList",
         elementType.getSimpleName(),
-        elementType.getSimpleName(),
+        implClass.getSimpleName(),
         predicateCode,
         getParametersVararg(elementParameters));
   }
@@ -110,34 +110,46 @@ public abstract class ElementMethod implements PageObjectMethod {
     return String.format("elm -> %s", matcherCode);
   }
 
-  public static final class Single implements PageObjectMethod {
+  private static void setInterfaceImports(List<TypeProvider> imports, TypeProvider returnType) {
+    ParameterUtils.setImport(imports, returnType);
+  }
+
+  private static void setClassImports(List<TypeProvider> classImports, TypeProvider interfaceType,
+      TypeProvider implType) {
+    ParameterUtils.setImport(classImports, interfaceType);
+    ParameterUtils.setImport(classImports, implType);
+  }
+
+  public static final class Single extends BasicElementGetterMethod {
 
     private final String methodCode;
     private final TypeProvider returnType;
     private final List<MethodParameter> parameters;
     private final String methodName;
     private final boolean isPublic;
+    private final List<TypeProvider> imports = new ArrayList<>();
+    private final List<TypeProvider> classImports = new ArrayList<>();
+    private final UnionType unionType;
 
-    public Single(ElementContext element, boolean isPublic) {
-      this.methodCode = getElementMethodCode(element, false);
+    public Single(ElementContext element, boolean isPublic, TypeProvider implType) {
+      this.methodCode = getElementMethodCode(element, implType, false);
       this.parameters = element.getParameters();
       this.methodName = getElementGetterMethodName(element.getName(), isPublic);
       this.returnType = element.getGetterReturnType();
       this.isPublic = isPublic;
+      setInterfaceImports(imports, returnType);
+      setClassImports(classImports, returnType, implType);
+      this.unionType = asUnionTypeOrNull(implType);
     }
 
     @Override
     public MethodDeclaration getDeclaration() {
-      List<TypeProvider> imports = new ArrayList<>();
-      ParameterUtils.setImport(imports, returnType);
       return new MethodDeclarationImpl(methodName, parameters, returnType, imports);
     }
 
     @Override
     public List<TypeProvider> getClassImports() {
-      List<TypeProvider> imports = new ArrayList<>(getDeclaration().getImports());
-      ParameterUtils.setImport(imports, BASE_PAGE_ELEMENT_TYPE);
-      return imports;
+      return classImports;
     }
 
     @Override
@@ -151,30 +163,40 @@ public abstract class ElementMethod implements PageObjectMethod {
     }
 
     @Override
-    public boolean isReturnsBasicElement() {
-      return true;
+    public UnionType getInterfaceUnionType() {
+      return asUnionTypeOrNull(returnType);
+    }
+
+    @Override
+    public UnionType getClassUnionType() {
+      return unionType;
     }
   }
 
-  public static final class Multiple implements PageObjectMethod {
+  public static final class Multiple extends BasicElementGetterMethod {
 
     private final String methodCode;
     private final TypeProvider listReturnType;
     private final List<MethodParameter> parameters;
     private final String methodName;
     private final boolean isPublic;
+    private final List<TypeProvider> imports = new ArrayList<>();
+    private final List<TypeProvider> classImports = new ArrayList<>();
+    private final UnionType unionType;
 
-    public Multiple(ElementContext element, boolean isPublic) {
-      this.methodCode = getElementMethodCode(element, true);
+    public Multiple(ElementContext element, boolean isPublic, TypeProvider implType) {
+      this.methodCode = getElementMethodCode(element, implType, true);
       this.parameters = element.getParameters();
       this.methodName = getElementGetterMethodName(element.getName(), isPublic);
       this.listReturnType = element.getGetterReturnType();
       this.isPublic = isPublic;
+      setInterfaceImports(imports, listReturnType);
+      setClassImports(classImports, listReturnType, implType);
+      this.unionType = asUnionTypeOrNull(implType);
     }
 
     @Override
     public MethodDeclaration getDeclaration() {
-      List<TypeProvider> imports = Stream.of(listReturnType).collect(Collectors.toList());
       return new MethodDeclarationImpl(
           methodName,
           parameters,
@@ -184,9 +206,7 @@ public abstract class ElementMethod implements PageObjectMethod {
 
     @Override
     public List<TypeProvider> getClassImports() {
-      List<TypeProvider> imports = new ArrayList<>(getDeclaration().getImports());
-      ParameterUtils.setImport(imports, BASE_PAGE_ELEMENT_TYPE);
-      return imports;
+      return classImports;
     }
 
     @Override
@@ -200,12 +220,17 @@ public abstract class ElementMethod implements PageObjectMethod {
     }
 
     @Override
-    public boolean isReturnsBasicElement() {
-      return true;
+    public UnionType getInterfaceUnionType() {
+      return asUnionTypeOrNull(listReturnType);
+    }
+
+    @Override
+    public UnionType getClassUnionType() {
+      return unionType;
     }
   }
 
-  public static final class Filtered implements PageObjectMethod {
+  public static final class Filtered extends BasicElementGetterMethod {
 
     private final boolean isPublic;
     private final String methodName;
@@ -213,10 +238,13 @@ public abstract class ElementMethod implements PageObjectMethod {
     private final List<MethodParameter> parameters;
     private final String methodCode;
     private final List<TypeProvider> imports = new ArrayList<>();
+    private final List<TypeProvider> classImports = new ArrayList<>();
+    private final UnionType unionType;
 
     public Filtered(
         String elementName,
         TypeProvider elementType,
+        TypeProvider implType,
         List<MethodParameter> elementParameters,
         boolean isPublic,
         String applyMethod,
@@ -230,15 +258,17 @@ public abstract class ElementMethod implements PageObjectMethod {
       this.parameters = new ArrayList<>(elementParameters);
       this.parameters.addAll(applyParameters);
       this.parameters.addAll(matcherParameters);
-      ParameterUtils.setImport(imports, returnType);
-      ParameterUtils.setImport(imports, BASE_PAGE_ELEMENT_TYPE);
+      setInterfaceImports(imports, returnType);
+      setClassImports(classImports, returnType, implType);
       methodCode =
           getElementFilteredListMethodCode(
               elementName,
               elementType,
+              implType,
               elementParameters,
               getPredicateCode(applyMethod, applyParameters, matcherType, matcherParameters),
               isFindFirstMatch);
+      this.unionType = asUnionTypeOrNull(implType);
     }
 
     @Override
@@ -253,7 +283,7 @@ public abstract class ElementMethod implements PageObjectMethod {
 
     @Override
     public List<TypeProvider> getClassImports() {
-      return getDeclaration().getImports();
+      return classImports;
     }
 
     @Override
@@ -262,8 +292,13 @@ public abstract class ElementMethod implements PageObjectMethod {
     }
 
     @Override
-    public boolean isReturnsBasicElement() {
-      return true;
+    public UnionType getInterfaceUnionType() {
+      return asUnionTypeOrNull(returnType);
+    }
+
+    @Override
+    public UnionType getClassUnionType() {
+      return unionType;
     }
   }
 }

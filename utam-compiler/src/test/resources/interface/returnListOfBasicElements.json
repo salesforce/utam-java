@@ -1,0 +1,10 @@
+{
+  "interface": true,
+  "methods": [
+    {
+      "name": "getTest",
+      "returnType": "actionable",
+      "returnAll": true
+    }
+  ]
+}

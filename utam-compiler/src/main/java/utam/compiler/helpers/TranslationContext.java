@@ -20,11 +20,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import utam.compiler.guardrails.GlobalValidation;
 import utam.compiler.guardrails.PageObjectValidation;
 import utam.compiler.helpers.ElementContext.Document;
 import utam.compiler.helpers.ElementContext.Self;
-import utam.core.declarative.representation.MethodParameter;
+import utam.compiler.representation.BasicElementGetterMethod;
 import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
@@ -46,9 +47,6 @@ public final class TranslationContext {
 
   public static final String ERR_CONTEXT_ELEMENT_NOT_FOUND =
       "referenced element '%s' not found in context";
-  static final String ERR_CONTEXT_DUPLICATE_PARAMETERS =
-      "duplicate parameters with name '%s' in method '%s'," +
-          " \n if the same parameter needed in multiple places, try to use 'reference' type parameter instead";
   static final String ERR_CONTEXT_DUPLICATE_METHOD = "duplicate method '%s'";
   static final String ERR_CONTEXT_DUPLICATE_FIELD = "duplicate field '%s'";
   static final String ERR_CONTEXT_DUPLICATE_ELEMENT_NAME =
@@ -56,6 +54,7 @@ public final class TranslationContext {
   static final String ERR_PROFILE_NOT_CONFIGURED = "profile '%s' is not configured";
   private final List<PageClassField> pageObjectFields = new ArrayList<>();
   private final List<PageObjectMethod> pageObjectMethods = new ArrayList<>();
+  private final List<BasicElementGetterMethod> elementGetters = new ArrayList<>();
   private final Set<String> methodNames = new HashSet<>();
   private final Map<String, ElementContext> elementContextMap =
       Collections.synchronizedMap(new HashMap<>());
@@ -68,10 +67,6 @@ public final class TranslationContext {
   private boolean isImplementationPageObject = false;
   private final TypeProvider pageObjectClassType;
   private TypeProvider pageObjectInterfaceType;
-  // some union types are declared inside interface
-  private final List<UnionType> interfaceUnionTypes = new ArrayList<>();
-  // some union types are declared inside implementing class only
-  private final List<UnionType> classUnionTypes = new ArrayList<>();
 
 
   public TranslationContext(String pageObjectURI, TranslatorConfig translatorConfiguration) {
@@ -84,24 +79,6 @@ public final class TranslationContext {
     // has impl prefixes
     this.pageObjectClassType = translationTypesConfig.getClassType(pageObjectURI);
     this.pageObjectInterfaceType = translationTypesConfig.getInterfaceType(pageObjectURI);
-  }
-
-  private static void checkParameters(PageObjectMethod method) {
-    if (method.getDeclaration().getParameters().isEmpty()) {
-      return;
-    }
-    List<MethodParameter> parameters = new ArrayList<>(method.getDeclaration().getParameters());
-    parameters.removeIf(MethodParameter::isLiteral);
-    for (int i = 0; i < parameters.size(); i++) {
-      String name = parameters.get(i).getValue();
-      for (int j = i + 1; j < parameters.size(); j++) {
-        if (parameters.get(j).getValue().equals(name)) {
-          throw new UtamError(
-              String.format(
-                  ERR_CONTEXT_DUPLICATE_PARAMETERS, name, method.getDeclaration().getName()));
-        }
-      }
-    }
   }
 
   public void guardrailsValidation() {
@@ -167,10 +144,13 @@ public final class TranslationContext {
       throw new UtamError(
           String.format(ERR_CONTEXT_DUPLICATE_METHOD, method.getDeclaration().getName()));
     }
-    checkParameters(method);
     // no duplicates - add method
     methodNames.add(method.getDeclaration().getName());
-    pageObjectMethods.add(method);
+    if(method instanceof BasicElementGetterMethod) {
+      elementGetters.add((BasicElementGetterMethod) method);
+    } else {
+      pageObjectMethods.add(method);
+    }
   }
 
   public ElementContext getRootElement() {
@@ -191,7 +171,11 @@ public final class TranslationContext {
   }
 
   public List<PageObjectMethod> getMethods() {
-    return pageObjectMethods;
+    List<PageObjectMethod> allMethods = new ArrayList<>();
+    // only used ones!
+    allMethods.addAll(getBasicElementsGetters());
+    allMethods.addAll(pageObjectMethods);
+    return allMethods;
   }
 
   public List<PageClassField> getFields() {
@@ -218,16 +202,21 @@ public final class TranslationContext {
     usedPrivateMethods.add(name);
   }
 
-  public Set<String> getUsedPrivateMethods() {
-    return usedPrivateMethods;
-  }
-
   public PageObjectMethod getMethod(String name) {
-    return pageObjectMethods.stream()
-        .filter(pageObjectMethod -> pageObjectMethod.getDeclaration().getName().equals(name))
+    PageObjectMethod result = pageObjectMethods.stream()
+        .filter(method -> method.getDeclaration().getName().equals(name))
         .findFirst()
-        .orElseThrow(
-            () -> new AssertionError(String.format("method '%s' not found in JSON", name)));
+        .orElse(null);
+    if(result == null) {
+      result = elementGetters.stream()
+          .filter(method -> method.getDeclaration().getName().equals(name))
+          .findFirst()
+          .orElse(null);
+    }
+    if(result == null) {
+      throw new AssertionError(String.format("method '%s' not found in JSON", name));
+    }
+    return result;
   }
 
   /**
@@ -250,27 +239,50 @@ public final class TranslationContext {
     this.testableElements.put(elementName, helper);
   }
 
-  /**
-   * get declared union types
-   *
-   * @param isPublic if true - should be declared in the interface, otherwise in class
-   * @return declared union types
-   */
-  public List<UnionType> getUnionTypes(boolean isPublic) {
-    return isPublic ? interfaceUnionTypes : classUnionTypes;
+  private List<BasicElementGetterMethod> getBasicElementsGetters() {
+    // only used element getter should be returned
+    return elementGetters.stream()
+        .filter(getter -> getter.isPublic() || usedPrivateMethods.contains(getter.getDeclaration().getName()))
+        .collect(Collectors.toList());
   }
 
   /**
-   * set union type to be declared
+   * get list of union types to be declared in the implementation class
    *
-   * @param unionType type
-   * @param isPublic  if true, should be declared in the interface
+   * @return list of union types
    */
-  public void setUnionType(UnionType unionType, boolean isPublic) {
-    if (isPublic) {
-      interfaceUnionTypes.add(unionType);
-    } else {
-      classUnionTypes.add(unionType);
+  public List<UnionType> getClassUnionTypes() {
+    List<BasicElementGetterMethod> getters = getBasicElementsGetters();
+    List<UnionType> unionTypes = new ArrayList<>();
+    if(isImplementationPageObject()) {
+      // if impl only PO has private basic elements - declare interface as well
+      getters.forEach(getter -> {
+        if(!getter.isPublic() && getter.getInterfaceUnionType() != null) {
+          unionTypes.add(getter.getInterfaceUnionType());
+        }
+      });
     }
+    getters.forEach(getter -> {
+      if(getter.getClassUnionType() != null) {
+        unionTypes.add(getter.getClassUnionType());
+      }
+    });
+    return unionTypes;
+  }
+
+  /**
+   * get list of union types to be declared in the interface
+   *
+   * @return list of union types
+   */
+  public List<UnionType> getInterfaceUnionTypes() {
+    List<BasicElementGetterMethod> getters = getBasicElementsGetters();
+    List<UnionType> unionTypes = new ArrayList<>();
+    getters.forEach(getter -> {
+      if(getter.getInterfaceUnionType() != null) {
+        unionTypes.add(getter.getInterfaceUnionType());
+      }
+    });
+    return unionTypes;
   }
 }

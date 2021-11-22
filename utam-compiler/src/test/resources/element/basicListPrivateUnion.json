@@ -1,0 +1,12 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "type" : "actionable",
+      "selector": {
+        "css": ".css",
+        "returnAll" : true
+      }
+    }
+  ]
+}

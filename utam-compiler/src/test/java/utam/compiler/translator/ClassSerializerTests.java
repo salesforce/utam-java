@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static utam.compiler.grammar.TestUtilities.getJsonStringDeserializer;
-import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -27,7 +26,7 @@ public class ClassSerializerTests {
 
   private static String getImplementationCode(String json) {
     PageObjectClass pageObject = getJsonStringDeserializer(json).getObject().getImplementation();
-    return new ClassSerializer(pageObject, getTestTranslationContext()).toString();
+    return new ClassSerializer(pageObject).toString();
   }
 
   @Test

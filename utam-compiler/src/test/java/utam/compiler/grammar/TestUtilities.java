@@ -67,25 +67,13 @@ public class TestUtilities {
   static class UtamEntityCreator {
 
     static UtamElement createUtamElement(String name) {
-      return createUtamElement(name, null);
-    }
-
-    static UtamElement createUtamElement(String name, UtamSelector selector) {
-      return createUtamElement(name, null, selector);
+      return createUtamElement(name, null, null);
     }
 
     static UtamElement createUtamElement(String name, String type, UtamSelector selector) {
       return new UtamElement(
           createStringTypeNode(type), name, false, null, null, selector,
           null, null, null);
-    }
-
-    static UtamMethod createUtamMethod(String name, UtamMethodAction[] compose) {
-      return new UtamMethod(name, compose, null, null, null);
-    }
-
-    static UtamMethod createUtamMethod(String name, String returns, UtamArgument[] args) {
-      return new UtamMethod(name, null, args, createStringTypeNode(returns), null);
     }
 
     private static JsonNode createStringTypeNode(String type) {

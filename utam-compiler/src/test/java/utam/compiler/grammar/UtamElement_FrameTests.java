@@ -15,7 +15,7 @@ import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_MISSING_SELECTOR_PROPERTY;
 import static utam.compiler.grammar.UtamElement.ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED;
 import static utam.compiler.grammar.UtamElement.Type;
-import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
+import static utam.compiler.representation.FrameMethod.FRAME_ELEMENT;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
 import java.util.List;

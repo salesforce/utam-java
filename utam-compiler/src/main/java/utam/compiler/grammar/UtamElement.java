@@ -8,20 +8,18 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.helpers.AnnotationUtils.getFindAnnotation;
-import static utam.compiler.helpers.BasicElementInterface.processBasicTypeNode;
+import static utam.compiler.types.BasicElementInterface.processBasicTypeNode;
+import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT_IMPL_CLASS;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT_TYPE_NAME;
 import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT_TYPE_NAME;
+import static utam.compiler.types.BasicElementUnionType.asBasicOrUnionType;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
-import utam.compiler.helpers.BasicElementUnionType;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementUnitTestHelper;
 import utam.compiler.helpers.LocatorCodeGeneration;
@@ -31,10 +29,12 @@ import utam.compiler.representation.CustomElementMethod;
 import utam.compiler.representation.ElementField;
 import utam.compiler.representation.ElementMethod;
 import utam.compiler.representation.FrameMethod;
+import utam.compiler.representation.MethodParametersTracker;
 import utam.compiler.translator.TranslationTypesConfigJava;
-import utam.core.declarative.representation.MethodParameter;
+import utam.compiler.types.BasicElementUnionTypeImpl;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.representation.UnionType;
 import utam.core.framework.consumer.UtamError;
 
 /**
@@ -103,7 +103,7 @@ public final class UtamElement {
         return new SimpleEntry<>(Custom::new, new String[]{value});
       }
     }
-    String[] type = processBasicTypeNode(typeNode, name);
+    String[] type = processBasicTypeNode(typeNode, name, true);
     return new SimpleEntry<>(Basic::new, type);
   }
 
@@ -203,14 +203,15 @@ public final class UtamElement {
         boolean isExpandScopeShadowRoot) {
       boolean isReturnList = selector.isReturnAll() && (filter == null || !filter.getFindFirst());
       LocatorCodeGeneration selectorContext = selector.getCodeGenerationHelper(translatorContext);
-      List<MethodParameter> addedParameters = new ArrayList<>(selectorContext.getParameters());
+      MethodParametersTracker parameters = new MethodParametersTracker(String.format("element '%s' getter", name));
+      parameters.setMethodParameters(selectorContext.getParameters());
       TypeProvider elementType = translatorContext.getType(type[0]);
       // addedParameters should only include selector parameters!
       CustomElementMethod.Root root = new CustomElementMethod.Root(selectorContext);
       if (filter != null) {
         filter.setElementFilter(translatorContext, Type.CUSTOM, elementType, name);
-        addedParameters.addAll(filter.getApplyMethodParameters());
-        addedParameters.addAll(filter.getMatcherParameters());
+        parameters.setMethodParameters(filter.getApplyMethodParameters());
+        parameters.setMethodParameters(filter.getMatcherParameters());
       }
       // set element
       ElementContext component = isReturnList ? new ElementContext.CustomReturnsAll(
@@ -218,14 +219,14 @@ public final class UtamElement {
           name,
           elementType,
           selectorContext.getLocator(),
-          addedParameters,
+          parameters.getMethodParameters(),
           isNullable()) :
           new ElementContext.Custom(
               scopeElement,
               name,
               elementType,
               selectorContext.getLocator(),
-              addedParameters,
+              parameters.getMethodParameters(),
               isNullable());
       PageObjectMethod method;
       if (filter != null) {
@@ -288,38 +289,43 @@ public final class UtamElement {
     final ElementContext[] traverse(
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
       boolean isPublicImplementationOnlyElement = isPublic() && context.isImplementationPageObject();
-      TypeProvider elementType =
-          BasicElementUnionType.asBasicType(name, type, isPublicImplementationOnlyElement);
+      TypeProvider elementType = asBasicOrUnionType(name, type, isPublicImplementationOnlyElement);
       LocatorCodeGeneration locatorHelper = selector.getCodeGenerationHelper(context);
-      List<MethodParameter> addedParameters = new ArrayList<>(locatorHelper.getParameters());
+      MethodParametersTracker allParameters = new MethodParametersTracker(String.format("element '%s' getter", name));
+      MethodParametersTracker parametersWithoutFilter = new MethodParametersTracker(String.format("element '%s' getter", name));
+      if(scopeElement != null) {
+        allParameters.setMethodParameters(scopeElement.getParameters());
+        parametersWithoutFilter.setMethodParameters(scopeElement.getParameters());
+      }
+      allParameters.setMethodParameters(locatorHelper.getParameters());
+      parametersWithoutFilter.setMethodParameters(locatorHelper.getParameters());
       ElementField field =
           new ElementField(
               name, getFindAnnotation(locatorHelper.getLocator(), scopeElement,
               isExpandScopeShadowRoot, isNullable()));
       if (filter != null) {
         filter.setElementFilter(context, Type.BASIC, elementType, name);
-        addedParameters.addAll(filter.getApplyMethodParameters());
-        addedParameters.addAll(filter.getMatcherParameters());
+        allParameters.setMethodParameters(filter.getApplyMethodParameters());
+        allParameters.setMethodParameters(filter.getMatcherParameters());
       }
       boolean isList = selector.isReturnAll() && (filter == null || !filter.getFindFirst());
       ElementContext elementContext = isList ?
           new ElementContext.BasicReturnsAll(
               scopeElement, name, elementType, locatorHelper.getLocator(),
-              addedParameters, isNullable()) :
+              allParameters.getMethodParameters(), isNullable()) :
           new ElementContext.Basic(
               scopeElement, name, elementType, locatorHelper.getLocator(),
-              addedParameters, isNullable());
+              allParameters.getMethodParameters(), isNullable());
       final PageObjectMethod method;
+      final TypeProvider implType = elementType instanceof UnionType ?
+          new BasicElementUnionTypeImpl(elementType) : BASIC_ELEMENT_IMPL_CLASS;
       if (filter != null) {
-        // element parameters do not include filter or matcher parameters
-        List<MethodParameter> elementParameters =  new ArrayList<>(
-            scopeElement == null ? Collections.emptyList() : scopeElement.getParameters());
-        elementParameters.addAll(locatorHelper.getParameters());
         method =
             new ElementMethod.Filtered(
                 name,
                 elementType,
-                elementParameters,
+                implType,
+                parametersWithoutFilter.getMethodParameters(),
                 isPublic(),
                 filter.applyMethod,
                 filter.getApplyMethodParameters(),
@@ -327,9 +333,9 @@ public final class UtamElement {
                 filter.getMatcherParameters(),
                 filter.getFindFirst());
       } else if (isList) {
-        method = new ElementMethod.Multiple(elementContext, isPublic());
+        method = new ElementMethod.Multiple(elementContext, isPublic(), implType);
       } else {
-        method = new ElementMethod.Single(elementContext, isPublic());
+        method = new ElementMethod.Single(elementContext, isPublic(), implType);
       }
       context.setClassField(field);
       context.setElement(elementContext);

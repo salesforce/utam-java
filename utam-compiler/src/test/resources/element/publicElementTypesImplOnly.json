@@ -1,0 +1,29 @@
+{
+  "implements": "utam-test/pageObjects/customInterface",
+  "elements": [
+    {
+      "type" : [ "actionable", "clickable" ],
+      "name": "test",
+      "selector": {
+        "css": ".css[%s]",
+        "args" : [
+          {
+            "type" : "string",
+            "name" : "arg"
+          }
+        ]
+      },
+      "public" : true
+    }
+  ],
+  "methods" : [
+    {
+      "name" : "usePrivateElementInCompose",
+      "compose" : [
+        {
+          "element" : "test"
+        }
+      ]
+    }
+  ]
+}

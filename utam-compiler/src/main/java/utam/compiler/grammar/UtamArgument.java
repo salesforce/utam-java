@@ -19,7 +19,7 @@ import static utam.compiler.helpers.PrimitiveType.isPrimitiveType;
 import static utam.compiler.helpers.StatementContext.StatementType.PREDICATE_LAST_STATEMENT;
 import static utam.compiler.helpers.StatementContext.StatementType.PREDICATE_STATEMENT;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
-import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
+import static utam.compiler.representation.FrameMethod.FRAME_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT_PARAMETER;
 import static utam.compiler.helpers.TypeUtilities.PARAMETER_REFERENCE;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT_PARAMETER;

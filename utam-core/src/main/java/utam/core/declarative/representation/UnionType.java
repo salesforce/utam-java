@@ -18,13 +18,6 @@ import java.util.List;
 public interface UnionType extends TypeProvider {
 
   /**
-   * some union types might be not public and declared only inside implementing class
-   *
-   * @return true if public
-   */
-  boolean isPublic();
-
-  /**
    * union type extends one or many other types
    *
    * @return list of extended types

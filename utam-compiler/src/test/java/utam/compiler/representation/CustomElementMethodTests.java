@@ -8,12 +8,14 @@
 package utam.compiler.representation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
-import static utam.compiler.helpers.BasicElementInterface.actionable;
+import static utam.compiler.types.BasicElementInterface.actionable;
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.representation.CustomElementMethod.Filtered;
@@ -23,6 +25,7 @@ import static utam.compiler.representation.CustomElementMethod.Single;
 
 import java.util.Collections;
 import org.testng.annotations.Test;
+import utam.compiler.grammar.DeserializerUtilities;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.MatcherType;
@@ -33,6 +36,7 @@ import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * Provides tests for the Custom Element Getter
@@ -182,5 +186,12 @@ public class CustomElementMethodTests {
         is(
             equalTo(
                 "LocatorBy.byCss(String.format(\".fakeSelector[title='%s']\", name))")));
+  }
+
+  @Test
+  public void testDuplicateArgsNamesThrows() {
+    UtamError e =
+        expectThrows(UtamError.class, () -> new DeserializerUtilities().getResultFromFile("custom/testDuplicateArgs"));
+    assertThat(e.getMessage(), containsString("duplicate parameters"));
   }
 }

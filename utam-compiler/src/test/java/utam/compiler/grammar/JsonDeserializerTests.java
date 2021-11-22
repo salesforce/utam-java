@@ -145,6 +145,7 @@ public class JsonDeserializerTests {
     String json =
         "{"
             + "  \"type\":[\"clickable\"],"
+            + "  \"exposeRootElement\" : true,"
             + "  \"selector\": {"
             + "    \"css\": \"rootSelector\""
             + "  },"
@@ -185,13 +186,12 @@ public class JsonDeserializerTests {
     PageObjectValidationTestHelper.MethodInfo rootElementMethod =
             new PageObjectValidationTestHelper.MethodInfo("getRoot", "RootElement");
     rootElementMethod.addCodeLine("return getProxy(this.getRootElement(), RootElement.class)");
-    rootElementMethod.setIsPublic(false);
 
     PageObjectValidationTestHelper.MethodInfo childElementGetter =
         new PageObjectValidationTestHelper.MethodInfo(
             getElementGetterMethodName("childElement", false), "ChildElementElement");
     childElementGetter.addCodeLine("return element(this.childElement).build(ChildElementElement.class, ChildElementElementImpl.class)");
-    childElementGetter.setIsPublic(false);
+    childElementGetter.setNotPublic();
 
     PageObjectValidationTestHelper.MethodInfo composeMethod =
         new PageObjectValidationTestHelper.MethodInfo("clickElement", "void");
@@ -201,7 +201,7 @@ public class JsonDeserializerTests {
     PageObjectClass classObject = createRootNode(json).getImplementation();
     PageObjectInterface interfaceObject = classObject.getImplementedType();
     PageObjectValidationTestHelper.validateInterface(
-        interfaceObject, nameInfo, Stream.of(composeMethod).collect(Collectors.toList()));
+        interfaceObject, nameInfo, Stream.of(rootElementMethod, composeMethod).collect(Collectors.toList()));
     PageObjectValidationTestHelper.validateImplementation(
         classObject,
         nameImplInfo,

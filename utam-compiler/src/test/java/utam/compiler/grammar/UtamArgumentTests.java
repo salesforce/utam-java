@@ -35,11 +35,8 @@ import org.testng.annotations.Test;
 import utam.compiler.grammar.ArgsProcessor.ArgsProcessorWithExpectedTypes;
 import utam.compiler.grammar.UtamArgument.UtamArgumentLiteralPrimitive;
 import utam.compiler.grammar.UtamArgument.UtamArgumentLiteralSelector;
-import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.ElementContext.Basic;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.representation.ElementMethod;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
@@ -121,9 +118,6 @@ public class UtamArgumentTests {
   @Test
   public void testLiteralParametersWithExpectedTypes() {
     TranslationContext context = getTestTranslationContext();
-    ElementContext elementContext = new Basic("element");
-    context.setElement(elementContext);
-    elementContext.setElementMethod(new ElementMethod.Single(elementContext, true));
     ArgsProcessor processor = new ArgsProcessorWithExpectedTypes(context, ARGS_CONTEXT,
         Arrays.asList(PrimitiveType.STRING,
             PrimitiveType.NUMBER,
@@ -151,9 +145,6 @@ public class UtamArgumentTests {
   @Test
   public void testLiteralParameters() {
     TranslationContext context = getTestTranslationContext();
-    ElementContext elementContext = new Basic("element");
-    context.setElement(elementContext);
-    elementContext.setElementMethod(new ElementMethod.Single(elementContext, true));
     ArgsProcessor processor = new ArgsProcessor(context, ARGS_CONTEXT);
     List<MethodParameter> parameters =
         processor.getParameters(

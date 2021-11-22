@@ -15,11 +15,13 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.DeserializerUtilities.readJSON;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.grammar.UtamArgumentTests.getNonLiteralArg;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_FILTER_NEEDS_LIST;
-import static utam.compiler.helpers.BasicElementInterface.actionable;
+import static utam.compiler.types.BasicElementInterface.actionable;
 
+import java.io.IOException;
 import java.util.List;
 import org.testng.annotations.Test;
 import utam.compiler.helpers.ElementContext;
@@ -165,12 +167,8 @@ public class UtamElementFilter_Tests {
 
   @Test
   public void testDuplicateArgsNames() {
-    UtamElement object = DeserializerUtilities
-        .getObjectFromFile("filter/basicFilterDuplicateArgs", UtamElement.class);
-    UtamElement.Traversal element = object.getAbstraction();
     UtamError e =
-        expectThrows(UtamError.class, () -> element.testRootTraverse(
-            TestUtilities.getTestTranslationContext()));
+        expectThrows(UtamError.class, () -> new DeserializerUtilities().getResultFromFile("filter/basicFilterDuplicateArgs"));
     assertThat(e.getMessage(), containsString("duplicate parameters"));
   }
 
@@ -180,14 +178,14 @@ public class UtamElementFilter_Tests {
     ElementContext elementContext = context.getElement("element");
     PageObjectMethod method = elementContext.getElementMethod();
     PageObjectValidationTestHelper.MethodInfo methodInfo =
-        new PageObjectValidationTestHelper.MethodInfo("getElementElement", "List<ElementElement>");
+        new PageObjectValidationTestHelper.MethodInfo("getElementElement", "List<BasicElement>");
     for (int i = 1; i <= 3; i++) {
       methodInfo.addParameter(
           new PageObjectValidationTestHelper.MethodParameterInfo("arg" + i, "String"));
     }
     methodInfo.addCodeLines(
         "return element(this.element)"
-            + ".buildList(ElementElement.class, ElementElementImpl.class, "
+            + ".buildList(BasicElement.class, BasePageElement.class, "
             + "elm -> (elm.getAttribute(arg2)!= null && elm.getAttribute(arg2).contains(arg3)), arg1)");
     methodInfo.setIsPublic(false);
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
@@ -224,9 +222,8 @@ public class UtamElementFilter_Tests {
   }
 
   @Test
-  public void testCustomNestedFilterFindFirst() {
-    UtamElement object = DeserializerUtilities
-        .getObjectFromFile("filter/customFilterNested", UtamElement.class);
+  public void testCustomNestedFilterFindFirst() throws IOException {
+    UtamElement object = JsonDeserializer.deserialize(UtamElement.class, readJSON("filter/customFilterNested"));
     TranslationContext context = TestUtilities.getTestTranslationContext();
     object.testTraverse(context);
     ElementContext elementContext = context.getElement("nested");

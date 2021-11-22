@@ -8,6 +8,7 @@
 package utam.compiler.helpers;
 
 import java.util.Objects;
+import utam.compiler.types.BasicElementInterface;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
@@ -21,6 +22,7 @@ import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.BasicElementActionType.getClassAttribute;
 import static utam.compiler.helpers.BasicElementActionTypeTests.sameType;
 import static utam.compiler.helpers.BasicElementActionType.ERR_UNKNOWN_ACTION;
+import static utam.compiler.types.BasicElementUnionType.asBasicOrUnionType;
 import static utam.core.framework.UtamLogger.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -60,17 +62,8 @@ public class ActionableActionTypeTests {
   }
 
   private static ElementContext.Basic getElementContext(BasicElementInterface type) {
-    return new ElementContext.Basic(ELEMENT_NAME, type, getCssSelector("selector"));
-  }
-
-  private static ElementContext.Basic getEditableElementContext() {
-    return new ElementContext.Basic(
-        ELEMENT_NAME, BasicElementInterface.editable, getCssSelector("selector"));
-  }
-
-  private static ElementContext.Basic getTouchableElementContext() {
-    return new ElementContext.Basic(
-        ELEMENT_NAME, BasicElementInterface.touchable, getCssSelector("selector"));
+    TypeProvider unionType = asBasicOrUnionType(ELEMENT_NAME, new String[] {type.name()}, false);
+    return new ElementContext.Basic(ELEMENT_NAME, unionType, getCssSelector("selector"));
   }
 
   private static void validateAction(ActionType action, String returnType) {
@@ -171,7 +164,7 @@ public class ActionableActionTypeTests {
     ElementContext elementContext = getElementContext(BasicElementInterface.actionable);
     assertThat(getActionType(waitForAbsence.getApplyString(), elementContext),
         is(equalTo(waitForAbsence)));
-    elementContext = getEditableElementContext();
+    elementContext = getElementContext(BasicElementInterface.actionable);
     assertThat(getActionType(getClassAttribute.getApplyString(), elementContext),
         is(equalTo(getClassAttribute)));
     elementContext = getElementContext(BasicElementInterface.clickable);
@@ -190,7 +183,7 @@ public class ActionableActionTypeTests {
   @Test
   public void testGetActionFromStringForEditable() {
     final ActionType ACTION = EditableActionType.clear;
-    ElementContext elementContext = getEditableElementContext();
+    ElementContext elementContext = getElementContext(BasicElementInterface.editable);
     assertThat(getActionType(ACTION.getApplyString(), elementContext),
         is(equalTo(ACTION)));
   }
@@ -198,7 +191,7 @@ public class ActionableActionTypeTests {
   @Test
   public void testGetActionFromStringForTouchable() {
     final ActionType ACTION = TouchableActionType.flick;
-    ElementContext elementContext = getTouchableElementContext();
+    ElementContext elementContext = getElementContext(BasicElementInterface.touchable);
     assertThat(getActionType(ACTION.getApplyString(), elementContext),
         is(equalTo(ACTION)));
   }

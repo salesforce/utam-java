@@ -7,18 +7,14 @@
  */
 package utam.compiler.grammar;
 
-import utam.compiler.helpers.BasicElementInterface;
+import utam.compiler.types.BasicElementInterface;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.representation.PageObjectValidationTestHelper;
-import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -133,27 +129,6 @@ public class UtamPageObject_Tests {
     pageObject.methods = new UtamMethod[] {};
     pageObject.compile(context);
     assertThat(context.getMethods(), hasSize(0));
-  }
-
-  /**
-   * The setPublicMethods method should set the proper methods on the TranslatorContext with the
-   * abstract property true and a valid method list
-   */
-  @Test
-  public void testSetPublicMethodsWithAbstractAndValidMethodList() {
-    TranslationContext context = getTestTranslationContext();
-    UtamPageObject pageObject = new UtamPageObject();
-    pageObject.isAbstract = true;
-    pageObject.methods = new UtamMethod[] {
-        TestUtilities.UtamEntityCreator.createUtamMethod("testMethod", null, null)
-    };
-    MethodInfo methodInfo = new MethodInfo("testMethod", "void");
-
-    pageObject.compile(context);
-    PageObjectValidationTestHelper.validateMethods(
-        "setPublicMethods",
-        new ArrayList<>(context.getMethods()),
-        Collections.singletonList(methodInfo));
   }
 
   @Test

@@ -19,12 +19,12 @@ import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.BasicElement;
 import utam.core.element.ElementLocation;
-import utam.core.element.FrameElement;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.BaseRootPageObject;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.consumer.ContainerElement;
+import utam.core.framework.element.BasePageElement;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -49,7 +49,6 @@ public final class TypeUtilities {
   public static final TypeProvider PARAMETER_REFERENCE = new UnimportableType("argumentReference");
   public static final TypeProvider CONTAINER_ELEMENT =
       new TypeUtilities.FromClass(ContainerElement.class);
-  public static final TypeProvider FRAME_ELEMENT = new TypeUtilities.FromClass(FrameElement.class);
   public static final TypeProvider SELECTOR = new FromClass(LocatorBy.class);
   public static final TypeProvider FUNCTION = new FromClass(Supplier.class) {
     @Override
@@ -63,7 +62,9 @@ public final class TypeUtilities {
   public static final String CONTAINER_ELEMENT_TYPE_NAME = "container";
   public static final TypeProvider PAGE_OBJECT_PARAMETER = new PageObjectClass(null);
   public static final TypeProvider BOUNDED_PAGE_OBJECT_PARAMETER = new PageObjectClass("T");
-  public static final TypeProvider ROOT_PAGE_OBJECT_PARAMETER = new RootPageObjectClass(null);
+  public static final TypeProvider ROOT_PAGE_OBJECT_PARAMETER = new RootPageObjectClass();
+  public static final TypeProvider BASIC_ELEMENT_IMPL_CLASS = new FromClass(
+      BasePageElement.class);
   static final TypeProvider JAVA_OBJECT_TYPE = new UnimportableType("Object");
   private static final String ERR_PARAMETERS_TYPES_MISMATCH =
       "expected %d parameters with type {%s}, provided were {%s}";
@@ -93,13 +94,6 @@ public final class TypeUtilities {
       }
     }
     return true;
-  }
-
-  public static TypeProvider getElementType(TypeProvider type) {
-    if (type instanceof ListOf) {
-      return type.getBoundTypes().get(0);
-    }
-    return type;
   }
 
   public static TypeProvider wrapAsList(TypeProvider originalType) {
@@ -314,8 +308,8 @@ public final class TypeUtilities {
 
   static class RootPageObjectClass extends PageObjectClass {
 
-    RootPageObjectClass(String boundStr) {
-      super(ROOT_PAGE_OBJECT, boundStr);
+    RootPageObjectClass() {
+      super(ROOT_PAGE_OBJECT, null);
     }
   }
 }

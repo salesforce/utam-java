@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.io.CharStreams;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.helpers.TypeUtilities;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.Profile;
 import utam.compiler.translator.ClassSerializer;
@@ -162,19 +161,10 @@ public final class JsonDeserializer {
     }
 
     @Override
-    public Collection<MethodDeclaration> getDeclaredApi() {
+    public List<MethodDeclaration> getDeclaredApi() {
       return context.getMethods().stream()
           .filter(PageObjectMethod::isPublic)
           .map(PageObjectMethod::getDeclaration)
-          .collect(Collectors.toList());
-    }
-
-    @Override
-    public Collection<TypeProvider> getNestedInterfaces() {
-      return context.getMethods().stream()
-          .filter(method -> method.isReturnsBasicElement() && method.isPublic())
-          .map(method -> method.getDeclaration().getReturnType())
-          .map(TypeUtilities::getElementType)
           .collect(Collectors.toList());
     }
 
@@ -200,7 +190,7 @@ public final class JsonDeserializer {
 
     @Override
     public List<UnionType> getUnionTypes() {
-      return context.getUnionTypes(true);
+      return context.getInterfaceUnionTypes();
     }
   }
 
@@ -246,7 +236,7 @@ public final class JsonDeserializer {
 
     @Override
     public String getGeneratedCode() {
-      return new ClassSerializer(this, this.context).toString();
+      return new ClassSerializer(this).toString();
     }
 
     @Override
@@ -270,17 +260,8 @@ public final class JsonDeserializer {
     }
 
     @Override
-    public List<TypeProvider> getDeclaredElementTypes(boolean isPublicElements) {
-      return getMethods().stream()
-          .filter(method -> method.isReturnsBasicElement() && method.isPublic() == isPublicElements)
-          .map(method -> method.getDeclaration().getReturnType())
-          .map(TypeUtilities::getElementType)
-          .collect(Collectors.toList());
-    }
-
-    @Override
     public List<UnionType> getUnionTypes() {
-      return context.getUnionTypes(false);
+      return context.getClassUnionTypes();
     }
   }
 }

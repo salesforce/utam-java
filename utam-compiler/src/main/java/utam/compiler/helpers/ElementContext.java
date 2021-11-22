@@ -8,9 +8,9 @@
 package utam.compiler.helpers;
 
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
-import static utam.compiler.helpers.BasicElementInterface.actionable;
+import static utam.compiler.types.BasicElementInterface.actionable;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
-import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
+import static utam.compiler.representation.FrameMethod.FRAME_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.wrapAsList;
 
 import java.util.ArrayList;
@@ -179,11 +179,6 @@ public abstract class ElementContext {
           EMPTY_SELECTOR,
           EMPTY_PARAMETERS,
           false);
-    }
-
-    // used in tests
-    Container(String name) {
-      this(null, name);
     }
   }
 

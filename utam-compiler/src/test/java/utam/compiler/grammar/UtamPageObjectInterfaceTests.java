@@ -14,7 +14,6 @@ import static org.hamcrest.Matchers.is;
 
 import org.testng.annotations.Test;
 import utam.compiler.grammar.DeserializerUtilities.Result;
-import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.core.declarative.representation.MethodDeclaration;

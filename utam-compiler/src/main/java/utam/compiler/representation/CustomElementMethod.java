@@ -85,7 +85,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     private final List<TypeProvider> interfaceImports = new ArrayList<>();
     private final boolean isPublic;
     private final String methodName;
-    private final List<MethodParameter> methodParameters = new ArrayList<>();
+    private final MethodParametersTracker parametersTracker;
     private final TypeProvider returnType;
 
     public Single(
@@ -115,8 +115,9 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       ParameterUtils.setImport(classImports, returnType);
       this.isPublic = isPublic;
       this.methodName = getElementGetterMethodName(componentName, isPublic);
-      this.methodParameters.addAll(scopeElement.getParameters());
-      this.methodParameters.addAll(root.selectorParameters);
+      this.parametersTracker = new MethodParametersTracker(String.format("method '%s'", methodName));
+      parametersTracker.setMethodParameters(scopeElement.getParameters());
+      parametersTracker.setMethodParameters(root.selectorParameters);
       this.returnType = returnType;
     }
 
@@ -132,7 +133,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, methodParameters, returnType, interfaceImports);
+      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), returnType, interfaceImports);
     }
 
     @Override
@@ -148,7 +149,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     private final List<TypeProvider> interfaceImports = new ArrayList<>();
     private final boolean isPublic;
     private final String methodName;
-    private final List<MethodParameter> methodParameters = new ArrayList<>();
+    private final MethodParametersTracker parametersTracker;
     private final TypeProvider returnType;
 
     public Filtered(
@@ -169,10 +170,11 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       ParameterUtils.setImport(classImports, this.returnType);
       this.isPublic = isPublic;
       this.methodName = getElementGetterMethodName(componentName, isPublic);
-      this.methodParameters.addAll(scopeElement.getParameters());
-      this.methodParameters.addAll(root.selectorParameters);
-      this.methodParameters.addAll(applyParameters);
-      this.methodParameters.addAll(matcherParameters);
+      this.parametersTracker = new MethodParametersTracker(String.format("method '%s'", methodName));
+      parametersTracker.setMethodParameters(scopeElement.getParameters());
+      parametersTracker.setMethodParameters(root.selectorParameters);
+      parametersTracker.setMethodParameters(applyParameters);
+      parametersTracker.setMethodParameters(matcherParameters);
       String builderPrefix = getBuilderPrefix(scopeElement, root, isNullable, isExpandParentShadow);
       String predicate = getPredicateCode(applyMethod, applyParameters, matcherType, matcherParameters);
       String builderSuffix = getFilteredBuilderSuffix(returnType, predicate, !isFindFirst);
@@ -191,7 +193,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, methodParameters, returnType, interfaceImports);
+      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), returnType, interfaceImports);
     }
 
     @Override
@@ -208,7 +210,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     private final List<TypeProvider> interfaceImports = new ArrayList<>();
     private final boolean isPublic;
     private final String methodName;
-    private final List<MethodParameter> methodParameters = new ArrayList<>();
+    private final MethodParametersTracker parametersTracker;
 
     public Multiple(
         boolean isPublic,
@@ -224,16 +226,16 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       String builderPrefix = getBuilderPrefix(scopeElement, root, isNullable, isExpandParentShadow);
       String builderSuffix = getBuilderSuffix(returnType, true);
       codeLines.add(String.format("return %s.%s", builderPrefix, builderSuffix));
-
       this.isPublic = isPublic;
       this.methodName = getElementGetterMethodName(componentName, isPublic);
-      this.methodParameters.addAll(scopeElement.getParameters());
-      this.methodParameters.addAll(root.selectorParameters);
+      this.parametersTracker = new MethodParametersTracker(String.format("method '%s'", methodName));
+      parametersTracker.setMethodParameters(scopeElement.getParameters());
+      parametersTracker.setMethodParameters(root.selectorParameters);
     }
 
     @Override
     public MethodDeclarationImpl getDeclaration() {
-      return new MethodDeclarationImpl(methodName, methodParameters, returnType, interfaceImports);
+      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), returnType, interfaceImports);
     }
 
     @Override

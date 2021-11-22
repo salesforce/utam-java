@@ -8,6 +8,8 @@
 package utam.compiler.representation;
 
 
+import static utam.compiler.types.BasicElementUnionType.asUnionTypeOrNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +18,6 @@ import java.util.stream.Stream;
 import utam.compiler.helpers.ParameterUtils;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.representation.UnionType;
 
@@ -38,7 +39,7 @@ public class RootElementMethod {
    *
    * @since 236
    */
-  public static class ProtectedDefaultType implements PageObjectMethod {
+  public static class ProtectedDefaultType extends BasicElementGetterMethod {
 
     private final TypeProvider returnType;
 
@@ -76,7 +77,7 @@ public class RootElementMethod {
    *
    * @since 236
    */
-  public static class PublicDefaultType implements PageObjectMethod {
+  public static class PublicDefaultType extends BasicElementGetterMethod {
 
     private final List<TypeProvider> imports;
     private final TypeProvider returnType;
@@ -116,10 +117,10 @@ public class RootElementMethod {
    *
    * @since 236
    */
-  public static class PublicCustomType implements PageObjectMethod {
+  public static class PublicCustomType extends BasicElementGetterMethod {
 
     static final String PROXY_CODE_LINE_TEMPLATE = "return getProxy(this.getRootElement(), %s.class)";
-    private final TypeProvider returnType;
+    private final UnionType returnType;
     private final List<TypeProvider> imports = new ArrayList<>();
     private final List<TypeProvider> classImports = new ArrayList<>();
 
@@ -153,6 +154,11 @@ public class RootElementMethod {
     public boolean isPublic() {
       return true;
     }
+
+    @Override
+    public UnionType getInterfaceUnionType() {
+      return asUnionTypeOrNull(returnType);
+    }
   }
 
   /**
@@ -160,14 +166,12 @@ public class RootElementMethod {
    *
    * @since 236
    */
-  public static class PrivateCustomType implements PageObjectMethod {
+  public static class PrivateCustomType extends BasicElementGetterMethod {
 
-    private final TypeProvider returnType;
-    private final List<TypeProvider> classImports = new ArrayList<>();
+    private final UnionType returnType;
 
     public PrivateCustomType(UnionType unionType) {
       this.returnType = unionType;
-      ParameterUtils.setImports(classImports, unionType.getExtendedTypes());
     }
 
     @Override
@@ -186,7 +190,7 @@ public class RootElementMethod {
 
     @Override
     public List<TypeProvider> getClassImports() {
-      return classImports;
+      return new ArrayList<>();
     }
 
     @Override
@@ -194,6 +198,11 @@ public class RootElementMethod {
       String type = this.returnType.getSimpleName();
       return Collections
           .singletonList(String.format(PublicCustomType.PROXY_CODE_LINE_TEMPLATE, type));
+    }
+
+    @Override
+    public UnionType getInterfaceUnionType() {
+      return asUnionTypeOrNull(returnType);
     }
   }
 }
