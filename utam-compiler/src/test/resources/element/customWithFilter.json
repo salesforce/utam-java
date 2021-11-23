@@ -1,0 +1,22 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "public": true,
+      "nullable": true,
+      "type": "utam-test/pageObjects/component",
+      "selector": {
+        "css": ".css",
+        "returnAll": true
+      },
+      "filter": {
+        "apply": "isVisible",
+        "matcher": {
+          "type": "isTrue"
+        },
+        "findFirst": false
+      }
+    }
+  ]
+}
+

@@ -131,6 +131,7 @@ class UtamMethod {
           isUsedAsChain(compose, i),
           statementDeclaration.getStatementType(i, compose.length),
           statementDeclaration.getDeclaredReturnType(name));
+      statementDeclaration.checkBeforeLoadElements(methodContext);
       ComposeMethodStatement statement = statementDeclaration.getComposeAction(context, methodContext, statementContext);
       previousStatementReturn = statement.getReturnType();
       statements.add(statement);

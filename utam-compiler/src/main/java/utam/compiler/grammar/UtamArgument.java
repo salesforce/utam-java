@@ -235,6 +235,7 @@ public abstract class UtamArgument {
             isUsedAsChain(conditions, i),
             i == conditions.length - 1 ? PREDICATE_LAST_STATEMENT : PREDICATE_STATEMENT,
             conditions[i].getDeclaredReturnType(methodContext.getName()));
+        conditions[i].checkBeforeLoadElements(methodContext);
         ComposeMethodStatement statement = conditions[i]
             .getComposeAction(context, methodContext, statementContext);
         previousStatementReturn = statement.getReturnType();

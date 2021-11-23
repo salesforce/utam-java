@@ -37,7 +37,6 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
   private static final String BUILDER_METHOD = "build";
   private static final String LIST_BUILDER_METHOD = "buildList";
-  private static final String TMP_VARIABLE = "instance";
 
   private static String getBuilderPrefix(ElementContext scopeElement, Root root, boolean isNullable, boolean isExpandParentShadow) {
     return String.format(
@@ -102,15 +101,8 @@ public abstract class CustomElementMethod implements PageObjectMethod {
               ? getExternalBuilderPrefix(scopeElement, root, isExpandParentShadow)
               : getBuilderPrefix(scopeElement, root, isNullable, isExpandParentShadow);
       String builderSuffix = getBuilderSuffix(returnType, false);
-      String firstStatement =
-          String.format(
-              "%s %s = %s.%s",
-              returnType.getSimpleName(), TMP_VARIABLE, builderPrefix, builderSuffix);
-      codeLines.add(firstStatement);
-      if (!isNullable && !isExternalImplementation) {
-        codeLines.add(String.format("%s.load()", TMP_VARIABLE));
-      }
-      codeLines.add("return " + TMP_VARIABLE);
+      String statement = String.format("return %s.%s", builderPrefix, builderSuffix);
+      codeLines.add(statement);
       ParameterUtils.setImport(interfaceImports, returnType);
       ParameterUtils.setImport(classImports, returnType);
       this.isPublic = isPublic;

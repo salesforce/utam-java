@@ -17,7 +17,7 @@ public class BaseRootPageObject extends BasePageObject implements RootPageObject
 
   @Override
   public Object load() {
-    log("wait for a root element to be found");
+    log("load the object - wait for a root element to be found");
     this.waitFor(this::getElement);
     return this;
   }

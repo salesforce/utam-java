@@ -7,77 +7,54 @@
  */
 package utam.compiler.grammar;
 
-import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.MatcherType;
-import utam.compiler.helpers.TranslationContext;
-import utam.core.declarative.representation.PageObjectMethod;
-import utam.compiler.representation.PageObjectValidationTestHelper;
-import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
-import utam.core.framework.consumer.UtamError;
-import org.testng.annotations.Test;
-
-import java.util.Objects;
-
-import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
-import static utam.compiler.grammar.UtamElement.*;
-import static utam.compiler.grammar.UtamElementFilter_Tests.getInnerTextFilter;
-import static utam.compiler.grammar.UtamSelectorTests.getListCssSelector;
-import static utam.compiler.grammar.UtamSelectorTests.getUtamCssSelector;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_EXTERNAL_NOT_ALLOWED;
+import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_FILTER_NEEDS_LIST;
+import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_MISSING_SELECTOR_PROPERTY;
+import static utam.compiler.grammar.UtamElement.Type;
+import static utam.compiler.grammar.UtamElementFilter_Tests.getInnerTextFilter;
+import static utam.compiler.grammar.UtamSelectorTests.getUtamCssSelector;
+
+import java.util.List;
+import org.testng.annotations.Test;
+import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.TranslationContext;
+import utam.compiler.helpers.TypeUtilities.FromString;
+import utam.compiler.representation.PageObjectValidationTestHelper;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.framework.consumer.UtamError;
+import utam.core.selenium.element.LocatorBy;
 
 public class UtamElement_CustomTests {
 
   private static final String ELEMENT_NAME = "test";
   private static final String METHOD_NAME = "getTest";
+  private static final TypeProvider EXPECTED_TYPE = new FromString(
+      "utam.test.pageobjects.Component");
   private static final String COMPONENT_TYPE_URI = "utam-test/pageObjects/test/componentName";
-  private static final String COMPONENT_TYPE_SHORT_NAME = "ComponentName";
-  private static final String COMPONENT_TYPE_LONG_NAME = "utam.test.pageobjects.test.ComponentName";
-  private static final String SCOPE_ELEMENT_NAME = "scope";
+  private static final String IMPORTED_LOCATOR_TYPE = LocatorBy.class.getName();
+  private static final String IMPORTED_LIST_TYPE = List.class.getName();
+
+  private static PageObjectMethod getTestMethod(String fileName) {
+    return new DeserializerUtilities().getContext("element/" + fileName).getMethod(METHOD_NAME);
+  }
 
   private static UtamElement getPublicComponentElement(UtamSelector selector) {
-    UtamElement utamElement = TestUtilities.UtamEntityCreator.createUtamElement(ELEMENT_NAME, COMPONENT_TYPE_URI, selector);
+    UtamElement utamElement = TestUtilities.UtamEntityCreator
+        .createUtamElement(ELEMENT_NAME, COMPONENT_TYPE_URI, selector);
     utamElement.isPublic = true;
     return utamElement;
   }
 
-  private static UtamElement getPublicComponentElement() {
-    return getPublicComponentElement(getUtamCssSelector());
-  }
-
-  private static void getAbstraction(UtamElement element) {
-    UtamElement.Traversal traversal = element.getAbstraction();
-    assertThat(traversal, is(instanceOf(UtamElement.Custom.class)));
-  }
-
-  private static PageObjectMethod getElementMethod(UtamElement element) {
-    TranslationContext context = getTestTranslationContext();
-    UtamElement scope = TestUtilities.UtamEntityCreator.createUtamElement(SCOPE_ELEMENT_NAME);
-    scope.selector = new UtamSelector("scopeSelector");
-    scope.elements = new UtamElement[] {element};
-    scope.testTraverse(context);
-    return context.getElement(element.name).getElementMethod();
-  }
-
   private static String getCustomSupportedProperties() {
     return Type.CUSTOM.getSupportedPropertiesErr(ELEMENT_NAME);
-  }
-
-  /** The validateComponentElement method with a component should succeed */
-  @Test
-  public void testValidateComponentElement() {
-    UtamElement element = getPublicComponentElement();
-    getAbstraction(element);
-  }
-
-  /** The validateComponentElement method with a component should succeed */
-  @Test
-  public void testValidateComponentElementWithFilter() {
-    UtamElement element = getPublicComponentElement(getListCssSelector());
-    element.filter = getInnerTextFilter();
-    getAbstraction(element);
   }
 
   /**
@@ -87,7 +64,7 @@ public class UtamElement_CustomTests {
   @Test
   public void testValidateComponentElementWithNullSelectorThrows() {
     UtamElement element = getPublicComponentElement(null);
-    UtamError e = expectThrows(UtamError.class, () -> getAbstraction(element));
+    UtamError e = expectThrows(UtamError.class, element::getAbstraction);
     assertThat(
         e.getMessage(), is(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, ELEMENT_NAME)));
   }
@@ -98,9 +75,9 @@ public class UtamElement_CustomTests {
    */
   @Test
   public void testValidateComponentWithFilterAndNonListSelectorThrows() {
-    UtamElement element = getPublicComponentElement();
+    UtamElement element = getPublicComponentElement(getUtamCssSelector());
     element.filter = getInnerTextFilter();
-    UtamError e = expectThrows(UtamError.class, () -> getAbstraction(element));
+    UtamError e = expectThrows(UtamError.class, element::getAbstraction);
     assertThat(
         e.getMessage(), containsString(String.format(ERR_ELEMENT_FILTER_NEEDS_LIST, ELEMENT_NAME)));
   }
@@ -111,9 +88,9 @@ public class UtamElement_CustomTests {
    */
   @Test
   public void testValidateComponentElementWithInnerElementsThrows() {
-    UtamElement element = getPublicComponentElement();
-    element.elements = new UtamElement[] {};
-    UtamError e = expectThrows(UtamError.class, () -> getAbstraction(element));
+    UtamElement element = getPublicComponentElement(getUtamCssSelector());
+    element.elements = new UtamElement[]{};
+    UtamError e = expectThrows(UtamError.class, element::getAbstraction);
     assertThat(e.getMessage(), containsString(getCustomSupportedProperties()));
   }
 
@@ -123,154 +100,86 @@ public class UtamElement_CustomTests {
    */
   @Test
   public void testValidateComponentElementWithInnerShadowElementsThrows() {
-    UtamElement element = getPublicComponentElement();
-    element.shadow = new UtamShadowElement(new UtamElement[] {});
-    UtamError e = expectThrows(UtamError.class, () -> getAbstraction(element));
+    UtamElement element = getPublicComponentElement(getUtamCssSelector());
+    element.shadow = new UtamShadowElement(new UtamElement[]{});
+    UtamError e = expectThrows(UtamError.class, element::getAbstraction);
     assertThat(e.getMessage(), containsString(getCustomSupportedProperties()));
   }
 
-  /** The getAsComponent method should return the proper value */
   @Test
-  public void testGetAsComponent() {
-    UtamPageObject object = new UtamPageObject();
-    TranslationContext context = getTestTranslationContext();
-    object.elements = new UtamElement[] {getPublicComponentElement()};
-    object.compile(context);
-    ElementContext elementContext = context.getElement(ELEMENT_NAME);
-    assertThat(elementContext.getType().getSimpleName(), is(equalTo(COMPONENT_TYPE_SHORT_NAME)));
-    assertThat(elementContext.getType().getFullName(), is(equalTo(COMPONENT_TYPE_LONG_NAME)));
-  }
-
-  /** The getAsComponent method should return the proper value for a list selector */
-  @Test
-  public void testGetAsComponentWithListSelector() {
-    UtamPageObject object = new UtamPageObject();
-    TranslationContext context = getTestTranslationContext();
-    object.elements = new UtamElement[] {getPublicComponentElement(getListCssSelector())};
-    object.compile(context);
-    ElementContext elementContext = context.getElement(ELEMENT_NAME);
-    assertThat(elementContext.getType().getSimpleName(), is(COMPONENT_TYPE_SHORT_NAME));
-  }
-
-  /**
-   * The getAsComponent method should return the proper value for a list selector with an element
-   * filter
-   */
-  @Test
-  public void testGetAsComponentWithListSelectorAndFilter() {
-    UtamPageObject object = new UtamPageObject();
-    TranslationContext context = getTestTranslationContext();
-    UtamElement element = getPublicComponentElement(getListCssSelector());
-    element.filter = new UtamElementFilter("apply", new UtamMatcher(MatcherType.isTrue, null));
-    object.elements = new UtamElement[] { element };
-    object.compile(context);
-    ElementContext elementContext = context.getElement(ELEMENT_NAME);
-    assertThat(elementContext.getType().getSimpleName(), is(equalTo(COMPONENT_TYPE_SHORT_NAME)));
-  }
-
-  @Test
-  public void testGetDeclaredMethodsWithComponent() {
-    UtamElement element = getPublicComponentElement();
-    MethodInfo expectedMethodInfo = new MethodInfo(METHOD_NAME, COMPONENT_TYPE_SHORT_NAME);
-    expectedMethodInfo.addCodeLines(
-        "ComponentName instance = inScope(this.scope, LocatorBy.byCss(\"selector\"), false, false)"
-            + ".build(ComponentName.class)",
-        "instance.load()",
-        "return instance");
-    PageObjectValidationTestHelper.validateMethod(
-        Objects.requireNonNull(getElementMethod(element)), expectedMethodInfo);
-  }
-
-  /** The getDeclaredMethod method should return null for a non-public component */
-  @Test
-  public void testGetDeclaredMethodWithNonPublicComponent() {
-    UtamElement element = getPublicComponentElement();
-    element.isPublic = false;
-    assertThat(getElementMethod(element), is(not(nullValue())));
-  }
-
-  /**
-   * The getDeclaredMethod method should return the proper value for a component with external set
-   * to true
-   */
-  @Test
-  public void testGetDeclaredMethodWithExternalComponent() {
-    UtamElement element = getPublicComponentElement();
-    element.isExternal = true;
-    MethodInfo expectedMethod = new MethodInfo(METHOD_NAME, COMPONENT_TYPE_SHORT_NAME);
+  public void testGetterWithExternalComponent() {
+    MethodInfo expectedMethod = new MethodInfo(METHOD_NAME, "Component");
     expectedMethod.addCodeLines(
-        "ComponentName instance = "
-            + "inScope(this.scope, LocatorBy.byCss(\"selector\"), false).build(ComponentName.class)",
-        "return instance");
-    PageObjectMethod method = getElementMethod(element);
+        "return inScope(this.root, LocatorBy.byCss(\"css\"), false).build(Component.class)");
+    PageObjectMethod method = getTestMethod("customExternal");
     PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
   }
 
   @Test
   public void testElementWithListCantBeExternal() {
-    UtamElement element = getPublicComponentElement(getListCssSelector());
-    element.isExternal = true;
-    UtamError e = expectThrows(UtamError.class, element::getAbstraction);
+    UtamError e = expectThrows(UtamError.class, () -> getTestMethod("customExternalListErr"));
     assertThat(
         e.getMessage(),
         containsString(String.format(ERR_ELEMENT_EXTERNAL_NOT_ALLOWED, ELEMENT_NAME)));
   }
 
   @Test
-  public void testNestedCustomList() {
-    TranslationContext context = new DeserializerUtilities().getContext("element/customElement");
-    ElementContext element = context.getElement("nestedList");
-    assertThat(element.getName(), is(equalTo("nestedList")));
+  public void testNestedCustomListWithFilterFindFirst() {
+    TranslationContext context = new DeserializerUtilities()
+        .getContext("element/customNestedWithFilter");
+    ElementContext element = context.getElement(ELEMENT_NAME);
     PageObjectMethod method = element.getElementMethod();
-    assertThat(element.getType().getSimpleName(), is(equalTo("Test")));
-    MethodInfo expectedMethod = new MethodInfo("getNestedList", "List<Test>");
-    expectedMethod.addParameter(
-        new PageObjectValidationTestHelper.MethodParameterInfo("arg1", "String"));
-    expectedMethod.addParameter(
-        new PageObjectValidationTestHelper.MethodParameterInfo("arg2", "String"));
-    expectedMethod.addCodeLines(
-        "return inScope(this.element.setParameters(arg1), LocatorBy.byCss(String.format(\"selector2 %s\", arg2)), false, false)"
-            + ".buildList(Test.class)");
-    PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
+    assertThat(element.getType().getFullName(), is(equalTo(EXPECTED_TYPE.getFullName())));
+    MethodInfo expected = new MethodInfo(METHOD_NAME, "Component");
+    expected.addParameter(new MethodParameterInfo("arg1", "String"));
+    expected.addParameter(new MethodParameterInfo("arg2", "String"));
+    expected.addCodeLines(
+        "return inScope(this.element.setParameters(arg1), LocatorBy.byCss(\"css\"), false, false)"
+            + ".build(Component.class, elm -> (elm.getText()!= null && elm.getText().contains(arg2)))");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 
   @Test
-  public void testCustomNullableList() {
-    MethodInfo methodInfo = new MethodInfo("getCustomNullableList", "List<CustomTest>");
-    methodInfo.addCodeLine(
-            "return inScope(this.root, LocatorBy.byCss(\"selector2\"), true, false)" +
-                    ".buildList(CustomTest.class)");
-    TranslationContext context = new DeserializerUtilities().getContext("element/customElementNullable");
-    PageObjectMethod method = context.getMethod("getCustomNullableList");
-    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  public void testCustomListWithSelectorArgsInsideShadow() {
+    MethodInfo expected = new MethodInfo(METHOD_NAME, "List<Component>");
+    expected.addParameter(new MethodParameterInfo("index", "Integer"));
+    expected.addCodeLine(
+        "return inScope(this.root, LocatorBy.byCss(String.format(\"css[%d]\", index)), true, true)"
+            +
+            ".buildList(Component.class)");
+    PageObjectMethod method = getTestMethod("customListWithSelectorArg");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 
   @Test
   public void testCustomNullableListWithFilter() {
-    MethodInfo methodInfo = new MethodInfo("getCustomNullableListFilter", "List<CustomTest>");
-    methodInfo.addCodeLine(
-            "return inScope(this.root, LocatorBy.byCss(\".css\"), true, false)" +
-                    ".buildList(CustomTest.class, elm -> Boolean.TRUE.equals(elm.isVisible()))");
-    TranslationContext context = new DeserializerUtilities().getContext("element/customElementNullable");
-    PageObjectMethod method = context.getMethod("getCustomNullableListFilter");
-    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+    MethodInfo expected = new MethodInfo(METHOD_NAME, "List<Component>");
+    expected.addCodeLine(
+        "return inScope(this.root, LocatorBy.byCss(\".css\"), true, false)" +
+            ".buildList(Component.class, elm -> Boolean.TRUE.equals(elm.isVisible()))");
+    PageObjectMethod method = getTestMethod("customWithFilter");
+    expected.addImportedTypes(EXPECTED_TYPE.getFullName(), IMPORTED_LIST_TYPE);
+    expected.addImpliedImportedTypes(EXPECTED_TYPE.getFullName(), IMPORTED_LOCATOR_TYPE,
+        IMPORTED_LIST_TYPE);
+    PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 
   @Test
-  public void testCustomNullableSingle() {
-    MethodInfo methodInfo = new MethodInfo("getCustomNullable", "CustomTest");
-    methodInfo.addCodeLine(
-            "CustomTest instance = inScope(this.root, LocatorBy.byCss(\"selector1\"), true, false)" +
-                    ".build(CustomTest.class)");
-    methodInfo.addCodeLine("return instance");
-    TranslationContext context = new DeserializerUtilities().getContext("element/customElementNullable");
-    PageObjectValidationTestHelper.validateMethod(context.getMethod("getCustomNullable"), methodInfo);
+  public void testCustomPublicNullableSingleElement() {
+    MethodInfo expected = new MethodInfo(METHOD_NAME, "Component");
+    expected.addCodeLine("return inScope(this.root, LocatorBy.byCss(\"css\"), true, false)" +
+        ".build(Component.class)");
+    expected.addImportedTypes(EXPECTED_TYPE.getFullName());
+    expected.addImpliedImportedTypes(EXPECTED_TYPE.getFullName());
+    expected.addImpliedImportedTypes(IMPORTED_LOCATOR_TYPE);
+    PageObjectMethod method = getTestMethod("customPublicNullable");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 
   @Test
   public void testDuplicateArgsNamesThrows() {
     UtamError e =
-        expectThrows(UtamError.class, () -> new DeserializerUtilities().getResultFromFile("custom/testDuplicateArgs"));
+        expectThrows(UtamError.class, () -> getTestMethod("customDuplicateArgs"));
     assertThat(e.getMessage(), containsString("duplicate parameters"));
   }
 }

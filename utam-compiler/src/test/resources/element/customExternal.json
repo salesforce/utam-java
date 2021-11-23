@@ -1,0 +1,14 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "external": true,
+      "public": true,
+      "type": "utam-test/pageObjects/component",
+      "selector": {
+        "css": "css"
+      }
+    }
+  ]
+}
+

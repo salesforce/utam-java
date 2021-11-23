@@ -1,0 +1,16 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "nullable": true,
+      "public": true,
+      "type": "utam-test/pageObjects/component",
+      "selector": {
+        "css": "css"
+      }
+    }
+  ]
+}
+
+
+

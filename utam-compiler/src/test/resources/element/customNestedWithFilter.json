@@ -1,0 +1,40 @@
+{
+  "elements": [
+    {
+      "name": "element",
+      "selector": {
+        "css": "selector1 %s",
+        "args": [
+          {
+            "name": "arg1",
+            "type": "string"
+          }
+        ]
+      },
+      "elements": [
+        {
+          "name": "test",
+          "public": true,
+          "type": "utam-test/pageObjects/component",
+          "selector": {
+            "css": "css",
+            "returnAll": true
+          },
+          "filter": {
+            "apply": "getText",
+            "matcher": {
+              "type": "stringContains",
+              "args": [
+                {
+                  "name": "arg2",
+                  "type": "string"
+                }
+              ]
+            },
+            "findFirst": true
+          }
+        }
+      ]
+    }
+  ]
+}

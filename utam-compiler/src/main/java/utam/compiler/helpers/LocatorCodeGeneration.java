@@ -47,12 +47,7 @@ public class LocatorCodeGeneration {
 
   // used in tests
   public LocatorCodeGeneration(String locatorCss) {
-    this(locatorCss, Collections.emptyList());
-  }
-
-  // used in tests
-  public LocatorCodeGeneration(String locatorCss, List<MethodParameter> parameters) {
-    this(SelectorType.css, LocatorBy.byCss(locatorCss), parameters);
+    this(SelectorType.css, LocatorBy.byCss(locatorCss), Collections.emptyList());
   }
 
   private static String getSelectorAsString(SelectorType type, String valueStr,

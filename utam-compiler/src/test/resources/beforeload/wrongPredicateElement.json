@@ -1,0 +1,26 @@
+{
+  "beforeLoad": [
+    {
+      "apply": "waitFor",
+      "args": [
+        {
+          "type": "function",
+          "predicate": [
+            {
+              "element": "test",
+              "apply": "isPresent"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "elements": [
+    {
+      "name": "test",
+      "selector": {
+        "css": "css"
+      }
+    }
+  ]
+}

@@ -90,7 +90,7 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
 
   @Override
   public Object load() {
-    log("find page object root element");
+    log("load the object - find a root element");
     getElement();
     if (rootFound == null || rootFound.isNull()) {
       throw new NullPointerException(getLogMessage(String
