@@ -7,7 +7,10 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.UtamPageObject.BEFORE_LOAD_METHOD_NAME;
 import static utam.compiler.helpers.BasicElementActionType.size;
+import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
+import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.translator.TranslationTypesConfigJava.isCustomType;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -16,7 +19,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.MatcherType;
@@ -52,6 +58,10 @@ public abstract class UtamMethodAction {
   static final String ERR_ELEMENT_REDUNDANT_FOR_CHAIN = "%s: statement marked as chain "
       + "and will be applied to the result of the previous statement, "
       + "so element property is redundant";
+  static final String ERR_DISALLOWED_ELEMENT = "Only document or root element are allowed in beforeLoad method";
+  private static final Set<String> BEFORE_LOAD_ELEMENTS = Stream
+      .of(DOCUMENT_ELEMENT_NAME, ROOT_ELEMENT_NAME).collect(
+          Collectors.toSet());
 
   static final Operand SELF_OPERAND = new ConstOperand("this");
 
@@ -139,6 +149,18 @@ public abstract class UtamMethodAction {
     if (isChain && elementName != null) {
       throw new UtamCompilationError(
           String.format(ERR_ELEMENT_REDUNDANT_FOR_CHAIN, validationContextStr));
+    }
+  }
+
+  /**
+   * check that beforeLoad method statement does not use elements other than "root" or "document"
+   *
+   * @param methodContext method context has method name
+   */
+  final void checkBeforeLoadElements(MethodContext methodContext) {
+    if (BEFORE_LOAD_METHOD_NAME.equals(methodContext.getName()) && elementName != null
+        && !BEFORE_LOAD_ELEMENTS.contains(elementName)) {
+      throw new UtamCompilationError(ERR_DISALLOWED_ELEMENT);
     }
   }
 

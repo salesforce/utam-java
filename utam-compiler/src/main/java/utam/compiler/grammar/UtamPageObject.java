@@ -12,7 +12,6 @@ import static utam.compiler.grammar.UtamMethod.getComposeStatements;
 import static utam.compiler.helpers.AnnotationUtils.getPageObjectAnnotation;
 import static utam.compiler.helpers.AnnotationUtils.getPagePlatformAnnotation;
 import static utam.compiler.types.BasicElementInterface.processBasicTypeNode;
-import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.BASE_ROOT_PAGE_OBJECT_CLASS;
@@ -26,10 +25,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import utam.compiler.UtamCompilationError;
+import utam.compiler.grammar.UtamMethodAction;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ReturnType;
@@ -65,10 +63,6 @@ final class UtamPageObject {
       "root page object requires default selector property";
   static final String ERR_ROOT_REDUNDANT_SELECTOR = "non root page object can't have selector";
   static final String ERR_ROOT_ABSTRACT = "interface declaration can only have 'methods' property";
-  static final String ERR_DISALLOWED_ELEMENT = "Only self, document or root element allowed in beforeLoad method";
-  private static final Set<String> BEFORE_LOAD_ELEMENTS = Stream
-      .of(DOCUMENT_ELEMENT_NAME, ROOT_ELEMENT_NAME).collect(
-          Collectors.toSet());
   final String implementsType;
   final Locator rootLocator;
   private final UtamMethodAction[] beforeLoad;
@@ -188,12 +182,6 @@ final class UtamPageObject {
   }
 
   private PageObjectMethod setBeforeLoadMethod(TranslationContext context) {
-    for (UtamMethodAction action : beforeLoad) {
-      String elementName = action.elementName;
-      if (elementName != null && !BEFORE_LOAD_ELEMENTS.contains(elementName)) {
-        throw new UtamCompilationError(ERR_DISALLOWED_ELEMENT);
-      }
-    }
     String name = BEFORE_LOAD_METHOD_NAME;
     MethodContext methodContext = new MethodContext(name, new ReturnType(name));
     List<ComposeMethodStatement> statements = getComposeStatements(context, methodContext,

@@ -55,7 +55,7 @@ public final class UtamElement {
   static final String ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED =
       "element '%s': frame selector cannot return all";
 
-  final String name;
+  private final String name;
   UtamSelector selector;
   UtamShadowElement shadow;
   String[] type;

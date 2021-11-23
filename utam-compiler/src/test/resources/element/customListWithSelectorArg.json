@@ -1,0 +1,23 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "test",
+        "public": true,
+        "nullable": true,
+        "type": "utam-test/pageObjects/component",
+        "selector": {
+          "css": "css[%d]",
+          "returnAll": true,
+          "args": [
+            {
+              "type": "number",
+              "name": "index"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+
