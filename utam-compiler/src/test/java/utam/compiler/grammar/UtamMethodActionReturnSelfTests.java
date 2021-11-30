@@ -10,6 +10,7 @@ package utam.compiler.grammar;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.UtamMethodActionReturnSelf.ERR_SHOULD_BE_LAST_STATEMENT;
 
 import org.testng.annotations.Test;
 import utam.compiler.helpers.TranslationContext;
@@ -71,8 +72,25 @@ public class UtamMethodActionReturnSelfTests {
 
   @Test
   public void returnSelfRedundantAttributes() {
-    UtamError e = expectThrows(UtamError.class,
-        () -> new DeserializerUtilities().getContext("compose/returnSelf/returnSelfError"));
+    UtamError e = expectThrows(UtamError.class, () -> getContext("returnSelfError"));
     assertThat(e.getCause().getMessage(), containsString("Unrecognized field \"element\""));
+  }
+
+  @Test
+  public void returnSelfNotLastStatementThrows() {
+    UtamError e = expectThrows(UtamError.class, () -> getContext("notLastStatement"));
+    assertThat(e.getMessage(), containsString(String.format(ERR_SHOULD_BE_LAST_STATEMENT, methodName)));
+  }
+
+  @Test
+  public void returnSelfNotLastStatementPredicateThrows() {
+    UtamError e = expectThrows(UtamError.class, () -> getContext("notLastStatementPredicate"));
+    assertThat(e.getMessage(), containsString(String.format(ERR_SHOULD_BE_LAST_STATEMENT, methodName)));
+  }
+
+  @Test
+  public void returnSelfNotLastStatementBeforeLoadThrows() {
+    UtamError e = expectThrows(UtamError.class, () -> getContext("notLastStatementBeforeLoad"));
+    assertThat(e.getMessage(), containsString(String.format(ERR_SHOULD_BE_LAST_STATEMENT, "load")));
   }
 }

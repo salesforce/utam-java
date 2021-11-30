@@ -1,0 +1,27 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "apply" : "waitFor",
+          "args" : [
+            {
+              "type" : "function",
+              "predicate" : [
+                {
+                  "apply": "returnSelf"
+                },
+                {
+                  "apply": "someMethod"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+
