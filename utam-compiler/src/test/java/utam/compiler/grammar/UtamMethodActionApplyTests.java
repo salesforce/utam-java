@@ -60,19 +60,6 @@ public class UtamMethodActionApplyTests {
   }
 
   @Test
-  public void testCustomElementActionsReturnSelf() {
-    TranslationContext context = getContext("customReturnSelf");
-    PageObjectMethod method = context.getMethod(methodName);
-    MethodInfo expected = new MethodInfo(methodName, "Test");
-    expected.addImpliedImportedTypes(CUSTOM_TYPE_IMPORT, "utam.test.pageobjects.test.Test");
-    expected.addImportedTypes("utam.test.pageobjects.test.Test");
-    expected.addCodeLine("Custom custom0 = this.getCustomElement()");
-    expected.addCodeLine("custom0.someMethod()");
-    expected.addCodeLine("return this");
-    PageObjectValidationTestHelper.validateMethod(method, expected);
-  }
-
-  @Test
   public void testComposeWithDocumentElement() {
     TranslationContext context = getContext("documentElement");
     PageObjectMethod actualMethod = context.getMethod(methodName);
@@ -101,18 +88,6 @@ public class UtamMethodActionApplyTests {
     methodInfo.addParameter(new MethodParameterInfo("buttonText"));
     methodInfo.addCodeLine("TestElement test0 = this.getTest(buttonText)");
     methodInfo.addCodeLine("test0.click()");
-    methodInfo.addCodeLine("return this");
-    PageObjectValidationTestHelper.validateMethod(actualMethod, methodInfo);
-  }
-
-  @Test
-  public void testBasicActionReturnsSelf() {
-    TranslationContext context = getContext("basicActionReturnsSelf");
-    PageObjectMethod actualMethod = context.getMethod(methodName);
-    MethodInfo methodInfo = new MethodInfo(methodName, "Test");
-    methodInfo.addCodeLine("BasicElement test0 = this.getTestElement()");
-    methodInfo.addCodeLine("test0.getText()");
-    methodInfo.addCodeLine("test0.getClassAttribute()");
     methodInfo.addCodeLine("return this");
     PageObjectValidationTestHelper.validateMethod(actualMethod, methodInfo);
   }

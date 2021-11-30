@@ -1,0 +1,11 @@
+{
+  "beforeLoad": [
+    {
+      "apply": "returnSelf"
+    },
+    {
+      "apply": "someMethod"
+    }
+  ]
+}
+

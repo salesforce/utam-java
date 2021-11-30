@@ -31,8 +31,10 @@
       "compose": [
         {
           "element": "test",
-          "apply": "click",
-          "returnType": "self"
+          "apply": "click"
+        },
+        {
+          "apply": "returnSelf"
         }
       ]
     }

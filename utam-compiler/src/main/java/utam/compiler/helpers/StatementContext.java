@@ -96,10 +96,6 @@ public class StatementContext {
     return declaredStatementReturn.getReturnTypeOrNull(context);
   }
 
-  public boolean isReturnSelf() {
-    return declaredStatementReturn.isReturnSelf();
-  }
-
   public boolean hasDeclaredReturn() {
     return declaredStatementReturn.isReturnTypeSet();
   }

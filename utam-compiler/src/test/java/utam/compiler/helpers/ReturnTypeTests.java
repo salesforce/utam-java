@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.helpers.ReturnType.ERR_RETURN_ALL_REDUNDANT;
-import static utam.compiler.helpers.ReturnType.ERR_RETURN_ALL_REDUNDANT_FOR_SELF;
 import static utam.compiler.helpers.ReturnType.ERR_UNSUPPORTED_RETURN_TYPE;
 
 import org.testng.annotations.Test;
@@ -45,12 +44,6 @@ public class ReturnTypeTests {
   public void testReturnAllRedundant() {
     String err = String.format(ERR_RETURN_ALL_REDUNDANT, validationContextStr);
     test("returnAllRedundant", err);
-  }
-
-  @Test
-  public void testReturnAllRedundantSelf() {
-    String err = String.format(ERR_RETURN_ALL_REDUNDANT_FOR_SELF, validationContextStr);
-    test("returnSelfAll", err);
   }
 
   @Test

@@ -1,0 +1,13 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "apply": "returnSelf",
+          "element": "document"
+        }
+      ]
+    }
+  ]
+}

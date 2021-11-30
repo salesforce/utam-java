@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.UtamMethodActionReturnSelf.RETURN_SELF;
 import static utam.compiler.grammar.UtamMethodActionWaitFor.WAIT_FOR;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -67,6 +68,9 @@ class UtamMethodActionDeserializer extends
     }
     if(WAIT_FOR.equals(apply)) {
       return mapper.treeToValue(objectNode, UtamMethodActionWaitFor.class);
+    }
+    if(RETURN_SELF.equals(apply)) {
+      return mapper.treeToValue(objectNode, UtamMethodActionReturnSelf.class);
     }
     return mapper.treeToValue(objectNode, UtamMethodActionApply.class);
   }

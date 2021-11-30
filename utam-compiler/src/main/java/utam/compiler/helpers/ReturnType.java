@@ -21,13 +21,10 @@ public class ReturnType {
   static final String ERR_UNSUPPORTED_RETURN_TYPE = "%s: invalid return type '%s'";
   static final String ERR_RETURN_ALL_REDUNDANT =
       "%s: 'returnAll' property can't be set without setting return type";
-  static final String ERR_RETURN_ALL_REDUNDANT_FOR_SELF =
-      "%s: 'returnAll' property can't be set for 'returnType' self";
 
   private final String validationContextStr;
   private final boolean isReturnList;
   private final boolean isReturnTypeSet;
-  private final boolean isReturnSelf;
 
   private final Function<TranslationContext, TypeProvider> typeProvider;
 
@@ -40,11 +37,6 @@ public class ReturnType {
           String.format(ERR_RETURN_ALL_REDUNDANT, validationContextStr));
     }
     this.isReturnList = Boolean.TRUE.equals(isReturnList);
-    this.isReturnSelf = isReturnTypeSet && typeNode.isTextual() && "self".equals(typeNode.asText());
-    if (isReturnList != null && isReturnSelf) {
-      throw new UtamCompilationError(
-          String.format(ERR_RETURN_ALL_REDUNDANT_FOR_SELF, validationContextStr));
-    }
   }
 
   /**
@@ -59,15 +51,10 @@ public class ReturnType {
     this.typeProvider = translationContext -> returnType;
     this.isReturnTypeSet = true;
     this.isReturnList = Boolean.TRUE.equals(isReturnList);
-    this.isReturnSelf = false;
   }
 
   public ReturnType(String methodName) {
     this((JsonNode) null, null, methodName);
-  }
-
-  public boolean isReturnSelf() {
-    return isReturnSelf;
   }
 
   public boolean isReturnTypeSet() {
@@ -81,9 +68,6 @@ public class ReturnType {
       }
       if (typeNode.isTextual()) {
         String typeValue = typeNode.textValue();
-        if ("self".equals(typeValue)) {
-          return translatorContext.getSelfType();
-        }
         if (isPrimitiveType(typeValue)) {
           return PrimitiveType.fromString(typeValue);
         }

@@ -122,7 +122,7 @@ public class PageObjectValidationTestHelper {
    * @param actualMethods the list of PageObjectMethod objects to validate
    * @param methods the list of MethodInfo objects describing each method properties
    */
-  public static void validateMethods(
+  private static void validateMethods(
       String methodSource, List<PageObjectMethod> actualMethods, List<MethodInfo> methods) {
     assertThat(methodSource, actualMethods, hasSize(methods.size()));
     for (int i = 0; i < actualMethods.size(); i++) {
