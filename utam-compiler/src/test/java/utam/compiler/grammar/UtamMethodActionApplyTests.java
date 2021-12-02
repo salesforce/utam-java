@@ -81,6 +81,19 @@ public class UtamMethodActionApplyTests {
   }
 
   @Test
+  public void testComposeWithNestedBasicElementWithSelectorArgs() {
+    TranslationContext context = getContext("nestedArgElement");
+    PageObjectMethod method = context.getMethod(methodName);
+    MethodInfo expected = new MethodInfo(methodName, "String");
+    expected.addParameter(new MethodParameterInfo("row", "Integer"));
+    expected.addParameter(new MethodParameterInfo("column", "Integer"));
+    expected.addCodeLine("BasicElement nestedTarget0 = this.getNestedTargetElement(row, column)");
+    expected.addCodeLine("String statement0 = nestedTarget0.getText()");
+    expected.addCodeLine("return statement0");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
+
+  @Test
   public void testComposeBasicElementWithFilter() {
     TranslationContext context = getContext("basicElementWithFilter");
     PageObjectMethod actualMethod = context.getMethod(methodName);

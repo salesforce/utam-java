@@ -293,10 +293,6 @@ public final class UtamElement {
       LocatorCodeGeneration locatorHelper = selector.getCodeGenerationHelper(context);
       MethodParametersTracker allParameters = new MethodParametersTracker(String.format("element '%s' getter", name));
       MethodParametersTracker parametersWithoutFilter = new MethodParametersTracker(String.format("element '%s' getter", name));
-      if(scopeElement != null) {
-        allParameters.setMethodParameters(scopeElement.getParameters());
-        parametersWithoutFilter.setMethodParameters(scopeElement.getParameters());
-      }
       allParameters.setMethodParameters(locatorHelper.getParameters());
       parametersWithoutFilter.setMethodParameters(locatorHelper.getParameters());
       ElementField field =
