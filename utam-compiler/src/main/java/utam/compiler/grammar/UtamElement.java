@@ -18,6 +18,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
 import utam.compiler.helpers.ElementContext;
@@ -32,6 +35,7 @@ import utam.compiler.representation.FrameMethod;
 import utam.compiler.representation.MethodParametersTracker;
 import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.compiler.types.BasicElementUnionTypeImpl;
+import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.representation.UnionType;
@@ -291,34 +295,32 @@ public final class UtamElement {
       boolean isPublicImplementationOnlyElement = isPublic() && context.isImplementationPageObject();
       TypeProvider elementType = asBasicOrUnionType(name, type, isPublicImplementationOnlyElement);
       LocatorCodeGeneration locatorHelper = selector.getCodeGenerationHelper(context);
-      MethodParametersTracker allParameters = new MethodParametersTracker(String.format("element '%s' getter", name));
-      MethodParametersTracker parametersWithoutFilter = new MethodParametersTracker(String.format("element '%s' getter", name));
-      if (scopeElement != null) {
-        parametersWithoutFilter.setMethodParameters(scopeElement.getParameters());
-      }
-      allParameters.setMethodParameters(locatorHelper.getParameters());
-      parametersWithoutFilter.setMethodParameters(locatorHelper.getParameters());
+      MethodParametersTracker addedParameters = new MethodParametersTracker(String.format("element '%s' getter", name));
+      addedParameters.setMethodParameters(locatorHelper.getParameters());
       ElementField field =
           new ElementField(
               name, getFindAnnotation(locatorHelper.getLocator(), scopeElement,
               isExpandScopeShadowRoot, isNullable()));
       if (filter != null) {
         filter.setElementFilter(context, Type.BASIC, elementType, name);
-        allParameters.setMethodParameters(filter.getApplyMethodParameters());
-        allParameters.setMethodParameters(filter.getMatcherParameters());
+        addedParameters.setMethodParameters(filter.getApplyMethodParameters());
+        addedParameters.setMethodParameters(filter.getMatcherParameters());
       }
       boolean isList = selector.isReturnAll() && (filter == null || !filter.getFindFirst());
       ElementContext elementContext = isList ?
           new ElementContext.BasicReturnsAll(
               scopeElement, name, elementType, locatorHelper.getLocator(),
-              allParameters.getMethodParameters(), isNullable()) :
+              addedParameters.getMethodParameters(), isNullable()) :
           new ElementContext.Basic(
               scopeElement, name, elementType, locatorHelper.getLocator(),
-              allParameters.getMethodParameters(), isNullable());
+              addedParameters.getMethodParameters(), isNullable());
       final PageObjectMethod method;
       final TypeProvider implType = elementType instanceof UnionType ?
           new BasicElementUnionTypeImpl(elementType) : BASIC_ELEMENT_IMPL_CLASS;
       if (filter != null) {
+        MethodParametersTracker parametersWithoutFilter = new MethodParametersTracker(String.format("element '%s' getter", name));
+        parametersWithoutFilter.setMethodParameters(scopeElement == null? new ArrayList<>() : scopeElement.getParameters());
+        parametersWithoutFilter.setMethodParameters(locatorHelper.getParameters());
         method =
             new ElementMethod.Filtered(
                 name,

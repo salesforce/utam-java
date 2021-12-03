@@ -1,0 +1,54 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "element",
+          "apply": "apply",
+          "args": [
+            {
+              "name": "applyArg",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "elements": [
+    {
+      "name": "body",
+      "selector": {
+        "css": "tbody"
+      },
+      "elements": [
+        {
+          "name": "scope",
+          "selector": {
+            "css": "tr:nth-of-type(%d) td:nth-of-type(%d)",
+            "args": [
+              {
+                "name": "row",
+                "type": "number"
+              },
+              {
+                "name": "column",
+                "type": "number"
+              }
+            ]
+          },
+          "elements": [
+            {
+              "name": "element",
+              "type": "my/custom/element",
+              "selector": {
+                "css": "nested-target"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
