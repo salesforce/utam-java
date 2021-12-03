@@ -1,0 +1,54 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "element",
+          "apply": "getText"
+        }
+      ]
+    }
+  ],
+  "elements": [
+    {
+      "name": "body",
+      "selector": {
+        "css": "tbody"
+      },
+      "elements": [
+        {
+          "name": "scope",
+          "selector": {
+            "css": "tr:nth-of-type(%d) td:nth-of-type(%s)",
+            "args": [
+              {
+                "name": "row",
+                "type": "number"
+              },
+              {
+                "name": "column",
+                "type": "string"
+              }
+            ]
+          },
+          "elements": [
+            {
+              "name": "element",
+              "selector": {
+                "css": "a",
+                "returnAll" : true
+              },
+              "filter" : {
+                "apply" : "isPresent",
+                "matcher" : {
+                  "type" : "isTrue"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

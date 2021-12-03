@@ -1,0 +1,47 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "nestedTarget",
+          "apply": "getText"
+        }
+      ]
+    }
+  ],
+  "elements": [
+    {
+      "name": "body",
+      "selector": {
+        "css": "tbody"
+      },
+      "elements": [
+        {
+          "name": "indexedElement",
+          "selector": {
+            "css": "tr:nth-of-type(%d) td:nth-of-type(%d)",
+            "args": [
+              {
+                "name": "row",
+                "type": "number"
+              },
+              {
+                "name": "column",
+                "type": "number"
+              }
+            ]
+          },
+          "elements": [
+            {
+              "name": "nestedTarget",
+              "selector": {
+                "css": "a"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

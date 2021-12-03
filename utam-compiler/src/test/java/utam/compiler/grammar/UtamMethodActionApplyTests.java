@@ -81,6 +81,19 @@ public class UtamMethodActionApplyTests {
   }
 
   @Test
+  public void testComposeWithNestedBasicElementWithSelectorArgs() {
+    TranslationContext context = getContext("nestedArgElement");
+    PageObjectMethod method = context.getMethod(methodName);
+    MethodInfo expected = new MethodInfo(methodName, "String");
+    expected.addParameter(new MethodParameterInfo("row", "Integer"));
+    expected.addParameter(new MethodParameterInfo("column", "Integer"));
+    expected.addCodeLine("BasicElement nestedTarget0 = this.getNestedTargetElement(row, column)");
+    expected.addCodeLine("String statement0 = nestedTarget0.getText()");
+    expected.addCodeLine("return statement0");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
+
+  @Test
   public void testComposeBasicElementWithFilter() {
     TranslationContext context = getContext("basicElementWithFilter");
     PageObjectMethod actualMethod = context.getMethod(methodName);
@@ -308,6 +321,38 @@ public class UtamMethodActionApplyTests {
     expected.addImpliedImportedTypes(importStr);
     expected.addCodeLine("Foo findFirst0 = this.getFindFirstElement(filterArg)");
     expected.addCodeLine("Foo statement0 = findFirst0.publicMethod(applyArg)");
+    expected.addCodeLine("return statement0");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
+
+  /**
+   * custom element has scope with parameters
+   */
+  @Test
+  public void testCustomElementWithParametrizedScope() {
+    TranslationContext context = getContext("customElementNestedWithArg");
+    PageObjectMethod method = context.getMethod(methodName);
+    MethodInfo expected = new MethodInfo(methodName);
+    expected.addParameter(new MethodParameterInfo("row", "Integer"));
+    expected.addParameter(new MethodParameterInfo("column", "Integer"));
+    expected.addParameter(new MethodParameterInfo("applyArg"));
+    expected.addCodeLine("Element element0 = this.getElementElement(row, column)");
+    expected.addCodeLine("element0.apply(applyArg)");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
+
+  /**
+   * basic element has scope with parameters and filter "findAll"
+   */
+  @Test
+  public void testBasicFilteredElementWithParametrizedScope() {
+    TranslationContext context = getContext("basicElementScopeWithParameters");
+    PageObjectMethod method = context.getMethod(methodName);
+    MethodInfo expected = new MethodInfo(methodName, "List<String>");
+    expected.addParameter(new MethodParameterInfo("row", "Integer"));
+    expected.addParameter(new MethodParameterInfo("column"));
+    expected.addCodeLine("List<BasicElement> element0 = this.getElementElement(row, column)");
+    expected.addCodeLine("List<String> statement0 = element0.stream().map(element -> element.getText()).collect(Collectors.toList())");
     expected.addCodeLine("return statement0");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
