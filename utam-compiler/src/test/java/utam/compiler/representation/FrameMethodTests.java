@@ -42,7 +42,7 @@ public class FrameMethodTests {
     PageObjectMethod method = new FrameMethod(element, true);
     MethodInfo expected = getExpectedMethod(true);
     expected.addCodeLine(String
-        .format("element(this.%s).build(FrameElement.class, FrameElementImpl.class)", ELEMENT_NAME));
+        .format("return element(this.%s).build(FrameElement.class, FrameElementImpl.class)", ELEMENT_NAME));
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 
@@ -54,7 +54,7 @@ public class FrameMethodTests {
     PageObjectMethod method = new FrameMethod(element, false);
     MethodInfo expected = getExpectedMethod(false);
     expected.addCodeLine(String
-        .format("element(this.%s).build(FrameElement.class, FrameElementImpl.class)", ELEMENT_NAME));
+        .format("return element(this.%s).build(FrameElement.class, FrameElementImpl.class)", ELEMENT_NAME));
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 
@@ -68,7 +68,7 @@ public class FrameMethodTests {
     PageObjectMethod method = new FrameMethod(element, false);
     MethodInfo expected = getExpectedMethod(false);
     expected.addParameter(new MethodParameterInfo("arg1", PrimitiveType.NUMBER));
-    expected.addCodeLine("element(this.testFrame).build(FrameElement.class, FrameElementImpl.class, arg1)");
+    expected.addCodeLine("return element(this.testFrame).build(FrameElement.class, FrameElementImpl.class, arg1)");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 }

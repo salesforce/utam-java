@@ -59,7 +59,7 @@ public class FrameMethod implements PageObjectMethod {
 
   @Override
   public List<String> getCodeLines() {
-    return  Stream.of(methodCode).collect(Collectors.toList());
+    return Stream.of("return " + methodCode).collect(Collectors.toList());
   }
 
   @Override

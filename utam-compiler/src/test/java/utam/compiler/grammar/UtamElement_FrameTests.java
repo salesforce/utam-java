@@ -61,7 +61,7 @@ public class UtamElement_FrameTests {
 
     method = context.getMethod(methodName);
     MethodInfo expected = new MethodInfo(methodName, FRAME_ELEMENT).setNotPublic();
-    expected.addCodeLine("element(this.simpleFrameElement).build(FrameElement.class, FrameElementImpl.class)");
+    expected.addCodeLine("return element(this.simpleFrameElement).build(FrameElement.class, FrameElementImpl.class)");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 
@@ -76,7 +76,7 @@ public class UtamElement_FrameTests {
     MethodInfo expected = new MethodInfo(methodName, FRAME_ELEMENT);
     expected.addParameter(new MethodParameterInfo("frameStr"));
     expected.addCodeLine(
-        "element(this.myPublicFrame).build(FrameElement.class, FrameElementImpl.class, frameStr)");
+        "return element(this.myPublicFrame).build(FrameElement.class, FrameElementImpl.class, frameStr)");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 
