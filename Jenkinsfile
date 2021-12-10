@@ -17,22 +17,14 @@ executePipeline(envDef) {
     }
 
     stage('Build') {
-        if(BuildUtils.isReleaseBuild(env)) {
-            print('Skipping the build as it will be run during the release prepare')
-        } else {
-            mavenBuild()
-        }
+        mavenBuild()
     }
 
     if (BuildUtils.isReleaseBuild(env)) {
         stage('Prepare release') {
-            mavenVersionsSet([managed: true])
-            mavenBuild()
         }
 
         stage('Release') {
-            mavenStageArtifacts()
-            mavenPromoteArtifacts()
         }
     }
 }
