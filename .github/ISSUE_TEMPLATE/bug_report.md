@@ -17,7 +17,7 @@ labels: bug, needs triaging
 <!-- Test are failing or the runtime doesn't behave as expected -->
 - [ ] Runtime error
 
-### What is your expected behavior??
+### What is your expected behavior?
 <!-- A clear and concise description of what you expected to happen. -->
 
 ### Steps to reproduce
