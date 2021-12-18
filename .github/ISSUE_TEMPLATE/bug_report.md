@@ -25,7 +25,7 @@ labels: bug, needs triaging
 
 ### Environment
 
-<!-- run ./node_modules/.bin/utam -v -->
+<!-- UTAM Dependency version -->
 - UTAM: [e.g 1.0.0] vX.Y.Z
 <!-- run java --version in your terminal -->
 - Java Version [e.g 11.0.9.1] 
