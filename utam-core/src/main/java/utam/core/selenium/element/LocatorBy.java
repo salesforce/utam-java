@@ -7,8 +7,7 @@
  */
 package utam.core.selenium.element;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Map.Entry;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import org.openqa.selenium.By;
@@ -60,30 +59,29 @@ public abstract class LocatorBy implements Locator<By> {
   }
 
   @Override
-  public Entry<Integer, Locator<By>> setParameters(int currentIndex, Object... parameters) {
-    if (parametersCount <= 0 || parameters == null || parameters.length == 0) {
-      return new SimpleEntry<>(currentIndex, this);
-    }
-    Object[] values = new Object[parametersCount];
-    for (int i = currentIndex; i < parametersCount + currentIndex; i++) {
-      if (i < parameters.length) {
-        values[i - currentIndex] = parameters[i];
-      } else {
-        throw new IndexOutOfBoundsException(
-            String.format("index %d is out of bounds: total number of parameters is %d", i,
-                parameters.length));
+  public LocatorBy setParameters(Object...parameters) {
+    if (parameters == null || parameters.length == 0) {
+      if (parametersCount > 0) {
+        throw new ArrayIndexOutOfBoundsException(String
+            .format("Locator '%s' requires %d parameters, none were provided", stringValue,
+                parametersCount));
       }
     }
+    if(parametersCount == 0) {
+      return this;
+    }
+    if (parametersCount > parameters.length) {
+      throw new ArrayIndexOutOfBoundsException(String
+          .format("Locator '%s' requires %d parameters, only %d were provided", stringValue,
+              parametersCount, parameters.length));
+    }
+    Object[] values = Arrays.copyOfRange(parameters, parameters.length - parametersCount, parameters.length);
     String mutableValue = String.format(stringValue, values);
-    return new SimpleEntry<>(currentIndex + parametersCount, getCopy(mutableValue));
+    return getCopy(mutableValue);
   }
 
-  // public because used in tests from other package
+  // public because used from other package
   abstract public LocatorBy getCopy(String valueWithParameters);
-
-  public Locator getCopy() {
-    return getCopy(stringValue);
-  }
 
   @Override
   public String getStringValue() {

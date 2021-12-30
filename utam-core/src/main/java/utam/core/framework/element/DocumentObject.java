@@ -8,12 +8,13 @@
 package utam.core.framework.element;
 
 import static utam.core.element.FindContext.Type.NULLABLE;
-import static utam.core.framework.base.FrameElementImpl.getUnwrappedElement;
+import static utam.core.framework.base.BasicElementBuilder.getUnwrappedElement;
 import static utam.core.framework.base.PageObjectsFactoryImpl.getRootLocator;
 
 import java.util.function.Supplier;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
+import utam.core.element.Element;
 import utam.core.element.Locator;
 import utam.core.framework.UtamCoreError;
 import utam.core.framework.base.PageObjectsFactory;
@@ -66,7 +67,8 @@ public class DocumentObject implements Document {
     if(frame == null) {
       throw new UtamCoreError(ERR_CANT_ENTER_NULL_FRAME);
     }
-    driver.enterFrame(getUnwrappedElement(frame));
+    Element element = getUnwrappedElement(frame);
+    driver.enterFrame(element);
   }
 
   @Override

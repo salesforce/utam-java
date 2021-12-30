@@ -18,149 +18,98 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
-import static utam.compiler.helpers.AnnotationUtils.EMPTY_ANNOTATION;
-import static utam.compiler.types.BasicElementInterface.actionable;
-import static utam.compiler.types.BasicElementInterface.editable;
 import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_DUPLICATE_ELEMENT_NAME;
 import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_DUPLICATE_FIELD;
 import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_DUPLICATE_METHOD;
 import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_ELEMENT_NOT_FOUND;
 import static utam.compiler.helpers.TranslationContext.ERR_PROFILE_NOT_CONFIGURED;
+import static utam.compiler.types.BasicElementInterface.editable;
 
+import org.hamcrest.CoreMatchers;
 import org.testng.annotations.Test;
-import utam.compiler.representation.ElementField;
-import utam.compiler.representation.ElementMethod;
-import utam.compiler.representation.PageObjectValidationTestHelper.FieldInfo;
-import utam.compiler.types.BasicElementInterface;
+import utam.compiler.grammar.DeserializerUtilities;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
+import utam.core.selenium.element.LocatorBy;
 
 public class TranslationContextTests {
 
-  private static final String TEST_ELEMENT_NAME = "testElement";
+  private static final String TEST_ELEMENT_NAME = "test";
 
-  private static ElementContext getElementContext() {
-    return getElementContext(TEST_ELEMENT_NAME, "css");
-  }
-
-  private static ElementContext getElementContext(String elementName, String selector) {
-    return new ElementContext.Basic(
-        elementName, BasicElementInterface.clickable, getCssSelector(selector));
-  }
-
-  private static TranslationContext getContainerContext() {
-    TranslationContext context = getTestTranslationContext();
-    ElementContext elementContext = getElementContext();
-    context.setElement(elementContext);
-    context.setClassField(
-        new ElementField(
-            "testField",
-            EMPTY_ANNOTATION));
-    context.setMethod(new ElementMethod.Single(elementContext, true, TypeUtilities.BASIC_ELEMENT_IMPL_CLASS));
-    context.setElement(new ElementContext.Container(null, "containerObject"));
-    return context;
-  }
+  private final TranslationContext context = new DeserializerUtilities()
+      .getContext("pageobjects/testContext");
 
   @Test
   public void testGetClassType() {
-    assertThat(
-        getContainerContext().getClassType().getFullName(),
+    assertThat(context.getClassType().getFullName(),
         is(equalTo("utam.test.pageobjects.test.impl.TestImpl")));
   }
 
   @Test
-  public void getDeclaredApiTest() {
-    assertThat(getContainerContext().getMethods(), hasSize(1));
+  public void testGetMethods() {
+    assertThat(context.getMethods(), hasSize(1));
   }
 
   @Test
   public void testGetElement() {
-    assertThat(
-        getContainerContext().getElement(TEST_ELEMENT_NAME).getType().getSimpleName(),
-        is(equalTo("Clickable")));
-  }
-
-  @Test
-  public void testGetElementErr() {
-    UtamError e = expectThrows(UtamError.class, () -> getContainerContext().getElement("error"));
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_CONTEXT_ELEMENT_NOT_FOUND, "error"))));
+    assertThat(context.getElement(TEST_ELEMENT_NAME), is(CoreMatchers.notNullValue()));
   }
 
   @Test
   public void testGetElementWithMissingElementThrows() {
-    UtamError e =
-        expectThrows(UtamError.class, () -> getContainerContext().getElement("doesNotExist"));
-    assertThat(e.getMessage(), containsString("referenced element 'doesNotExist' not found"));
+    UtamError e = expectThrows(UtamError.class, () -> context.getElement("error"));
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_CONTEXT_ELEMENT_NOT_FOUND, "error"))));
   }
 
   @Test
   public void testGetFields() {
-    FieldInfo fieldInfo = new FieldInfo("testField");
-    TranslationContext context = getContainerContext();
-    assertThat(context.getFields(), hasSize(1));
-    fieldInfo.validateField(context.getFields().get(0));
+    assertThat(context.getFields(), hasSize(0));
   }
 
   @Test
   public void testGetInterfaceType() {
-    TranslationContext context = getContainerContext();
+    TranslationContext context = getTestTranslationContext();
     context.setImplementedType("utam-test/pageObjects/test/testInterface");
     assertThat(context.getSelfType().getFullName(),
         is(equalTo("utam.test.pageobjects.test.TestInterface")));
   }
 
   @Test
-  public void testGetInterfaceTypeWithNullInterfaceTypeName() {
-    assertThat(
-        getContainerContext().getSelfType().getFullName(),
+  public void testGetSelfType() {
+    TranslationContext context = getTestTranslationContext();
+    assertThat(context.getSelfType().getFullName(),
         is(equalTo("utam.test.pageobjects.test.Test")));
   }
 
   @Test
   public void testGetType() {
-    assertThat(
-        getContainerContext().getType("utam-test/pageObjects/test/testType").getFullName(),
+    TranslationContext context = getTestTranslationContext();
+    assertThat(context.getType("utam-test/pageObjects/test/testType").getFullName(),
         is(equalTo("utam.test.pageobjects.test.TestType")));
   }
 
   @Test
   public void testGetUtilityType() {
-    assertThat(
-        getContainerContext().getUtilityType("utam-test/utils/test/test").getFullName(),
+    TranslationContext context = getTestTranslationContext();
+    assertThat(context.getUtilityType("utam-test/utils/test/test").getFullName(),
         is(equalTo("utam.test.utils.test.Test")));
   }
 
   @Test
   public void testSetElement() {
-    TranslationContext context = getContainerContext();
-    context.setElement(getElementContext("newElement", "newCss"));
-    assertThat(context.getElement("newElement"), is(not(nullValue())));
-  }
-
-  @Test
-  public void testSetElementWithDuplicateElementThrows() {
-    TranslationContext context = getContainerContext();
-    RuntimeException e =
-        expectThrows(RuntimeException.class, () -> context.setElement(getElementContext()));
+    TranslationContext context = getTestTranslationContext();
+    ElementContext elementContext = new ElementContext.Basic(TEST_ELEMENT_NAME,
+        mock(TypeProvider.class), mock(LocatorBy.class));
+    context.setElement(elementContext);
+    assertThat(context.getElement(TEST_ELEMENT_NAME), is(not(nullValue())));
+    UtamError e = expectThrows(UtamError.class, () -> context.setElement(elementContext));
     assertThat(
         e.getMessage(),
-        containsString(String.format(ERR_CONTEXT_DUPLICATE_ELEMENT_NAME, "testElement")));
-  }
-
-  @Test
-  public void testDuplicateElementName() {
-    final String name = "fakeElementName";
-    TranslationContext context = getTestTranslationContext();
-    ElementContext element =
-        new ElementContext.Basic(name, actionable, getCssSelector("css"));
-    context.setElement(element);
-    UtamError e = expectThrows(UtamError.class, () -> context.setElement(element));
-    assertThat(
-        e.getMessage(), containsString(String.format(ERR_CONTEXT_DUPLICATE_ELEMENT_NAME, name)));
+        containsString(String.format(ERR_CONTEXT_DUPLICATE_ELEMENT_NAME, TEST_ELEMENT_NAME)));
   }
 
   @Test
@@ -198,14 +147,14 @@ public class TranslationContextTests {
   }
 
   @Test
-  public void testGetAllElements() {
+  public void testGetTestableElements() {
     TranslationContext context = getTestTranslationContext();
     context.setTestableElement("name", mock(ElementUnitTestHelper.class));
     assertThat(context.getTestableElements().get("name"), is(notNullValue()));
   }
 
   @Test
-  public void nonExistingProfile() {
+  public void testNonExistingProfileThrows() {
     TranslationContext translationInstantContext = getTestTranslationContext();
     UtamError e =
         expectThrows(

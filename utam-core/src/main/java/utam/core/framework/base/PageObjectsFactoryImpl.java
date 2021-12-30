@@ -7,23 +7,20 @@
  */
 package utam.core.framework.base;
 
-import static utam.core.element.FindContext.Type.EXISTING;
+import static utam.core.framework.base.ElementMarker.getElementLocation;
 import static utam.core.framework.base.PageMarker.getRootLocatorFromAnnotation;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import utam.core.driver.Driver;
-import utam.core.element.ElementLocation;
+import utam.core.element.Element;
 import utam.core.element.Locator;
 import utam.core.framework.consumer.PageObjectContext;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.consumer.UtamLoaderConfig;
 import utam.core.framework.context.PlatformType;
-import utam.core.framework.element.ElementLocationChain;
 
 /**
  * selenium page objects factory
@@ -67,7 +64,7 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
   }
 
   @Override
-  public void bootstrap(PageObject instance, ElementLocation root) {
+  public void bootstrap(PageObject instance, Element element, Locator locator) {
     if (!(instance instanceof BasePageObject)) {
       throw new UtamError(
           String.format(
@@ -75,8 +72,8 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
               instance.getClass(), BasePageObject.class.getName()));
     }
     BasePageObject pageObject = (BasePageObject) instance;
-    pageObject.setBootstrap(root, this);
-    new FieldsBuilder(pageObject).bootstrapElements();
+    pageObject.initialize(this, element, locator);
+    bootstrapElements(pageObject);
     setPlatform(instance);
   }
 
@@ -109,73 +106,39 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
   @Override
   public <T extends RootPageObject> T create(Class<T> rootPageObjectType) {
     T instance = getPageContext().getBean(rootPageObjectType);
-    Locator rootLocator = getRootLocator(instance);
-    ElementLocation rootElementLocation = new ElementLocationChain(rootLocator, EXISTING);
-    bootstrap(instance, rootElementLocation);
+    bootstrap(instance, null, getRootLocator(instance));
     return instance;
   }
 
-  // assign values to the fields
-  static class FieldsBuilder {
-
-    static final String NON_EXISTING_FIELD_ERROR = "non-existing field '%s' is referenced as a scope";
-
-    private final BasePageObject instance;
-    private final Map<String, ElementLocation> pageElements = new TreeMap<>();
-
-    FieldsBuilder(BasePageObject instance) {
-      this.instance = instance;
+  private static List<Field> getFields(BasePageObject instance) {
+    List<Field> fields = new ArrayList<>();
+    Class clazz = instance.getClass();
+    while (clazz != Object.class) {
+      fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+      clazz = clazz.getSuperclass();
     }
+    return fields;
+  }
 
-    // get fields including base classes
-    private List<Field> getFields() {
-      List<Field> fields = new ArrayList<>();
-      Class clazz = instance.getClass();
-      while (clazz != Object.class) {
-        fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
-        clazz = clazz.getSuperclass();
-      }
-      return fields;
-    }
-
-    ElementLocation getLocator(Field f) {
-      ElementMarker.Find annotation = f.getDeclaredAnnotation(ElementMarker.Find.class);
-      String scopeString = annotation.scope();
-      ElementLocation finder;
-      if (scopeString.isEmpty()) {
-        finder = instance.getRootLocator()
-            .scope(ElementMarker.getLocator(annotation),
-                ElementMarker.getFinderContext(annotation));
-      } else if (pageElements.containsKey(scopeString)) {
-        finder = pageElements.get(scopeString)
-            .scope(ElementMarker.getLocator(annotation),
-                ElementMarker.getFinderContext(annotation));
-      } else {
-        throw new UtamError(String.format(NON_EXISTING_FIELD_ERROR, scopeString));
-      }
-      pageElements.put(f.getName(), finder);
-      return finder;
-    }
-
-    void bootstrapElements() {
-      getFields()
-          .stream()
-          .filter(f -> ElementLocation.class.isAssignableFrom(f.getType())
-              && f.getAnnotation(ElementMarker.Find.class) != null)
-          .forEach(
-              f -> {
-                ElementLocation elementLocation = getLocator(f);
-                try {
-                  f.setAccessible(true);
-                  f.set(instance, elementLocation);
-                } catch (Exception e) {
-                  throw new UtamError(
-                      String.format(
-                          "Error while setting field '%s' in class '%s'",
-                          f.getName(), instance.getClass().getSimpleName()),
-                      e);
-                }
-              });
-    }
+  private static void bootstrapElements(BasePageObject instance) {
+    getFields(instance)
+        .stream()
+        .filter(f -> ElementLocation.class.isAssignableFrom(f.getType())
+            && f.getAnnotation(ElementMarker.Find.class) != null)
+        .forEach(
+            f -> {
+              ElementMarker.Find annotation = f.getDeclaredAnnotation(ElementMarker.Find.class);
+              ElementLocation elementLocation = getElementLocation(annotation);
+              try {
+                f.setAccessible(true);
+                f.set(instance, elementLocation);
+              } catch (Exception e) {
+                throw new UtamError(
+                    String.format(
+                        "Error while setting field '%s' in class '%s'",
+                        f.getName(), instance.getClass().getSimpleName()),
+                    e);
+              }
+            });
   }
 }

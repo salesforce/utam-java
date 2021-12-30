@@ -7,17 +7,14 @@
  */
 package utam.core.framework.base;
 
+import static utam.core.framework.base.BasicElementBuilder.getUnwrappedElement;
+
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import utam.core.element.Element;
-import utam.core.element.ElementLocation;
-import utam.core.element.FindContext;
-import utam.core.element.Locator;
-import utam.core.framework.consumer.Contained;
-import utam.core.framework.consumer.Container;
-import utam.core.framework.consumer.UtamError;
-import utam.core.framework.element.ElementLocationChain;
+import utam.core.element.BasicElement;
+import utam.core.framework.base.ElementLocation.ElementFound;
 
 /**
  * builder for a custom element (Page Object) scoped inside a page object
@@ -29,36 +26,27 @@ public class CustomElementBuilder {
 
   private static final String ERR_CANT_FIND_ELEMENT_WITH_FILTER = "can't find element [%s] that matches condition";
 
-  final PageObjectsFactory factory;
-  final ElementLocation root;
-  final boolean isNullable;
+  private final PageObjectsFactory factory;
+  private final Element scope;
+  private final ElementLocation elementLocation;
 
-  CustomElementBuilder(PageObjectsFactory factory,
-      ElementLocation scope,
-      Locator rootLocator,
-      FindContext finderContext) {
-    this(factory, scope != null ? scope.scope(rootLocator, finderContext)
-        : new ElementLocationChain(rootLocator, finderContext), finderContext.isNullable());
+  CustomElementBuilder(PageObjectsFactory factory, BasicElement scopeElement, ElementLocation elementLocation) {
+    this(factory, getUnwrappedElement(scopeElement), elementLocation);
   }
 
-  CustomElementBuilder(PageObjectsFactory factory, ElementLocation root, boolean isNullable) {
+  CustomElementBuilder(PageObjectsFactory factory, Element scopeElement, ElementLocation elementLocation) {
     this.factory = factory;
-    this.root = root;
-    this.isNullable = isNullable;
+    this.scope = scopeElement;
+    this.elementLocation = elementLocation;
   }
 
   static String getFilteredElementNotFoundErr(Class type) {
     return String.format(ERR_CANT_FIND_ELEMENT_WITH_FILTER, type.getSimpleName());
   }
 
-  // overridden for external PO as need to inject its root
-  <T extends PageObject> T getRawInstance(Class<T> type) {
+  private <T extends PageObject> T getBootstrappedInstance(Class<T> type, ElementFound foundRoot) {
     T poInstance = factory.getPageContext().getBean(type);
-    if (poInstance instanceof Container || poInstance instanceof Contained) {
-      throw new UtamError(
-          String.format(
-              "wrong builder used to scope Page Object '%s'", poInstance.getClass().getName()));
-    }
+    factory.bootstrap(poInstance, foundRoot.getFoundElement(), foundRoot.getLocatorWithParameters());
     return poInstance;
   }
 
@@ -71,21 +59,13 @@ public class CustomElementBuilder {
    * @return instance of the Page Object of given type
    */
   public <T extends PageObject> T build(Class<T> type) {
-    T poInstance = getRawInstance(type);
-    factory.bootstrap(poInstance, root);
-    BasePageObject pageObject = (BasePageObject) poInstance;
+    ElementLocation.ElementFound element = elementLocation.find(scope);
     // if nothing is found and element is nullable - return null
-    if (isNullable && pageObject.getElement().isNull()) {
+    if (element == null) {
       return null;
     }
-    pageObject.load();
-    return poInstance;
-  }
-
-  // for internal tests
-  <T extends PageObject> T test(Class<T> type) {
-    T poInstance = getRawInstance(type);
-    factory.bootstrap(poInstance, root);
+    T poInstance = getBootstrappedInstance(type, element);
+    poInstance.load();
     return poInstance;
   }
 
@@ -99,19 +79,18 @@ public class CustomElementBuilder {
    * @return instance of the Page Object of given type
    */
   public <T extends PageObject> T build(Class<T> type, Predicate<T> filter) {
-    // if element is not nullable - this throws an error
-    List<Element> found = root.findElements(factory.getDriver());
-
-    for (Element el : found) {
-      T instance = new CustomElementBuilder(factory, new ElementLocationChain(el), isNullable).build(type);
-      if (filter.test(instance)) {
-        instance.load();
-        return instance;
-      }
-    }
+    List<ElementLocation.ElementFound> elements = elementLocation.findList(scope);
     // if nothing is found and element is nullable - return null
-    if (root.isNullable()) {
+    if (elements == null) {
       return null;
+    }
+
+    for (ElementLocation.ElementFound el : elements) {
+      T poInstance = getBootstrappedInstance(type, el);
+      if (filter.test(poInstance)) {
+        poInstance.load();
+        return poInstance;
+      }
     }
     throw new NullPointerException(getFilteredElementNotFoundErr(type));
   }
@@ -123,16 +102,18 @@ public class CustomElementBuilder {
    * @param <T>  custom generic type
    * @return all found instances of the Page Object of given type
    */
-  public <T extends PageObject> List<T> buildList(Class<T> type) {
-    // if element is not nullable - this throws an error
-    List<Element> found = root.findElements(factory.getDriver());
-
+  public <T extends PageObject> List<T> buildList(Class<T> type, Object... parameters) {
+    List<ElementLocation.ElementFound> elements = elementLocation.findList(scope, parameters);
     // if nothing is found and element is nullable - return null
-    if ((found == null || found.isEmpty()) && isNullable) {
+    if (elements == null) {
       return null;
     }
-    return found.stream()
-        .map(el -> new CustomElementBuilder(factory, new ElementLocationChain(el), isNullable).build(type))
+    return elements.stream()
+        .map(el -> {
+          T poInstance = getBootstrappedInstance(type, el);
+          poInstance.load();
+          return poInstance;
+        })
         .collect(Collectors.toList());
   }
 

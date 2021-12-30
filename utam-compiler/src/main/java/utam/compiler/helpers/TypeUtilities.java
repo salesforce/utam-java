@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.BasicElement;
-import utam.core.element.ElementLocation;
+import utam.core.framework.base.ElementLocation;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.BaseRootPageObject;
 import utam.core.framework.base.PageObject;

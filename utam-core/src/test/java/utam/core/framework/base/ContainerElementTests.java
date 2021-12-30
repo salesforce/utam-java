@@ -8,21 +8,25 @@
 package utam.core.framework.base;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.element.Element;
-import utam.core.element.ElementLocation;
-import utam.core.element.FindContext.Type;
+import utam.core.element.Locator;
 import utam.core.framework.consumer.Contained;
-import utam.core.framework.element.ElementLocationChain;
+import utam.core.framework.consumer.ContainerElement;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -34,75 +38,73 @@ import utam.core.selenium.element.LocatorBy;
 public class ContainerElementTests {
 
   @Test
-  public void testCreateWithElementNotFound() {
+  public void testWithNonExistingElement() {
     MockUtilities mock = new MockUtilities();
     Element elementMock = mock.getElementAdapter();
-    ElementLocation elementLocation = new ElementLocationChain(elementMock);
+    Locator locator = LocatorBy.byCss("css");
     // nothing found, throw if not nullable
     expectThrows(NullPointerException.class,
-        () -> new ContainerElementImpl(mock.getFactory(), elementLocation, Type.EXISTING)
-            .load(TestLoad.class, LocatorBy.byCss("css")));
+        () -> new ContainerElementImpl(mock.getFactory(), elementMock, false)
+            .load(TestLoad.class, locator));
     expectThrows(NoSuchElementException.class,
-        () -> new ContainerElementImpl(mock.getFactory(), elementLocation, Type.EXISTING_IN_SHADOW)
-            .load(TestLoad.class, LocatorBy.byCss("css")));
-    // nullable but can't find root
-    expectThrows(NullPointerException.class,
-        () -> new ContainerElementImpl(mock.getFactory(), elementLocation, Type.NULLABLE)
-            .load(TestLoad.class, LocatorBy.byCss("css")));
-    expectThrows(NullPointerException.class,
-        () -> new ContainerElementImpl(mock.getFactory(), elementLocation, Type.NULLABLE_IN_SHADOW)
-            .load(TestLoad.class, LocatorBy.byCss("css")));
+        () -> new ContainerElementImpl(mock.getFactory(), elementMock, true)
+            .loadList(TestLoad.class, locator));
   }
 
   @Test
   public void testCreateWithElementFound() {
     MockUtilities mock = new MockUtilities();
     Element elementMock = mock.getElementAdapter();
-    ElementLocation elementLocation = new ElementLocationChain(elementMock);
-    ContainerElementImpl element = new ContainerElementImpl(mock.getFactory(), elementLocation,
-        Type.EXISTING);
-    element.setScope(mock(Contained.class));
+    ContainerElement element = new ContainerElementImpl(mock.getFactory(), elementMock, false);
     when(mock.getWebElementMock().findElement(By.cssSelector("css"))).thenReturn(mock.getWebElementMock());
     TestLoad testLoad = element.load(TestLoad.class, LocatorBy.byCss("css"));
-    assertThat(testLoad.getRootLocator().getLocatorChainString(),
-        is(equalTo("driver > element > By.cssSelector: css")));
-    element = new ContainerElementImpl(mock.getFactory(), elementLocation, Type.NULLABLE);
-    testLoad = element.load(TestLoad.class, LocatorBy.byCss("css"));
-    assertThat(testLoad.getRootLocator().getLocatorChainString(),
-        is(equalTo("driver > element > By.cssSelector: css")));
+    // driver > element > By.cssSelector: css
+    assertThat(testLoad.getRootLocator().getStringValue(), is(equalTo("css")));
+
+    when(mock.getWebElementMock().findElements(By.cssSelector("css"))).thenReturn(Collections.singletonList(mock.getWebElementMock()));
+    List<TestLoad> list = element.loadList(TestLoad.class, LocatorBy.byCss("css"));
+    assertThat(list.get(0).getRootLocator().getStringValue(), is(equalTo("css")));
   }
 
   @Test
   public void testCreateWithElementFoundInShadow() {
     MockUtilities mock = new MockUtilities();
     Element elementMock = mock.getElementAdapter();
-    ElementLocation elementLocation = new ElementLocationChain(elementMock);
-    ContainerElementImpl element = new ContainerElementImpl(mock.getFactory(), elementLocation,
-        Type.EXISTING_IN_SHADOW);
-    element.setScope(mock(Contained.class));
+    ContainerElement element = new ContainerElementImpl(mock.getFactory(), elementMock, true);
     mock.setShadowMock(mock.getWebElementMock(), "css");
     TestLoad testLoad = element.load(TestLoad.class, LocatorBy.byCss("css"));
-    assertThat(testLoad.getRootLocator().getLocatorChainString(),
-        is(equalTo("driver > element >> By.cssSelector: css")));
+    // driver > element >> By.cssSelector: css
+    assertThat(testLoad.getRootLocator().getStringValue(), is(equalTo("css")));
   }
 
   @Test
-  public void testCreateWithLocator() {
+  public void testSetScope() {
     MockUtilities mock = new MockUtilities();
-    ContainerElementImpl element = new ContainerElementImpl(mock.getFactory(),
-        new ElementLocationChain(LocatorBy.byCss("scope"), Type.NULLABLE), Type.NULLABLE);
-    element.setScope(mock(Contained.class));
-    when(mock.getWebDriverMock().findElement(By.cssSelector("scope"))).thenReturn(mock.getWebElementMock());
-    when(mock.getWebElementMock().findElement(By.cssSelector("css"))).thenReturn(mock.getWebElementMock());
-    TestLoad testLoad = element.load(TestLoad.class, LocatorBy.byCss("css"));
-    assertThat(testLoad.getRootLocator().getLocatorChainString(),
-        is(equalTo("driver > By.cssSelector: scope > By.cssSelector: css")));
+    Element elementMock = mock.getElementAdapter();
+    ContainerElement element = new ContainerElementImpl(mock.getFactory(), elementMock, false);
+    CompatiblePageObject compatiblePageObjectInsideContainer = new CompatiblePageObject();
+    element.setScope(compatiblePageObjectInsideContainer);
+    assertThat(compatiblePageObjectInsideContainer.getRoot(), is(sameInstance(mock.getWebElementMock())));
   }
 
   static final class TestLoad extends BasePageObject {
 
     // should be public for java reflection to work
     public TestLoad() {
+    }
+  }
+
+  static final class CompatiblePageObject implements Contained {
+
+    private Supplier<SearchContext> scopeSupplier;
+
+    WebElement getRoot() {
+      return (WebElement) scopeSupplier.get();
+    }
+
+    @Override
+    public void setScope(Supplier<SearchContext> scopeSupplier) {
+      this.scopeSupplier = scopeSupplier;
     }
   }
 }

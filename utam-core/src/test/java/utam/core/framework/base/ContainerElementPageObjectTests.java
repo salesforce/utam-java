@@ -12,15 +12,18 @@ import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
-import static utam.core.element.FindContext.Type.EXISTING;
 import static utam.core.framework.base.ContainerElementPageObject.ERR_UNSUPPORTED_METHOD;
 
+import java.util.Collections;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
-import utam.core.MockUtilities.MockDriver;
-import utam.core.element.ElementLocation;
+import utam.core.MockUtilities;
+import utam.core.element.Locator;
 import utam.core.framework.UtamCoreError;
-import utam.core.framework.element.ElementLocationChain;
+import utam.core.selenium.element.ElementAdapter;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -29,25 +32,28 @@ import utam.core.selenium.element.LocatorBy;
  */
 public class ContainerElementPageObjectTests {
 
+  private static ContainerElementPageObject getMockPageObject() {
+    MockUtilities mock = new MockUtilities();
+    ContainerElementImpl containerElement = new ContainerElementImpl(mock.getFactory(), mock.getElementAdapter(), false);
+    return new ContainerElementPageObject(containerElement);
+  }
+
   @Test
   public void testGetContainer() {
-    ContainerElementImpl containerElement = mock(ContainerElementImpl.class);
-    ContainerElementPageObject pageObject = new ContainerElementPageObject(containerElement);
+    ContainerElementPageObject pageObject = getMockPageObject();
     assertThat(pageObject.getContainerElement(), is(sameInstance(pageObject)));
   }
 
   @Test
   public void testSupportedCompatibilityMethods() {
-    ContainerElementImpl containerElement = mock(ContainerElementImpl.class);
-    ContainerElementPageObject pageObject = new ContainerElementPageObject(containerElement);
+    ContainerElementPageObject pageObject = getMockPageObject();
     assertThat(pageObject.isPresent(), is(equalTo(false)));
     pageObject.load();
   }
 
   @Test
   public void testUnsupportedMethods() {
-    ContainerElementPageObject pageObject = new ContainerElementPageObject(
-        mock(ContainerElementImpl.class));
+    ContainerElementPageObject pageObject = getMockPageObject();
 
     UtamCoreError e = expectThrows(UtamCoreError.class,
         () -> pageObject.containsElement(mock(LocatorBy.class)));
@@ -75,49 +81,78 @@ public class ContainerElementPageObjectTests {
 
   @Test
   public void testCorrectContainer() {
-    PageObjectsFactory factory = new MockDriver().getFactory();
-    TestContainersPage page = new TestContainersPage(factory);
+    MockUtilities mock = new MockUtilities();
+    TestContainersPage page = new TestContainersPage(mock);
+    WebElement expectedContent = mock(WebElement.class);
+    when(mock.getWebElementMock().findElement(By.cssSelector(TestContainersPage.CONTAINER_CSS)))
+        .thenReturn(expectedContent);
     ContainerElementPageObject testMe = page
         .getContainerContent(ContainerElementPageObject.class, false);
-    assertThat(testMe.getRootLocationChain().getLocatorChainString(),
-        is(equalTo("driver > By.cssSelector: root > By.cssSelector: :scope > *:first-child")));
+    WebElement actualContent = ((ElementAdapter) (testMe.getContainerElement()).containerScope)
+        .getWebElement();
+    // locator: "driver > By.cssSelector: root >> By.cssSelector: :scope > *:first-child"
+    assertThat(actualContent, is(equalTo(expectedContent)));
 
-    LoadMe test = testMe.test(LoadMe.class, "inject");
-    assertThat(test.getRootLocation().getLocatorChainString(), is(equalTo(
-        "driver > By.cssSelector: root > By.cssSelector: :scope > *:first-child > By.cssSelector: inject")));
+    WebElement expectedContentInjected = mock(WebElement.class);
+    when(expectedContent.findElement(By.cssSelector("inject"))).thenReturn(expectedContentInjected);
+    LoadMe test = testMe.load(LoadMe.class, LocatorBy.byCss("inject"));
+    WebElement actualContentInjected = ((ElementAdapter) test.getElement()).getWebElement();
+    // "driver > By.cssSelector: root >> By.cssSelector: :scope > *:first-child > By.cssSelector: inject"
+    assertThat(actualContentInjected, is(equalTo(expectedContentInjected)));
+    assertThat(test.getRootLocation().getStringValue(), is(equalTo("inject")));
+
+    when(expectedContent.findElements(By.cssSelector("inject")))
+        .thenReturn(Collections.singletonList(expectedContentInjected));
+    test = testMe.loadList(LoadMe.class, LocatorBy.byCss("inject")).get(0);
+    actualContentInjected = ((ElementAdapter) test.getElement()).getWebElement();
+    assertThat(actualContentInjected, is(equalTo(expectedContentInjected)));
   }
 
   @Test
   public void testCorrectContainerInsideShadow() {
-    PageObjectsFactory factory = new MockDriver().getFactory();
-    TestContainersPage page = new TestContainersPage(factory);
+    MockUtilities mock = new MockUtilities();
+    TestContainersPage page = new TestContainersPage(mock);
+    WebElement expectedContent = mock.getWebElementMock();
+    mock.setShadowMock(expectedContent, TestContainersPage.CONTAINER_CSS);
     ContainerElementPageObject testMe = page
         .getContainerContent(ContainerElementPageObject.class, true);
-    assertThat(testMe.getRootLocationChain().getLocatorChainString(),
-        is(equalTo("driver > By.cssSelector: root >> By.cssSelector: :scope > *:first-child")));
+    WebElement actualContent = ((ElementAdapter) (testMe.getContainerElement()).containerScope)
+        .getWebElement();
+    // locator: "driver > By.cssSelector: root >> By.cssSelector: :scope > *:first-child"
+    assertThat(actualContent, is(equalTo(expectedContent)));
 
-    LoadMe test = testMe.test(LoadMe.class, "inject");
-    assertThat(test.getRootLocation().getLocatorChainString(), is(equalTo(
-        "driver > By.cssSelector: root >> By.cssSelector: :scope > *:first-child >> By.cssSelector: inject")));
+    WebElement expectedContentInjected = mock.getWebElementMock();
+    mock.setShadowMock(expectedContentInjected, "inject");
+    LoadMe test = testMe.load(LoadMe.class, LocatorBy.byCss("inject"));
+    WebElement actualContentInjected = ((ElementAdapter) test.getElement()).getWebElement();
+    // "driver > By.cssSelector: root >> By.cssSelector: :scope > *:first-child >> By.cssSelector: inject"
+    assertThat(actualContentInjected, is(equalTo(expectedContentInjected)));
+
+    test = testMe.loadList(LoadMe.class, LocatorBy.byCss("inject")).get(0);
+    actualContentInjected = ((ElementAdapter) test.getElement()).getWebElement();
+    assertThat(actualContentInjected, is(equalTo(expectedContentInjected)));
   }
 
   public static class LoadMe extends BasePageObject {
 
-    ElementLocation getRootLocation() {
-      return super.root;
+    Locator getRootLocation() {
+      return getRootLocator();
     }
   }
 
   static class TestContainersPage extends BasePageObject {
 
-    TestContainersPage(PageObjectsFactory factory) {
-      factory.bootstrap(this, new ElementLocationChain(LocatorBy.byCss("root"), EXISTING));
+    static final String CONTAINER_CSS = ":scope > *:first-child";
+
+    TestContainersPage(MockUtilities mockUtilities) {
+      mockUtilities.getFactory()
+          .bootstrap(this, mockUtilities.getElementAdapter(), LocatorBy.byCss("root"));
     }
 
     final <T extends PageObject> T getContainerContent(Class<T> pageObjectType,
-        boolean isExpandRoot) {
-      return this.inContainer(this.root, isExpandRoot)
-          .load(pageObjectType, LocatorBy.byCss(":scope > *:first-child"));
+        boolean isExpandShadowRoot) {
+      return this.container(this.getRootElement(), isExpandShadowRoot)
+          .load(pageObjectType, LocatorBy.byCss(CONTAINER_CSS));
     }
   }
 }

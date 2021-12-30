@@ -8,11 +8,9 @@
 package utam.core.framework.base;
 
 import java.util.function.Supplier;
-import utam.core.element.ElementLocation;
 import utam.core.element.Locator;
 import utam.core.framework.UtamCoreError;
 import utam.core.framework.consumer.ContainerElement;
-import utam.core.selenium.element.LocatorBy;
 
 /**
  * Page Object that acts as a wrapper for a ContainerElement. Only used in compatibility mode.
@@ -34,11 +32,6 @@ public final class ContainerElementPageObject extends ContainerElementImpl imple
    */
   ContainerElementPageObject(ContainerElementImpl container) {
     super(container);
-  }
-
-  // for testing
-  ElementLocation getRootLocationChain() {
-    return containerRoot;
   }
 
   /**
@@ -99,10 +92,5 @@ public final class ContainerElementPageObject extends ContainerElementImpl imple
   @Override
   public <T> T waitFor(Supplier<T> condition) {
     throw new UtamCoreError(ERR_UNSUPPORTED_METHOD);
-  }
-
-  <T extends PageObject> T test(Class<T> type, String css) {
-    return new CustomElementBuilder(factory, getRootLocationChain(), LocatorBy.byCss(css), finderContext)
-        .test(type);
   }
 }

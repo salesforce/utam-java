@@ -18,11 +18,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import utam.core.selenium.element.LocatorBy;
 
-import static utam.compiler.grammar.TestUtilities.TEST_PAGE_OBJECT;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
-import static utam.compiler.helpers.ElementContext.EMPTY_SELECTOR;
-import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
-import static utam.compiler.types.BasicElementInterface.actionable;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.expectThrows;
@@ -36,16 +32,6 @@ public class AnnotationUtilsTests {
 
   private static final String ELEMENT_MARKER_ANNOTATION_CLASS = ElementMarker.class.getName();
   private static final String PAGE_OBJECT_ANNOTATION_CLASS = PageMarker.class.getName();
-
-  private static ElementContext getBasicElement(String value) {
-    return new ElementContext.Basic(
-        null,
-        value,
-        actionable,
-        EMPTY_SELECTOR,
-        EMPTY_PARAMETERS,
-        false);
-  }
 
   /** The getSelectorAnnotation method should return the proper value */
   @Test
@@ -72,26 +58,24 @@ public class AnnotationUtilsTests {
   @Test
   public void testGetFindAnnotationCss() {
     AnnotationProvider provider =
-        AnnotationUtils.getFindAnnotation(
-            getCssSelector(".fakeSelector"), getBasicElement("fakeElement"), true, false);
+        AnnotationUtils.getFindAnnotation(getCssSelector(".fakeSelector"), true, false);
     assertThat(
         provider.getAnnotationText(),
         is(
             equalTo(
-                "@ElementMarker.Find(css = \".fakeSelector\", scope = \"fakeElement\", expand = true)")));
+                "@ElementMarker.Find(css = \".fakeSelector\", expand = true)")));
     assertThat(getImportedTypes(provider), containsInAnyOrder(ELEMENT_MARKER_ANNOTATION_CLASS));
   }
 
   @Test
   public void testGetFindAnnotationNullable() {
     AnnotationProvider provider =
-        AnnotationUtils.getFindAnnotation(
-            getCssSelector(".fakeSelector"), getBasicElement("fakeElement"), true, true);
+        AnnotationUtils.getFindAnnotation(getCssSelector(".fakeSelector"), true, true);
     assertThat(
         provider.getAnnotationText(),
         is(
             equalTo(
-                "@ElementMarker.Find(css = \".fakeSelector\", scope = \"fakeElement\", expand = true, nullable = true)")));
+                "@ElementMarker.Find(css = \".fakeSelector\", expand = true, nullable = true)")));
     assertThat(getImportedTypes(provider), containsInAnyOrder(ELEMENT_MARKER_ANNOTATION_CLASS));
   }
 
@@ -100,12 +84,12 @@ public class AnnotationUtilsTests {
   public void testGetFindAnnotationAccessId() {
     Locator selector = LocatorBy.byAccessibilityId("fakeSelector");
     AnnotationProvider provider =
-        AnnotationUtils.getFindAnnotation(selector, getBasicElement("fakeElement"), true, false);
+        AnnotationUtils.getFindAnnotation(selector,true, false);
     assertThat(
         provider.getAnnotationText(),
         is(
             equalTo(
-                "@ElementMarker.Find(accessid = \"fakeSelector\", scope = \"fakeElement\", expand = true)")));
+                "@ElementMarker.Find(accessid = \"fakeSelector\", expand = true)")));
     assertThat(getImportedTypes(provider), containsInAnyOrder(ELEMENT_MARKER_ANNOTATION_CLASS));
   }
 
@@ -114,12 +98,12 @@ public class AnnotationUtilsTests {
   public void testGetFindAnnotationClassChain() {
     Locator selector = LocatorBy.byClassChain("fakeSelector");
     AnnotationProvider provider =
-        AnnotationUtils.getFindAnnotation(selector, getBasicElement("fakeElement"), true, false);
+        AnnotationUtils.getFindAnnotation(selector, true, false);
     assertThat(
         provider.getAnnotationText(),
         is(
             equalTo(
-                "@ElementMarker.Find(classchain = \"fakeSelector\", scope = \"fakeElement\", expand = true)")));
+                "@ElementMarker.Find(classchain = \"fakeSelector\", expand = true)")));
     assertThat(getImportedTypes(provider), containsInAnyOrder(ELEMENT_MARKER_ANNOTATION_CLASS));
   }
 
@@ -128,12 +112,12 @@ public class AnnotationUtilsTests {
   public void testGetFindAnnotationUIAutomator() {
     Locator selector = LocatorBy.byUiAutomator("new UiSelector().checked(true)");
     AnnotationProvider provider =
-        AnnotationUtils.getFindAnnotation(selector, getBasicElement("fakeElement"), true, false);
+        AnnotationUtils.getFindAnnotation(selector, true, false);
     assertThat(
         provider.getAnnotationText(),
         is(
             equalTo(
-                "@ElementMarker.Find(uiautomator = \"new UiSelector().checked(true)\", scope = \"fakeElement\", expand = true)")));
+                "@ElementMarker.Find(uiautomator = \"new UiSelector().checked(true)\", expand = true)")));
     assertThat(getImportedTypes(provider), containsInAnyOrder(ELEMENT_MARKER_ANNOTATION_CLASS));
   }
 
@@ -142,8 +126,7 @@ public class AnnotationUtilsTests {
   public void testGetFindAnnotationWithEmptyElement() {
     AnnotationProvider provider =
         AnnotationUtils.getFindAnnotation(
-            getCssSelector(".fakeSelector"),
-            new ElementContext.Root(TEST_PAGE_OBJECT, null, null), true, false);
+            getCssSelector(".fakeSelector"), true, false);
     assertThat(
         provider.getAnnotationText(),
         is(equalTo("@ElementMarker.Find(css = \".fakeSelector\", expand = true)")));
@@ -154,11 +137,10 @@ public class AnnotationUtilsTests {
   @Test
   public void testGetFindAnnotationWithQuotedString() {
     AnnotationProvider provider =
-        AnnotationUtils.getFindAnnotation(
-            getCssSelector(".fakeSelector"), getBasicElement("\"scopeElement\""), false, false);
+        AnnotationUtils.getFindAnnotation(getCssSelector(".fakeSelector"), false, false);
     assertThat(
         provider.getAnnotationText(),
-        is(equalTo("@ElementMarker.Find(css = \".fakeSelector\", scope = \"scopeElement\")")));
+        is(equalTo("@ElementMarker.Find(css = \".fakeSelector\")")));
     assertThat(getImportedTypes(provider), containsInAnyOrder(ELEMENT_MARKER_ANNOTATION_CLASS));
   }
 

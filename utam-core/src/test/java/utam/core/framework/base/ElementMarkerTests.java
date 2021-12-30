@@ -12,15 +12,11 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertThrows;
 import static utam.core.framework.base.ElementMarker.getLocator;
 
-import java.lang.reflect.Field;
 import org.openqa.selenium.By;
 import org.testng.annotations.Test;
-import utam.core.element.ElementLocation;
 import utam.core.element.FindContext.Type;
-import utam.core.framework.base.PageObjectsFactoryImpl.FieldsBuilder;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -35,6 +31,15 @@ public class ElementMarkerTests {
     when(annotation.expand()).thenReturn(true);
     when(annotation.nullable()).thenReturn(true);
     assertThat(ElementMarker.getFinderContext(annotation), is(equalTo(Type.NULLABLE_IN_SHADOW)));
+    when(annotation.expand()).thenReturn(false);
+    when(annotation.nullable()).thenReturn(true);
+    assertThat(ElementMarker.getFinderContext(annotation), is(equalTo(Type.NULLABLE)));
+    when(annotation.expand()).thenReturn(false);
+    when(annotation.nullable()).thenReturn(false);
+    assertThat(ElementMarker.getFinderContext(annotation), is(equalTo(Type.EXISTING)));
+    when(annotation.expand()).thenReturn(true);
+    when(annotation.nullable()).thenReturn(false);
+    assertThat(ElementMarker.getFinderContext(annotation), is(equalTo(Type.EXISTING_IN_SHADOW)));
   }
 
   @Test
@@ -60,30 +65,5 @@ public class ElementMarkerTests {
     when(annotation.uiautomator()).thenReturn("");
     when(annotation.css()).thenReturn("css");
     assertThat(getLocator(annotation).getValue(), is(equalTo(By.cssSelector(annotation.css()))));
-  }
-
-  @Test
-  public void testGetLocatorFromAnnotation() throws NoSuchFieldException {
-    BasePageObject pageObject = new MockPageObject();
-    FieldsBuilder builder = new FieldsBuilder(pageObject);
-    Field field = pageObject.getClass().getDeclaredField("emptySelectorElement");
-    assertThrows(() -> builder.getLocator(field)); // root is null
-    pageObject.setBootstrap(mock(ElementLocation.class), mock(PageObjectsFactory.class));
-    builder.getLocator(field);
-  }
-
-  static class MockPageObject extends BasePageObject {
-
-    @ElementMarker.Find(css = ".fakeSelector")
-    ElementLocation unscopedElement;
-
-    @ElementMarker.Find(css = ".fakeScopedSelector", scope = "fakeScope")
-    ElementLocation scopedElement;
-
-    @ElementMarker.Find(css = ".fakeMissingScopeSelector", scope = "missingScope")
-    ElementLocation illegalElement;
-
-    @ElementMarker.Find(css = "")
-    ElementLocation emptySelectorElement;
   }
 }

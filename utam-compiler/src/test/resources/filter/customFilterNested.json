@@ -1,42 +1,52 @@
 {
-  "name" : "element",
-  "selector" : {
-    "css" : "selector1 %s",
-    "args" : [
-      {
-        "name" : "arg1",
-        "type" : "string"
-      }
-    ]
-  },
-  "elements" : [
+  "elements": [
     {
-      "name" : "nested",
-      "public" : true,
-      "type" : "utam-test/pageObjects/test/test",
-      "selector" : {
-        "css" : "selector2 %s",
-        "returnAll" : true,
-        "args" : [
+      "name": "scope",
+      "selector": {
+        "css": "selector1 %s",
+        "args": [
           {
-            "name" : "arg2",
-            "type" : "string"
+            "name": "scopeArg",
+            "type": "string"
           }
         ]
       },
-      "filter" : {
-        "apply" : "customMethod",
-        "args" : [
-          {
-            "name" : "arg3",
-            "type" : "string"
+      "elements": [
+        {
+          "name": "test",
+          "public": true,
+          "type": "utam-test/pageObjects/test/test",
+          "selector": {
+            "css": "%s",
+            "returnAll": true,
+            "args": [
+              {
+                "name": "selectorArg",
+                "type": "string"
+              }
+            ]
+          },
+          "filter": {
+            "apply": "customMethod",
+            "args": [
+              {
+                "name": "applyArg",
+                "type": "string"
+              }
+            ],
+            "matcher": {
+              "type": "stringEquals",
+              "args": [
+                {
+                  "name": "matcherArg",
+                  "type": "string"
+                }
+              ]
+            },
+            "findFirst": true
           }
-        ],
-        "matcher" : {
-          "type": "isTrue"
-        },
-        "findFirst" : true
-      }
+        }
+      ]
     }
   ]
 }

@@ -11,6 +11,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyIterable;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 
 import java.util.List;
@@ -33,11 +34,6 @@ public class InterfaceMethodTests {
   private static PageObjectInterface getInterface(String fileName) {
     return new DeserializerUtilities()
         .getResultFromFile("interface/" + fileName).getPageObject().getInterface();
-  }
-
-  private static PageObjectClass getImplementation(String fileName) {
-    return new DeserializerUtilities()
-        .getResultFromFile("interface/" + fileName).getPageObject().getImplementation();
   }
 
   private static MethodDeclaration getMethod(PageObjectInterface result) {
@@ -63,10 +59,13 @@ public class InterfaceMethodTests {
 
   @Test
   public void testMethodReturnsListOfBasicElementsImplOnly() {
-    PageObjectClass result = getImplementation("returnListOfBasicElementsImpl");
+    PageObjectClass result = new DeserializerUtilities()
+        .getResultFromFile("interface/returnListOfBasicElementsImpl").getPageObject()
+        .getImplementation();
     PageObjectMethod method = result.getMethods().get(0);
-    assertThat(method.getDeclaration().getCodeLine(), is(equalTo("List<GetTestElement> getTest()")));
-    assertThat(method.getClassImports(), hasSize(1));
+    assertThat(method.getDeclaration().getCodeLine(),
+        is(equalTo("List<GetTestElement> getTest()")));
+    assertThat(method.getClassImports(), hasSize(greaterThanOrEqualTo(1)));
     assertListImport(method.getClassImports().get(0));
     assertThat(result.getUnionTypes(), hasSize(1));
     assertThat(result.getUnionTypes().get(0).getDeclarationCode().get(0),

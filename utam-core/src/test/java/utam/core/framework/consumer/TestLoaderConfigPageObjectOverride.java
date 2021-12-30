@@ -7,7 +7,7 @@
  */
 package utam.core.framework.consumer;
 
-import utam.core.element.ElementLocation;
+import utam.core.element.Locator;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageMarker;
 
@@ -19,7 +19,7 @@ public class TestLoaderConfigPageObjectOverride extends BasePageObject implement
     TestLoaderConfigPageObject {
 
   @Override
-  public ElementLocation getRoot() {
+  public Locator getRoot() {
     return getRootLocator();
   }
 

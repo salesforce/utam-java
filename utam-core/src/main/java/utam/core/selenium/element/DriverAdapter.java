@@ -89,7 +89,7 @@ public class DriverAdapter implements Driver {
       if (finderContext.isNullable()) {
         return null;
       }
-      throw new org.openqa.selenium.NoSuchElementException(getNotFoundErr(by), e);
+      throw new NoSuchElementException(getNotFoundErr(by), e);
     }
   }
 

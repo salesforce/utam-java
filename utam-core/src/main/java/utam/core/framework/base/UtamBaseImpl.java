@@ -25,14 +25,28 @@ import utam.core.framework.UtamLogger;
  */
 public abstract class UtamBaseImpl implements UtamBase {
 
-  protected UtamBaseImpl() {}
+  private Driver driver;
+  private Element element;
 
-  protected abstract Element getElement();
+  protected UtamBaseImpl() {
+  }
 
-  protected abstract PageObjectsFactory getFactory();
+  // not final to allow mocks from tests
+  protected Element getElement() {
+    return element;
+  }
 
-  protected final Driver getDriver() {
-    return getFactory().getDriver();
+  // not final to allow mocks from tests
+  protected Driver getDriver() {
+    return driver;
+  }
+
+  protected final void setElement(Element element) {
+    this.element = element;
+  }
+
+  protected final void setDriver(Driver driver) {
+    this.driver = driver;
   }
 
   protected final void log(String message) {

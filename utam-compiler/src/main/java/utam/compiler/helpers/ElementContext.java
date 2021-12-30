@@ -8,7 +8,6 @@
 package utam.compiler.helpers;
 
 import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
-import static utam.compiler.types.BasicElementInterface.actionable;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
 import static utam.compiler.representation.FrameMethod.FRAME_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.wrapAsList;
@@ -43,6 +42,7 @@ public abstract class ElementContext {
   private final boolean isNullable;
   private PageObjectMethod elementGetter;
   private final ElementType elementType;
+  private final ElementContext scopeElement;
 
   ElementContext(
       ElementType elementType,
@@ -62,6 +62,11 @@ public abstract class ElementContext {
     }
     this.parameters.addAll(parameters);
     this.isNullable = isNullable;
+    this.scopeElement = scopeContext;
+  }
+
+  public ElementContext getScopeElement() {
+    return scopeElement;
   }
 
   public final String getName() {
@@ -141,11 +146,6 @@ public abstract class ElementContext {
     // used in tests
     public Basic(TypeProvider elementType, Locator selector) {
       this(null, "test", elementType, selector, EMPTY_PARAMETERS, false);
-    }
-
-    // used in tests
-    public Basic(String name) {
-      this(name, actionable, EMPTY_SELECTOR);
     }
   }
 

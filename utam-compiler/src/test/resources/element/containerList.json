@@ -1,0 +1,35 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "scope",
+        "selector": {
+          "css": ".scope %s",
+          "args": [
+            {
+              "name": "scopeArg",
+              "type": "string"
+            }
+          ]
+        },
+        "elements": [
+          {
+            "name": "test",
+            "type": "container",
+            "public": true,
+            "selector": {
+              "css": ".css%s",
+              "args": [
+                {
+                  "name": "selectorArg",
+                  "type": "string"
+                }
+              ],
+              "returnAll": true
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

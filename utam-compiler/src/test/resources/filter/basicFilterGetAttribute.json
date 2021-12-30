@@ -1,35 +1,50 @@
 {
   "elements" : [
     {
-      "name" : "element",
+      "name" : "scope",
       "selector" : {
-        "css" : "selector %s",
-        "returnAll" : true,
+        "css" : "%s",
         "args" : [
           {
-            "name" : "arg1",
+            "name" : "scopeArg",
             "type" : "string"
           }
         ]
       },
-      "filter" : {
-        "apply" : "getAttribute",
-        "args" : [
-          {
-            "name" : "arg2",
-            "type" : "string"
-          }
-        ],
-        "matcher" : {
-          "type" : "stringContains",
-          "args" : [
-            {
-              "name" : "arg3",
-              "type" : "string"
+      "elements" : [
+        {
+          "name" : "test",
+          "public": true,
+          "selector" : {
+            "css" : "selector %s",
+            "returnAll" : true,
+            "args" : [
+              {
+                "name" : "selectorArg",
+                "type" : "string"
+              }
+            ]
+          },
+          "filter" : {
+            "apply" : "getAttribute",
+            "args" : [
+              {
+                "name" : "applyArg",
+                "type" : "string"
+              }
+            ],
+            "matcher" : {
+              "type" : "stringContains",
+              "args" : [
+                {
+                  "name" : "matcherArg",
+                  "type" : "string"
+                }
+              ]
             }
-          ]
+          }
         }
-      }
+      ]
     }
   ]
 }

@@ -10,12 +10,16 @@ package utam.core.framework.base;
 import static utam.core.framework.base.CustomElementBuilder.getFilteredElementNotFoundErr;
 import static utam.core.framework.element.BasePageElement.createInstance;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import utam.core.driver.Driver;
 import utam.core.element.BasicElement;
 import utam.core.element.Element;
-import utam.core.element.ElementLocation;
+import utam.core.element.FrameElement;
+import utam.core.framework.UtamCoreError;
 import utam.core.framework.element.BasePageElement;
 
 /**
@@ -26,35 +30,56 @@ import utam.core.framework.element.BasePageElement;
  */
 public class BasicElementBuilder {
 
-  private final PageObjectsFactory factory;
-  private final ElementLocation elementFinder;
+  private final Driver driver;
+  private final Element scope;
+  private final ElementLocation elementLocation;
 
-  BasicElementBuilder(PageObjectsFactory factory, ElementLocation elementFinder) {
-    this.factory = factory;
-    this.elementFinder = elementFinder;
+  BasicElementBuilder(PageObjectsFactory factory, BasicElement scopeElement, ElementLocation elementLocation) {
+    this(factory.getDriver(), getUnwrappedElement(scopeElement), elementLocation);
+  }
+
+  BasicElementBuilder(Driver driver, Element scopeElement, ElementLocation elementLocation) {
+    this.driver = driver;
+    this.scope = scopeElement;
+    this.elementLocation = elementLocation;
+  }
+
+  /**
+   * Unwrap element that is used as a scope from basic element or proxy
+   *
+   * @param basicElement instance of the element
+   * @return unwrapped Element
+   */
+  public static Element getUnwrappedElement(BasicElement basicElement) {
+    if (basicElement instanceof BasePageElement) {
+      return ((BasePageElement) basicElement).getElement();
+    }
+    try {
+      Method method = basicElement.getClass().getDeclaredMethod("getElement");
+      method.setAccessible(true);
+      return (Element) method.invoke(basicElement);
+    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+      throw new UtamCoreError("Can't invoke getElement on proxy class", e);
+    }
   }
 
   /**
    * set parameters in actionable
    *
    * @param type   type of the actionable
-   * @param values selector parameters values, can be empty
    * @param <T>    element type
    * @return instance with parameters set in selector
    */
-  public <T extends BasicElement, R extends BasePageElement> T build(
-      Class<T> type, Class<R> implType, Object... values) {
-    ElementLocation elementLocation = this.elementFinder.setParameters(values);
-
+  public <T extends BasicElement, R extends BasePageElement> T build(Class<T> type, Class<R> implType) {
     // if element is not nullable - this throws an error
-    Element element = elementLocation.findElement(factory.getDriver());
+    ElementLocation.ElementFound element = this.elementLocation.find(scope);
 
     // if nothing is found and element is nullable - return null
-    if (element.isNull()) {
+    if (element == null) {
       return null;
     }
 
-    return createInstance(implType, element, factory);
+    return createInstance(implType, element.getFoundElement(), driver);
   }
 
   /**
@@ -62,14 +87,12 @@ public class BasicElementBuilder {
    *
    * @param type   type of the actionable
    * @param filter to apply to found list
-   * @param values selector parameters values, can be empty
    * @param <T>    element type
    * @return instance with parameters set in selector
    */
-  public <T extends BasicElement, R extends BasePageElement> T build(
-      Class<T> type, Class<R> implType, Predicate<T> filter, Object... values) {
+  public <T extends BasicElement, R extends BasePageElement> T build(Class<T> type, Class<R> implType, Predicate<T> filter) {
     // if element is not nullable - this throws an error
-    List<T> list = buildList(type, implType, values);
+    List<T> list = buildList(type, implType);
 
     if (list == null) {
       return null;
@@ -94,10 +117,8 @@ public class BasicElementBuilder {
    */
   public <T extends BasicElement, R extends BasePageElement> List<T> buildList(
       Class<T> type, Class<R> implType, Object... parameters) {
-    ElementLocation elementFinder = this.elementFinder.setParameters(parameters);
-
     // if element is not nullable - this throws an error
-    List<Element> elementsFound = elementFinder.findElements(factory.getDriver());
+    List<ElementLocation.ElementFound> elementsFound = elementLocation.findList(scope, parameters);
 
     // if nothing is found and element is nullable - return null
     if (elementsFound == null || elementsFound.isEmpty()) {
@@ -106,7 +127,7 @@ public class BasicElementBuilder {
 
     return elementsFound
         .stream()
-        .map(el -> (T) createInstance(implType, el, factory))
+        .map(el -> (T) createInstance(implType, el.getFoundElement(), driver))
         .collect(Collectors.toList());
   }
 
@@ -130,5 +151,13 @@ public class BasicElementBuilder {
     }
 
     return list.stream().filter(filter).collect(Collectors.toList());
+  }
+
+  /**
+   * same as build(FrameElement.class, FrameElementImpl.class)
+   * @return frame element instance
+   */
+  public FrameElement buildFrame() {
+    return build(FrameElement.class, FrameElementImpl.class);
   }
 }

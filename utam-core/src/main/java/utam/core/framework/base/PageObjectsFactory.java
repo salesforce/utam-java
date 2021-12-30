@@ -8,7 +8,8 @@
 package utam.core.framework.base;
 
 import utam.core.driver.Driver;
-import utam.core.element.ElementLocation;
+import utam.core.element.Element;
+import utam.core.element.Locator;
 import utam.core.framework.consumer.PageObjectContext;
 
 /**
@@ -37,9 +38,10 @@ public interface PageObjectsFactory {
    * bootstrap Page Object using provided parameters
    *
    * @param instance instance to bootstrap
-   * @param root     scoped root locator
+   * @param element  page object root or null for root page object
+   * @param locator  root locator
    */
-  void bootstrap(PageObject instance, ElementLocation root);
+  void bootstrap(PageObject instance, Element element, Locator locator);
 
   /**
    * create instance of a Root Page Object

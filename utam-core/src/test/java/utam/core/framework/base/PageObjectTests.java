@@ -11,17 +11,15 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
+import static utam.core.element.FindContext.Type.EXISTING;
 
 import java.util.function.Supplier;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
-import utam.core.element.ElementLocation;
 import utam.core.framework.element.BasePageElement;
 import utam.core.framework.element.DocumentObject;
-import utam.core.framework.element.ElementLocationChain;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -62,20 +60,20 @@ public class PageObjectTests {
   @Test
   public void testInScopeMethod() {
     TestPageImpl testPage = new TestPageImpl();
-    assertThat(testPage.inScope(testPage.root, LocatorBy.byCss("css"), false, false),
+    assertThat(testPage.custom(testPage.getRootElement(), testPage.element),
         is(instanceOf(CustomElementBuilder.class)));
   }
 
   @Test
   public void testElementMethod() {
     TestPageImpl testPage = new TestPageImpl();
-    testPage.element(mock(ElementLocation.class));
+    testPage.basic(testPage.getRootElement(), testPage.element);
   }
 
   @Test
   public void testInContainerMethod() {
     TestPageImpl testPage = new TestPageImpl();
-    assertThat(testPage.inContainer(testPage.root, false),
+    assertThat(testPage.container(testPage.getRootElement(), false),
         is(instanceOf(ContainerElementImpl.class)));
   }
 
@@ -83,9 +81,10 @@ public class PageObjectTests {
 
     final MockUtilities mockUtilities = new MockUtilities();
 
+    final ElementLocation element = new ElementLocation(LocatorBy.byCss("css"), EXISTING);
+
     TestPageImpl() {
-      setBootstrap(new ElementLocationChain(mockUtilities.getElementAdapter()),
-          mockUtilities.getFactory());
+      initialize(mockUtilities.getFactory(), mockUtilities.getElementAdapter(), LocatorBy.byCss("root"));
     }
   }
 }

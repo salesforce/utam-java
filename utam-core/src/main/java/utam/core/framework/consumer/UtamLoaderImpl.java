@@ -16,7 +16,6 @@ import org.openqa.selenium.WebElement;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.element.Element;
-import utam.core.element.ElementLocation;
 import utam.core.element.FrameElement;
 import utam.core.element.Locator;
 import utam.core.framework.base.PageObject;
@@ -24,7 +23,6 @@ import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.PageObjectsFactoryImpl;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.element.DocumentObject;
-import utam.core.framework.element.ElementLocationChain;
 import utam.core.selenium.appium.MobileElementAdapter;
 import utam.core.selenium.element.ElementAdapter;
 import utam.core.selenium.factory.WebDriverFactory;
@@ -111,13 +109,13 @@ public class UtamLoaderImpl implements UtamLoader {
     // todo - abstract selenium
     WebElement webElement = (WebElement) externalScopeProvider.getScope().get();
     // 1. create element wrapper for scope
-    Element element =
+    Element scope =
         driver.isMobile() ? new MobileElementAdapter(webElement, driver) : new ElementAdapter(webElement, driver);
     // 2. scope root inside wrapper
-    ElementLocation pageObjectRoot = new ElementLocationChain(element).scope(utamPageObjectRoot, EXISTING);
+    Element element = scope.findElement(utamPageObjectRoot, EXISTING);
     T instance = factory.getPageContext().getBean(utamPageObjectType);
     // 3. inject root
-    factory.bootstrap(instance, pageObjectRoot);
+    factory.bootstrap(instance, element, utamPageObjectRoot);
     return instance;
   }
 
