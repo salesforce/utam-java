@@ -12,7 +12,7 @@ import utam.core.element.Locator;
 import utam.core.framework.base.PageObject;
 
 /**
- * Element that can be used as scope to load any UTAM page object with a given type
+ * Element that can be used as scope to load any UTAM page object with a given type. 
  *
  * @author elizaveta.ivanova
  * @since 228
@@ -43,13 +43,13 @@ public interface ContainerElement {
    * Inject container element as a root into external non-UTAM page object that should be scoped
    * inside the container element
    *
-   * @param externalInstanceInsideContainer external (non-UTAM page object that should be loaded
-   *                                        inside UTAM container)
+   * @param externalObjectInsideContainer external (non-UTAM page object that should be loaded
+   *                                      inside UTAM container)
    * @deprecated not supported outside Salesforce engineering teams. Compatibility mode and Selenium
    * only.
    */
   @Deprecated
-  void setScope(Contained externalInstanceInsideContainer);
+  void setScope(Contained externalObjectInsideContainer);
 
   /**
    * @deprecated use methods with locator as a parameter

@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import utam.core.element.ElementLocation;
 import utam.core.element.Locator;
 import utam.core.framework.UtamCoreError;
+import utam.core.framework.consumer.ContainerElement;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -20,7 +21,8 @@ import utam.core.selenium.element.LocatorBy;
  * @deprecated not supported outside Salesforce engineering teams
  */
 @Deprecated
-public final class ContainerElementPageObject extends ContainerElementImpl implements PageObject {
+public final class ContainerElementPageObject extends ContainerElementImpl implements PageObject,
+    ContainerElement {
 
   static final String ERR_UNSUPPORTED_METHOD =
       "method is not supported for a " + ContainerElementPageObject.class.getSimpleName();
