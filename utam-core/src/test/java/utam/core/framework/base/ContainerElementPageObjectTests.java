@@ -20,7 +20,6 @@ import org.testng.annotations.Test;
 import utam.core.MockUtilities.MockDriver;
 import utam.core.element.ElementLocation;
 import utam.core.framework.UtamCoreError;
-import utam.core.framework.consumer.ContainerElement;
 import utam.core.framework.element.ElementLocationChain;
 import utam.core.selenium.element.LocatorBy;
 
@@ -32,14 +31,14 @@ public class ContainerElementPageObjectTests {
 
   @Test
   public void testGetContainer() {
-    ContainerElement containerElement = mock(ContainerElement.class);
+    ContainerElementImpl containerElement = mock(ContainerElementImpl.class);
     ContainerElementPageObject pageObject = new ContainerElementPageObject(containerElement);
-    assertThat(pageObject.getContainerElement(), is(sameInstance(containerElement)));
+    assertThat(pageObject.getContainerElement(), is(sameInstance(pageObject)));
   }
 
   @Test
   public void testSupportedCompatibilityMethods() {
-    ContainerElement containerElement = mock(ContainerElement.class);
+    ContainerElementImpl containerElement = mock(ContainerElementImpl.class);
     ContainerElementPageObject pageObject = new ContainerElementPageObject(containerElement);
     assertThat(pageObject.isPresent(), is(equalTo(false)));
     pageObject.load();
@@ -48,7 +47,7 @@ public class ContainerElementPageObjectTests {
   @Test
   public void testUnsupportedMethods() {
     ContainerElementPageObject pageObject = new ContainerElementPageObject(
-        mock(ContainerElement.class));
+        mock(ContainerElementImpl.class));
 
     UtamCoreError e = expectThrows(UtamCoreError.class,
         () -> pageObject.containsElement(mock(LocatorBy.class)));

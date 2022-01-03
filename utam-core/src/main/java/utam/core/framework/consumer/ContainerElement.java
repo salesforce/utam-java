@@ -12,8 +12,7 @@ import utam.core.element.Locator;
 import utam.core.framework.base.PageObject;
 
 /**
- * page object element that can be used as scope, applicable only for LPOP compatibility mode,
- * supported only for Selenium
+ * Element that can be used as scope to load any UTAM page object with a given type. 
  *
  * @author elizaveta.ivanova
  * @since 228
@@ -21,41 +20,40 @@ import utam.core.framework.base.PageObject;
 public interface ContainerElement {
 
   /**
-   * inject scope into page object
+   * Load UTAM Page object using current element as scope
    *
-   * @param object page object
+   * @param utamPageObjectType type to load
+   * @param injectRootLocator  inject root into created page object instance
+   * @param <T>                UTAM page object type
+   * @return UTAM page object instance
    */
-  void setScope(Contained object);
+  <T extends PageObject> T load(Class<T> utamPageObjectType, Locator injectRootLocator);
 
   /**
-   * load UTAM Page object using current element as scope
+   * Load list of UTAM Page object using current element as a scope
    *
-   * @param utamType  type to load
-   * @param injectCss inject root
-   * @param <T> the Page Object type
-   * @return Page Object instance
+   * @param utamPageObjectType type to load
+   * @param injectRootLocator  inject root into created page object instance
+   * @param <T>                UTAM page object type
+   * @return UTAM page object instance
+   */
+  <T extends PageObject> List<T> loadList(Class<T> utamPageObjectType, Locator injectRootLocator);
+
+  /**
+   * Inject container element as a root into external non-UTAM page object that should be scoped
+   * inside the container element
+   *
+   * @param externalObjectInsideContainer external (non-UTAM page object that should be loaded
+   *                                      inside UTAM container)
+   * @deprecated not supported outside Salesforce engineering teams. Compatibility mode and Selenium
+   * only.
+   */
+  @Deprecated
+  void setScope(Contained externalObjectInsideContainer);
+
+  /**
    * @deprecated use methods with locator as a parameter
    */
   @Deprecated
   <T extends PageObject> T load(Class<T> utamType, String injectCss);
-
-  /**
-   * load UTAM Page object using current element as scope
-   *
-   * @param utamType       type to load
-   * @param injectSelector inject root, use Web.byCss or Mobile.by
-   * @param <T> the Page Object type
-   * @return UTAM Page Object instance
-   */
-  <T extends PageObject> T load(Class<T> utamType, Locator injectSelector);
-
-  /**
-   * load UTAM Page objects using current element as scope
-   *
-   * @param utamType       type to load
-   * @param injectSelector inject root, use Web.byCss or Mobile.by
-   * @param <T> the Page Object type
-   * @return UTAM Page Object instance
-   */
-  <T extends PageObject> List<T> loadList(Class<T> utamType, Locator injectSelector);
 }
