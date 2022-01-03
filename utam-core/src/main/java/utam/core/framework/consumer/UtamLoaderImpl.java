@@ -109,7 +109,7 @@ public class UtamLoaderImpl implements UtamLoader {
   @Deprecated
   public <T extends PageObject> T create(Container externalScopeProvider, Class<T> utamPageObjectType, Locator utamPageObjectRoot) {
     // todo - abstract selenium
-    WebElement webElement = (WebElement) externalScopeProvider.getScopeSupplier().get();
+    WebElement webElement = (WebElement) externalScopeProvider.getScope().get();
     // 1. create element wrapper for scope
     Element element =
         driver.isMobile() ? new MobileElementAdapter(webElement, driver) : new ElementAdapter(webElement, driver);

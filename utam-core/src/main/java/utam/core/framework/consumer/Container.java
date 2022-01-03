@@ -28,5 +28,5 @@ public interface Container {
    *
    * @return supplier of a Selenium SearchContext
    */
-  Supplier<SearchContext> getScopeSupplier();
+  Supplier<SearchContext> getScope();
 }
