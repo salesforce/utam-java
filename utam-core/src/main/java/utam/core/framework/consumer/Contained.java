@@ -11,14 +11,28 @@ import java.util.function.Supplier;
 import org.openqa.selenium.SearchContext;
 
 /**
- * external PO scoped inside UTAM, only supported for Selenium!
+ * External page object that can be located inside UTAM page object, compatibility mode only,
+ * Selenium only. Example of usage: public MyPageObjectClass implements Contained { // override
+ * setRoot, setScope }.
  *
  * @author elizaveta.ivanova
  * @since 228
+ * @deprecated not supported outside Salesforce engineering teams
  */
+@Deprecated
 public interface Contained {
 
+  /**
+   * used in CustomElementBuilder: when loading Contained as custom element, inject element locator
+   * as root
+   *
+   * @param rootSupplier supplier of the root from UTAM element
+   */
   void setRoot(Supplier<SearchContext> rootSupplier);
 
+  /**
+   *
+   * @param scopeSupplier
+   */
   void setScope(Supplier<SearchContext> scopeSupplier);
 }

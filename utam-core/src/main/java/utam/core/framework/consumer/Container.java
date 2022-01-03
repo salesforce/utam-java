@@ -11,12 +11,22 @@ import java.util.function.Supplier;
 import org.openqa.selenium.SearchContext;
 
 /**
- * can act as UTAM PO container, only supported for Selenium!
+ * External page object that can contain a UTAM page object, compatibility mode only,
+ * Selenium only. Example of usage: public MyPageObjectClass implements Container { // override
+ * "getScopeSupplier()" }.
  *
  * @author elizaveta.ivanova
  * @since 228
+ * @deprecated not supported outside Salesforce engineering teams
  */
+@Deprecated
 public interface Container {
 
-  Supplier<SearchContext> getScope();
+  /**
+   * Supplier to get scope WebElement. Invoked from UtamLoader.create(Container
+   * externalScopeProvider, Class<T> utamPageObjectType, Locator utamPageObjectRoot)
+   *
+   * @return supplier of a Selenium SearchContext
+   */
+  Supplier<SearchContext> getScopeSupplier();
 }

@@ -42,16 +42,16 @@ public interface UtamLoader {
   /**
    * creates instance of the UTAM Page Object inside external parent
    *
-   * @param parent  external parent
-   * @param type    type of the object
-   * @param locator UTAM PO root locator
-   * @param <T> type of Root Page Object to return
+   * @param externalScopeProvider external parent
+   * @param utamPageObjectType    type of the object
+   * @param utamPageObjectRoot    UTAM PO root locator
+   * @param <T>                   type of Root Page Object to return
    * @return instance of the Page Object, not loaded
+   * @deprecated compatibility mode not supported
    */
-  <T extends PageObject> T create(
-      Container parent,
-      Class<T> type,
-      Locator locator);
+  @Deprecated
+  <T extends PageObject> T create(Container externalScopeProvider, Class<T> utamPageObjectType,
+      Locator utamPageObjectRoot);
 
   /**
    * enters a frame or iframe element

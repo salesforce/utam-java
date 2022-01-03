@@ -156,7 +156,7 @@ public class UtamLoaderTests {
     final Supplier<SearchContext> root = () -> mock(WebElement.class);
 
     @Override
-    public Supplier<SearchContext> getScope() {
+    public Supplier<SearchContext> getScopeSupplier() {
       return root;
     }
   }

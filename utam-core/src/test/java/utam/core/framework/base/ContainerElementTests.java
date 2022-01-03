@@ -22,7 +22,6 @@ import utam.core.element.Element;
 import utam.core.element.ElementLocation;
 import utam.core.element.FindContext.Type;
 import utam.core.framework.consumer.Contained;
-import utam.core.framework.consumer.ContainerElement;
 import utam.core.framework.element.ElementLocationChain;
 import utam.core.selenium.element.LocatorBy;
 
@@ -60,7 +59,7 @@ public class ContainerElementTests {
     MockUtilities mock = new MockUtilities();
     Element elementMock = mock.getElementAdapter();
     ElementLocation elementLocation = new ElementLocationChain(elementMock);
-    ContainerElement element = new ContainerElementImpl(mock.getFactory(), elementLocation,
+    ContainerElementImpl element = new ContainerElementImpl(mock.getFactory(), elementLocation,
         Type.EXISTING);
     element.setScope(mock(Contained.class));
     when(mock.getWebElementMock().findElement(By.cssSelector("css"))).thenReturn(mock.getWebElementMock());
@@ -78,7 +77,7 @@ public class ContainerElementTests {
     MockUtilities mock = new MockUtilities();
     Element elementMock = mock.getElementAdapter();
     ElementLocation elementLocation = new ElementLocationChain(elementMock);
-    ContainerElement element = new ContainerElementImpl(mock.getFactory(), elementLocation,
+    ContainerElementImpl element = new ContainerElementImpl(mock.getFactory(), elementLocation,
         Type.EXISTING_IN_SHADOW);
     element.setScope(mock(Contained.class));
     mock.setShadowMock(mock.getWebElementMock(), "css");
@@ -90,7 +89,7 @@ public class ContainerElementTests {
   @Test
   public void testCreateWithLocator() {
     MockUtilities mock = new MockUtilities();
-    ContainerElement element = new ContainerElementImpl(mock.getFactory(),
+    ContainerElementImpl element = new ContainerElementImpl(mock.getFactory(),
         new ElementLocationChain(LocatorBy.byCss("scope"), Type.NULLABLE), Type.NULLABLE);
     element.setScope(mock(Contained.class));
     when(mock.getWebDriverMock().findElement(By.cssSelector("scope"))).thenReturn(mock.getWebElementMock());

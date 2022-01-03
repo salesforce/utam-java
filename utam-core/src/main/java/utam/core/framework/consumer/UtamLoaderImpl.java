@@ -106,16 +106,18 @@ public class UtamLoaderImpl implements UtamLoader {
   }
 
   @Override
-  public <T extends PageObject> T create(
-      Container parent, Class<T> type, Locator locator) {
-    T instance = factory.getPageContext().getBean(type);
+  @Deprecated
+  public <T extends PageObject> T create(Container externalScopeProvider, Class<T> utamPageObjectType, Locator utamPageObjectRoot) {
     // todo - abstract selenium
-    WebElement webElement = (WebElement) parent.getScope().get();
+    WebElement webElement = (WebElement) externalScopeProvider.getScopeSupplier().get();
+    // 1. create element wrapper for scope
     Element element =
         driver.isMobile() ? new MobileElementAdapter(webElement, driver) : new ElementAdapter(webElement, driver);
-    ElementLocation finder = new ElementLocationChain(element)
-        .scope(locator, EXISTING);
-    factory.bootstrap(instance, finder);
+    // 2. scope root inside wrapper
+    ElementLocation pageObjectRoot = new ElementLocationChain(element).scope(utamPageObjectRoot, EXISTING);
+    T instance = factory.getPageContext().getBean(utamPageObjectType);
+    // 3. inject root
+    factory.bootstrap(instance, pageObjectRoot);
     return instance;
   }
 
