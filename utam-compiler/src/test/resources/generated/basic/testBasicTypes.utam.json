@@ -1,0 +1,10 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "selector": {
+        "css": ".css"
+      }
+    }
+  ]
+}

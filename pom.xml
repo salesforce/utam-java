@@ -106,6 +106,7 @@
         <maven.javadoc.plugin.version>2.9.1</maven.javadoc.plugin.version>
         <maven.source.plugin.version>3.2.1</maven.source.plugin.version>
         <maven.surefire.plugin.version>3.0.0-M3</maven.surefire.plugin.version>
+        <maven.exec.plugin.version>1.1</maven.exec.plugin.version>
 
         <selenium.version>3.141.59</selenium.version>
         <appium.version>7.3.0</appium.version>
@@ -211,21 +212,6 @@
     <build>
         <pluginManagement>
             <plugins>
-                <!-- As a Maven project, Maven plugins are used by the build
-                     system. Usually, the default plugin versions of these
-                     are fine. Internally, however, we have standardized on
-                     specific versions of the Maven plugins. The versions
-                     standardized on for internal use are enumerated below. -->
-                <!--plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.1.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.0.0-M3</version>
-                </plugin-->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
@@ -260,6 +246,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>${maven.exec.plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>

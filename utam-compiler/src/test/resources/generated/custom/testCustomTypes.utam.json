@@ -1,0 +1,13 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "nullable": true,
+      "public": true,
+      "type": "generated-basic/pageObjects/testBasicTypes",
+      "selector": {
+        "css": "css"
+      }
+    }
+  ]
+}
