@@ -7,23 +7,17 @@
  */
 package utam.core.framework.base;
 
-import static utam.core.element.FindContext.Type.EXISTING;
-
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import org.openqa.selenium.SearchContext;
 import utam.core.element.Element;
 import utam.core.element.ElementLocation;
 import utam.core.element.FindContext;
-import utam.core.element.FindContext.Type;
 import utam.core.element.Locator;
 import utam.core.framework.consumer.Contained;
 import utam.core.framework.consumer.Container;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.element.ElementLocationChain;
-import utam.core.selenium.element.ElementAdapter;
 
 /**
  * builder for a custom element (Page Object) scoped inside a page object
@@ -162,34 +156,5 @@ public class CustomElementBuilder {
     return found.stream()
         .filter(filter)
         .collect(Collectors.toList());
-  }
-
-  /**
-   * UTAM PO as a parent of external PO <br> it needs to get
-   */
-  static class External extends CustomElementBuilder {
-
-    External(PageObjectsFactory factory, ElementLocation scopeElement, Locator selector,
-        boolean isExpandParentShadowRoot) {
-      super(factory, scopeElement, selector,
-          isExpandParentShadowRoot ? Type.EXISTING_IN_SHADOW : EXISTING);
-    }
-
-    @Override
-    <T extends PageObject> T getRawInstance(Class<T> type) {
-      T instance = factory.getPageContext().getBean(type);
-      if (!(instance instanceof Contained)) {
-        throw new UtamError(
-            String.format(
-                "wrong builder used to scope Page Object '%s' inside UTAM parent",
-                instance.getClass().getName()));
-      }
-      Supplier<SearchContext> rootSupplier = () -> {
-        ElementAdapter element = (ElementAdapter) root.findElement(factory.getDriver());
-        return element.getWebElement();
-      };
-      ((Contained) instance).setRoot(rootSupplier);
-      return instance;
-    }
   }
 }

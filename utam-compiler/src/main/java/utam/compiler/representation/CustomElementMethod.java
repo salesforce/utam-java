@@ -47,14 +47,6 @@ public abstract class CustomElementMethod implements PageObjectMethod {
         isExpandParentShadow);
   }
 
-  private static String getExternalBuilderPrefix(ElementContext scopeElement, Root root, boolean isExpandParentShadow) {
-    return String.format(
-        "inScope(%s, %s, %s)",
-        getElementLocatorString(scopeElement),
-        root.getCodeString(),
-        isExpandParentShadow);
-  }
-
   // <T extends PageObject> T build(Class<T> type);
   // or <T extends PageObject> List<T> buildList(Class<T> type)
   private static String getBuilderSuffix(TypeProvider returnType, boolean isList) {
@@ -92,14 +84,10 @@ public abstract class CustomElementMethod implements PageObjectMethod {
         String componentName,
         Root root,
         ElementContext scopeElement,
-        boolean isExternalImplementation,
         TypeProvider returnType,
         boolean isNullable,
         boolean isExpandParentShadow) {
-      String builderPrefix =
-          isExternalImplementation
-              ? getExternalBuilderPrefix(scopeElement, root, isExpandParentShadow)
-              : getBuilderPrefix(scopeElement, root, isNullable, isExpandParentShadow);
+      String builderPrefix = getBuilderPrefix(scopeElement, root, isNullable, isExpandParentShadow);
       String builderSuffix = getBuilderSuffix(returnType, false);
       String statement = String.format("return %s.%s", builderPrefix, builderSuffix);
       codeLines.add(statement);

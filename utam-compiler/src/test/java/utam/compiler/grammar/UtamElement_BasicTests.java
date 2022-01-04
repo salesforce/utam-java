@@ -115,14 +115,6 @@ public class UtamElement_BasicTests {
     getAbstraction(getPublicHtmlElement(getUtamCssSelector(), null));
   }
 
-  @Test
-  public void testValidateRedundantProperties() {
-    UtamElement externalElement = getPublicHtmlElement(getUtamCssSelector(), null);
-    externalElement.isExternal = true;
-    UtamError e = expectThrows(UtamError.class, () -> getAbstraction(externalElement));
-    assertThat(e.getMessage(), is(equalTo(getBasicSupportedProperties())));
-  }
-
   /**
    * The getAsSimpleElement method should return the proper value
    */

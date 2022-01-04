@@ -19,8 +19,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
 import utam.compiler.helpers.ElementContext;
@@ -35,7 +33,6 @@ import utam.compiler.representation.FrameMethod;
 import utam.compiler.representation.MethodParametersTracker;
 import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.compiler.types.BasicElementUnionTypeImpl;
-import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.representation.UnionType;
@@ -54,8 +51,6 @@ public final class UtamElement {
   static final String ERR_ELEMENT_MISSING_SELECTOR_PROPERTY =
       "element '%s': missing 'selector' property";
   static final String ERR_ELEMENT_NESTED_ELEMENTS = "element '%s' can't have nested elements";
-  static final String ERR_ELEMENT_EXTERNAL_NOT_ALLOWED =
-      "element '%s': external flag is not supported";
   static final String ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED =
       "element '%s': frame selector cannot return all";
 
@@ -67,7 +62,6 @@ public final class UtamElement {
   UtamElement[] elements;
   UtamElementFilter filter;
   private final Boolean isNullable;
-  Boolean isExternal;
   private final Supplier<Traversal> traversalAbstraction;
 
   @JsonCreator
@@ -76,7 +70,6 @@ public final class UtamElement {
       @JsonProperty(value = "name", required = true) String name,
       @JsonProperty(value = "public") Boolean isPublic,
       @JsonProperty(value = "nullable") Boolean isNullable,
-      @JsonProperty(value = "external") Boolean isExternal, // to support compatibility
       @JsonProperty(value = "selector") UtamSelector selector,
       @JsonProperty(value = "filter") UtamElementFilter filter,
       @JsonProperty("shadow") UtamShadowElement shadow,
@@ -88,7 +81,6 @@ public final class UtamElement {
     this.elements = elements;
     this.filter = filter;
     this.isNullable = isNullable;
-    this.isExternal = isExternal;
     Entry<Supplier<Traversal>, String[]> elementType = processTypeNode(type);
     this.type = elementType.getValue();
     this.traversalAbstraction = elementType.getKey();
@@ -152,7 +144,7 @@ public final class UtamElement {
     BASIC(String.join(", ",
         "name", "public", "selector", "type", "filter", "nullable", "shadow", "elements")),
     CUSTOM(String.join(", ",
-        "name", "public", "selector", "type", "filter", "nullable", "external")),
+        "name", "public", "selector", "type", "filter", "nullable")),
     CONTAINER(String.join(", ", "name", "public", "selector", "type")),
     FRAME(String.join(", ",
         "name", "public", "selector", "type"));
@@ -194,9 +186,6 @@ public final class UtamElement {
       }
       if (elements != null || shadow != null) {
         throw new UtamError(Type.CUSTOM.getSupportedPropertiesErr(name));
-      }
-      if (isExternal != null && selector.isReturnAll()) {
-        throw new UtamError(String.format(ERR_ELEMENT_EXTERNAL_NOT_ALLOWED, name));
       }
     }
 
@@ -253,10 +242,9 @@ public final class UtamElement {
             new CustomElementMethod.Multiple(
                 isPublic(), name, root, scopeElement, elementType, isNullable(), isExpandScopeShadowRoot);
       } else {
-        boolean isExternalElement = Boolean.TRUE.equals(isExternal);
         method =
             new CustomElementMethod.Single(
-                isPublic(), name, root, scopeElement, isExternalElement, elementType, isNullable(), isExpandScopeShadowRoot);
+                isPublic(), name, root, scopeElement, elementType, isNullable(), isExpandScopeShadowRoot);
       }
       translatorContext.setElement(component);
       translatorContext.setMethod(method);
@@ -280,9 +268,6 @@ public final class UtamElement {
       }
       if (filter != null && !selector.isReturnAll()) {
         throw new UtamError(String.format(ERR_ELEMENT_FILTER_NEEDS_LIST, name));
-      }
-      if (isExternal != null) {
-        throw new UtamError(Type.BASIC.getSupportedPropertiesErr(name));
       }
       if (selector.isReturnAll() && (elements != null || shadow != null)) {
         throw new UtamError(String.format(ERR_ELEMENT_NESTED_ELEMENTS, name));
@@ -359,7 +344,6 @@ public final class UtamElement {
     private Container() {
       if (filter != null
           || isNullable != null
-          || isExternal != null
           || elements != null
           || shadow != null) {
         throw new UtamError(Type.CONTAINER.getSupportedPropertiesErr(name));
@@ -399,7 +383,6 @@ public final class UtamElement {
     private Frame() {
       if (filter != null
           || isNullable != null
-          || isExternal != null
           || elements != null
           || shadow != null) {
         throw new UtamError(Type.FRAME.getSupportedPropertiesErr(name));
