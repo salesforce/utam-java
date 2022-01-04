@@ -70,29 +70,22 @@ public class UtamElement_ContainerTests {
   }
 
   @Test
-  public void testNotAllowedExternal() {
-    UtamElement element = containers.get(3);
-    UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(e.getMessage(), is(CONTAINER.getSupportedPropertiesErr("externalThrows")));
-  }
-
-  @Test
   public void testNotAllowedLoad() {
-    UtamElement element = containers.get(4);
+    UtamElement element = containers.get(3);
     UtamError e = expectThrows(UtamError.class, element::getAbstraction);
     assertThat(e.getMessage(), is(CONTAINER.getSupportedPropertiesErr("nullableThrows")));
   }
 
   @Test
   public void testPrivateWithoutSelector() {
-    UtamElement element = containers.get(5);
+    UtamElement element = containers.get(4);
     assertThat(element.getAbstraction(), is(instanceOf(UtamElement.Container.class)));
     assertThat(element.getLocatorString(), is(equalTo(DEFAULT_CONTAINER_SELECTOR_CSS)));
   }
 
   @Test
   public void testPublicWithSelector() {
-    UtamElement element = containers.get(6);
+    UtamElement element = containers.get(5);
     assertThat(element.getAbstraction(), is(instanceOf(UtamElement.Container.class)));
     assertThat(element.getLocatorString(), is(equalTo("injected")));
   }

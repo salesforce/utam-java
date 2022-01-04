@@ -23,14 +23,6 @@ import org.openqa.selenium.SearchContext;
 public interface Contained {
 
   /**
-   * used in CustomElementBuilder: when loading Contained as custom element, inject element locator
-   * as root
-   *
-   * @param rootSupplier supplier of the SearchContext from UTAM element root
-   */
-  void setRoot(Supplier<SearchContext> rootSupplier);
-
-  /**
    * used in ContainerElement.setScope(Contained externalObjectInsideContainer)
    * @param scopeSupplier supplier of the SearchContext from UTAM element root
    */

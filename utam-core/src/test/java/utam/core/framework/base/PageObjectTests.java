@@ -60,12 +60,10 @@ public class PageObjectTests {
   }
 
   @Test
-  public void testInScopeMethods() {
+  public void testInScopeMethod() {
     TestPageImpl testPage = new TestPageImpl();
     assertThat(testPage.inScope(testPage.root, LocatorBy.byCss("css"), false, false),
         is(instanceOf(CustomElementBuilder.class)));
-    assertThat(testPage.inScope(testPage.root, LocatorBy.byCss("css"), false),
-        is(instanceOf(CustomElementBuilder.External.class)));
   }
 
   @Test

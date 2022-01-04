@@ -116,14 +116,6 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
         FindContext.Type.build(isNullable, isExpandParentShadow));
   }
 
-  @SuppressWarnings("unused")
-  // used by generator for external page objects only (result is never nullable)
-  protected final CustomElementBuilder inScope(ElementLocation scopeElement, Locator selector,
-      boolean isExpandParentShadowRoot) {
-    return new CustomElementBuilder.External(
-        getFactory(), scopeElement, selector, isExpandParentShadowRoot);
-  }
-
   protected final BasicElementBuilder element(ElementLocation element) {
     return new BasicElementBuilder(getFactory(), element);
   }

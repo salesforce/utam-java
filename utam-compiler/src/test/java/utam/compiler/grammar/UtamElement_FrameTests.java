@@ -67,7 +67,7 @@ public class UtamElement_FrameTests {
 
   @Test
   public void testPublicFrameElementGetterWithParameters() {
-    UtamElement utamElement = frames.get(8);
+    UtamElement utamElement = frames.get(7);
     TranslationContext context = getTestTranslationContext();
     UtamElement.Traversal abstraction = utamElement.getAbstraction();
     abstraction.testRootTraverse(context);
@@ -104,30 +104,23 @@ public class UtamElement_FrameTests {
   }
 
   @Test
-  public void testFrameElementWithExternalThrows() {
-    UtamElement utamElement = frames.get(4);
-    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(Type.FRAME.getSupportedPropertiesErr("externalThrows"))));
-  }
-
-  @Test
   public void testFrameElementWithElementsThrows() {
-    UtamElement utamElement = frames.get(5);
+    UtamElement utamElement = frames.get(4);
     UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
     assertThat(e.getMessage(), is(equalTo(Type.FRAME.getSupportedPropertiesErr("elementsThrows"))));
   }
 
   @Test
-  public void testFrameElementWithFilterThrows() {
-    UtamElement utamElement = frames.get(7);
+  public void testFrameElementWithShadowThrows() {
+    UtamElement utamElement = frames.get(5);
     UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(Type.FRAME.getSupportedPropertiesErr("filterThrows"))));
+    assertThat(e.getMessage(), is(equalTo(Type.FRAME.getSupportedPropertiesErr("shadowThrows"))));
   }
 
   @Test
-  public void testFrameElementWithShadowThrows() {
+  public void testFrameElementWithFilterThrows() {
     UtamElement utamElement = frames.get(6);
     UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(Type.FRAME.getSupportedPropertiesErr("shadowThrows"))));
+    assertThat(e.getMessage(), is(equalTo(Type.FRAME.getSupportedPropertiesErr("filterThrows"))));
   }
 }

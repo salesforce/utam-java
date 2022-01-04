@@ -27,14 +27,6 @@
     "nullable": true
   },
   {
-    "name": "externalThrows",
-    "type": "frame",
-    "selector": {
-      "css": "iframe"
-    },
-    "external": true
-  },
-  {
     "name": "elementsThrows",
     "type": "frame",
     "selector": {

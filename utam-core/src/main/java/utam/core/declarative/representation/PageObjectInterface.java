@@ -7,7 +7,6 @@
  */
 package utam.core.declarative.representation;
 
-import java.util.Collection;
 import java.util.List;
 
 /**

@@ -22,11 +22,6 @@
     "elements": []
   },
   {
-    "name": "externalThrows",
-    "type": "container",
-    "external": true
-  },
-  {
     "name": "nullableThrows",
     "type": "container",
     "nullable": true

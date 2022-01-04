@@ -12,7 +12,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_EXTERNAL_NOT_ALLOWED;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_FILTER_NEEDS_LIST;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_MISSING_SELECTOR_PROPERTY;
 import static utam.compiler.grammar.UtamElement.Type;
@@ -104,23 +103,6 @@ public class UtamElement_CustomTests {
     element.shadow = new UtamShadowElement(new UtamElement[]{});
     UtamError e = expectThrows(UtamError.class, element::getAbstraction);
     assertThat(e.getMessage(), containsString(getCustomSupportedProperties()));
-  }
-
-  @Test
-  public void testGetterWithExternalComponent() {
-    MethodInfo expectedMethod = new MethodInfo(METHOD_NAME, "Component");
-    expectedMethod.addCodeLines(
-        "return inScope(this.root, LocatorBy.byCss(\"css\"), false).build(Component.class)");
-    PageObjectMethod method = getTestMethod("customExternal");
-    PageObjectValidationTestHelper.validateMethod(method, expectedMethod);
-  }
-
-  @Test
-  public void testElementWithListCantBeExternal() {
-    UtamError e = expectThrows(UtamError.class, () -> getTestMethod("customExternalListErr"));
-    assertThat(
-        e.getMessage(),
-        containsString(String.format(ERR_ELEMENT_EXTERNAL_NOT_ALLOWED, ELEMENT_NAME)));
   }
 
   @Test
