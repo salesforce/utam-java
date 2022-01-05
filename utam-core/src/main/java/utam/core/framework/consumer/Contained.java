@@ -25,6 +25,16 @@ public interface Contained {
   /**
    * used in ContainerElement.setScope(Contained externalObjectInsideContainer)
    * @param scopeSupplier supplier of the SearchContext from UTAM element root
+   * @deprecated not supported outside Salesforce engineering teams
    */
+  @Deprecated
   void setScope(Supplier<SearchContext> scopeSupplier);
+
+  /**
+   * @deprecated legacy method, to be removed
+   */
+  @Deprecated
+  default void setRoot(Supplier<SearchContext> rootSupplier) {
+    throw new UnsupportedOperationException("Unsupported functionality");
+  }
 }
