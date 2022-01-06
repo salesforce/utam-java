@@ -67,7 +67,8 @@ class ContainerElementImpl implements ContainerElement {
 
   private ContainerElementPageObject getContainerElementPageObject(Locator locator) {
     ElementLocation elementLocation = new ElementLocation(locator, findContext);
-    Element scopeElement = elementLocation.findNotNullElement(this.containerScope);
+    // findContext not nullable so can't be null
+    Element scopeElement = elementLocation.find(this.containerScope).getFoundElement();
     ContainerElementImpl containerElement = new ContainerElementImpl(factory, scopeElement, findContext.isExpandScopeShadowRoot());
     return new ContainerElementPageObject(containerElement);
   }

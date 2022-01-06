@@ -12,7 +12,6 @@ import static utam.core.selenium.element.DriverAdapter.getNotFoundErr;
 import static utam.core.selenium.element.DriverAdapter.getSeleniumDriver;
 
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementNotVisibleException;
@@ -71,9 +70,8 @@ public class ElementAdapter implements Element {
     return webElement;
   }
 
-  private Function<WebElement, Element> getElementBuilder() {
-    return element -> this instanceof MobileElementAdapter ? new MobileElementAdapter(element,
-        driverAdapter) : new ElementAdapter(element, driverAdapter);
+  static Element wrapElement(Driver driver, WebElement element) {
+    return driver.isMobile() ? new MobileElementAdapter(element, driver) : new ElementAdapter(element, driver);
   }
 
   @Override
@@ -84,7 +82,7 @@ public class ElementAdapter implements Element {
     if (res == null) { //this can happen for mock in unit tests
       throw new NoSuchElementException(getNotFoundErr(locator));
     }
-    return getElementBuilder().apply(res);
+    return wrapElement(driverAdapter, res);
   }
 
   @Override
@@ -95,7 +93,7 @@ public class ElementAdapter implements Element {
     if (found == null || found.isEmpty()) {
       throw new NoSuchElementException(getNotFoundErr(locator));
     }
-    return found.stream().map(el -> getElementBuilder().apply(el)).collect(Collectors.toList());
+    return found.stream().map(el -> wrapElement(driverAdapter, el)).collect(Collectors.toList());
   }
 
   @Override

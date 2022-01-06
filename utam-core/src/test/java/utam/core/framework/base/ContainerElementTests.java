@@ -59,8 +59,9 @@ public class ContainerElementTests {
     Element elementMock = mock.getElementAdapter();
     ContainerElement element = new ContainerElementImpl(mock.getFactory(), elementMock, false);
     when(mock.getWebElementMock().findElement(By.cssSelector("css"))).thenReturn(mock.getWebElementMock());
-    TestLoad testLoad = element.load(TestLoad.class, LocatorBy.byCss("css"));
-    // driver > element > By.cssSelector: css
+    TestLoad testLoad = element.load(TestLoad.class, "css");
+    assertThat(testLoad.getRootLocator().getStringValue(), is(equalTo("css")));
+    testLoad = element.load(TestLoad.class, LocatorBy.byCss("css"));
     assertThat(testLoad.getRootLocator().getStringValue(), is(equalTo("css")));
 
     when(mock.getWebElementMock().findElements(By.cssSelector("css"))).thenReturn(Collections.singletonList(mock.getWebElementMock()));

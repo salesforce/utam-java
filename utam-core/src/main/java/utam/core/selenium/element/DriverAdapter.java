@@ -8,10 +8,10 @@
 package utam.core.selenium.element;
 
 import static utam.core.framework.UtamLogger.error;
+import static utam.core.selenium.element.ElementAdapter.wrapElement;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,7 +29,6 @@ import utam.core.driver.DriverConfig;
 import utam.core.element.Element;
 import utam.core.framework.UtamCoreError;
 import utam.core.element.Locator;
-import utam.core.selenium.appium.MobileElementAdapter;
 
 /**
  * selenium web driver implementation of the driver
@@ -82,10 +81,6 @@ public class DriverAdapter implements Driver {
     return ((DriverAdapter) driver).getSeleniumDriver();
   }
 
-  private Function<WebElement, Element> getElementBuilder() {
-    return element -> isMobile() ? new MobileElementAdapter(element, this) : new ElementAdapter(element, this);
-  }
-
   protected final void resetDriver(WebDriver driver) {
     this.driver = driver;
   }
@@ -117,7 +112,7 @@ public class DriverAdapter implements Driver {
     if (res == null) { // can happen only for mock
       throw new NoSuchElementException(getNotFoundErr(locator));
     }
-    return getElementBuilder().apply(res);
+    return wrapElement(this, res);
   }
 
   @Override
@@ -127,7 +122,7 @@ public class DriverAdapter implements Driver {
     if (found == null || found.isEmpty()) {
       throw new NoSuchElementException(getNotFoundErr(locator));
     }
-    return found.stream().map(el -> getElementBuilder().apply(el)).collect(Collectors.toList());
+    return found.stream().map(el -> wrapElement(this, el)).collect(Collectors.toList());
   }
 
   @Override

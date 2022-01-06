@@ -54,21 +54,6 @@ public final class ElementLocation {
   }
 
   /**
-   * Get found Element or throw an error if nothing was found
-   *
-   * @param scope search context to find an element
-   * @return instance of the found element
-   */
-  Element findNotNullElement(Element scope) {
-    ElementFound found = find(scope);
-    if (found == null) {
-      throw new NullPointerException(
-          String.format("Can't find element with locator '%s'", locator.getStringValue()));
-    }
-    return found.getFoundElement();
-  }
-
-  /**
    * apply parameters to locator and find all element or return null
    *
    * @param scope search context to find an element
