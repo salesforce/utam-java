@@ -111,7 +111,7 @@ public class UtamLoaderImpl implements UtamLoader {
     Element scope =
         driver.isMobile() ? new MobileElementAdapter(webElement, driver) : new ElementAdapter(webElement, driver);
     // 2. scope root inside wrapper
-    Element element = scope.findElement(utamPageObjectRoot, false);
+    Element element = scope.findElement(utamPageObjectRoot);
     T instance = factory.getPageContext().getBean(utamPageObjectType);
     // 3. inject root
     factory.bootstrap(instance, element, utamPageObjectRoot);

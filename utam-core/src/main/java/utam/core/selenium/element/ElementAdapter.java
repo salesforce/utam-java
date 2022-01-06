@@ -63,6 +63,16 @@ public class ElementAdapter implements Element {
     this.driverAdapter = driverAdapter;
   }
 
+  // used by ShadowRootElementAdapter
+  ElementAdapter(Element element) {
+    if(!(element instanceof ElementAdapter)) {
+      throw new UnsupportedOperationException("Can't wrap element as shadow root");
+    }
+    this.webElement = new ShadowRootWebElement(((ElementAdapter) element).getWebElement());
+    this.driver = ((ElementAdapter) element).driver;
+    this.driverAdapter = ((ElementAdapter) element).driverAdapter;
+  }
+
   public WebElement getWebElement() {
     if (webElement == null) {
       throw new NullPointerException(ERR_NULL_ELEMENT);
@@ -75,10 +85,9 @@ public class ElementAdapter implements Element {
   }
 
   @Override
-  public Element findElement(Locator locator, boolean isExpandShadowRoot) {
+  public Element findElement(Locator locator) {
     By by = ((LocatorBy) locator).getValue();
-    WebElement searchContext = isExpandShadowRoot ? new ShadowRootWebElement(getWebElement()) : getWebElement();
-    WebElement res = searchContext.findElement(by);
+    WebElement res = getWebElement().findElement(by);
     if (res == null) { //this can happen for mock in unit tests
       throw new NoSuchElementException(getNotFoundErr(locator));
     }
@@ -86,10 +95,9 @@ public class ElementAdapter implements Element {
   }
 
   @Override
-  public List<Element> findElements(Locator locator, boolean isExpandShadowRoot) {
+  public List<Element> findElements(Locator locator) {
     By by = ((LocatorBy) locator).getValue();
-    WebElement searchContext = isExpandShadowRoot ? new ShadowRootWebElement(getWebElement()) : getWebElement();
-    List<WebElement> found = searchContext.findElements(by);
+    List<WebElement> found = getWebElement().findElements(by);
     if (found == null || found.isEmpty()) {
       throw new NoSuchElementException(getNotFoundErr(locator));
     }
@@ -174,10 +182,9 @@ public class ElementAdapter implements Element {
   }
 
   @Override
-  public int containsElements(Locator locator, boolean isExpandShadowRoot) {
+  public int containsElements(Locator locator) {
     By by = ((LocatorBy) locator).getValue();
-    WebElement searchContext = isExpandShadowRoot ? new ShadowRootWebElement(getWebElement()) : getWebElement();
-    return searchContext.findElements(by).size();
+    return getWebElement().findElements(by).size();
   }
 
   @Override

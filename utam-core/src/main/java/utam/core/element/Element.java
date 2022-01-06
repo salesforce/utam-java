@@ -21,29 +21,26 @@ public interface Element {
    * find and element with a given locator inside current element
    *
    * @param by                 locator
-   * @param isExpandShadowRoot boolean indicator to expand shadow root of the element
    * @return instance of the found element or "null" element (with isNull returning true) for
    * nullable context
    */
-  Element findElement(Locator by, boolean isExpandShadowRoot);
+  Element findElement(Locator by);
 
   /**
    * find all elements with a given locator inside current element
    *
    * @param by            locator
-   * @param isExpandShadowRoot boolean indicator to expand shadow root of the element
    * @return list of found elements or empty list for nullable context
    */
-  List<Element> findElements(Locator by, boolean isExpandShadowRoot);
+  List<Element> findElements(Locator by);
 
   /**
    * get number of elements with a given locator inside current element
    *
    * @param by                 locator
-   * @param isExpandShadowRoot if true, search inside element's shadowRoot
    * @return number of elements or 0 if none found
    */
-  int containsElements(Locator by, boolean isExpandShadowRoot);
+  int containsElements(Locator by);
 
   /**
    * check if element is "displayed" according to underlying implementing library

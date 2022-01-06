@@ -208,10 +208,8 @@ public class BasePageElementTests {
     Locator locator = LocatorBy.byCss("css");
     assertThat(mock.getUtamElement().containsElement(locator, false), is(false));
     assertThat(mock.getUtamElement().containsElement(locator, true), is(false));
-    when(mock.getElementAdapter().containsElements(locator, false)).thenReturn(1);
+    when(mock.getElementAdapter().containsElements(locator)).thenReturn(1);
     assertThat(mock.getUtamElement().containsElement(locator), is(true));
-    when(mock.getElementAdapter().containsElements(locator, true)).thenReturn(1);
-    assertThat(mock.getUtamElement().containsElement(locator, true), is(true));
   }
 
   @Test

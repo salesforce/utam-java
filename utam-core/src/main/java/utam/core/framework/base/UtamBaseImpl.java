@@ -12,6 +12,7 @@ import utam.core.driver.Driver;
 import utam.core.element.Element;
 import utam.core.element.Locator;
 import utam.core.framework.UtamLogger;
+import utam.core.selenium.element.ShadowRootElementAdapter;
 
 /**
  * abstraction base for an element and a page object
@@ -85,7 +86,8 @@ public abstract class UtamBaseImpl implements UtamBase {
 
   @Override
   public final boolean containsElement(Locator locator, boolean isExpandShadow) {
-    return getElement().containsElements(locator, isExpandShadow) > 0;
+    Element transformed = isExpandShadow? new ShadowRootElementAdapter(getElement()) : getElement();
+    return transformed.containsElements(locator) > 0;
   }
 
   @Override

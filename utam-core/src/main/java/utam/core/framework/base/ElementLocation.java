@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import utam.core.element.Element;
 import utam.core.element.FindContext;
 import utam.core.element.Locator;
+import utam.core.selenium.element.ShadowRootElementAdapter;
 
 /**
  * helper class, location of the element inside its scope
@@ -29,6 +30,13 @@ public final class ElementLocation {
     this.findContext = findContext;
   }
 
+  private Element transformScope(Element scope) {
+    if(scope == null || !findContext.isExpandScopeShadowRoot()) {
+      return scope;
+    }
+    return new ShadowRootElementAdapter(scope);
+  }
+
   private boolean isNullableAndNull(Element scope) {
     if (!findContext.isNullable()) {
       return false;
@@ -36,34 +44,36 @@ public final class ElementLocation {
     if (scope == null) {
       return true;
     }
-    return scope.containsElements(locator, findContext.isExpandScopeShadowRoot()) <= 0;
+    return scope.containsElements(locator) <= 0;
   }
 
   /**
    * apply parameters to locator and find element or return null
    *
-   * @param scope search context to find an element
+   * @param scopeElement search context to find an element
    * @return instance of the found element or null
    */
-  ElementFound find(Element scope) {
-    if (isNullableAndNull(scope)) {
+  ElementFound find(Element scopeElement) {
+    Element transformedScope = transformScope(scopeElement);
+    if (isNullableAndNull(transformedScope)) {
       return null;
     }
-    Element foundElement = scope.findElement(locator, findContext.isExpandScopeShadowRoot());
+    Element foundElement = transformedScope.findElement(locator);
     return new ElementFound(locator, foundElement);
   }
 
   /**
    * apply parameters to locator and find all element or return null
    *
-   * @param scope search context to find an element
+   * @param scopeElement search context to find an element
    * @return list of the found elements or null
    */
-  List<ElementFound> findList(Element scope) {
-    if (isNullableAndNull(scope)) {
+  List<ElementFound> findList(Element scopeElement) {
+    Element transformedScope = transformScope(scopeElement);
+    if (isNullableAndNull(transformedScope)) {
       return null;
     }
-    List<Element> foundList = scope.findElements(locator, findContext.isExpandScopeShadowRoot());
+    List<Element> foundList = transformedScope.findElements(locator);
     return foundList
         .stream()
         .map(e -> new ElementFound(locator, e))

@@ -57,26 +57,25 @@ public class ElementAdapterTests {
     Element test = mock.getElementAdapter();
     when(mock.getWebElementMock().findElement(By.cssSelector("css")))
         .thenReturn(foundMock);
-    ElementAdapter found = (ElementAdapter) test.findElement(byCss("css"), false);
+    ElementAdapter found = (ElementAdapter) test.findElement(byCss("css"));
     assertThat(found.getWebElement(), is(sameInstance(foundMock)));
-    assertThrows(() -> test.findElement(byCss("css1"), false));
+    assertThrows(() -> test.findElement(byCss("css1")));
     when(mock.getWebElementMock().findElements(By.cssSelector("css")))
         .thenReturn(Collections.singletonList(mock(WebElement.class)));
-    assertThat(test.findElements(byCss("css"), false),
+    assertThat(test.findElements(byCss("css")),
         is(not(empty())));
-    assertThrows(() -> test.findElements(byCss("css1"), false));
+    assertThrows(() -> test.findElements(byCss("css1")));
   }
 
   @Test
   public void testFindInShadow() {
     MockUtilities mock = new MockUtilities();
     mock.setShadowMock(mock.getWebElementMock(), "css");
-    assertThat(mock.getElementAdapter().findElement(byCss("css"), true), is(notNullValue()));
-    assertThrows(() -> mock.getElementAdapter().findElement(byCss("css1"), true));
-    assertThat(
-        mock.getElementAdapter().findElements(byCss("css"), true),
-        is(not(empty())));
-    assertThrows(() -> mock.getElementAdapter().findElements(byCss("css1"), true));
+    Element test = new ShadowRootElementAdapter(mock.getElementAdapter());
+    assertThat(test.findElement(byCss("css")), is(notNullValue()));
+    assertThrows(() -> test.findElement(byCss("css1")));
+    assertThat(test.findElements(byCss("css")), is(not(empty())));
+    assertThrows(() -> test.findElements(byCss("css1")));
   }
 
   @Test
@@ -215,8 +214,8 @@ public class ElementAdapterTests {
     MockUtilities mock = new MockUtilities();
     when(mock.getWebElementMock().findElements(By.cssSelector("css")))
         .thenReturn(Collections.singletonList(mock.getWebElementMock()));
-    assertThat(mock.getElementAdapter().containsElements(byCss("css"), false), is(equalTo(1)));
-    assertThat(mock.getElementAdapter().containsElements(byCss("css1"), false), is(equalTo(0)));
+    assertThat(mock.getElementAdapter().containsElements(byCss("css")), is(equalTo(1)));
+    assertThat(mock.getElementAdapter().containsElements(byCss("css1")), is(equalTo(0)));
   }
 
   @Test
@@ -226,7 +225,7 @@ public class ElementAdapterTests {
         .executeScript(contains(String.format(GET_SHADOW_ROOT_QUERY_SELECTOR_ALL, "css")),
             refEq(mock.getWebElementMock())))
         .thenReturn(Collections.singletonList(mock.getWebElementMock()));
-    assertThat(mock.getElementAdapter().containsElements(byCss("css"), true), is(equalTo(1)));
+    assertThat(new ShadowRootElementAdapter(mock.getElementAdapter()).containsElements(byCss("css")), is(equalTo(1)));
   }
 
   @Test
