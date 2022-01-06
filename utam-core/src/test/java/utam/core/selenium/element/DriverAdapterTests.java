@@ -24,7 +24,6 @@ import static utam.core.selenium.element.DriverAdapter.ERR_CANT_ENTER_NULL_FRAME
 
 import java.time.Duration;
 import java.util.Collections;
-import java.util.Objects;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -106,9 +105,7 @@ public class DriverAdapterTests {
   @Test
   public void testWaitFor() {
     Driver driver = new MockUtilities().getDriverAdapter();
-    assertThat(
-        driver.waitFor(() -> Objects.nonNull(this), "test", Duration.ofSeconds(10)),
-        is(true));
+    assertThat(driver.waitFor(() -> true, "test", Duration.ofSeconds(10)), is(true));
     assertThrows(() -> driver.waitFor(() -> null, null, null));
     assertThrows(() -> driver.waitFor(() -> false, null, null));
   }
