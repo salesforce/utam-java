@@ -7,14 +7,10 @@
  */
 package utam.core.framework.base;
 
-import static utam.core.element.FindContext.Type.NULLABLE;
-import static utam.core.element.FindContext.Type.NULLABLE_IN_SHADOW;
-
 import java.util.function.Supplier;
 import utam.core.driver.Driver;
 import utam.core.element.Element;
 import utam.core.element.Locator;
-import utam.core.framework.UtamCoreError;
 import utam.core.framework.UtamLogger;
 
 /**
@@ -72,35 +68,24 @@ public abstract class UtamBaseImpl implements UtamBase {
   @Override
   public final void waitForVisible() {
     log("wait for element visibility");
-    if(!isPresent()) {
-      throw new UtamCoreError("Element is not present, can't wait for its visibility");
-    }
     getDriver().waitFor(() -> getElement().isDisplayed(), "wait for element visibility", null);
   }
 
   @Override
   public final void waitForInvisible() {
     log("wait for element invisibility");
-    if(!isPresent()) {
-      throw new UtamCoreError("Element is not present, can't wait for its invisibility");
-    }
     getDriver().waitFor(() -> !getElement().isDisplayed(), "wait for element invisibility", null);
   }
 
   @Override
   public final boolean isVisible() {
     log("check element visibility");
-    if(!isPresent()) {
-      throw new UtamCoreError("Element is absent, can't check its visibility");
-    }
     return getElement().isDisplayed();
   }
 
   @Override
   public final boolean containsElement(Locator locator, boolean isExpandShadow) {
-    return
-        getElement().findElements(locator, isExpandShadow ? NULLABLE_IN_SHADOW : NULLABLE).size()
-            > 0;
+    return getElement().containsElements(locator, isExpandShadow) > 0;
   }
 
   @Override
@@ -110,6 +95,6 @@ public abstract class UtamBaseImpl implements UtamBase {
 
   @Override
   public boolean isPresent() {
-    return !getElement().isNull();
+    return getElement().isExisting();
   }
 }

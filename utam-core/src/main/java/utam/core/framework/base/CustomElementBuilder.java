@@ -7,6 +7,7 @@
  */
 package utam.core.framework.base;
 
+import static utam.core.framework.base.BasicElementBuilder.checkNullScope;
 import static utam.core.framework.base.BasicElementBuilder.getUnwrappedElement;
 
 import java.util.List;
@@ -38,6 +39,7 @@ public class CustomElementBuilder {
     this.factory = factory;
     this.scope = scopeElement;
     this.elementLocation = elementLocation;
+    checkNullScope(scope, elementLocation);
   }
 
   static String getFilteredElementNotFoundErr(Class type) {
@@ -102,8 +104,8 @@ public class CustomElementBuilder {
    * @param <T>  custom generic type
    * @return all found instances of the Page Object of given type
    */
-  public <T extends PageObject> List<T> buildList(Class<T> type, Object... parameters) {
-    List<ElementLocation.ElementFound> elements = elementLocation.findList(scope, parameters);
+  public <T extends PageObject> List<T> buildList(Class<T> type) {
+    List<ElementLocation.ElementFound> elements = elementLocation.findList(scope);
     // if nothing is found and element is nullable - return null
     if (elements == null) {
       return null;

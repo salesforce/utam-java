@@ -8,7 +8,9 @@
 package utam.core.selenium.element;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
@@ -27,9 +29,8 @@ import static utam.core.selenium.element.ElementAdapter.ERR_NULL_ELEMENT;
 import static utam.core.selenium.element.ElementAdapter.FOCUS_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_CENTER_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_TOP_VIA_JAVASCRIPT;
-import static utam.core.selenium.element.ElementAdapter.getNullElement;
 import static utam.core.selenium.element.LocatorBy.byCss;
-import static utam.core.selenium.element.ShadowRootWebElement.*;
+import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR_ALL;
 
 import java.util.Collections;
 import org.openqa.selenium.By;
@@ -38,10 +39,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
-import utam.core.element.Element;
 import utam.core.element.DragAndDropOptions;
+import utam.core.element.Element;
 import utam.core.element.Element.ScrollOptions;
-import utam.core.element.FindContext.Type;
 
 /**
  * element tests
@@ -53,49 +53,30 @@ public class ElementAdapterTests {
   @Test
   public void testFind() {
     MockUtilities mock = new MockUtilities();
+    WebElement foundMock = mock(WebElement.class);
+    Element test = mock.getElementAdapter();
     when(mock.getWebElementMock().findElement(By.cssSelector("css")))
-        .thenReturn(mock(WebElement.class));
-    assertThat(
-        mock.getElementAdapter().findElement(byCss("css"), Type.EXISTING),
-        is(notNullValue()));
-    assertThat(
-        mock.getElementAdapter().findElement(byCss("css1"), Type.NULLABLE).isNull(),
-        is(true));
+        .thenReturn(foundMock);
+    ElementAdapter found = (ElementAdapter) test.findElement(byCss("css"), false);
+    assertThat(found.getWebElement(), is(sameInstance(foundMock)));
+    assertThrows(() -> test.findElement(byCss("css1"), false));
     when(mock.getWebElementMock().findElements(By.cssSelector("css")))
         .thenReturn(Collections.singletonList(mock(WebElement.class)));
-    assertThat(
-        mock.getElementAdapter().findElements(byCss("css"), Type.EXISTING),
+    assertThat(test.findElements(byCss("css"), false),
         is(not(empty())));
-    assertThat(
-        mock.getElementAdapter().findElements(byCss("css1"), Type.NULLABLE),
-        is(empty()));
+    assertThrows(() -> test.findElements(byCss("css1"), false));
   }
 
   @Test
   public void testFindInShadow() {
     MockUtilities mock = new MockUtilities();
     mock.setShadowMock(mock.getWebElementMock(), "css");
+    assertThat(mock.getElementAdapter().findElement(byCss("css"), true), is(notNullValue()));
+    assertThrows(() -> mock.getElementAdapter().findElement(byCss("css1"), true));
     assertThat(
-        mock.getElementAdapter().findElement(byCss("css"), Type.EXISTING_IN_SHADOW).isNull(),
-        is(false));
-    assertThat(
-        mock.getElementAdapter().findElement(byCss("css1"), Type.NULLABLE_IN_SHADOW).isNull(),
-        is(true));
-    assertThat(
-        mock.getElementAdapter().findElements(byCss("css"), Type.EXISTING_IN_SHADOW),
+        mock.getElementAdapter().findElements(byCss("css"), true),
         is(not(empty())));
-    assertThat(
-        mock.getElementAdapter().findElements(byCss("css1"), Type.NULLABLE_IN_SHADOW),
-        is(empty()));
-  }
-
-  @Test
-  public void testIsNull() {
-    ElementAdapter nullElement = getNullElement(new MockUtilities().getDriverAdapter());
-    assertThat(nullElement.isNull(), is(true));
-    NullPointerException e = expectThrows(NullPointerException.class, nullElement::getWebElement);
-    assertThat(e.getMessage(), is(equalTo(ERR_NULL_ELEMENT)));
-    assertThat(new ElementAdapter(mock(WebElement.class), new MockUtilities().getDriverAdapter()).isNull(), is(false));
+    assertThrows(() -> mock.getElementAdapter().findElements(byCss("css1"), true));
   }
 
   @Test
@@ -131,8 +112,6 @@ public class ElementAdapterTests {
   @Test
   public void testIsExisting() {
     MockUtilities mock = new MockUtilities();
-    ElementAdapter nullElement = getNullElement(mock.getDriverAdapter());
-    assertThat(nullElement.isExisting(), is(false));
     when(mock.getWebElementMock().isDisplayed()).thenReturn(true);
     assertThat(mock.getElementAdapter().isExisting(), is(true));
     when(mock.getWebElementMock().isDisplayed()).thenThrow(StaleElementReferenceException.class);
@@ -268,5 +247,12 @@ public class ElementAdapterTests {
     MockUtilities mock = new MockUtilities.MockDriver();
     mock.getElementAdapter().dragAndDrop(new DragAndDropOptions.ByOffset(1,1));
     mock.getElementAdapter().dragAndDrop(new DragAndDropOptions.ByOffset(1,1,1));
+  }
+
+  @Test
+  public void testGetWebElement() {
+    NullPointerException e = expectThrows(NullPointerException.class,
+        () -> new ElementAdapter(null, new MockUtilities().getDriverAdapter()).getWebElement());
+    assertThat(e.getMessage(), containsString(ERR_NULL_ELEMENT));
   }
 }

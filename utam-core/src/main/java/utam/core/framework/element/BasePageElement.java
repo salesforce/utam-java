@@ -57,7 +57,7 @@ public class BasePageElement extends UtamBaseImpl implements Actionable, Clickab
    */
   public static <T extends BasicElement, R extends BasePageElement> T createInstance(
       Class<R> implType, Element element, Driver driver) {
-    if (element.isNull()) {
+    if(element == null) {
       return null;
     }
     try {

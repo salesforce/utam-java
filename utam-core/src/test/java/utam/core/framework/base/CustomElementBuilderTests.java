@@ -10,6 +10,7 @@ package utam.core.framework.base;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -18,14 +19,17 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
 import static utam.core.element.FindContext.Type.EXISTING;
 import static utam.core.element.FindContext.Type.NULLABLE;
+import static utam.core.framework.base.BasicElementBuilder.NULL_SCOPE_ERR;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.NotFoundException;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
+import utam.core.element.Element;
 import utam.core.element.FindContext;
 import utam.core.selenium.element.LocatorBy;
 
@@ -69,7 +73,7 @@ public class CustomElementBuilderTests {
     assertThat(instance, is(notNullValue()));
 
     // nothing found
-    Exception e = expectThrows(NullPointerException.class,
+    Exception e = expectThrows(NoSuchElementException.class,
         () -> getNullBuilder(mock).build(TestPageObject.class));
     assertThat(e.getMessage(), startsWith(NOTHING_FOUND_ERR));
 
@@ -149,6 +153,24 @@ public class CustomElementBuilderTests {
     instances = getNullableBuilder(mock)
         .buildList(TestPageObject.class, TestPageObject::isFalse);
     assertThat(instances, is(nullValue()));
+  }
+
+  @Test
+  public void testNullScopeWithNullableBuilder() {
+    MockUtilities mock = new MockUtilities();
+    Object test = new CustomElementBuilder(mock.getFactory(), (Element) null,
+        new ElementLocation(LocatorBy.byCss("found"), NULLABLE))
+        .build(TestPageObject.class);
+    assertThat(test, is(nullValue()));
+  }
+
+  @Test
+  public void testNullScopeWithNotNullableBuilderThrows() {
+    MockUtilities mock = new MockUtilities();
+    NoSuchElementException e = expectThrows(NoSuchElementException.class,
+        () -> new CustomElementBuilder(mock.getFactory(), (Element) null,
+            new ElementLocation(LocatorBy.byCss("existing"), EXISTING)));
+    assertThat(e.getMessage(), containsString(String.format(NULL_SCOPE_ERR, "existing")));
   }
 
   // has to be public to construct with reflections

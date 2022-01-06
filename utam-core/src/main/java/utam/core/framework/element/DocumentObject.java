@@ -7,7 +7,6 @@
  */
 package utam.core.framework.element;
 
-import static utam.core.element.FindContext.Type.NULLABLE;
 import static utam.core.framework.base.BasicElementBuilder.getUnwrappedElement;
 import static utam.core.framework.base.PageObjectsFactoryImpl.getRootLocator;
 
@@ -52,14 +51,14 @@ public class DocumentObject implements Document {
 
   @Override
   public boolean containsElement(Locator locator) {
-    return driver.findElements(locator, NULLABLE).size() > 0;
+    return driver.containsElements(locator) > 0;
   }
 
   @Override
   public boolean containsObject(Class<? extends RootPageObject> pageObjectType) {
     RootPageObject instance = factory.getPageContext().getBean(pageObjectType);
     Locator rootLocator = getRootLocator(instance);
-    return driver.findElements(rootLocator, NULLABLE).size() > 0;
+    return containsElement(rootLocator);
   }
 
   @Override

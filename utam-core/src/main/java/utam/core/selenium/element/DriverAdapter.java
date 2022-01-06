@@ -8,8 +8,6 @@
 package utam.core.selenium.element;
 
 import static utam.core.framework.UtamLogger.error;
-import static utam.core.selenium.element.ElementAdapter.EMPTY_LIST;
-import static utam.core.selenium.element.ElementAdapter.getNullElement;
 
 import java.time.Duration;
 import java.util.List;
@@ -17,10 +15,10 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.openqa.selenium.By;
 import org.openqa.selenium.InvalidElementStateException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
@@ -29,7 +27,6 @@ import org.openqa.selenium.support.ui.FluentWait;
 import utam.core.driver.Driver;
 import utam.core.driver.DriverConfig;
 import utam.core.element.Element;
-import utam.core.element.FindContext;
 import utam.core.framework.UtamCoreError;
 import utam.core.element.Locator;
 import utam.core.selenium.appium.MobileElementAdapter;
@@ -77,36 +74,8 @@ public class DriverAdapter implements Driver {
     ).toArray(Object[]::new);
   }
 
-  static WebElement find(SearchContext searchContext, LocatorBy by, FindContext finderContext) {
-    try {
-      WebElement res = searchContext.findElement(by.getValue());
-      // mocks return null, so need this condition
-      if (res == null && !finderContext.isNullable()) {
-        throw new NullPointerException(getNotFoundErr(by));
-      }
-      return res;
-    } catch (NoSuchElementException e) {
-      if (finderContext.isNullable()) {
-        return null;
-      }
-      throw new NoSuchElementException(getNotFoundErr(by), e);
-    }
-  }
-
   static String getNotFoundErr(Locator by) {
     return String.format("%s with locator '%s'", ERR_ELEMENT_NOT_FOUND_PREFIX, by.getValue().toString());
-  }
-
-  static List<WebElement> findList(SearchContext searchContext, LocatorBy by,
-      FindContext finderContext) {
-    List<WebElement> founds = searchContext.findElements(by.getValue());
-    if (founds == null || founds.isEmpty()) {
-      if (finderContext.isNullable()) {
-        return null;
-      }
-      throw new NoSuchElementException(getNotFoundErr(by));
-    }
-    return founds;
   }
 
   static WebDriver getSeleniumDriver(Driver driver) {
@@ -142,16 +111,29 @@ public class DriverAdapter implements Driver {
   }
 
   @Override
-  public Element findElement(Locator by, FindContext finderContext) {
-    WebElement element = find(getSeleniumDriver(), (LocatorBy) by, finderContext);
-    return element == null ? getNullElement(this) : getElementBuilder().apply(element);
+  public Element findElement(Locator locator) {
+    By by = ((LocatorBy) locator).getValue();
+    WebElement res = getSeleniumDriver().findElement(by);
+    if (res == null) { // can happen only for mock
+      throw new NoSuchElementException(getNotFoundErr(locator));
+    }
+    return getElementBuilder().apply(res);
   }
 
   @Override
-  public List<Element> findElements(Locator by, FindContext finderContext) {
-    List<WebElement> elements = findList(getSeleniumDriver(), (LocatorBy) by, finderContext);
-    return elements == null ? EMPTY_LIST
-        : elements.stream().map(el -> getElementBuilder().apply(el)).collect(Collectors.toList());
+  public List<Element> findElements(Locator locator) {
+    By by = ((LocatorBy) locator).getValue();
+    List<WebElement> found = getSeleniumDriver().findElements(by);
+    if (found == null || found.isEmpty()) {
+      throw new NoSuchElementException(getNotFoundErr(locator));
+    }
+    return found.stream().map(el -> getElementBuilder().apply(el)).collect(Collectors.toList());
+  }
+
+  @Override
+  public int containsElements(Locator locator) {
+    By by = ((LocatorBy) locator).getValue();
+    return getSeleniumDriver().findElements(by).size();
   }
 
   @Override

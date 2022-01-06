@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.openqa.selenium.NoSuchElementException;
 import utam.core.driver.Driver;
 import utam.core.element.BasicElement;
 import utam.core.element.Element;
@@ -30,18 +31,23 @@ import utam.core.framework.element.BasePageElement;
  */
 public class BasicElementBuilder {
 
+  static final String NULL_SCOPE_ERR = "Scope of locator '%s' can't be null because element is not marked as nullable";
+
   private final Driver driver;
   private final Element scope;
   private final ElementLocation elementLocation;
 
   BasicElementBuilder(PageObjectsFactory factory, BasicElement scopeElement, ElementLocation elementLocation) {
-    this(factory.getDriver(), getUnwrappedElement(scopeElement), elementLocation);
+    this.driver = factory.getDriver();
+    this.scope = getUnwrappedElement(scopeElement);
+    this.elementLocation = elementLocation;
+    checkNullScope(scope, elementLocation);
   }
 
-  BasicElementBuilder(Driver driver, Element scopeElement, ElementLocation elementLocation) {
-    this.driver = driver;
-    this.scope = scopeElement;
-    this.elementLocation = elementLocation;
+  static void checkNullScope(Element scope, ElementLocation elementLocation) {
+    if (scope == null && !elementLocation.findContext.isNullable()) {
+      throw new NoSuchElementException(String.format(NULL_SCOPE_ERR, elementLocation.locator.getStringValue()));
+    }
   }
 
   /**
@@ -51,6 +57,9 @@ public class BasicElementBuilder {
    * @return unwrapped Element
    */
   public static Element getUnwrappedElement(BasicElement basicElement) {
+    if(basicElement == null) { // sometimes scope can be passed as null if element is inside nullable
+      return null;
+    }
     if (basicElement instanceof BasePageElement) {
       return ((BasePageElement) basicElement).getElement();
     }
@@ -111,14 +120,12 @@ public class BasicElementBuilder {
    * set parameters in actionable, then find all elements and return list
    *
    * @param type       type of the actionable
-   * @param parameters selector parameters values, can be empty
    * @param <T>        element type
    * @return list of instances with index in selector
    */
-  public <T extends BasicElement, R extends BasePageElement> List<T> buildList(
-      Class<T> type, Class<R> implType, Object... parameters) {
+  public <T extends BasicElement, R extends BasePageElement> List<T> buildList(Class<T> type, Class<R> implType) {
     // if element is not nullable - this throws an error
-    List<ElementLocation.ElementFound> elementsFound = elementLocation.findList(scope, parameters);
+    List<ElementLocation.ElementFound> elementsFound = elementLocation.findList(scope);
 
     // if nothing is found and element is nullable - return null
     if (elementsFound == null || elementsFound.isEmpty()) {
@@ -136,14 +143,12 @@ public class BasicElementBuilder {
    *
    * @param type   type of the actionable
    * @param filter to apply to found list
-   * @param values selector parameters values, can be empty
    * @param <T>    element type
    * @return instance with parameters set in selector
    */
-  public <T extends BasicElement, R extends BasePageElement> List<T> buildList(
-      Class<T> type, Class<R> implType, Predicate<T> filter, Object... values) {
+  public <T extends BasicElement, R extends BasePageElement> List<T> buildList(Class<T> type, Class<R> implType, Predicate<T> filter) {
     // if element is not nullable - this throws an error
-    List<T> list = buildList(type, implType, values);
+    List<T> list = buildList(type, implType);
 
     // if nothing is found and element is nullable - return null
     if (list == null || list.isEmpty()) {

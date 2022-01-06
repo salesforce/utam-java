@@ -11,7 +11,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.function.Supplier;
 import utam.core.element.Element;
-import utam.core.element.FindContext;
 import utam.core.element.Locator;
 
 /**
@@ -35,19 +34,25 @@ public interface Driver {
    * find element inside driver
    *
    * @param by            selector used to find an element
-   * @param finderContext indicates conditions of the search, ex. element being nullable
-   * @return if finder context is nullable can return null
+   * @return element or throws
    */
-  Element findElement(Locator by, FindContext finderContext);
+  Element findElement(Locator by);
 
   /**
    * find multiple elements inside driver
    *
    * @param by            selector used to find elements
-   * @param finderContext indicates conditions of the search, ex. element being nullable
-   * @return if finder context is nullable can return null
+   * @return list of elements or throws
    */
-  List<Element> findElements(Locator by, FindContext finderContext);
+  List<Element> findElements(Locator by);
+
+  /**
+   * get number of elements with a given locator inside current element
+   *
+   * @param by                 locator
+   * @return number of elements or 0 if none found
+   */
+  int containsElements(Locator by);
 
   /**
    * polling wait repeatedly applies expectations until truthy value is return (not null or boolean

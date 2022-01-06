@@ -29,20 +29,27 @@ public final class ElementLocation {
     this.findContext = findContext;
   }
 
+  private boolean isNullableAndNull(Element scope) {
+    if (!findContext.isNullable()) {
+      return false;
+    }
+    if (scope == null) {
+      return true;
+    }
+    return scope.containsElements(locator, findContext.isExpandScopeShadowRoot()) <= 0;
+  }
+
   /**
    * apply parameters to locator and find element or return null
    *
-   * @param scope             search context to find an element
-   * @param locatorParameters vararg with locator parameters
+   * @param scope search context to find an element
    * @return instance of the found element or null
    */
-  ElementFound find(Element scope, Object... locatorParameters) {
-    Locator locator = this.locator.setParameters(locatorParameters);
-    if (findContext.isNullable()
-        && scope.containsElements(locator, findContext.isExpandScopeShadowRoot()) <= 0) {
+  ElementFound find(Element scope) {
+    if (isNullableAndNull(scope)) {
       return null;
     }
-    Element foundElement = scope.findElement(locator, findContext);
+    Element foundElement = scope.findElement(locator, findContext.isExpandScopeShadowRoot());
     return new ElementFound(locator, foundElement);
   }
 
@@ -64,17 +71,14 @@ public final class ElementLocation {
   /**
    * apply parameters to locator and find all element or return null
    *
-   * @param scope             search context to find an element
-   * @param locatorParameters vararg with locator parameters
+   * @param scope search context to find an element
    * @return list of the found elements or null
    */
-  List<ElementFound> findList(Element scope, Object... locatorParameters) {
-    Locator locator = this.locator.setParameters(locatorParameters);
-    if (findContext.isNullable()
-        && scope.containsElements(locator, findContext.isExpandScopeShadowRoot()) <= 0) {
+  List<ElementFound> findList(Element scope) {
+    if (isNullableAndNull(scope)) {
       return null;
     }
-    List<Element> foundList = scope.findElements(locator, findContext);
+    List<Element> foundList = scope.findElements(locator, findContext.isExpandScopeShadowRoot());
     return foundList
         .stream()
         .map(e -> new ElementFound(locator, e))

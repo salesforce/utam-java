@@ -7,7 +7,6 @@
  */
 package utam.core.framework.base;
 
-import static utam.core.element.FindContext.Type.EXISTING;
 import static utam.core.framework.element.BasePageElement.createInstance;
 
 import utam.core.element.Element;
@@ -35,7 +34,7 @@ public class BaseRootPageObject extends BasePageObject implements RootPageObject
   protected final BasePageElement getRootElement() {
     if(rootElement == null) {
       if( getElement() == null) {
-        Element root = getDriver().findElement(rootLocator, EXISTING);
+        Element root = getDriver().findElement(rootLocator);
         setElement(root);
       }
       rootElement = createInstance(getElement(), getDriver());

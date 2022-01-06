@@ -12,6 +12,7 @@ import static utam.core.framework.base.BasicElementBuilder.getUnwrappedElement;
 
 import java.util.Collections;
 import java.util.List;
+import org.openqa.selenium.NoSuchElementException;
 import utam.core.element.BasicElement;
 import utam.core.element.Element;
 import utam.core.element.FindContext;
@@ -29,20 +30,23 @@ import utam.core.selenium.element.LocatorBy;
  */
 class ContainerElementImpl implements ContainerElement {
 
+  static final String NULL_SCOPE_ERR = "Container scope can't be null";
+
   private final PageObjectsFactory factory;
   final Element containerScope;
   private final FindContext findContext;
 
   ContainerElementImpl(PageObjectsFactory factory, BasicElement scopeElement, boolean isExpandShadowRoot) {
-    this.factory = factory;
-    this.containerScope = getUnwrappedElement(scopeElement);
-    this.findContext = FindContext.Type.build(false, isExpandShadowRoot);
+    this(factory, getUnwrappedElement(scopeElement), isExpandShadowRoot);
   }
 
   ContainerElementImpl(PageObjectsFactory factory, Element scopeElement, boolean isExpandShadowRoot) {
     this.factory = factory;
     this.containerScope = scopeElement;
     this.findContext = FindContext.Type.build(false, isExpandShadowRoot);
+    if(containerScope == null) {
+      throw new NoSuchElementException(NULL_SCOPE_ERR);
+    }
   }
 
   ContainerElementImpl(ContainerElementImpl containerElement) {

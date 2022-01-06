@@ -10,9 +10,11 @@ package utam.core.framework.base;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
+import static utam.core.framework.base.ContainerElementImpl.NULL_SCOPE_ERR;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +45,7 @@ public class ContainerElementTests {
     Element elementMock = mock.getElementAdapter();
     Locator locator = LocatorBy.byCss("css");
     // nothing found, throw if not nullable
-    expectThrows(NullPointerException.class,
+    expectThrows(NoSuchElementException.class,
         () -> new ContainerElementImpl(mock.getFactory(), elementMock, false)
             .load(TestLoad.class, locator));
     expectThrows(NoSuchElementException.class,
@@ -85,6 +87,14 @@ public class ContainerElementTests {
     CompatiblePageObject compatiblePageObjectInsideContainer = new CompatiblePageObject();
     element.setScope(compatiblePageObjectInsideContainer);
     assertThat(compatiblePageObjectInsideContainer.getRoot(), is(sameInstance(mock.getWebElementMock())));
+  }
+
+  @Test
+  public void testNullScopeThrows() {
+    MockUtilities mock = new MockUtilities();
+    NoSuchElementException e = expectThrows(NoSuchElementException.class,
+        () -> new ContainerElementImpl(mock.getFactory(), (Element) null, false));
+    assertThat(e.getMessage(), containsString(NULL_SCOPE_ERR));
   }
 
   static final class TestLoad extends BasePageObject {

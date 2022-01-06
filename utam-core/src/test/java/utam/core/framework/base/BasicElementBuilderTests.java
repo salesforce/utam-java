@@ -8,11 +8,11 @@
 package utam.core.framework.base;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.not;
@@ -21,7 +21,9 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
 import static utam.core.element.FindContext.Type.EXISTING;
 import static utam.core.element.FindContext.Type.NULLABLE;
+import static utam.core.framework.base.BasicElementBuilder.NULL_SCOPE_ERR;
 import static utam.core.framework.base.CustomElementBuilder.getFilteredElementNotFoundErr;
+import static utam.core.framework.element.BasePageElement.createInstance;
 import static utam.core.selenium.element.DriverAdapter.ERR_ELEMENT_NOT_FOUND_PREFIX;
 
 import java.util.Collections;
@@ -31,6 +33,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
+import utam.core.driver.Driver;
 import utam.core.element.Actionable;
 import utam.core.element.BasicElement;
 import utam.core.element.FrameElement;
@@ -49,8 +52,10 @@ public class BasicElementBuilderTests {
   private static final String NULLABLE_CSS = "nullable";
   private static final String NOT_NULLABLE_CSS = "existing";
 
-  private static BasicElementBuilder getBuilder(MockUtilities mock, ElementLocation location) {
-    return new BasicElementBuilder(mock.getFactory().getDriver(), mock.getElementAdapter(), location);
+  static BasicElementBuilder getBasicBuilder(MockUtilities mock, ElementLocation location) {
+    Driver driver = mock.getFactory().getDriver();
+    BasePageElement element = createInstance(mock.getElementAdapter(), driver);
+    return new BasicElementBuilder(mock.getFactory(), element, location);
   }
 
   private static ElementLocation getNullableLocation() {
@@ -65,35 +70,15 @@ public class BasicElementBuilderTests {
   public void testBuildSingleElement() {
     MockUtilities mock = new MockUtilities();
 
-    Exception e = expectThrows(NullPointerException.class,
-        () -> getBuilder(mock, getNotNullableLocation())
+    Exception e = expectThrows(NoSuchElementException.class,
+        () -> getBasicBuilder(mock, getNotNullableLocation())
             .build(Actionable.class, BasePageElement.class));
     assertThat(e.getMessage(), startsWith(ERR_ELEMENT_NOT_FOUND_PREFIX));
 
     when(mock.getWebElementMock().findElement(By.cssSelector(NOT_NULLABLE_CSS)))
         .thenReturn(mock.getWebElementMock());
-    BasicElement test = getBuilder(mock, getNotNullableLocation())
+    BasicElement test = getBasicBuilder(mock, getNotNullableLocation())
         .build(Actionable.class, BasePageElement.class);
-    assertThat(test, is(notNullValue()));
-  }
-
-  @Test
-  public void testBuildFrame() {
-    MockUtilities mock = new MockUtilities();
-    when(mock.getWebElementMock().findElement(By.cssSelector(NOT_NULLABLE_CSS)))
-        .thenReturn(mock.getWebElementMock());
-    BasicElement test = getBuilder(mock, getNotNullableLocation()).buildFrame();
-    assertThat(test, is(instanceOf(FrameElementImpl.class)));
-  }
-
-  @Test
-  public void testBuildFrameWithParametrizedLocator() {
-    MockUtilities mock = new MockUtilities();
-    when(mock.getWebElementMock().findElement(By.cssSelector("css[string][1]")))
-        .thenReturn(mock.getWebElementMock());
-    ElementLocation location = new ElementLocation(LocatorBy.byCss("css[%s][%d]"), EXISTING);
-    FrameElement test = new BasicElementBuilder(mock.getDriverAdapter(), mock.getElementAdapter(), location.setParameters("string", 1))
-        .buildFrame();
     assertThat(test, is(notNullValue()));
   }
 
@@ -103,7 +88,7 @@ public class BasicElementBuilderTests {
     when(mock.getWebElementMock().findElement(By.cssSelector("css[string]")))
         .thenReturn(mock.getWebElementMock());
     ElementLocation location = new ElementLocation(LocatorBy.byCss("css[%s]"), EXISTING);
-    BasicElement test = new BasicElementBuilder(mock.getDriverAdapter(), mock.getElementAdapter(), location.setParameters("string"))
+    BasicElement test = getBasicBuilder(mock, location.setParameters("string"))
         .build(Actionable.class, BasePageElement.class);
     assertThat(test, is(notNullValue()));
   }
@@ -111,15 +96,14 @@ public class BasicElementBuilderTests {
   @Test
   public void testBuildSingleElementNullable() {
     MockUtilities mock = new MockUtilities();
-    BasicElement test = new BasicElementBuilder(mock.getDriverAdapter(), mock.getElementAdapter(), getNullableLocation())
-        .build(Actionable.class, BasePageElement.class);
+    BasicElement test = getBasicBuilder(mock, getNullableLocation()).build(Actionable.class, BasePageElement.class);
     assertThat(test, is(nullValue()));
 
     when(mock.getWebElementMock().findElements(By.cssSelector(NULLABLE_CSS)))
         .thenReturn(Collections.singletonList(mock.getWebElementMock()));
     when(mock.getWebElementMock().findElement(By.cssSelector(NULLABLE_CSS)))
         .thenReturn(mock.getWebElementMock());
-    test = getBuilder(mock, getNullableLocation()).build(Actionable.class, BasePageElement.class);
+    test = getBasicBuilder(mock, getNullableLocation()).build(Actionable.class, BasePageElement.class);
     assertThat(test, is(notNullValue()));
   }
 
@@ -129,7 +113,7 @@ public class BasicElementBuilderTests {
     ElementLocation location = getNotNullableLocation();
 
     // not found
-    Exception e = expectThrows(NoSuchElementException.class, () -> getBuilder(mock, location)
+    Exception e = expectThrows(NoSuchElementException.class, () -> getBasicBuilder(mock, location)
         .build(Actionable.class, BasePageElement.class, UtamBase::isPresent));
     assertThat(e.getMessage(), startsWith(ERR_ELEMENT_NOT_FOUND_PREFIX));
 
@@ -140,13 +124,13 @@ public class BasicElementBuilderTests {
     when(mock.getWebElementMock().findElement(By.cssSelector(NOT_NULLABLE_CSS)))
         .thenReturn(mockElement);
     e = expectThrows(NullPointerException.class,
-        () -> getBuilder(mock, location)
+        () -> getBasicBuilder(mock, location)
             .build(Actionable.class, BasePageElement.class, UtamBase::isVisible));
     assertThat(e.getMessage(), is(equalTo(ERR_FOR_FILTER)));
 
     // found filter match
     when(mockElement.isDisplayed()).thenReturn(true);
-    BasicElement test = getBuilder(mock, location)
+    BasicElement test = getBasicBuilder(mock, location)
         .build(Actionable.class, BasePageElement.class, UtamBase::isVisible);
     assertThat(test, is(notNullValue()));
   }
@@ -157,7 +141,7 @@ public class BasicElementBuilderTests {
     ElementLocation location = getNullableLocation();
 
     // not found
-    BasicElement test = getBuilder(mock, location)
+    BasicElement test = getBasicBuilder(mock, location)
         .build(Actionable.class, BasePageElement.class, UtamBase::isPresent);
     assertThat(test, is(nullValue()));
 
@@ -166,13 +150,13 @@ public class BasicElementBuilderTests {
     when(mockElement.findElements(By.cssSelector(NULLABLE_CSS)))
         .thenReturn(Collections.singletonList(mockElement));
     Exception e = expectThrows(NullPointerException.class,
-        () -> getBuilder(mock, location)
+        () -> getBasicBuilder(mock, location)
             .build(Actionable.class, BasePageElement.class, UtamBase::isVisible));
     assertThat(e.getMessage(), is(equalTo(ERR_FOR_FILTER)));
 
     // found filter match
     when(mockElement.isDisplayed()).thenReturn(true);
-    test = getBuilder(mock, location)
+    test = getBasicBuilder(mock, location)
         .build(Actionable.class, BasePageElement.class, UtamBase::isVisible);
     assertThat(test, is(notNullValue()));
   }
@@ -183,22 +167,22 @@ public class BasicElementBuilderTests {
     ElementLocation location = getNotNullableLocation();
 
     // not found
-    Exception e = expectThrows(NoSuchElementException.class, () -> getBuilder(mock, location)
+    Exception e = expectThrows(NoSuchElementException.class, () -> getBasicBuilder(mock, location)
         .buildList(Actionable.class, BasePageElement.class));
     assertThat(e.getMessage(), startsWith(ERR_ELEMENT_NOT_FOUND_PREFIX));
 
     // found
     when(mock.getWebElementMock().findElements(By.cssSelector(NOT_NULLABLE_CSS)))
         .thenReturn(Collections.singletonList(mock.getWebElementMock()));
-    List<Actionable> list = getBuilder(mock, location).buildList(Actionable.class, BasePageElement.class);
+    List<Actionable> list = getBasicBuilder(mock, location).buildList(Actionable.class, BasePageElement.class);
     assertThat(list, is(not(empty())));
 
     // found, with parameter
     when(mock.getWebElementMock().findElements(By.cssSelector("css[string]")))
         .thenReturn(Collections.singletonList(mock.getWebElementMock()));
-    assertThat(getBuilder(mock,
-        new ElementLocation(LocatorBy.byCss("css[%s]"), EXISTING))
-        .buildList(Actionable.class, BasePageElement.class, "string"), is(not(empty())));
+    assertThat(getBasicBuilder(mock,
+        new ElementLocation(LocatorBy.byCss("css[%s]"), EXISTING).setParameters("string"))
+        .buildList(Actionable.class, BasePageElement.class), is(not(empty())));
   }
 
   @Test
@@ -207,7 +191,7 @@ public class BasicElementBuilderTests {
     ElementLocation location = getNullableLocation();
 
     // not found
-    List<Actionable> list = getBuilder(mock, location)
+    List<Actionable> list = getBasicBuilder(mock, location)
         .buildList(Actionable.class, BasePageElement.class);
     assertThat(list, is(nullValue()));
 
@@ -215,7 +199,7 @@ public class BasicElementBuilderTests {
     WebElement mockElement = mock.getWebElementMock();
     when(mock.getWebDriverMock().findElements(By.cssSelector(NULLABLE_CSS)))
         .thenReturn(Collections.singletonList(mockElement));
-    list = getBuilder(mock, location).buildList(Actionable.class, BasePageElement.class);
+    list = getBasicBuilder(mock, location).buildList(Actionable.class, BasePageElement.class);
     assertThat(list, is(not(emptyIterable())));
   }
 
@@ -225,7 +209,7 @@ public class BasicElementBuilderTests {
     ElementLocation location = getNotNullableLocation();
 
     // not found
-    Exception e = expectThrows(NoSuchElementException.class, () -> getBuilder(mock, location)
+    Exception e = expectThrows(NoSuchElementException.class, () -> getBasicBuilder(mock, location)
         .buildList(Actionable.class, BasePageElement.class, UtamBase::isVisible));
     assertThat(e.getMessage(), startsWith(ERR_ELEMENT_NOT_FOUND_PREFIX));
 
@@ -233,13 +217,13 @@ public class BasicElementBuilderTests {
     WebElement mockElement = mock.getWebElementMock();
     when(mock.getWebElementMock().findElements(By.cssSelector(NOT_NULLABLE_CSS)))
         .thenReturn(Collections.singletonList(mockElement));
-    List<Actionable> list = getBuilder(mock, location)
+    List<Actionable> list = getBasicBuilder(mock, location)
         .buildList(Actionable.class, BasePageElement.class, UtamBase::isVisible);
     assertThat(list, is(emptyIterable()));
 
     // found, filter matches
     when(mockElement.isDisplayed()).thenReturn(true);
-    list = getBuilder(mock, location)
+    list = getBasicBuilder(mock, location)
         .buildList(Actionable.class, BasePageElement.class, UtamBase::isVisible);
     assertThat(list, is(not(emptyIterable())));
   }
@@ -250,7 +234,7 @@ public class BasicElementBuilderTests {
     ElementLocation location = getNullableLocation();
 
     // not found
-    List<Actionable> list = getBuilder(mock, location)
+    List<Actionable> list = getBasicBuilder(mock, location)
         .buildList(Actionable.class, BasePageElement.class, UtamBase::isVisible);
     assertThat(list, is(nullValue()));
 
@@ -258,13 +242,13 @@ public class BasicElementBuilderTests {
     WebElement mockElement = mock.getWebElementMock();
     when(mockElement.findElements(By.cssSelector(NULLABLE_CSS)))
         .thenReturn(Collections.singletonList(mockElement));
-    list = getBuilder(mock, location)
+    list = getBasicBuilder(mock, location)
         .buildList(Actionable.class, BasePageElement.class, UtamBase::isVisible);
     assertThat(list, is(emptyIterable()));
 
     // found, filter matches
     when(mockElement.isDisplayed()).thenReturn(true);
-    list = getBuilder(mock, location)
+    list = getBasicBuilder(mock, location)
         .buildList(Actionable.class, BasePageElement.class, UtamBase::isVisible);
     assertThat(list, is(not(emptyIterable())));
   }
@@ -274,7 +258,23 @@ public class BasicElementBuilderTests {
     MockUtilities mock = new MockUtilities();
     when(mock.getWebElementMock().findElement(By.cssSelector(NOT_NULLABLE_CSS)))
         .thenReturn(mock.getWebElementMock());
-    FrameElement test = getBuilder(mock, getNotNullableLocation()).build(FrameElement.class, FrameElementImpl.class);
+    FrameElement test = getBasicBuilder(mock, getNotNullableLocation()).build(FrameElement.class, FrameElementImpl.class);
     assertThat(test, is(notNullValue()));
+  }
+
+  @Test
+  public void testNullScopeWithNullableBuilder() {
+    MockUtilities mock = new MockUtilities();
+    Object test = new BasicElementBuilder(mock.getFactory(), null, getNullableLocation())
+        .build(Actionable.class, BasePageElement.class);
+    assertThat(test, is(nullValue()));
+  }
+
+  @Test
+  public void testNullScopeWithNotNullableBuilderThrows() {
+    MockUtilities mock = new MockUtilities();
+    NoSuchElementException e = expectThrows(NoSuchElementException.class,
+        () -> new BasicElementBuilder(mock.getFactory(), null, getNotNullableLocation()));
+    assertThat(e.getMessage(), containsString(String.format(NULL_SCOPE_ERR, "existing")));
   }
 }

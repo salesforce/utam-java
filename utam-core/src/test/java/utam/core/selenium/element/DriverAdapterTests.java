@@ -33,7 +33,6 @@ import utam.core.MockUtilities;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.element.Element;
-import utam.core.element.FindContext.Type;
 import utam.core.framework.consumer.UtamError;
 
 
@@ -87,23 +86,21 @@ public class DriverAdapterTests {
   @Test
   public void testFindElement() {
     MockUtilities mock = new MockUtilities();
-    assertThat(mock.getDriverAdapter().findElement(LocatorBy.byCss("not-existing"), Type.NULLABLE)
-        .isNull(), is(true));
+    assertThrows(() -> mock.getDriverAdapter().findElement(LocatorBy.byCss("not-existing")));
     when(mock.getWebDriverMock().findElement(By.cssSelector("test")))
         .thenReturn(mock(WebElement.class));
-    assertThat(mock.getDriverAdapter().findElement(LocatorBy.byCss("test"), Type.EXISTING).isNull(),
-        is(false));
+    assertThat(mock.getDriverAdapter().findElement(LocatorBy.byCss("test")),
+        is(notNullValue()));
   }
 
   @Test
   public void testFindElements() {
     MockUtilities mock = new MockUtilities();
     Driver driver = mock.getDriverAdapter();
-    assertThat(driver.findElements(LocatorBy.byCss("not-existing"), Type.NULLABLE),
-        is(empty()));
+    assertThrows(() -> driver.findElements(LocatorBy.byCss("not-existing")));
     when(mock.getWebDriverMock().findElements(By.cssSelector("test")))
         .thenReturn(Collections.singletonList(mock(WebElement.class)));
-    assertThat(driver.findElements(LocatorBy.byCss("test"), Type.EXISTING), is(not(empty())));
+    assertThat(driver.findElements(LocatorBy.byCss("test")), is(not(empty())));
   }
 
   @Test

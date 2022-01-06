@@ -31,7 +31,7 @@ public class UtamBaseTests {
   @Test
   public void testIsPresent() {
     UtamBase utamBase = new UtamBaseImplTest();
-    assertThat(utamBase.isPresent(), is(equalTo(true)));
+    assertThat(utamBase.isPresent(), is(equalTo(false)));
   }
 
   @Test

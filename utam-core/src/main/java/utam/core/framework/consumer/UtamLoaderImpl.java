@@ -8,7 +8,6 @@
 package utam.core.framework.consumer;
 
 import static utam.core.driver.DriverConfig.DEFAULT_EXPLICIT_TIMEOUT_MOCK;
-import static utam.core.element.FindContext.Type.EXISTING;
 import static utam.core.selenium.factory.WebDriverFactory.getAdapter;
 
 import org.openqa.selenium.WebDriver;
@@ -112,7 +111,7 @@ public class UtamLoaderImpl implements UtamLoader {
     Element scope =
         driver.isMobile() ? new MobileElementAdapter(webElement, driver) : new ElementAdapter(webElement, driver);
     // 2. scope root inside wrapper
-    Element element = scope.findElement(utamPageObjectRoot, EXISTING);
+    Element element = scope.findElement(utamPageObjectRoot, false);
     T instance = factory.getPageContext().getBean(utamPageObjectType);
     // 3. inject root
     factory.bootstrap(instance, element, utamPageObjectRoot);
