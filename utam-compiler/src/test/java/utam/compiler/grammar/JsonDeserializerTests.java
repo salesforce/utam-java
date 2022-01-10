@@ -560,4 +560,11 @@ public class JsonDeserializerTests {
   public void testErrorThrownByConstructor() {
     assertThrows(UtamError.class, () -> new JsonDeserializer("error", "error", getDefaultConfig()));
   }
+
+  @Test
+  public void testDuplicateKeyThrows() {
+    String json = "{ \"elements\" : [], \"elements\" : [] }";
+    UtamError e = expectThrows(UtamError.class, () -> createRootNode(json));
+    assertThat(e.getCause().getMessage(), containsString("Duplicate field 'elements'"));
+  }
 }
