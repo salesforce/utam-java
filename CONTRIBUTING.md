@@ -15,7 +15,7 @@ This guide has instructions to install, build, test, and contribute to the proje
 
 ## Code of Conduct
 
-The UTAM Java project has a [Code of Conduct](https://github.com/salesforce/utam-js/blob/master/CODE_OF_CONDUCT.md) to
+The UTAM Java project has a [Code of Conduct](https://github.com/salesforce/utam-java/blob/master/CODE_OF_CONDUCT.md) to
 which all contributors must adhere.
 
 ## Requirements
