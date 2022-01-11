@@ -15,13 +15,13 @@ This guide has instructions to install, build, test, and contribute to the proje
 
 ## Code of Conduct
 
-The UTAM Java project has a [Code of Conduct](https://github.com/salesforce/utam-java/blob/master/CODE_OF_CONDUCT.md) to
+The UTAM Java project has a [Code of Conduct](./CODE_OF_CONDUCT.md) to
 which all contributors must adhere.
 
 ## Requirements
 
 -   [Java JDK](https://www.oracle.com/java/technologies/downloads/#java11) >= 11
--   [Maven](https://yarnpkg.com/) >= 3.8.4
+-   [Maven](https://maven.apache.org/) >= 3.8.4
 
 ## Installation
 
