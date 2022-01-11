@@ -8,6 +8,7 @@
 package utam.core.framework.element;
 
 import org.openqa.selenium.Keys;
+import utam.core.driver.Driver;
 import utam.core.element.Actionable;
 import utam.core.element.BasicElement;
 import utam.core.element.Clickable;
@@ -18,7 +19,6 @@ import utam.core.element.Element;
 import utam.core.element.Element.ScrollOptions;
 import utam.core.element.Touchable;
 import utam.core.framework.UtamLogger;
-import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.UtamBaseImpl;
 import utam.core.framework.consumer.UtamError;
 
@@ -32,46 +32,44 @@ import utam.core.framework.consumer.UtamError;
 public class BasePageElement extends UtamBaseImpl implements Actionable, Clickable, Editable,
     Touchable, Draggable {
 
-  private Element element;
-  private PageObjectsFactory factory;
+  // note: class needs constructor without parameters!
 
-  // empty constructor is needed for union types to work
-  public BasePageElement() {
+  /**
+   * Build instance of the BasePageElement
+   *
+   * @param element element to inject
+   * @param driver  driver instance
+   * @return instance of the element
+   */
+  public static BasePageElement createInstance(Element element, Driver driver) {
+    return createInstance(BasePageElement.class, element, driver);
   }
 
-  public static <T extends BasicElement, R extends BasePageElement> T createInstance(Class<R> implType, Element element, PageObjectsFactory factory) {
-    if(element.isNull()) {
+  /**
+   * Build instance of the basic type
+   *
+   * @param implType type to build
+   * @param element  element to inject
+   * @param driver   driver instance
+   * @param <T>      bound for BasicElement
+   * @param <R>      bound for BasePageElement
+   * @return instance of the element
+   */
+  public static <T extends BasicElement, R extends BasePageElement> T createInstance(
+      Class<R> implType, Element element, Driver driver) {
+    if(element == null) {
       return null;
     }
     try {
-      R instance =  implType.getConstructor().newInstance();
-      instance.initialize(factory, element);
-      return (T)instance;
+      R instance = implType.getConstructor().newInstance();
+      instance.setDriver(driver);
+      instance.setElement(element);
+      return (T) instance;
     } catch (ReflectiveOperationException e) {
       throw new UtamError(
           String.format("Error creating instance of type '%s'", implType.getSimpleName()),
           e);
     }
-  }
-
-  public static BasePageElement createElementInstance(Element element, PageObjectsFactory factory) {
-    return createInstance(BasePageElement.class, element, factory);
-  }
-
-  // called from method that uses reflection to build an instance
-  void initialize(PageObjectsFactory factory, Element element) {
-    this.factory = factory;
-    this.element = element;
-  }
-
-  @Override
-  protected final PageObjectsFactory getFactory() {
-    return factory;
-  }
-
-  @Override
-  protected final Element getElement() {
-    return element;
   }
 
   @Override

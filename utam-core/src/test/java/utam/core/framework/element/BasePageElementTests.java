@@ -21,12 +21,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
-import static utam.core.element.FindContext.Type.NULLABLE;
-import static utam.core.element.FindContext.Type.NULLABLE_IN_SHADOW;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_INTO_VIEW_JS;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_TOP_VIA_JAVASCRIPT;
 
-import java.util.Collections;
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.JavascriptExecutor;
@@ -37,7 +34,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
-import utam.core.element.Element;
 import utam.core.element.Locator;
 import utam.core.selenium.element.LocatorBy;
 
@@ -212,14 +208,8 @@ public class BasePageElementTests {
     Locator locator = LocatorBy.byCss("css");
     assertThat(mock.getUtamElement().containsElement(locator, false), is(false));
     assertThat(mock.getUtamElement().containsElement(locator, true), is(false));
-    when(mock.getElementAdapter().findElements(locator, NULLABLE))
-        .thenReturn(Collections.singletonList(mock(
-            Element.class)));
+    when(mock.getElementAdapter().containsElements(locator)).thenReturn(1);
     assertThat(mock.getUtamElement().containsElement(locator), is(true));
-    when(mock.getElementAdapter().findElements(locator, NULLABLE_IN_SHADOW))
-        .thenReturn(Collections.singletonList(mock(
-            Element.class)));
-    assertThat(mock.getUtamElement().containsElement(locator, true), is(true));
   }
 
   @Test

@@ -8,18 +8,14 @@
 package utam.core.selenium.element;
 
 import static utam.core.selenium.element.DriverAdapter.ERR_SUPPORTED_FOR_MOBILE;
-import static utam.core.selenium.element.DriverAdapter.find;
-import static utam.core.selenium.element.DriverAdapter.findList;
 import static utam.core.selenium.element.DriverAdapter.getNotFoundErr;
 import static utam.core.selenium.element.DriverAdapter.getSeleniumDriver;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.openqa.selenium.By;
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -27,7 +23,6 @@ import org.openqa.selenium.interactions.Actions;
 import utam.core.driver.Driver;
 import utam.core.element.DragAndDropOptions;
 import utam.core.element.Element;
-import utam.core.element.FindContext;
 import utam.core.element.Locator;
 import utam.core.selenium.appium.MobileElementAdapter;
 
@@ -49,12 +44,11 @@ public class ElementAdapter implements Element {
           + "} else {"
           + "arguments[0].scrollIntoView(false);"
           + "}";
-  static final List<Element> EMPTY_LIST = Collections.emptyList();
   static final String CLICK_VIA_JAVASCRIPT = "arguments[0].click();";
   static final String FOCUS_VIA_JAVASCRIPT = "arguments[0].focus();";
   static final String SCROLL_CENTER_VIA_JAVASCRIPT = "arguments[0].scrollIntoView({block:'center'});";
   static final String BLUR_VIA_JAVASCRIPT = "arguments[0].blur();";
-  static final String ERR_NULL_ELEMENT = "Action can't be applied to an element that was not found; please check for null first";
+  static final String ERR_NULL_ELEMENT = "Element inside adapter is null";
   private static final String SCROLL_INTO_VIEW_ERR =
       "element is still not visible or clickable after scroll into view";
   private static final String SCROLL_TO_DOCUMENT_ORIGIN_JS =
@@ -69,6 +63,16 @@ public class ElementAdapter implements Element {
     this.driverAdapter = driverAdapter;
   }
 
+  // used by ShadowRootElementAdapter
+  ElementAdapter(Element element) {
+    if(!(element instanceof ElementAdapter)) {
+      throw new UnsupportedOperationException("Can't wrap element as shadow root");
+    }
+    this.webElement = new ShadowRootWebElement(((ElementAdapter) element).getWebElement());
+    this.driver = ((ElementAdapter) element).driver;
+    this.driverAdapter = ((ElementAdapter) element).driverAdapter;
+  }
+
   public WebElement getWebElement() {
     if (webElement == null) {
       throw new NullPointerException(ERR_NULL_ELEMENT);
@@ -76,46 +80,28 @@ public class ElementAdapter implements Element {
     return webElement;
   }
 
-  private Function<WebElement, Element> getElementBuilder() {
-    return element -> this instanceof MobileElementAdapter ? new MobileElementAdapter(element,
-        driverAdapter) : new ElementAdapter(element, driverAdapter);
-  }
-
-  public static ElementAdapter getNullElement(Driver driverAdapter) {
-    return new ElementAdapter(null, driverAdapter);
+  static Element wrapElement(Driver driver, WebElement element) {
+    return driver.isMobile() ? new MobileElementAdapter(element, driver) : new ElementAdapter(element, driver);
   }
 
   @Override
-  public String toString() {
-    return isNull() ? "null" : webElement.toString();
+  public Element findElement(Locator locator) {
+    By by = ((LocatorBy) locator).getValue();
+    WebElement res = getWebElement().findElement(by);
+    if (res == null) { //this can happen for mock in unit tests
+      throw new NoSuchElementException(getNotFoundErr(locator));
+    }
+    return wrapElement(driverAdapter, res);
   }
 
   @Override
-  public Element findElement(Locator by, FindContext finderContext) {
-    if (webElement == null && finderContext.isNullable()) {
-      return getNullElement(driverAdapter);
+  public List<Element> findElements(Locator locator) {
+    By by = ((LocatorBy) locator).getValue();
+    List<WebElement> found = getWebElement().findElements(by);
+    if (found == null || found.isEmpty()) {
+      throw new NoSuchElementException(getNotFoundErr(locator));
     }
-    WebElement element = find(getScope(by, finderContext), (LocatorBy) by, finderContext);
-    return element == null ? getNullElement(driverAdapter) : getElementBuilder().apply(element);
-  }
-
-  private SearchContext getScope(Locator by, FindContext findContext) {
-    if (webElement == null) {
-      throw new NullPointerException(getNotFoundErr(by) + ", scope element is null");
-    }
-    return findContext.isExpandScopeShadowRoot() ? new ShadowRootWebElement(webElement)
-        : webElement;
-  }
-
-  @Override
-  public List<Element> findElements(Locator by, FindContext finderContext) {
-    if (webElement == null && finderContext.isNullable()) {
-      return EMPTY_LIST;
-    }
-    List<WebElement> elements = findList(getScope(by, finderContext), (LocatorBy) by,
-        finderContext);
-    return elements == null ? EMPTY_LIST
-        : elements.stream().map(el -> getElementBuilder().apply(el)).collect(Collectors.toList());
+    return found.stream().map(el -> wrapElement(driverAdapter, el)).collect(Collectors.toList());
   }
 
   @Override
@@ -196,12 +182,9 @@ public class ElementAdapter implements Element {
   }
 
   @Override
-  public int containsElements(Locator by, boolean isExpandShadowRoot) {
-    List<Element> found = this.findElements(by, FindContext.Type.build(true, isExpandShadowRoot));
-    if (found == null) {
-      return 0;
-    }
-    return found.size();
+  public int containsElements(Locator locator) {
+    By by = ((LocatorBy) locator).getValue();
+    return getWebElement().findElements(by).size();
   }
 
   @Override
@@ -211,9 +194,6 @@ public class ElementAdapter implements Element {
 
   @Override
   public boolean isExisting() {
-    if (isNull()) {
-      return false;
-    }
     // try apply any action to the element
     try {
       getWebElement().isDisplayed();
@@ -221,11 +201,6 @@ public class ElementAdapter implements Element {
     } catch (StaleElementReferenceException | NoSuchElementException e) {
       return false;
     }
-  }
-
-  @Override
-  public boolean isNull() {
-    return this.webElement == null;
   }
 
   @Override

@@ -7,11 +7,9 @@
  */
 package utam.core.element;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Map.Entry;
-
 /**
- * Locator for an elements
+ * Locator for an element. Depending on the integration, T can be any type of the selector presented
+ * in the framework. For example By in selenium
  *
  * @author elizaveta.ivanova
  * @since 234
@@ -21,15 +19,25 @@ public interface Locator<T> {
   String SELECTOR_STRING_PARAMETER = "%s";
   String SELECTOR_INTEGER_PARAMETER = "%d";
 
+  /**
+   * get locator value, for example Locator with type By returns By
+   *
+   * @return locator value
+   */
   T getValue();
 
-  default String getStringValue() {
-    return getValue().toString();
-  }
+  /**
+   * String value of the locator
+   *
+   * @return string representation
+   */
+  String getStringValue();
 
-  default Entry<Integer, Locator<T>> setParameters(int currentIndex, Object... values) {
-    return new SimpleEntry<>(currentIndex, this);
-  }
-
-  Locator getCopy();
+  /**
+   * set parameters to the locator string (replace %d and %s by values)
+   *
+   * @param values array of parameter values
+   * @return pair of index of the last applied parameter and locator with applied parameters
+   */
+  Locator<T> setParameters(Object... values);
 }

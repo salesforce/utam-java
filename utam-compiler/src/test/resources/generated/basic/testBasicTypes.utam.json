@@ -1,6 +1,7 @@
 {
   "elements": [
     {
+      "public" : true,
       "name": "test",
       "selector": {
         "css": ".css"

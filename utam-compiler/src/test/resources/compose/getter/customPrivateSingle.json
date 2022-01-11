@@ -1,7 +1,7 @@
 {
   "elements": [
     {
-      "name": "private",
+      "name": "test",
       "type": "my/pageObject/foo",
       "selector": {
         "css": "css"
@@ -15,7 +15,7 @@
       "compose": [
         {
           "returnType": "my/pageObject/foo",
-          "element": "private"
+          "element": "test"
         }
       ]
     }

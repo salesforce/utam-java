@@ -10,22 +10,27 @@ package utam.core.framework.base;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
 import static utam.core.element.FindContext.Type.EXISTING;
 import static utam.core.element.FindContext.Type.NULLABLE;
+import static utam.core.framework.base.BasicElementBuilder.NULL_SCOPE_ERR;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.NotFoundException;
 import org.testng.annotations.Test;
-import utam.core.MockUtilities.MockAdapter;
+import utam.core.MockUtilities;
 import utam.core.element.Element;
-import utam.core.element.ElementLocation;
-import utam.core.framework.element.ElementLocationChain;
+import utam.core.element.FindContext;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -38,73 +43,70 @@ public class CustomElementBuilderTests {
 
   private static final String NOTHING_FOUND_ERR = "can't find element";
 
-  private static CustomElementBuilder getNullBuilder(PageObjectsFactory factory) {
-    return new CustomElementBuilder(factory, null, LocatorBy.byCss("notfound"),
-        EXISTING);
+  private static CustomElementBuilder getNullBuilder(MockUtilities mock) {
+    return new CustomElementBuilder(mock.getFactory(), mock.getElementAdapter(),
+        new ElementLocation(LocatorBy.byCss("notfound"), EXISTING));
   }
 
-  private static CustomElementBuilder getNullableBuilder(PageObjectsFactory factory) {
-    return new CustomElementBuilder(factory, null, LocatorBy.byCss("notfound"),
-        NULLABLE);
+  private static CustomElementBuilder getNullableBuilder(MockUtilities mock) {
+    return new CustomElementBuilder(mock.getFactory(), mock.getElementAdapter(),
+        new ElementLocation(LocatorBy.byCss("notfound"), NULLABLE));
   }
 
-  private static CustomElementBuilder getBuilder(PageObjectsFactory factory, ElementLocation root, boolean isNullable) {
-    return new CustomElementBuilder(factory, root, isNullable);
+  private static CustomElementBuilder getBuilder(MockUtilities mock) {
+    when(mock.getWebElementMock().findElement(By.cssSelector("found")))
+        .thenReturn(mock.getWebElementMock());
+    when(mock.getWebElementMock().findElements(By.cssSelector("found")))
+        .thenReturn(Collections.singletonList(mock.getWebElementMock()));
+    FindContext.Type findContext = FindContext.Type.build(false, false);
+    return new CustomElementBuilder(mock.getFactory(), mock.getElementAdapter(),
+        new ElementLocation(LocatorBy.byCss("found"), findContext));
   }
 
   @Test
   public void testBuildSingleElement() {
-    MockAdapter mock = new MockAdapter();
-    Element rootElement = mock.getElementAdapter();
-    PageObjectsFactory factory = mock.getFactory();
-    ElementLocation root = new ElementLocationChain(rootElement);
+    MockUtilities mock = new MockUtilities();
 
     // not null
-    CustomElementBuilder builder = getBuilder(factory, root, false);
+    CustomElementBuilder builder = getBuilder(mock);
     TestPageObject instance = builder.build(TestPageObject.class);
     assertThat(instance, is(notNullValue()));
 
     // nothing found
-    Exception e = expectThrows(NullPointerException.class,
-        () -> getNullBuilder(factory).build(TestPageObject.class));
+    Exception e = expectThrows(NoSuchElementException.class,
+        () -> getNullBuilder(mock).build(TestPageObject.class));
     assertThat(e.getMessage(), startsWith(NOTHING_FOUND_ERR));
 
     // nullable
-    instance = getNullableBuilder(factory).build(TestPageObject.class);
+    instance = getNullableBuilder(mock).build(TestPageObject.class);
     assertThat(instance, is(nullValue()));
   }
 
   @Test
   public void testBuildList() {
-    MockAdapter mock = new MockAdapter();
-    Element rootElement = mock.getElementAdapter();
-    PageObjectsFactory factory = mock.getFactory();
-    ElementLocation root = new ElementLocationChain(rootElement);
+    MockUtilities mock = new MockUtilities();
 
     // not null
-    CustomElementBuilder builder = getBuilder(factory, root, false);
+    CustomElementBuilder builder = getBuilder(mock);
     List<TestPageObject> instances = builder.buildList(TestPageObject.class);
     assertThat(instances, is(not(emptyIterable())));
 
     // nothing found
     Exception e = expectThrows(NotFoundException.class,
-        () -> getNullBuilder(factory).buildList(TestPageObject.class));
+        () -> getNullBuilder(mock).buildList(TestPageObject.class));
     assertThat(e.getMessage(), startsWith(NOTHING_FOUND_ERR));
 
     // nullable
-    instances = getNullableBuilder(factory).buildList(TestPageObject.class);
+    instances = getNullableBuilder(mock).buildList(TestPageObject.class);
     assertThat(instances, is(nullValue()));
   }
 
   @Test
   public void testBuildSingleElementWithFilter() {
-    MockAdapter mock = new MockAdapter();
-    Element rootElement = mock.getElementAdapter();
-    PageObjectsFactory factory = mock.getFactory();
-    ElementLocation root = new ElementLocationChain(rootElement);
+    MockUtilities mock = new MockUtilities();
 
     // not null, filter returns true
-    CustomElementBuilder builder = getBuilder(factory, root, false);
+    CustomElementBuilder builder = getBuilder(mock);
     TestPageObject instance = builder
         .build(TestPageObject.class, Objects::nonNull);
     assertThat(instance, is(notNullValue()));
@@ -116,25 +118,22 @@ public class CustomElementBuilderTests {
 
     // nothing found
     e = expectThrows(NotFoundException.class,
-        () -> getNullBuilder(factory)
+        () -> getNullBuilder(mock)
             .build(TestPageObject.class, Objects::nonNull));
     assertThat(e.getMessage(), startsWith(NOTHING_FOUND_ERR));
 
     // nullable, filter returns false
-    instance = getNullableBuilder(factory)
+    instance = getNullableBuilder(mock)
         .build(TestPageObject.class, TestPageObject::isFalse);
     assertThat(instance, is(nullValue()));
   }
 
   @Test
   public void testBuildListWithFilter() {
-    MockAdapter mock = new MockAdapter();
-    Element rootElement = mock.getElementAdapter();
-    PageObjectsFactory factory = mock.getFactory();
-    ElementLocation root = new ElementLocationChain(rootElement);
+    MockUtilities mock = new MockUtilities();
 
     // not null, filter returns true
-    CustomElementBuilder builder = getBuilder(factory, root, false);
+    CustomElementBuilder builder = getBuilder(mock);
     List<TestPageObject> instances = builder
         .buildList(TestPageObject.class, Objects::nonNull);
     assertThat(instances, is(not(emptyIterable())));
@@ -146,20 +145,38 @@ public class CustomElementBuilderTests {
 
     // not nullable, nothing found
     NotFoundException e = expectThrows(NotFoundException.class,
-        () -> getNullBuilder(factory)
+        () -> getNullBuilder(mock)
             .buildList(TestPageObject.class, Objects::nonNull));
     assertThat(e.getMessage(), startsWith("can't find element"));
 
     // nullable, nothing found
-    instances = getNullableBuilder(factory)
+    instances = getNullableBuilder(mock)
         .buildList(TestPageObject.class, TestPageObject::isFalse);
     assertThat(instances, is(nullValue()));
+  }
+
+  @Test
+  public void testNullScopeWithNullableBuilder() {
+    MockUtilities mock = new MockUtilities();
+    Object test = new CustomElementBuilder(mock.getFactory(), (Element) null,
+        new ElementLocation(LocatorBy.byCss("found"), NULLABLE))
+        .build(TestPageObject.class);
+    assertThat(test, is(nullValue()));
+  }
+
+  @Test
+  public void testNullScopeWithNotNullableBuilderThrows() {
+    MockUtilities mock = new MockUtilities();
+    NoSuchElementException e = expectThrows(NoSuchElementException.class,
+        () -> new CustomElementBuilder(mock.getFactory(), (Element) null,
+            new ElementLocation(LocatorBy.byCss("existing"), EXISTING)));
+    assertThat(e.getMessage(), containsString(String.format(NULL_SCOPE_ERR, "existing")));
   }
 
   // has to be public to construct with reflections
   public static class TestPageObject extends BasePageObject {
 
-    boolean isFalse() {
+    private boolean isFalse() {
       return false;
     }
   }

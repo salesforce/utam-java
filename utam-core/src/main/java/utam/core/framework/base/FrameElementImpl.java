@@ -7,25 +7,17 @@
  */
 package utam.core.framework.base;
 
-import utam.core.element.Element;
 import utam.core.element.FrameElement;
 import utam.core.framework.element.BasePageElement;
 
 /**
- * element representing a frame or iframe
+ * element representing a frame or an iframe
  *
  * @author james.evans
  * @since 236
  */
 public class FrameElementImpl extends BasePageElement implements FrameElement {
 
-  public FrameElementImpl() {}
+  // note: class needs constructor without parameters!
 
-  public static FrameElement createFrameInstance(Element element, PageObjectsFactory factory) {
-    return createInstance(FrameElementImpl.class, element, factory);
-  }
-
-  public static Element getUnwrappedElement(FrameElement frameElement) {
-    return ((FrameElementImpl)frameElement).getElement();
-  }
 }

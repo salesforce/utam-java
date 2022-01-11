@@ -7,6 +7,12 @@
  */
 package utam.core.framework.base;
 
+import static utam.core.framework.element.BasePageElement.createInstance;
+
+import utam.core.element.Element;
+import utam.core.element.Locator;
+import utam.core.framework.element.BasePageElement;
+
 /**
  * base class for a Root Page Objects
  *
@@ -15,10 +21,31 @@ package utam.core.framework.base;
  */
 public class BaseRootPageObject extends BasePageObject implements RootPageObject {
 
+  private Locator rootLocator;
+
+  @Override
+  final void initialize(PageObjectsFactory factory, Element scopeElement, Locator locator) {
+    this.factory = factory;
+    setDriver(factory.getDriver());
+    this.rootLocator = locator;
+  }
+
+  @Override
+  protected final BasePageElement getRootElement() {
+    if(rootElement == null) {
+      if( getElement() == null) {
+        Element root = getDriver().findElement(rootLocator);
+        setElement(root);
+      }
+      rootElement = createInstance(getElement(), getDriver());
+    }
+    return rootElement;
+  }
+
   @Override
   public Object load() {
     log("load the object - wait for a root element to be found");
-    this.waitFor(this::getElement);
+    this.waitFor(this::getRootElement);
     return this;
   }
 }

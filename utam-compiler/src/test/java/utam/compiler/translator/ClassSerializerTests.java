@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import utam.core.framework.base.ElementLocation;
 
 import static utam.compiler.grammar.TestUtilities.getJsonStringDeserializer;
 import static utam.compiler.helpers.TypeUtilities.VOID;
@@ -82,7 +83,7 @@ public class ClassSerializerTests {
     String code = getImplementationCode(json);
     assertThat(code, containsString("package utam.test.pageobjects.test.impl;"));
     assertThat(code, containsString("import utam.core.framework.base.BasePageObject;"));
-    assertThat(code, containsString("import utam.core.element.ElementLocation;"));
+    assertThat(code, containsString(String.format("import %s;", ElementLocation.class.getName())));
     assertThat(code, containsString("import utam.core.framework.base.ElementMarker;"));
     assertThat(code, containsString("import utam.test.pageobjects.test.Test;"));
     assertThat(

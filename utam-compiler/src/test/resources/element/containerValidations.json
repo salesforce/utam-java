@@ -25,17 +25,5 @@
     "name": "nullableThrows",
     "type": "container",
     "nullable": true
-  },
-  {
-    "name": "withoutSelector",
-    "type": "container"
-  },
-  {
-    "name": "withSelector",
-    "public": true,
-    "selector" : {
-      "css": "injected"
-    },
-    "type": "container"
   }
 ]

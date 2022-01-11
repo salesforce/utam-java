@@ -13,8 +13,6 @@ import java.lang.reflect.Proxy;
 import utam.core.driver.Document;
 import utam.core.element.BasicElement;
 import utam.core.element.Element;
-import utam.core.element.ElementLocation;
-import utam.core.element.FindContext;
 import utam.core.element.Locator;
 import utam.core.framework.UtamCoreError;
 import utam.core.framework.consumer.ContainerElement;
@@ -27,24 +25,37 @@ import utam.core.framework.element.DocumentObject;
  * @author elizaveta.ivanova
  * @since 228
  */
+@SuppressWarnings("WeakerAccess")
 public abstract class BasePageObject extends UtamBaseImpl implements PageObject {
 
-  // has to be protected as used in "inScope" method from generated page objects
-  protected ElementLocation root;
-  // lazy factory injected by factory
-  private PageObjectsFactory factory;
-  // lazy document injected by factory
+  PageObjectsFactory factory;
+  BasePageElement rootElement;
   private Document document;
-  // lazy element injected in runtime when a Page Object is loaded
-  private Element rootFound;
-  private BasePageElement rootElement = null;
+  // used for testing
+  private Locator locatorInsideScope;
 
   protected BasePageObject() {
   }
 
-  final void setBootstrap(ElementLocation root, PageObjectsFactory factory) {
-    this.root = root;
-    this.factory = factory;
+  /**
+   * Get instance of the root element. Not Nullable. Method is not final because overridden for Root
+   * page objects.
+   *
+   * @return instance of the root element, invoked to expose root
+   */
+  protected BasePageElement getRootElement() {
+    if (rootElement == null) {
+      if (getElement() == null) {
+        throw new NullPointerException("Root element not set, report a bug");
+      }
+      rootElement = createInstance(getElement(), getDriver());
+    }
+    return rootElement;
+  }
+
+  // used in unit tests
+  protected final Locator getRootLocator() {
+    return locatorInsideScope;
   }
 
   protected final Document getDocument() {
@@ -54,32 +65,22 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
     return document;
   }
 
-  protected final ElementLocation getRootLocator() {
-    return root;
+  /**
+   * During bootstrap assign values injected by page objects factory. Method is not final because
+   * overridden for Root page objects
+   *
+   * @param factory instance of the factory
+   * @param element root element (not null!)
+   * @param locator root locator (not null!)
+   */
+  void initialize(PageObjectsFactory factory, Element element, Locator locator) {
+    this.factory = factory;
+    setDriver(factory.getDriver());
+    setElement(element);
+    this.locatorInsideScope = locator;
   }
 
-  // this method can be called from generated Page Objects when root element is not public
-  protected final BasePageElement getRootElement() {
-    if (rootElement == null) {
-      if (getElement().isNull()) {
-        rootElement = null;
-      } else {
-        rootElement = createInstance(BasePageElement.class, getElement(), getFactory());
-      }
-    }
-    return rootElement;
-  }
-
-  @Override
-  protected final Element getElement() {
-    if (rootFound == null) {
-      rootFound = getRootLocator().findElement(getFactory().getDriver());
-    }
-    return rootFound;
-  }
-
-  @Override
-  protected final PageObjectsFactory getFactory() {
+  private PageObjectsFactory getFactory() {
     return factory;
   }
 
@@ -90,40 +91,48 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
 
   @Override
   public Object load() {
-    log("load the object - find a root element");
-    getElement();
-    if (rootFound == null || rootFound.isNull()) {
-      throw new NullPointerException(getLogMessage(String
-          .format("root element not found with locator '%s'", root.getLocatorChainString())));
-    }
-    getRootElement();
+    // for non root PO element is already found, for root we override this method
     return this;
   }
 
   @Override
   public final boolean isPresent() {
     log("check for page object root element presence inside its scope");
-    return getRootElement() != null && getRootElement().isPresent();
+    return getElement().isExisting();
   }
 
-  @SuppressWarnings("unused")
-  // used by generator - scope inside element of the page object
-  protected final CustomElementBuilder inScope(
-      ElementLocation scopeElement, Locator selector, boolean isNullable,
-      boolean isExpandParentShadow) {
-    return new CustomElementBuilder(
-        getFactory(), scopeElement, selector,
-        FindContext.Type.build(isNullable, isExpandParentShadow));
+  /**
+   * scopes custom element in certain location
+   *
+   * @param scopeElement    scope element (can be root)
+   * @param location locator and expand/nullable flags
+   * @return builder
+   */
+  protected final CustomElementBuilder custom(BasicElement scopeElement, ElementLocation location) {
+    return new CustomElementBuilder(getFactory(), scopeElement, location);
   }
 
-  protected final BasicElementBuilder element(ElementLocation element) {
-    return new BasicElementBuilder(getFactory(), element);
+  /**
+   * scopes basic element in certain location
+   *
+   * @param scopeElement    scope element (can be root)
+   * @param location locator and expand/nullable flags
+   * @return builder
+   */
+  protected final BasicElementBuilder basic(BasicElement scopeElement, ElementLocation location) {
+    return new BasicElementBuilder(getFactory(), scopeElement, location);
   }
 
-  protected final ContainerElement inContainer(ElementLocation element,
+  /**
+   * scopes custom element in certain location
+   *
+   * @param scopeElement       scope element (can be root)
+   * @param isExpandShadowRoot expand flag
+   * @return builder
+   */
+  protected final ContainerElement container(BasicElement scopeElement,
       boolean isExpandShadowRoot) {
-    return new ContainerElementImpl(getFactory(), element,
-        FindContext.Type.build(false, isExpandShadowRoot));
+    return new ContainerElementImpl(getFactory(), scopeElement, isExpandShadowRoot);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -145,16 +154,32 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   protected final <T extends BasicElement> T getProxy(BasePageElement element, Class<T> unionType) {
     return (T) Proxy.newProxyInstance(
         this.getClass().getClassLoader(),
-        new Class[]{unionType},
+        new Class[]{unionType, HasElementGetter.class},
         (proxy, method, args) -> {
           try {
-            method.setAccessible(true);
-            // NB: DURING DEBUG STEP INSIDE THIS METHOD
-            return method.invoke(element, args);
+            // without it reflection throws "object is not an instance of declaring class" because
+            if (method.getName().equals("getElement")) {
+              return element.getElement();
+            } else {
+              method.setAccessible(true);
+              // NB: DURING DEBUG STEP INSIDE THIS METHOD
+              return method.invoke(element, args);
+            }
           } catch (Exception e) {
-            throw new UtamCoreError(String.format("Unable to invoke method '%s'", method.getName()), e);
+            throw new UtamCoreError(String.format("Unable to invoke method '%s'", method.getName()),
+                e);
           }
         }
     );
+  }
+
+  /**
+   * dummy interface whose sole purpose is to have getElement method so that it'd be called for a
+   * proxy instance. interface should not be public
+   */
+  @SuppressWarnings("unused")
+  interface HasElementGetter {
+
+    Element getElement();
   }
 }

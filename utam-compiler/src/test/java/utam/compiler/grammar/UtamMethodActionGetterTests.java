@@ -137,7 +137,7 @@ public class UtamMethodActionGetterTests {
     MethodInfo expected = new MethodInfo(methodName, "Foo");
     expected.addImportedTypes(CUSTOM_TYPE_IMPORT);
     expected.addImpliedImportedTypes(CUSTOM_TYPE_IMPORT);
-    expected.addCodeLine("Foo statement0 = this.getPrivateElement()");
+    expected.addCodeLine("Foo statement0 = this.getTestElement()");
     expected.addCodeLine("return statement0");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }

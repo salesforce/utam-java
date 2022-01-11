@@ -18,39 +18,29 @@ import java.util.List;
 public interface Element {
 
   /**
-   * determines if find methods returned null
-   *
-   * @return true if element was not found
-   */
-  boolean isNull();
-
-  /**
    * find and element with a given locator inside current element
    *
-   * @param by            locator
-   * @param finderContext context can be expanding shadowRoot and be nullable
+   * @param by                 locator
    * @return instance of the found element or "null" element (with isNull returning true) for
    * nullable context
    */
-  Element findElement(Locator by, FindContext finderContext);
+  Element findElement(Locator by);
 
   /**
    * find all elements with a given locator inside current element
    *
    * @param by            locator
-   * @param finderContext context can be expanding shadowRoot and be nullable
    * @return list of found elements or empty list for nullable context
    */
-  List<Element> findElements(Locator by, FindContext finderContext);
+  List<Element> findElements(Locator by);
 
   /**
    * get number of elements with a given locator inside current element
    *
    * @param by                 locator
-   * @param isExpandShadowRoot if true, search inside element's shadowRoot
    * @return number of elements or 0 if none found
    */
-  int containsElements(Locator by, boolean isExpandShadowRoot);
+  int containsElements(Locator by);
 
   /**
    * check if element is "displayed" according to underlying implementing library

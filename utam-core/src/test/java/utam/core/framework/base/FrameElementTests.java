@@ -7,19 +7,24 @@
  */
 package utam.core.framework.base;
 
-import org.testng.annotations.Test;
-import utam.core.MockUtilities;
-import utam.core.element.Element;
-import utam.core.element.FrameElement;
-import utam.core.selenium.element.ElementAdapter;
-
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
-import static utam.core.framework.base.FrameElementImpl.createFrameInstance;
-import static utam.core.framework.base.FrameElementImpl.getUnwrappedElement;
-import static utam.core.selenium.element.ElementAdapter.getNullElement;
+import static org.mockito.Mockito.when;
+import static utam.core.element.FindContext.Type.EXISTING;
+import static utam.core.element.FindContext.Type.NULLABLE;
+import static utam.core.framework.base.BasicElementBuilder.getUnwrappedElement;
+import static utam.core.framework.base.BasicElementBuilderTests.getBasicBuilder;
+
+import org.openqa.selenium.By;
+import org.testng.annotations.Test;
+import utam.core.MockUtilities;
+import utam.core.element.BasicElement;
+import utam.core.element.Element;
+import utam.core.element.FrameElement;
+import utam.core.selenium.element.LocatorBy;
 
 public class FrameElementTests {
 
@@ -32,10 +37,22 @@ public class FrameElementTests {
   }
 
   @Test
-  public void testGetElementNull() {
+  public void testBuildFrame() {
     MockUtilities mock = new MockUtilities();
-    ElementAdapter nullElement = getNullElement(mock.getDriverAdapter());
-    FrameElement element = createFrameInstance(nullElement, mock.getFactory());
-    assertThat(element, is(nullValue()));
+    when(mock.getWebElementMock().findElement(By.cssSelector("css")))
+        .thenReturn(mock.getWebElementMock());
+    ElementLocation location = new ElementLocation(LocatorBy.byCss("css"), NULLABLE);
+    BasicElement test = getBasicBuilder(mock, location).buildFrame();
+    assertThat(test, is(nullValue()));
+  }
+
+  @Test
+  public void testBuildFrameWithParametrizedLocator() {
+    MockUtilities mock = new MockUtilities();
+    when(mock.getWebElementMock().findElement(By.cssSelector("css[string][1]")))
+        .thenReturn(mock.getWebElementMock());
+    ElementLocation location = new ElementLocation(LocatorBy.byCss("css[%s][%d]"), EXISTING);
+    FrameElement test = getBasicBuilder(mock, location.setParameters("string", 1)).buildFrame();
+    assertThat(test, is(notNullValue()));
   }
 }

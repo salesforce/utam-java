@@ -7,18 +7,19 @@
  */
 package utam.compiler.representation;
 
+import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.BOUNDED_PAGE_OBJECT_PARAMETER;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.wrapAsList;
-import static utam.compiler.representation.ComposeMethod.getElementLocatorString;
+import static utam.compiler.representation.ElementMethod.getScopeElementCode;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.LocatorCodeGeneration;
+import utam.compiler.helpers.ParameterUtils;
 import utam.compiler.helpers.ParameterUtils.Regular;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
@@ -34,49 +35,67 @@ import utam.core.declarative.representation.TypeProvider;
 public abstract class ContainerMethod implements PageObjectMethod {
 
   private static final String PAGE_OBJECT_TYPE_PARAMETER_NAME = "pageObjectType";
-  public static final MethodParameter PAGE_OBJECT_PARAMETER =
+  static final MethodParameter PAGE_OBJECT_PARAMETER =
       new Regular(PAGE_OBJECT_TYPE_PARAMETER_NAME, BOUNDED_PAGE_OBJECT_PARAMETER);
-  final String codePrefix;
+  private final List<String> codeLines = new ArrayList<>();
   final String methodName;
   private final boolean isPublic;
   final MethodParametersTracker parametersTracker;
+  final String locatorVariableName;
 
 
-  ContainerMethod(ElementContext scopeElement, boolean isExpandScope, String elementName,
-      boolean isPublic) {
+  ContainerMethod(
+      ElementContext scopeElement,
+      boolean isExpandScope,
+      String elementName,
+      boolean isPublic,
+      String selectorBuilderString) {
+    this.locatorVariableName = String.format("%sLocator", elementName);
     this.methodName = getElementGetterMethodName(elementName, isPublic);
-    this.parametersTracker = new MethodParametersTracker(String.format("element '%s'", elementName));
-    if(scopeElement != null) {
+    this.parametersTracker = new MethodParametersTracker(
+        String.format("element '%s'", elementName));
+    if (scopeElement != null) {
       parametersTracker.setMethodParameters(scopeElement.getParameters());
     }
-    this.codePrefix = String
-        .format("return this.inContainer(%s, %s)", getElementLocatorString(scopeElement), isExpandScope);
+    String scopeElementLine = getScopeElementCode(scopeElement);
+    codeLines.add(scopeElementLine);
+    codeLines.add(String.format("%s %s = %s", SELECTOR.getSimpleName(), this.locatorVariableName, selectorBuilderString));
+    String scopeVariableName = scopeElement.getName();
+    codeLines.add(String.format("return this.container(%s, %s).%s",
+        scopeVariableName, isExpandScope, getContainerMethodInvocationString()));
     this.isPublic = isPublic;
   }
+
+  abstract String getContainerMethodInvocationString();
 
   @Override
   public boolean isPublic() {
     return isPublic;
   }
 
+  @Override
+  public List<String> getCodeLines() {
+    return codeLines;
+  }
+
   public static class WithSelectorReturnsList extends ContainerMethod {
 
-    private final String selectorValue;
+    private final List<TypeProvider> classImports = new ArrayList<>();
 
     public WithSelectorReturnsList(ElementContext scopeElement, boolean isExpandScope,
         String elementName, LocatorCodeGeneration selectorContext, boolean isPublic) {
-      super(scopeElement, isExpandScope, elementName, isPublic);
+      super(scopeElement, isExpandScope, elementName, isPublic, selectorContext.getBuilderString());
       parametersTracker.setMethodParameters(selectorContext.getParameters());
       parametersTracker.setMethodParameter(PAGE_OBJECT_PARAMETER);
-      selectorValue = selectorContext.getBuilderString();
+      ParameterUtils.setImport(classImports, BASIC_ELEMENT);
+      // because of method that builds selector
+      ParameterUtils.setImport(classImports, SELECTOR);
+      ParameterUtils.setImports(classImports, getDeclaration().getImports());
     }
 
     @Override
     public List<TypeProvider> getClassImports() {
-      List<TypeProvider> imports = new ArrayList<>(getDeclaration().getImports());
-      // because of method that builds selector
-      imports.add(SELECTOR);
-      return imports;
+      return classImports;
     }
 
     @Override
@@ -90,31 +109,33 @@ public abstract class ContainerMethod implements PageObjectMethod {
     }
 
     @Override
-    public List<String> getCodeLines() {
-      String codeLine = String
-          .format(".loadList(%s, %s)", PAGE_OBJECT_TYPE_PARAMETER_NAME, selectorValue);
-      return Collections.singletonList(codePrefix + codeLine);
+    String getContainerMethodInvocationString() {
+      return String
+          .format("loadList(%s, %s)", PAGE_OBJECT_TYPE_PARAMETER_NAME, locatorVariableName);
     }
   }
 
   public static class WithSelector extends ContainerMethod {
 
-    private final String selectorValue;
+    private final List<TypeProvider> classImports = new ArrayList<>();
 
-    public WithSelector(ElementContext scopeElement, boolean isExpandScope, String elementName,
-        LocatorCodeGeneration selectorContext, boolean isPublic) {
-      super(scopeElement, isExpandScope, elementName, isPublic);
-      selectorValue = selectorContext.getBuilderString();
+    public WithSelector(ElementContext scopeElement,
+        boolean isExpandScope,
+        String elementName,
+        LocatorCodeGeneration selectorContext,
+        boolean isPublic) {
+      super(scopeElement, isExpandScope, elementName, isPublic, selectorContext.getBuilderString());
       parametersTracker.setMethodParameters(selectorContext.getParameters());
       parametersTracker.setMethodParameter(PAGE_OBJECT_PARAMETER);
+      ParameterUtils.setImport(classImports, BASIC_ELEMENT);
+      // because of method that builds selector
+      ParameterUtils.setImport(classImports, SELECTOR);
+      ParameterUtils.setImports(classImports, getDeclaration().getImports());
     }
 
     @Override
     public List<TypeProvider> getClassImports() {
-      List<TypeProvider> imports = new ArrayList<>(getDeclaration().getImports());
-      // because of method that builds selector
-      imports.add(SELECTOR);
-      return imports;
+      return classImports;
     }
 
     @Override
@@ -128,10 +149,8 @@ public abstract class ContainerMethod implements PageObjectMethod {
     }
 
     @Override
-    public List<String> getCodeLines() {
-      String codeLine = String
-          .format(".load(%s, %s)", PAGE_OBJECT_TYPE_PARAMETER_NAME, selectorValue);
-      return Collections.singletonList(codePrefix + codeLine);
+    String getContainerMethodInvocationString() {
+      return String.format("load(%s, %s)", PAGE_OBJECT_TYPE_PARAMETER_NAME, locatorVariableName);
     }
   }
 }

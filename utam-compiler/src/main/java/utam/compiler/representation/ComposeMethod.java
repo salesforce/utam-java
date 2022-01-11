@@ -7,12 +7,10 @@
  */
 package utam.compiler.representation;
 
-import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import java.util.ArrayList;
 import java.util.List;
-import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ParameterUtils;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -50,14 +48,6 @@ public class ComposeMethod implements PageObjectMethod {
       ParameterUtils.setImport(imports, returnType);
       ParameterUtils.setImport(classImports, returnType);
     }
-  }
-
-  static String getElementLocatorString(ElementContext elementContext) {
-    if(elementContext.getParameters().isEmpty()) {
-      return String.format("this.%s", elementContext.getName());
-    }
-    String parameters = getParametersValuesString(elementContext.getParameters());
-    return String.format("this.%s.setParameters(%s)", elementContext.getName(), parameters);
   }
 
   @Override

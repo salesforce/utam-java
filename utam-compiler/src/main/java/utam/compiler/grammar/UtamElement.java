@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
 import utam.compiler.helpers.ElementContext;
@@ -53,6 +52,7 @@ public final class UtamElement {
   static final String ERR_ELEMENT_NESTED_ELEMENTS = "element '%s' can't have nested elements";
   static final String ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED =
       "element '%s': frame selector cannot return all";
+  public static final String DEFAULT_CONTAINER_SELECTOR_CSS = ":scope > *:first-child";
 
   private final String name;
   UtamSelector selector;
@@ -131,15 +131,6 @@ public final class UtamElement {
     }
   }
 
-  // used in tests
-  String getLocatorString() {
-    return selector.getLocator().getStringValue();
-  }
-
-  void testTraverse(TranslationContext context) {
-    traverse(context, null, false);
-  }
-
   public enum Type {
     BASIC(String.join(", ",
         "name", "public", "selector", "type", "filter", "nullable", "shadow", "elements")),
@@ -169,10 +160,6 @@ public final class UtamElement {
     // returning both for testing purposes
     abstract ElementContext[] traverse(
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot);
-
-    ElementContext testRootTraverse(TranslationContext context) {
-      return traverse(context, null, false)[0];
-    }
   }
 
   class Custom extends Traversal {
@@ -199,8 +186,6 @@ public final class UtamElement {
       MethodParametersTracker parameters = new MethodParametersTracker(String.format("element '%s' getter", name));
       parameters.setMethodParameters(selectorContext.getParameters());
       TypeProvider elementType = translatorContext.getType(type[0]);
-      // addedParameters should only include selector parameters!
-      CustomElementMethod.Root root = new CustomElementMethod.Root(selectorContext);
       if (filter != null) {
         filter.setElementFilter(translatorContext, Type.CUSTOM, elementType, name);
         parameters.setMethodParameters(filter.getApplyMethodParameters());
@@ -227,11 +212,9 @@ public final class UtamElement {
             new CustomElementMethod.Filtered(
                 isPublic(),
                 name,
-                root,
+                selectorContext.getParameters(),
                 scopeElement,
                 elementType,
-                isNullable(),
-                isExpandScopeShadowRoot,
                 filter.applyMethod,
                 filter.getApplyMethodParameters(),
                 filter.getMatcherType(),
@@ -240,11 +223,19 @@ public final class UtamElement {
       } else if (selector.isReturnAll()) {
         method =
             new CustomElementMethod.Multiple(
-                isPublic(), name, root, scopeElement, elementType, isNullable(), isExpandScopeShadowRoot);
+                isPublic(),
+                name,
+                selectorContext.getParameters(),
+                scopeElement,
+                elementType);
       } else {
         method =
             new CustomElementMethod.Single(
-                isPublic(), name, root, scopeElement, elementType, isNullable(), isExpandScopeShadowRoot);
+                isPublic(),
+                name,
+                selectorContext.getParameters(),
+                scopeElement,
+                elementType);
       }
       translatorContext.setElement(component);
       translatorContext.setMethod(method);
@@ -256,6 +247,13 @@ public final class UtamElement {
               scopeElement.getName(),
               isExpandScopeShadowRoot,
               isReturnList));
+      ElementField field =
+          new ElementField(
+              name, getFindAnnotation(selectorContext.getLocator(),
+              isExpandScopeShadowRoot, isNullable()));
+      translatorContext.setClassField(field);
+      // scope element method is invoked
+      component.getScopeElement().setElementMethodUsage(translatorContext);
       return new ElementContext[] {null, component};
     }
   }
@@ -284,7 +282,7 @@ public final class UtamElement {
       addedParameters.setMethodParameters(locatorHelper.getParameters());
       ElementField field =
           new ElementField(
-              name, getFindAnnotation(locatorHelper.getLocator(), scopeElement,
+              name, getFindAnnotation(locatorHelper.getLocator(),
               isExpandScopeShadowRoot, isNullable()));
       if (filter != null) {
         filter.setElementFilter(context, Type.BASIC, elementType, name);
@@ -303,15 +301,13 @@ public final class UtamElement {
       final TypeProvider implType = elementType instanceof UnionType ?
           new BasicElementUnionTypeImpl(elementType) : BASIC_ELEMENT_IMPL_CLASS;
       if (filter != null) {
-        MethodParametersTracker parametersWithoutFilter = new MethodParametersTracker(String.format("element '%s' getter", name));
-        parametersWithoutFilter.setMethodParameters(scopeElement == null? new ArrayList<>() : scopeElement.getParameters());
-        parametersWithoutFilter.setMethodParameters(locatorHelper.getParameters());
         method =
             new ElementMethod.Filtered(
+                scopeElement,
                 name,
                 elementType,
                 implType,
-                parametersWithoutFilter.getMethodParameters(),
+                locatorHelper.getParameters(),
                 isPublic(),
                 filter.applyMethod,
                 filter.getApplyMethodParameters(),
@@ -319,14 +315,16 @@ public final class UtamElement {
                 filter.getMatcherParameters(),
                 filter.getFindFirst());
       } else if (isList) {
-        method = new ElementMethod.Multiple(elementContext, isPublic(), implType);
+        method = new ElementMethod.Multiple(elementContext, locatorHelper.getParameters(), isPublic(), implType);
       } else {
-        method = new ElementMethod.Single(elementContext, isPublic(), implType);
+        method = new ElementMethod.Single(elementContext, locatorHelper.getParameters(), isPublic(), implType);
       }
       context.setClassField(field);
       context.setElement(elementContext);
       context.setMethod(method);
       elementContext.setElementMethod(method);
+      // scope element method is invoked
+      elementContext.getScopeElement().setElementMethodUsage(context);
       context.setTestableElement(name, new ElementUnitTestHelper(
               locatorHelper.getLocator().getStringValue(),
               scopeElement == null? null : scopeElement.getName(),
@@ -338,8 +336,6 @@ public final class UtamElement {
   }
 
   class Container extends Traversal {
-
-    static final String DEFAULT_CONTAINER_SELECTOR_CSS = ":scope > *:first-child";
 
     private Container() {
       if (filter != null
@@ -375,6 +371,8 @@ public final class UtamElement {
       elementContext.setElementMethod(method);
       context.setElement(elementContext);
       context.setMethod(method);
+      // scope element method is invoked
+      elementContext.getScopeElement().setElementMethodUsage(context);
       return new ElementContext[]{null, elementContext};
     }
   }
@@ -401,10 +399,10 @@ public final class UtamElement {
       LocatorCodeGeneration selectorContext = selector.getCodeGenerationHelper(context);
       ElementField field =
           new ElementField(
-              name, getFindAnnotation(selectorContext.getLocator(), scopeElement,
+              name, getFindAnnotation(selectorContext.getLocator(),
               isExpandScopeShadowRoot, isNullable()));
       ElementContext elementContext = new ElementContext.Frame(scopeElement, name, selectorContext);
-      PageObjectMethod method = new FrameMethod(elementContext, isPublic());
+      PageObjectMethod method = new FrameMethod(elementContext, isPublic(), selectorContext.getParameters());
       elementContext.setElementMethod(method);
       context.setClassField(field);
       context.setElement(elementContext);

@@ -1,0 +1,32 @@
+{
+  "elements" : [
+    {
+      "name": "scope",
+      "selector": {
+        "css": "scope[%s]",
+        "args": [
+          {
+            "type": "string",
+            "name": "scopeStr"
+          }
+        ]
+      },
+      "elements" : [
+        {
+          "name": "test",
+          "public" : true,
+          "type": "frame",
+          "selector": {
+            "css": "iframe[%s]",
+            "args": [
+              {
+                "type": "string",
+                "name": "frameStr"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

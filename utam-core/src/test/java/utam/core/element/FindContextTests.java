@@ -37,12 +37,6 @@ public class FindContextTests {
   }
 
   @Test
-  public void testGetSeparator() {
-    assertThat(FindContext.Type.EXISTING.getString(), is(equalTo(">")));
-    assertThat(FindContext.Type.EXISTING_IN_SHADOW.getString(), is(">>"));
-  }
-
-  @Test
   public void testBuilder() {
     assertThat(FindContext.Type.build(false, false), is(equalTo(Type.EXISTING)));
     assertThat(FindContext.Type.build(false, true), is(equalTo(Type.EXISTING_IN_SHADOW)));

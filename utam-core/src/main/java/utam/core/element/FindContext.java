@@ -31,13 +31,6 @@ public interface FindContext {
   boolean isNullable();
 
   /**
-   * string for logging and errors
-   *
-   * @return string to use in logging
-   */
-  String getString();
-
-  /**
    * currently known four types of context - nullable or not and in or outside shadow
    *
    * @author elizaveta.ivanova
@@ -64,11 +57,6 @@ public interface FindContext {
     @Override
     public boolean isExpandScopeShadowRoot() {
       return this == EXISTING_IN_SHADOW || this == NULLABLE_IN_SHADOW;
-    }
-
-    @Override
-    public String getString() {
-      return isExpandScopeShadowRoot() ? ">>" : ">";
     }
   }
 }

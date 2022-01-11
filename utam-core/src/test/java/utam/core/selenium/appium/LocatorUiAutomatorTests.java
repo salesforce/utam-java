@@ -37,7 +37,7 @@ public class LocatorUiAutomatorTests {
     By by = MobileBy.AndroidUIAutomator(selector);
     assertThat(locator.getValue(), is(equalTo(by)));
     assertThat(locator.getStringValue(), is(equalTo(selector)));
-    assertThat(locator.setParameters(0).getValue().getValue(), is(equalTo(by)));
+    assertThat(locator.setParameters().getValue(), is(equalTo(by)));
   }
 
   @Test

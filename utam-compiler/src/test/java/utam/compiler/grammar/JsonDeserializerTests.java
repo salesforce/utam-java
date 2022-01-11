@@ -190,7 +190,8 @@ public class JsonDeserializerTests {
     PageObjectValidationTestHelper.MethodInfo childElementGetter =
         new PageObjectValidationTestHelper.MethodInfo(
             getElementGetterMethodName("childElement", false), "ChildElementElement");
-    childElementGetter.addCodeLine("return element(this.childElement).build(ChildElementElement.class, ChildElementElementImpl.class)");
+    childElementGetter.addCodeLine("BasicElement root = this.getRoot()");
+    childElementGetter.addCodeLine("return basic(root, this.childElement).build(ChildElementElement.class, ChildElementElementImpl.class)");
     childElementGetter.setNotPublic();
 
     PageObjectValidationTestHelper.MethodInfo composeMethod =

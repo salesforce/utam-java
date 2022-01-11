@@ -16,8 +16,6 @@ import static utam.core.selenium.appium.LocatorClassChain.ERR_SELECTOR_CLASSCHAI
 import static utam.core.selenium.appium.LocatorClassChain.ERR_SELECTOR_CLASSCHAIN_UNSUPPORTED_QUOTE;
 
 import io.appium.java_client.MobileBy;
-import java.util.Map.Entry;
-import org.openqa.selenium.By;
 import org.testng.annotations.Test;
 import utam.core.element.Locator;
 import utam.core.framework.consumer.UtamError;
@@ -41,7 +39,7 @@ public class LocatorClassChainTests {
     assertThat(locator.getValue(), is(equalTo(MobileBy.iOSClassChain(selector))));
     assertThat(locator.getStringValue(), is(equalTo(selector)));
     assertThat(locator.getCopy(selector), is(equalTo(locator)));
-    assertThat(locator.setParameters(0, "parameters").getValue(), is(sameInstance(locator)));
+    assertThat(locator.setParameters("parameters"), is(sameInstance(locator)));
   }
 
   /**
@@ -54,9 +52,7 @@ public class LocatorClassChainTests {
     assertThat(locator.getValue(), is(equalTo(MobileBy.iOSClassChain(selector))));
     assertThat(locator.getStringValue(), is(equalTo(selector)));
     String filteredSelector = String.format(selector, 1);
-    Entry<Integer, Locator<By>> withParameters = locator.setParameters(0, 1);
-    assertThat(withParameters.getKey(), is(equalTo(1)));
-    locator = withParameters.getValue();
+    locator = locator.setParameters(1);
     assertThat(locator.getValue(), is(equalTo(MobileBy.iOSClassChain(filteredSelector))));
     assertThat(locator.getStringValue(), is(equalTo(filteredSelector)));
   }

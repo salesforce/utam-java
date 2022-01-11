@@ -10,8 +10,7 @@ package utam.core;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
-import static utam.core.framework.base.FrameElementImpl.createFrameInstance;
-import static utam.core.framework.element.BasePageElement.createElementInstance;
+import static utam.core.framework.element.BasePageElement.createInstance;
 import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR;
 import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR_ALL;
 
@@ -31,6 +30,7 @@ import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.element.Element;
 import utam.core.element.FrameElement;
+import utam.core.framework.base.FrameElementImpl;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.PageObjectsFactoryImpl;
 import utam.core.framework.consumer.PageObjectContext;
@@ -68,8 +68,8 @@ public class MockUtilities {
     PageObjectContext pageObjectContext = new PageObjectContextImpl(Collections.emptyMap());
     factory = new PageObjectsFactoryImpl(pageObjectContext, "", driverAdapter);
     elementAdapter = setElementAdapter(driverType);
-    utamElement = createElementInstance(elementAdapter, factory);
-    frameElement = createFrameInstance(elementAdapter, factory);
+    utamElement = createInstance(BasePageElement.class, elementAdapter, factory.getDriver());
+    frameElement = createInstance(FrameElementImpl.class, elementAdapter, factory.getDriver());
     if (isMobileMock(driverType)) {
       setMobilePlatform(Platform.LINUX);
     }

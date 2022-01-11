@@ -16,6 +16,7 @@ import static utam.core.selenium.factory.WebDriverFactory.getAdapterMock;
 
 import org.openqa.selenium.WebDriver;
 import org.testng.annotations.Test;
+import utam.core.driver.Driver;
 import utam.core.element.Element;
 import utam.core.element.Locator;
 import utam.core.framework.consumer.PageObjectContext;
@@ -30,7 +31,7 @@ public class UtamBaseTests {
   @Test
   public void testIsPresent() {
     UtamBase utamBase = new UtamBaseImplTest();
-    assertThat(utamBase.isPresent(), is(equalTo(true)));
+    assertThat(utamBase.isPresent(), is(equalTo(false)));
   }
 
   @Test
@@ -93,8 +94,8 @@ public class UtamBaseTests {
     }
 
     @Override
-    protected PageObjectsFactory getFactory() {
-      return factory;
+    protected Driver getDriver() {
+      return factory.getDriver();
     }
   }
 }

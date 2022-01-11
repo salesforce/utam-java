@@ -15,12 +15,14 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
 import static utam.core.framework.consumer.UtamLoaderConfigTests.getDefaultConfig;
 import static utam.core.framework.consumer.UtamLoaderImpl.getSimulatorLoader;
 
 import io.appium.java_client.AppiumDriver;
 import java.util.function.Supplier;
+import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -68,11 +70,13 @@ public class UtamLoaderTests {
   @Test
   public void testCreateUtamFromContainer() {
     UtamLoader loader = getDefaultLoader();
-    ContainerMock containerMock = new ContainerMock();
+    WebElement mockElement = mock(WebElement.class);
+    when(mockElement.findElement(By.cssSelector("root"))).thenReturn(mockElement);
+    ContainerMock containerMock = new ContainerMock(() -> mockElement);
     TestLoaderConfigPageObject pageObjectMock =
         loader.create(containerMock, TestLoaderConfigPageObject.class, LocatorBy.byCss("root"));
-    assertThat(pageObjectMock.getRoot().getLocatorChainString(),
-        is(equalTo("driver > element > By.cssSelector: root")));
+    // driver > element > By.cssSelector: root
+    assertThat(pageObjectMock.getRoot().getStringValue(), is(equalTo("root")));
   }
 
   @Test
@@ -153,7 +157,11 @@ public class UtamLoaderTests {
 
   private static class ContainerMock implements Container {
 
-    final Supplier<SearchContext> root = () -> mock(WebElement.class);
+    final Supplier<SearchContext> root;
+
+    ContainerMock(Supplier<SearchContext> root) {
+      this.root = root;
+    }
 
     @Override
     public Supplier<SearchContext> getScope() {

@@ -7,7 +7,7 @@
  */
 package utam.core.framework.consumer;
 
-import utam.core.element.ElementLocation;
+import utam.core.element.Locator;
 import utam.core.framework.base.RootPageObject;
 
 /**
@@ -18,5 +18,5 @@ import utam.core.framework.base.RootPageObject;
  */
 public interface TestLoaderConfigDefault extends RootPageObject {
 
-  ElementLocation getRoot();
+  Locator getRoot();
 }

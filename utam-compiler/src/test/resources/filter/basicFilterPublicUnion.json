@@ -2,9 +2,13 @@
   "elements": [
     {
       "name": "test",
+      "type": [
+        "editable",
+        "clickable"
+      ],
       "selector": {
         "css": ".css",
-        "returnAll" : true
+        "returnAll": true
       },
       "filter": {
         "apply": "getText",
@@ -16,9 +20,11 @@
               "type": "string"
             }
           ]
-        }
+        },
+        "findFirst": true
       },
-      "public" : true
+      "public": true
     }
   ]
 }
+

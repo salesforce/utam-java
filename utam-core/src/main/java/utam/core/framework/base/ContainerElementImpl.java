@@ -8,14 +8,17 @@
 
 package utam.core.framework.base;
 
+import static utam.core.framework.base.BasicElementBuilder.getUnwrappedElement;
+
 import java.util.Collections;
 import java.util.List;
-import utam.core.element.ElementLocation;
+import org.openqa.selenium.NoSuchElementException;
+import utam.core.element.BasicElement;
+import utam.core.element.Element;
 import utam.core.element.FindContext;
 import utam.core.element.Locator;
 import utam.core.framework.consumer.Contained;
 import utam.core.framework.consumer.ContainerElement;
-import utam.core.framework.element.ElementLocationChain;
 import utam.core.selenium.element.ElementAdapter;
 import utam.core.selenium.element.LocatorBy;
 
@@ -27,36 +30,46 @@ import utam.core.selenium.element.LocatorBy;
  */
 class ContainerElementImpl implements ContainerElement {
 
-  final PageObjectsFactory factory;
-  final ElementLocation containerRoot;
-  final FindContext finderContext;
+  static final String NULL_SCOPE_ERR = "Container scope can't be null";
 
-  ContainerElementImpl(PageObjectsFactory factory, ElementLocation containerRoot,
-      FindContext finderContext) {
+  private final PageObjectsFactory factory;
+  final Element containerScope;
+  private final FindContext findContext;
+
+  ContainerElementImpl(PageObjectsFactory factory, BasicElement scopeElement, boolean isExpandShadowRoot) {
+    this(factory, getUnwrappedElement(scopeElement), isExpandShadowRoot);
+  }
+
+  ContainerElementImpl(PageObjectsFactory factory, Element scopeElement, boolean isExpandShadowRoot) {
     this.factory = factory;
-    this.containerRoot = containerRoot;
-    this.finderContext = finderContext;
+    this.containerScope = scopeElement;
+    this.findContext = FindContext.Type.build(false, isExpandShadowRoot);
+    if(containerScope == null) {
+      throw new NoSuchElementException(NULL_SCOPE_ERR);
+    }
   }
 
   ContainerElementImpl(ContainerElementImpl containerElement) {
-    this(containerElement.factory, containerElement.containerRoot, containerElement.finderContext);
+    this(containerElement.factory, containerElement.containerScope, containerElement.findContext.isExpandScopeShadowRoot());
   }
 
   @Override
-  public void setScope(Contained pageObject) {
-    pageObject.setScope(() -> ((ElementAdapter)containerRoot.findElement(factory.getDriver())).getWebElement());
+  @Deprecated
+  public void setScope(Contained externalObjectInsideContainer) {
+    externalObjectInsideContainer.setScope(((ElementAdapter) containerScope)::getWebElement);
   }
 
   @Override
+  @Deprecated
   public <T extends PageObject> T load(Class<T> utamType, String injectCss) {
     return load(utamType, LocatorBy.byCss(injectCss));
   }
 
   private ContainerElementPageObject getContainerElementPageObject(Locator locator) {
-    ElementLocation location =
-        containerRoot == null ? new ElementLocationChain(locator, finderContext) :
-            containerRoot.scope(locator, finderContext);
-    ContainerElementImpl containerElement = new ContainerElementImpl(factory, location, finderContext);
+    ElementLocation elementLocation = new ElementLocation(locator, findContext);
+    // findContext not nullable so can't be null
+    Element scopeElement = elementLocation.find(this.containerScope).getFoundElement();
+    ContainerElementImpl containerElement = new ContainerElementImpl(factory, scopeElement, findContext.isExpandScopeShadowRoot());
     return new ContainerElementPageObject(containerElement);
   }
 
@@ -69,10 +82,8 @@ class ContainerElementImpl implements ContainerElement {
     if (isCompatibilityMode(utamPageObject)) {
       return (T) getContainerElementPageObject(rootLocator);
     }
-    T instance = new CustomElementBuilder(factory, containerRoot, rootLocator, finderContext)
-        .build(utamPageObject);
-    instance.load();
-    return instance;
+    ElementLocation elementLocation = new ElementLocation(rootLocator, findContext);
+    return new CustomElementBuilder(factory, containerScope, elementLocation).build(utamPageObject);
   }
 
   @Override
@@ -80,6 +91,7 @@ class ContainerElementImpl implements ContainerElement {
     if (isCompatibilityMode(type)) {
       return Collections.singletonList((T) getContainerElementPageObject(locator));
     }
-    return new CustomElementBuilder(factory, containerRoot, locator, finderContext).buildList(type);
+    ElementLocation elementLocation = new ElementLocation(locator, findContext);
+    return new CustomElementBuilder(factory, containerScope, elementLocation).buildList(type);
   }
 }

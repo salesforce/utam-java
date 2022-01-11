@@ -28,6 +28,6 @@ public class LocatorAccessibilityIdTests {
     assertThat(locator.getValue(), is(equalTo(MobileBy.AccessibilityId(selector))));
     assertThat(locator.getStringValue(), is(equalTo(selector)));
     assertThat(locator.getCopy(selector), is(equalTo(locator)));
-    assertThat(locator.setParameters(0,"parameters").getValue(), is(sameInstance(locator)));
+    assertThat(locator.setParameters("parameters"), is(sameInstance(locator)));
   }
 }
