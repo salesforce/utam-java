@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_COMMENTS;
+import static com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION;
 import static com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY;
 
 /**
@@ -82,6 +83,7 @@ public final class JsonDeserializer {
     ObjectMapper mapper = new ObjectMapper();
     mapper.enable(ALLOW_COMMENTS);
     mapper.enable(ACCEPT_SINGLE_VALUE_AS_ARRAY);
+    mapper.enable(STRICT_DUPLICATE_DETECTION);
     mapper.registerModule(registerDeserializers());
     return mapper;
   }
