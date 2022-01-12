@@ -20,6 +20,7 @@ chromedriver*
 log.out
 surefire*
 *.png
+*.pgp
 out/
 **/test-output/
 # generated tests page objects
