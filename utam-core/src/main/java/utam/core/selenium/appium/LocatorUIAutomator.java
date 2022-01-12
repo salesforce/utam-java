@@ -23,6 +23,11 @@ public class LocatorUIAutomator extends LocatorBy {
   static final String ERR_SELECTOR_UIAUTOMATOR_UISCROLLABLE_UNSUPPORTED_METHOD =
       "unsupported UiSelector method '%s', supported method are: scrollable, " + SUPPORTED_UIAUTOMATOR_METHODS;
 
+  /**
+   * Initializes a new instance of the LocatorUIAutomator class
+   *
+   * @param selectorString selector string to use
+   */
   public LocatorUIAutomator(String selectorString) {
     super(selectorString);
     validateUIAutomatorSelector(this.stringValue);

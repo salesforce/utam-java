@@ -32,6 +32,11 @@ public class GlobalValidation {
       .synchronizedMap(new HashMap<>());
   private final GuardrailsMode guardrailsMode;
 
+  /**
+   * Initializes a new instance of the GlobalValidation class
+   *
+   * @param guardrailsMode the mode to use for the guardrails
+   */
   public GlobalValidation(GuardrailsMode guardrailsMode) {
     this.guardrailsMode = guardrailsMode;
   }
@@ -44,6 +49,11 @@ public class GlobalValidation {
         second.pageObjectName);
   }
 
+  /**
+   * Adds the page object elements to the validation list
+   * @param pageObjectURI the URI of the Page Object
+   * @param elements      the list of elements to add
+   */
   public void setPageObjectElements(String pageObjectURI, Collection<ElementContext> elements) {
     this.allElementsAccumulated.put(pageObjectURI, elements);
   }

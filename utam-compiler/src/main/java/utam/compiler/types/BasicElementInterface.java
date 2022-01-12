@@ -30,12 +30,34 @@ import utam.core.element.Touchable;
  * @since 234
  */
 public enum BasicElementInterface implements TypeProvider {
+  /**
+   * An actionable element
+   */
   actionable(Actionable.class),
+
+  /**
+   * A clickable element
+   */
   clickable(Clickable.class),
+
+  /**
+   * A draggable element
+   */
   draggable(Draggable.class),
+
+  /**
+   * An editable element
+   */
   editable(Editable.class),
+
+  /**
+   * A touchable element
+   */
   touchable(Touchable.class);
 
+  /**
+   * Error template string for an unsupported element type
+   */
   public static final String ERR_UNSUPPORTED_ELEMENT_TYPE =
       "element '%s': type %s is not supported, "
           + "valid values are: " + Arrays.stream(values()).map(Enum::name)
@@ -55,6 +77,11 @@ public enum BasicElementInterface implements TypeProvider {
     return false;
   }
 
+  /**
+   * Gets a value indicating whether the element is a basic element type
+   * @param type the type of the element
+   * @return true if the element is a basic type; otherwise, false
+   */
   public static boolean isBasicType(TypeProvider type) {
     if (type instanceof UnionType || type.isSameType(BASIC_ELEMENT)) {
       return true;
@@ -117,6 +144,7 @@ public enum BasicElementInterface implements TypeProvider {
   /**
    * check if "returnType" in an interface method returns basic type
    *
+   * @param returnTypeNode the node containing the return type
    * @return true if it is
    */
   public static boolean isReturnBasicType(JsonNode returnTypeNode) {

@@ -48,22 +48,48 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
   private String bridgeAppTitle;
   private final BiFunction<String, Profile, ProfileContext> profileContextProvider;
 
+  /**
+   * Initializes a new instance of the UtamLoaderConfigImpl class
+   *
+   * @param config the JsonLoaderConfig object to configure the loader
+   */
   public UtamLoaderConfigImpl(JsonLoaderConfig config) {
     this(config, DefaultProfileContext::new);
   }
 
+  /**
+   * Initializes a new instance of the UtamLoaderConfigImpl class
+   *
+   * @param resourceWithConfig a string resource containing configuration information to configure
+   *                           the loader
+   */
   public UtamLoaderConfigImpl(String resourceWithConfig) {
     this(loadConfig(resourceWithConfig));
   }
 
+  /**
+   * Initializes a new instance of the UtamLoaderConfigImpl class
+   *
+   * @param fileWithConfig a file containing configuration information to configure the loader
+   */
   public UtamLoaderConfigImpl(File fileWithConfig) {
     this(loadConfig(fileWithConfig));
   }
 
+  /**
+   * Initializes a new instance of the UtamLoaderConfigImpl class
+   */
   public UtamLoaderConfigImpl() {
     this(new JsonLoaderConfig());
   }
 
+  /**
+   * Initializes a new instance of the UtamLoaderConfigImpl class
+   *
+   * @param resourceWithConfig     a string resource containing configuration information to
+   *                               configure the loader
+   * @param profileContextProvider a function to map profile information into the loader
+   */
   protected UtamLoaderConfigImpl(String resourceWithConfig, BiFunction<String, Profile, ProfileContext> profileContextProvider) {
     this(loadConfig(resourceWithConfig), profileContextProvider);
   }

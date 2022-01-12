@@ -255,10 +255,21 @@ public abstract class UtamMethodAction {
     private final String strValue;
     private final boolean isList;
 
+    /**
+     * Initializes a new instance of the ConstOperand class
+     *
+     * @param strValue the value of the operand
+     */
     ConstOperand(String strValue) {
       this(strValue, false);
     }
 
+    /**
+     * Initializes a new instance of the ConstOperand class
+     *
+     * @param strValue the value of the operand
+     * @param isList   a value indicating whether this operand is a list
+     */
     public ConstOperand(String strValue, boolean isList) {
       this.strValue = strValue;
       this.isList = isList;

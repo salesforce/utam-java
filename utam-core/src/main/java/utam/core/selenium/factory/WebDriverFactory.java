@@ -53,10 +53,23 @@ public class WebDriverFactory {
     return !Boolean.TRUE.toString().equals(System.getProperty("Jenkins"));
   }
 
+  /**
+   * Creates a WebDriver instance
+   *
+   * @param browserType the browser type to create the instance
+   * @return the created WebDriver instance
+   */
   public static WebDriver getWebDriver(DriverType browserType) {
     return getWebDriver(browserType, null, null);
   }
 
+  /**
+   * creates a DriverAdapter
+   *
+   * @param webDriver    the WebDriver instance to wrap
+   * @param driverConfig the configuration object to configure the driver adapter
+   * @return the driver adapter
+   */
   public static Driver getAdapter(WebDriver webDriver, DriverConfig driverConfig) {
     return webDriver instanceof AppiumDriver ? new MobileDriverAdapter((AppiumDriver) webDriver, driverConfig)
         : new DriverAdapter(webDriver, driverConfig);
@@ -77,6 +90,14 @@ public class WebDriverFactory {
       DEFAULT_EXPLICIT_TIMEOUT_MOCK,
       DEFAULT_POLLING_INTERVAL);
 
+  /**
+   * Creates a WebDriver instance
+   * 
+   * @param browserType         the type of browser for which to create the WebDriver instance
+   * @param service             the service to create the driver
+   * @param desiredCapabilities the desired capabilities of the resulting WebDriver instance
+   * @return the created WebDriver instance
+   */
   @SuppressWarnings("WeakerAccess")
   public static WebDriver getWebDriver(
       DriverType browserType,

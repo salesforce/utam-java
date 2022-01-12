@@ -34,6 +34,12 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
 
   private final MobilePlatformType mobilePlatform;
 
+  /**
+   * Initializes a new instance of the MobileDriverAdapter class
+   *
+   * @param driver       the driver to use
+   * @param driverConfig the driver config to use
+   */
   public MobileDriverAdapter(AppiumDriver driver, DriverConfig driverConfig) {
     super(driver, driverConfig);
     this.mobilePlatform = MobilePlatformType.fromDriver(driver);

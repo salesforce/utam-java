@@ -31,6 +31,9 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
  */
 public class TranslationUtilities {
 
+  /**
+   * Represents an empty comment
+   */
   public static final String EMPTY_COMMENTS = "";
   static final String NEW_LINE = System.lineSeparator();
   static final String JAVADOC_LINE_PATTERN = "   * %s";
@@ -114,6 +117,12 @@ public class TranslationUtilities {
     return isImportableType(type) && !type.getPackageName().equals(currentPackage);
   }
 
+  /**
+   * Gets a value indicating if a give type provider is an importable type
+   *
+   * @param type the type provider to check
+   * @return true if the type provider is importable; otherwise false
+   */
   public static boolean isImportableType(TypeProvider type) {
     return !type.getFullName().isEmpty()
         && !type.getPackageName().isEmpty()
@@ -149,6 +158,13 @@ public class TranslationUtilities {
     return getStatement("package " + packageName);
   }
 
+  /**
+   * Gets the name of an element getter method
+   *
+   * @param elementName the name of the element
+   * @param isPublic    a value indicating whether the element is public
+   * @return the name of the element getter method
+   */
   public static String getElementGetterMethodName(String elementName, boolean isPublic) {
     return "get"
             + elementName.substring(0, 1).toUpperCase()

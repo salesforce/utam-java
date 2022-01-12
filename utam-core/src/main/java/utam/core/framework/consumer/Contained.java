@@ -31,6 +31,8 @@ public interface Contained {
   void setScope(Supplier<SearchContext> scopeSupplier);
 
   /**
+   * used to set the root element of the Page Object
+   * @param rootSupplier supplier of the SearchContext from UTAM element root
    * @deprecated legacy method, to be removed
    */
   @Deprecated

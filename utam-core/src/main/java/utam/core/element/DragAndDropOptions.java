@@ -53,12 +53,23 @@ public interface DragAndDropOptions {
     private final Element targetElement;
     private final Duration holdDuration;
 
+    /**
+     * Initializes a new instance of the DragAndDropOptions class
+     *
+     * @param targetElement   the target element
+     * @param holdDurationSec the duration to hold the gesture, in seconds
+     */
     public ByElement(Element targetElement, int holdDurationSec) {
       this.holdDuration =
           holdDurationSec == 0 ? Duration.ZERO : Duration.ofSeconds(holdDurationSec);
       this.targetElement = targetElement;
     }
 
+    /**
+     * Initializes a new instance of the DragAndDropOptions class
+     *
+     * @param targetElement the target element
+     */
     public ByElement(Element targetElement) {
       this(targetElement, 0);
     }
@@ -92,6 +103,13 @@ public interface DragAndDropOptions {
     private final int x, y;
     private final Duration holdDuration;
 
+    /**
+     * Initializes a new instance of the ByOffset class
+     *
+     * @param xOffset         the horizontal offset
+     * @param yOffset         the vertical offset
+     * @param holdDurationSec the duration to hold the gesture, in seconds
+     */
     public ByOffset(int xOffset, int yOffset, int holdDurationSec) {
       this.holdDuration =
           holdDurationSec == 0 ? Duration.ZERO : Duration.ofSeconds(holdDurationSec);
@@ -99,6 +117,12 @@ public interface DragAndDropOptions {
       this.y = yOffset;
     }
 
+    /**
+     * Initializes a new instance of the ByOffset class
+     *
+     * @param xOffset the horizontal offset
+     * @param yOffset the vertical offset
+     */
     public ByOffset(int xOffset, int yOffset) {
       this(xOffset, yOffset, 0);
     }

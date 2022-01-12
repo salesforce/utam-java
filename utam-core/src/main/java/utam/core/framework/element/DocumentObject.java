@@ -34,6 +34,10 @@ public class DocumentObject implements Document {
   private final Driver driver;
   private final PageObjectsFactory factory;
 
+  /**
+   * Initializes a new instance of the DocumentObject class
+   * @param factory the PageObjectsFactory used to create Page Object instances.
+   */
   public DocumentObject(PageObjectsFactory factory) {
     this.driver = factory.getDriver();
     this.factory = factory;

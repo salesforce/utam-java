@@ -27,6 +27,12 @@ public final class ElementField implements PageClassField {
   private final String name;
   private final List<AnnotationProvider> annotations;
 
+  /**
+   * Initializes a new instance of the ElementField class
+   *
+   * @param name       the name of the element
+   * @param annotation the annotation provider for generating the field annotation
+   */
   public ElementField(String name, AnnotationProvider annotation) {
     this.name = name;
     this.annotations = Collections.singletonList(annotation);

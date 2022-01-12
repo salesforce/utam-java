@@ -28,6 +28,12 @@ public class MobileElementAdapter extends ElementAdapter {
 
   private static final Duration DEFAULT_FLICK_ACTION_WAIT_MILLISECONDS = Duration.ofMillis(500);
 
+  /**
+   * Initializes a new instance of the MobileElementAdapter class
+   *
+   * @param element       the underlying element to wrap
+   * @param driverAdapter the driver used to drive this element
+   */
   public MobileElementAdapter(WebElement element, Driver driverAdapter) {
     super(element, driverAdapter);
   }

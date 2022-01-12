@@ -39,6 +39,11 @@ public class UtamLoaderImpl implements UtamLoader {
   private PageObjectsFactory factory;
   private Document document;
 
+  /**
+   * Initializes a new instance of the UtamLoaderImpl class
+   * @param loaderConfig the configuration object to configure the loader
+   * @param driver       a driver object to drive loaded Page Objects
+   */
   public UtamLoaderImpl(UtamLoaderConfig loaderConfig, Driver driver) {
     this.loaderConfig = loaderConfig;
     this.driver = driver;
@@ -46,6 +51,11 @@ public class UtamLoaderImpl implements UtamLoader {
     this.document = new DocumentObject(factory);
   }
 
+  /**
+   * Initializes a new instance of the UtamLoaderImpl class
+   * @param loaderConfig the configuration object to configure the loader
+   * @param webDriver    a WebDriver object to drive loaded Page Objects
+   */
   public UtamLoaderImpl(UtamLoaderConfig loaderConfig, WebDriver webDriver) {
     this.loaderConfig = loaderConfig;
     this.driver = WebDriverFactory.getAdapter(webDriver, loaderConfig.getDriverConfig());
@@ -65,10 +75,20 @@ public class UtamLoaderImpl implements UtamLoader {
     return new UtamLoaderImpl(config, getAdapter(driver, config.getDriverConfig()));
   }
 
+  /**
+   * Gets the factory for creating Page Object instances
+   *
+   * @return the factory for creating Page Object instances
+   */
   protected final PageObjectsFactory getFactory() {
     return factory;
   }
 
+  /**
+   * Gets the driver object for automating Page Object instances
+   *
+   * @return the driver object for automating Page Object instances
+   */
   protected final Driver getDriver() {
     return driver;
   }
@@ -90,6 +110,12 @@ public class UtamLoaderImpl implements UtamLoader {
     return factory.create(type);
   }
 
+  /**
+   * gets the java bean for the specified class type, only used by unit tests
+   *
+   * @param type the class object to get
+   * @return the bean for the specified class type
+   */
   // for tests
   protected PageObject getBean(Class type) {
     return factory.getPageContext().getBean(type);

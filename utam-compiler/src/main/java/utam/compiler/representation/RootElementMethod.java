@@ -43,6 +43,11 @@ public class RootElementMethod {
 
     private final TypeProvider returnType;
 
+    /**
+     * Initializes a new instance of the ProtectedDefaultType class
+     *
+     * @param returnType the return type
+     */
     public ProtectedDefaultType(TypeProvider returnType) {
       this.returnType = returnType;
     }
@@ -82,6 +87,10 @@ public class RootElementMethod {
     private final List<TypeProvider> imports;
     private final TypeProvider returnType;
 
+    /**
+     * Initializes a new instance of the PublicDefaultType class
+     * @param returnType the default return type
+     */
     public PublicDefaultType(TypeProvider returnType) {
       this.returnType = returnType;
       this.imports = Collections.singletonList(returnType);
@@ -124,6 +133,11 @@ public class RootElementMethod {
     private final List<TypeProvider> imports = new ArrayList<>();
     private final List<TypeProvider> classImports = new ArrayList<>();
 
+    /**
+     * Initializes a new instance of the PublicCustomType class
+     *
+     * @param unionType the union type that is the return type
+     */
     public PublicCustomType(UnionType unionType) {
       this.returnType = unionType;
       ParameterUtils.setImports(imports, unionType.getExtendedTypes());
@@ -170,6 +184,11 @@ public class RootElementMethod {
 
     private final UnionType returnType;
 
+    /**
+     * Initializes a new instance of the PrivateCustomtype class
+     *
+     * @param unionType the union type that is the return type
+     */
     public PrivateCustomType(UnionType unionType) {
       this.returnType = unionType;
     }

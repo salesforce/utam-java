@@ -48,16 +48,35 @@ public class UtamSelector extends UtamRootSelector {
     this.args = args;
   }
 
+  /**
+   * Initializes a new instance of the UtamSelector class, only used in unit tests
+   *
+   * @param css         the CSS selector
+   * @param accessid    the mobile accessibility ID
+   * @param classchain  the iOS class chain
+   * @param uiautomator the Android UI automator ID
+   */
   // used in tests
   public UtamSelector(String css, String accessid, String classchain, String uiautomator) {
     this(css, accessid, classchain, uiautomator, false, null);
   }
 
+  /**
+   * Initializes a new instance of the UtamSelector class, only used in unit tests
+   *
+   * @param cssSelector  the CSS selector
+   */
   // used in tests
   public UtamSelector(String cssSelector) {
     this(cssSelector, null, null, null);
   }
 
+  /**
+   * Initializes a new instance of the UtamSelector class, only used in unit tests
+   *
+   * @param cssSelector  the CSS selector
+   * @param isList       a value indicating whether this selector returns a list
+   */
   // used in tests
   public UtamSelector(String cssSelector, boolean isList) {
     this(cssSelector, null, null, null, isList, null);

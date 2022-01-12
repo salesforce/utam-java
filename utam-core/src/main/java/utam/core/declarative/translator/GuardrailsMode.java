@@ -15,9 +15,21 @@ package utam.core.declarative.translator;
  */
 public enum GuardrailsMode {
 
+  /**
+   * Guardrails violations emit a compiler warning
+   */
   WARNING,
+
+  /**
+   * Guardrails violations emit a compiler error
+   */
   ERROR;
 
+  /**
+   * Gets a value indicating whether to interrupt on an error
+   *
+   * @return true if the compiler should interrupt with an error; otherwise, false
+   */
   public boolean isInterruptWithError() {
     return this == ERROR;
   }

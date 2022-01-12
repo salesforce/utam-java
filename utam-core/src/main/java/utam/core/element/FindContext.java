@@ -37,11 +37,33 @@ public interface FindContext {
    */
   enum Type implements FindContext {
 
+    /**
+     * element is existing
+     */
     EXISTING,
+
+    /**
+     * element is nullable
+     */
     NULLABLE,
+
+    /**
+     * element exists in shadow root
+     */
     EXISTING_IN_SHADOW,
+
+    /**
+     * element is nullable in shadow root
+     */
     NULLABLE_IN_SHADOW;
 
+    /**
+     * Builds the find context type value
+     *
+     * @param isNullable          a value indicating whether the element is nullable
+     * @param isExpandsShadowRoot a value indicating whether the element is in the shadow root
+     * @return the appropriate type value
+     */
     public static Type build(boolean isNullable, boolean isExpandsShadowRoot) {
       if (isNullable) {
         return isExpandsShadowRoot ? NULLABLE_IN_SHADOW : NULLABLE;

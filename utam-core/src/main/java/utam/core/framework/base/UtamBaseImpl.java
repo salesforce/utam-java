@@ -25,27 +25,54 @@ public abstract class UtamBaseImpl implements UtamBase {
   private Driver driver;
   private Element element;
 
+  /**
+   * Initializes a new instance of the UtamBaseImpl class
+   */
   protected UtamBaseImpl() {
   }
 
+  /**
+   * Gets the element for this implementation
+   *
+   * @return the element for this implementation
+   */
   // not final to allow mocks from tests
   protected Element getElement() {
     return element;
   }
 
+  /**
+   * Gets the driver for this implementation
+   *
+   * @return the driver for this implementation
+   */
   // not final to allow mocks from tests
   protected Driver getDriver() {
     return driver;
   }
 
+  /**
+   * Sets the element for this implementation
+   *
+   * @param element the element to be used for this implementation
+   */
   protected final void setElement(Element element) {
     this.element = element;
   }
 
+  /**
+   * Sets the driver for this implementation
+   *
+   * @param driver the drover to be used for this implementation
+   */
   protected final void setDriver(Driver driver) {
     this.driver = driver;
   }
 
+  /**
+   * Logs a message
+   * @param message the message to log
+   */
   protected final void log(String message) {
     UtamLogger.info(getLogMessage(message));
   }

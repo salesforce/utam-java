@@ -68,6 +68,16 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
     this.guardrailsMode = guardrailsMode;
   }
 
+  /**
+   * Initializes a new instance of the translator configuration class
+   *
+   * @param moduleName         name of the module with page object sources
+   * @param guardrailsMode     type of guardrails to apply - with warning or error
+   * @param sourceConfig       configuration to scan for page object sources
+   * @param targetConfig       information about output folders for page objects, configs and unit
+   *                           tests
+   * @param profileDefinitions list of known profiles and their values
+   */
   public DefaultTranslatorConfiguration(
       String moduleName,
       GuardrailsMode guardrailsMode,
@@ -77,6 +87,16 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
     this(moduleName, guardrailsMode, new TranslationTypesConfigJava(), sourceConfig, targetConfig, profileDefinitions);
   }
 
+
+  /**
+   * Initializes a new instance of the translator configuration class
+   *
+   * @param moduleName         name of the module with page object sources
+   * @param sourceConfig       configuration to scan for page object sources
+   * @param targetConfig       information about output folders for page objects, configs and unit
+   *                           tests
+   * @param profileDefinitions list of known profiles and their values
+   */
   public DefaultTranslatorConfiguration(
       String moduleName,
       TranslatorSourceConfig sourceConfig,
@@ -85,6 +105,14 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
     this(moduleName, GuardrailsMode.WARNING, new TranslationTypesConfigJava(), sourceConfig, targetConfig, profileDefinitions);
   }
 
+
+  /**
+   * Initializes a new instance of the translator configuration class, only used in unit tests
+   *
+   * @param sourceConfig       configuration to scan for page object sources
+   * @param targetConfig       information about output folders for page objects, configs and unit
+   *                           tests
+   */
   // used in tests
   DefaultTranslatorConfiguration(
       TranslatorSourceConfig sourceConfig,
@@ -150,6 +178,11 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Sets the configured profile, only used in profiles unit tests
+   *
+   * @param profileConfiguration the profile configuration to use
+   */
   // used in profiles tests in another package, hence public
   public void setConfiguredProfile(ProfileConfiguration profileConfiguration) {
     this.profileConfigurations.add(profileConfiguration);

@@ -13,13 +13,38 @@ package utam.core.declarative.representation;
  */
 public interface PageObjectDeclaration {
 
+  /**
+   * Gets a value indicating whether the Page Object contains only an interface
+   *
+   * @return true if the Page Object contains only an interface; otherwise false
+   */
   boolean isInterfaceOnly();
 
+  /**
+   * Gets a value indicating whether the Page Object contains an interface and implementation
+   *
+   * @return true if the Page Object contains an interface and implementation; otherwise false
+   */
   boolean isClassWithInterface();
 
+  /**
+   * Gets a value indicating whether the Page Object contains a class with profiles
+   *
+   * @return true if the Page Object contains a class with profiles; otherwise false
+   */
   boolean isClassWithProfiles();
 
+  /**
+   * Gets the implementation of the Page Object
+   *
+   * @return the implementation of the Page Object
+   */
   PageObjectClass getImplementation();
 
+  /**
+   * Gets the interface of the Page Object
+   *
+   * @return the interface of the Page Object
+   */
   PageObjectInterface getInterface();
 }

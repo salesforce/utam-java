@@ -20,14 +20,30 @@ public class UtamError extends RuntimeException {
    */
   private static final long serialVersionUID = 1L;
 
+  /**
+   * Initializes a new instance of the UtamError class
+   *
+   * @param message the error message
+   */
   public UtamError(String message) {
     super(message);
   }
 
+  /**
+   * Initializes a new instance of the UtamError class
+   *
+   * @param message the error message
+   * @param cause   the underlying wrapped exception
+   */
   public UtamError(String message, Throwable cause) {
     super(message, cause);
   }
 
+  /**
+   * Initializes a new instance of the UtamError class
+   *
+   * @param e the underlying wrapped exception
+   */
   public UtamError(Exception e) {
     super(e);
   }

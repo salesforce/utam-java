@@ -28,6 +28,12 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
 
   private static final List<String> EMPTY_CODE = new ArrayList<>();
 
+  /**
+   * Initializes a new instance of the InterfaceMethod class
+   * @param methodName       the name of the method
+   * @param returnType       the return type of the method
+   * @param methodParameters the list of parameters for the method
+   */
   public InterfaceMethod(
       String methodName,
       TypeProvider returnType,
@@ -76,6 +82,12 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
     private final MethodDeclaration declaration;
     private final UnionType unionType;
 
+    /**
+     * Initializes a new instance of the AbstractBasicElementGetter class
+     * @param methodName the name of the method
+     * @param parameters the list of parameters of the method
+     * @param returnType the return type of the method
+     */
     public AbstractBasicElementGetter(
         String methodName,
         List<MethodParameter> parameters,

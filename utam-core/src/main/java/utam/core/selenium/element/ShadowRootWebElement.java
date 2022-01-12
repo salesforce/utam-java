@@ -32,8 +32,19 @@ import java.util.Map;
 @SuppressWarnings("all")
 public class ShadowRootWebElement implements WebElement, WrapsElement, WrapsDriver {
 
+  /**
+   * the JavaScript snippet to query all elements for a selector in a shadow root
+   */
   public static final String GET_SHADOW_ROOT_QUERY_SELECTOR_ALL = "return arguments[0].shadowRoot.querySelectorAll('%s')";
+
+  /**
+   * the JavaScript snippet to query a single element for a selector in a shadow root
+   */
   public static final String GET_SHADOW_ROOT_QUERY_SELECTOR = "return arguments[0].shadowRoot.querySelector('%s')";
+
+  /**
+   * the JavaScript snippet to detect the presence of a shadow root
+   */
   public static final String SHADOW_ROOT_DETECTION_SCRIPT_FRAGMENT = "arguments[0].shadowRoot;";
 
 
@@ -41,6 +52,11 @@ public class ShadowRootWebElement implements WebElement, WrapsElement, WrapsDriv
   private final WebElement rootElement;
   private final JavascriptExecutor executor;
 
+  /**
+   * Initializes a new instance of the ShadowRootWebElement class
+   *
+   * @param we the WebElement object to wrap
+   */
   public ShadowRootWebElement(WebElement we) {
     this.rootElement = we;
     this.executor = (JavascriptExecutor) ((WrapsDriver) we).getWrappedDriver();
@@ -50,6 +66,11 @@ public class ShadowRootWebElement implements WebElement, WrapsElement, WrapsDriv
     return queryString.replace("\\", "\\\\").replace("'", "\\'").replace("\"", "\\\"");
   }
 
+  /**
+   * Gets the JavascriptExecutor for this element.
+   *
+   * @return the JavascriptExecutor for this element.
+   */
   public JavascriptExecutor getExecutor() {
     return executor;
   }

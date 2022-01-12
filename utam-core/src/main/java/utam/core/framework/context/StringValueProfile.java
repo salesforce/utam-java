@@ -17,6 +17,9 @@ import utam.core.framework.consumer.UtamError;
  */
 public class StringValueProfile implements Profile {
 
+  /**
+   * the default profile to use
+   */
   // profile with default implementations for interfaces in case if modules are not set
   public static final Profile DEFAULT_PROFILE = new StringValueProfile("default", "impl") {
     @Override
@@ -32,6 +35,11 @@ public class StringValueProfile implements Profile {
   private final String name;
   private final String value;
 
+  /**
+   * Initializes a new instance of the StringValueProfile class
+   * @param profileName name of the profile
+   * @param value       value for the profile
+   */
   public StringValueProfile(String profileName, String value) {
     if (profileName == null || profileName.isEmpty()) {
       throw new UtamError(ERR_NAME_REQUIRED);

@@ -31,6 +31,11 @@ public class BeforeLoadMethod implements PageObjectMethod {
     private final List<TypeProvider> classImports = new ArrayList<>();
     private final List<TypeProvider> imports = new ArrayList<>();
 
+    /**
+     * Initializes a new instance of the BeforeLoadMethod class.
+     * @param methodContext the method context of the before load method
+     * @param statements    the statements of the method
+     */
     public BeforeLoadMethod(MethodContext methodContext, List<ComposeMethodStatement> statements) {
         this.name = methodContext.getName();
         statements.forEach(

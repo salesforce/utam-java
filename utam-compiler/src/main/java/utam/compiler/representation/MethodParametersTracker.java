@@ -28,6 +28,11 @@ public class MethodParametersTracker {
   private final Set<String> parameterNames = new HashSet<>();
   private final String methodContext;
 
+  /**
+   * Initializes a new instance of the MethodParametersTracker class
+   *
+   * @param methodContext the method context for tracking parameters
+   */
   public MethodParametersTracker(String methodContext) {
     this.methodContext = methodContext;
   }
@@ -45,10 +50,20 @@ public class MethodParametersTracker {
     methodParameters.add(parameter);
   }
 
+  /**
+   * Sets the method parameters
+   *
+   * @param parameters the list of parameters to set
+   */
   public void setMethodParameters(List<MethodParameter> parameters) {
     parameters.forEach(this::setMethodParameter);
   }
 
+  /**
+   * Gets the method parameters
+   *
+   * @return the list of the method parameters to set
+   */
   public List<MethodParameter> getMethodParameters() {
     return methodParameters;
   }

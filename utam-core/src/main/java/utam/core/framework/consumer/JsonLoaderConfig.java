@@ -36,6 +36,13 @@ public class JsonLoaderConfig {
   final DriverConfig driverConfig;
   private final List<Module> modules = new ArrayList<>();
 
+  /**
+   * Initializes a new instance of the JsonLoaderConfig class
+   *
+   * @param driverConfig the driver configuration
+   * @param modules      the list of modules
+   * @param profiles     the list of profiles
+   */
   @JsonCreator
   public JsonLoaderConfig(
       @JsonProperty(value = "timeouts") TimeoutsJsonMapping driverConfig,
@@ -119,6 +126,11 @@ public class JsonLoaderConfig {
     @JsonProperty(value = "name")
     private final String name;
 
+    /**
+     * Initializes a new instance of the Module class
+     * @param name     name of the module
+     * @param profiles profiles defined for the module
+     */
     @JsonCreator
     public Module(
         @JsonProperty(value = "name", required = true) String name,
@@ -169,6 +181,11 @@ public class JsonLoaderConfig {
       return allProfiles;
     }
 
+    /**
+     * Gets the name of the module
+     *
+     * @return the name of the module
+     */
     public String getName() {
       return name;
     }
@@ -190,6 +207,11 @@ public class JsonLoaderConfig {
     @JsonProperty(value = "values")
     final String[] values;
 
+    /**
+     * Initializes a new instance of the Profile class
+     * @param name   name of the profile
+     * @param values array of the values defined in the profile
+     */
     @JsonCreator
     public Profile(
         @JsonProperty(value = "name", required = true) String name,

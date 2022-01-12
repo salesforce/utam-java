@@ -34,6 +34,13 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
   private final Driver driver;
   private final String bridgeAppTitle;
 
+  /**
+   * Initializes a new instance of the PageObjectsFactoryImpl class
+   *
+   * @param pageObjectContext the Page Object context
+   * @param bridgeAppTitle    the bridge app title for mobile apps
+   * @param driver            the driver instance
+   */
   public PageObjectsFactoryImpl(
       PageObjectContext pageObjectContext,
       String bridgeAppTitle,
@@ -43,7 +50,13 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
     this.bridgeAppTitle = bridgeAppTitle;
   }
 
-  public PageObjectsFactoryImpl(UtamLoaderConfig utamLoaderConfig, Driver driver) {
+  /**
+   * Initializes a new instance of the PageObjectsFactoryImpl class
+   *
+   * @param utamLoaderConfig the loader configuration for the UTAM loader
+   * @param driver           the driver instance
+   */
+ public PageObjectsFactoryImpl(UtamLoaderConfig utamLoaderConfig, Driver driver) {
     this(utamLoaderConfig.getPageContext(), utamLoaderConfig.getBridgeAppTitle(), driver);
   }
 

@@ -152,7 +152,13 @@ public interface Element {
    * types of scroll action
    */
   enum ScrollOptions {
+    /**
+     * scroll element to the top of the viewport
+     */
     TOP,
+    /**
+     * scroll element to the center of the viewport
+     */
     CENTER
   }
 }

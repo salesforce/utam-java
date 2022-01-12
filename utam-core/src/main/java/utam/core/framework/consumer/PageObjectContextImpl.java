@@ -22,15 +22,29 @@ import utam.core.framework.base.PageObject;
  */
 public class PageObjectContextImpl implements PageObjectContext {
 
+  /**
+   * Error template for not being able to find a class by name
+   */
   public static final String ERR_GET_CLASS_BY_NAME = "can't find class with name %s";
   static final String ERR_GET_INSTANCE_BY_NAME = "can't create instance of type '%s'";
 
   private final Map<Class<? extends PageObject>, Class> activeBeans;
 
+  /**
+   * Initializes a new instance of the PageObjectContextImpl class
+   *
+   * @param activeBeans the active beans in the Page Object
+   */
   public PageObjectContextImpl(Map<Class<? extends PageObject>, Class> activeBeans) {
     this.activeBeans = activeBeans;
   }
 
+  /**
+   * Gets the class from the name
+   *
+   * @param className name of the class to retrieve
+   * @return the class
+   */
   public static Class getClassFromName(String className) {
     try {
       return Class.forName(className);
@@ -39,6 +53,12 @@ public class PageObjectContextImpl implements PageObjectContext {
     }
   }
 
+  /**
+   * Gets the default implementation type for an interface
+   *
+   * @param fullInterfaceName full interface name for which to get the default implementation
+   * @return the default implementation
+   */
   public static String[] getDefaultImplType(String fullInterfaceName) {
     String packageName = fullInterfaceName.substring(0, fullInterfaceName.lastIndexOf("."));
     String typeName = fullInterfaceName.substring(fullInterfaceName.lastIndexOf(".") + 1) + "Impl";

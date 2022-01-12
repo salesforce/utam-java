@@ -33,6 +33,10 @@ public final class InterfaceSerializer {
 
   private final PageObjectInterface source;
 
+  /**
+   * Initializes a new instance of the InterfaceSerializer class
+   * @param source the interface object to serialize
+   */
   public InterfaceSerializer(PageObjectInterface source) {
     this.source = source;
   }

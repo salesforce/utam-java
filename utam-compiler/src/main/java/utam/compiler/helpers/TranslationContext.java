@@ -45,6 +45,9 @@ import utam.core.framework.context.Profile;
  */
 public final class TranslationContext {
 
+  /**
+   * The error template string for an element not found in the context
+   */
   public static final String ERR_CONTEXT_ELEMENT_NOT_FOUND =
       "referenced element '%s' not found in context";
   static final String ERR_CONTEXT_DUPLICATE_METHOD = "duplicate method '%s'";
@@ -68,7 +71,12 @@ public final class TranslationContext {
   private final TypeProvider pageObjectClassType;
   private TypeProvider pageObjectInterfaceType;
 
-
+  /**
+   * Initializes a new instance of the TranslationContext class
+   *
+   * @param pageObjectURI           the Page Object URI
+   * @param translatorConfiguration the translator configuration
+   */
   public TranslationContext(String pageObjectURI, TranslatorConfig translatorConfiguration) {
     this.pageObjectURI = pageObjectURI;
     this.translationTypesConfig = translatorConfiguration.getTranslationTypesConfig();
@@ -81,49 +89,101 @@ public final class TranslationContext {
     this.pageObjectInterfaceType = translationTypesConfig.getInterfaceType(pageObjectURI);
   }
 
+  /**
+   * Performs guardrails validation
+   */
   public void guardrailsValidation() {
     PageObjectValidation pageObjectValidation = new PageObjectValidation(
         translatorConfiguration.getValidationMode(), pageObjectURI, elementContextMap.values());
     pageObjectValidation.validate();
   }
 
+  /**
+   * Sets the global guardrails validation context
+   *
+   * @param validation the global validation context
+   */
   public void setGlobalGuardrailsContext(GlobalValidation validation) {
     validation.setPageObjectElements(pageObjectURI, elementContextMap.values());
   }
 
+  /**
+   * Sets that the Page Object is abstract
+   */
   public void setAbstract() {
     this.isAbstractPageObject = true;
   }
 
+  /**
+   * Gets a value indicating that the Page Object is abstract
+   *
+   * @return true if the Page Object is abstract; otherwise, false
+   */
   public boolean isAbstractPageObject() {
     return isAbstractPageObject;
   }
 
+  /**
+   * Gets a value indicating that the Page Object is an implementation-only Page Object
+   *
+   * @return true if the Page Object is  an implementation-only Page Object; otherwise, false
+   */
   public boolean isImplementationPageObject() {
     return isImplementationPageObject;
   }
 
+  /**
+   * Sets the type that this Page Object implements
+   *
+   * @param implementsProperty the type that the Page Object implements
+   */
   public void setImplementedType(String implementsProperty) {
     this.isImplementationPageObject = true;
     this.pageObjectInterfaceType = translationTypesConfig.getInterfaceType(implementsProperty);
   }
 
+  /**
+   * Gets the interface type of this Page Object
+   *
+   * @return the interface type of this Page Object
+   */
   public TypeProvider getSelfType() {
     return pageObjectInterfaceType;
   }
 
+  /**
+   * Gets the implementation type of this Page Object
+   *
+   * @return the implementation type of this Page Object
+   */
   public TypeProvider getClassType() {
     return pageObjectClassType;
   }
 
+  /**
+   * Gets the specified type provider
+   * @param type the type to get
+   * @return the type provider of the specified type
+   */
   public TypeProvider getType(String type) {
     return translationTypesConfig.getInterfaceType(type);
   }
 
+  /**
+   * Gets the imperative extensions type of this Page Object
+   *
+   * @param type the type of the imperative extensions class
+   * @return the imperative extensions type of this Page Object
+   */
   public TypeProvider getUtilityType(String type) {
     return translationTypesConfig.getUtilityType(type);
   }
 
+  /**
+   * Sets the element context for this Page Object
+   *
+   * @param element the element context to set
+   */
   public void setElement(ElementContext element) {
     if (elementContextMap.containsKey(element.getName())) {
       throw new UtamError(String.format(ERR_CONTEXT_DUPLICATE_ELEMENT_NAME, element.getName()));
@@ -131,6 +191,11 @@ public final class TranslationContext {
     elementContextMap.put(element.getName(), element);
   }
 
+  /**
+   * Sets a field for this Page Object
+   *
+   * @param field the field to set
+   */
   public void setClassField(PageClassField field) {
     if (pageObjectFields.stream().anyMatch(f -> f.getName().equals(field.getName()))) {
       throw new UtamError(String.format(ERR_CONTEXT_DUPLICATE_FIELD, field.getName()));
@@ -138,6 +203,11 @@ public final class TranslationContext {
     pageObjectFields.add(field);
   }
 
+  /**
+   * Sets a method on the Page Object
+   *
+   * @param method the method to set
+   */
   public void setMethod(PageObjectMethod method) {
     // first check if same method already exists
     if (methodNames.contains(method.getDeclaration().getName())) {
@@ -153,10 +223,21 @@ public final class TranslationContext {
     }
   }
 
+  /**
+   * Gets the root element of this Page Object
+   *
+   * @return the root element of this Page Object
+   */
   public ElementContext getRootElement() {
     return getElement(ROOT_ELEMENT_NAME);
   }
 
+  /**
+   * Gets an element by name in this Page Object
+   *
+   * @param name the name of the element to get
+   * @return the element in the Page Object
+   */
   public ElementContext getElement(String name) {
     if (name == null || SELF_ELEMENT_NAME.equals(name)) {
       return SELF_ELEMENT;
@@ -170,6 +251,11 @@ public final class TranslationContext {
     return elementContextMap.get(name);
   }
 
+  /**
+   * Gets the list of methods defined in the Page Object
+   *
+   * @return the list of Page Object methods
+   */
   public List<PageObjectMethod> getMethods() {
     List<PageObjectMethod> allMethods = new ArrayList<>();
     // only used ones!
@@ -178,10 +264,22 @@ public final class TranslationContext {
     return allMethods;
   }
 
+  /**
+   * Gets the list of fields defined in the Page Object
+   *
+   * @return the list of fields defined in the Page Object
+   */
   public List<PageClassField> getFields() {
     return pageObjectFields;
   }
 
+  /**
+   * Gets a profile
+   * @param jsonKey the key specified in the JSON for the profile
+   * @param value   the value of the profile
+   *
+   * @return the profile
+   */
   public Profile getProfile(String jsonKey, String value) {
     ProfileConfiguration profileConfiguration = translatorConfiguration.getConfiguredProfiles()
         .stream()
@@ -202,6 +300,12 @@ public final class TranslationContext {
     usedPrivateMethods.add(name);
   }
 
+  /**
+   * Gets a method from the Page Object
+   *
+   * @param name the name of the method to get
+   * @return the named method on the Page Object
+   */
   public PageObjectMethod getMethod(String name) {
     PageObjectMethod result = pageObjectMethods.stream()
         .filter(method -> method.getDeclaration().getName().equals(name))

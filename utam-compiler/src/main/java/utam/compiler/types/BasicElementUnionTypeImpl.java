@@ -25,6 +25,10 @@ public class BasicElementUnionTypeImpl extends FromString implements UnionType {
   private static final TypeProvider extendedType = TypeUtilities.BASIC_ELEMENT_IMPL_CLASS;
   private final TypeProvider implementedInterface;
 
+  /**
+   * Initializes a new instance of the BasicElementUnionTypeImpl class
+   * @param implementedInterface the interface to be implemented
+   */
   public BasicElementUnionTypeImpl(TypeProvider implementedInterface) {
     super(implementedInterface.getSimpleName() + "Impl");
     this.implementedInterface = implementedInterface;

@@ -38,10 +38,13 @@ import utam.core.element.Locator;
  */
 public class DriverAdapter implements Driver {
 
+  // used in tests to validate right message
+  /**
+   * Error prefix for element not found
+   */
+  public static final String ERR_ELEMENT_NOT_FOUND_PREFIX = "can't find element";
   static final String ERR_SUPPORTED_FOR_MOBILE = "method is applicable only for iOS/Android";
   static final String ERR_CANT_ENTER_NULL_FRAME = "Can't enter null frame element";
-  // used in tests to validate right message
-  public static final String ERR_ELEMENT_NOT_FOUND_PREFIX = "can't find element";
   private static final List<Class<? extends Throwable>> IGNORE_EXCEPTIONS =
       Stream.of(
           NoSuchElementException.class,
@@ -53,6 +56,11 @@ public class DriverAdapter implements Driver {
   private WebDriver driver;
   private final DriverConfig driverConfig;
 
+  /**
+   * Initializes a new instance of the DriverAdapter class
+   * @param driver       the driver instance
+   * @param driverConfig the driver configuration object
+   */
   public DriverAdapter(WebDriver driver, DriverConfig driverConfig) {
     this.driver = driver;
     this.driverConfig = driverConfig;
@@ -81,6 +89,11 @@ public class DriverAdapter implements Driver {
     return ((DriverAdapter) driver).getSeleniumDriver();
   }
 
+  /**
+   * Resets the underlying driver
+   *
+   * @param driver the driver with which to replace the active one
+   */
   protected final void resetDriver(WebDriver driver) {
     this.driver = driver;
   }
@@ -158,6 +171,11 @@ public class DriverAdapter implements Driver {
     driver.switchTo().defaultContent();
   }
 
+  /**
+   * Gets the underlying Selenium WebDriver instance
+   *
+   * @return the underlying Selenium WebDriver instance
+   */
   public WebDriver getSeleniumDriver() {
     return this.driver;
   }

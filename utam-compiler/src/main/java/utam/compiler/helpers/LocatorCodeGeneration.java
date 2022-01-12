@@ -31,6 +31,10 @@ public class LocatorCodeGeneration {
 
   private static final Set<String> SUPPORTED_SELECTOR_TYPES = Stream.of(SelectorType.values())
       .map(Enum::name).collect(Collectors.toSet());
+
+  /**
+   * The supported selector types as a comma-delimited string
+   */
   public static final String SUPPORTED_SELECTOR_TYPES_STRING =
       String.join(",", SUPPORTED_SELECTOR_TYPES);
 
@@ -38,6 +42,13 @@ public class LocatorCodeGeneration {
   private final Locator locator;
   private final List<MethodParameter> parameters;
 
+  /**
+   * Initializes a new instance of the LocatorCodeGeneration class
+   *
+   * @param type       the type of selector
+   * @param locator    the locator
+   * @param parameters the list of parameters
+   */
   public LocatorCodeGeneration(SelectorType type, Locator locator,
       List<MethodParameter> parameters) {
     this.locator = locator;
@@ -45,6 +56,11 @@ public class LocatorCodeGeneration {
     this.builderValue = getSelectorAsString(type, locator.getStringValue(), parameters);
   }
 
+  /**
+   * Initializes a new instance of the LocatorCodeGeneration class, only used in unit tests
+   *
+   * @param locatorCss the CSS selector fo the loctor to use
+   */
   // used in tests
   public LocatorCodeGeneration(String locatorCss) {
     this(SelectorType.css, LocatorBy.byCss(locatorCss), Collections.emptyList());
@@ -63,28 +79,63 @@ public class LocatorCodeGeneration {
     return selectorString.replaceAll("\"", Matcher.quoteReplacement("\\\""));
   }
 
+  /**
+   * Gets the builder string for the locator
+   *
+   * @return the builder string
+   */
   public String getBuilderString() {
     return builderValue;
   }
 
+  /**
+   * Gets the parameters of the locator
+   * @return the list of parameters of the locator
+   */
   public List<MethodParameter> getParameters() {
     return parameters;
   }
 
+  /**
+   * Gets the locator
+   * @return the locator
+   */
   public Locator getLocator() {
     return locator;
   }
 
+  /**
+   * Gets a literal parameter
+   * @return the literal parameter for the locator
+   */
   public MethodParameter getLiteralParameter() {
     String strValue = getBuilderString();
     List<MethodParameter> nestedParameters = getParameters();
     return new Literal(strValue, SELECTOR, nestedParameters);
   }
 
+  /**
+   * The types of selectors usable
+   */
   public enum SelectorType {
+    /**
+     * A CSS selector
+     */
     css("%s.byCss(%s)"),
+
+    /**
+     * An accessibility ID for mobile applications
+     */
     accessid("%s.byAccessibilityId(%s)"),
+
+    /**
+     * A class chain for iOS applications
+     */
     classchain("%s.byClassChain(%s)"),
+
+    /**
+     * A UIAutomator locator for Android applications
+     */
     uiautomator("%s.byUiAutomator(%s)");
 
     private final String pattern;

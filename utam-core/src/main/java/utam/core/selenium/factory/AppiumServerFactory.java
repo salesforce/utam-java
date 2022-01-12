@@ -24,6 +24,11 @@ import java.io.File;
  */
 public class AppiumServerFactory {
 
+  /**
+   * Gets an instance of the local Appium server.
+   *
+   * @return An AppiumDriverLocalService instance
+   */
   public static AppiumDriverLocalService getAppiumServer() {
     SystemProperties.setNodeJSPath();
     SystemProperties.setAppiumPath();

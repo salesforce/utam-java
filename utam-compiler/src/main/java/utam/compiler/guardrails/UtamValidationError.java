@@ -22,6 +22,11 @@ public class UtamValidationError extends UtamError {
    */
   private static final long serialVersionUID = 1L;
 
+  /**
+   * Initializes a new instance of the UtamValidationError class
+   *
+   * @param message the validation error message
+   */
   public UtamValidationError(String message) {
     super(message);
   }

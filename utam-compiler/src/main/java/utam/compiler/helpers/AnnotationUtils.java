@@ -26,6 +26,9 @@ import utam.core.selenium.appium.LocatorUIAutomator;
  */
 public final class AnnotationUtils {
 
+  /**
+   * A provider for an empty annotation
+   */
   public static final AnnotationProvider EMPTY_ANNOTATION = () -> "";
   private static final TypeProvider MARKER_CLASS = new TypeUtilities.FromClass(PageMarker.class);
   private static final List<TypeProvider> MARKER_CLASS_LIST =
@@ -35,6 +38,11 @@ public final class AnnotationUtils {
       Stream.of(new TypeUtilities.FromClass(ElementMarker.class)).collect(Collectors.toList());
   private static final String MARKER_CLASS_STRING = PageMarker.class.getSimpleName();
 
+  /**
+   * Gets the provider for the annotation for a given locator
+   * @param selector the locator object containing the mechanism for selecting the element
+   * @return the provider for creating the annotation for selecting the element
+   */
   public static AnnotationProvider getPageObjectAnnotation(Locator selector) {
     String string =
         String.format(
@@ -87,6 +95,11 @@ public final class AnnotationUtils {
     return new Annotation(res.toString(), SELECTOR_CLASS_LIST);
   }
 
+  /**
+   * Gets the annotation provider for the page platform
+   * @param string the string representing the platform
+   * @return the object providing the annotation for the given platform
+   */
   public static AnnotationProvider getPagePlatformAnnotation(String string) {
     PlatformType pagePlatform = PlatformType.fromString(string);
     if (pagePlatform == PlatformType.NONE) {

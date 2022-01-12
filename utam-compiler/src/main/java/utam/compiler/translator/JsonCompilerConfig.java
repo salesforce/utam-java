@@ -56,6 +56,12 @@ public class JsonCompilerConfig {
     return mapper;
   }
 
+  /**
+   * Initializes a new instance of the JsonCompilerConfig class
+   * @param configFile   the configuration file
+   * @param compilerRoot the root directory for the compiler
+   * @throws IOException thrown if there is an exception during the execution
+   */
   public JsonCompilerConfig(File configFile, File compilerRoot) throws IOException {
     try {
       moduleConfig = getJsonCompilerMapper().readValue(configFile, Module.class);
@@ -65,18 +71,37 @@ public class JsonCompilerConfig {
     }
   }
 
+  /**
+   * Gets the list of configured profiles
+   *
+   * @return the list of configured profiles
+   */
   public List<ProfileConfiguration> getConfiguredProfiles() {
     return moduleConfig.getConfiguredProfiles();
   }
 
+  /**
+   * Gets the target configuration
+   *
+   * @return the target configuration
+   */
   public TranslatorTargetConfig getTargetConfig() {
     return moduleConfig.getTargetConfig(filePathsRoot);
   }
 
+  /**
+   * Gets the source configuration
+   *
+   * @return the source configuration
+   */
   public TranslatorSourceConfig getSourceConfig() {
     return moduleConfig.getSourceConfig(filePathsRoot);
   }
 
+  /**
+   * Gets the module name
+   * @return the name of the module
+   */
   public String getModuleName() {
     return moduleConfig.moduleName;
   }
@@ -86,6 +111,12 @@ public class JsonCompilerConfig {
     return moduleConfig;
   }
 
+  /**
+   * Gets the translator configuration
+   *
+   * @param guardrailsMode the guardrails mode
+   * @return the translator configurtion
+   */
   public TranslatorConfig getTranslatorConfig(GuardrailsMode guardrailsMode) {
     TranslatorSourceConfig sourceConfig = getSourceConfig();
     TranslatorTargetConfig targetConfig = getTargetConfig();
@@ -196,6 +227,12 @@ public class JsonCompilerConfig {
           new ArrayList<>());
     }
 
+    /**
+     * Gets the translator source configuration
+     *
+     * @param compilerRootFolderName the name of the root folder for the compiler
+     * @return the translator source configuration
+     */
     public TranslatorSourceConfig getSourceConfig(String compilerRootFolderName) {
       if(namespaces.isEmpty()) {
         return new SourceWithoutPackages(compilerRootFolderName + pageObjectsRootDirectory, pageObjectFileMaskRegex);
@@ -206,6 +243,12 @@ public class JsonCompilerConfig {
           scanner);
     }
 
+    /**
+     * Gets the translator target configuration
+     *
+     * @param compilerRootFolderName the name of the root folder for the compiler
+     * @return the translator target configuration
+     */
     public TranslatorTargetConfig getTargetConfig(String compilerRootFolderName) {
       return new DefaultTargetConfiguration(
           compilerRootFolderName + pageObjectsOutputDir,
@@ -214,6 +257,11 @@ public class JsonCompilerConfig {
           compilerRootFolderName + unitTestsOutputDir);
     }
 
+    /**
+     * Gets the mapping for the packages
+     *
+     * @return the mapping for the packages
+     */
     public Map<String, String> getPackagesMapping() {
       Map<String, String> packages = new HashMap<>();
       namespaces.forEach(namespace -> namespace.setPackageMapping(packages));
@@ -332,10 +380,20 @@ public class JsonCompilerConfig {
       this.values = values;
     }
 
+    /**
+     * Gets the profile configuration
+     *
+     * @return the profile configuration
+     */
     public ProfileConfiguration getProfileConfiguration() {
       return new StringValueProfileConfig(name, values);
     }
 
+    /**
+     * Sets the configured profile
+     *
+     * @param profiles the list of profiles to configure
+     */
     public void setConfiguredProfile(List<ProfileConfiguration> profiles) {
       ProfileConfiguration profileConfiguration = getProfileConfiguration();
       for (ProfileConfiguration alreadyConfigured : profiles) {

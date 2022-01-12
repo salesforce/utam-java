@@ -50,6 +50,8 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
   private final ScannerConfig scannerConfig;
 
   /**
+   * Initializes a new instance of the DefaultSourceConfiguration class
+   *
    * @param scannerConfig      configuration to scan for page object sources
    * @param scanner         scanner for page object sources Page Objects will be written
    */
@@ -58,6 +60,9 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
     this.scannerConfig = scannerConfig;
   }
 
+  /**
+   * Initializes a new instance of the DefaultSourceConfiguration class, only used by unit tests
+   */
   // used in tests
   DefaultSourceConfiguration() {
     this(new ScannerConfig(new HashMap<>()), new RecursiveScanner(null));
@@ -129,6 +134,11 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
 
     final String rootFolder;
 
+    /**
+     * Initializes a new instance of the RecursiveScanner class
+     *
+     * @param rootFolder the root folder
+     */
     public RecursiveScanner(String rootFolder) {
       this.rootFolder = rootFolder;
     }
@@ -161,6 +171,11 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
 
     final List<File> inputFiles;
 
+    /**
+     * Initializes a new instance of the FilesScanner class
+     *
+     * @param inputFiles the list of input files for the scanner
+     */
     public FilesScanner(List<File> inputFiles) {
       super(null);
       this.inputFiles = inputFiles;
@@ -189,12 +204,23 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
 
     private final Map<String, String> packagesMapping = new HashMap<>();
 
+    /**
+     * Initializes a new instance of the ScannerConfig class
+     *
+     * @param pageObjectFileMask the file mask for Page Object description files
+     * @param packagesMapping    the map of directories to packages
+     */
     public ScannerConfig(String pageObjectFileMask, Map<String, String> packagesMapping) {
       packagesMapping.forEach((key, value) -> this.packagesMapping
           .put(key, value + File.separator + pageObjectFileMask));
     }
 
-    public ScannerConfig(Map<String, String> packagesMapping) {
+    /**
+     * Initializes a new instance of the ScannerConfig class using the default file mask
+     *
+     * @param packagesMapping the map of directories to packages
+     */
+   public ScannerConfig(Map<String, String> packagesMapping) {
       this(DEFAULT_JSON_FILE_MASK_REGEX, packagesMapping);
     }
 
@@ -218,6 +244,12 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
     private final String rootFolder;
     private static final String DEFAULT_PACKAGE_NAME = "utam";
 
+    /**
+     * Initializes a new instance of the SourceWithoutPackages class
+     *
+     * @param rootFolder          the root folder to scan
+     * @param pageObjectsFileMask the file mask for Page Object description files
+     */
     SourceWithoutPackages(String rootFolder, String pageObjectsFileMask) {
       super(new ScannerConfig(pageObjectsFileMask, new HashMap<>()), new RecursiveScanner(rootFolder));
       this.pageObjectFileMask = pageObjectsFileMask;

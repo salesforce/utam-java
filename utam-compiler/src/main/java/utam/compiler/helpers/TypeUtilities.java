@@ -36,33 +36,108 @@ import utam.core.selenium.element.LocatorBy;
 @SuppressWarnings("rawtypes")
 public final class TypeUtilities {
 
+  /**
+   * A type provider for the java.util.stream.Collectors class
+   */
   public static final TypeProvider COLLECTOR_IMPORT = new TypeUtilities.FromClass(Collectors.class);
+
+  /**
+   * A type provider for the java.util.List class
+   */
   public static final TypeProvider LIST_IMPORT = new TypeUtilities.FromClass(List.class);
+
+  /**
+   * A type provider for the PageObject class
+   */
   public static final TypeProvider PAGE_OBJECT = new TypeUtilities.FromClass(PageObject.class);
+
+  /**
+   * A type provider for the BasePageObject class
+   */
   public static final TypeProvider BASE_PAGE_OBJECT_CLASS =
       new TypeUtilities.FromClass(BasePageObject.class);
+
+  /**
+   * A type provider for the RootPageObject class
+   */
   public static final TypeProvider ROOT_PAGE_OBJECT =
       new TypeUtilities.FromClass(RootPageObject.class);
+
+  /**
+   * A type provider for the BaseRootPageObject class
+   */
   public static final TypeProvider BASE_ROOT_PAGE_OBJECT_CLASS =
       new TypeUtilities.FromClass(BaseRootPageObject.class);
+
+  /**
+   * A type provider for void
+   */
   public static final TypeProvider VOID = new UnimportableType("void");
+
+  /**
+   * A type provider an argument reference
+   */
   public static final TypeProvider PARAMETER_REFERENCE = new UnimportableType("argumentReference");
+
+  /**
+   * A type provider for the ContainerElement class
+   */
   public static final TypeProvider CONTAINER_ELEMENT =
       new TypeUtilities.FromClass(ContainerElement.class);
+
+  /**
+   * A type provider for the LocatorBy class
+   */
   public static final TypeProvider SELECTOR = new FromClass(LocatorBy.class);
+
+  /**
+   * A type provider for the java.util.function.Supplier class
+   */
   public static final TypeProvider FUNCTION = new FromClass(Supplier.class) {
     @Override
     public String getSimpleName() {
       return "Supplier<T>";
     }
   };
+
+  /**
+   * A type provider for the ElementLocation class
+   */
   public static final TypeProvider ELEMENT_FIELD = new FromClass(ElementLocation.class);
+
+  /**
+   * A type provider for the BasicElement class
+   */
   public static final TypeProvider BASIC_ELEMENT = new FromClass(BasicElement.class);
+
+  /**
+   * The type name for a frame element
+   */
   public static final String FRAME_ELEMENT_TYPE_NAME = "frame";
+
+  /**
+   * A type name for a container element
+   */
   public static final String CONTAINER_ELEMENT_TYPE_NAME = "container";
+
+  /**
+   * A type provider for a Page Object parameter
+   */
   public static final TypeProvider PAGE_OBJECT_PARAMETER = new PageObjectClass(null);
+
+  /**
+   * A type provider for the bounded Page Object parameter
+   */
   public static final TypeProvider BOUNDED_PAGE_OBJECT_PARAMETER = new PageObjectClass("T");
+
+  /**
+   * A type provider for the RootPageObject class
+   */
   public static final TypeProvider ROOT_PAGE_OBJECT_PARAMETER = new RootPageObjectClass();
+
+  /**
+   * A type provider for the BasicPageElement class
+   */
   public static final TypeProvider BASIC_ELEMENT_IMPL_CLASS = new FromClass(
       BasePageElement.class);
   static final TypeProvider JAVA_OBJECT_TYPE = new UnimportableType("Object");
@@ -96,14 +171,28 @@ public final class TypeUtilities {
     return true;
   }
 
+  /**
+   * Wraps a type provider as a list
+   *
+   * @param originalType a type provider
+   * @return a type provider describing a list of the original type
+   */
   public static TypeProvider wrapAsList(TypeProvider originalType) {
     return originalType instanceof ListOf ? originalType : new ListOf(originalType);
   }
 
+  /**
+   * Creates a type provider from a Class object
+   */
   public static class FromClass implements TypeProvider {
 
     final Class clazz;
 
+    /**
+     * Initializes a new instance of the FromClass class
+     *
+     * @param type the Class from which to create the type provider
+     */
     public FromClass(Class type) {
       this.clazz = type;
     }
@@ -141,18 +230,32 @@ public final class TypeUtilities {
     }
   }
 
+  /**
+   * Creates a type provider from a string
+   */
   public static class FromString implements TypeProvider {
 
     private final String name;
     private final String fullName;
     private final String packageName;
 
+    /**
+     * Initializes a new instance of the FromString class
+     *
+     * @param name     the name of the type
+     * @param fullName the full name of the type
+     */
     public FromString(String name, String fullName) {
       this.name = name;
       this.fullName = fullName;
       this.packageName = setPackageName(fullName);
     }
 
+    /**
+     * Initializes a new instance of the FromString class
+     *
+     * @param fullName the full name of the type
+     */
     public FromString(String fullName) {
       this.name = getShortName(fullName);
       this.fullName = fullName;
@@ -201,10 +304,18 @@ public final class TypeUtilities {
     }
   }
 
+  /**
+   * Creates a type provider describing a list of types
+   */
   public static final class ListOf extends FromClass {
 
     private final TypeProvider elementType;
 
+    /**
+     * Intializes a new instance of the ListOf class
+     *
+     * @param elementType the type provider to create a list of
+     */
     private ListOf(TypeProvider elementType) {
       super(List.class);
       this.elementType = elementType;
@@ -241,8 +352,16 @@ public final class TypeUtilities {
     }
   }
 
+  /**
+   * Creates a type provider for a virtual type that does not require an import statement
+   */
   public static class UnimportableType extends FromString {
 
+    /**
+     * Initializes a new instance of the UmimportableType class
+     *
+     * @param name the name of the type
+     */
     public UnimportableType(String name) {
       super(name, "");
     }

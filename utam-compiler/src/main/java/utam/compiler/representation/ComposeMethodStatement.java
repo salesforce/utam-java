@@ -43,6 +43,14 @@ public abstract class ComposeMethodStatement {
   private final TypeProvider matcherOperandType;
   private final TypeProvider actionReturnType;
 
+  /**
+   * Initializes aa new instance of the ComposeMethodStatement class
+   * @param operand            the operand of the statement
+   * @param operation          the operation of the statement
+   * @param declaredReturnType the return type of the statement
+   * @param matcher            a matcher for the statement
+   * @param statementContext   the context of the statement
+   */
   ComposeMethodStatement(
       Operand operand,
       Operation operation,
@@ -150,22 +158,42 @@ public abstract class ComposeMethodStatement {
     }
   }
 
+  /**
+   * Gets the parameters of the statement
+   * @return the list of parameters of the statement
+   */
   public List<MethodParameter> getParameters() {
     return parameters;
   }
 
+  /**
+   * Gets the return type of the statement
+   * @return the return type of the statement
+   */
   public TypeProvider getReturnType() {
     return statementReturns;
   }
 
+  /**
+   * Gets the code lines of the statement
+   * @return the list of code lines of the statement
+   */
   public List<String> getCodeLines() {
     return codeLines;
   }
 
+  /**
+   * Gets the imports required by the statement
+   * @return the list of imports required to be added to the interface definition by tne statement
+   */
   public List<TypeProvider> getImports() {
     return imports;
   }
 
+  /**
+   * Gets the class imports required by the statement
+   * @return the list of imports required to be added to the implementation definition by tne statement
+   */
   public List<TypeProvider> getClassImports() {
     return classImports;
   }
@@ -186,6 +214,14 @@ public abstract class ComposeMethodStatement {
    */
   public static class Single extends ComposeMethodStatement {
 
+    /**
+     * Initializes aa new instance of the ComposeMethodStatement class for a single element
+     *
+     * @param operand            the operand of the statement
+     * @param operation          the operation of the statement
+     * @param matcher            a matcher for the statement
+     * @param statementContext   the context of the statement
+     */
     public Single(Operand operand, Operation operation, Matcher matcher, StatementContext statementContext) {
       super(operand, operation, operation.getReturnType(), matcher, statementContext);
     }
@@ -203,6 +239,13 @@ public abstract class ComposeMethodStatement {
    */
   public static class ForEach extends ComposeMethodStatement {
 
+    /**
+     * Initializes aa new instance of the ComposeMethodStatement class to be executed on a list
+     *
+     * @param operand            the operand of the statement
+     * @param operation          the operation of the statement
+     * @param statementContext   the context of the statement
+     */
     public ForEach(Operand operand, Operation operation, StatementContext statementContext) {
       super(operand, operation, VOID, null, statementContext);
     }
@@ -221,6 +264,15 @@ public abstract class ComposeMethodStatement {
    */
   public static final class MapEach extends ComposeMethodStatement {
 
+    /**
+     * Initializes aa new instance of the ComposeMethodStatement class to be executed on a list and
+     * returning a list
+     *
+     * @param operand            the operand of the statement
+     * @param operation          the operation of the statement
+     * @param matcher            a matcher for the statement
+     * @param statementContext   the context of the statement
+     */
     public MapEach(Operand operand, Operation operation, Matcher matcher, StatementContext statementContext) {
       super(operand, operation, wrapAsList(operation.getReturnType()), matcher, statementContext);
       ParameterUtils.setImport(getClassImports(), COLLECTOR_IMPORT);
@@ -242,6 +294,15 @@ public abstract class ComposeMethodStatement {
    */
   public static final class FlatMapEach extends ComposeMethodStatement {
 
+    /**
+     * Initializes aa new instance of the ComposeMethodStatement class to be executed on a list and
+     * returning a list
+     *
+     * @param operand            the operand of the statement
+     * @param operation          the operation of the statement
+     * @param matcher            a matcher for the statement
+     * @param statementContext   the context of the statement
+     */
     public FlatMapEach(Operand operand, Operation operation, Matcher matcher, StatementContext statementContext) {
       super(operand, operation, wrapAsList(operation.getReturnType()), matcher, statementContext);
       ParameterUtils.setImport(getClassImports(), COLLECTOR_IMPORT);
@@ -264,20 +325,46 @@ public abstract class ComposeMethodStatement {
    */
   public static abstract class Operand {
 
+    /**
+     * Gets the element parameters
+     *
+     * @return the list of element parameters
+     */
     protected List<MethodParameter> getElementParameters() {
       return new ArrayList<>();
     }
 
+    /**
+     * Gets a value indicating whether this operand applies to a list
+     *
+     * @return true if the operand applies to each element of a list; otherwise, false
+     */
     public abstract boolean isApplyToList();
 
+    /**
+     * Gets the operand instantiation code
+     *
+     * @param statementReturn the return type of the statement
+     * @return the list of code statements of the operand
+     */
     protected List<String> getOperandInstantiationCode(TypeProvider statementReturn) {
       return new ArrayList<>();
     }
 
+    /**
+     * Gets the list of imports required to add to the implementation class
+     *
+     * @return the list of types added to the implementation class
+     */
     protected List<TypeProvider> getAddedClassImports() {
       return new ArrayList<>();
     }
 
+    /**
+     * Gets the operand string
+     *
+     * @return the operand string
+     */
     protected abstract String getOperandString();
   }
 
@@ -286,18 +373,43 @@ public abstract class ComposeMethodStatement {
    */
   public static abstract class Operation {
 
+    /**
+     * Gets the action parameters
+     *
+     * @return the list of action parameters
+     */
     protected abstract List<MethodParameter> getActionParameters();
 
+    /**
+     * Gets a value indicating whether this operation returns void
+     *
+     * @return true if the operation returns void; otherwise, false
+     */
     public boolean isReturnsVoid() {
       return VOID.isSameType(getReturnType());
     }
 
+    /**
+     * Gets the return type of the operation
+     *
+     * @return the operation return type
+     */
     public abstract TypeProvider getReturnType();
 
+    /**
+     * Gets the list of imports required to add to the implementation class
+     *
+     * @return the list of types added to the implementation class
+     */
     protected List<TypeProvider> getAddedClassImports() {
       return new ArrayList<>();
     }
 
+    /**
+     * Gets the operation invocation string
+     *
+     * @return the operation invocation string
+     */
     protected abstract String getInvocationString();
   }
 
@@ -309,6 +421,11 @@ public abstract class ComposeMethodStatement {
     private final MatcherType matcherType;
     private final List<MethodParameter> matcherParameters;
 
+    /**
+     * Initializes a new instance of the Matcher class
+     * @param matcherType       the type of matcher to create
+     * @param matcherParameters the list of parameters for the matcher
+     */
     public Matcher(MatcherType matcherType,
         List<MethodParameter> matcherParameters) {
       this.matcherType = matcherType;
@@ -321,6 +438,10 @@ public abstract class ComposeMethodStatement {
    */
   public static class ReturnSelf extends ComposeMethodStatement {
 
+    /**
+     * Initializes a new instance of the ReturnSelf class, a statement that returns the PageObject
+     * @param returnType the return type of the Page Object
+     */
     public ReturnSelf(TypeProvider returnType) {
       super(returnType);
     }

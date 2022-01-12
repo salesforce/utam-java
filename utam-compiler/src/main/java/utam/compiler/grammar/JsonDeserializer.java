@@ -41,6 +41,13 @@ public final class JsonDeserializer {
   private final UtamPageObject utamPageObject;
   private final TranslationContext context;
 
+  /**
+   * Initializes a new instance of the JsonDeserializer class
+   *
+   * @param pageObjectURI           the URI of the Page Object to deserialize
+   * @param jsonString              the JSON string describing the Page Object
+   * @param translatorConfiguration the configuration of the translator
+   */
   JsonDeserializer(
       String pageObjectURI,
       String jsonString,
@@ -56,6 +63,13 @@ public final class JsonDeserializer {
     }
   }
 
+  /**
+   * Initializes a new instance of the JsonDeserializer class
+   *
+   * @param translatorConfig       the configuration of the translator
+   * @param translatorSourceConfig the configuration for the source
+   * @param pageObjectURI          the URI of the Page Object to deserialize
+\   */
   public JsonDeserializer(
       TranslatorConfig translatorConfig,
       TranslatorSourceConfig translatorSourceConfig,
@@ -100,6 +114,11 @@ public final class JsonDeserializer {
     return getDeserializerMapper().readValue(jsonString, type);
   }
 
+  /**
+   * Gets the Page Object translation context
+   *
+   * @return the Page Object translation context
+   */
   public final TranslationContext getPageObjectContext() {
     return context;
   }
@@ -108,6 +127,11 @@ public final class JsonDeserializer {
     return getErrorPrefix(pageObjectURI);
   }
 
+  /**
+   * Gets the Page Object declaration
+   *
+   * @return the Page Object declaration
+   */
   public PageObjectDeclaration getObject() {
     return new Object(utamPageObject, context);
   }

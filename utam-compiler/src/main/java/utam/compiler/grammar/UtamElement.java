@@ -45,6 +45,10 @@ import utam.core.framework.consumer.UtamError;
  */
 public final class UtamElement {
 
+  /**
+   * The default CSS selector for a container
+   */
+  public static final String DEFAULT_CONTAINER_SELECTOR_CSS = ":scope > *:first-child";
   static final String ERR_ELEMENT_FILTER_NEEDS_LIST =
       "element '%s': filter can only be set for list";
   static final String ERR_ELEMENT_MISSING_SELECTOR_PROPERTY =
@@ -52,7 +56,6 @@ public final class UtamElement {
   static final String ERR_ELEMENT_NESTED_ELEMENTS = "element '%s' can't have nested elements";
   static final String ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED =
       "element '%s': frame selector cannot return all";
-  public static final String DEFAULT_CONTAINER_SELECTOR_CSS = ":scope > *:first-child";
 
   private final String name;
   UtamSelector selector;
@@ -131,12 +134,30 @@ public final class UtamElement {
     }
   }
 
+  /**
+   * The type of element
+   */
   public enum Type {
+    /**
+     * A basic element
+     */
     BASIC(String.join(", ",
         "name", "public", "selector", "type", "filter", "nullable", "shadow", "elements")),
+
+    /**
+     * A custom element
+     */
     CUSTOM(String.join(", ",
         "name", "public", "selector", "type", "filter", "nullable")),
+
+    /**
+     * A container element
+     */
     CONTAINER(String.join(", ", "name", "public", "selector", "type")),
+
+    /**
+     * A frame element
+     */
     FRAME(String.join(", ",
         "name", "public", "selector", "type"));
 

@@ -47,6 +47,15 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     private final MethodParametersTracker parametersTracker;
     private final TypeProvider returnType;
 
+    /**
+     * Initializes a new instance of the Single class
+     *
+     * @param isPublic          a value indicating whether the method is public
+     * @param componentName     the name of the component
+     * @param locatorParameters the list of parameters of the method
+     * @param scopeElement      the scope element of the method
+     * @param returnType        the return type of the method
+     */
     public Single(
         boolean isPublic,
         String componentName,
@@ -107,6 +116,20 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     private final MethodParametersTracker parametersTracker;
     private final TypeProvider returnType;
 
+    /**
+     * Initializes a new instance of the Filtered class
+     *
+     * @param isPublic          a value indicating whether the method is public
+     * @param componentName     the name of the component
+     * @param locatorParameters the list of parameters of the method
+     * @param scopeElement      the scope element of the method
+     * @param returnType        the return type of the method
+     * @param applyMethod       the method to apply for the filter
+     * @param applyParameters   the list of parameters to apply for the filter
+     * @param matcherType       the type of matcher for the filter
+     * @param matcherParameters the list of parameters for the matcher
+     * @param isFindFirst       a value indicating whether the filter applies to only the first element found
+     */
     public Filtered(
         boolean isPublic,
         String componentName,
@@ -178,6 +201,15 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     private final String methodName;
     private final MethodParametersTracker parametersTracker;
 
+    /**
+     * Initializes a new instance of the Multiple class
+     *
+     * @param isPublic          a value indicating whether the method is public
+     * @param componentName     the name of the component
+     * @param locatorParameters the list of parameters of the method
+     * @param scopeElement      the scope element of the method
+     * @param returnType        the return type of the method
+     */
     public Multiple(
         boolean isPublic,
         String componentName,
