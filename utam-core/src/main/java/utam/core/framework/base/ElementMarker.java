@@ -62,21 +62,54 @@ public abstract class ElementMarker {
     return new ElementLocation(getLocator(annotation), getFinderContext(annotation));
   }
 
+  /**
+   * Annotation marker for finding elements
+   */
   @Target({ElementType.FIELD})
   @Retention(RetentionPolicy.RUNTIME)
   public @interface Find {
 
+    /**
+     * Gets the CSS selector to find the element
+     *
+     * @return the CSS selector to find the element
+     */
     String css() default "";
 
+    /**
+     * Gets the mobile accessibility ID to find the element
+     *
+     * @return the mobile accessibility ID to find the element
+     */
     String accessid() default "";
 
+    /**
+     * Gets the iOS class chain to find the element
+     *
+     * @return the iOS class chain to find the element
+     */
     String classchain() default "";
 
+    /**
+     * Gets the Android UI Automator locator to find the element
+     *
+     * @return theAndroid UI Automator locator to find the element
+     */
     String uiautomator() default "";
 
+    /**
+     * Gets a value indicating whether the parent scope shadow root should be expanded
+     *
+     * @return true if the parent scope shadow root should be expanded; otherwise, false
+     */
     // defines if parent scope shadow root should be expanded
     boolean expand() default false;
 
+    /**
+     * Gets a value indicating whether the element is nullable
+     *
+     * @return true if the element is nullable; otherwise, false
+     */
     boolean nullable() default false;
   }
 }

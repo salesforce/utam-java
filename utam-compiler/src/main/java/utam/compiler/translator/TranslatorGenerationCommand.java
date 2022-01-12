@@ -30,6 +30,9 @@ import utam.core.declarative.translator.TranslatorSourceConfig;
 import utam.core.declarative.translator.TranslatorTargetConfig;
 import utam.core.declarative.translator.UnitTestRunner;
 
+/**
+ * A translator generation command callable via command line or programmatically
+ */
 @Command(name = "generatePageObjects", mixinStandardHelpOptions = true, description = "A command to generate UTAM Page Objects")
 public class TranslatorGenerationCommand implements Callable<Integer> {
 
@@ -98,6 +101,11 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
   private Exception thrownError;
   Integer returnCode = CommandLine.ExitCode.OK;
 
+  /**
+   * Gets the thrown error during translation, if any
+   *
+   * @return the error thrown during translation, or null if none was thrown
+   */
   public Exception getThrownError() {
     return thrownError;
   }

@@ -48,6 +48,11 @@ public final class MethodContext {
   // index of the current elements usage tracker, starting from 0 and incrementing as we get into a predicate
   private int elementsUsageContextIndex = 0;
 
+  /**
+   * Initializes a new instance of the MethodContext class
+   * @param methodName         the name of the method
+   * @param declaredReturnType the declared return type of the method
+   */
   public MethodContext(String methodName, ReturnType declaredReturnType) {
     this.methodName = methodName;
     this.validationContext = String.format("method '%s'", methodName);
@@ -158,6 +163,12 @@ public final class MethodContext {
     });
   }
 
+  /**
+   * Sets a statement parameter
+   * @param parameter        the parameter to set
+   * @param statementContext the statement requiring the parameter
+   * @return the parameter for the statement
+   */
   public MethodParameter setStatementParameter(MethodParameter parameter,
       StatementContext statementContext) {
     if (parameter == null) { //predicate

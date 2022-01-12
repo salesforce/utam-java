@@ -34,8 +34,15 @@ import utam.core.selenium.appium.MobileElementAdapter;
  */
 public class ElementAdapter implements Element {
 
+  /**
+   * The JavaScript snippet used to scroll elements into view to the top of the viewport
+   */
   public static final String SCROLL_TOP_VIA_JAVASCRIPT =
       "return arguments[0].scrollIntoView(true);";
+
+  /**
+   * The JavaScript snippet used to scroll elements into view to the center of the viewport
+   */
   public static final String SCROLL_INTO_VIEW_JS =
       "if (document.documentElement"
           + " && document.documentElement.style"
@@ -53,10 +60,20 @@ public class ElementAdapter implements Element {
       "element is still not visible or clickable after scroll into view";
   private static final String SCROLL_TO_DOCUMENT_ORIGIN_JS =
       "window.scrollTo(0,0);";
+
+  /**
+   * The driver instance driving this element
+   */
   protected final Driver driverAdapter;
   private final WebElement webElement;
   private final WebDriver driver;
 
+  /**
+   * Initializes a new instance of the ElementAdapter class
+   *
+   * @param element       the WebElement to wrap
+   * @param driverAdapter the driver used to drive the element
+   */
   public ElementAdapter(WebElement element, Driver driverAdapter) {
     this.webElement = element;
     this.driver = getSeleniumDriver(driverAdapter);
@@ -73,6 +90,11 @@ public class ElementAdapter implements Element {
     this.driverAdapter = ((ElementAdapter) element).driverAdapter;
   }
 
+  /**
+   * Gets the underlying web element object
+   *
+   * @return the underlying web element object
+   */
   public WebElement getWebElement() {
     if (webElement == null) {
       throw new NullPointerException(ERR_NULL_ELEMENT);

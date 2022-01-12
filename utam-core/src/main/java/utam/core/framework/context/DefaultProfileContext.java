@@ -36,6 +36,11 @@ public class DefaultProfileContext implements ProfileContext {
   private final Profile profile;
   private final String moduleName;
 
+  /**
+   * Initializes a new instance of the DefaultProfileContext class
+   * @param moduleName name of the module
+   * @param profile    profile used in the module
+   */
   public DefaultProfileContext(String moduleName, Profile profile) {
     this.profile = profile;
     this.moduleName = moduleName;
@@ -49,6 +54,12 @@ public class DefaultProfileContext implements ProfileContext {
     });
   }
 
+  /**
+   * Initializes a new instance of the DefaultProfileContext class, only used in unit tests
+   * @param moduleName name of the module
+   * @param profile    profile used in the module
+   * @param properties properties to map class types
+   */
   // used in tests
   protected DefaultProfileContext(String moduleName, Profile profile, Properties properties) {
     this.profile = profile;

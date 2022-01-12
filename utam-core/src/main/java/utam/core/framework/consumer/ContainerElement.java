@@ -52,6 +52,12 @@ public interface ContainerElement {
   void setScope(Contained externalObjectInsideContainer);
 
   /**
+   * Load UTAM Page Object
+   *
+   * @param utamType type to load
+   * @param injectCss CSS to inject
+   * @param <T> class type
+   * @return the Page Object instance
    * @deprecated use methods with locator as a parameter
    */
   @Deprecated

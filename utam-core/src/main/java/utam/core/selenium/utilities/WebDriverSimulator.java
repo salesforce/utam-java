@@ -156,6 +156,11 @@ public class WebDriverSimulator {
       return selector;
     }
 
+    /**
+     * Gets the CSS selector used to locate the element
+     *
+     * @return the By object containing the CSS selector used to locate the element
+     */
     public By getCssSelector() {
       return By.cssSelector(selector);
     }

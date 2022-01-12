@@ -42,6 +42,10 @@ public abstract class ElementMethod {
       EMPTY_PARAMETERS,
       DOCUMENT_TYPE,
       Collections.emptyList());
+
+  /**
+   * The Page Object method for a document getter
+   */
   public static final PageObjectMethod DOCUMENT_GETTER = new PageObjectMethod() {
     @Override
     public MethodDeclaration getDeclaration() {
@@ -115,6 +119,9 @@ public abstract class ElementMethod {
     ParameterUtils.setImport(classImports, BASIC_ELEMENT);
   }
 
+  /**
+   * represents an element getter method for a basic element
+   */
   public static final class Single extends BasicElementGetterMethod {
 
     private final List<String> methodCode;
@@ -126,6 +133,14 @@ public abstract class ElementMethod {
     private final List<TypeProvider> classImports = new ArrayList<>();
     private final UnionType unionType;
 
+    /**
+     * Initializes a new instance of the Single class
+     *
+     * @param element           the element to get
+     * @param locatorParameters the list of parameters for the locator of the element
+     * @param isPublic          a value indicating whether the element is public
+     * @param implType          the type provider for the implementation type
+     */
     public Single(ElementContext element, List<MethodParameter> locatorParameters, boolean isPublic, TypeProvider implType) {
       this.methodCode = getElementMethodCode(element, locatorParameters, implType, false);
       this.parameters = element.getParameters();
@@ -168,6 +183,9 @@ public abstract class ElementMethod {
     }
   }
 
+  /**
+   * represents an element getter method for a list of basic element
+   */
   public static final class Multiple extends BasicElementGetterMethod {
 
     private final List<String> methodCode;
@@ -179,6 +197,14 @@ public abstract class ElementMethod {
     private final List<TypeProvider> classImports = new ArrayList<>();
     private final UnionType unionType;
 
+    /**
+     * Initializes a new instance of the Multiple class
+     *
+     * @param element           the element to get
+     * @param locatorParameters the list of parameters for the locator of the element
+     * @param isPublic          a value indicating whether the element is public
+     * @param implType          the type provider for the implementation type
+     */
     public Multiple(ElementContext element, List<MethodParameter> locatorParameters, boolean isPublic, TypeProvider implType) {
       this.methodCode = getElementMethodCode(element, locatorParameters, implType, true);
       this.parameters = element.getParameters();
@@ -225,6 +251,9 @@ public abstract class ElementMethod {
     }
   }
 
+  /**
+   * represents an element getter method for a filtered element
+   */
   public static final class Filtered extends BasicElementGetterMethod {
 
     private final boolean isPublic;
@@ -236,6 +265,21 @@ public abstract class ElementMethod {
     private final List<TypeProvider> classImports = new ArrayList<>();
     private final UnionType unionType;
 
+    /**
+     * Initializes a new instance of the Filtered class
+     *
+     * @param scopeElement      the context of the scope element
+     * @param elementName       the name of the element
+     * @param elementType       the element type
+     * @param implType          the type provider for the implementation type
+     * @param locatorParameters the list of parameters for the locator of the element
+     * @param isPublic          a value indicating whether the element is public
+     * @param applyMethod       the method to apply in filtering the element
+     * @param applyParameters   the list of parameters to use in the filter
+     * @param matcherType       the type of matcher for the filter
+     * @param matcherParameters the list of parameters for the matcher
+     * @param isFindFirstMatch  a value indicting whether to only return the first match of the filter.
+     */
     public Filtered(
         ElementContext scopeElement,
         String elementName,

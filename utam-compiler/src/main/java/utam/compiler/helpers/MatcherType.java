@@ -24,12 +24,31 @@ import utam.core.declarative.representation.TypeProvider;
  */
 public enum MatcherType {
 
+  /**
+   * a matcher for a true condition
+   */
   isTrue("Boolean.TRUE.equals(%s)", Collections.emptyList(), PrimitiveType.BOOLEAN),
+
+  /**
+   * a matcher for a false condition
+   */
   isFalse("Boolean.FALSE.equals(%s)", Collections.emptyList(), PrimitiveType.BOOLEAN),
+
+  /**
+   * a matcher for a string containing a substring
+   */
   stringContains("(%s!= null && %s.contains(%s))", Collections.singletonList(PrimitiveType.STRING),
       PrimitiveType.STRING),
+
+  /**
+   * a matcher for a string equaling another string
+   */
   stringEquals("%s.equals(%s)", Collections.singletonList(PrimitiveType.STRING),
       PrimitiveType.STRING),
+
+  /**
+   * a matcher for an object being not null
+   */
   notNull("%s != null", Collections.emptyList(), JAVA_OBJECT_TYPE);
 
   private static final String ERR_INCORRECT_MATCHER_FOR_METHOD = ": matcher '%s' requires applied method to return type '%s', returned is '%s'";
@@ -45,6 +64,12 @@ public enum MatcherType {
     this.operandType = operandType;
   }
 
+  /**
+   * Gets the code for the matcher
+   * @param actualValue       the actual value of the matcher
+   * @param matcherParameters the list of parameters for the matcher
+   * @return the code for the matcher
+   */
   public String getCode(String actualValue, List<MethodParameter> matcherParameters) {
     if (this == isTrue || this == isFalse || this == notNull) {
       return String.format(methodCodeMask, actualValue);
@@ -57,20 +82,41 @@ public enum MatcherType {
     return String.format(methodCodeMask, expectedValue, actualValue);
   }
 
+  /**
+   * Gets the expected parameter types for the matcher
+   *
+   * @return the expected parameter types for the matcher
+   */
   public List<TypeProvider> getExpectedParametersTypes() {
     return expectedParametersTypes;
   }
 
+  /**
+   * Gets the type of the operand
+   *
+   * @return the tupe of the operand
+   */
   public TypeProvider getOperandType() {
     return operandType;
   }
 
+  /**
+   * Gets the error for an incorrect matcher type
+   *
+   * @param operandType the type of the operand
+   * @return the error for an incorrect matcher type
+   */
   public String getIncorrectTypeError(TypeProvider operandType) {
     return String.format(ERR_INCORRECT_MATCHER_FOR_METHOD,
         name(),
         getOperandType().getSimpleName(), operandType.getSimpleName());
   }
 
+  /**
+   * Checks the operand is of the valid type
+   * @param operandType       the operand type
+   * @param validationContext the validation context for checking
+   */
   public void checkOperandForMatcher(TypeProvider operandType, String validationContext) {
     if (this == notNull) { // not null allows any type
       return;

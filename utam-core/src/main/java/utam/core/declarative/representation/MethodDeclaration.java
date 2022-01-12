@@ -17,15 +17,45 @@ import java.util.List;
  */
 public interface MethodDeclaration {
 
+  /**
+   * Gets the name of the method declaration
+   *
+   * @return the name of the method declaration
+   */
   String getName();
 
+  /**
+   * Gets the list of parameters of the method declaration
+   *
+   * @return the list of parameters of the method declaration
+   */
   List<MethodParameter> getParameters();
 
+  /**
+   * Gets the return type of the method declaration
+   *
+   * @return the return type of the method declaration
+   */
   TypeProvider getReturnType();
 
+  /**
+   * Gets the list of imports of the method declaration
+   *
+   * @return the list of imports of the method declaration
+   */
   List<TypeProvider> getImports();
 
+  /**
+   * Gets the code line of the method declaration
+   *
+   * @return the code line of the method declaration
+   */
   String getCodeLine();
 
+  /**
+   * Gets the comments of the method declaration
+   *
+   * @return the comments of the method declaration
+   */
   String getComments();
 }

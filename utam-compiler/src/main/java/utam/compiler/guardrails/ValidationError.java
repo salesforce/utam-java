@@ -15,9 +15,20 @@ package utam.compiler.guardrails;
  */
 public enum ValidationError {
 
+  /**
+   * Error for components with the same selector but different types
+   */
   COMPONENTS_WITH_SAME_SELECTOR_BUT_DIFFERENT_TYPES(
       "components have same selector but different types"),
+
+  /**
+   * Error for components and elements having a duplicate selector
+   */
   COMPONENT_AND_ELEMENT_DUPLICATE_SELECTOR("component and element can't have same selector"),
+
+  /**
+   * Error for a selector duplicating the root selector
+   */
   DUPLICATE_WITH_ROOT_SELECTOR("selector is duplicate of the root selector");
 
   private final String errMessage;

@@ -36,6 +36,11 @@ public class LocatorClassChain extends LocatorBy {
       String.format("only operator {%s} can be set, and must be leading and ending with space(s)",
           SUPPORTED_CLASSCHAIN_OPERATORS);
 
+  /**
+   * Initializes a new instance of the LocatorClassChain class
+   *
+   * @param selectorString selector string to use
+   */
   public LocatorClassChain(String selectorString) {
     super(selectorString);
     // To avoid to split the string based on the / in attribute part, for example:

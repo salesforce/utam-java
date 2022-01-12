@@ -33,6 +33,13 @@ public class PageObjectValidation {
   private final Collection<ElementContext> elements;
   private final GuardrailsMode guardrailsMode;
 
+  /**
+   * Initializes a new instance of the PageObjectValidation class
+   *
+   * @param guardrailsMode the guard rails mode to use for validation
+   * @param pageObjectURI  the Page object URI
+   * @param elements       the elements to validate
+   */
   public PageObjectValidation(GuardrailsMode guardrailsMode, String pageObjectURI,
       Collection<ElementContext> elements) {
     this.pageObjectURI = pageObjectURI;

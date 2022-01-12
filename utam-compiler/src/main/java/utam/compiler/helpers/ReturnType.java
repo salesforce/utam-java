@@ -28,6 +28,13 @@ public class ReturnType {
 
   private final Function<TranslationContext, TypeProvider> typeProvider;
 
+  /**
+   * Initializes a new instance of the ReturnType class
+   *
+   * @param typeNode     the JSON node of the type
+   * @param isReturnList a value indiciating whether the return type is a list
+   * @param methodName   the method name
+   */
   public ReturnType(JsonNode typeNode, Boolean isReturnList, String methodName) {
     this.validationContextStr = String.format("method '%s'", methodName);
     this.typeProvider = getTypeProvider(typeNode);
@@ -53,10 +60,20 @@ public class ReturnType {
     this.isReturnList = Boolean.TRUE.equals(isReturnList);
   }
 
+  /**
+   * Initializes a new instance of the ReturnType class
+   *
+   * @param methodName the method name
+   */
   public ReturnType(String methodName) {
     this((JsonNode) null, null, methodName);
   }
 
+  /**
+   * Gets a value indicating whether a return type is set
+   *
+   * @return true if the return type is set; otherwise, false
+   */
   public boolean isReturnTypeSet() {
     return isReturnTypeSet;
   }
@@ -84,12 +101,25 @@ public class ReturnType {
     };
   }
 
+  /**
+   * Gets the return type or a default value
+   *
+   * @param translatorContext the translation context
+   * @param typeProvider      the default type provider
+   * @return the return type if defined; otherwise return the default type
+   */
   public TypeProvider getReturnTypeOrDefault(TranslationContext translatorContext,
       TypeProvider typeProvider) {
     TypeProvider definedType = getReturnTypeOrNull(translatorContext);
     return definedType == null ? typeProvider : definedType;
   }
 
+  /**
+   * Gets the return type or null
+   *
+   * @param translatorContext the translation context
+   * @return the return type if defined; otherwise return null
+   */
   public TypeProvider getReturnTypeOrNull(TranslationContext translatorContext) {
     TypeProvider returns = typeProvider.apply(translatorContext);
     if (isReturnList) {
@@ -98,6 +128,10 @@ public class ReturnType {
     return returns;
   }
 
+  /**
+   * Gets a value indicating whether to return a list
+   * @return true if the return type is a list; otherwise false
+   */
   boolean isReturnAllSet() {
     return isReturnList;
   }

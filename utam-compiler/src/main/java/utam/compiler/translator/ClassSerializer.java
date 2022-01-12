@@ -37,6 +37,10 @@ public final class ClassSerializer {
 
   private final PageObjectClass source;
 
+  /**
+   * Initializes a new instance of the ClassSerializer class
+   * @param pageObject the Page Object class to serialize
+   */
   public ClassSerializer(PageObjectClass pageObject) {
     this.source = pageObject;
   }

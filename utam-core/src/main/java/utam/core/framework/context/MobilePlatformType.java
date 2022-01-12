@@ -23,20 +23,60 @@ import org.openqa.selenium.WebDriver;
  */
 public enum MobilePlatformType implements Profile {
 
+  /**
+   * mobile web platform
+   */
   WEB,
+
+  /**
+   * android platform
+   */
   ANDROID,
+
+  /**
+   * android tablet platform
+   */
   ANDROID_TABLET,
+
+  /**
+   * android phone platform
+   */
   ANDROID_PHONE,
+
+  /**
+   * ios platform
+   */
   IOS,
+
+  /**
+   * ios tablet platform
+   */
   IOS_TABLET,
+
+  /**
+   * ios phone platform
+   */
   IOS_PHONE;
 
+  /**
+   * Mobile platform profile name
+   */
   public static final String PLATFORM_PROFILE_NAME = "platform";
 
+  /**
+   * gets a value indicating whether the platform type is iOS
+   *
+   * @return true if the platform type is iOS; otherwise false
+   */
   public boolean isIOS() {
     return this == IOS || this == IOS_PHONE || this == IOS_TABLET;
   }
 
+  /**
+   * gets a value indicating whether the platform type is Android
+   *
+   * @return true if the platform type is Android; otherwise false
+   */
   public boolean isAndroid() {
     return this == ANDROID || this == ANDROID_PHONE || this == ANDROID_TABLET;
   }

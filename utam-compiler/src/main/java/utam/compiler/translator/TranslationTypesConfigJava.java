@@ -56,6 +56,12 @@ public class TranslationTypesConfigJava implements TranslationTypesConfig {
     return fileName.substring(0, 1).toUpperCase() + fileName.substring(1);
   }
 
+  /**
+   * Gets a value indicating whether a string is a Page Object type
+   *
+   * @param typeString the string to check
+   * @return true if the string represents a Page Object type; otherwise, false
+   */
   public static boolean isPageObjectType(String typeString) {
     try {
       getJavaTypeName(typeString);
@@ -92,6 +98,11 @@ public class TranslationTypesConfigJava implements TranslationTypesConfig {
     }
   }
 
+  /**
+   * Gets a value indicating whether a given type provider is a custom type
+   * @param type the type provider to check
+   * @return true if the type provider is a custom type; otherwise failse
+   */
   public static boolean isCustomType(TypeProvider type) {
     if(type == null) {
       return false;

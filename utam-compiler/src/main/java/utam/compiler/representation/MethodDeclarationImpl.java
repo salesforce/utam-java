@@ -77,6 +77,11 @@ class MethodDeclarationImpl implements MethodDeclaration {
     return parameters;
   }
 
+  /**
+   * Gets the list of imports for the method declaration
+   *
+   * @return the list of imports for the method declaration
+   */
   public final List<TypeProvider> getImports() {
     return imports;
   }

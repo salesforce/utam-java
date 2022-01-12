@@ -42,12 +42,32 @@ public abstract class PageMarker {
   @Retention(RetentionPolicy.RUNTIME)
   public @interface Find {
 
+    /**
+     * CSS selector
+     *
+     * @return CSS selector
+     */
     String css() default "";
 
+    /**
+     * Accessibility ID
+     *
+     * @return Accessibility ID
+     */
     String accessid() default "";
 
+    /**
+     * iOS class chain
+     *
+     * @return iOS class chain
+     */
     String classchain() default "";
 
+    /**
+     * Android UI Automator ID
+     *
+     * @return Android UI Automator ID
+     */
     String uiautomator() default "";
   }
 
@@ -58,6 +78,10 @@ public abstract class PageMarker {
   @Retention(RetentionPolicy.RUNTIME)
   public @interface Switch {
 
+    /**
+     * The value of the platform
+     * @return platform type
+     */
     PlatformType value();
   }
 }

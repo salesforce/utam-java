@@ -25,19 +25,36 @@ import java.util.stream.Collectors;
  */
 public class ParameterUtils {
 
+  /**
+   * An empty parameter list
+   */
   public static final List<MethodParameter> EMPTY_PARAMETERS = new ArrayList<>();
 
+  /**
+   * Gets the parameter values string from a list of parameters
+   * @param parameters the list of method parameters
+   * @return the parameter list as a comma-delimited string
+   */
   public static String getParametersValuesString(List<MethodParameter> parameters) {
     return parameters.stream()
         .map(MethodParameter::getValue)
         .collect(Collectors.joining(", "));
   }
 
+  /**
+   * Represents a regualar method parameter
+   */
   public static class Regular implements MethodParameter {
 
     final String valueAsString;
     final TypeProvider type;
 
+    /**
+     * Initializes a new instance of the Regular class
+     *
+     * @param valueAsString the value of the parameter
+     * @param type          the type of the parameter
+     */
     public Regular(String valueAsString, TypeProvider type) {
       this.valueAsString = valueAsString;
       this.type = type;
@@ -77,14 +94,30 @@ public class ParameterUtils {
     }
   }
 
+  /**
+   * Represents a literal parameter
+   */
   public static class Literal extends Regular {
 
     private final List<MethodParameter> nestedParameters;
 
+    /**
+     * Initializes a new instance of the Literal class
+     *
+     * @param value the value of the parameter
+     * @param type  the type of the parameter
+     */
     public Literal(Object value, TypeProvider type) {
       this(value, type, null);
     }
 
+    /**
+     * Initializes a new instance of the Literal class
+     *
+     * @param value            the value of the parameter
+     * @param type             the type of the parameter
+     * @param nestedParameters the list of nested parameters
+     */
     public Literal(Object value, TypeProvider type, List<MethodParameter> nestedParameters) {
       super(value.toString(), type);
       this.nestedParameters = nestedParameters;
@@ -119,6 +152,11 @@ public class ParameterUtils {
    */
   public static class LiteralPageObjectClass extends Literal {
 
+    /**
+     * Initializes a new instance of the LiteralPageObjectClass class
+     *
+     * @param type the type of the Page object
+     */
     public LiteralPageObjectClass(TypeProvider type) {
       super(String.format("%s.class", type.getSimpleName()), type);
     }
@@ -166,6 +204,12 @@ public class ParameterUtils {
     parameters.forEach(p -> setImplementationImport(imports, p));
   }
 
+  /**
+   * Sets the imports for the parameter
+   *
+   * @param imports the list of types to be imported
+   * @param type    the type of the parameter
+   */
   public static void setImport(List<TypeProvider> imports, TypeProvider type) {
     if(type == null || type.isSameType(VOID)) {
       return;
@@ -179,6 +223,12 @@ public class ParameterUtils {
         .forEach(imports::add);
   }
 
+  /**
+   * Sets the imports for the parameter
+   *
+   * @param imports the list of types to be imported
+   * @param types   the list of types of the parameter
+   */
   public static void setImports(List<TypeProvider> imports, List<TypeProvider> types) {
     types.forEach(t -> setImport(imports, t));
   }

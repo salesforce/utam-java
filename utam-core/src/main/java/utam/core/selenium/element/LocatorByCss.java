@@ -17,6 +17,11 @@ import org.openqa.selenium.By;
  */
 class LocatorByCss extends LocatorBy {
 
+  /**
+   * Initializes a new instance of the LocatorByCss class
+   *
+   * @param stringValue selector string to use
+   */
   LocatorByCss(String stringValue) {
     super(stringValue);
   }

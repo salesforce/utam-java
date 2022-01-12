@@ -19,6 +19,8 @@ public interface PageObject extends UtamBase {
   /**
    * actions in this method will be performed when page object is loaded from loader <br>
    * by default it's checking for visibility of its root element
+   *
+   * @return An Object that can be cast to the appropriate PageObject type
    */
   Object load();
 

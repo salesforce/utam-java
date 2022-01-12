@@ -31,6 +31,13 @@ public class ComposeMethod implements PageObjectMethod {
   private final List<TypeProvider> imports = new ArrayList<>();
   private final TypeProvider returns;
 
+  /**
+   * Initializes a new instance of the ComposeMethod class
+   * @param methodName the name of the method
+   * @param returnType the return type of the method
+   * @param parameters the list of parameters of the method
+   * @param statements the list of statments of the method
+   */
   public ComposeMethod(String methodName,
       TypeProvider returnType,
       List<MethodParameter> parameters,

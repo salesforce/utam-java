@@ -78,10 +78,23 @@ public abstract class ContainerMethod implements PageObjectMethod {
     return codeLines;
   }
 
+  /**
+   * Represents a container method with a selector that returns a list
+   */
   public static class WithSelectorReturnsList extends ContainerMethod {
 
     private final List<TypeProvider> classImports = new ArrayList<>();
 
+
+    /**
+     * Initializes a new instance of the WithSelectorReturnsList class
+     *
+     * @param scopeElement    the scope element
+     * @param isExpandScope   a value indicating whether the method introspects into shadow roots
+     * @param elementName     the name of the element
+     * @param selectorContext the context for the selector
+     * @param isPublic        a value indicating whether the method is public
+     */
     public WithSelectorReturnsList(ElementContext scopeElement, boolean isExpandScope,
         String elementName, LocatorCodeGeneration selectorContext, boolean isPublic) {
       super(scopeElement, isExpandScope, elementName, isPublic, selectorContext.getBuilderString());
@@ -115,10 +128,22 @@ public abstract class ContainerMethod implements PageObjectMethod {
     }
   }
 
+  /**
+   * Represents a container method with a selector
+   */
   public static class WithSelector extends ContainerMethod {
 
     private final List<TypeProvider> classImports = new ArrayList<>();
 
+    /**
+     * Initializes a new instance of the WithSelector class
+     *
+     * @param scopeElement    the scope element
+     * @param isExpandScope   a value indicating whether the method introspects into shadow roots
+     * @param elementName     the name of the element
+     * @param selectorContext the context for the selector
+     * @param isPublic        a value indicating whether the method is public
+     */
     public WithSelector(ElementContext scopeElement,
         boolean isExpandScope,
         String elementName,

@@ -75,8 +75,10 @@ public class BasicElementBuilder {
   /**
    * set parameters in actionable
    *
-   * @param type   type of the actionable
-   * @param <T>    element type
+   * @param type     interface type of the actionable
+   * @param implType implementation type of the actionable
+   * @param <T>      element type
+   * @param <R>      implementation type
    * @return instance with parameters set in selector
    */
   public <T extends BasicElement, R extends BasePageElement> T build(Class<T> type, Class<R> implType) {
@@ -94,9 +96,11 @@ public class BasicElementBuilder {
   /**
    * set parameters in actionable, then find it and apply filter to return first match
    *
-   * @param type   type of the actionable
-   * @param filter to apply to found list
-   * @param <T>    element type
+   * @param type     interface type of the actionable
+   * @param implType implementation type of the actionable
+   * @param filter   to apply to found list
+   * @param <T>      element type
+   * @param <R>      implementation type
    * @return instance with parameters set in selector
    */
   public <T extends BasicElement, R extends BasePageElement> T build(Class<T> type, Class<R> implType, Predicate<T> filter) {
@@ -119,8 +123,10 @@ public class BasicElementBuilder {
   /**
    * set parameters in actionable, then find all elements and return list
    *
-   * @param type       type of the actionable
+   * @param type       interface type of the actionable
+   * @param implType   implementation type of the actionable
    * @param <T>        element type
+   * @param <R>        implementation type
    * @return list of instances with index in selector
    */
   public <T extends BasicElement, R extends BasePageElement> List<T> buildList(Class<T> type, Class<R> implType) {
@@ -141,9 +147,11 @@ public class BasicElementBuilder {
   /**
    * set parameters in actionable, then find it and apply filter to return all elements that match
    *
-   * @param type   type of the actionable
-   * @param filter to apply to found list
-   * @param <T>    element type
+   * @param type       type of the actionable
+   * @param implType   implementation type of the actionable
+   * @param filter     to apply to found list
+   * @param <T>        element type
+   * @param <R>        implementation type
    * @return instance with parameters set in selector
    */
   public <T extends BasicElement, R extends BasePageElement> List<T> buildList(Class<T> type, Class<R> implType, Predicate<T> filter) {

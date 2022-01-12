@@ -106,6 +106,9 @@ public enum BasicElementActionType implements ActionType {
    */
   waitForVisible(null);
 
+  /**
+   * The error string template for an unknown action
+   */
   public static final String ERR_UNKNOWN_ACTION = "unknown action '%s' for element '%s' with %s";
   // return type of the action
   private final TypeProvider returnType;
@@ -121,6 +124,13 @@ public enum BasicElementActionType implements ActionType {
     this.returnType = Objects.requireNonNullElse(returnType, VOID);
   }
 
+  /**
+   * Gets the object representing the action type for the element
+   * @param apply       the string value of the action to retrieve
+   * @param elementType the type of the element
+   * @param elementName the name of the element
+   * @return            the object representing the action type for the element
+   */
   public static ActionType getActionType(String apply, TypeProvider elementType,
       String elementName) {
     // Element type is BaseElement, with no other actionable methods available.

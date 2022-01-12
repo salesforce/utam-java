@@ -22,14 +22,30 @@ public class UtamCompilationError extends UtamError {
    */
   private static final long serialVersionUID = 1L;
 
+  /**
+   * Initializes a new instance of the UtamCompilationError class
+   *
+   * @param message the message of the error
+   */
   public UtamCompilationError(String message) {
     super(message);
   }
 
+  /**
+   * Initializes a new instance of the UtamCompilationError class
+   *
+   * @param message the message of the error
+   * @param e the inner exception wrapped by the error
+   */
   public UtamCompilationError(String message, Exception e) {
     super(message, e);
   }
 
+  /**
+   * Initializes a new instance of the UtamCompilationError class
+   *
+   * @param e the inner exception wrapped by the error
+   */
   public UtamCompilationError(Exception e) {
     super(e);
   }

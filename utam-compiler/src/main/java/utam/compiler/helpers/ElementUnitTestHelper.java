@@ -29,6 +29,13 @@ public class ElementUnitTestHelper {
   private final boolean isExpandsParentShadow;
   private final boolean isList;
 
+  /**
+   * Initializes a new instance of the ElementUnitTestHelper class
+   * @param selector              the selector to use
+   * @param parentElementName     the name of the parent element
+   * @param isExpandsParentShadow a value indicating whether to look in the parent element's shadow root
+   * @param isList                a value indicating whether the element is a list
+   */
   public ElementUnitTestHelper(
       String selector, String parentElementName, boolean isExpandsParentShadow, boolean isList) {
     this.selector = selector;
@@ -37,6 +44,11 @@ public class ElementUnitTestHelper {
     this.isList = isList;
   }
 
+  /**
+   * Gets the element registration
+   * @param elementName the name of the element
+   * @return a list of the element registration for logging purposes
+   */
   public List<String> getElementRegistration(String elementName) {
     List<String> elementRegistration = new ArrayList<>();
     String parentDescription = "root element";

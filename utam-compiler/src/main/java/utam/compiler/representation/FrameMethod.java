@@ -33,12 +33,21 @@ import utam.core.element.FrameElement;
  */
 public class FrameMethod implements PageObjectMethod {
 
+  /**
+   * A type provider representing a frame element
+   */
   public static final TypeProvider FRAME_ELEMENT = new TypeUtilities.FromClass(FrameElement.class);
   private final String methodName;
   private final List<String> methodCode = new ArrayList<>();
   private final List<MethodParameter> parameters;
   private final boolean isPublic;
 
+  /**
+   * Initializes a new instance of the FrameMethod class
+   * @param element           the element
+   * @param isPublic          a value indicating whether the element is public
+   * @param locatorParameters the list of parameters to use in locating the element
+   */
   public FrameMethod(ElementContext element, boolean isPublic, List<MethodParameter> locatorParameters) {
     methodCode.add(getScopeElementCode(element.getScopeElement()));
     String scopeVariableName = element.getScopeElement().getName();

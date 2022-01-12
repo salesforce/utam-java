@@ -24,7 +24,7 @@ public interface Container {
 
   /**
    * Supplier to get scope WebElement. Invoked from UtamLoader.create(Container
-   * externalScopeProvider, Class<T> utamPageObjectType, Locator utamPageObjectRoot)
+   * externalScopeProvider, Class&lt;T&gt; utamPageObjectType, Locator utamPageObjectRoot)
    *
    * @return supplier of a Selenium SearchContext
    */

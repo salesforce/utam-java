@@ -24,26 +24,58 @@ import utam.core.selenium.appium.LocatorUIAutomator;
  */
 public abstract class LocatorBy implements Locator<By> {
 
+  /**
+   * The string value of the locator
+   */
   protected final String stringValue;
   private final int parametersCount;
 
+  /**
+   * Initializes a new instance of the LocatorBy class
+   *
+   * @param stringValue value to use to locate elements
+   */
   protected LocatorBy(String stringValue) {
     this.stringValue = stringValue;
     this.parametersCount = getParametersCount(stringValue);
   }
 
+  /**
+   * Get a locator using a CSS selector
+   *
+   * @param value CSS selector to use
+   * @return the locator object
+   */
   public static LocatorBy byCss(String value) {
     return new LocatorByCss(value);
   }
 
+  /**
+   * Get a locator using a mobile accessibility ID selector
+   *
+   * @param value mobile accessibility ID to use
+   * @return the locator object
+   */
   public static LocatorBy byAccessibilityId(String value) {
     return new LocatorAccessibilityId(value);
   }
 
+  /**
+   * Get a locator using an iOS class chain selector
+   *
+   * @param value iOS class chain to use
+   * @return the locator object
+   */
   public static LocatorBy byClassChain(String value) {
     return new LocatorClassChain(value);
   }
 
+  /**
+   * Get a locator using an Android UI Automator ID selector
+   *
+   * @param value Android UI Automator ID to use
+   * @return the locator object
+   */
   public static LocatorBy byUiAutomator(String value) {
     return new LocatorUIAutomator(value);
   }
@@ -80,6 +112,11 @@ public abstract class LocatorBy implements Locator<By> {
     return getCopy(mutableValue);
   }
 
+  /**
+   * Gets a copy of a locator object
+   * @param valueWithParameters the value to use
+   * @return the locator object
+   */
   // public because used from other package
   abstract public LocatorBy getCopy(String valueWithParameters);
 

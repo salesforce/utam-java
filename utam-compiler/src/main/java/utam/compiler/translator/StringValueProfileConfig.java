@@ -36,6 +36,12 @@ public class StringValueProfileConfig implements ProfileConfiguration {
   private final Function<String, Profile> profileValueProvider;
   private final Set<String> values;
 
+  /**
+   * Initializes a new instance of the StringValueProfileConfig class
+   *
+   * @param profileName the name of the profile
+   * @param values      the list of values making up the profile
+   */
   public StringValueProfileConfig(String profileName, String[] values) {
     if (profileName == null || profileName.isEmpty()) {
       throw new UtamError(ERR_NAME_REQUIRED);
@@ -68,10 +74,22 @@ public class StringValueProfileConfig implements ProfileConfiguration {
                         string)));
   }
 
+  /**
+   * Initializes a new instance of the StringValueProfileConfig class
+   *
+   * @param name     the name of the profile
+   * @param profiles the list of profiles
+   */
   public StringValueProfileConfig(String name, Profile...profiles) {
     this(name, Stream.of(profiles).map(Profile::getValue).toArray(String[]::new));
   }
 
+  /**
+   * Initializes a new instance of the StringValueProfileConfig class, only used in unit tests
+   *
+   * @param name  the name of the profile
+   * @param value the value making up the profile
+   */
   // used in tests
   public StringValueProfileConfig(String name, String value) {
     this(name, new String[] { value } );

@@ -32,7 +32,17 @@ public interface PageClassField {
    */
   List<AnnotationProvider> getAnnotations();
 
+  /**
+   * type provider of field
+   *
+   * @return field type provider
+   */
   TypeProvider getType();
 
+  /**
+   * declaration of the field
+   *
+   * @return declaration of the field
+   */
   String getDeclaration();
 }

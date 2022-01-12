@@ -14,9 +14,28 @@ package utam.core.driver;
  * @since 228
  */
 public enum DriverType {
+  /**
+   * driver is a web browser
+   */
   web,
+
+  /**
+   * driver is for iOS applications
+   */
   ios,
+
+  /**
+   * driver is for Android applications
+   */
   android,
+
+  /**
+   * driver is for the Chrome browser
+   */
   chrome,
+
+  /**
+   * driver is for the Firefox browser
+   */
   firefox
 }

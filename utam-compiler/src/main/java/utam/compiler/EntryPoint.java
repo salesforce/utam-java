@@ -10,8 +10,17 @@ package utam.compiler;
 import utam.compiler.translator.TranslatorGenerationCommand;
 import picocli.CommandLine;
 
+/**
+ * The entry point for the compiler when invoked programmatically
+ */
 public class EntryPoint {
 
+  /**
+   * The main method for the command line entry point
+   *
+   * @param args the list of arguments passed in via the command line
+   * @throws Exception thrown if the command executed does not return a success status
+   */
   public static void main(String[] args) throws Exception {
     TranslatorGenerationCommand command = new TranslatorGenerationCommand();
     int exitCode = new CommandLine(command)

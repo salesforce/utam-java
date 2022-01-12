@@ -17,6 +17,11 @@ import utam.core.element.Element;
  */
 public class ShadowRootElementAdapter extends ElementAdapter {
 
+  /**
+   * Initializes a new instance of the ShadowRootElementAdapter class
+   *
+   * @param elementAdapter the element adaptor to use
+   */
   public ShadowRootElementAdapter(Element elementAdapter) {
     super(elementAdapter);
   }

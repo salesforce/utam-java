@@ -139,6 +139,9 @@ public abstract class UtamArgument {
     }
   }
 
+  /**
+   * Represents a literal primitive argument
+   */
   @JsonDeserialize //use default deserializer for nested args
   public static class UtamArgumentLiteralPrimitive extends UtamArgument {
 
@@ -161,16 +164,31 @@ public abstract class UtamArgument {
       }
     }
 
+    /**
+     * Initializes a new instance of the UtamArgumentLiteralPrimitive class for a boolean value
+     *
+     * @param booleanValue the boolean value
+     */
     public UtamArgumentLiteralPrimitive(Boolean booleanValue) {
       super(null, null, null, null, null);
       methodParameter = new Literal(String.valueOf(booleanValue), BOOLEAN);
     }
 
+    /**
+     * Initializes a new instance of the UtamArgumentLiteralPrimitive class for a numeric value
+     *
+     * @param numericValue the boolean value
+     */
     public UtamArgumentLiteralPrimitive(int numericValue) {
       super(null, null, null, null, null);
       methodParameter = new Literal(String.valueOf(numericValue), NUMBER);
     }
 
+    /**
+     * Initializes a new instance of the UtamArgumentLiteralPrimitive class for a string value
+     *
+     * @param strValue the boolean value
+     */
     UtamArgumentLiteralPrimitive(String strValue) {
       super(null, null, null, null, null);
       methodParameter = new Literal(strValue, STRING);

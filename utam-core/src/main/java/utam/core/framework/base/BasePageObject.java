@@ -34,6 +34,9 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   // used for testing
   private Locator locatorInsideScope;
 
+  /**
+   * Initializes a new instance of the BasePageObject class.
+   */
   protected BasePageObject() {
   }
 
@@ -53,11 +56,21 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
     return rootElement;
   }
 
+  /**
+   * Gets the root locator of the root element. Should not be used outside unit tests.
+   *
+   * @return a Locator object containing the selector of the root element
+   */
   // used in unit tests
   protected final Locator getRootLocator() {
     return locatorInsideScope;
   }
 
+  /**
+   * Gets the document object associated with this Page object.
+   *
+   * @return the document object for this Page Object.
+   */
   protected final Document getDocument() {
     if (document == null) {
       document = new DocumentObject(getFactory());
@@ -135,6 +148,12 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
     return new ContainerElementImpl(getFactory(), scopeElement, isExpandShadowRoot);
   }
 
+  /**
+   * Gets the instance of the imperative extensions for this Page Object
+   * @param type Class of the class containing the imperative extensions for this Page Object
+   * @param <T>  type name of the imperative extension class
+   * @return the instance of the class containing the imperative extensions for thie Page Object
+   */
   @SuppressWarnings({"unchecked", "rawtypes"})
   // used by generator - return imperative utility
   protected final <T extends ImperativeProvider> T getUtility(Class<T> type) {

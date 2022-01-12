@@ -18,6 +18,11 @@ import utam.core.selenium.element.LocatorBy;
  */
 public class LocatorAccessibilityId extends LocatorBy {
 
+  /**
+   * Initializes a new instance of the LocatorAccessibilityId class
+   *
+   * @param selectorString selector string to use
+   */
   public LocatorAccessibilityId(String selectorString) {
     super(selectorString);
   }

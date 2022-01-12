@@ -58,6 +58,11 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
   // max number of POs to generate for generator performance measurements
   private int maxPageObjectsCounter = Integer.MAX_VALUE;
 
+  /**
+   * Initializes a new instance of the DefaultTranslatorRunner class
+   *
+   * @param translatorConfig the configuration of the translator
+   */
   public DefaultTranslatorRunner(TranslatorConfig translatorConfig) {
     this.translatorConfig = translatorConfig;
     for (ProfileConfiguration configuration : translatorConfig.getConfiguredProfiles()) {
@@ -124,7 +129,11 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
         System.currentTimeMillis() - timer));
   }
 
-  // set max number of POs to generate for generator performance measurements
+  /**
+   * Sets the maximum number of POs to generate. Only used for generator performance measurements.
+   *
+   * @param number the maximum number of Page Objects to generate.
+   */
   protected void setMaxToGenerate(int number) {
     this.maxPageObjectsCounter = number;
   }
@@ -209,6 +218,11 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     }
   }
 
+  /**
+   * Writes the dependencies configuration
+   * @param profile       the profile to use
+   * @param configToWrite the list of properties to write
+   */
   // possible override in tests classes
   protected void writeDependenciesConfig(Profile profile, Properties configToWrite) {
     String moduleName = translatorConfig.getModuleName();
