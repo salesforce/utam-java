@@ -194,10 +194,10 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
 
   /**
    * dummy interface whose sole purpose is to have getElement method so that it'd be called for a
-   * proxy instance. interface should not be public
+   * proxy instance. interface should be public otherwise proxy throws IllegalArgumentException: non-public interfaces from different packages
    */
   @SuppressWarnings("unused")
-  interface HasElementGetter {
+  public interface HasElementGetter {
 
     Element getElement();
   }
