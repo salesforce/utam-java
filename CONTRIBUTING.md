@@ -115,8 +115,10 @@ $ git remote add upstream git@github.com:salesforce/utam-java.git
 ### Create a feature branch
 
 ```bash
-$ git checkout main
-$ git pull origin main
+$ git checkout dev
+$ git pull
+$ git merge upstream/dev
+$ git push
 $ git checkout -b <name-of-the-feature>
 ```
 
@@ -156,10 +158,13 @@ Sometimes your feature branch will get stale with respect to the master branch, 
 following steps can help:
 
 ```bash
-$ git checkout main
-$ git pull origin main
+$ git fetch upstream
+$ git checkout dev
+$ git pull
+$ git merge upstream/dev
+$ git push
 $ git checkout <name-of-the-feature>
-$ git rebase upstream/main
+$ git rebase dev
 ```
 
 _note: If no conflicts arise, these commands will ensure that your changes are applied on top of the master branch. Any
@@ -184,8 +189,8 @@ Scope: The scope should be the name of the documentation section affected (guide
 ### Update the pull request
 
 ```bash
-$ git fetch origin
-$ git rebase origin/${base_branch}
+$ git fetch upstream
+$ git rebase upstream/${base_branch}
 
 # If there were no merge conflicts in the rebase
 $ git push origin ${feature_branch}
