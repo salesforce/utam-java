@@ -25,7 +25,7 @@ public class BaseRootPageObject extends BasePageObject implements RootPageObject
   protected final BasePageElement getRootElement() {
     if(rootElement == null) {
       if( getElement() == null) {
-        Element root = getDriver().findElement(locatorInsideScope);
+        Element root = getDriver().findElement(getRootLocator());
         setElement(root);
       }
       rootElement = createInstance(getElement(), getDriver());

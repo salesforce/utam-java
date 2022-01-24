@@ -31,7 +31,7 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   PageObjectsFactory factory;
   BasePageElement rootElement;
   private Document document;
-  Locator locatorInsideScope;
+  private Locator locatorInsideScope;
 
   /**
    * Initializes a new instance of the BasePageObject class.
