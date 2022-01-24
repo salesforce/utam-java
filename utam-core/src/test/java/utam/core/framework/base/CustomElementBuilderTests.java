@@ -173,11 +173,25 @@ public class CustomElementBuilderTests {
     assertThat(e.getMessage(), containsString(String.format(NULL_SCOPE_ERR, "existing")));
   }
 
+  @Test
+  public void testBuildSingleRootElement() {
+    MockUtilities mock = new MockUtilities();
+
+    CustomElementBuilder builder = getBuilder(mock);
+    TestRootPageObject instance = builder.build(TestRootPageObject.class);
+    assertThat(instance, is(notNullValue()));
+  }
+
   // has to be public to construct with reflections
   public static class TestPageObject extends BasePageObject {
 
     private boolean isFalse() {
       return false;
     }
+  }
+
+  @PageMarker.Find(css = "any")
+  public static class TestRootPageObject extends BaseRootPageObject {
+
   }
 }
