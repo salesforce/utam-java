@@ -7,6 +7,7 @@
  */
 package utam.core.framework.base;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -173,11 +174,30 @@ public class CustomElementBuilderTests {
     assertThat(e.getMessage(), containsString(String.format(NULL_SCOPE_ERR, "existing")));
   }
 
+  /**
+   * when calling getter for custom element, make sure element is injected by finding locator inside
+   * root and not root locator inside the driver
+   */
+  @Test
+  public void testElementForRootPageObjectInjected() {
+    MockUtilities mock = new MockUtilities();
+    CustomElementBuilder builder = getBuilder(mock);
+    TestRootPageObject instance = builder.build(TestRootPageObject.class);
+    assertThat(instance, is(notNullValue()));
+    assertThat("locator is injected from parent", instance.getRootLocator().getStringValue(), is(equalTo("found")));
+    assertThat("element is injected from parent", instance.getElement(), is(notNullValue()));
+  }
+
   // has to be public to construct with reflections
   public static class TestPageObject extends BasePageObject {
 
     private boolean isFalse() {
       return false;
     }
+  }
+
+  @PageMarker.Find(css = "any")
+  public static class TestRootPageObject extends BaseRootPageObject {
+
   }
 }

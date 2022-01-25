@@ -21,20 +21,11 @@ import utam.core.framework.element.BasePageElement;
  */
 public class BaseRootPageObject extends BasePageObject implements RootPageObject {
 
-  private Locator rootLocator;
-
-  @Override
-  final void initialize(PageObjectsFactory factory, Element scopeElement, Locator locator) {
-    this.factory = factory;
-    setDriver(factory.getDriver());
-    this.rootLocator = locator;
-  }
-
   @Override
   protected final BasePageElement getRootElement() {
     if(rootElement == null) {
       if( getElement() == null) {
-        Element root = getDriver().findElement(rootLocator);
+        Element root = getDriver().findElement(getRootLocator());
         setElement(root);
       }
       rootElement = createInstance(getElement(), getDriver());

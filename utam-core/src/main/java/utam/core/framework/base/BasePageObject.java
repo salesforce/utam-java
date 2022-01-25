@@ -31,7 +31,6 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   PageObjectsFactory factory;
   BasePageElement rootElement;
   private Document document;
-  // used for testing
   private Locator locatorInsideScope;
 
   /**
@@ -79,18 +78,17 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   }
 
   /**
-   * During bootstrap assign values injected by page objects factory. Method is not final because
-   * overridden for Root page objects
+   * During bootstrap assign values injected by page objects factory
    *
    * @param factory instance of the factory
    * @param element root element (not null!)
    * @param locator root locator (not null!)
    */
-  void initialize(PageObjectsFactory factory, Element element, Locator locator) {
+  final void initialize(PageObjectsFactory factory, Element element, Locator locator) {
     this.factory = factory;
+    this.locatorInsideScope = locator;
     setDriver(factory.getDriver());
     setElement(element);
-    this.locatorInsideScope = locator;
   }
 
   private PageObjectsFactory getFactory() {
