@@ -115,7 +115,10 @@ public class BasicElementBuilder {
         return t;
       }
     }
-
+    // if no match found and element is nullable - return null
+    if(elementLocation.findContext.isNullable()) {
+      return null;
+    }
     // if none found that match condition - throw
     throw new NullPointerException(getFilteredElementNotFoundErr(type));
   }

@@ -94,6 +94,11 @@ public class CustomElementBuilder {
         return poInstance;
       }
     }
+
+    // if no match found and element is nullable - return null
+    if(elementLocation.findContext.isNullable()) {
+      return null;
+    }
     throw new NullPointerException(getFilteredElementNotFoundErr(type));
   }
 
