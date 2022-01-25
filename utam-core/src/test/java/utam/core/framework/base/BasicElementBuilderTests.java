@@ -149,10 +149,9 @@ public class BasicElementBuilderTests {
     WebElement mockElement = mock.getWebElementMock();
     when(mockElement.findElements(By.cssSelector(NULLABLE_CSS)))
         .thenReturn(Collections.singletonList(mockElement));
-    Exception e = expectThrows(NullPointerException.class,
-        () -> getBasicBuilder(mock, location)
-            .build(Actionable.class, BasePageElement.class, UtamBase::isVisible));
-    assertThat(e.getMessage(), is(equalTo(ERR_FOR_FILTER)));
+    test = getBasicBuilder(mock, location)
+            .build(Actionable.class, BasePageElement.class, UtamBase::isVisible);
+    assertThat(test, is(nullValue()));
 
     // found filter match
     when(mockElement.isDisplayed()).thenReturn(true);

@@ -54,14 +54,18 @@ public class CustomElementBuilderTests {
         new ElementLocation(LocatorBy.byCss("notfound"), NULLABLE));
   }
 
-  private static CustomElementBuilder getBuilder(MockUtilities mock) {
+  private static CustomElementBuilder getBuilder(MockUtilities mock, boolean isNullable) {
     when(mock.getWebElementMock().findElement(By.cssSelector("found")))
         .thenReturn(mock.getWebElementMock());
     when(mock.getWebElementMock().findElements(By.cssSelector("found")))
         .thenReturn(Collections.singletonList(mock.getWebElementMock()));
-    FindContext.Type findContext = FindContext.Type.build(false, false);
+    FindContext.Type findContext = FindContext.Type.build(isNullable, false);
     return new CustomElementBuilder(mock.getFactory(), mock.getElementAdapter(),
         new ElementLocation(LocatorBy.byCss("found"), findContext));
+  }
+
+  private static CustomElementBuilder getBuilder(MockUtilities mock) {
+    return getBuilder(mock, false);
   }
 
   @Test
@@ -122,9 +126,20 @@ public class CustomElementBuilderTests {
         () -> getNullBuilder(mock)
             .build(TestPageObject.class, Objects::nonNull));
     assertThat(e.getMessage(), startsWith(NOTHING_FOUND_ERR));
+  }
 
-    // nullable, filter returns false
-    instance = getNullableBuilder(mock)
+  @Test
+  public void testFindFirstWithFilterNullableFound() {
+    MockUtilities mock = new MockUtilities();
+    TestPageObject instance = getBuilder(mock, true)
+        .build(TestPageObject.class, TestPageObject::isFalse);
+    assertThat(instance, is(nullValue()));
+  }
+
+  @Test
+  public void testFindFirstWithFilterNullableNothingFound() {
+    MockUtilities mock = new MockUtilities();
+    TestPageObject instance = getNullableBuilder(mock)
         .build(TestPageObject.class, TestPageObject::isFalse);
     assertThat(instance, is(nullValue()));
   }
