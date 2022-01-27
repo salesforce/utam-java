@@ -23,6 +23,13 @@ public class UtamLogger {
    */
   static Logger UTAM_LOGGER = null;
 
+  /**
+   * Static initializer used to create logger and set property for formatting log messages.
+   * There may be other ways to accomplish this without using such a little-used language
+   * construct. Those should be investigated for the best approach. Note that for further
+   * control over formatting of log messages, one might extend the Formatter class, and set
+   * the property to use that class for formatting log messages.
+   */
   static {
     System.setProperty("java.util.logging.SimpleFormatter.format",
         "%1$tT %3$s %4$-7s: %5$s %6$s%n");
