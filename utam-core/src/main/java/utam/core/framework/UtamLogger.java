@@ -7,27 +7,40 @@
  */
 package utam.core.framework;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.event.Level;
 
 import java.util.List;
 
 /**
  * Logger for UTAM operations
  */
-public interface UtamLogger {
+public class UtamLogger {
 
   /**
    * Logger used to log messages
    */
-  Logger UTAM_LOGGER = Logger.getLogger("utam");
+  static Logger UTAM_LOGGER = null;
 
+  /**
+   * Static initializer used to create logger and set property for formatting log messages.
+   * There may be other ways to accomplish this without using such a little-used language
+   * construct. Those should be investigated for the best approach. Note that for further
+   * control over formatting of log messages, one might extend the Formatter class, and set
+   * the property to use that class for formatting log messages.
+   */
+  static {
+    System.setProperty("java.util.logging.SimpleFormatter.format",
+        "%1$tT %3$s %4$-7s: %5$s %6$s%n");
+    UTAM_LOGGER = LoggerFactory.getLogger("utam");
+  }
   /**
    * Log message at info level
    *
    * @param message message to log
    */
-  static void info(String message) {
+  public static void info(String message) {
     if (message != null && !message.isEmpty()) {
       UTAM_LOGGER.info(message);
     }
@@ -38,7 +51,7 @@ public interface UtamLogger {
    *
    * @param messages messages to log
    */
-  static void info(List<String> messages) {
+  public static void info(List<String> messages) {
     messages.forEach(UtamLogger::info);
   }
 
@@ -48,9 +61,19 @@ public interface UtamLogger {
    * @param priority level to use to log the message
    * @param message  messages to log
    */
-  static void log(Level priority, String message) {
+  public static void log(Level priority, String message) {
     if (message != null && !message.isEmpty()) {
-      UTAM_LOGGER.log(priority, message);
+      if (priority == Level.INFO) {
+        UTAM_LOGGER.info(message);
+      } else if (priority == Level.DEBUG) {
+        UTAM_LOGGER.debug(message);
+      } else if (priority == Level.ERROR) {
+        UTAM_LOGGER.error(message);
+      } else if (priority == Level.TRACE) {
+        UTAM_LOGGER.trace(message);
+      } else if (priority == Level.ERROR) {
+        UTAM_LOGGER.error(message);
+      }
     }
   }
 
@@ -59,8 +82,8 @@ public interface UtamLogger {
    *
    * @param t exception to log
    */
-  static void error(Throwable t) {
-    UTAM_LOGGER.error(t);
+  public static void error(Throwable t) {
+    UTAM_LOGGER.error("Unexpected exception", t);
   }
 
   /**
@@ -68,7 +91,7 @@ public interface UtamLogger {
    *
    * @param message message to log
    */
-  static void error(String message) {
+  public static void error(String message) {
     if (message != null && !message.isEmpty()) {
       UTAM_LOGGER.error(message);
     }
@@ -79,7 +102,7 @@ public interface UtamLogger {
    *
    * @param message message to log
    */
-  static void warning(String message) {
+  public static void warning(String message) {
     if (message != null && !message.isEmpty()) {
       UTAM_LOGGER.warn(message);
     }
