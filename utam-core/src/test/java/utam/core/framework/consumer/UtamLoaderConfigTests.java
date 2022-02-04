@@ -35,7 +35,7 @@ public class UtamLoaderConfigTests {
   public void testSetBridgeApp() {
     UtamLoaderConfig config = getDefaultConfig();
     config.setBridgeAppTitle("bridge");
-    assertThat(config.getBridgeAppTitle(), is(equalTo("bridge")));
+    assertThat(config.getDriverConfig().getBridgeAppTitle(), is(equalTo("bridge")));
   }
 
   @Test

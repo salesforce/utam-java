@@ -42,7 +42,7 @@ public abstract class MobileDriverUtils {
   static Point[] getFlickCoordinates(MobileDriverAdapter driverAdapter, Point nativeStartPoint,
       Point nativeEndPoint) {
     AppiumDriver driver = driverAdapter.getAppiumDriver();
-    if (!driverAdapter.isNative()) {
+    if (!driverAdapter.isNativeContext()) {
       WebElement webViewElement = driverAdapter.getWebViewElement();
       nativeStartPoint = convertWebViewLocationToNativeCoordinates(
           driverAdapter,

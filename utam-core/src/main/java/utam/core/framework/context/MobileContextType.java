@@ -8,12 +8,12 @@
 package utam.core.framework.context;
 
 /**
- * platform type can be native or web to switch driver context inside a page object
+ * mobile driver context can be native or web to switch inside a page object
  *
  * @author elizaveta.ivanova
  * @since 230
  */
-public enum PlatformType {
+public enum MobileContextType {
   /**
    * no platform
    */
@@ -31,7 +31,7 @@ public enum PlatformType {
 
   private final String name;
 
-  PlatformType(String name) {
+  MobileContextType(String name) {
     this.name = name;
   }
 
@@ -40,11 +40,11 @@ public enum PlatformType {
    * @param string the platform type string
    * @return the platform type for the specified string
    */
-  public static PlatformType fromString(String string) {
+  public static MobileContextType fromString(String string) {
     if (string == null || string.isEmpty()) {
       return NONE;
     }
-    for (PlatformType type : PlatformType.values()) {
+    for (MobileContextType type : MobileContextType.values()) {
       if (type.name.equals(string)) {
         return type;
       }

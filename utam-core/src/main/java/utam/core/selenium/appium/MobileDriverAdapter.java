@@ -14,9 +14,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import utam.core.driver.Driver;
 import utam.core.driver.DriverConfig;
+import utam.core.element.Element;
 import utam.core.framework.consumer.UtamError;
+import utam.core.framework.context.MobileContextType;
 import utam.core.framework.context.MobilePlatformType;
 import utam.core.selenium.element.DriverAdapter;
+import utam.core.selenium.element.ElementAdapter;
 
 /**
  * Appium Driver wrapper
@@ -55,14 +58,14 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
             mobilePlatform == MobilePlatformType.IOS_TABLET;
   }
 
-  Boolean isWebViewAvailable() {
+  final Boolean isWebViewAvailable() {
     AppiumDriver appiumDriver = getAppiumDriver();
     Set<String> contextHandles = appiumDriver.getContextHandles();
     return contextHandles.stream().
         anyMatch(handle -> handle.contains(WEBVIEW_CONTEXT_HANDLE_PREFIX));
   }
 
-  AppiumDriver switchToWebView(String title) {
+  final AppiumDriver switchToWebView(String title) {
     AppiumDriver appiumDriver = getAppiumDriver();
     if (!isIOSPlatform()) {
         // Set current context to native to get the updated available contexts
@@ -114,7 +117,7 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
   }
 
   @Override
-  public boolean isNative() {
+  public boolean isNativeContext() {
     return MobileDriverUtils.isNative(getAppiumDriver());
   }
 
@@ -123,12 +126,7 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
   }
 
   @Override
-  public boolean isMobile() {
-    return true;
-  }
-
-  @Override
-  public String getContext() {
+  public String getPageContext() {
     return getAppiumDriver().getContext();
   }
 
@@ -142,5 +140,19 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
   // for tests
   final <T> T waitFor(Supplier<T> isTrue) {
     return waitFor(isTrue, null, null);
+  }
+
+  @Override
+  public void setPageContext(MobileContextType mobileContextType) {
+    if (mobileContextType.equals(MobileContextType.WEB)) {
+      setPageContextToWebView(getDriverConfig().getBridgeAppTitle());
+    } else {
+      setPageContextToNative();
+    }
+  }
+
+  @Override
+  protected Element wrapElement(WebElement element) {
+    return new MobileElementAdapter(element, this);
   }
 }

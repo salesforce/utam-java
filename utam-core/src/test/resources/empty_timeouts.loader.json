@@ -1,4 +1,5 @@
 {
   "timeouts": {
-  }
+  },
+  "bridgeAppTitle" : "salesforce"
 }

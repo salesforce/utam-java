@@ -191,11 +191,11 @@ public class BasePageElement extends UtamBaseImpl implements Actionable, Clickab
   @Override
   public void flick(int xOffset, int yOffset) {
     log(String.format("flick element at X '%d' Y '%d'", xOffset, yOffset));
-    String originalContext = getDriver().getContext();
+    String originalContext = getDriver().getPageContext();
     try {
       getElement().flick(xOffset, yOffset);
     } finally {
-      if (!getDriver().isNative()) {
+      if (!getDriver().isNativeContext()) {
         getDriver().setPageContextToWebView(originalContext);
       }
     }

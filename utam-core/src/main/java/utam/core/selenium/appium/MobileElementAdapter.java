@@ -16,6 +16,7 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebElement;
 import utam.core.driver.Driver;
+import utam.core.element.Element;
 import utam.core.selenium.element.ElementAdapter;
 
 /**
@@ -58,5 +59,10 @@ public class MobileElementAdapter extends ElementAdapter {
         .moveTo(PointOption.point(end.getX(), end.getY()))
         .release()
         .perform();
+  }
+
+  @Override
+  protected Element wrapElement(WebElement element) {
+    return new MobileElementAdapter(element, driverAdapter);
   }
 }

@@ -15,7 +15,7 @@ import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Locator;
 import utam.core.framework.base.ElementMarker;
 import utam.core.framework.base.PageMarker;
-import utam.core.framework.context.PlatformType;
+import utam.core.framework.context.MobileContextType;
 import utam.core.selenium.appium.LocatorAccessibilityId;
 import utam.core.selenium.appium.LocatorClassChain;
 import utam.core.selenium.appium.LocatorUIAutomator;
@@ -101,8 +101,8 @@ public final class AnnotationUtils {
    * @return the object providing the annotation for the given platform
    */
   public static AnnotationProvider getPagePlatformAnnotation(String string) {
-    PlatformType pagePlatform = PlatformType.fromString(string);
-    if (pagePlatform == PlatformType.NONE) {
+    MobileContextType pagePlatform = MobileContextType.fromString(string);
+    if (pagePlatform == MobileContextType.NONE) {
       return EMPTY_ANNOTATION;
     }
     String annotation =
@@ -113,7 +113,7 @@ public final class AnnotationUtils {
             pagePlatform.getAnnotation());
     return new Annotation(
         annotation,
-        Stream.of(MARKER_CLASS, new TypeUtilities.FromClass(PlatformType.class))
+        Stream.of(MARKER_CLASS, new TypeUtilities.FromClass(MobileContextType.class))
             .collect(Collectors.toList()));
   }
 

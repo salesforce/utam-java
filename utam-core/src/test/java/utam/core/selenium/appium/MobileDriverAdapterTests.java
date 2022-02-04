@@ -39,6 +39,8 @@ import org.openqa.selenium.WebDriver.TargetLocator;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.framework.consumer.UtamError;
+import utam.core.framework.context.MobileContextType;
+import utam.core.selenium.element.DriverAdapter;
 
 /**
  * @author qren
@@ -56,8 +58,7 @@ public class MobileDriverAdapterTests {
     MobileDriverAdapter driverAdapter = new MockUtilities(AppiumDriver.class).getMobileDriverAdapter();
     assertThat(driverAdapter, is(not(nullValue())));
     assertThat(driverAdapter.getAppiumDriver(), is(instanceOf(AppiumDriver.class)));
-    assertThat(driverAdapter.isMobile(), is(true));
-    assertThat(driverAdapter.isNative(), is(false));
+    assertThat(driverAdapter.isNativeContext(), is(false));
     assertThat(driverAdapter.getSeleniumDriver(), is(instanceOf(AppiumDriver.class)));
   }
 
@@ -65,14 +66,14 @@ public class MobileDriverAdapterTests {
   public void testIsNative() {
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
     when(mock.getAppiumDriverMock().getContext()).thenReturn(NATIVE_CONTEXT_HANDLE);
-    assertThat(mock.getDriverAdapter().isNative(), is(true));
+    assertThat(mock.getDriverAdapter().isNativeContext(), is(true));
   }
 
   @Test
   public void testGetContext() {
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
     when(mock.getAppiumDriverMock().getContext()).thenReturn(NATIVE_CONTEXT_HANDLE);
-    mock.getDriverAdapter().getContext();
+    mock.getDriverAdapter().getPageContext();
   }
 
   /**
@@ -437,6 +438,20 @@ public class MobileDriverAdapterTests {
     assertThat(
         windowHandleTracker.currentHandle,
         Matchers.is(equalTo(testWindowHandle)));
+  }
+
+  @Test
+  public void testSetPageContext() {
+    MockUtilities mock = new MockUtilities(AppiumDriver.class);
+    ContextTracker tracker = new ContextTracker(
+        WEBVIEW_CONTEXT_HANDLE_PREFIX + "_1");
+    AppiumDriver driver = mock.getAppiumDriverMock();
+    when(driver.context(anyString())).then((arg) -> {
+      tracker.currentContext = arg.getArgument(0);
+      return driver;
+    });
+    when(driver.getContext()).thenReturn(tracker.currentContext);
+    mock.getDriverAdapter().setPageContext(MobileContextType.NATIVE);
   }
 
   private static class ContextTracker {

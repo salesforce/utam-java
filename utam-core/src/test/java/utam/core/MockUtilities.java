@@ -66,7 +66,7 @@ public class MockUtilities {
     when(((WrapsDriver) webElementMock).getWrappedDriver()).thenReturn(webDriverMock);
     driverAdapter = setDriverAdapter(driverType);
     PageObjectContext pageObjectContext = new PageObjectContextImpl(Collections.emptyMap());
-    factory = new PageObjectsFactoryImpl(pageObjectContext, "", driverAdapter);
+    factory = new PageObjectsFactoryImpl(pageObjectContext, driverAdapter);
     elementAdapter = setElementAdapter(driverType);
     utamElement = createInstance(BasePageElement.class, elementAdapter, factory.getDriver());
     frameElement = createInstance(FrameElementImpl.class, elementAdapter, factory.getDriver());

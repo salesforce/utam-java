@@ -20,7 +20,7 @@ import utam.core.element.Locator;
 import utam.core.framework.consumer.PageObjectContext;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.consumer.UtamLoaderConfig;
-import utam.core.framework.context.PlatformType;
+import utam.core.framework.context.MobileContextType;
 
 /**
  * selenium page objects factory
@@ -32,22 +32,18 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
 
   private final PageObjectContext pageObjectContext;
   private final Driver driver;
-  private final String bridgeAppTitle;
 
   /**
    * Initializes a new instance of the PageObjectsFactoryImpl class
    *
    * @param pageObjectContext the Page Object context
-   * @param bridgeAppTitle    the bridge app title for mobile apps
    * @param driver            the driver instance
    */
   public PageObjectsFactoryImpl(
       PageObjectContext pageObjectContext,
-      String bridgeAppTitle,
       Driver driver) {
     this.pageObjectContext = pageObjectContext;
     this.driver = driver;
-    this.bridgeAppTitle = bridgeAppTitle;
   }
 
   /**
@@ -57,7 +53,7 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
    * @param driver           the driver instance
    */
  public PageObjectsFactoryImpl(UtamLoaderConfig utamLoaderConfig, Driver driver) {
-    this(utamLoaderConfig.getPageContext(), utamLoaderConfig.getBridgeAppTitle(), driver);
+    this(utamLoaderConfig.getPageContext(), driver);
   }
 
   /**
@@ -91,19 +87,13 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
   }
 
   private void setPlatform(PageObject instance) {
-    PlatformType pagePlatform;
+    MobileContextType pagePlatform;
     if (instance.getClass().isAnnotationPresent(PageMarker.Switch.class)) {
       pagePlatform = instance.getClass().getAnnotation(PageMarker.Switch.class).value();
     } else {
-      pagePlatform = PlatformType.WEB;
+      pagePlatform = MobileContextType.WEB;
     }
-    if (getDriver().isMobile()) {
-      if (pagePlatform.equals(PlatformType.WEB)) {
-        getDriver().setPageContextToWebView(bridgeAppTitle);
-      } else {
-        getDriver().setPageContextToNative();
-      }
-    }
+    getDriver().setPageContext(pagePlatform);
   }
 
   @Override

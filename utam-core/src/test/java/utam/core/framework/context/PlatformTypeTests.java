@@ -27,10 +27,10 @@ public class PlatformTypeTests {
    */
   @Test
   public void testFromString() {
-    assertThat(PlatformType.fromString("native"), is(equalTo(PlatformType.NATIVE)));
-    assertThat(PlatformType.fromString("web"), is(equalTo(PlatformType.WEB)));
-    assertThat(PlatformType.fromString(null), is(equalTo(PlatformType.NONE)));
-    assertThat(PlatformType.fromString(""), is(equalTo(PlatformType.NONE)));
+    assertThat(MobileContextType.fromString("native"), is(equalTo(MobileContextType.NATIVE)));
+    assertThat(MobileContextType.fromString("web"), is(equalTo(MobileContextType.WEB)));
+    assertThat(MobileContextType.fromString(null), is(equalTo(MobileContextType.NONE)));
+    assertThat(MobileContextType.fromString(""), is(equalTo(MobileContextType.NONE)));
   }
 
   /**
@@ -40,7 +40,7 @@ public class PlatformTypeTests {
   public void testFromStringWithUnknownTypeThrows() {
     IllegalArgumentException e = expectThrows(
         IllegalArgumentException.class,
-        () -> PlatformType.fromString("illegal"));
+        () -> MobileContextType.fromString("illegal"));
     assertThat(e.getMessage(), containsString("Unknown platform type 'illegal'"));
   }
 }

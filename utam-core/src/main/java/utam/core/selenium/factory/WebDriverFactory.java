@@ -88,7 +88,7 @@ public class WebDriverFactory {
   private static final DriverConfig TEST_SIMULATOR_DRIVER_CONFIG = new DriverConfig(
       DEFAULT_IMPLICIT_TIMEOUT,
       DEFAULT_EXPLICIT_TIMEOUT_MOCK,
-      DEFAULT_POLLING_INTERVAL);
+      DEFAULT_POLLING_INTERVAL, "");
 
   /**
    * Creates a WebDriver instance

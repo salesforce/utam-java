@@ -39,16 +39,18 @@ public class JsonLoaderConfig {
   /**
    * Initializes a new instance of the JsonLoaderConfig class
    *
-   * @param driverConfig the driver configuration
+   * @param bridgeAppTitle mobile only: bridge app title
+   * @param timeoutsConfig the driver configuration
    * @param modules      the list of modules
    * @param profiles     the list of profiles
    */
   @JsonCreator
   public JsonLoaderConfig(
-      @JsonProperty(value = "timeouts") TimeoutsJsonMapping driverConfig,
+      @JsonProperty(value = "bridgeAppTitle", defaultValue = "") String bridgeAppTitle,
+      @JsonProperty(value = "timeouts") TimeoutsJsonMapping timeoutsConfig,
       @JsonProperty(value = "modules") List<Module> modules,
       @JsonProperty(value = "profiles") List<Profile> profiles) {
-    this.driverConfig = driverConfig == null ? new DriverConfig() : driverConfig.getDriverConfig();
+    this.driverConfig = timeoutsConfig == null ? new DriverConfig(bridgeAppTitle) : timeoutsConfig.getDriverConfig(bridgeAppTitle);
     this.modules.add(new Module(null, new ArrayList<>()));
     if (modules != null) {
       this.modules.addAll(modules);
@@ -62,7 +64,7 @@ public class JsonLoaderConfig {
    * create empty loader config without JSON file
    */
   public JsonLoaderConfig() {
-    this(null, new ArrayList<>(), new ArrayList<>());
+    this("", null, new ArrayList<>(), new ArrayList<>());
   }
 
   /**
@@ -256,8 +258,8 @@ public class JsonLoaderConfig {
           : Duration.ofMillis(pollingIntervalMsec);
     }
 
-    DriverConfig getDriverConfig() {
-      return new DriverConfig(implicitTimeout, explicitTimeout, pollingInterval);
+    DriverConfig getDriverConfig(String bridgeAppTitle) {
+      return new DriverConfig(implicitTimeout, explicitTimeout, pollingInterval, bridgeAppTitle);
     }
   }
 }

@@ -11,7 +11,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import utam.core.framework.context.PlatformType;
+import utam.core.framework.context.MobileContextType;
 import utam.core.element.Locator;
 import utam.core.selenium.element.LocatorBy;
 
@@ -82,6 +82,6 @@ public abstract class PageMarker {
      * The value of the platform
      * @return platform type
      */
-    PlatformType value();
+    MobileContextType value();
   }
 }
