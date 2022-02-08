@@ -139,7 +139,7 @@ public class DriverAdapter implements Driver {
     Duration waitDuration = timeout == null? driverConfig.getExplicitTimeout() : timeout;
     String errorMessage = message == null? "wait for condition" : message;
     DriverWait driverWait = new DriverWait(this, waitDuration, driverConfig.getPollingInterval(), errorMessage);
-    return driverWait.until(driver -> isTrue.get());
+    return driverWait.until((driver) -> isTrue.get());
   }
 
   @Override

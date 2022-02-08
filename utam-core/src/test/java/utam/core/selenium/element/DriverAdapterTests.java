@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.element.DriverAdapter.ERR_CANT_ENTER_NULL_FRAME;
+import static utam.core.selenium.element.DriverAdapter.ERR_SUPPORTED_FOR_MOBILE;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -70,22 +71,23 @@ public class DriverAdapterTests {
 
   @Test
   public void testSetPageContextToNative() {
-    assertThrows(() -> new MockUtilities().getDriverAdapter().setPageContextToNative());
+    IllegalStateException e = expectThrows(IllegalStateException.class,
+        () -> new MockUtilities().getDriverAdapter().setPageContextToNative());
+    assertThat(e.getMessage(), containsString(ERR_SUPPORTED_FOR_MOBILE));
   }
 
   @Test
   public void testSetPageContextToWebView() {
-    assertThrows(() -> new MockUtilities().getDriverAdapter().setPageContextToNative());
-  }
-
-  @Test
-  public void testTestSetPageContextToWebView() {
-    assertThrows(() -> new MockUtilities().getDriverAdapter().setPageContextToNative());
+    IllegalStateException e = expectThrows(IllegalStateException.class,
+        () -> new MockUtilities().getDriverAdapter().setPageContextToWebView("title"));
+    assertThat(e.getMessage(), containsString(ERR_SUPPORTED_FOR_MOBILE));
   }
 
   @Test
   public void testGetContext() {
-    assertThrows(() -> new MockUtilities().getDriverAdapter().getContext());
+    IllegalStateException e = expectThrows(IllegalStateException.class,
+        () -> new MockUtilities().getDriverAdapter().getContext());
+    assertThat(e.getMessage(), containsString(ERR_SUPPORTED_FOR_MOBILE));
   }
 
   @Test
