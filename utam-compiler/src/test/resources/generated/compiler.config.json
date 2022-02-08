@@ -11,6 +11,10 @@
     {
       "typeMatch": "generated-custom",
       "pathMatch": ".*/custom"
+    },
+    {
+      "typeMatch": "generated-mobile",
+      "pathMatch": ".*/mobile"
     }
   ]
 }
