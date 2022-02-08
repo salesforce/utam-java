@@ -25,7 +25,7 @@ import utam.core.driver.DriverConfig;
 import utam.core.element.Element;
 import utam.core.element.Locator;
 import utam.core.framework.UtamCoreError;
-import utam.core.framework.context.MobileContextType;
+import utam.core.framework.context.PlatformType;
 
 /**
  * selenium web driver implementation of the driver
@@ -190,8 +190,8 @@ public class DriverAdapter implements Driver {
   }
 
   @Override
-  public void setPageContext(MobileContextType mobileContextType) {
-    throw new IllegalStateException(ERR_SUPPORTED_FOR_MOBILE);
+  public void setPageContext(PlatformType mobileContextType) {
+    // do nothing
   }
 
   static class DriverWait extends FluentWait<Driver> {

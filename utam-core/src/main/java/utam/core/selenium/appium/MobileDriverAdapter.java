@@ -16,10 +16,9 @@ import utam.core.driver.Driver;
 import utam.core.driver.DriverConfig;
 import utam.core.element.Element;
 import utam.core.framework.consumer.UtamError;
-import utam.core.framework.context.MobileContextType;
+import utam.core.framework.context.PlatformType;
 import utam.core.framework.context.MobilePlatformType;
 import utam.core.selenium.element.DriverAdapter;
-import utam.core.selenium.element.ElementAdapter;
 
 /**
  * Appium Driver wrapper
@@ -143,8 +142,8 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
   }
 
   @Override
-  public void setPageContext(MobileContextType mobileContextType) {
-    if (mobileContextType.equals(MobileContextType.WEB)) {
+  public void setPageContext(PlatformType mobileContextType) {
+    if (mobileContextType.equals(PlatformType.WEB)) {
       setPageContextToWebView(getDriverConfig().getBridgeAppTitle());
     } else {
       setPageContextToNative();

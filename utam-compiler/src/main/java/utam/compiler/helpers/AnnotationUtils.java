@@ -7,6 +7,7 @@
  */
 package utam.compiler.helpers;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,7 +16,7 @@ import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Locator;
 import utam.core.framework.base.ElementMarker;
 import utam.core.framework.base.PageMarker;
-import utam.core.framework.context.MobileContextType;
+import utam.core.framework.context.PlatformType;
 import utam.core.selenium.appium.LocatorAccessibilityId;
 import utam.core.selenium.appium.LocatorClassChain;
 import utam.core.selenium.appium.LocatorUIAutomator;
@@ -37,6 +38,8 @@ public final class AnnotationUtils {
   private static final List<TypeProvider> SELECTOR_CLASS_LIST =
       Stream.of(new TypeUtilities.FromClass(ElementMarker.class)).collect(Collectors.toList());
   private static final String MARKER_CLASS_STRING = PageMarker.class.getSimpleName();
+  private static final List<TypeProvider> PLATFORM_ANNOTATION_IMPORTS = Stream.of(
+      new TypeUtilities.FromClass(PlatformType.class), MARKER_CLASS).collect(Collectors.toList());
 
   /**
    * Gets the provider for the annotation for a given locator
@@ -97,12 +100,12 @@ public final class AnnotationUtils {
 
   /**
    * Gets the annotation provider for the page platform
-   * @param string the string representing the platform
+   * @param platformTypeStr the string representing the platform in JSON file
    * @return the object providing the annotation for the given platform
    */
-  public static AnnotationProvider getPagePlatformAnnotation(String string) {
-    MobileContextType pagePlatform = MobileContextType.fromString(string);
-    if (pagePlatform == MobileContextType.NONE) {
+  public static AnnotationProvider getPagePlatformAnnotation(String platformTypeStr) {
+    PlatformType platformType = PlatformType.fromString(platformTypeStr);
+    if (platformType == null) {
       return EMPTY_ANNOTATION;
     }
     String annotation =
@@ -110,11 +113,8 @@ public final class AnnotationUtils {
             "@%s.%s(%s)",
             MARKER_CLASS_STRING,
             PageMarker.Switch.class.getSimpleName(),
-            pagePlatform.getAnnotation());
-    return new Annotation(
-        annotation,
-        Stream.of(MARKER_CLASS, new TypeUtilities.FromClass(MobileContextType.class))
-            .collect(Collectors.toList()));
+            platformType.getAnnotation());
+    return new Annotation(annotation, PLATFORM_ANNOTATION_IMPORTS);
   }
 
   static String getWrappedString(String string) {

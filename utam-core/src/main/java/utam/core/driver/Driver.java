@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import utam.core.element.Element;
 import utam.core.element.Locator;
-import utam.core.framework.context.MobileContextType;
+import utam.core.framework.context.PlatformType;
 
 /**
  * Driver interface allows to integrate any driver type, default is Selenium and Appium
@@ -113,7 +113,7 @@ public interface Driver {
    *
    * @param mobileContextType mobile context type
    */
-  void setPageContext(MobileContextType mobileContextType);
+  void setPageContext(PlatformType mobileContextType);
 
   /**
    * mobile only: set active page context to NATIVE_APP

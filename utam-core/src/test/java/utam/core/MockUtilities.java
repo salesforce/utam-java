@@ -173,6 +173,10 @@ public class MockUtilities {
       super();
     }
 
+    public MockDriver(Class<? extends WebDriver> driverType) {
+      super(driverType);
+    }
+
     @Override
     DriverAdapter setDriverAdapter(Class<? extends WebDriver> driverType) {
       DriverAdapter driverAdapterMock =

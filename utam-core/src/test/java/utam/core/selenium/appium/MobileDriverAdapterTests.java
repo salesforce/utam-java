@@ -39,8 +39,7 @@ import org.openqa.selenium.WebDriver.TargetLocator;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.framework.consumer.UtamError;
-import utam.core.framework.context.MobileContextType;
-import utam.core.selenium.element.DriverAdapter;
+import utam.core.framework.context.PlatformType;
 
 /**
  * @author qren
@@ -451,7 +450,7 @@ public class MobileDriverAdapterTests {
       return driver;
     });
     when(driver.getContext()).thenReturn(tracker.currentContext);
-    mock.getDriverAdapter().setPageContext(MobileContextType.NATIVE);
+    mock.getDriverAdapter().setPageContext(PlatformType.NATIVE);
   }
 
   private static class ContextTracker {

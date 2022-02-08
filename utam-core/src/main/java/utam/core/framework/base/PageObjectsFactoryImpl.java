@@ -20,7 +20,7 @@ import utam.core.element.Locator;
 import utam.core.framework.consumer.PageObjectContext;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.consumer.UtamLoaderConfig;
-import utam.core.framework.context.MobileContextType;
+import utam.core.framework.context.PlatformType;
 
 /**
  * selenium page objects factory
@@ -83,17 +83,9 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
     BasePageObject pageObject = (BasePageObject) instance;
     pageObject.initialize(this, element, locator);
     bootstrapElements(pageObject);
-    setPlatform(instance);
-  }
-
-  private void setPlatform(PageObject instance) {
-    MobileContextType pagePlatform;
-    if (instance.getClass().isAnnotationPresent(PageMarker.Switch.class)) {
-      pagePlatform = instance.getClass().getAnnotation(PageMarker.Switch.class).value();
-    } else {
-      pagePlatform = MobileContextType.WEB;
-    }
-    getDriver().setPageContext(pagePlatform);
+    PlatformType mobileContextType = PlatformType.from(pageObject.getClass());
+    // only mobile driver implementation actually changes context
+    getDriver().setPageContext(mobileContextType);
   }
 
   @Override

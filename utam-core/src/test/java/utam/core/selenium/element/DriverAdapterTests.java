@@ -24,7 +24,6 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.element.DriverAdapter.ERR_CANT_ENTER_NULL_FRAME;
-import static utam.core.selenium.element.DriverAdapter.ERR_SUPPORTED_FOR_MOBILE;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -40,7 +39,7 @@ import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.element.Element;
 import utam.core.framework.consumer.UtamError;
-import utam.core.framework.context.MobileContextType;
+import utam.core.framework.context.PlatformType;
 
 
 public class DriverAdapterTests {
@@ -194,7 +193,7 @@ public class DriverAdapterTests {
   public void testSetPageContextThrows() {
     MockUtilities mock = new MockUtilities();
     DriverAdapter adapter = (DriverAdapter) mock.getDriverAdapter();
-    Exception e = expectThrows(IllegalStateException.class, () -> adapter.setPageContext(MobileContextType.WEB));
-    assertThat(e.getMessage(), is(equalTo(ERR_SUPPORTED_FOR_MOBILE)));
+    // nothing happens
+    adapter.setPageContext(PlatformType.WEB);
   }
 }
