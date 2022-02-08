@@ -9,9 +9,12 @@ package utam.core.selenium.element;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.any;
@@ -23,8 +26,11 @@ import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.element.DriverAdapter.ERR_CANT_ENTER_NULL_FRAME;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
@@ -106,8 +112,45 @@ public class DriverAdapterTests {
   public void testWaitFor() {
     Driver driver = new MockUtilities().getDriverAdapter();
     assertThat(driver.waitFor(() -> true, "test", Duration.ofSeconds(10)), is(true));
-    assertThrows(() -> driver.waitFor(() -> null, null, null));
-    assertThrows(() -> driver.waitFor(() -> false, null, null));
+  }
+
+  @Test
+  public void testWaitForThrowsTimeout() {
+    Driver driver = new MockUtilities().getDriverAdapter();
+    Instant start = Instant.now();
+    TimeoutException e = expectThrows(TimeoutException.class, () -> driver.waitFor(() -> null, "test", null));
+    Instant stop = Instant.now();
+    assertThat(Duration.between(start, stop).toSecondsPart() , is(lessThanOrEqualTo(1)));
+    assertThat(e.getMessage(), containsString("Expected condition failed: test"));
+    start = Instant.now();
+    e = expectThrows(TimeoutException.class, () -> driver.waitFor(() -> false, null, null));
+    stop = Instant.now();
+    assertThat(e.getMessage(), containsString("Expected condition failed: wait for condition"));
+    assertThat(Duration.between(start, stop).toSecondsPart() , is(lessThanOrEqualTo(1)));
+  }
+
+  @Test
+  public void testWaitForThrowsNullPointer() {
+    Driver driver = new MockUtilities().getDriverAdapter();
+    Instant start = Instant.now();
+    NullPointerException e = expectThrows(NullPointerException.class, () -> driver.waitFor(() -> {
+      throw new NullPointerException("my error");
+    }, "test", Duration.ofSeconds(3)));
+    Instant stop = Instant.now();
+    assertThat(e.getMessage(), containsString("my error"));
+    assertThat(Duration.between(start, stop).toSecondsPart() , is(greaterThanOrEqualTo(3)));
+  }
+
+  @Test
+  public void testWaitForThrowsSeleniumException() {
+    Driver driver = new MockUtilities().getDriverAdapter();
+    Instant start = Instant.now();
+    NoSuchElementException e = expectThrows(NoSuchElementException.class, () -> driver
+        .waitFor(() -> driver.findElement(LocatorBy.byCss("css")), "test", Duration.ofSeconds(3)));
+    Instant stop = Instant.now();
+    assertThat(e.getMessage(),
+        containsString("can't find element with locator 'By.cssSelector: css'"));
+    assertThat(Duration.between(start, stop).toSecondsPart(), is(greaterThanOrEqualTo(3)));
   }
 
   @Test
