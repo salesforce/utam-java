@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.element.DriverAdapter.ERR_CANT_ENTER_NULL_FRAME;
+import static utam.core.selenium.element.DriverAdapter.ERR_SUPPORTED_FOR_MOBILE;
 
 import java.time.Duration;
 import java.time.Instant;
