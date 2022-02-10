@@ -10,7 +10,6 @@ package utam.core.framework.base;
 import static utam.core.framework.element.BasePageElement.createInstance;
 
 import utam.core.element.Element;
-import utam.core.element.Locator;
 import utam.core.framework.element.BasePageElement;
 
 /**

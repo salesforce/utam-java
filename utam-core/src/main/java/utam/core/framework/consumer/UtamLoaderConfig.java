@@ -21,14 +21,6 @@ import utam.core.framework.context.Profile;
 public interface UtamLoaderConfig {
 
   /**
-   * before setting active profiles, configure all existing profiles
-   *
-   * @param module  name of the module, can be null
-   * @param profile profile value
-   */
-  void setConfiguredProfile(String module, Profile profile);
-
-  /**
    * set active profile with intention to correctly pick implementing class if there are overrides
    * <br> for each jar with dependencies it will try to find dependencies config and add overrides
    * injected class
@@ -36,6 +28,15 @@ public interface UtamLoaderConfig {
    * @param profile active profile
    */
   void setProfile(Profile profile);
+
+  /**
+   * for compatibility with utam-js we allow to set module without loader config JSON file. Each new
+   * dependency module will search for dependency config file with the name moduleName.config.json in resources
+   *
+   * @param moduleName name of the module
+   * @since 238
+   */
+  void setDependencyModule(String moduleName);
 
   /**
    * create page objects context for dependency injection for each Jar and each profile, search for

@@ -46,7 +46,6 @@ import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.representation.UnionType;
 import utam.core.element.BasicElement;
 import utam.core.element.Locator;
-import utam.core.framework.consumer.UtamError;
 
 /**
  * mapping for a Page Object JSON
@@ -63,7 +62,8 @@ final class UtamPageObject {
       "root page object requires default selector property";
   static final String ERR_ROOT_REDUNDANT_SELECTOR = "non root page object can't have selector";
   static final String ERR_ROOT_ABSTRACT = "interface declaration can only have 'methods' property";
-  final String implementsType;
+  static final String ERR_PROFILE_IS_REQUIRED = "implementing class should have profiles";
+  String implementsType;
   final Locator rootLocator;
   private final UtamMethodAction[] beforeLoad;
   private final RootElementHelper rootElementHelper;
@@ -119,18 +119,21 @@ final class UtamPageObject {
   void validate() {
     if (isAbstract) {
       if (shadow != null || elements != null || rootLocator != null || profiles != null) {
-        throw new UtamError(ERR_ROOT_ABSTRACT);
+        throw new UtamCompilationError(ERR_ROOT_ABSTRACT);
       }
       return;
     }
     if (isRootPageObject && rootLocator == null) {
-      throw new UtamError(ERR_ROOT_MISSING_SELECTOR);
+      throw new UtamCompilationError(ERR_ROOT_MISSING_SELECTOR);
     }
     if (!isRootPageObject && rootLocator != null) {
-      throw new UtamError(ERR_ROOT_REDUNDANT_SELECTOR);
+      throw new UtamCompilationError(ERR_ROOT_REDUNDANT_SELECTOR);
     }
     if (profiles != null && implementsType == null) {
-      throw new UtamError(ERR_ROOT_PROFILE_HAS_NO_INTERFACE);
+      throw new UtamCompilationError(ERR_ROOT_PROFILE_HAS_NO_INTERFACE);
+    }
+    if (profiles == null && implementsType != null) {
+      throw new UtamCompilationError(ERR_PROFILE_IS_REQUIRED);
     }
   }
 

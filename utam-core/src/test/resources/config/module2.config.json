@@ -1,0 +1,18 @@
+{
+  "name": {
+    "value2": [
+      {
+        "interface": "utam.core.framework.consumer.TestLoaderConfigPageObject",
+        "implementation": "utam.core.framework.consumer.TestLoaderConfigPageObjectOverride"
+      }
+    ]
+  },
+  "name2": {
+    "value2": [
+      {
+        "interface": "utam.core.framework.consumer.TestLoaderConfigDefault",
+        "implementation": "utam.core.framework.consumer.TestLoaderConfigPageObjectOverride"
+      }
+    ]
+  }
+}

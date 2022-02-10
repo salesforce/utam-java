@@ -3,11 +3,8 @@ package utam.core.framework.consumer;
 import static utam.core.driver.DriverConfig.DEFAULT_EXPLICIT_TIMEOUT;
 import static utam.core.driver.DriverConfig.DEFAULT_IMPLICIT_TIMEOUT;
 import static utam.core.driver.DriverConfig.DEFAULT_POLLING_INTERVAL;
-import static utam.core.framework.consumer.UtamLoaderConfigImpl.ERR_DUPLICATE_PROFILE;
-import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -15,7 +12,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import utam.core.driver.DriverConfig;
@@ -28,11 +29,12 @@ import utam.core.framework.context.StringValueProfile;
  * @author elizaveta.ivanova
  * @since 234
  */
-public class JsonLoaderConfig {
+class JsonLoaderConfig {
 
   static final String ERR_READING_LOADER_CONFIG = "error while reading config '%s' for UTAM loader";
+  static final String ERR_DUPLICATE_PROFILE = "Profile '%s = %s' is already configured";
   // if profile is set at the loader level, then it applies to all modules
-  final List<Profile> profiles = new ArrayList<>();
+  private final List<Profile> profiles = new ArrayList<>();
   final DriverConfig driverConfig;
   private final List<Module> modules = new ArrayList<>();
 
@@ -45,13 +47,12 @@ public class JsonLoaderConfig {
    * @param profiles     the list of profiles
    */
   @JsonCreator
-  public JsonLoaderConfig(
-      @JsonProperty(value = "bridgeAppTitle", defaultValue = "") String bridgeAppTitle,
+  JsonLoaderConfig(
+      @JsonProperty(value = "bridgeAppTitle") String bridgeAppTitle,
       @JsonProperty(value = "timeouts") TimeoutsJsonMapping timeoutsConfig,
       @JsonProperty(value = "modules") List<Module> modules,
       @JsonProperty(value = "profiles") List<Profile> profiles) {
     this.driverConfig = timeoutsConfig == null ? new DriverConfig(bridgeAppTitle) : timeoutsConfig.getDriverConfig(bridgeAppTitle);
-    this.modules.add(new Module(null, new ArrayList<>()));
     if (modules != null) {
       this.modules.addAll(modules);
     }
@@ -63,7 +64,7 @@ public class JsonLoaderConfig {
   /**
    * create empty loader config without JSON file
    */
-  public JsonLoaderConfig() {
+  JsonLoaderConfig() {
     this("", null, new ArrayList<>(), new ArrayList<>());
   }
 
@@ -73,7 +74,7 @@ public class JsonLoaderConfig {
    * @param jsonConfigFile JSON file with config
    * @return config object
    */
-  public static JsonLoaderConfig loadConfig(File jsonConfigFile) {
+  static JsonLoaderConfig loadConfig(File jsonConfigFile) {
     try {
       return new ObjectMapper().readValue(jsonConfigFile, JsonLoaderConfig.class);
     } catch (IOException e) {
@@ -89,7 +90,7 @@ public class JsonLoaderConfig {
    *                     "utam.loader.json"
    * @return config object
    */
-  public static JsonLoaderConfig loadConfig(String resourceName) {
+  static JsonLoaderConfig loadConfig(String resourceName) {
     URL url = JsonLoaderConfig.class.getClassLoader().getResource(resourceName);
     if (url == null) {
       throw new UtamCoreError(String.format(ERR_READING_LOADER_CONFIG, resourceName));
@@ -103,12 +104,51 @@ public class JsonLoaderConfig {
   }
 
   /**
-   * get list of configured modules
+   * get list of configured modules. used in tests
    *
    * @return list of modules from config
    */
-  public List<Module> getModules() {
+  List<Module> getModules() {
     return modules;
+  }
+
+  /**
+   * get profiles configured for module. used in tests
+   *
+   * @param module module instance
+   * @return list of configured profiles
+   */
+  List<utam.core.framework.context.Profile> getModuleProfiles(Module module) {
+    return new ArrayList<>(getModuleToProfilesMapping()
+        .get(module.getName())
+        .values());
+  }
+
+  /**
+   * set profile at config level. used in tests
+   *
+   * @param profile profile instance
+   */
+  void setProfile(Profile profile) {
+    this.profiles.add(profile);
+  }
+
+  /**
+   * for each configured module, set map of configured profiles
+   *
+   * @return profiles assigned to a module: key is module name, value is pairs of profileKey/profile
+   */
+  Map<String, Map<String, utam.core.framework.context.Profile>> getModuleToProfilesMapping() {
+    Map<String, Map<String, utam.core.framework.context.Profile>> pageObjectModules = new HashMap<>();
+    for (Module module : modules) {
+      String moduleName = module.getName();
+      Map<String, utam.core.framework.context.Profile> mappedProfiles = new HashMap<>();
+      for (utam.core.framework.context.Profile profile : module.getModuleProfiles(this.profiles)) {
+        mappedProfiles.put(profile.getKey(), profile);
+      }
+      pageObjectModules.put(moduleName, mappedProfiles);
+    }
+    return pageObjectModules;
   }
 
   /**
@@ -118,11 +158,11 @@ public class JsonLoaderConfig {
    * @author elizaveta.ivanova
    * @since 234
    */
-  public static class Module {
+  static class Module {
 
     // annotation is required for serializer to write into output
     @JsonProperty(value = "profiles")
-    final List<Profile> profiles = new ArrayList<>();
+    private final List<Profile> profiles = new ArrayList<>();
 
     // annotation is required for serializer to write into output
     @JsonProperty(value = "name")
@@ -134,7 +174,7 @@ public class JsonLoaderConfig {
      * @param profiles profiles defined for the module
      */
     @JsonCreator
-    public Module(
+    Module(
         @JsonProperty(value = "name", required = true) String name,
         @JsonProperty(value = "profiles") List<Profile> profiles) {
       this.name = name;
@@ -155,32 +195,20 @@ public class JsonLoaderConfig {
     }
 
     /**
-     * used for testing in downstream modules to check how profiles were setup. marked to ignore by
-     * serializer
-     *
-     * @return list of profiles
-     */
-    @JsonIgnore
-    public List<Profile> getRawProfiles() {
-      return profiles;
-    }
-
-    /**
      * module profiles can be combined with shared profiles, but there should not be duplicates
      *
      * @param sharedProfiles profiles shared by all modules
      * @return list of both module and shared profiles
      */
-    List<utam.core.framework.context.Profile> getModuleProfiles(List<Profile> sharedProfiles) {
+    Set<utam.core.framework.context.Profile> getModuleProfiles(List<Profile> sharedProfiles) {
       List<utam.core.framework.context.Profile> allProfiles = new ArrayList<>();
-      allProfiles.add(DEFAULT_PROFILE);
       this.profiles.stream()
           .flatMap(profile -> profile.getProfiles().stream())
           .forEach(profile -> checkDuplicateProfile(allProfiles, profile));
       sharedProfiles.stream()
           .flatMap(profile -> profile.getProfiles().stream())
           .forEach(profile -> checkDuplicateProfile(allProfiles, profile));
-      return allProfiles;
+      return new HashSet<>(allProfiles);
     }
 
     /**
@@ -188,8 +216,17 @@ public class JsonLoaderConfig {
      *
      * @return the name of the module
      */
-    public String getName() {
+    String getName() {
       return name;
+    }
+
+    /**
+     * set profile at module level. used in tests
+     *
+     * @param profile profile instance
+     */
+    void setProfile(Profile profile) {
+      this.profiles.add(profile);
     }
   }
 
@@ -200,7 +237,7 @@ public class JsonLoaderConfig {
    * @author elizaveta.ivanova
    * @since 234
    */
-  public static class Profile {
+  static class Profile {
 
     // annotation is required for serializer to write into output
     @JsonProperty(value = "name")
@@ -215,7 +252,7 @@ public class JsonLoaderConfig {
      * @param values array of the values defined in the profile
      */
     @JsonCreator
-    public Profile(
+    Profile(
         @JsonProperty(value = "name", required = true) String name,
         @JsonProperty(value = "values", required = true) String[] values) {
       this.name = name;

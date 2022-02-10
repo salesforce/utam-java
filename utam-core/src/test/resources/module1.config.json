@@ -1,0 +1,10 @@
+{
+  "custom": {
+    "one": [
+      {
+        "interface": "utam.core.framework.consumer.TestLoaderConfigPageObject",
+        "implementation": "utam.core.framework.consumer.TestLoaderConfigPageObjectProfile"
+      }
+    ]
+  }
+}

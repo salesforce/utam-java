@@ -1,0 +1,22 @@
+{
+  "platform" : {
+    "ios_tablet" : [
+      {
+        "interface" : "utam.profiles.pageobjects.DeviceInterface",
+        "implementation" : "utam.profiles.pageobjects.impl.DeviceIOSandIOSTabletImpl"
+      }
+    ],
+    "ios_phone" : [
+      {
+        "interface" : "utam.profiles.pageobjects.DeviceInterface",
+        "implementation" : "utam.profiles.pageobjects.impl.DeviceIOSPhoneImpl"
+      }
+    ],
+    "ios" : [
+      {
+        "interface" : "utam.profiles.pageobjects.DeviceInterface",
+        "implementation" : "utam.profiles.pageobjects.impl.DeviceIOSandIOSTabletImpl"
+      }
+    ]
+  }
+}

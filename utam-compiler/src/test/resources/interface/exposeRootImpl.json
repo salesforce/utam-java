@@ -1,6 +1,9 @@
 {
   "implements": "utam-tests/pageObjects/root/exposeRoot",
   "exposeRootElement": true,
+  "profile" : {
+    "profile" : "test"
+  },
   "type": [
     "editable",
     "clickable"

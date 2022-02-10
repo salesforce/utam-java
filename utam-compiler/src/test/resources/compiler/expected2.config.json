@@ -1,0 +1,14 @@
+{
+  "name" : {
+    "value" : [
+      {
+        "interface" : "utam.my.PageObject1",
+        "implementation" : "utam.my.PageObjectImpl1"
+      },
+      {
+        "interface" : "utam.my.PageObject2",
+        "implementation" : "utam.my.PageObjectImpl2"
+      }
+    ]
+  }
+}

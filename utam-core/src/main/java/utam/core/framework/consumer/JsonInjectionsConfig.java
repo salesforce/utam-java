@@ -1,0 +1,286 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root
+ * or https://opensource.org/licenses/MIT
+ */
+package utam.core.framework.consumer;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import utam.core.framework.UtamCoreError;
+import utam.core.framework.UtamLogger;
+import utam.core.framework.context.DefaultProfileContext;
+import utam.core.framework.context.ProfileContext;
+import utam.core.framework.context.StringValueProfile;
+
+/**
+ * Compiler generates output file with dependencies injections
+ *
+ * @author elizaveta.ivanova
+ * @since 238
+ */
+public class JsonInjectionsConfig {
+
+  public static final String CONFIG_FILE_MASK = "%s.config.json";
+  static final String ERR_WHILE_READING_CONFIG = "Error while reading JSON config '%s'";
+
+  /**
+   * read all existing resources with same module name
+   *
+   * @param moduleName name of the module to use as a file name
+   * @return map of profiles mapping
+   */
+  Map<String, ProfileContext> readDependenciesConfig(String moduleName) {
+    Map<String, ProfileContext> map = new HashMap<>();
+    String filename = String.format(CONFIG_FILE_MASK, moduleName);
+    try {
+      // with dependencies from different modules, there could be modules with same name
+      List<URL> resources = Collections.list(getClass().getClassLoader().getResources(filename));
+      if (!resources.isEmpty()) {
+        for (URL resource : resources) {
+          UtamLogger.info(String.format("Reading Page Objects config file %s", filename));
+          Mapping mapping = new ObjectMapper().readValue(resource, Mapping.class);
+          mapping.setInjectionsMapping(map);
+        }
+      } else {
+        UtamLogger.warning(String.format("Page Objects config file '%s' not found", filename));
+      }
+    } catch (IOException e) {
+      throw new UtamCoreError(String.format(ERR_WHILE_READING_CONFIG, filename), e);
+    }
+    return map;
+  }
+
+  /**
+   * JSON mapping with dependency injection config file
+   *
+   * @author elizaveta.ivanova
+   * @since 238
+   */
+  @JsonDeserialize(using = Deserializer.class)
+  public static class Mapping {
+
+    private final Map<String, ProfileImplementations> mapping = new HashMap<>();
+
+    /**
+     * read mapping and set values to provided map
+     *
+     * @param injections map for mapping
+     */
+    void setInjectionsMapping(Map<String, ProfileContext> injections) {
+      for (String profileName : mapping.keySet()) {
+        ProfileImplementations mappingProfile = mapping.get(profileName);
+        for (String profileValue : mappingProfile.getProfileValues()) {
+          String profileKey = new StringValueProfile(profileName, profileValue).getKey();
+          Map<String, String> map = mappingProfile.getPairs(profileValue)
+              .stream()
+              .collect(
+                  Collectors.toMap(ImplementationPair::getInterface,
+                      ImplementationPair::getImplementation));
+          ProfileContext profileContext = new DefaultProfileContext(map);
+          if (injections.containsKey(profileKey)) {
+            ProfileContext existingContext = injections.get(profileKey);
+            for (Class beanType : profileContext.getConfiguredBeans()) {
+              existingContext.setBean(beanType, profileContext.getBeanName(beanType));
+            }
+          } else {
+            injections.put(profileKey, profileContext);
+          }
+        }
+      }
+    }
+
+    /**
+     * for output compiler config: profile names
+     *
+     * @return set of profile names
+     */
+    public Set<String> getProfileNames() {
+      return mapping.keySet();
+    }
+
+    /**
+     * for output compiler config: get injections map
+     *
+     * @param profileName name of the profile to get the map
+     * @return map as an object
+     */
+    public ProfileImplementations getImplementationsMap(String profileName) {
+      return mapping.containsKey(profileName) ? mapping.get(profileName)
+          : new ProfileImplementations();
+    }
+
+    /**
+     * for output compiler config: set injections for a given profile
+     *
+     * @param profileName    name of the profile
+     * @param mappingProfile injections map
+     */
+    public void setImplementationsMap(String profileName,
+        ProfileImplementations mappingProfile) {
+      mapping.put(profileName, mappingProfile);
+    }
+  }
+
+  /**
+   * mapping between profile value and implementations pairs
+   *
+   * @author elizaveta.ivanova
+   * @since 238
+   */
+  public static class ProfileImplementations {
+
+    private final Map<String, List<ImplementationPair>> mapping;
+
+    ProfileImplementations() {
+      mapping = new HashMap<>();
+    }
+
+    /**
+     * for output compiler config: get possible values
+     *
+     * @return set of profile values
+     */
+    public Set<String> getProfileValues() {
+      return mapping.keySet();
+    }
+
+    /**
+     * for output compiler config: get pairs for the given profile value
+     *
+     * @param profileValue profile value
+     * @return list of configured pairs
+     */
+    public List<ImplementationPair> getPairs(String profileValue) {
+      return mapping.get(profileValue);
+    }
+
+    /**
+     * for output compiler config: for a given profile value, set pairs
+     *
+     * @param profileValue profile value
+     * @param pairs        implementation pairs
+     */
+    public void setPairs(String profileValue, List<ImplementationPair> pairs) {
+      if (mapping.containsKey(profileValue)) {
+        mapping.get(profileValue).addAll(pairs);
+      } else {
+        mapping.put(profileValue, pairs);
+      }
+    }
+
+    /**
+     * used in serializer - check if mapping is empty
+     *
+     * @return boolean
+     */
+    boolean isEmpty() {
+      return mapping.isEmpty();
+    }
+  }
+
+  /**
+   * pairs of interface - implementation for dependency injections
+   *
+   * @author elizaveta.ivanova
+   * @since 238
+   */
+  public static class ImplementationPair {
+
+    private final String interfaceName;
+    private final String implementationName;
+
+    @JsonCreator
+    public ImplementationPair(
+        @JsonProperty(value = "interface", required = true) String interfaceName,
+        @JsonProperty(value = "implementation", required = true) String implementationName) {
+      this.interfaceName = interfaceName;
+      this.implementationName = implementationName;
+    }
+
+    /**
+     * getter has to be public for serializer to work
+     *
+     * @return interface name
+     */
+    public String getInterface() {
+      return interfaceName;
+    }
+
+    /**
+     * getter has to be public for serializer to work
+     *
+     * @return implementing class name
+     */
+    public String getImplementation() {
+      return implementationName;
+    }
+  }
+
+  /**
+   * custom deserializer to read injections config from JSON
+   *
+   * @author elizaveta.ivanova
+   * @since 238
+   */
+  private static class Deserializer extends JsonDeserializer<Mapping> {
+
+    /**
+     * custom deserializer to read injections config
+     *
+     * @param jp                     parser
+     * @param deserializationContext context
+     * @return mapping object
+     * @throws IOException if parsing fails
+     */
+    @Override
+    public Mapping deserialize(JsonParser jp, DeserializationContext deserializationContext)
+        throws IOException {
+      JsonNode node = jp.getCodec().readTree(jp);
+      Iterator<String> profiles = node.fieldNames();
+      Mapping result = new Mapping();
+      ObjectMapper objectMapper = new ObjectMapper();
+      while (profiles.hasNext()) {
+        String profileName = profiles.next();
+        JsonNode valuesNode = node.get(profileName);
+        Iterator<String> profileValues = valuesNode.fieldNames();
+        ProfileImplementations mappingProfile = new ProfileImplementations();
+        while (profileValues.hasNext()) {
+          String profileValue = profileValues.next();
+          JsonNode pairsNode = valuesNode.get(profileValue);
+          List<ImplementationPair> pairsList = new ArrayList<>();
+          for (JsonNode pairNode : pairsNode) {
+            ImplementationPair pair = objectMapper
+                .treeToValue(pairNode, ImplementationPair.class);
+            pairsList.add(pair);
+          }
+          if (!pairsList.isEmpty()) {
+            mappingProfile.setPairs(profileValue, pairsList);
+          }
+        }
+        if (!mappingProfile.isEmpty()) {
+          result.setImplementationsMap(profileName, mappingProfile);
+        }
+      }
+      return result;
+    }
+  }
+}

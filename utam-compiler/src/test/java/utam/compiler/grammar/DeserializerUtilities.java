@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.translator.ClassSerializer;
 import utam.compiler.translator.InterfaceSerializer;
+import utam.compiler.translator.StringValueProfileConfig;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.framework.consumer.UtamError;
@@ -39,9 +40,11 @@ public class DeserializerUtilities {
   public DeserializerUtilities() {
     this.type = TEST_URI;
     this.translatorConfig = getDefaultConfig();
+    // profile is required for implementations POs
+    this.translatorConfig.getConfiguredProfiles().add(new StringValueProfileConfig("profile", "test"));
   }
 
-  static String readJSON(String fileName) {
+  private static String readJSON(String fileName) {
     String testFileName = fileName + ".json";
     InputStream stream =
         DeserializerUtilities.class.getClassLoader().getResourceAsStream(testFileName);

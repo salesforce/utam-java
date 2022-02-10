@@ -12,20 +12,17 @@ import static utam.core.framework.consumer.PageObjectContextImpl.getClassFromNam
 
 import java.io.File;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import utam.core.driver.DriverConfig;
-import utam.core.framework.UtamCoreError;
+import utam.core.framework.UtamLogger;
 import utam.core.framework.base.PageObject;
-import utam.core.framework.consumer.JsonLoaderConfig.Module;
 import utam.core.framework.context.DefaultProfileContext;
 import utam.core.framework.context.Profile;
 import utam.core.framework.context.ProfileContext;
+import utam.core.framework.context.StringValueProfile;
 
 /**
  * Loader config is used to set
@@ -35,28 +32,16 @@ import utam.core.framework.context.ProfileContext;
  */
 public class UtamLoaderConfigImpl implements UtamLoaderConfig {
 
-  static final String ERR_DUPLICATE_PROFILE = "Profile %s = %s is already configured";
-
-  private final Map<ProfileKey, ProfileContext> configuredProfilesContext = new HashMap<>();
-  // profiles that were set as active
-  private final List<Profile> activeProfiles = new ArrayList<>();
-  private final List<String> pageObjectModules = new ArrayList<>();
-  // driver config timeouts
+  // profiles that were set as active. it's a map because same profile should override old value
+  private final Map<String, String> activeProfiles = new HashMap<>();
+  // profiles assigned to a module: key is module name, value is pairs of profileKey/profile
+  private final Map<String, Map<String, Profile>> pageObjectModules;
+  // driver timeouts
   private Duration implicitTimeout = Duration.ZERO;
   private Duration explicitTimeout = Duration.ofSeconds(20);
   private Duration pollingInterval = Duration.ofMillis(200);
-  // driver config bridge app title
-  private String bridgeAppTitle = "";
-  private final BiFunction<String, Profile, ProfileContext> profileContextProvider;
-
-  /**
-   * Initializes a new instance of the UtamLoaderConfigImpl class
-   *
-   * @param config the JsonLoaderConfig object to configure the loader
-   */
-  public UtamLoaderConfigImpl(JsonLoaderConfig config) {
-    this(config, DefaultProfileContext::new);
-  }
+  // mobile bridge app title
+  private String bridgeAppTitle;
 
   /**
    * Initializes a new instance of the UtamLoaderConfigImpl class
@@ -87,86 +72,104 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
   /**
    * Initializes a new instance of the UtamLoaderConfigImpl class
    *
-   * @param resourceWithConfig     a string resource containing configuration information to
-   *                               configure the loader
-   * @param profileContextProvider a function to map profile information into the loader
+   * @param config loader config from json file
    */
-  protected UtamLoaderConfigImpl(String resourceWithConfig, BiFunction<String, Profile, ProfileContext> profileContextProvider) {
-    this(loadConfig(resourceWithConfig), profileContextProvider);
-  }
-
-  private UtamLoaderConfigImpl(JsonLoaderConfig config, BiFunction<String, Profile, ProfileContext> profileContextProvider) {
-    this.profileContextProvider = profileContextProvider;
-    for (Module module : config.getModules()) {
-      String moduleName = module.getName();
-      pageObjectModules.add(moduleName);
-      for(Profile profile : module.getModuleProfiles(config.profiles)) {
-        setConfiguredProfile(moduleName, profile);
-      }
-    }
+  public UtamLoaderConfigImpl(JsonLoaderConfig config) {
+    this.pageObjectModules = config.getModuleToProfilesMapping();
     DriverConfig driverConfig = config.driverConfig;
     setImplicitTimeout(driverConfig.getImplicitTimeout());
     setExplicitTimeout(driverConfig.getExplicitTimeout());
     setPollingInterval(driverConfig.getPollingInterval());
   }
 
-  private static Map<Class<? extends PageObject>, Class<? extends PageObject>> getConfiguredBeans(
-      ProfileContext profileContext) {
-    return profileContext
-        .getConfiguredBeans()
-        .stream()
-        .collect(Collectors.toMap(bean -> bean, bean -> {
-          String name = profileContext.getBeanName(bean);
-          return getClassFromName(name);
-        }));
+  /**
+   * used in tests to initiate config with hardcoded modules
+   *
+   * @param modules name of the configured modules
+   */
+  UtamLoaderConfigImpl(String... modules) {
+    this();
+    Stream.of(modules).forEach(this::setDependencyModule);
   }
 
-  @Override
-  public void setConfiguredProfile(String module, Profile profile) {
-    ProfileKey key = new ProfileKey(profile, module);
-    if (configuredProfilesContext.containsKey(key)) {
-      throw new UtamCoreError(String.format(ERR_DUPLICATE_PROFILE, profile.getName(), profile.getValue()));
+  private static void setConfiguredProfile(Map<String, ProfileContext> configuredProfilesContext, String profileKey, ProfileContext profileContext) {
+    if (configuredProfilesContext.containsKey(profileKey)) {
+      // add beans to already existing for same profile
+      ProfileContext alreadyLoaded = configuredProfilesContext.get(profileKey);
+      profileContext.getConfiguredBeans().forEach(bean -> alreadyLoaded.setBean(bean, profileContext.getBeanName(bean)));
+    } else {
+      configuredProfilesContext.put(profileKey, profileContext);
     }
-    configuredProfilesContext.put(key, profileContextProvider.apply(module, profile));
+  }
+
+  private void setModuleProfile(String moduleName, Profile profile) {
+    if (pageObjectModules.containsKey(moduleName)) {
+      pageObjectModules.get(moduleName).put(profile.getKey(), profile);
+    } else {
+      Map<String, Profile> map = new HashMap<>();
+      map.put(profile.getKey(), profile);
+      pageObjectModules.put(moduleName, map);
+    }
   }
 
   @Override
   public void setProfile(Profile profile) {
-    if (activeProfiles.contains(profile)) {
-      throw new UtamCoreError(String.format(ERR_DUPLICATE_PROFILE, profile.getName(), profile.getValue()));
+    UtamLogger.info(String.format("Set profile '%s' value to '%s'", profile.getName(), profile.getValue()));
+    activeProfiles.put(profile.getName(), profile.getValue());
+    Set<String> modules = getModules();
+    if (modules.isEmpty()) { //modules might not be set
+      setModuleProfile("", profile);
     }
-    activeProfiles.add(profile);
-    for (String module : pageObjectModules) {
-      ProfileKey profileKey = new ProfileKey(profile, module);
-      if (!configuredProfilesContext.containsKey(profileKey)) {
-        setConfiguredProfile(module, profile);
+    else {
+      for (String moduleName : getModules()) {
+        setModuleProfile(moduleName, profile);
       }
     }
   }
 
-  private boolean isInactiveDefaultProfile(ProfileKey profileKey) {
-    return !activeProfiles.contains(profileKey.profile) && profileKey.profile.isDefault();
+  @Override
+  public void setDependencyModule(String moduleName) {
+    pageObjectModules.put(moduleName, new HashMap<>());
+  }
+
+  private Map<String, ProfileContext> setConfig() {
+    Map<String, ProfileContext> configuredProfilesContext = new HashMap<>();
+    for (String moduleName : getModules()) {
+      // from json
+      if(!moduleName.isEmpty()) {
+        Map<String, ProfileContext> injectionsConfig = new JsonInjectionsConfig()
+            .readDependenciesConfig(moduleName);
+        injectionsConfig
+            .forEach((key, value) -> setConfiguredProfile(configuredProfilesContext, key, value));
+      }
+      // from properties
+      if (pageObjectModules.containsKey(moduleName)) { // sometimes from test we override getModules
+        for (String profileKey : pageObjectModules.get(moduleName).keySet()) {
+          Profile profile = pageObjectModules.get(moduleName).get(profileKey);
+          ProfileContext profileContext = new DefaultProfileContext(moduleName, profile);
+          setConfiguredProfile(configuredProfilesContext, profileKey, profileContext);
+        }
+      }
+    }
+    return configuredProfilesContext;
   }
 
   @Override
   public PageObjectContext getPageContext() {
+    UtamLogger.info("Reload injection dependencies configurations");
+    Map<String, ProfileContext> configuredProfilesContext = setConfig();
     Map<Class<? extends PageObject>, Class> beans = new HashMap<>();
-    // first load beans for inactive profiles, active profiles are loaded last
-    configuredProfilesContext.keySet().forEach(key -> {
-      if (isInactiveDefaultProfile(key)) {
-        ProfileContext profileContext = configuredProfilesContext.get(key);
-        beans.putAll(getConfiguredBeans(profileContext));
+    for (String profileName : activeProfiles.keySet()) {
+      String profileKey = new StringValueProfile(profileName, activeProfiles.get(profileName)).getKey();
+      ProfileContext profileContext = configuredProfilesContext.get(profileKey);
+      if(profileContext != null) {
+        profileContext.getConfiguredBeans().forEach(beanType -> {
+          String name = profileContext.getBeanName(beanType);
+          Class implementation = getClassFromName(name);
+          beans.put(beanType, implementation);
+        });
       }
-    });
-    // load beans for active profiles to override
-    activeProfiles
-        .stream()
-        .flatMap(profile -> getModules().stream().map(module -> new ProfileKey(profile, module)))
-        .forEach(
-            profileKey -> {
-              ProfileContext profileContext = configuredProfilesContext.get(profileKey);
-              beans.putAll(getConfiguredBeans(profileContext));
-            });
+    }
     return new PageObjectContextImpl(beans);
   }
 
@@ -195,40 +198,7 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
     return new DriverConfig(implicitTimeout, explicitTimeout, pollingInterval, bridgeAppTitle);
   }
 
-  // used in tests
-  Set<Profile> getConfiguredProfiles() {
-    return configuredProfilesContext.keySet().stream().map(key -> key.profile).collect(Collectors.toSet());
-  }
-
-  // used in tests
-  List<String> getModules() {
-    return pageObjectModules;
-  }
-
-  static class ProfileKey {
-
-    private final Profile profile;
-    private final String moduleName;
-
-    ProfileKey(Profile profile, String moduleName) {
-      this.profile = profile;
-      this.moduleName = moduleName;
-    }
-
-    // used as key in a map
-    @Override
-    public int hashCode() {
-      return profile.getConfigName(moduleName).hashCode();
-    }
-
-    // used as key in a map
-    @Override
-    public boolean equals(Object obj) {
-      if(obj instanceof ProfileKey) {
-        return profile.getConfigName(moduleName)
-            .equals(((ProfileKey)obj).profile.getConfigName(((ProfileKey) obj).moduleName));
-      }
-      return false;
-    }
+  private Set<String> getModules() {
+    return pageObjectModules.keySet();
   }
 }

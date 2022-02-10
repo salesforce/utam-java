@@ -41,9 +41,13 @@ import org.hamcrest.CoreMatchers;
 import org.testng.annotations.Test;
 import utam.compiler.translator.DefaultSourceConfiguration.FilesScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
+import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorSourceConfig;
+import utam.core.declarative.translator.TranslatorTargetConfig;
 import utam.core.framework.consumer.UtamError;
+import utam.core.framework.context.Profile;
+import utam.core.framework.context.StringValueProfile;
 
 /**
  * @author elizaveta.ivanova
@@ -65,6 +69,7 @@ public class DefaultSourceConfigurationTests {
   private static final String IMPL_ONLY_SOURCE =
       "{"
           + "  \"implements\": \"utam-test/pageObjects/test/testAbstractObject\",\n"
+          + "\"profile\":[{\"profile\": [\"test\"]}],\n"
           + "  \"methods\": [\n"
           + "    {\n"
           + "      \"name\" : \"testMethod\",\n"
@@ -82,7 +87,7 @@ public class DefaultSourceConfigurationTests {
 
   @Test
   public void testRunWithDuplicatePageObjectsThrows() {
-    TranslatorConfig configuration = new DefaultTranslatorConfiguration(new DuplicatePageObjects(),
+    TranslatorConfig configuration = new TranslatorConfigWithProfile(new DuplicatePageObjects(),
         new DefaultTargetConfiguration());
     DefaultTranslatorRunner translator = new DefaultTranslatorRunner(configuration);
     UtamError e = expectThrows(UtamError.class, translator::run);
@@ -157,6 +162,23 @@ public class DefaultSourceConfigurationTests {
     configuration.recursiveScan();
     assertThat(configuration.getPageObjectFileSourcePath("package/pageObjects/first"),
         is(CoreMatchers.notNullValue()));
+  }
+
+  /**
+   * config with preset profile, used in tests
+   */
+  static class TranslatorConfigWithProfile extends DefaultTranslatorConfiguration {
+
+    static final Profile TEST_PROFILE = new StringValueProfile("profile", "test");
+    static final ProfileConfiguration TEST_PROFILE_CONFIG = new StringValueProfileConfig(
+        TEST_PROFILE);
+
+    TranslatorConfigWithProfile(
+        TranslatorSourceConfig sourceConfig,
+        TranslatorTargetConfig targetConfig) {
+      super(sourceConfig, targetConfig);
+      setConfiguredProfile(TEST_PROFILE_CONFIG);
+    }
   }
 
   static class Mock extends DefaultSourceConfiguration implements TranslatorSourceConfig {

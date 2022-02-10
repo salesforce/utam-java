@@ -76,7 +76,7 @@ public class JsonCompilerConfig {
    *
    * @return the list of configured profiles
    */
-  public List<ProfileConfiguration> getConfiguredProfiles() {
+  private List<ProfileConfiguration> getConfiguredProfiles() {
     return moduleConfig.getConfiguredProfiles();
   }
 
@@ -85,7 +85,7 @@ public class JsonCompilerConfig {
    *
    * @return the target configuration
    */
-  public TranslatorTargetConfig getTargetConfig() {
+  private TranslatorTargetConfig getTargetConfig() {
     return moduleConfig.getTargetConfig(filePathsRoot);
   }
 
@@ -164,7 +164,7 @@ public class JsonCompilerConfig {
      *                                 JSON files of the module
      */
     @JsonCreator
-    public Module(
+    Module(
         @JsonProperty(value = "module") String moduleName,
         @JsonProperty(value = "pageObjectsFilesMask", defaultValue = DEFAULT_JSON_FILE_MASK_REGEX) String filesMaskRegex,
         @JsonProperty(value = "pageObjectsRootDir", required = true) String pageObjectsRootDirectory,
@@ -394,7 +394,7 @@ public class JsonCompilerConfig {
      *
      * @param profiles the list of profiles to configure
      */
-    public void setConfiguredProfile(List<ProfileConfiguration> profiles) {
+    void setConfiguredProfile(List<ProfileConfiguration> profiles) {
       ProfileConfiguration profileConfiguration = getProfileConfiguration();
       for (ProfileConfiguration alreadyConfigured : profiles) {
         if (profileConfiguration.equals(alreadyConfigured)) {
@@ -463,7 +463,7 @@ public class JsonCompilerConfig {
      *
      * @return key for package mapping
      */
-    protected String getPackageMappingKey() {
+    String getPackageMappingKey() {
       return getTypeMatch();
     }
 
@@ -472,7 +472,7 @@ public class JsonCompilerConfig {
      *
      * @return value for package mapping
      */
-    protected String getPackageMappingValue() {
+    String getPackageMappingValue() {
       return getPathMatch();
     }
 
