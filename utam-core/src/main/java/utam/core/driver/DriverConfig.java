@@ -37,6 +37,11 @@ public class DriverConfig {
    */
   public static final Duration DEFAULT_POLLING_INTERVAL = Duration.ofMillis(200);
 
+  public static final DriverConfig TEST_SIMULATOR_DRIVER_CONFIG = new DriverConfig(
+      DEFAULT_IMPLICIT_TIMEOUT,
+      DEFAULT_EXPLICIT_TIMEOUT_MOCK,
+      DEFAULT_POLLING_INTERVAL, "");
+
   private final Duration implicitTimeout;
   private final Duration explicitTimeout;
   private final Duration pollingInterval;

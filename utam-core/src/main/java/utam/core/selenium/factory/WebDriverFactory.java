@@ -14,9 +14,7 @@
 
 package utam.core.selenium.factory;
 
-import static utam.core.driver.DriverConfig.DEFAULT_EXPLICIT_TIMEOUT_MOCK;
-import static utam.core.driver.DriverConfig.DEFAULT_IMPLICIT_TIMEOUT;
-import static utam.core.driver.DriverConfig.DEFAULT_POLLING_INTERVAL;
+import static utam.core.driver.DriverConfig.TEST_SIMULATOR_DRIVER_CONFIG;
 
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
@@ -84,11 +82,6 @@ public class WebDriverFactory {
   public static Driver getAdapterMock(WebDriver driver) {
     return getAdapter(driver, TEST_SIMULATOR_DRIVER_CONFIG);
   }
-
-  private static final DriverConfig TEST_SIMULATOR_DRIVER_CONFIG = new DriverConfig(
-      DEFAULT_IMPLICIT_TIMEOUT,
-      DEFAULT_EXPLICIT_TIMEOUT_MOCK,
-      DEFAULT_POLLING_INTERVAL, "");
 
   /**
    * Creates a WebDriver instance
