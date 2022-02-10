@@ -37,9 +37,15 @@ public class DriverConfig {
    */
   public static final Duration DEFAULT_POLLING_INTERVAL = Duration.ofMillis(200);
 
+  public static final DriverConfig TEST_SIMULATOR_DRIVER_CONFIG = new DriverConfig(
+      DEFAULT_IMPLICIT_TIMEOUT,
+      DEFAULT_EXPLICIT_TIMEOUT_MOCK,
+      DEFAULT_POLLING_INTERVAL, "");
+
   private final Duration implicitTimeout;
   private final Duration explicitTimeout;
   private final Duration pollingInterval;
+  private final String bridgeAppTitle;
 
   /**
    * Initializes a new instance of the DriverConfig class
@@ -47,21 +53,27 @@ public class DriverConfig {
    * @param implicitTimeout the implicit wait timeout for finding elements
    * @param explicitTimeout the explicit wait timeout for actions
    * @param pollingInterval the polling interval used to poll for conditions
+   * @param bridgeAppTitle  bridge app title for mobile app
    */
   public DriverConfig(
       Duration implicitTimeout,
       Duration explicitTimeout,
-      Duration pollingInterval) {
+      Duration pollingInterval,
+      String bridgeAppTitle) {
     this.implicitTimeout = implicitTimeout;
     this.explicitTimeout = explicitTimeout;
     this.pollingInterval = pollingInterval;
+    this.bridgeAppTitle = bridgeAppTitle;
   }
 
   /**
-   * Initializes a new instance of the DriverConfig class
+   * Initializes DriverConfig with default timeouts
+   *
+   * @param bridgeAppTitle bridge app title for mobile app
    */
-  public DriverConfig() {
-    this(DEFAULT_IMPLICIT_TIMEOUT, DEFAULT_EXPLICIT_TIMEOUT, DEFAULT_POLLING_INTERVAL);
+  public DriverConfig(String bridgeAppTitle) {
+    this(DEFAULT_IMPLICIT_TIMEOUT, DEFAULT_EXPLICIT_TIMEOUT, DEFAULT_POLLING_INTERVAL,
+        bridgeAppTitle);
   }
 
   /**
@@ -89,5 +101,14 @@ public class DriverConfig {
    */
   public Duration getPollingInterval() {
     return pollingInterval;
+  }
+
+  /**
+   * get configured bridge app title
+   *
+   * @return string with bridge app title
+   */
+  public String getBridgeAppTitle() {
+    return bridgeAppTitle;
   }
 }

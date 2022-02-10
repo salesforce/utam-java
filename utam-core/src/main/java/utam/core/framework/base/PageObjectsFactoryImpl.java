@@ -32,22 +32,18 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
 
   private final PageObjectContext pageObjectContext;
   private final Driver driver;
-  private final String bridgeAppTitle;
 
   /**
    * Initializes a new instance of the PageObjectsFactoryImpl class
    *
    * @param pageObjectContext the Page Object context
-   * @param bridgeAppTitle    the bridge app title for mobile apps
    * @param driver            the driver instance
    */
   public PageObjectsFactoryImpl(
       PageObjectContext pageObjectContext,
-      String bridgeAppTitle,
       Driver driver) {
     this.pageObjectContext = pageObjectContext;
     this.driver = driver;
-    this.bridgeAppTitle = bridgeAppTitle;
   }
 
   /**
@@ -57,7 +53,7 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
    * @param driver           the driver instance
    */
  public PageObjectsFactoryImpl(UtamLoaderConfig utamLoaderConfig, Driver driver) {
-    this(utamLoaderConfig.getPageContext(), utamLoaderConfig.getBridgeAppTitle(), driver);
+    this(utamLoaderConfig.getPageContext(), driver);
   }
 
   /**
@@ -87,23 +83,9 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
     BasePageObject pageObject = (BasePageObject) instance;
     pageObject.initialize(this, element, locator);
     bootstrapElements(pageObject);
-    setPlatform(instance);
-  }
-
-  private void setPlatform(PageObject instance) {
-    PlatformType pagePlatform;
-    if (instance.getClass().isAnnotationPresent(PageMarker.Switch.class)) {
-      pagePlatform = instance.getClass().getAnnotation(PageMarker.Switch.class).value();
-    } else {
-      pagePlatform = PlatformType.WEB;
-    }
-    if (getDriver().isMobile()) {
-      if (pagePlatform.equals(PlatformType.WEB)) {
-        getDriver().setPageContextToWebView(bridgeAppTitle);
-      } else {
-        getDriver().setPageContextToNative();
-      }
-    }
+    PlatformType mobileContextType = PlatformType.from(pageObject.getClass());
+    // only mobile driver implementation actually changes context
+    getDriver().setPageContext(mobileContextType);
   }
 
   @Override

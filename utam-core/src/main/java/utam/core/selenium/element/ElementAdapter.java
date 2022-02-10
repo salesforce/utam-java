@@ -24,7 +24,6 @@ import utam.core.driver.Driver;
 import utam.core.element.DragAndDropOptions;
 import utam.core.element.Element;
 import utam.core.element.Locator;
-import utam.core.selenium.appium.MobileElementAdapter;
 
 /**
  * implementation for selenium element
@@ -102,8 +101,8 @@ public class ElementAdapter implements Element {
     return webElement;
   }
 
-  static Element wrapElement(Driver driver, WebElement element) {
-    return driver.isMobile() ? new MobileElementAdapter(element, driver) : new ElementAdapter(element, driver);
+  protected Element wrapElement(WebElement element) {
+    return new ElementAdapter(element, driverAdapter);
   }
 
   @Override
@@ -113,7 +112,7 @@ public class ElementAdapter implements Element {
     if (res == null) { //this can happen for mock in unit tests
       throw new NoSuchElementException(getNotFoundErr(locator));
     }
-    return wrapElement(driverAdapter, res);
+    return wrapElement(res);
   }
 
   @Override
@@ -123,7 +122,7 @@ public class ElementAdapter implements Element {
     if (found == null || found.isEmpty()) {
       throw new NoSuchElementException(getNotFoundErr(locator));
     }
-    return found.stream().map(el -> wrapElement(driverAdapter, el)).collect(Collectors.toList());
+    return found.stream().map(el -> wrapElement(el)).collect(Collectors.toList());
   }
 
   @Override

@@ -13,6 +13,8 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyIterable;
+import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -140,7 +142,7 @@ public class JsonLoaderConfigTests {
   }
 
   @Test
-  public void testExistingJsonWithEmptyTimeouts() {
+  public void testExistingJsonWithEmptyTimeoutsAndBridgeApp() {
     JsonLoaderConfig config = fromResource("empty_timeouts.loader.json");
     assertThat(config.getModules(), hasSize(1));
     DriverConfig driverConfig = config.driverConfig;
@@ -148,16 +150,18 @@ public class JsonLoaderConfigTests {
     assertThat(driverConfig.getImplicitTimeout(), is(DEFAULT_IMPLICIT_TIMEOUT));
     assertThat(driverConfig.getExplicitTimeout(), is(DEFAULT_EXPLICIT_TIMEOUT));
     assertThat(driverConfig.getPollingInterval(), is(DEFAULT_POLLING_INTERVAL));
+    assertThat(driverConfig.getBridgeAppTitle(), is(equalTo("salesforce")));
   }
 
   @Test
-  public void testExistingJsonWithTimeouts() {
+  public void testExistingJsonWithTimeoutsAndBridgeApp() {
     JsonLoaderConfig config = fromResource("timeouts.loader.json");
     DriverConfig driverConfig = config.driverConfig;
     assertThat(driverConfig, is(notNullValue()));
     assertThat(driverConfig.getImplicitTimeout(), is(Duration.ofMillis(1)));
     assertThat(driverConfig.getExplicitTimeout(), is(Duration.ofMillis(2)));
     assertThat(driverConfig.getPollingInterval(), is(Duration.ofMillis(3)));
+    assertThat(driverConfig.getBridgeAppTitle(), is(equalTo("salesforce")));
   }
 
   @Test
@@ -168,5 +172,6 @@ public class JsonLoaderConfigTests {
     assertThat(driverConfig.getImplicitTimeout(), is(DEFAULT_IMPLICIT_TIMEOUT));
     assertThat(driverConfig.getExplicitTimeout(), is(DEFAULT_EXPLICIT_TIMEOUT));
     assertThat(driverConfig.getPollingInterval(), is(DEFAULT_POLLING_INTERVAL));
+    assertThat(driverConfig.getBridgeAppTitle(), is(emptyOrNullString()));
   }
 }

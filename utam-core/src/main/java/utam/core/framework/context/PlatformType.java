@@ -7,53 +7,65 @@
  */
 package utam.core.framework.context;
 
+import utam.core.framework.base.BasePageObject;
+import utam.core.framework.base.PageMarker;
+
 /**
- * platform type can be native or web to switch driver context inside a page object
+ * mobile driver context can be native or web to switch inside a page object. same as
+ * MobileContextType in utam-js
  *
  * @author elizaveta.ivanova
  * @since 230
  */
 public enum PlatformType {
-  /**
-   * no platform
-   */
-  NONE(""),
 
   /**
    * platform is the web
    */
-  WEB("web"),
+  WEB,
 
   /**
    * platform is a native app
    */
-  NATIVE("native");
+  NATIVE;
 
-  private final String name;
-
-  PlatformType(String name) {
-    this.name = name;
-  }
+  static final String ERR_UNKNOWN_PLATFORM = "Unknown platform type '%s'";
 
   /**
    * Gets a platform type from a string value
-   * @param string the platform type string
+   *
+   * @param platformStr the platform type string
    * @return the platform type for the specified string
    */
-  public static PlatformType fromString(String string) {
-    if (string == null || string.isEmpty()) {
-      return NONE;
+  public static PlatformType fromString(String platformStr) {
+    if (platformStr == null || platformStr.isEmpty()) {
+      return null;
     }
     for (PlatformType type : PlatformType.values()) {
-      if (type.name.equals(string)) {
+      if (type.name().equalsIgnoreCase(platformStr)) {
         return type;
       }
     }
-    throw new IllegalArgumentException(String.format("Unknown platform type '%s'", string));
+    throw new IllegalArgumentException(String.format(ERR_UNKNOWN_PLATFORM, platformStr));
   }
 
   /**
-   * Gets the annotation for the platform type
+   * get platform type or WEB from page object class annotation
+   *
+   * @param pageObjectClass page object implementing class
+   * @return platform type from annotation or default value (WEB)
+   */
+  public static PlatformType from(Class<? extends BasePageObject> pageObjectClass) {
+    if (pageObjectClass.isAnnotationPresent(PageMarker.Switch.class)) {
+      return pageObjectClass.getAnnotation(PageMarker.Switch.class).value();
+    }
+    // for mobile platform default context is WEB
+    return PlatformType.WEB;
+  }
+
+  /**
+   * Gets the annotation string for the platform type
+   *
    * @return the annotation for the platform type
    */
   public String getAnnotation() {

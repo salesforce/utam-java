@@ -84,9 +84,7 @@ public class UtamBaseTests {
 
     private final Element element = mock(Element.class);
     private final PageObjectsFactory factory = new PageObjectsFactoryImpl(
-        mock(PageObjectContext.class), "",
-        getAdapterMock(mock(WebDriver.class))
-    );
+        mock(PageObjectContext.class), getAdapterMock(mock(WebDriver.class)));
 
     @Override
     protected Element getElement() {

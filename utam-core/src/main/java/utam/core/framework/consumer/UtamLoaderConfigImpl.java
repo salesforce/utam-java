@@ -41,11 +41,12 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
   // profiles that were set as active
   private final List<Profile> activeProfiles = new ArrayList<>();
   private final List<String> pageObjectModules = new ArrayList<>();
-  // driver timeouts
+  // driver config timeouts
   private Duration implicitTimeout = Duration.ZERO;
   private Duration explicitTimeout = Duration.ofSeconds(20);
   private Duration pollingInterval = Duration.ofMillis(200);
-  private String bridgeAppTitle;
+  // driver config bridge app title
+  private String bridgeAppTitle = "";
   private final BiFunction<String, Profile, ProfileContext> profileContextProvider;
 
   /**
@@ -191,12 +192,7 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
 
   @Override
   public DriverConfig getDriverConfig() {
-    return new DriverConfig(implicitTimeout, explicitTimeout, pollingInterval);
-  }
-
-  @Override
-  public String getBridgeAppTitle() {
-    return bridgeAppTitle;
+    return new DriverConfig(implicitTimeout, explicitTimeout, pollingInterval, bridgeAppTitle);
   }
 
   // used in tests

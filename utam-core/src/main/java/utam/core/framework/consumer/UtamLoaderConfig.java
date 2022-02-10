@@ -74,13 +74,6 @@ public interface UtamLoaderConfig {
   void setPollingInterval(Duration pollingInterval);
 
   /**
-   * get configured bridge app title
-   *
-   * @return string with bridge app title
-   */
-  String getBridgeAppTitle();
-
-  /**
    * used for mobile integration: set bridge app title
    *
    * @param title title of the bridge app

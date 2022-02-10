@@ -8,7 +8,7 @@
 package utam.core.driver;
 
 /**
- * Supported driver types
+ * Supported driver types used in Driver factory utilities to create instance of the driver
  *
  * @author elizaveta.ivanova
  * @since 228

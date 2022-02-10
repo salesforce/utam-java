@@ -22,6 +22,7 @@ import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.PageObjectsFactoryImpl;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.element.DocumentObject;
+import utam.core.selenium.appium.MobileDriverAdapter;
 import utam.core.selenium.appium.MobileElementAdapter;
 import utam.core.selenium.element.ElementAdapter;
 import utam.core.selenium.factory.WebDriverFactory;
@@ -135,7 +136,8 @@ public class UtamLoaderImpl implements UtamLoader {
     WebElement webElement = (WebElement) externalScopeProvider.getScope().get();
     // 1. create element wrapper for scope
     Element scope =
-        driver.isMobile() ? new MobileElementAdapter(webElement, driver) : new ElementAdapter(webElement, driver);
+        driver instanceof MobileDriverAdapter
+            ? new MobileElementAdapter(webElement, driver) : new ElementAdapter(webElement, driver);
     // 2. scope root inside wrapper
     Element element = scope.findElement(utamPageObjectRoot);
     T instance = factory.getPageContext().getBean(utamPageObjectType);

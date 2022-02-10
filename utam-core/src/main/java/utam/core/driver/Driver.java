@@ -12,9 +12,10 @@ import java.util.List;
 import java.util.function.Supplier;
 import utam.core.element.Element;
 import utam.core.element.Locator;
+import utam.core.framework.context.PlatformType;
 
 /**
- * Driver interface allows to plugin any driver type, default is Selenium
+ * Driver interface allows to integrate any driver type, default is Selenium and Appium
  *
  * @author elizaveta.ivanova
  * @since 234
@@ -33,7 +34,7 @@ public interface Driver {
   /**
    * find element inside driver
    *
-   * @param by            selector used to find an element
+   * @param by selector used to find an element
    * @return element or throws
    */
   Element findElement(Locator by);
@@ -41,7 +42,7 @@ public interface Driver {
   /**
    * find multiple elements inside driver
    *
-   * @param by            selector used to find elements
+   * @param by selector used to find elements
    * @return list of elements or throws
    */
   List<Element> findElements(Locator by);
@@ -49,7 +50,7 @@ public interface Driver {
   /**
    * get number of elements with a given locator inside current element
    *
-   * @param by                 locator
+   * @param by locator
    * @return number of elements or 0 if none found
    */
   int containsElements(Locator by);
@@ -58,8 +59,8 @@ public interface Driver {
    * polling wait repeatedly applies expectations until truthy value is return (not null or boolean
    * true)
    *
-   * @param timeout timeout after which exception is thrown if condition is not met. If passed as null, timeout
-   *                from config is used
+   * @param timeout timeout after which exception is thrown if condition is not met. If passed as
+   *                null, timeout from config is used
    * @param isTrue  condition to apply
    * @param message error message to throw if timeout is reached, can be null
    * @param <T>     return type
@@ -75,43 +76,16 @@ public interface Driver {
   void enterFrame(Element element);
 
   /**
-   * exits focus from a frame or iframe to the immediate parent frame, or a no-op
-   * if already on the top-level frame
+   * exits focus from a frame or iframe to the immediate parent frame, or a no-op if already on the
+   * top-level frame
    */
   void exitToParentFrame();
 
   /**
-   * exits focus from a frame or iframe to the immediate parent frame, or a no-op
-   * if already on the top-level frame
+   * exits focus from a frame or iframe to the immediate parent frame, or a no-op if already on the
+   * top-level frame
    */
   void exitFrame();
-
-  /**
-   * set active page context to NATIVE_APP
-   */
-  void setPageContextToNative();
-
-  /**
-   * set active page context to the target WebView page, if view is different from current, new
-   * driver is created
-   *
-   * @param title         title to switch to
-   */
-  void setPageContextToWebView(String title);
-
-  /**
-   * check if current context is native
-   *
-   * @return boolean true if current context is native
-   */
-  boolean isNative();
-
-  /**
-   * check if current context is mobile
-   *
-   * @return boolean true if current context is native
-   */
-  boolean isMobile();
 
   /**
    * get current URL
@@ -121,16 +95,43 @@ public interface Driver {
   String getUrl();
 
   /**
-   * get current context, wraps AppiumDriver.getContext
-   *
-   * @return string with current context
-   */
-  String getContext();
-
-  /**
    * get Driver configuration parameters
    *
    * @return driver configuration parameters
    */
   DriverConfig getDriverConfig();
+
+  /**
+   * mobile only: get current context, wraps AppiumDriver.getContext
+   *
+   * @return string with current context
+   */
+  String getPageContext();
+
+  /**
+   * mobile only: switch context between native and webview
+   *
+   * @param mobileContextType mobile context type
+   */
+  void setPageContext(PlatformType mobileContextType);
+
+  /**
+   * mobile only: set active page context to NATIVE_APP
+   */
+  void setPageContextToNative();
+
+  /**
+   * mobile only: set active page context to the target WebView page, if view is different from
+   * current, new driver is created
+   *
+   * @param title title to switch to
+   */
+  void setPageContextToWebView(String title);
+
+  /**
+   * mobile only: check if current context is native
+   *
+   * @return boolean true if current context is native
+   */
+  boolean isNativeContext();
 }

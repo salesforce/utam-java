@@ -40,6 +40,7 @@ import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.element.Element;
 import utam.core.framework.consumer.UtamError;
+import utam.core.framework.context.PlatformType;
 
 
 public class DriverAdapterTests {
@@ -49,8 +50,7 @@ public class DriverAdapterTests {
     MockUtilities mock = new MockUtilities();
     DriverAdapter adapter = (DriverAdapter) mock.getDriverAdapter();
     assertThat(adapter.getSeleniumDriver(), is(instanceOf(WebDriver.class)));
-    assertThat(adapter.isMobile(), is(false));
-    assertThat(adapter.isNative(), is(false));
+    assertThat(adapter.isNativeContext(), is(false));
     assertThat(adapter.getSeleniumDriver(), is(notNullValue()));
   }
 
@@ -86,7 +86,7 @@ public class DriverAdapterTests {
   @Test
   public void testGetContext() {
     IllegalStateException e = expectThrows(IllegalStateException.class,
-        () -> new MockUtilities().getDriverAdapter().getContext());
+        () -> new MockUtilities().getDriverAdapter().getPageContext());
     assertThat(e.getMessage(), containsString(ERR_SUPPORTED_FOR_MOBILE));
   }
 
@@ -188,5 +188,13 @@ public class DriverAdapterTests {
   public void exitFrame() {
     MockUtilities mock = new MockUtilities();
     mock.getDriverAdapter().exitFrame();
+  }
+
+  @Test
+  public void testSetPageContextThrows() {
+    MockUtilities mock = new MockUtilities();
+    DriverAdapter adapter = (DriverAdapter) mock.getDriverAdapter();
+    // nothing happens
+    adapter.setPageContext(PlatformType.WEB);
   }
 }

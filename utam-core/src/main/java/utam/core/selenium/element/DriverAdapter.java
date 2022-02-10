@@ -8,7 +8,6 @@
 package utam.core.selenium.element;
 
 import static utam.core.framework.UtamLogger.error;
-import static utam.core.selenium.element.ElementAdapter.wrapElement;
 
 import java.time.Duration;
 import java.util.List;
@@ -26,6 +25,7 @@ import utam.core.driver.DriverConfig;
 import utam.core.element.Element;
 import utam.core.element.Locator;
 import utam.core.framework.UtamCoreError;
+import utam.core.framework.context.PlatformType;
 
 /**
  * selenium web driver implementation of the driver
@@ -99,13 +99,17 @@ public class DriverAdapter implements Driver {
   }
 
   @Override
-  public boolean isNative() {
+  public boolean isNativeContext() {
     return false;
   }
 
   @Override
   public Object executeScript(String script, Object... parameters) {
     return ((JavascriptExecutor) driver).executeScript(script, unwrapParameters(parameters));
+  }
+
+  protected Element wrapElement(WebElement element) {
+    return new ElementAdapter(element, this);
   }
 
   @Override
@@ -115,7 +119,7 @@ public class DriverAdapter implements Driver {
     if (res == null) { // can happen only for mock
       throw new NoSuchElementException(getNotFoundErr(locator));
     }
-    return wrapElement(this, res);
+    return wrapElement(res);
   }
 
   @Override
@@ -125,7 +129,7 @@ public class DriverAdapter implements Driver {
     if (found == null || found.isEmpty()) {
       throw new NoSuchElementException(getNotFoundErr(locator));
     }
-    return found.stream().map(el -> wrapElement(this, el)).collect(Collectors.toList());
+    return found.stream().map(el -> wrapElement(el)).collect(Collectors.toList());
   }
 
   @Override
@@ -171,23 +175,23 @@ public class DriverAdapter implements Driver {
   }
 
   @Override
-  public boolean isMobile() {
-    return false;
-  }
-
-  @Override
   public String getUrl() {
     return driver.getCurrentUrl();
   }
 
   @Override
-  public String getContext() {
+  public String getPageContext() {
     throw new IllegalStateException(ERR_SUPPORTED_FOR_MOBILE);
   }
 
   @Override
   public DriverConfig getDriverConfig() {
     return driverConfig;
+  }
+
+  @Override
+  public void setPageContext(PlatformType mobileContextType) {
+    // do nothing
   }
 
   static class DriverWait extends FluentWait<Driver> {
