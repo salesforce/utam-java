@@ -16,19 +16,16 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.openqa.selenium.By;
-import org.openqa.selenium.InvalidElementStateException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.FluentWait;
 import utam.core.driver.Driver;
 import utam.core.driver.DriverConfig;
 import utam.core.element.Element;
-import utam.core.framework.UtamCoreError;
 import utam.core.element.Locator;
+import utam.core.framework.UtamCoreError;
 
 /**
  * selenium web driver implementation of the driver
@@ -45,13 +42,6 @@ public class DriverAdapter implements Driver {
   public static final String ERR_ELEMENT_NOT_FOUND_PREFIX = "can't find element";
   static final String ERR_SUPPORTED_FOR_MOBILE = "method is applicable only for iOS/Android";
   static final String ERR_CANT_ENTER_NULL_FRAME = "Can't enter null frame element";
-  private static final List<Class<? extends Throwable>> IGNORE_EXCEPTIONS =
-      Stream.of(
-          NoSuchElementException.class,
-          StaleElementReferenceException.class,
-          InvalidElementStateException.class,
-          WebDriverException.class)
-          .collect(Collectors.toList());
   // not final because can be reset
   private WebDriver driver;
   private final DriverConfig driverConfig;
@@ -206,7 +196,7 @@ public class DriverAdapter implements Driver {
       super(input);
       withTimeout(timeout);
       pollingEvery(pollingInterval);
-      ignoreAll(IGNORE_EXCEPTIONS);
+      ignoring(Exception.class);
       withMessage(message);
     }
 
