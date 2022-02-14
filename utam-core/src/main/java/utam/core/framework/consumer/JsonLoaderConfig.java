@@ -32,6 +32,7 @@ import utam.core.framework.context.StringValueProfile;
 class JsonLoaderConfig {
 
   static final String ERR_READING_LOADER_CONFIG = "error while reading config '%s' for UTAM loader";
+  static final String ERR_CANT_FIND_LOADER_CONFIG = "can't find loader config '%s'";
   static final String ERR_DUPLICATE_PROFILE = "Profile '%s = %s' is already configured";
   // if profile is set at the loader level, then it applies to all modules
   private final List<Profile> profiles = new ArrayList<>();
@@ -93,7 +94,7 @@ class JsonLoaderConfig {
   static JsonLoaderConfig loadConfig(String resourceName) {
     URL url = JsonLoaderConfig.class.getClassLoader().getResource(resourceName);
     if (url == null) {
-      throw new UtamCoreError(String.format(ERR_READING_LOADER_CONFIG, resourceName));
+      throw new UtamCoreError(String.format(ERR_CANT_FIND_LOADER_CONFIG, resourceName));
     }
     try {
       return new ObjectMapper().readValue(url, JsonLoaderConfig.class);

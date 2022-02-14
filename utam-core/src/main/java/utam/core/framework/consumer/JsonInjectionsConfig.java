@@ -43,7 +43,7 @@ public class JsonInjectionsConfig {
   static final String ERR_WHILE_READING_CONFIG = "Error while reading JSON config '%s'";
 
   /**
-   * read all existing resources with same module name
+   * read JSON config with a given module name
    *
    * @param moduleName name of the module to use as a file name
    * @return map of profiles mapping
@@ -53,7 +53,7 @@ public class JsonInjectionsConfig {
     String filename = String.format(CONFIG_FILE_MASK, moduleName);
     try {
       // with dependencies from different modules, there could be modules with same name
-      List<URL> resources = Collections.list(getClass().getClassLoader().getResources(filename));
+      List<URL> resources = getDependenciesConfigResources(filename);
       if (!resources.isEmpty()) {
         for (URL resource : resources) {
           UtamLogger.info(String.format("Reading Page Objects config file %s", filename));
@@ -70,7 +70,17 @@ public class JsonInjectionsConfig {
   }
 
   /**
-   * JSON mapping with dependency injection config file
+   * overridden in unit test to verify possible resources with same name
+   * @param filename name of the resource
+   * @return list of found URLs
+   * @throws IOException if file error happened
+   */
+  List<URL> getDependenciesConfigResources(String filename) throws IOException {
+    return Collections.list(getClass().getClassLoader().getResources(filename));
+  }
+
+  /**
+   * mapping for JSON with dependency injection config file
    *
    * @author elizaveta.ivanova
    * @since 238
@@ -96,6 +106,7 @@ public class JsonInjectionsConfig {
                   Collectors.toMap(ImplementationPair::getInterface,
                       ImplementationPair::getImplementation));
           ProfileContext profileContext = new DefaultProfileContext(map);
+          // there could be more than one config for module with same name, then we need to merge
           if (injections.containsKey(profileKey)) {
             ProfileContext existingContext = injections.get(profileKey);
             for (Class beanType : profileContext.getConfiguredBeans()) {

@@ -89,7 +89,7 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
    */
   UtamLoaderConfigImpl(String... modules) {
     this();
-    Stream.of(modules).forEach(this::setDependencyModule);
+    Stream.of(modules).forEach(this::setLoaderConfig);
   }
 
   private static void setConfiguredProfile(Map<String, ProfileContext> configuredProfilesContext, String profileKey, ProfileContext profileContext) {
@@ -128,7 +128,7 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
   }
 
   @Override
-  public void setDependencyModule(String moduleName) {
+  public void setLoaderConfig(String moduleName) {
     pageObjectModules.put(moduleName, new HashMap<>());
   }
 
@@ -136,19 +136,17 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
     Map<String, ProfileContext> configuredProfilesContext = new HashMap<>();
     for (String moduleName : getModules()) {
       // from json
-      if(!moduleName.isEmpty()) {
+      if (!moduleName.isEmpty()) {
         Map<String, ProfileContext> injectionsConfig = new JsonInjectionsConfig()
             .readDependenciesConfig(moduleName);
         injectionsConfig
             .forEach((key, value) -> setConfiguredProfile(configuredProfilesContext, key, value));
       }
       // from properties
-      if (pageObjectModules.containsKey(moduleName)) { // sometimes from test we override getModules
-        for (String profileKey : pageObjectModules.get(moduleName).keySet()) {
-          Profile profile = pageObjectModules.get(moduleName).get(profileKey);
-          ProfileContext profileContext = new DefaultProfileContext(moduleName, profile);
-          setConfiguredProfile(configuredProfilesContext, profileKey, profileContext);
-        }
+      for (String profileKey : pageObjectModules.get(moduleName).keySet()) {
+        Profile profile = pageObjectModules.get(moduleName).get(profileKey);
+        ProfileContext profileContext = new DefaultProfileContext(moduleName, profile);
+        setConfiguredProfile(configuredProfilesContext, profileKey, profileContext);
       }
     }
     return configuredProfilesContext;
@@ -160,15 +158,14 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
     Map<String, ProfileContext> configuredProfilesContext = setConfig();
     Map<Class<? extends PageObject>, Class> beans = new HashMap<>();
     for (String profileName : activeProfiles.keySet()) {
-      String profileKey = new StringValueProfile(profileName, activeProfiles.get(profileName)).getKey();
+      String profileKey = new StringValueProfile(profileName, activeProfiles.get(profileName))
+          .getKey();
       ProfileContext profileContext = configuredProfilesContext.get(profileKey);
-      if(profileContext != null) {
-        profileContext.getConfiguredBeans().forEach(beanType -> {
-          String name = profileContext.getBeanName(beanType);
-          Class implementation = getClassFromName(name);
-          beans.put(beanType, implementation);
-        });
-      }
+      profileContext.getConfiguredBeans().forEach(beanType -> {
+        String name = profileContext.getBeanName(beanType);
+        Class implementation = getClassFromName(name);
+        beans.put(beanType, implementation);
+      });
     }
     return new PageObjectContextImpl(beans);
   }

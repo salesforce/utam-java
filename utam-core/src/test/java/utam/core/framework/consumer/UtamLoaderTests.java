@@ -141,6 +141,12 @@ public class UtamLoaderTests {
     loader.exitFrame();
   }
 
+  @Test
+  public void testGetConfig() {
+    UtamLoader loader = getDefaultLoader();
+    assertThat(loader.getConfig(), is(instanceOf(UtamLoaderConfig.class)));
+  }
+
   private static class ContainerMock implements Container {
 
     final Supplier<SearchContext> root;

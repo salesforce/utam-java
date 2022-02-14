@@ -11,12 +11,17 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
 import static utam.core.framework.consumer.JsonInjectionsConfig.ERR_WHILE_READING_CONFIG;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import java.net.URL;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.testng.annotations.Test;
 import utam.core.framework.UtamCoreError;
 import utam.core.framework.base.PageObject;
@@ -123,7 +128,7 @@ public class JsonInjectionsConfigTests {
   @Test
   public void testSwitchProfile() {
     UtamLoaderConfig loaderConfig = new UtamLoaderConfigImpl();
-    loaderConfig.setDependencyModule("config/module1");
+    loaderConfig.setLoaderConfig("config/module1");
     loaderConfig.setProfile(TestNonStringProfile.ONE);
     PageObject instance = loaderConfig.getPageContext().getBean(TestLoaderConfigDefault.class);
     assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
@@ -131,6 +136,22 @@ public class JsonInjectionsConfigTests {
     loaderConfig.setProfile(TestNonStringProfile.TWO);
     instance = loaderConfig.getPageContext().getBean(TestLoaderConfigDefault.class);
     assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
+  }
+
+  @Test
+  public void testSameModuleName() {
+    JsonInjectionsConfig config = new JsonInjectionsConfig() {
+      @Override
+      List<URL> getDependenciesConfigResources(String filename) {
+        return Stream.of(
+            getClass().getClassLoader().getResource("config/moduleMerge1.config.json"),
+            getClass().getClassLoader().getResource("config/moduleMerge2.config.json")
+        ).collect(Collectors.toList());
+      }
+    };
+    Map<String, ProfileContext> map = config.readDependenciesConfig("");
+    assertThat(map.keySet(), hasSize(2));
+
   }
 
   /**

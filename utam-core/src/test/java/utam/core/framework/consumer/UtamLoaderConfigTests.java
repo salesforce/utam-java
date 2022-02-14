@@ -102,7 +102,7 @@ public class UtamLoaderConfigTests {
   @Test
   public void testProfileConfigPickedUpAfterReset() {
     UtamLoaderConfig config = new UtamLoaderConfigImpl();
-    config.setDependencyModule("module1");
+    config.setLoaderConfig("module1");
     UtamLoader utamLoader = new UtamLoaderImpl(config,
         new DriverAdapter(mock(WebDriver.class), null));
     PageObject instance = config.getPageContext().getBean(TestLoaderConfigPageObject.class);

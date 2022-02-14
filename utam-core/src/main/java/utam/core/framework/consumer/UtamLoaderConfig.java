@@ -36,7 +36,7 @@ public interface UtamLoaderConfig {
    * @param moduleName name of the module
    * @since 238
    */
-  void setDependencyModule(String moduleName);
+  void setLoaderConfig(String moduleName);
 
   /**
    * create page objects context for dependency injection for each Jar and each profile, search for

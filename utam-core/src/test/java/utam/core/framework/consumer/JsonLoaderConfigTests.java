@@ -12,6 +12,7 @@ import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
@@ -20,6 +21,7 @@ import static org.testng.Assert.expectThrows;
 import static utam.core.driver.DriverConfig.DEFAULT_EXPLICIT_TIMEOUT;
 import static utam.core.driver.DriverConfig.DEFAULT_IMPLICIT_TIMEOUT;
 import static utam.core.driver.DriverConfig.DEFAULT_POLLING_INTERVAL;
+import static utam.core.framework.consumer.JsonLoaderConfig.ERR_CANT_FIND_LOADER_CONFIG;
 import static utam.core.framework.consumer.JsonLoaderConfig.ERR_DUPLICATE_PROFILE;
 import static utam.core.framework.consumer.JsonLoaderConfig.ERR_READING_LOADER_CONFIG;
 import static utam.core.framework.consumer.JsonLoaderConfig.loadConfig;
@@ -47,13 +49,9 @@ public class JsonLoaderConfigTests {
     return new JsonLoaderConfig();
   }
 
-  private static JsonLoaderConfig fromResource(String name) {
-    return loadConfig(name);
-  }
-
   @Test
   public void testExistingJson() {
-    JsonLoaderConfig config = fromResource("module.loader.json");
+    JsonLoaderConfig config = loadConfig("module.loader.json");
     assertThat(config.getModules(), hasSize(2));
     StringValueProfile sharedProfile = new StringValueProfile("platform", "ios");
 
@@ -132,7 +130,7 @@ public class JsonLoaderConfigTests {
 
   @Test
   public void testExistingJsonWithEmptyTimeoutsAndBridgeApp() {
-    JsonLoaderConfig config = fromResource("empty_timeouts.loader.json");
+    JsonLoaderConfig config = loadConfig("empty_timeouts.loader.json");
     assertThat(config.getModules(), is(emptyIterable()));
     DriverConfig driverConfig = config.driverConfig;
     assertThat(driverConfig, is(notNullValue()));
@@ -144,7 +142,7 @@ public class JsonLoaderConfigTests {
 
   @Test
   public void testExistingJsonWithTimeoutsAndBridgeApp() {
-    JsonLoaderConfig config = fromResource("timeouts.loader.json");
+    JsonLoaderConfig config = loadConfig("timeouts.loader.json");
     DriverConfig driverConfig = config.driverConfig;
     assertThat(driverConfig, is(notNullValue()));
     assertThat(driverConfig.getImplicitTimeout(), is(Duration.ofMillis(1)));
@@ -155,12 +153,20 @@ public class JsonLoaderConfigTests {
 
   @Test
   public void testExistingJsonDefaultTimeouts() {
-    JsonLoaderConfig config = fromResource("module.loader.json");
+    JsonLoaderConfig config = loadConfig("module.loader.json");
     DriverConfig driverConfig = config.driverConfig;
     assertThat(driverConfig, is(notNullValue()));
     assertThat(driverConfig.getImplicitTimeout(), is(DEFAULT_IMPLICIT_TIMEOUT));
     assertThat(driverConfig.getExplicitTimeout(), is(DEFAULT_EXPLICIT_TIMEOUT));
     assertThat(driverConfig.getPollingInterval(), is(DEFAULT_POLLING_INTERVAL));
     assertThat(driverConfig.getBridgeAppTitle(), is(emptyOrNullString()));
+  }
+
+  @Test
+  public void testNonExistingLoaderConfigThrows() {
+    final String config = "i.do.not.exist";
+    UtamError e = expectThrows(UtamError.class, () -> loadConfig(config));
+    final String message = e.getMessage();
+    assertThat(message, containsString(String.format(ERR_CANT_FIND_LOADER_CONFIG, config)));
   }
 }
