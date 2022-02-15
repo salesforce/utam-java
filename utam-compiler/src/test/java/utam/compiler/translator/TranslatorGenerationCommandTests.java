@@ -61,10 +61,8 @@ public class TranslatorGenerationCommandTests {
     assertThat(foundPageObjects.keySet(),
         containsInAnyOrder("utam-one/pageObjects/first", "utam-two/pageObjects/second"));
     assertThat(foundPageObjects.values(), containsInAnyOrder(
-        (USER_ROOT + RESOURCES_PATH + "/spec/one/first.utam.json").replaceAll("/",
-            Matcher.quoteReplacement(File.separator)),
-        (USER_ROOT + RESOURCES_PATH + "/spec/two/second.utam.json").replaceAll("/",
-            Matcher.quoteReplacement(File.separator))));
+        (USER_ROOT + RESOURCES_PATH + "/spec/one/first.utam.json").replace("/", File.separator),
+        (USER_ROOT + RESOURCES_PATH + "/spec/two/second.utam.json").replace("/", File.separator)));
   }
 
   @Test

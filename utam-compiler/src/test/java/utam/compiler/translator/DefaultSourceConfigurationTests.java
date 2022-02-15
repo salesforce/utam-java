@@ -116,7 +116,7 @@ public class DefaultSourceConfigurationTests {
     ScannerConfig scannerConfig = new ScannerConfig(Collections.singletonMap("utam-one", ".*/one"));
     RecursiveScanner scanner = new RecursiveScanner(null);
     DefaultSourceConfiguration config = new DefaultSourceConfiguration(scannerConfig, scanner);
-    String pathString = "folder" + File.separator + "one" + File.separator + "test.utam.json";
+    String pathString = "folder/one/test.utam.json".replace("/", File.separator);
     Consumer<String> test = str -> config.preProcess("utam-one", Paths.get(str),
         ".*/one/" + DEFAULT_JSON_FILE_MASK_REGEX);
     test.accept(pathString);
