@@ -87,7 +87,8 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
     Matcher matcher = relativePattern.matcher(filePath.toString());
     // gets text inside () of the mask, usually PO file name
     final String relativePath = matcher.find() ? matcher.group(1) : "";
-    final String relativePageObjectName = relativePath.replaceAll(Pattern.quote("."), "/");
+    final String relativePageObjectName = relativePath.replaceAll(Pattern.quote("."), "/")
+        .replace(File.separator, "/");
     return String.format(PAGE_OBJECT_URI_FORMAT, packageName, relativePageObjectName);
   }
 
