@@ -23,10 +23,7 @@ import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import utam.compiler.UtamCompilationError;
@@ -89,7 +86,7 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
     Matcher matcher = relativePattern.matcher(filePath.toString());
     // gets text inside () of the mask, usually PO file name
     final String relativePath = matcher.find() ? matcher.group(1) : "";
-    final String relativePageObjectName = relativePath.replaceAll(Pattern.quote("."), File.separator);
+    final String relativePageObjectName = relativePath.replaceAll(Pattern.quote("."), "/");
     return String.format(PAGE_OBJECT_URI_FORMAT, packageName, relativePageObjectName);
   }
 
@@ -132,7 +129,7 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
    */
   public static class RecursiveScanner {
 
-    final String rootFolder;
+    final Path rootFolder;
 
     /**
      * Initializes a new instance of the RecursiveScanner class
@@ -140,13 +137,13 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
      * @param rootFolder the root folder
      */
     public RecursiveScanner(String rootFolder) {
-      this.rootFolder = rootFolder;
+      this.rootFolder = rootFolder == null ? null : Paths.get(rootFolder);
     }
 
     void scan(DefaultSourceConfiguration config, String packageName, String fileMaskRegex) {
       PathMatcher matcher = FileSystems.getDefault().getPathMatcher("regex:" + fileMaskRegex);
       try {
-        Files.walkFileTree(Paths.get(rootFolder), new SimpleFileVisitor<>() {
+        Files.walkFileTree(rootFolder, new SimpleFileVisitor<>() {
           @Override
           public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
             if (matcher.matches(file)) {
@@ -211,8 +208,18 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
      * @param packagesMapping    the map of directories to packages
      */
     public ScannerConfig(String pageObjectFileMask, Map<String, String> packagesMapping) {
-      packagesMapping.forEach((key, value) -> this.packagesMapping
-          .put(key, value + File.separator + pageObjectFileMask));
+      packagesMapping.forEach((key, value) -> {
+        // If the file separator for the OS is a backslash, it must be escaped
+        // as a double-backslash in the regex.
+        String regexPartSeparator = File.separator == "\\" ? "\\\\" : File.separator;
+
+        // We can hard-code a forward slash here, as the compiler config JSON
+        // must, by definition and convention, use forward slashes as path separators.
+        List<String> regexParts = new ArrayList<>(Arrays.asList(value.split("/")));
+        regexParts.add(pageObjectFileMask);
+
+        this.packagesMapping.put(key, String.join(regexPartSeparator, regexParts));
+      });
     }
 
     /**
@@ -241,7 +248,7 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
   static class SourceWithoutPackages extends DefaultSourceConfiguration {
 
     private final String pageObjectFileMask;
-    private final String rootFolder;
+    private final Path rootFolder;
     private static final String DEFAULT_PACKAGE_NAME = "utam";
 
     /**
@@ -253,14 +260,14 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
     SourceWithoutPackages(String rootFolder, String pageObjectsFileMask) {
       super(new ScannerConfig(pageObjectsFileMask, new HashMap<>()), new RecursiveScanner(rootFolder));
       this.pageObjectFileMask = pageObjectsFileMask;
-      this.rootFolder = rootFolder;
+      this.rootFolder = rootFolder == null ? null : Paths.get(rootFolder);
     }
 
     @Override
     public void recursiveScan() {
       PathMatcher matcher = FileSystems.getDefault().getPathMatcher("regex:" + pageObjectFileMask);
       try {
-        Files.walkFileTree(Paths.get(rootFolder), new SimpleFileVisitor<>() {
+        Files.walkFileTree(rootFolder, new SimpleFileVisitor<>() {
           @Override
           public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
             if (matcher.matches(file)) {
