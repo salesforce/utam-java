@@ -215,4 +215,11 @@ public class UtamPageObject_DeserializeTests {
     assertThat(declaration.getImplementation().getComments(), is(equalTo("my description")));
     assertThat(declaration.getInterface().getComments(), is(equalTo("my description")));
   }
+
+  @Test
+  public void testGetDescriptionForNull() {
+    String json = "{}";
+    UtamPageObject utamPageObject = createRootElementNode(json);
+    assertThat(utamPageObject.getDescription(), is(emptyString()));
+  }
 }

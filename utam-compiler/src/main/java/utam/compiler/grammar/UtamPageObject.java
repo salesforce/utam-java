@@ -201,7 +201,7 @@ final class UtamPageObject {
    * @return string
    */
   String getDescription() {
-    return description;
+    return description == null ? "" : description;
   }
 
   /**
