@@ -58,9 +58,9 @@ public abstract class ContainerMethod implements PageObjectMethod {
         String.format("element '%s'", elementName));
     if (scopeElement != null) {
       parametersTracker.setMethodParameters(scopeElement.getParameters());
+      String scopeElementLine = getScopeElementCode(scopeElement);
+      codeLines.add(scopeElementLine);
     }
-    String scopeElementLine = getScopeElementCode(scopeElement);
-    codeLines.add(scopeElementLine);
     codeLines.add(String.format("%s %s = %s", SELECTOR.getSimpleName(), this.locatorVariableName, selectorBuilderString));
     String scopeVariableName = scopeElement.getName();
     codeLines.add(String.format("return this.container(%s, %s).%s",

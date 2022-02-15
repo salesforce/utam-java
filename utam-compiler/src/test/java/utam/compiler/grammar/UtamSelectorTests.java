@@ -14,33 +14,28 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.DeserializerUtilities.expectCompilerErrorFromFile;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
-import static utam.compiler.grammar.UtamArgument.ERR_ARGS_WRONG_TYPE;
 import static utam.compiler.grammar.UtamSelector.ERR_SELECTOR_PARAM_UNKNOWN_TYPE;
 
 import java.util.List;
+import java.util.Objects;
 import org.testng.annotations.Test;
-import utam.compiler.grammar.UtamArgument.UtamArgumentLiteralPrimitive;
 import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.PrimitiveType;
 import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.LocatorBy;
 
 public class UtamSelectorTests {
 
-  static final String SELECTOR_STRING = "selector";
-
-  static UtamSelector getUtamCssSelector() {
-    return new UtamSelector(SELECTOR_STRING);
-  }
-
-  static UtamSelector getListCssSelector() {
-    return new UtamSelector(SELECTOR_STRING, true);
-  }
-
   private static LocatorCodeGeneration getLocatorContext(UtamSelector utamSelector) {
-    return utamSelector.getCodeGenerationHelper(getTestTranslationContext());
+    return utamSelector.getCodeGenerationHelper("test", getTestTranslationContext(), null);
+  }
+
+  private static String getBuilderString(UtamSelector selector) {
+    return selector.getCodeGenerationHelper("test", getTestTranslationContext(), null).getBuilderString();
   }
 
   @Test
@@ -55,24 +50,20 @@ public class UtamSelectorTests {
 
   @Test
   public void testSelectorNonLiteralParameters() {
-    UtamSelector selector = new UtamSelector("str[%s] num[%d]", new UtamArgument[]{
-        new UtamArgument.UtamArgumentNonLiteral("strArg", "string", null),
-        new UtamArgument.UtamArgumentNonLiteral("numArg", "number", "description")
-    });
-    LocatorCodeGeneration context = getLocatorContext(selector);
-    List<MethodParameter> parameters = context.getParameters();
+    PageObjectMethod method = Objects
+        .requireNonNull(new DeserializerUtilities().getContext("selector/selectorArgs")
+            .getElement("test")).getElementMethod();
+    List<MethodParameter> parameters = method.getDeclaration().getParameters();
     assertThat(parameters, hasSize(2));
     MethodParameter strParameter = parameters.get(0);
     assertThat(strParameter.isLiteral(), is(false));
-    assertThat(strParameter.getValue(), is("strArg"));
-    assertThat(strParameter.getType(), is(equalTo(PrimitiveType.STRING)));
+    assertThat(strParameter.getValue(), is("str"));
+    assertThat(strParameter.getType().isSameType(PrimitiveType.STRING), is(true));
     assertThat(strParameter.getDescription(), is(nullValue()));
-
     MethodParameter numberParameter = parameters.get(1);
-    assertThat(numberParameter.getType(), is(equalTo(PrimitiveType.NUMBER)));
-    assertThat(context.getBuilderString(),
-        is(equalTo("LocatorBy.byCss(String.format(\"str[%s] num[%d]\", strArg, numArg))")));
-    assertThat(numberParameter.getDescription(), is(equalTo("description")));
+    assertThat(numberParameter.isLiteral(), is(false));
+    assertThat(numberParameter.getValue(), is("num"));
+    assertThat(numberParameter.getType().isSameType(PrimitiveType.NUMBER), is(true));
   }
 
   /**
@@ -88,23 +79,46 @@ public class UtamSelectorTests {
 
   @Test
   public void testWrongArgTypeProvided() {
-    UtamSelector selector = new UtamSelector("selector[%d]",
-        new UtamArgument[]{
-            new UtamArgument.UtamArgumentNonLiteral("name", "string", null)
-    });
-    UtamError e = expectThrows(UtamError.class, () -> getLocatorContext(selector));
+    Exception e = expectCompilerErrorFromFile("selector/selectorWrongArgs");
     assertThat(
         e.getMessage(),
-        is(containsString(
-            String.format(ERR_ARGS_WRONG_TYPE, "selector 'selector[%d]'",  "name", "Integer", "String"))));
+        containsString(
+            "error UA009: element \"test\" selector \"str[%s]\": incorrect parameter type [ num ]: "
+                + "expected type \"String\", found \"Integer\""));
   }
 
   @Test
-  public void testLiteralArgProvided() {
-    UtamSelector selector = new UtamSelector("selector[%d]",
-        new UtamArgument[]{
-            new UtamArgumentLiteralPrimitive(1)
-        });
-    getLocatorContext(selector);
+  public void testArgsWithDuplicateNamesThrows() {
+    Exception e = expectCompilerErrorFromFile("selector/selectorSameArgs");
+    assertThat(e.getMessage(),
+        containsString(
+            "error UA007: element \"test\" selector \"str[%s] num[%s]\": parameter with name \"str\" is already declared"));
+  }
+
+  @Test
+  public void testGetBuilderString() {
+    final String prefix = LocatorBy.class.getSimpleName();
+
+    UtamSelector selector = new UtamSelector("css", null, null, null);
+    assertThat(getBuilderString(selector), is(equalTo(prefix + ".byCss(\"css\")")));
+
+    selector = new UtamSelector(null, "accessId", null, null);
+    assertThat(getBuilderString(selector),
+        is(equalTo(prefix + ".byAccessibilityId(\"accessId\")")));
+
+    selector = new UtamSelector(null, null, "chain", null);
+    assertThat(getBuilderString(selector), is(equalTo(prefix + ".byClassChain(\"chain\")")));
+
+    selector = new UtamSelector(null, null, null, "new UiSelector().checkable()");
+    assertThat(getBuilderString(selector),
+        is(equalTo(prefix + ".byUiAutomator(\"new UiSelector().checkable()\")")));
+  }
+
+  @Test
+  public void testInvalidSelectorFormatThrows() {
+    Exception e = expectCompilerErrorFromFile("selector/wrongFormat");
+    assertThat(e.getMessage(),
+        containsString(
+            "error US000: element \"test\": format of selector is incorrect"));
   }
 }

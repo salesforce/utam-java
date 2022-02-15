@@ -7,43 +7,38 @@
  */
 package utam.compiler.grammar;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.TextNode;
-import utam.compiler.UtamCompilationError;
+import static utam.compiler.translator.DefaultTranslatorConfiguration.CompilerOutputOptions.DEFAULT_COMPILER_OUTPUT_OPTIONS;
+
+import java.util.ArrayList;
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.translator.DefaultSourceConfigurationTests;
+import utam.compiler.translator.DefaultTargetConfigurationTests;
+import utam.compiler.translator.DefaultTranslatorConfiguration;
+import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.declarative.translator.TranslationTypesConfig;
-import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.core.declarative.translator.TranslatorConfig;
+import utam.core.declarative.translator.TranslatorSourceConfig;
+import utam.core.declarative.translator.TranslatorTargetConfig;
 import utam.core.element.Locator;
-
-import java.io.IOException;
-
 import utam.core.selenium.element.LocatorBy;
 
-import static utam.compiler.translator.TranslatorMockUtilities.getDefaultConfig;
-
+/**
+ * test utilities
+ *
+ * @author elizaveta.ivanova
+ * @since 230
+ */
 public class TestUtilities {
 
-  static final String TEST_URI = "utam-test/pageObjects/test/test";
-  static final String JACKSON_MISSING_REQUIRED_PROPERTY_ERROR = "Missing required creator property";
-  static final String JACKSON_WRONG_PROPERTY_TYPE =
-      "Cannot deserialize value of type `%s` from String \"%s\"";
+  public static final String TEST_URI = "utam-test/pageObjects/test/test";
   private static final TranslationTypesConfig TYPES_CONFIG = new TranslationTypesConfigJava();
   public static final TypeProvider TEST_PAGE_OBJECT = TYPES_CONFIG.getInterfaceType(TEST_URI);
-  static final String JSON_MAPPING_ERROR = "Unrecognized field";
 
   public static TranslationContext getTestTranslationContext() {
     return new TranslationContext(TEST_URI, getDefaultConfig());
-  }
-
-  public static <T> T getDeserializedObject(String json, Class<T> tClass) {
-    try {
-      return JsonDeserializer.deserialize(tClass, json);
-    } catch (IOException e) {
-      throw new UtamCompilationError(e);
-    }
   }
 
   public static Locator getCssSelector(String value) {
@@ -51,36 +46,25 @@ public class TestUtilities {
   }
 
   public static JsonDeserializer getJsonStringDeserializer(String json) {
-    return new JsonDeserializer(TEST_URI, json, getDefaultConfig());
+    return getJsonStringDeserializer(json, getDefaultConfig());
   }
 
-  public static JsonDeserializer getJsonStringDeserializer(
-      String json, TranslatorConfig translatorConfig) {
-    return new JsonDeserializer(TEST_URI, json, translatorConfig);
+  public static JsonDeserializer getJsonStringDeserializer(String json,
+      TranslatorConfig translatorConfig) {
+    TranslationContext translationContext = new TranslationContext(TEST_URI, translatorConfig);
+    return new JsonDeserializer(translationContext, json);
   }
 
   public static PageObjectDeclaration getPageObject(String json) {
-    return new JsonDeserializer.Object(
-        getDeserializedObject(json, UtamPageObject.class), getTestTranslationContext());
+    TranslationContext translationContext = getTestTranslationContext();
+    JsonDeserializer deserializer = new JsonDeserializer(translationContext, json);
+    return deserializer.getObject();
   }
 
-  static class UtamEntityCreator {
-
-    static UtamElement createUtamElement(String name) {
-      return createUtamElement(name, null, null);
-    }
-
-    static UtamElement createUtamElement(String name, String type, UtamSelector selector) {
-      return new UtamElement(
-          createStringTypeNode(type), name, false, null, selector,
-          null, null, null, null);
-    }
-
-    private static JsonNode createStringTypeNode(String type) {
-      if (type == null) {
-        return null;
-      }
-      return new TextNode(type);
-    }
+  public static DefaultTranslatorConfiguration getDefaultConfig() {
+    TranslatorTargetConfig targetConfig = new DefaultTargetConfigurationTests.Mock();
+    TranslatorSourceConfig sourceConfig = new DefaultSourceConfigurationTests.Mock();
+    return new DefaultTranslatorConfiguration(DEFAULT_COMPILER_OUTPUT_OPTIONS, GuardrailsMode.ERROR, sourceConfig,
+        targetConfig, new ArrayList<>());
   }
 }

@@ -7,20 +7,22 @@
  */
 package utam.compiler.helpers;
 
-import utam.core.declarative.representation.TypeProvider;
-import org.testng.annotations.Test;
-import utam.core.element.Touchable;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static utam.compiler.helpers.BasicElementActionTypeTests.sameType;
+import static utam.core.framework.UtamLogger.info;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static utam.compiler.helpers.BasicElementActionTypeTests.sameType;
-import static utam.core.framework.UtamLogger.info;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import org.testng.annotations.Test;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.element.Touchable;
 
 /**
  * Tests for the TouchableActionType enum
@@ -28,8 +30,6 @@ import static org.hamcrest.Matchers.*;
  * @author r.rajasekaran
  */
 public class TouchableActionTypeTests {
-
-  private static final String VOID_TYPE_NAME = "void";
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   private static Method getMethod(Class clazz, String methodName, Class[] parameters) {
@@ -55,24 +55,18 @@ public class TouchableActionTypeTests {
   /** The flick member should return the proper value */
   @Test
   public void testFlick() {
-    validateAction(
-        TouchableActionType.flick,
-            VOID_TYPE_NAME,
-            Collections.unmodifiableList(List.of("Integer", "Integer")));
-  }
-
-  private void validateAction(
-          ActionType action, String returnType, List<String> parameterTypes) {
+    TouchableActionType action = TouchableActionType.flick;
+    List<String> parametersTypes = List.of("Integer", "Integer");
     List<String> parameterTypeStrings =
-        action.getParametersTypes().stream()
+        action.getParametersTypes("test", 2).stream()
             .filter((type) -> !type.getSimpleName().isEmpty())
             .map(TypeProvider::getSimpleName)
             .collect(Collectors.toList());
 
-    assertThat(parameterTypeStrings, containsInAnyOrder(parameterTypes.toArray()));
-    assertThat(parameterTypeStrings, hasSize(parameterTypes.size()));
-    assertThat(action.getReturnType().getSimpleName(), is(equalTo(returnType)));
-    assertThat(action.getApplyString(), is(equalTo(((TouchableActionType)action).name())));
+    assertThat(parameterTypeStrings, containsInAnyOrder(parametersTypes.toArray()));
+    assertThat(parameterTypeStrings, hasSize(parametersTypes.size()));
+    assertThat(action.getReturnType().getSimpleName(), is(equalTo("void")));
+    assertThat(action.getApplyString(), is(equalTo(action.name())));
   }
 
   @SuppressWarnings("rawtypes")

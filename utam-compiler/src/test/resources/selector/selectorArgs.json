@@ -1,0 +1,21 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "public": true,
+      "selector": {
+        "css": "str[%s] num[%d]",
+        "args": [
+          {
+            "name": "str",
+            "type": "string"
+          },
+          {
+            "name": "num",
+            "type": "number"
+          }
+        ]
+      }
+    }
+  ]
+}

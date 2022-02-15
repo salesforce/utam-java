@@ -1,0 +1,97 @@
+{
+  "elements": [
+    {
+      "name": "draggable",
+      "type": "draggable",
+      "selector": {
+        "css": "css"
+      }
+    },
+    {
+      "name": "targetWithSelector",
+      "selector": {
+        "css": "css[%s]",
+        "args": [
+          {
+            "name": "selectorArg",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "targetWithFilter",
+      "selector": {
+        "css": "css",
+        "returnAll": true
+      },
+      "filter": {
+        "apply": "getAttribute",
+        "args": [
+          {
+            "name": "filterApplyArg",
+            "type": "string"
+          }
+        ],
+        "findFirst": true,
+        "matcher": {
+          "type": "stringEquals",
+          "args": [
+            {
+              "name": "matcherArg",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "draggable",
+          "apply": "dragAndDrop",
+          "args": [
+            {
+              "value": "targetWithFilter",
+              "type": "elementReference"
+            }
+          ]
+        },
+        {
+          "element": "draggable",
+          "apply": "dragAndDrop",
+          "args": [
+            {
+              "value": "targetWithSelector",
+              "type": "elementReference",
+              "args": [
+                {
+                  "value": "selectorArgValue"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "element": "draggable",
+          "apply": "dragAndDrop",
+          "args": [
+            {
+              "value": "targetWithSelector",
+              "type": "elementReference",
+              "args": [
+                {
+                  "name": "selectorArgName",
+                  "type": "string"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

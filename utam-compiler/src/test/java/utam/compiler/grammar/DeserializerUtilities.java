@@ -7,27 +7,25 @@
  */
 package utam.compiler.grammar;
 
-import static utam.compiler.grammar.JsonDeserializer.getDeserializerMapper;
+import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.TEST_URI;
-import static utam.compiler.translator.TranslatorMockUtilities.getDefaultConfig;
+import static utam.compiler.grammar.TestUtilities.getDefaultConfig;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.CollectionType;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.List;
 import java.util.stream.Collectors;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.translator.ClassSerializer;
 import utam.compiler.translator.InterfaceSerializer;
 import utam.compiler.translator.StringValueProfileConfig;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.translator.TranslatorConfig;
-import utam.core.framework.consumer.UtamError;
+import utam.core.framework.UtamLogger;
 
 /**
- * deserialize json from resources folder
+ * test utilities to deserialize json
  *
  * @author elizaveta.ivanova
  * @since 232
@@ -41,20 +39,18 @@ public class DeserializerUtilities {
     this.type = TEST_URI;
     this.translatorConfig = getDefaultConfig();
     // profile is required for implementations POs
-    this.translatorConfig.getConfiguredProfiles().add(new StringValueProfileConfig("profile", "test"));
+    this.translatorConfig.getConfiguredProfiles()
+        .add(new StringValueProfileConfig("profile", "test"));
   }
 
-  private static String readJSON(String fileName) {
-    String testFileName = fileName + ".json";
-    InputStream stream =
-        DeserializerUtilities.class.getClassLoader().getResourceAsStream(testFileName);
-    if (stream == null) {
-      throw new AssertionError(String.format("JSON file '%s' not found", testFileName));
-    }
-    return new BufferedReader(new InputStreamReader(stream))
-        .lines()
-        .parallel()
-        .collect(Collectors.joining("\n"));
+  static UtamCompilationError expectCompilerError(String json) {
+    return expectThrows(UtamCompilationError.class,
+        () -> new DeserializerUtilities().getResultFromString(json));
+  }
+
+  static UtamCompilationError expectCompilerErrorFromFile(String fileName) {
+    return expectThrows(UtamCompilationError.class,
+        () -> new DeserializerUtilities().getContext(fileName));
   }
 
   TranslatorConfig getTranslatorConfig() {
@@ -62,16 +58,33 @@ public class DeserializerUtilities {
   }
 
   public Result getResultFromFile(String fileName) {
-    String content = readJSON(fileName);
-    return getResultFromString(content);
+    String testFileName = fileName + ".json";
+    InputStream stream =
+        DeserializerUtilities.class.getClassLoader().getResourceAsStream(testFileName);
+    if (stream == null) {
+      throw new AssertionError(String.format("JSON file '%s' not found", testFileName));
+    }
+    String content = new BufferedReader(new InputStreamReader(stream))
+        .lines()
+        .parallel()
+        .collect(Collectors.joining("\n"));
+    try {
+      return getResultFromString(content);
+    } catch (Exception e) {
+      UtamLogger.error(String.format("ERROR IN FILE %s", fileName));
+      throw e;
+    }
   }
 
   public Result getResultFromString(String content) {
-    JsonDeserializer deserializer = new JsonDeserializer(type, content, translatorConfig);
+    TranslationContext context = new TranslationContext(type, translatorConfig);
+    // to test implementations
+    translatorConfig.getConfiguredProfiles().add(new StringValueProfileConfig("name", "value"));
+    JsonDeserializer deserializer = new JsonDeserializer(context, content);
     PageObjectDeclaration declaration = deserializer.getObject();
     // to ensure that code can be generated
     new InterfaceSerializer(declaration.getInterface()).toString();
-    if(!declaration.isInterfaceOnly()) {
+    if (!declaration.isInterfaceOnly()) {
       new ClassSerializer(declaration.getImplementation()).toString();
     }
     return new Result(deserializer.getObject(), deserializer.getPageObjectContext());
@@ -82,41 +95,13 @@ public class DeserializerUtilities {
   }
 
   /**
-   * read JSON file with array of objects and deserialize
-   * @param contentType type of objects in json
-   * @param fileName name of the file without extension
-   * @return list of deserialized objects
+   * utility class to combine de-serialization results
+   *
+   * @author elizaveta.ivanova
+   * @since 232
    */
-  static <T> List<T> getDeserializedObjects(Class<T> contentType, String fileName) {
-    ArrayResult<T> res = new ArrayResult(contentType);
-    return res.getObjects(fileName);
-  }
-
-  static class ArrayResult<T> {
-    private final Class<T> type;
-
-    ArrayResult(Class<T> type) {
-      this.type = type;
-    }
-
-    List<T> getObjects(String fileName) {
-      try {
-        String fullFileName = fileName + ".json";
-        ObjectMapper mapper = getDeserializerMapper();
-        CollectionType collectionType = mapper.getTypeFactory()
-            .constructCollectionType(List.class, type);
-        InputStream stream = getClass().getClassLoader().getResourceAsStream(fullFileName);
-        if(stream == null) {
-          throw new AssertionError(String.format("JSON file '%s' not found", fullFileName));
-        }
-        return mapper.readValue(stream, collectionType);
-      } catch (Exception e) {
-        throw new UtamError("error in " + fileName, e);
-      }
-    }
-  }
-
   public static class Result {
+
     private final PageObjectDeclaration pageObjectDeclaration;
     private final TranslationContext translationContext;
 
@@ -134,4 +119,5 @@ public class DeserializerUtilities {
       return translationContext;
     }
   }
+
 }

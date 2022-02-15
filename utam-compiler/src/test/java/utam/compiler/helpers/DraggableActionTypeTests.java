@@ -8,17 +8,19 @@
 package utam.compiler.helpers;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.helpers.DraggableActionType.ERR_MULTIPLE_EXPECTED_ARGS_TYPES;
+import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import java.lang.reflect.Method;
 import java.util.List;
 import org.testng.annotations.Test;
+import utam.compiler.UtamCompilerIntermediateError;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Draggable;
 
@@ -43,17 +45,21 @@ public class DraggableActionTypeTests {
     assertThat(action.getReturnType().isSameType(VOID), is(true));
     assertThat(action.getApplyString(), is(equalTo(action.name())));
 
-    List<List<TypeProvider>> parametersOptions = action.getParametersTypesOptions();
-    assertThat(parametersOptions, hasSize(2));
-    //1
-    List<TypeProvider> parameters = parametersOptions.get(0);
+    List<TypeProvider> parameters = action.getParametersTypes("test", 1);
     assertThat(parameters, hasSize(1));
     assertThat(parameters.get(0).isSameType(BASIC_ELEMENT), is(true));
-    //2
-    parameters = parametersOptions.get(1);
+
+    parameters = action.getParametersTypes("test", 2);
     assertThat(parameters, hasSize(2));
     assertThat(parameters.get(0).isSameType(BASIC_ELEMENT), is(true));
     assertThat(parameters.get(1).isSameType(PrimitiveType.NUMBER), is(true));
+
+    UtamCompilerIntermediateError e = expectThrows(UtamCompilerIntermediateError.class,
+        () -> action.getParametersTypes("test", 0));
+    assertThat(e.getCompilationError(getTestTranslationContext(), null, null).get().getMessage(),
+        containsString(
+            "error UA010: \"test\": incorrect number of parameters for action \"dragAndDrop\": "
+                + "expected (check documentation), provided 0"));
   }
 
   @Test
@@ -62,25 +68,15 @@ public class DraggableActionTypeTests {
     assertThat(action.getReturnType().isSameType(VOID), is(true));
     assertThat(action.getApplyString(), is(equalTo(action.name())));
 
-    List<List<TypeProvider>> parametersOptions = action.getParametersTypesOptions();
-    assertThat(parametersOptions, hasSize(2));
-    //1
-    List<TypeProvider> parameters = parametersOptions.get(0);
+    List<TypeProvider> parameters = action.getParametersTypes("test", 2);
     assertThat(parameters, hasSize(2));
     assertThat(parameters.get(0).isSameType(PrimitiveType.NUMBER), is(true));
     assertThat(parameters.get(1).isSameType(PrimitiveType.NUMBER), is(true));
-    //2
-    parameters = parametersOptions.get(1);
+
+    parameters = action.getParametersTypes("test", 3);
     assertThat(parameters, hasSize(3));
     assertThat(parameters.get(0).isSameType(PrimitiveType.NUMBER), is(true));
     assertThat(parameters.get(1).isSameType(PrimitiveType.NUMBER), is(true));
     assertThat(parameters.get(2).isSameType(PrimitiveType.NUMBER), is(true));
-  }
-
-  @Test
-  public void testGetParameterTypesThrows() {
-    ActionType action = DraggableActionType.dragAndDropByOffset;
-    IllegalStateException e = expectThrows(IllegalStateException.class, action::getParametersTypes);
-    assertThat(e.getMessage(), is(equalTo(ERR_MULTIPLE_EXPECTED_ARGS_TYPES)));
   }
 }

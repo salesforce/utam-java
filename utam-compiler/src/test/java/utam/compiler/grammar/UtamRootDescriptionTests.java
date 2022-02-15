@@ -13,7 +13,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.UtamRootDescription.ERR_FORMAT_ERROR;
 import static utam.compiler.grammar.UtamRootDescription.VERSION_TAG;
 
 import java.util.List;
@@ -125,14 +124,14 @@ public class UtamRootDescriptionTests {
   public void testFormatIsNotStringOrObject() {
     UtamError e = expectThrows(UtamError.class,
         () -> new DeserializerUtilities().getResultFromString("{ \"description\" : true }"));
-    assertThat(e.getCause().getMessage(), containsString(ERR_FORMAT_ERROR));
+    assertThat(e.getMessage(), containsString("error URD000: format of the root description is incorrect"));
   }
 
   @Test
-  public void testIncorrectFormatOfDesscriptionObject() {
+  public void testIncorrectTextInsideDescriptionThrows() {
     UtamError e = expectThrows(UtamError.class,
-        () -> new DeserializerUtilities().getResultFromString("{ \"description\" : { \"text\" : true } }"));
-    assertThat(e.getCause().getMessage(), containsString(ERR_FORMAT_ERROR));
+        () -> new DeserializerUtilities().getResultFromString("{ \"description\" : { \"text\" : {} } }"));
+    assertThat(e.getMessage(), containsString("error URD000: format of the root description is incorrect"));
   }
 
   @Test

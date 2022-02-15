@@ -7,20 +7,26 @@
  */
 package utam.compiler.helpers;
 
-import utam.core.declarative.representation.TypeProvider;
-import org.testng.annotations.Test;
-import utam.core.element.Editable;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static utam.compiler.helpers.BasicElementActionTypeTests.sameType;
+import static utam.core.framework.UtamLogger.info;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static utam.compiler.helpers.BasicElementActionTypeTests.sameType;
-import static utam.core.framework.UtamLogger.info;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import org.testng.annotations.Test;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.element.Editable;
 
 /**
  * Provides tests for the TranslatableAction enum
@@ -42,6 +48,20 @@ public class EditableActionTypeTests {
     }
   }
 
+  private static void validateAction(
+      ActionType action, List<String> parameterTypes) {
+    Set<String> parameterTypeStrings =
+        action.getParametersTypes("test", parameterTypes.size()).stream()
+            .filter((type) -> !type.getSimpleName().isEmpty())
+            .map(TypeProvider::getSimpleName)
+            .collect(Collectors.toSet());
+
+    assertThat(parameterTypeStrings, containsInAnyOrder(parameterTypes.toArray()));
+    assertThat(parameterTypeStrings, hasSize(parameterTypes.size()));
+    assertThat(action.getReturnType().getSimpleName(),
+        is(equalTo(EditableActionTypeTests.VOID_TYPE_NAME)));
+  }
+
   @Test
   public void checkSupportedActions() {
     for (Method method : Editable.class.getDeclaredMethods()) {
@@ -53,26 +73,32 @@ public class EditableActionTypeTests {
     consumer.accept(method.getName());
   }
 
-  /** The clear member should return the proper value */
+  /**
+   * The clear member should return the proper value
+   */
   @Test
   public void testClear() {
     validateAction(EditableActionType.clear, new ArrayList<>());
   }
 
-  /** The clearAndType member should return the proper value */
+  /**
+   * The clearAndType member should return the proper value
+   */
   @Test
   public void testClearAndType() {
     validateAction(
         EditableActionType.clearAndType,
-            Collections.singletonList("String"));
+        Collections.singletonList("String"));
   }
 
-  /** The setText member should return the proper value */
+  /**
+   * The setText member should return the proper value
+   */
   @Test
   public void testSetText() {
     validateAction(
         EditableActionType.setText,
-            Collections.singletonList(STRING_TYPE_NAME));
+        Collections.singletonList(STRING_TYPE_NAME));
   }
 
   @Test
@@ -82,19 +108,6 @@ public class EditableActionTypeTests {
             .map(Class::getSimpleName)
             .collect(Collectors.toList());
     assertThat(list, containsInAnyOrder(STRING_TYPE_NAME));
-  }
-
-  private void validateAction(
-          ActionType action, List<String> parameterTypes) {
-    Set<String> parameterTypeStrings =
-        action.getParametersTypes().stream()
-            .filter((type) -> !type.getSimpleName().isEmpty())
-            .map(TypeProvider::getSimpleName)
-            .collect(Collectors.toSet());
-
-    assertThat(parameterTypeStrings, containsInAnyOrder(parameterTypes.toArray()));
-    assertThat(parameterTypeStrings, hasSize(parameterTypes.size()));
-    assertThat(action.getReturnType().getSimpleName(), is(equalTo(EditableActionTypeTests.VOID_TYPE_NAME)));
   }
 
   @SuppressWarnings("rawtypes")

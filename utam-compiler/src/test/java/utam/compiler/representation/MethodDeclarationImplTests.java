@@ -38,10 +38,9 @@ public class MethodDeclarationImplTests {
 
     MethodDeclarationImpl declaration =
         new MethodDeclarationImpl(
-            "fakeMethod",
             new ArrayList<>(),
             returnType);
-    assertThat(declaration.getName(), is(equalTo("fakeMethod")));
+    assertThat(declaration.getName(), is(equalTo("test")));
     assertThat(declaration.getReturnType(), is(equalTo(returnType)));
     assertThat(declaration.getParameters(), hasSize(0));
     assertThat(declaration.getImports(), is(equalTo(Collections.singletonList(returnType))));
@@ -56,14 +55,12 @@ public class MethodDeclarationImplTests {
 
     MethodDeclarationImpl declaration =
         new MethodDeclarationImpl(
-            "fakeMethod",
             parameters,
             returnType);
-    assertThat(declaration.getName(), is(equalTo("fakeMethod")));
     assertThat(declaration.getReturnType(), is(equalTo(returnType)));
     assertThat(declaration.getParameters(), is(equalTo(parameters)));
     assertThat(declaration.getImports(), is(equalTo(Collections.singletonList(returnType))));
-    assertThat(declaration.getCodeLine(), is(equalTo("ReturnType fakeMethod(String param1)")));
+    assertThat(declaration.getCodeLine(), is(equalTo("ReturnType test(String param1)")));
   }
 
   /** A MethodDeclaration object should be able to be constructed with parameters and imports */
@@ -77,15 +74,13 @@ public class MethodDeclarationImplTests {
 
     MethodDeclarationImpl declaration =
         new MethodDeclarationImpl(
-            "fakeMethod",
             parameters,
             returnType);
-    assertThat(declaration.getName(), is(equalTo("fakeMethod")));
     assertThat(declaration.getReturnType(), is(equalTo(returnType)));
     assertThat(declaration.getParameters(), is(equalTo(parameters)));
     assertThat(declaration.getImports(), is(containsInAnyOrder(returnType)));
     assertThat(
         declaration.getCodeLine(),
-        is(equalTo("ReturnType fakeMethod(String param1, String param2)")));
+        is(equalTo("ReturnType test(String param1, String param2)")));
   }
 }

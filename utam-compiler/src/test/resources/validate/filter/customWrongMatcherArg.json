@@ -1,0 +1,24 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "selector": {
+        "css": "selector",
+        "returnAll": true
+      },
+      "type": "my/page/object",
+      "filter": {
+        "apply": "getText",
+        "matcher": {
+          "type": "isTrue",
+          "args": [
+            {
+              "name": "arg",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -10,12 +10,9 @@ package utam.compiler.grammar;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.UtamMethodActionDeserializer.ERR_REDUNDANT_ELEMENT;
-import static utam.compiler.grammar.UtamMethodActionDeserializer.ERR_REDUNDANT_KEYS;
-import static utam.compiler.grammar.UtamMethodActionDeserializer.ERR_REQUIRED_KEYS;
 
 import org.testng.annotations.Test;
-import utam.core.framework.consumer.UtamError;
+import utam.compiler.UtamCompilationError;
 
 /**
  * tests for statement deserializer
@@ -25,47 +22,36 @@ import utam.core.framework.consumer.UtamError;
  */
 public class UtamMethodActionDeserializerTests {
 
-  private static void test(String jsonFile, String expectedError) {
-    UtamError e = expectThrows(UtamError.class,
+  private static Exception getError(String jsonFile) {
+    return expectThrows(UtamCompilationError.class,
         () -> new DeserializerUtilities().getContext(jsonFile));
-    assertThat(e.getCause().getMessage(), containsString(expectedError));
   }
 
   @Test
   public void testRedundantApplyThrows() {
-    test("validate/compose/redundantApply", ERR_REDUNDANT_KEYS);
+    Exception e = getError("validate/compose/redundantApply");
+    assertThat(e.getMessage(), containsString(
+        "error UMA010: method \"test\" statement: either \"apply\" or \"applyExternal\" should be defined"));
   }
 
   @Test
   public void testEmptyStatementThrows() {
-    test("validate/compose/emptyComposeStatement", ERR_REQUIRED_KEYS);
+    Exception e = getError("validate/compose/emptyComposeStatement");
+    assertThat(e.getMessage(), containsString(
+        "error UMA009: method \"test\" statement: either \"element\" or \"apply\" or \"applyExternal\" should be defined"));
   }
 
   @Test
   public void testIncorrectPredicateThrows() {
-    test("validate/compose/incorrectPredicate", ERR_REQUIRED_KEYS);
+    Exception e = getError("validate/compose/incorrectPredicate");
+    assertThat(e.getMessage(), containsString(
+        "error UMA009: method \"predicate\" statement: either \"element\" or \"apply\" or \"applyExternal\" should be defined"));
   }
 
   @Test
   public void testRedundantElementThrows() {
-    test("validate/compose/redundantElement", ERR_REDUNDANT_ELEMENT);
-  }
-
-  @Test
-  public void matcherNotSupportedForUtilities() {
-    String expectedError = "Unrecognized field \"matcher\"";
-    test("validate/compose/utilWithMatcher", expectedError);
-  }
-
-  @Test
-  public void chainNotSupportedForUtilities() {
-    String expectedError = "Unrecognized field \"chain\"";
-    test("validate/compose/utilWithChain", expectedError);
-  }
-
-  @Test
-  public void elementNotSupportedForUtilities() {
-    String expectedError = "should not have 'element' property";
-    test("validate/compose/utilWithElement", expectedError);
+    Exception e = getError("validate/compose/redundantElement");
+    assertThat(e.getMessage(), containsString(
+        "error UMA011: method \"test\" utility statement: either \"element\" is redundant"));
   }
 }

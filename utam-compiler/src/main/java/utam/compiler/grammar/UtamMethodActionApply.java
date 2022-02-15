@@ -8,6 +8,7 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.helpers.BasicElementActionType.getActionType;
+import static utam.compiler.helpers.BasicElementActionType.size;
 import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.compiler.helpers.TypeUtilities.wrapAsList;
@@ -18,8 +19,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import utam.compiler.grammar.ArgsProcessor.ArgsProcessorBasicAction;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementContext.BasicReturnsAll;
@@ -27,7 +27,10 @@ import utam.compiler.helpers.ElementContext.CustomReturnsAll;
 import utam.compiler.helpers.ElementContext.Document;
 import utam.compiler.helpers.ElementContext.ElementType;
 import utam.compiler.helpers.MethodContext;
+import utam.compiler.helpers.MethodContext.ElementsUsageTracker;
 import utam.compiler.helpers.ParameterUtils;
+import utam.compiler.helpers.ParametersContext;
+import utam.compiler.helpers.ParametersContext.StatementParametersContext;
 import utam.compiler.helpers.ReturnType;
 import utam.compiler.helpers.StatementContext;
 import utam.compiler.helpers.TranslationContext;
@@ -49,126 +52,198 @@ class UtamMethodActionApply extends UtamMethodAction {
   private static final Operand DOCUMENT_OPERAND = new ConstOperand(String.format("this.%s()",
       Document.DOCUMENT_ELEMENT.getElementGetterName()));
 
+  private final String apply;
+
   @JsonCreator
   UtamMethodActionApply(
       @JsonProperty(value = "element") String elementName,
       @JsonProperty(value = "apply") String apply,
-      @JsonProperty(value = "args") UtamArgument[] args,
-      @JsonProperty(value = "matcher") UtamMatcher matcher,
+      @JsonProperty(value = "args") JsonNode argsNode,
+      @JsonProperty(value = "matcher") JsonNode matcherNode,
       @JsonProperty(value = "returnType") JsonNode returnType,
       @JsonProperty(value = "returnAll") Boolean isReturnList,
       @JsonProperty(value = "chain", defaultValue = "false") boolean isChain) {
-    super(elementName, apply, null, args, matcher, returnType, isReturnList, isChain);
+    super(elementName, argsNode, matcherNode, returnType, isReturnList, isChain);
+    this.apply = apply;
   }
 
-  // no validation for apply args
-  private boolean isBasicElement(TranslationContext context) {
+  private boolean isBasicElement(TranslationContext context, String methodName) {
     if (isChain || elementName == null) {
       return false;
     }
-    ElementContext.ElementType type = context.getElement(elementName).getElementNodeType();
+    ElementContext elementContext = getElementByName(context, methodName);
+    ElementContext.ElementType type = elementContext.getElementNodeType();
     return type == ElementType.BASIC || type == ElementType.ROOT;
   }
 
-  private Operand getOperand(TranslationContext context,
-      MethodContext methodContext, StatementContext statementContext) {
-    if (isChain) {
-      return statementContext.getChainOperand();
-    }
+  private ElementContext getElementByName(TranslationContext context, String methodName) {
     ElementContext element = context.getElement(elementName);
-    if (element.getElementNodeType() == ElementType.SELF) {
-      return SELF_OPERAND;
-    } else if (element.getElementNodeType() == ElementType.DOCUMENT) {
-      return DOCUMENT_OPERAND;
-    } else {
-      // register usage of getter from compose statement
-      element.setElementMethodUsage(context);
-      return new ElementOperand(element, methodContext, statementContext);
+    if (element == null) {
+      String message = context.getErrorMessage("UMA001", methodName, elementName);
+      throw new UtamCompilationError(message);
     }
+    return element;
+  }
+
+  private ElementOperand getReferencedElementOperand(
+      ElementContext elementContext,
+      TranslationContext context,
+      MethodContext methodContext,
+      StatementContext statementContext) {
+    // register usage of getter from compose statement
+    elementContext.setElementMethodUsage(context);
+    ElementsUsageTracker usageTracker = methodContext.getElementUsageTracker();
+    String elementName = elementContext.getName();
+    if (usageTracker.isReusedElement(elementName)) {
+      return new ElementOperand(elementContext, usageTracker.getReusedElementVariable(elementName));
+    }
+    String elementVariableName = statementContext.getElementVariableName(elementName);
+    // remember that element is used to not propagate its parameters to method for second time
+    // if element is already used in a previous statement, parameters were already added
+    // should be done AFTER statement is created
+    usageTracker.setElementUsage(elementVariableName, elementContext);
+    String parserContext = String
+        .format("method \"%s\", element \"%s\"", methodContext.getName(), elementName);
+    ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
+        null, methodContext);
+    elementContext.getParameters().forEach(parametersContext::setParameter);
+    List<MethodParameter> parameters = parametersContext.getParameters();
+    return new ElementOperand(elementContext, elementVariableName, parameters);
+  }
+
+  @Override
+  boolean isApplyToList(Operand operand) {
+    return operand.isApplyToList() && !size.getApplyString().equals(apply);
+  }
+
+  private Operation getCustomApplyOperation(
+      TranslationContext context,
+      MethodContext methodContext,
+      StatementContext statementContext
+  ) {
+    // in case of self invocations make sure that private method is declared because it's being called from another method
+    context.setMethodUsage(apply);
+    String parserContext = String.format("method \"%s\"", methodContext.getName());
+    ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
+        argsNode, methodContext);
+    ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
+    List<UtamArgument> arguments = argumentsProvider.getArguments(true);
+    arguments
+        .stream()
+        .map(argument -> argument.asParameter(context, methodContext, parametersContext))
+        .forEach(parametersContext::setParameter);
+    TypeProvider defaultReturnType = statementContext.isLastStatement() ?
+        methodContext.getDeclaredReturnType().getReturnTypeOrDefault(context, VOID) : VOID;
+    TypeProvider operationReturnType = statementContext
+        .getDeclaredReturnOrDefault(context, methodContext.getDeclaredReturnType(),
+            defaultReturnType);
+    ActionType action = new CustomActionType(apply, operationReturnType);
+    List<MethodParameter> parameters = parametersContext.getParameters();
+    return new ApplyOperation(action, operationReturnType, parameters);
+  }
+
+  private Operation getBasicActionOperation(
+      ElementContext element,
+      TranslationContext context,
+      MethodContext methodContext) {
+    String methodName = methodContext.getName();
+    String parserContext = String.format("method \"%s\"", methodName);
+    ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
+    ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
+        argsNode, methodContext);
+    List<UtamArgument> arguments = argumentsProvider.getArguments(true);
+    arguments
+        .stream()
+        .map(argument -> argument.asParameter(context, methodContext, parametersContext))
+        .forEach(parametersContext::setParameter);
+    ActionType action = getActionType(apply, element.getType());
+    if (action == null) {
+      String message = context.getErrorMessage("UMA012", methodName, this.apply);
+      throw new UtamCompilationError(message);
+    }
+    TypeProvider expectedReturn =
+        element.isReturnAll() ? wrapAsList(action.getReturnType()) : action.getReturnType();
+    ReturnType declaredReturnType = getDeclaredReturnType(methodName);
+    if (declaredReturnType.isReturnTypeSet()) {
+      TypeProvider declaredReturn = getDeclaredReturnType(methodName)
+          .getReturnTypeOrNull(context);
+      checkDefinedReturnType(expectedReturn, declaredReturn, methodName);
+    }
+    List<TypeProvider> expectedTypes = action.getParametersTypes(parserContext, arguments.size());
+    List<MethodParameter> parameters = parametersContext.getParameters(expectedTypes);
+    checkMatcher(expectedReturn, parserContext);
+    return new ApplyOperation(action, action.getReturnType(), parameters);
   }
 
   @Override
   ComposeMethodStatement getComposeAction(TranslationContext context,
       MethodContext methodContext, StatementContext statementContext) {
     String methodName = methodContext.getName();
-    String validationContextStr = String.format("method '%s'", methodName);
-
     // if statement is marked as a chain, it should be applied to previous result, so "element" is redundant
-    checkChainElementRedundant(validationContextStr);
+    checkChainElementRedundant(context, methodName);
     // first statement can't be marked as chain
     checkFirsStatementCantBeChain(statementContext, methodName);
     checkChainAllowed(statementContext, methodName);
 
     // set operand
-    Operand operand = getOperand(context, methodContext, statementContext);
+    Operand operand;
+    if (isChain) {
+      operand = statementContext.getChainOperand();
+    } else {
+      ElementContext elementContext = getElementByName(context, methodContext.getName());
+      if (elementContext.getElementNodeType() == ElementType.SELF) {
+        operand = SELF_OPERAND;
+      } else if (elementContext.getElementNodeType() == ElementType.DOCUMENT) {
+        operand = DOCUMENT_OPERAND;
+      } else {
+        operand = getReferencedElementOperand(elementContext, context, methodContext,
+            statementContext);
+      }
+    }
 
     // set operation
     Operation operation;
-
-    if (isBasicElement(context)) {
+    if (isBasicElement(context, methodName)) {
       ElementContext element = ((ElementOperand) operand).elementContext;
-      ActionType action = getActionType(apply, element.getType(), element.getName());
-      TypeProvider expectedReturn =
-          element.isReturnAll() ? wrapAsList(action.getReturnType()) : action.getReturnType();
-      ReturnType declaredReturnType = getDeclaredReturnType(methodName);
-      if (declaredReturnType.isReturnTypeSet()) {
-        TypeProvider declaredReturn = getDeclaredReturnType(methodName)
-            .getReturnTypeOrNull(context);
-        checkDefinedReturnType(expectedReturn, declaredReturn, methodName);
-      }
-      List<MethodParameter> parameters = new ArgsProcessorBasicAction(context, validationContextStr,
-          action, p -> methodContext.setStatementParameter(p, statementContext))
-          .getParameters(args);
-      operation = new BasicElementOperation(action, action.getReturnType(), parameters);
-      checkMatcher(expectedReturn, validationContextStr);
+      operation = getBasicActionOperation(element, context, methodContext);
     } else {
-      // for self invocations make sure that private method is declared because it's being called from another method
-      context.setMethodUsage(apply);
-      ArgsProcessor argsProcessor = new ArgsProcessor(context, methodContext,
-          p -> methodContext.setStatementParameter(p, statementContext));
-      List<MethodParameter> parameters = argsProcessor.getParameters(args);
-      TypeProvider defaultReturnType = statementContext.isLastStatement() ?
-          methodContext.getDeclaredReturnType().getReturnTypeOrDefault(context, VOID) : VOID;
-      TypeProvider operationReturnType = statementContext
-          .getDeclaredReturnOrDefault(context, methodContext.getDeclaredReturnType(),
-              defaultReturnType);
-      ActionType action = new CustomActionType(apply, operationReturnType);
-      operation = new ApplyOperation(action, operationReturnType, parameters);
+      operation = getCustomApplyOperation(context, methodContext, statementContext);
     }
 
     return buildStatement(operand, operation, context, methodContext, statementContext);
   }
 
+  /**
+   * operand represented by an element reference
+   *
+   * @author elizaveta.ivanova
+   * @since 230
+   */
   static class ElementOperand extends Operand {
 
     private final List<MethodParameter> parameters;
     private final ElementContext elementContext;
-    private final boolean isElementAlreadyUsed;
     private final List<TypeProvider> addedImports = new ArrayList<>();
     private final String elementVariableName;
+    private final boolean isReusedElement;
 
-    ElementOperand(ElementContext elementContext,
-        MethodContext methodContext,
-        StatementContext statementContext) {
+    ElementOperand(
+        ElementContext elementContext,
+        String elementVariableName,
+        List<MethodParameter> parameters) {
       this.elementContext = elementContext;
-      String elementName = elementContext.getName();
-      this.isElementAlreadyUsed = methodContext.getElementUsageTracker().isReusedElement(elementName);
-      if (isElementAlreadyUsed) {
-        this.elementVariableName = methodContext.getElementUsageTracker().getReusedElementVariable(elementName);
-        parameters = new ArrayList<>();
-      } else {
-        this.elementVariableName = statementContext.getElementVariableName(elementName);
-        // remember that element is used to not propagate its parameters to method for second time
-        // if element is already used in a previous statement, parameters were already added
-        // should be done AFTER statement is created
-        methodContext.getElementUsageTracker().setElementUsage(elementVariableName, elementContext);
-        parameters = elementContext.getParameters()
-            .stream()
-            .map(p -> methodContext.setStatementParameter(p, statementContext))
-            .collect(Collectors.toList());
-        ParameterUtils.setImplementationImports(addedImports, parameters);
-        ParameterUtils.setImport(addedImports, elementContext.getGetterReturnType());
-      }
+      this.elementVariableName = elementVariableName;
+      this.parameters = parameters;
+      this.isReusedElement = false;
+      ParameterUtils.setImplementationImports(addedImports, parameters);
+      ParameterUtils.setImport(addedImports, elementContext.getGetterReturnType());
+    }
+
+    ElementOperand(ElementContext elementContext, String elementVariableName) {
+      this.elementContext = elementContext;
+      this.elementVariableName = elementVariableName;
+      parameters = new ArrayList<>();
+      this.isReusedElement = true;
     }
 
     @Override
@@ -184,7 +259,7 @@ class UtamMethodActionApply extends UtamMethodAction {
     @Override
     protected List<String> getOperandInstantiationCode(TypeProvider statementReturn) {
       List<String> codeLines = new ArrayList<>();
-      if (isElementAlreadyUsed) {
+      if (isReusedElement) {
         return codeLines;
       }
       String variableType = elementContext.getGetterReturnType().getSimpleName();
@@ -218,6 +293,12 @@ class UtamMethodActionApply extends UtamMethodAction {
     }
   }
 
+  /**
+   * operation from "apply" property
+   *
+   * @author elizaveta.ivanova
+   * @since 230
+   */
   static class ApplyOperation extends Operation {
 
     private final List<MethodParameter> actionParameters = new ArrayList<>();
@@ -255,14 +336,6 @@ class UtamMethodActionApply extends UtamMethodAction {
       return String.format("%s(%s)",
           action.getApplyString(),
           getParametersValuesString(actionParameters));
-    }
-  }
-
-  static class BasicElementOperation extends ApplyOperation {
-
-    BasicElementOperation(ActionType action, TypeProvider returnType,
-        List<MethodParameter> actionParameters) {
-      super(action, returnType, actionParameters);
     }
   }
 }

@@ -7,19 +7,18 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import utam.compiler.UtamCompilationError;
+import utam.compiler.UtamCompilerIntermediateError;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
@@ -31,12 +30,6 @@ import utam.core.declarative.representation.TypeProvider;
  * @since 238
  */
 public class UtamMethodDescription {
-
-  final static String ERR_FORMAT_ERROR =
-      "format of the root comment can be either: \n"
-          + "1. \"description\" : \"string\" "
-          + "or \n"
-          + "2. \"description\" : { \"text\" : [\"array of strings\"], \"return\" : \"what method returns\", \"throws\" : \"what method throws\" }";
 
   private final List<String> text = new ArrayList<>();
   private final String returnStr;
@@ -67,12 +60,13 @@ public class UtamMethodDescription {
   }
 
   /**
-   * Process/deserialize description node at the method level
+   * Process/deserialize description node at the method or element level
    *
    * @param descriptionNode Json node
+   * @param parserContext   element or method name with prefix
    * @return object with description
    */
-  static UtamMethodDescription processMethodDescriptionNode(JsonNode descriptionNode) {
+  static UtamMethodDescription processMethodDescriptionNode(JsonNode descriptionNode, String parserContext) {
     if (descriptionNode == null || descriptionNode.isNull()) {
       return null;
     }
@@ -80,15 +74,10 @@ public class UtamMethodDescription {
       String value = descriptionNode.textValue();
       return new UtamMethodDescription(Collections.singletonList(value), null, null, null);
     }
-    if (descriptionNode.isObject()) {
-      try {
-        return new ObjectMapper()
-            .readValue(descriptionNode.toString(), UtamMethodDescription.class);
-      } catch (IOException e) {
-        throw new UtamCompilationError(ERR_FORMAT_ERROR, e);
-      }
-    }
-    throw new UtamCompilationError(ERR_FORMAT_ERROR);
+    Function<Exception, RuntimeException> parserErrorWrapper = causeErr -> new UtamCompilerIntermediateError(
+        causeErr, descriptionNode, "UMD001", parserContext, causeErr.getMessage());
+    return readNode(descriptionNode, UtamMethodDescription.class,
+        parserErrorWrapper);
   }
 
   /**
@@ -165,14 +154,13 @@ public class UtamMethodDescription {
     // replace any invalid HTML characters with their appropriate encoded entities.
     // special note: iOS class chains contain "*/" in their paths, so this must be
     // escaped for Javadoc generation.
-    List<String> res = descriptionLines.stream()
+    return descriptionLines.stream()
         .map((s) -> s
             .replace("&", "&amp;")
             .replace("<", "&lt;")
             .replace(">", "&gt;")
             .replace("*/", "*&#47"))
         .collect(Collectors.toList());
-    return res;
   }
 
   /**

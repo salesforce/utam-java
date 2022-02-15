@@ -17,20 +17,15 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.TestUtilities.TEST_URI;
 import static utam.compiler.grammar.TestUtilities.getJsonStringDeserializer;
 import static utam.compiler.translator.DefaultSourceConfigurationTests.TranslatorConfigWithProfile.TEST_PROFILE;
 import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_IMPL_WITH_PROFILE_ERR;
 import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_PAGE_OBJECT_NAME;
 import static utam.compiler.translator.DefaultTranslatorRunner.ERR_PROFILE_PATH_DOES_NOT_EXIST;
 import static utam.compiler.translator.DefaultTranslatorRunner.ERR_PROFILE_PATH_NOT_CONFIGURED;
-import static utam.compiler.translator.DefaultTranslatorRunner.PROFILE_NOT_CONFIGURED_ERR;
-import static utam.compiler.translator.TranslatorMockUtilities.IMPL_ONLY_CLASS_NAME;
-import static utam.compiler.translator.TranslatorMockUtilities.INTERFACE_ONLY_CLASS_NAME;
-import static utam.compiler.translator.TranslatorMockUtilities.PAGE_OBJECT_IMPL_CLASS_NAME;
-import static utam.compiler.translator.TranslatorMockUtilities.PAGE_OBJECT_INTERFACE_CLASS_NAME;
-import static utam.compiler.translator.TranslatorMockUtilities.TEST_URI;
-import static utam.compiler.translator.TranslatorMockUtilities.TEST_URI_CLASS_NAME;
-import static utam.compiler.translator.TranslatorMockUtilities.TEST_URI_INTERFACE_NAME;
+import static utam.compiler.translator.DefaultTargetConfigurationTests.PAGE_OBJECT_IMPL_CLASS_NAME;
+import static utam.compiler.translator.DefaultTargetConfigurationTests.PAGE_OBJECT_INTERFACE_CLASS_NAME;
 
 import java.io.IOException;
 import java.util.Map;
@@ -38,7 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hamcrest.Matchers;
 import org.testng.annotations.Test;
-import utam.compiler.grammar.JsonDeserializer;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.TestUtilities;
 import utam.compiler.translator.DefaultSourceConfigurationTests.TranslatorConfigWithProfile;
 import utam.core.declarative.representation.PageObjectDeclaration;
@@ -55,6 +50,9 @@ import utam.core.framework.context.StringValueProfile;
  */
 public class DefaultTranslatorRunnerTests {
 
+  static final String INTERFACE_ONLY_CLASS_NAME = "utam.test.pageobjects.test.TestAbstractObject";
+  static final String IMPL_ONLY_CLASS_NAME = "utam.test.pageobjects.test.impl.TestImplObjectImpl";
+
   private static DefaultTranslatorRunner getRunner() {
     DefaultSourceConfigurationTests.Mock sourceConfig =
         new DefaultSourceConfigurationTests.Mock();
@@ -68,7 +66,7 @@ public class DefaultTranslatorRunnerTests {
 
   private static DefaultTranslatorConfiguration getTranslatorConfig(
       ProfileConfiguration profileConfig) {
-    DefaultTranslatorConfiguration translatorConfig = TranslatorMockUtilities.getDefaultConfig();
+    DefaultTranslatorConfiguration translatorConfig = TestUtilities.getDefaultConfig();
     translatorConfig.setConfiguredProfile(profileConfig);
     return translatorConfig;
   }
@@ -210,29 +208,11 @@ public class DefaultTranslatorRunnerTests {
   }
 
   @Test
-  public void testProfileConfigNotSetJson() {
-    final String json =
-        String.format(
-            "{ \"implements\" : \"%s\", \"profile\" : [{\"driver\" : \"chrome\"}] }", TEST_URI);
-
-    JsonDeserializer deserializer = getJsonStringDeserializer(json);
-    UtamError e =
-        expectThrows(
-            UtamError.class, () -> deserializer.getObject().getImplementation().getProfiles());
-    assertThat(
-        e.getMessage(),
-        is(equalTo(String.format(PROFILE_NOT_CONFIGURED_ERR, "driver"))));
-  }
-
-  @Test
   public void testSetImplProfileConfigNotSet() {
     DefaultTranslatorRunner runner = getRunner();
     Profile profile = new StringValueProfile("my", "test");
-    UtamError e = expectThrows(
-        UtamError.class, () -> runner.setImplementation(profile, "type", "type"));
-    assertThat(
-        e.getMessage(),
-        is(equalTo(String.format(PROFILE_NOT_CONFIGURED_ERR, "my"))));
+    Exception e = expectThrows(UtamCompilationError.class, () -> runner.setImplementation(profile, "type", "type"));
+    assertThat(e.getMessage(), containsString("is not configured, make sure it's in compiler config"));
   }
 
   @Test
@@ -264,8 +244,8 @@ public class DefaultTranslatorRunnerTests {
     translator.run();
     Map<String,String> profiles = translator.testProfileMapping(new StringValueProfile("driver", "chrome"));
     assertThat(profiles.size(), is(equalTo(1)));
-    assertThat(profiles.keySet().iterator().next(), is(equalTo(TEST_URI_INTERFACE_NAME)));
-    assertThat(profiles.values().iterator().next(), is(equalTo(TEST_URI_CLASS_NAME)));
+    assertThat(profiles.keySet().iterator().next(), is(equalTo("utam.test.pageobjects.test.Test")));
+    assertThat(profiles.values().iterator().next(), is(equalTo("utam.test.pageobjects.test.impl.TestImpl")));
   }
 
   @Test
@@ -346,21 +326,6 @@ public class DefaultTranslatorRunnerTests {
         new DefaultTranslatorRunner(translatorConfig);
     runner.setPageObject("initial", declaration);
     assertThat(runner.getGeneratedObject("initial"), is(sameInstance(declaration)));
-  }
-
-  @Test
-  public void testSetPageObjectWithProfileReferencingUnconfiguredProfileThrows() {
-    String json =
-        "{"
-            + "  \"implements\": \"utam-test/pageObjects/test/testInterface\","
-            + "  \"profile\": [{"
-            + "    \"color\": \"red\""
-            + "  }]"
-            + "}";
-    PageObjectDeclaration declaration = TestUtilities.getPageObject(json);
-    DefaultTranslatorRunner runner = getRunnerMock();
-    UtamError e = expectThrows(UtamError.class, () -> runner.setPageObject("name", declaration));
-    assertThat(e.getMessage(), is(Matchers.equalTo(String.format(PROFILE_NOT_CONFIGURED_ERR, "color"))));
   }
 
   @Test

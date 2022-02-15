@@ -31,7 +31,7 @@ class UtamMethodActionReturnSelf extends UtamMethodAction {
 
   @JsonCreator
   UtamMethodActionReturnSelf(@JsonProperty(value = "apply", required = true) String apply) {
-    super(null, apply, null, null, null, null, null, false);
+    super(null, null, null, null, null, false);
   }
 
   @Override

@@ -34,9 +34,9 @@ public class JsonCompilerOutputTests {
   private static final Profile DUMMY_PROFILE = new StringValueProfile("name", "value");
   private static final String USER_ROOT = System.getProperty("user.dir");
 
-  private static void runCompiler(String compilerConfig) throws IOException {
+  private static void runCompiler() throws IOException {
     JsonCompilerConfig jsonConfig = new JsonCompilerConfig(
-        new File(USER_ROOT + "/src/test/resources/compiler/" + compilerConfig),
+        new File(USER_ROOT + "/src/test/resources/compiler/" + "test.compiler.json"),
         new File(USER_ROOT)
     );
     TranslatorConfig config = jsonConfig.getTranslatorConfig(GuardrailsMode.WARNING);
@@ -54,7 +54,7 @@ public class JsonCompilerOutputTests {
 
   @Test
   public void testGeneratedConfigByRunner() throws IOException {
-    runCompiler("test.compiler.json");
+    runCompiler();
     String actualConfigStr = getCompilerOutputAsString("myModule.config.json");
     String expectedConfigStr = getCompilerOutputAsString("compiler/expected1.config.json");
     assertThat(actualConfigStr, is(equalTo(expectedConfigStr)));

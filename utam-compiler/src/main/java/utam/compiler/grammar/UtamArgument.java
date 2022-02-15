@@ -7,10 +7,10 @@
  */
 package utam.compiler.grammar;
 
-import static utam.compiler.grammar.UtamArgumentDeserializer.SUPPORTED_NON_LITERAL_TYPES;
-import static utam.compiler.grammar.UtamArgumentDeserializer.getErrorMessage;
-import static utam.compiler.grammar.UtamArgumentDeserializer.getUnsupportedTypeErr;
-import static utam.compiler.grammar.UtamMethod.isUsedAsChain;
+import static utam.compiler.UtamCompilerIntermediateError.getJsonNodeType;
+import static utam.compiler.grammar.JsonDeserializer.readNode;
+import static utam.compiler.grammar.UtamComposeMethod.isUsedAsChain;
+import static utam.compiler.grammar.UtamComposeMethod.processComposeNodes;
 import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
 import static utam.compiler.helpers.PrimitiveType.BOOLEAN;
 import static utam.compiler.helpers.PrimitiveType.NUMBER;
@@ -18,109 +18,300 @@ import static utam.compiler.helpers.PrimitiveType.STRING;
 import static utam.compiler.helpers.PrimitiveType.isPrimitiveType;
 import static utam.compiler.helpers.StatementContext.StatementType.PREDICATE_LAST_STATEMENT;
 import static utam.compiler.helpers.StatementContext.StatementType.PREDICATE_STATEMENT;
-import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
-import static utam.compiler.representation.FrameMethod.FRAME_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT_PARAMETER;
 import static utam.compiler.helpers.TypeUtilities.PARAMETER_REFERENCE;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT_PARAMETER;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
+import static utam.compiler.representation.FrameMethod.FRAME_ELEMENT;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.Set;
 import java.util.stream.Collectors;
-import utam.compiler.UtamCompilationError;
-import utam.compiler.grammar.ArgsProcessor.ArgsProcessorWithExpectedTypes;
+import java.util.stream.Stream;
+import utam.compiler.UtamCompilerIntermediateError;
+import utam.compiler.grammar.UtamMethodAction.ArgumentsProvider;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParameterUtils.Literal;
 import utam.compiler.helpers.ParameterUtils.LiteralPageObjectClass;
 import utam.compiler.helpers.ParameterUtils.Regular;
+import utam.compiler.helpers.ParametersContext;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.StatementContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethodStatement;
+import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 
 /**
- * UTAM argument inside selector, method, filter, matcher etc.
+ * argument inside selector, method, filter, matcher etc.
  *
  * @author elizaveta.ivanova
  * @since 228
  */
-@JsonDeserialize(using = UtamArgumentDeserializer.class)
-public abstract class UtamArgument {
+abstract class UtamArgument {
 
-  static final String FUNCTION_TYPE_PROPERTY = "function";
-  static final String SELECTOR_TYPE_PROPERTY = "locator";
-  static final String ELEMENT_REFERENCE_TYPE_PROPERTY = "elementReference";
-  static final String PAGE_OBJECT_TYPE_PROPERTY = "pageObject";
-  static final String ROOT_PAGE_OBJECT_TYPE_PROPERTY = "rootPageObject";
-  static final String FRAME_ELEMENT_TYPE_PROPERTY = "frame";
-  static final String ERR_ARGS_WRONG_TYPE = "%s parameter '%s': expected type is '%s', actual was '%s'";
-  static final String ERR_ARGS_DUPLICATE_NAMES = "%s: duplicate arguments names '%s'";
-  static final String ERR_ARGS_WRONG_COUNT = "%s: expected %s parameters, provided %s";
-  static final String ERR_GET_PREDICATE_NEEDS_PREDICATE_ARG = "Only predicate argument supports this method";
-  final Object value;
-  final String name;
-  final String type;
-  final UtamMethodAction[] conditions;
-  final UtamArgument[] nestedArgs;
+  private static final String FUNCTION_TYPE_PROPERTY = "function";
+  private static final String SELECTOR_TYPE_PROPERTY = "locator";
+  private static final String PAGE_OBJECT_TYPE_PROPERTY = "pageObject";
+  private static final String ROOT_PAGE_OBJECT_TYPE_PROPERTY = "rootPageObject";
+  private static final String ELEMENT_REFERENCE_TYPE_PROPERTY = "elementReference";
+  private static final String FRAME_ELEMENT_TYPE_PROPERTY = "frame";
+  private static final String SUPPORTED_LITERALS = String.join(", ", getSupportedLiteralTypes());
+  private static final String SUPPORTED_NON_LITERALS = String
+      .join(", ", getSupportedNonLiteralTypes());
 
-  @JsonCreator
-  UtamArgument(
-      @JsonProperty(value = "value") Object value,
-      @JsonProperty(value = "name") String name,
-      @JsonProperty(value = "type") String type,
-      @JsonProperty(value = "predicate") UtamMethodAction[] conditions,
-      @JsonProperty(value = "args") UtamArgument[] nestedArgs) {
-    this.name = name;
-    this.type = type;
-    this.value = value;
-    this.conditions = conditions;
-    this.nestedArgs = nestedArgs;
+  private static Set<String> getSupportedLiteralTypes() {
+    Set<String> supported = Stream.of(PrimitiveType.values())
+        .map(PrimitiveType::getJsonTypeName)
+        .collect(Collectors.toSet());
+    supported.add(SELECTOR_TYPE_PROPERTY);
+    supported.add(FUNCTION_TYPE_PROPERTY);
+    supported.add(ELEMENT_REFERENCE_TYPE_PROPERTY);
+    supported.add(PAGE_OBJECT_TYPE_PROPERTY);
+    supported.add(ROOT_PAGE_OBJECT_TYPE_PROPERTY);
+    return supported;
   }
 
-  abstract MethodParameter asParameter(TranslationContext translationContext,
-      Function<MethodParameter, MethodParameter> parameterReferenceTransformer);
-
-  final MethodParameter asParameter(TranslationContext translationContext) {
-    return asParameter(translationContext, p -> p);
+  private static Set<String> getSupportedNonLiteralTypes() {
+    Set<String> supported = Stream.of(PrimitiveType.values())
+        .map(PrimitiveType::getJsonTypeName)
+        .collect(Collectors.toSet());
+    supported.add(SELECTOR_TYPE_PROPERTY);
+    supported.add(PARAMETER_REFERENCE.getSimpleName());
+    supported.add(PAGE_OBJECT_TYPE_PROPERTY);
+    supported.add(ROOT_PAGE_OBJECT_TYPE_PROPERTY);
+    supported.add(FRAME_ELEMENT_TYPE_PROPERTY);
+    return supported;
   }
 
+  /**
+   * process args node parser
+   *
+   * @param argsNode          json node
+   * @param parserContext     parser context
+   * @param isLiteralsAllowed true if literal args are allowed
+   * @return list of declared arguments
+   */
+  static List<UtamArgument> processArgsNode(JsonNode argsNode, String parserContext,
+      boolean isLiteralsAllowed) {
+    List<UtamArgument> args = new ArrayList<>();
+    if (argsNode == null || argsNode.isNull()) {
+      return args;
+    }
+    if (!argsNode.isArray() || argsNode.size() == 0) {
+      throw new UtamCompilerIntermediateError(argsNode, "U0004", parserContext, "args");
+    }
+    for (JsonNode argNode : argsNode) {
+      if (argNode == null || argNode.isNull() || !argNode.isObject()) {
+        throw new UtamCompilerIntermediateError("U0005", parserContext, "argument");
+      }
+      UtamArgument arg = processArgNode(argNode, parserContext, isLiteralsAllowed);
+      args.add(arg);
+    }
+    return args;
+  }
+
+  private static UtamArgument processArgNode(JsonNode argNode, String parserContext,
+      boolean isLiteralsAllowed) {
+    boolean hasType = argNode.has("type");
+    boolean isLiteral = argNode.has("value");
+    if (isLiteral && !isLiteralsAllowed) {
+      throw new UtamCompilerIntermediateError(argNode, "UA005", parserContext);
+    }
+    String type;
+    if (hasType) {
+      JsonNode typeNode = argNode.get("type");
+      if (!typeNode.isTextual() || typeNode.textValue().isEmpty()) {
+        throw new UtamCompilerIntermediateError(argNode, "U0001", parserContext, "type",
+            getJsonNodeType(typeNode));
+      }
+      type = argNode.get("type").textValue();
+      if (FUNCTION_TYPE_PROPERTY.equals(type)) {
+        return readNode(argNode, UtamArgumentPredicate.class, e ->
+            new UtamCompilerIntermediateError(e, argNode, "UA004", parserContext, e.getMessage()));
+      }
+      if (isLiteral && !getSupportedLiteralTypes().contains(type)) {
+        throw new UtamCompilerIntermediateError(argNode, "UA002", parserContext, type,
+            SUPPORTED_LITERALS);
+      }
+      if (!isLiteral && !getSupportedNonLiteralTypes().contains(type)) {
+        throw new UtamCompilerIntermediateError(argNode, "UA003", parserContext, type,
+            SUPPORTED_NON_LITERALS);
+      }
+    } else {
+      type = null;
+    }
+    if (isLiteral) {
+      return processLiteralNode(argNode, type, parserContext);
+    }
+    return readNode(argNode, UtamArgumentNonLiteral.class, e ->
+        new UtamCompilerIntermediateError(e, argNode, "UA000", parserContext, e.getMessage()));
+  }
+
+  private static UtamArgument processLiteralNode(JsonNode argNode, String typeStr,
+      String parserContext) {
+    JsonNode valueNode = argNode.get("value");
+    if (valueNode.isTextual()) {
+      String valueStr = valueNode.asText();
+      if (typeStr != null) {
+        if (PAGE_OBJECT_TYPE_PROPERTY.equals(typeStr) || ROOT_PAGE_OBJECT_TYPE_PROPERTY
+            .equals(typeStr)) {
+          return new UtamArgumentLiteralPageObject(valueStr);
+        }
+        if (ELEMENT_REFERENCE_TYPE_PROPERTY.equals(typeStr)) {
+          return readNode(argNode, UtamArgumentElementReference.class,
+              e -> new UtamCompilerIntermediateError(e, argNode, "UA006", parserContext,
+                  e.getMessage()));
+        }
+      }
+    }
+    if (SELECTOR_TYPE_PROPERTY.equals(typeStr)) {
+      UtamSelector selector = readNode(valueNode, UtamSelector.class,
+          e -> new UtamCompilerIntermediateError(e, valueNode, "US000", parserContext));
+      return new UtamArgumentLiteralSelector(selector, parserContext);
+    }
+    if (valueNode.isBoolean() || valueNode.isInt() || valueNode.isTextual()) {
+      return readNode(argNode, UtamArgumentLiteralPrimitive.class,
+          e -> new UtamCompilerIntermediateError(e, argNode, "UA000", parserContext,
+              e.getMessage()));
+    }
+    throw new UtamCompilerIntermediateError(argNode, "UA002", parserContext,
+        valueNode.toPrettyString(), SUPPORTED_LITERALS);
+  }
+
+  /**
+   * unwraps argument as a parameter
+   *
+   * @param context           translation context
+   * @param methodContext     method context, can be null
+   * @param parametersContext parameters context
+   * @return parameter instance
+   */
+  abstract MethodParameter asParameter(TranslationContext context,
+      MethodContext methodContext,
+      ParametersContext parametersContext);
+
+  /**
+   * get predicate statements from nested function argument
+   *
+   * @param context       translation context
+   * @param methodContext method context
+   * @return list of predicate statements
+   */
   List<ComposeMethodStatement> getPredicate(TranslationContext context,
       MethodContext methodContext) {
-    throw new IllegalStateException(ERR_GET_PREDICATE_NEEDS_PREDICATE_ARG);
+    throw new IllegalStateException("Only predicate argument supports this method");
   }
 
-  @JsonDeserialize // reset to default
+  /**
+   * literal selector argument
+   *
+   * @author elizaveta.ivanova
+   * @since 238
+   */
+  static class UtamArgumentLiteralSelector extends UtamArgument {
+
+    private final UtamSelector selector;
+    private final String parserContext;
+
+    UtamArgumentLiteralSelector(UtamSelector selector, String parserContext) {
+      this.selector = selector;
+      this.parserContext = parserContext;
+    }
+
+    @Override
+    MethodParameter asParameter(TranslationContext context, MethodContext methodContext, ParametersContext parametersContext) {
+      LocatorCodeGeneration locatorCode = selector
+          .getCodeGenerationHelper(parserContext, context, methodContext);
+      return locatorCode.getLiteralParameter();
+    }
+  }
+
+  /**
+   * literal page object or root page object argument
+   *
+   * @author elizaveta.ivanova
+   * @since 238
+   */
+  static class UtamArgumentLiteralPageObject extends UtamArgument {
+
+    private final String pageObjectType;
+
+    UtamArgumentLiteralPageObject(String pageObjectType) {
+      this.pageObjectType = pageObjectType;
+    }
+
+    @Override
+    MethodParameter asParameter(TranslationContext context, MethodContext methodContext, ParametersContext parametersContext) {
+      TypeProvider literalType = context.getType(pageObjectType);
+      return new LiteralPageObjectClass(literalType);
+    }
+  }
+
+  /**
+   * literal promitive argument
+   *
+   * @author elizaveta.ivanova
+   * @since 238
+   */
+  static class UtamArgumentLiteralPrimitive extends UtamArgument {
+
+    private final MethodParameter parameter;
+
+    @JsonCreator
+    UtamArgumentLiteralPrimitive(
+        @JsonProperty(value = "value", required = true) JsonNode valueNode) {
+      if (valueNode.isBoolean()) {
+        parameter = new Literal(String.valueOf(valueNode.asBoolean()), BOOLEAN);
+      } else if (valueNode.isInt()) {
+        parameter = new Literal(String.valueOf(valueNode.asInt()), NUMBER);
+      } else if (valueNode.isTextual()) {
+        parameter = new Literal(valueNode.asText(), STRING);
+      } else {
+        throw new IllegalArgumentException();
+      }
+    }
+
+    @Override
+    MethodParameter asParameter(TranslationContext translationContext, MethodContext methodContext, ParametersContext context) {
+      return parameter;
+    }
+
+  }
+
+  /**
+   * non literal argument (with name and type)
+   *
+   * @author elizaveta.ivanova
+   * @since 238
+   */
   static class UtamArgumentNonLiteral extends UtamArgument {
 
+    private final String name;
+    private final String type;
     private final String description;
 
     @JsonCreator
     UtamArgumentNonLiteral(
         @JsonProperty(value = "name", required = true) String name,
         @JsonProperty(value = "type", required = true) String type,
-        @JsonProperty(value = "description") String description
-    ) {
-      super(null, name, type, null, null);
-      if (!SUPPORTED_NON_LITERAL_TYPES.contains(type)) {
-        throw new UtamCompilationError(getUnsupportedTypeErr(type));
-      }
+        @JsonProperty(value = "description") String description) {
+      this.type = type;
+      this.name = name;
       this.description = description;
     }
 
     @Override
-    MethodParameter asParameter(TranslationContext translationContext,
-        Function<MethodParameter, MethodParameter> parameterReferenceTransformer) {
+    MethodParameter asParameter(TranslationContext context,
+        MethodContext methodContext,
+        ParametersContext parametersContext) {
       if (isPrimitiveType(type)) {
         return new Regular(name, PrimitiveType.fromString(type), this.description);
       }
@@ -140,108 +331,34 @@ public abstract class UtamArgument {
         return new Regular(name, ROOT_PAGE_OBJECT_PARAMETER, this.description);
       }
       // this can only mean bug, never thrown
-      throw new IllegalStateException(String.format("Bug in %s Unsupported argument type", UtamArgumentDeserializer.class.getName()));
+      throw new IllegalStateException(String.format("Unsupported argument type %s", type));
     }
   }
 
   /**
-   * Represents a literal primitive argument
+   * literal primitive argument
+   *
+   * @author elizaveta.ivanova
+   * @since 238
    */
-  @JsonDeserialize //use default deserializer for nested args
-  public static class UtamArgumentLiteralPrimitive extends UtamArgument {
+  static class UtamArgumentPredicate extends UtamArgumentNonLiteral {
 
-    static final String ERR_ARGS_UNKNOWN = "unsupported literal argument type";
-
-    private final MethodParameter methodParameter;
-
-    @JsonCreator
-    UtamArgumentLiteralPrimitive(
-        @JsonProperty(value = "value", required = true) JsonNode valueNode) {
-      super(null, null, null, null, null);
-      if (valueNode.isTextual()) {
-        methodParameter = new Literal(valueNode.asText(), STRING);
-      } else if (valueNode.isBoolean()) {
-        methodParameter = new Literal(String.valueOf(valueNode.asBoolean()), BOOLEAN);
-      } else if (valueNode.isInt()) {
-        methodParameter = new Literal(String.valueOf(valueNode.asInt()), NUMBER);
-      } else {
-        throw new UtamCompilationError(getErrorMessage(valueNode, ERR_ARGS_UNKNOWN));
-      }
-    }
-
-    /**
-     * Initializes a new instance of the UtamArgumentLiteralPrimitive class for a boolean value
-     *
-     * @param booleanValue the boolean value
-     */
-    public UtamArgumentLiteralPrimitive(Boolean booleanValue) {
-      super(null, null, null, null, null);
-      methodParameter = new Literal(String.valueOf(booleanValue), BOOLEAN);
-    }
-
-    /**
-     * Initializes a new instance of the UtamArgumentLiteralPrimitive class for a numeric value
-     *
-     * @param numericValue the boolean value
-     */
-    public UtamArgumentLiteralPrimitive(int numericValue) {
-      super(null, null, null, null, null);
-      methodParameter = new Literal(String.valueOf(numericValue), NUMBER);
-    }
-
-    /**
-     * Initializes a new instance of the UtamArgumentLiteralPrimitive class for a string value
-     *
-     * @param strValue the boolean value
-     */
-    UtamArgumentLiteralPrimitive(String strValue) {
-      super(null, null, null, null, null);
-      methodParameter = new Literal(strValue, STRING);
-    }
-
-    @Override
-    MethodParameter asParameter(TranslationContext translationContext,
-        Function<MethodParameter, MethodParameter> parameterReferenceTransformer) {
-      return methodParameter;
-    }
-  }
-
-  @JsonDeserialize // reset to default
-  static class UtamArgumentLiteralSelector extends UtamArgument {
-
-    UtamArgumentLiteralSelector(
-        @JsonProperty(value = "value", required = true) UtamSelector value,
-        @JsonProperty(value = "type", required = true) String type) {
-      super(value, null, type, null, null);
-    }
-
-    @Override
-    MethodParameter asParameter(TranslationContext translationContext,
-        Function<MethodParameter, MethodParameter> parameterReferenceTransformer) {
-      UtamSelector selector = (UtamSelector) value;
-      LocatorCodeGeneration locatorCode = selector.getCodeGenerationHelper(translationContext);
-      return locatorCode.getLiteralParameter();
-    }
-  }
-
-  @JsonDeserialize // reset to default deserializer
-  static class UtamArgumentPredicate extends UtamArgument {
+    private final List<UtamMethodAction> conditions;
 
     @JsonCreator
     UtamArgumentPredicate(
         @JsonProperty(value = "name") String name,
         @JsonProperty(value = "type", required = true) String type,
-        @JsonProperty(value = "predicate", required = true) UtamMethodAction[] conditions) {
-      super(null, name, type, conditions, null);
-    }
-
-    UtamArgumentPredicate(UtamMethodAction[] conditions) {
-      this(null, FUNCTION_TYPE_PROPERTY, conditions);
+        @JsonProperty(value = "description") String description,
+        @JsonProperty(value = "predicate", required = true) JsonNode conditionsNode) {
+      super(name, type, description);
+      this.conditions = processComposeNodes("predicate", conditionsNode, false);
     }
 
     @Override
     MethodParameter asParameter(TranslationContext translationContext,
-        Function<MethodParameter, MethodParameter> parameterReferenceTransformer) {
+        MethodContext methodContext,
+        ParametersContext parametersContext) {
       // predicate is not used as a parameter
       return null;
     }
@@ -251,15 +368,16 @@ public abstract class UtamArgument {
         MethodContext methodContext) {
       List<ComposeMethodStatement> predicateStatements = new ArrayList<>();
       TypeProvider previousStatementReturn = null;
-      for (int i = 0; i < conditions.length; i++) {
+      for (int i = 0; i < conditions.size(); i++) {
+        UtamMethodAction condition = conditions.get(i);
         StatementContext statementContext = new StatementContext(
             previousStatementReturn,
             i,
             isUsedAsChain(conditions, i),
-            i == conditions.length - 1 ? PREDICATE_LAST_STATEMENT : PREDICATE_STATEMENT,
-            conditions[i].getDeclaredReturnType(methodContext.getName()));
-        conditions[i].checkBeforeLoadElements(methodContext);
-        ComposeMethodStatement statement = conditions[i]
+            i == conditions.size() - 1 ? PREDICATE_LAST_STATEMENT : PREDICATE_STATEMENT,
+            condition.getDeclaredReturnType(methodContext.getName()));
+        condition.checkBeforeLoadElements(context, methodContext);
+        ComposeMethodStatement statement = condition
             .getComposeAction(context, methodContext, statementContext);
         previousStatementReturn = statement.getReturnType();
         predicateStatements.add(statement);
@@ -268,68 +386,64 @@ public abstract class UtamArgument {
     }
   }
 
-  @JsonDeserialize // reset to default deserializer
-  static class UtamArgumentLiteralPageObjectType extends UtamArgument {
-
-    @JsonCreator
-    UtamArgumentLiteralPageObjectType(
-        @JsonProperty(value = "value", required = true) String typeName,
-        @JsonProperty(value = "type", required = true) String type) {
-      super(typeName, null, type, null, null);
-    }
-
-    @Override
-    MethodParameter asParameter(TranslationContext translationContext,
-        Function<MethodParameter, MethodParameter> parameterReferenceTransformer) {
-      TypeProvider literalType = translationContext.getType(value.toString());
-      return new LiteralPageObjectClass(literalType);
-    }
-  }
-
-  @JsonDeserialize // reset to default deserializer
+  /**
+   * literal element reference argument
+   *
+   * @author elizaveta.ivanova
+   * @since 238
+   */
   static class UtamArgumentElementReference extends UtamArgument {
+
+    private final JsonNode argsNode;
+    private final String value;
 
     @JsonCreator
     UtamArgumentElementReference(
         @JsonProperty(value = "value", required = true) String elementName,
         @JsonProperty(value = "type", required = true) String type,
-        @JsonProperty(value = "args") UtamArgument[] nestedArgs) {
-      super(elementName, null, type, null, nestedArgs);
+        @JsonProperty(value = "args") JsonNode nestedArgs) {
+      this.argsNode = nestedArgs;
+      this.value = elementName;
     }
 
     /**
      * returns element getter invocation code like this.getMyElement() also returns all its args as
      * they need to be added to the method parameters
      *
-     * @param translationContext allows to get element getter name
+     * @param context allows to get element getter name
      * @return literal value as an invocation code
      */
     @Override
-    MethodParameter asParameter(TranslationContext translationContext,
-        Function<MethodParameter, MethodParameter> parameterReferenceTransformer) {
-      ElementContext elementContext = translationContext.getElement(value.toString());
-      PageObjectMethod elementGetter = elementContext.getElementMethod();
-      List<MethodParameter> actualParameters;
-      // if args not set - no need to check number of parameters
-      if (nestedArgs != null) {
+    MethodParameter asParameter(TranslationContext context,
+        MethodContext methodContext,
+        ParametersContext parametersContext) {
+      String parserContext = String.format("method \"%s\", element \"%s\" reference", methodContext.getName(), value);
+      ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
+      ElementContext elementContext = provider.getElementArgument(context, value);
+      MethodDeclaration elementGetter = elementContext.getElementMethod().getDeclaration();
+
+      List<UtamArgument> args = provider.getArguments(true);
+      List<MethodParameter> parameters;
+      if (args.isEmpty()) {
+        // if args are not overwritten, get parameters from context
+        parameters = elementGetter.getParameters();
+      } else {
         List<TypeProvider> expectedElementArgs = elementGetter
-            .getDeclaration()
             .getParameters()
             .stream()
             .map(MethodParameter::getType)
             .collect(Collectors.toList());
-        ArgsProcessor argsProcessor =
-            new ArgsProcessorWithExpectedTypes(translationContext,
-                String.format("element '%s' reference", name), expectedElementArgs, parameterReferenceTransformer);
-        actualParameters = argsProcessor.getParameters(nestedArgs);
-      } else {
-        actualParameters = elementGetter.getDeclaration().getParameters();
+        parameters = args
+            .stream()
+            .map(argument -> argument.asParameter(context, methodContext, parametersContext))
+            .collect(Collectors.toList());
+        parametersContext.setNestedParameters(parameters, expectedElementArgs);
       }
-      String argsString = getParametersValuesString(actualParameters);
-      String elementGetterName = elementGetter.getDeclaration().getName();
-      translationContext.setMethodUsage(elementGetterName);
+      String argsString = getParametersValuesString(parameters);
+      String elementGetterName = elementGetter.getName();
+      context.setMethodUsage(elementGetterName);
       String literalValue = String.format("this.%s(%s)", elementGetterName, argsString);
-      return new Literal(literalValue, BASIC_ELEMENT, actualParameters);
+      return new Literal(literalValue, elementContext.getType(), parameters);
     }
   }
 

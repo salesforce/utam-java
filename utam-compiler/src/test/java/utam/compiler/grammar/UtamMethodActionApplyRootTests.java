@@ -13,10 +13,10 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.helpers.BasicElementActionType.ERR_UNKNOWN_ACTION;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 
 import org.testng.annotations.Test;
+import utam.compiler.JsonBuilderTestUtility;
 import utam.compiler.grammar.DeserializerUtilities.Result;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
@@ -59,7 +59,7 @@ public class UtamMethodActionApplyRootTests {
     expected.addImpliedImportedTypes(BasePageElement.class.getName());
     expected.addCodeLine("BasePageElement root0 = this.getRootElement()");
     expected.addCodeLine(
-        "Boolean statement0 = root0.containsElement(LocatorBy.byCss(String.format(\".foo[title='%s']\", title)), false)");
+        "Boolean statement0 = root0.containsElement(LocatorBy.byCss(String.format(\".foo[title='%s']\", title)))");
     expected.addCodeLine("return statement0");
     expected.addParameter(new MethodParameterInfo("title"));
     PageObjectValidationTestHelper.validateMethod(actualMethod, expected);
@@ -86,19 +86,18 @@ public class UtamMethodActionApplyRootTests {
 
   @Test
   public void testPublicRootNoTypeClickThrows() {
-    String expectedError = String.format(ERR_UNKNOWN_ACTION, "click", "root", "basic type");
     UtamError e = expectThrows(UtamError.class,
         () -> getResult("publicRootWrongAction"));
-    assertThat(e.getMessage(), containsString(expectedError));
+    assertThat(e.getMessage(),
+        containsString("error UMA012: method \"test\" statement: unknown method \"click\" for basic element"));
   }
 
   @Test
   public void testPrivateRootWrongTypeClickThrows() {
-    String expectedError = String
-        .format(ERR_UNKNOWN_ACTION, "click", "root", "declared interfaces [ editable ]");
     UtamError e = expectThrows(UtamError.class,
         () -> getResult("privateRootWrongAction"));
-    assertThat(e.getMessage(), containsString(expectedError));
+    assertThat(e.getMessage(),
+        containsString("error UMA012: method \"test\" statement: unknown method \"click\" for basic element"));
   }
 
   @Test
@@ -138,5 +137,25 @@ public class UtamMethodActionApplyRootTests {
         result.getContext().getInterfaceUnionTypes().get(0).getDeclarationCode().get(0),
         is(equalTo("interface RootElement extends Clickable {}")));
     assertThat(result.getContext().getClassUnionTypes().size(), is(equalTo(0)));
+  }
+
+  @Test
+  public void incorrectComposeFormatThrows() {
+    JsonBuilderTestUtility test = new JsonBuilderTestUtility();
+    test.addRawString("methods",
+        "[{ \"name\" : \"test\", \"compose\" : [ {\"element\": \"root\", \"apply\": []} ]}]");
+    Exception e = test.expectCompilerError();
+    assertThat(e.getMessage(), containsString(
+        "error UMA000: method \"test\" statement: incorrect compose statement format"));
+  }
+
+  @Test
+  public void incorrectComposeNotObjectFormatThrows() {
+    JsonBuilderTestUtility test = new JsonBuilderTestUtility();
+    test.addRawString("methods",
+        "[{ \"name\" : \"test\", \"compose\" : [ true ]}]");
+    Exception e = test.expectCompilerError();
+    assertThat(e.getMessage(), containsString(
+        "error UMA008: method \"test\" statement: compose statement should be a non empty object"));
   }
 }

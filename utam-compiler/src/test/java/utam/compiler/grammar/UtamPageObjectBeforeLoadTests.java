@@ -11,8 +11,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.UtamMethod.ERR_BEFORE_LOAD_HAS_NO_ARGS;
-import static utam.compiler.grammar.UtamMethodAction.ERR_DISALLOWED_ELEMENT;
 import static utam.compiler.grammar.UtamPageObject.BEFORE_LOAD_METHOD_NAME;
 
 import org.testng.annotations.Test;
@@ -104,18 +102,21 @@ public class UtamPageObjectBeforeLoadTests {
   @Test
   public void testCantHaveArgs() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("withArgs"));
-    assertThat(e.getMessage(), containsString(ERR_BEFORE_LOAD_HAS_NO_ARGS));
+    assertThat(e.getMessage(),
+        containsString("error UPO005: method \"beforeLoad\" cannot have parameters"));
   }
 
   @Test
   public void testUnallowedElement() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("wrongElement"));
-    assertThat(e.getMessage(), containsString(ERR_DISALLOWED_ELEMENT));
+    assertThat(e.getMessage(), containsString(
+        "error UMA007: method \"beforeLoad\" statement: only \"document\" or \"root\" elements are allowed"));
   }
 
   @Test
   public void testUnallowedElementInsidePredicate() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("wrongPredicateElement"));
-    assertThat(e.getMessage(), containsString(ERR_DISALLOWED_ELEMENT));
+    assertThat(e.getMessage(), containsString(
+        "error UMA007: method \"beforeLoad\" statement: only \"document\" or \"root\" elements are allowed"));
   }
 }

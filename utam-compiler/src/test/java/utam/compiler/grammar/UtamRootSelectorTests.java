@@ -12,8 +12,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.TestUtilities.JSON_MAPPING_ERROR;
-import static utam.compiler.grammar.TestUtilities.getDeserializedObject;
 import static utam.compiler.grammar.UtamRootSelector.ERR_SELECTOR_MISSING;
 import static utam.compiler.grammar.UtamRootSelector.ERR_SELECTOR_REDUNDANT;
 
@@ -36,30 +34,6 @@ public class UtamRootSelectorTests {
     UtamRootSelector selector = new UtamRootSelector(value, null, null, null);
     assertThat(selector.getLocator(), is(equalTo(LocatorBy.byCss(value))));
     assertThat(selector.getSelectorType(), is(SelectorType.css));
-  }
-
-  @Test
-  public void testRootNodeWithListSelectorThrows() {
-    String json =
-        "{"
-            + "    \"css\": \".invalidList\","
-            + "    \"returnAll\": true"
-            + "  }";
-    UtamError e = expectThrows(UtamError.class,
-        () -> getDeserializedObject(json, UtamRootSelector.class));
-    assertThat(e.getMessage(), containsString(JSON_MAPPING_ERROR));
-  }
-
-  @Test
-  public void testRootNodeWithParameterizedSelectorThrows() {
-    String json =
-        "{"
-            + "    \"css\": \"input[value=*(%s)]\","
-            + "    \"args\": [ {\"name\": \"text\", \"type\":\"string\" }]"
-            + "}";
-    UtamError e = expectThrows(UtamError.class,
-        () -> getDeserializedObject(json, UtamRootSelector.class));
-    assertThat(e.getMessage(), containsString(JSON_MAPPING_ERROR));
   }
 
   @Test

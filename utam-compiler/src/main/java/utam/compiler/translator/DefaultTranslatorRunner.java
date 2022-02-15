@@ -10,6 +10,7 @@ package utam.compiler.translator;
 import static utam.core.framework.UtamLogger.info;
 import static utam.core.framework.consumer.JsonInjectionsConfig.CONFIG_FILE_MASK;
 
+import com.google.common.io.CharStreams;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.util.Map;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.JsonDeserializer;
 import utam.compiler.guardrails.GlobalValidation;
+import utam.compiler.helpers.TranslationContext;
 import utam.core.declarative.representation.PageObjectClass;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.PageObjectInterface;
@@ -47,13 +49,20 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
   static final String DUPLICATE_PAGE_OBJECT_NAME = "declaration '%s' already generated";
   static final String DUPLICATE_IMPL_WITH_PROFILE_ERR =
       "can't set dependency as '%s' for type '%s', it was already set as '%s' for profile %s";
-  static final String PROFILE_NOT_CONFIGURED_ERR = "profile '%s' is not configured";
-  static final String ERR_MODULE_NAME = "module name is not configured, can't write dependencies config file";
+  private static final String ERR_MODULE_NAME = "module name is not configured, can't write dependencies config file";
   private final TranslatorConfig translatorConfig;
   private final Map<String, PageObjectDeclaration> generated = new HashMap<>();
   private final Map<Profile, Map<String, String>> profileDependenciesMapping = new HashMap<>();
   // max number of POs to generate for generator performance measurements
   private int maxPageObjectsCounter = Integer.MAX_VALUE;
+
+  private static String getStringFromReader(TranslatorSourceConfig translatorSourceConfig, String pageObjectURI) {
+    try {
+      return CharStreams.toString(translatorSourceConfig.getDeclarationReader(pageObjectURI));
+    } catch (IOException e) {
+      throw new UtamCompilationError(String.format("Error in the page object '%s'", pageObjectURI), e);
+    }
+  }
 
   /**
    * Initializes a new instance of the DefaultTranslatorRunner class
@@ -177,7 +186,9 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
         break;
       }
       info(String.format("de-serialize Page Object %s", pageObjectURI));
-      JsonDeserializer deserializer = new JsonDeserializer(translatorConfig, sourceConfig, pageObjectURI);
+      TranslationContext translationContext = new TranslationContext(pageObjectURI, translatorConfig);
+      String jsonSource = getStringFromReader(sourceConfig, pageObjectURI);
+      JsonDeserializer deserializer = new JsonDeserializer(translationContext, jsonSource);
       PageObjectDeclaration object = deserializer.getObject();
       setPageObject(pageObjectURI, object);
       deserializer.getPageObjectContext().setGlobalGuardrailsContext(globalGuardrails);
@@ -243,7 +254,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
 
   final void setImplementation(Profile profile, String typeName, String classTypeName) {
     if (!profileDependenciesMapping.containsKey(profile)) {
-      throw new UtamCompilationError(String.format(PROFILE_NOT_CONFIGURED_ERR, profile.getName()));
+      throw new UtamCompilationError(translatorConfig.getErrorMessage("UP003", profile.getName(), profile.getValue()));
     }
     if (profileDependenciesMapping.get(profile).containsKey(typeName)) {
       String profileValue = String.format("{ %s : %s }", profile.getName(), profile.getValue());

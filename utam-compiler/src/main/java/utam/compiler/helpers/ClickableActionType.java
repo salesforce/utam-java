@@ -7,9 +7,11 @@
  */
 package utam.compiler.helpers;
 
+import static utam.compiler.helpers.BasicElementActionType.ERROR_CODE_FOR_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import utam.compiler.UtamCompilerIntermediateError;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Clickable;
 
@@ -51,8 +53,13 @@ public enum ClickableActionType implements ActionType {
   }
 
   @Override
-  public List<TypeProvider> getParametersTypes() {
-    return Collections.emptyList();
+  public List<TypeProvider> getParametersTypes(String parserContext, int parameterCount) {
+    int expected = 0;
+    if (expected != parameterCount) {
+      throw new UtamCompilerIntermediateError(ERROR_CODE_FOR_PARAMETERS, parserContext, this.name(),
+          String.valueOf(expected), String.valueOf(parameterCount));
+    }
+    return new ArrayList<>();
   }
 
   @Override

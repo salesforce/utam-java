@@ -14,9 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import utam.compiler.UtamCompilationError;
-import utam.compiler.grammar.UtamArgument;
-import utam.compiler.grammar.UtamArgument.UtamArgumentLiteralPrimitive;
+import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.types.BasicElementInterface;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.representation.UnionType;
@@ -106,10 +104,6 @@ public enum BasicElementActionType implements ActionType {
    */
   waitForVisible(null);
 
-  /**
-   * The error string template for an unknown action
-   */
-  public static final String ERR_UNKNOWN_ACTION = "unknown action '%s' for element '%s' with %s";
   // return type of the action
   private final TypeProvider returnType;
   // parameters accepted by the action
@@ -124,15 +118,15 @@ public enum BasicElementActionType implements ActionType {
     this.returnType = Objects.requireNonNullElse(returnType, VOID);
   }
 
+  static final String ERROR_CODE_FOR_PARAMETERS = "UA010";
+
   /**
    * Gets the object representing the action type for the element
    * @param apply       the string value of the action to retrieve
    * @param elementType the type of the element
-   * @param elementName the name of the element
    * @return            the object representing the action type for the element
    */
-  public static ActionType getActionType(String apply, TypeProvider elementType,
-      String elementName) {
+  public static ActionType getActionType(String apply, TypeProvider elementType) {
     // Element type is BaseElement, with no other actionable methods available.
     for (BasicElementActionType action : values()) {
       if (action.getApplyString().equals(apply)) {
@@ -140,8 +134,7 @@ public enum BasicElementActionType implements ActionType {
       }
     }
     if (!(elementType instanceof UnionType)) {
-      throw new UtamCompilationError(
-          String.format(ERR_UNKNOWN_ACTION, apply, elementName, "basic type"));
+      return null;
     }
     List<TypeProvider> actionableTypes = ((UnionType) elementType).getExtendedTypes();
     for (TypeProvider actionableType : actionableTypes) {
@@ -179,13 +172,7 @@ public enum BasicElementActionType implements ActionType {
         }
       }
     }
-    String actionableTypeNames = actionableTypes
-        .stream()
-        .map(t -> t.getSimpleName().toLowerCase())
-        .collect(Collectors.joining(","));
-    throw new UtamCompilationError(
-        String.format(ERR_UNKNOWN_ACTION, apply, elementName,
-            String.format("declared interfaces [ %s ]", actionableTypeNames)));
+    return null;
   }
 
   // used in unit tests
@@ -205,29 +192,28 @@ public enum BasicElementActionType implements ActionType {
     return returnType;
   }
 
+  private static final List<TypeProvider> CONTAINS_LOCATOR = Stream.of(SELECTOR)
+      .collect(Collectors.toList());
+  private static final List<TypeProvider> CONTAINS_LOCATOR_AND_BOOLEAN = Stream
+      .of(SELECTOR, PrimitiveType.BOOLEAN).collect(Collectors.toList());
+
   @Override
-  public List<TypeProvider> getParametersTypes() {
-    return Stream.of(actionParameters).collect(Collectors.toList());
+  public List<TypeProvider> getParametersTypes(String parserContext, int parameterCount) {
+    if (this == containsElement && (parameterCount == 1 || parameterCount == 2)) {
+      return parameterCount == 1? CONTAINS_LOCATOR : CONTAINS_LOCATOR_AND_BOOLEAN;
+    } else {
+      int expected = actionParameters.length;
+      if (actionParameters.length != parameterCount) {
+        throw new UtamCompilerIntermediateError(ERROR_CODE_FOR_PARAMETERS, parserContext, this.name(),
+            String.valueOf(expected), String.valueOf(parameterCount));
+      }
+      return Stream.of(actionParameters).collect(Collectors.toList());
+    }
   }
 
   @Override
   public String getApplyString() {
     return this.name();
-  }
-
-  @Override
-  public UtamArgument[] getTransformedArgs(UtamArgument[] args) {
-    if (args == null) {
-      return null;
-    }
-    if (this == BasicElementActionType.containsElement && args.length == 1) {
-      // If the action is "containsElement", it may have one argument (a selector),
-      // or two arguments (a selector and a boolean indicating whether to search in
-      // the shadow DOM) declared in the JSON. If the second argument is omitted,
-      // it can be assumed to be false, so substitute that value here.
-      return new UtamArgument[]{args[0], new UtamArgumentLiteralPrimitive(Boolean.FALSE)};
-    }
-    return args;
   }
 
   /**

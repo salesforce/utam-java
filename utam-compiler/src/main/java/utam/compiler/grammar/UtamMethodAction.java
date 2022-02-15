@@ -7,17 +7,14 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.UtamArgument.processArgsNode;
+import static utam.compiler.grammar.UtamMatcher.processMatcherNode;
 import static utam.compiler.grammar.UtamPageObject.BEFORE_LOAD_METHOD_NAME;
-import static utam.compiler.helpers.BasicElementActionType.size;
 import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.translator.TranslationTypesConfigJava.isCustomType;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -25,10 +22,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.ActionType;
-import utam.compiler.helpers.MatcherType;
+import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.ReturnType;
+import utam.compiler.helpers.ReturnType.StatementReturnType;
 import utam.compiler.helpers.StatementContext;
 import utam.compiler.helpers.StatementContext.StatementType;
 import utam.compiler.helpers.TranslationContext;
@@ -39,7 +37,6 @@ import utam.compiler.representation.ComposeMethodStatement.MapEach;
 import utam.compiler.representation.ComposeMethodStatement.Matcher;
 import utam.compiler.representation.ComposeMethodStatement.Operand;
 import utam.compiler.representation.ComposeMethodStatement.Operation;
-import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
 /**
@@ -48,75 +45,59 @@ import utam.core.declarative.representation.TypeProvider;
  * @author elizaveta.ivanova
  * @since 228
  */
-@JsonDeserialize(using = UtamMethodActionDeserializer.class)
 public abstract class UtamMethodAction {
 
   static final String ERR_FIRST_STATEMENT_CANT_BE_MARKED_AS_CHAIN = "method '%s': first statement can't be marked as chain";
   static final String ERR_INCORRECT_RETURN_TYPE = "method '%s' incorrect statement return type: expected '%s', provided is '%s'";
   static final String ERR_CHAIN_REQUIRES_CUSTOM_RETURN = "method '%s': to use chain, "
       + "previous statement should return custom type, but it returns '%s'";
-  static final String ERR_ELEMENT_REDUNDANT_FOR_CHAIN = "%s: statement marked as chain "
-      + "and will be applied to the result of the previous statement, "
-      + "so element property is redundant";
-  static final String ERR_DISALLOWED_ELEMENT = "Only document or root element are allowed in beforeLoad method";
+  static final Operand SELF_OPERAND = new ConstOperand("this");
   private static final Set<String> BEFORE_LOAD_ELEMENTS = Stream
       .of(DOCUMENT_ELEMENT_NAME, ROOT_ELEMENT_NAME).collect(
           Collectors.toSet());
-
-  static final Operand SELF_OPERAND = new ConstOperand("this");
-
   final String elementName;
-  final String apply;
-  final UtamUtilityMethodAction applyExternal;
-  final UtamMatcher matcher;
-  final UtamArgument[] args;
   // if set to true, action should be applied to the result of the previous statement
   final boolean isChain;
-  // need method context to use method name inside return type class
-  private final Function<String, ReturnType> declaredTypeProvider;
+  final JsonNode argsNode;
+  final boolean hasMatcher;
+  private final Function<String, UtamMatcher> matcherProvider;
+  private final JsonNode returnTypeJsonNode;
+  private final Boolean isReturnList;
 
-  @JsonCreator
   UtamMethodAction(
-      @JsonProperty(value = "element") String elementName,
-      @JsonProperty(value = "apply") String apply,
-      @JsonProperty(value = "applyExternal") UtamUtilityMethodAction applyExternal,
-      @JsonProperty(value = "args") UtamArgument[] args,
-      @JsonProperty(value = "matcher") UtamMatcher matcher,
-      @JsonProperty(value = "returnType") JsonNode returnType,
-      @JsonProperty(value = "returnAll") Boolean isReturnList,
-      @JsonProperty(value = "chain", defaultValue = "false") boolean isChain) {
-    this.args = args;
-    this.matcher = matcher;
+      String elementName,
+      JsonNode argsNode,
+      JsonNode matcherNode,
+      JsonNode returnTypeJsonNode,
+      Boolean isReturnList,
+      boolean isChain) {
+    this.argsNode = argsNode;
+    this.matcherProvider = str -> processMatcherNode(matcherNode, str);
     this.elementName = elementName;
-    this.apply = apply;
-    this.applyExternal = applyExternal;
     this.isChain = isChain;
-    this.declaredTypeProvider = str -> new ReturnType(returnType, isReturnList, str);
-  }
-
-  private MatcherType getMatcherType() {
-    return matcher == null ? null : matcher.getMatcherType();
-  }
-
-  private List<MethodParameter> getMatcherParameters(TranslationContext context,
-      MethodContext methodContext, StatementContext statementContext) {
-    return matcher == null ? new ArrayList<>()
-        : matcher.getParameters(context, methodContext, statementContext);
+    this.isReturnList = isReturnList;
+    this.returnTypeJsonNode = returnTypeJsonNode;
+    this.hasMatcher = matcherNode != null && !matcherNode.isNull();
   }
 
   final ReturnType getDeclaredReturnType(String methodName) {
-    return declaredTypeProvider.apply(methodName);
+    return new StatementReturnType(returnTypeJsonNode, isReturnList, methodName);
   }
 
   final void checkMatcher(TypeProvider operandType, String validationContextStr) {
-    if (getMatcherType() != null) {
-      getMatcherType().checkOperandForMatcher(operandType, validationContextStr);
+    if (hasMatcher) {
+      UtamMatcher matcher = getMatcher(validationContextStr);
+      matcher.getMatcherType().checkOperandForMatcher(operandType, validationContextStr);
     }
+  }
+
+  final UtamMatcher getMatcher(String parserContext) {
+    return matcherProvider.apply(parserContext);
   }
 
   final void checkDefinedReturnType(TypeProvider expectedType, TypeProvider declaredType,
       String methodName) {
-    TypeProvider adjustedExpectedType = matcher != null ? PrimitiveType.BOOLEAN : expectedType;
+    TypeProvider adjustedExpectedType = hasMatcher ? PrimitiveType.BOOLEAN : expectedType;
     if (!adjustedExpectedType.isSameType(declaredType)) {
       throw new UtamCompilationError(String
           .format(ERR_INCORRECT_RETURN_TYPE,
@@ -144,11 +125,17 @@ public abstract class UtamMethodAction {
     }
   }
 
-  // if statement is marked as a chain, it should be applied to previous result, so "element" is redundant
-  final void checkChainElementRedundant(String validationContextStr) {
+  /**
+   * if statement is marked as a chain, it should be applied to previous result, so "element" is
+   * redundant
+   *
+   * @param context    translation context
+   * @param methodName string with method name
+   */
+  final void checkChainElementRedundant(TranslationContext context, String methodName) {
     if (isChain && elementName != null) {
-      throw new UtamCompilationError(
-          String.format(ERR_ELEMENT_REDUNDANT_FOR_CHAIN, validationContextStr));
+      String message = context.getErrorMessage("UMA006", methodName);
+      throw new UtamCompilationError(message);
     }
   }
 
@@ -156,11 +143,13 @@ public abstract class UtamMethodAction {
    * check that beforeLoad method statement does not use elements other than "root" or "document"
    *
    * @param methodContext method context has method name
+   * @param context       translation context
    */
-  final void checkBeforeLoadElements(MethodContext methodContext) {
+  final void checkBeforeLoadElements(TranslationContext context, MethodContext methodContext) {
     if (BEFORE_LOAD_METHOD_NAME.equals(methodContext.getName()) && elementName != null
         && !BEFORE_LOAD_ELEMENTS.contains(elementName)) {
-      throw new UtamCompilationError(ERR_DISALLOWED_ELEMENT);
+      String message = context.getErrorMessage("UMA007");
+      throw new UtamCompilationError(message);
     }
   }
 
@@ -185,13 +174,17 @@ public abstract class UtamMethodAction {
       TranslationContext context,
       MethodContext methodContext,
       StatementContext statementContext) {
-    List<MethodParameter> matcherParameters = getMatcherParameters(context, methodContext,
-        statementContext);
-    ComposeMethodStatement.Matcher matcher =
-        this.matcher == null ? null : new Matcher(getMatcherType(), matcherParameters);
-
+    ComposeMethodStatement.Matcher matcher;
+    if (hasMatcher) {
+      String parserContext = String.format("method \"%s\"", methodContext.getName());
+      UtamMatcher utamMatcher = getMatcher(parserContext);
+      matcher = new Matcher(utamMatcher.getMatcherType(),
+          utamMatcher.getParameters(context, methodContext));
+    } else {
+      matcher = null;
+    }
     if (isApplyToList(operand)) {
-      if (operation.isReturnsVoid() && matcher == null) {
+      if (operation.isReturnsVoid() && !hasMatcher) {
         return new ForEach(operand, operation, statementContext);
       }
       if (statementContext.isFlatMap()) {
@@ -202,8 +195,14 @@ public abstract class UtamMethodAction {
     return new ComposeMethodStatement.Single(operand, operation, matcher, statementContext);
   }
 
-  private boolean isApplyToList(Operand operand) {
-    return operand.isApplyToList() && !size.getApplyString().equals(apply);
+  /**
+   * override for basic action - operation "size" changes it
+   *
+   * @param operand operand
+   * @return boolean
+   */
+  boolean isApplyToList(Operand operand) {
+    return operand.isApplyToList();
   }
 
   // overridden for beforeLoad which is not supposed to return value ever
@@ -234,7 +233,7 @@ public abstract class UtamMethodAction {
     }
 
     @Override
-    public List<TypeProvider> getParametersTypes() {
+    public List<TypeProvider> getParametersTypes(String parserContext, int parameterCount) {
       return null; //parameter types are not checked for custom action
     }
 
@@ -283,6 +282,49 @@ public abstract class UtamMethodAction {
     @Override
     protected String getOperandString() {
       return strValue;
+    }
+  }
+
+  /**
+   * utility class to process arguments
+   *
+   * @author elizaveta.ivanova
+   * @since 238
+   */
+  final static class ArgumentsProvider {
+
+    final JsonNode argsNode;
+    final String argsParserContext;
+
+    ArgumentsProvider(JsonNode argsNode, String argsParserContext) {
+      this.argsNode = argsNode;
+      this.argsParserContext = argsParserContext;
+    }
+
+    /**
+     * get list of arguments
+     *
+     * @param isLiteralsAllowed boolean
+     * @return list
+     */
+    final List<UtamArgument> getArguments(boolean isLiteralsAllowed) {
+      return processArgsNode(argsNode, argsParserContext, isLiteralsAllowed);
+    }
+
+    /**
+     * wrap getting an element
+     *
+     * @param context     translation context
+     * @param elementName element name
+     * @return element context
+     */
+    ElementContext getElementArgument(TranslationContext context, String elementName) {
+      ElementContext element = context.getElement(elementName);
+      if (element == null) {
+        String message = context.getErrorMessage("UA001", argsParserContext, elementName);
+        throw new UtamCompilationError(argsNode, message);
+      }
+      return element;
     }
   }
 }

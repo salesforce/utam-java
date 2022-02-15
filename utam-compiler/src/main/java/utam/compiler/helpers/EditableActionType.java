@@ -7,12 +7,14 @@
  */
 package utam.compiler.helpers;
 
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.element.Editable;
+import static utam.compiler.helpers.BasicElementActionType.ERROR_CODE_FOR_PARAMETERS;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import utam.compiler.UtamCompilerIntermediateError;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.element.Editable;
 
 /**
  * this enum links element actions with translator code <br>
@@ -69,7 +71,12 @@ public enum EditableActionType implements ActionType {
   }
 
   @Override
-  public List<TypeProvider> getParametersTypes() {
+  public List<TypeProvider> getParametersTypes(String parserContext, int parameterCount) {
+    int expected = actionParameters.length;
+    if (actionParameters.length != parameterCount) {
+      throw new UtamCompilerIntermediateError(ERROR_CODE_FOR_PARAMETERS, parserContext, this.name(),
+          String.valueOf(expected), String.valueOf(parameterCount));
+    }
     return Stream.of(actionParameters).collect(Collectors.toList());
   }
 

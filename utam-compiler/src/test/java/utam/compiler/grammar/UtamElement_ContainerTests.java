@@ -7,16 +7,11 @@
  */
 package utam.compiler.grammar;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.UtamElement.Type.CONTAINER;
+import static utam.compiler.grammar.DeserializerUtilities.expectCompilerError;
 
-import java.util.List;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import utam.core.framework.consumer.UtamError;
 
 /**
  * test validation of JSON files with container elements
@@ -26,39 +21,33 @@ import utam.core.framework.consumer.UtamError;
  */
 public class UtamElement_ContainerTests {
 
-  private List<UtamElement> containers;
-
-  @BeforeClass
-  private void prepareData() {
-    containers = DeserializerUtilities
-        .getDeserializedObjects(UtamElement.class, "element/containerValidations");
+  @Test
+  public void testDuplicatePropertyThrows() {
+    String json = "{\"elements\": [\n"
+        + "    {\n"
+        + "      \"name\": \"test\",\n"
+        + "      \"name\": \"test\",\n"
+        + "      \"type\": \"container\""
+        + "    }\n"
+        + "  ]}";
+    Exception e = expectCompilerError(json);
+    assertThat(e.getMessage(),
+        containsString("error UPO000: incorrect format of the page object: \n"
+            + "Duplicate field 'name'"));
   }
 
   @Test
-  public void testNotAllowedFilter() {
-    UtamElement element = containers.get(0);
-    UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(CONTAINER.getSupportedPropertiesErr("filterThrows"))));
-  }
-
-  @Test
-  public void testNotAllowedShadow() {
-    UtamElement element = containers.get(1);
-    UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(e.getMessage(), is(CONTAINER.getSupportedPropertiesErr("shadowThrows")));
-  }
-
-  @Test
-  public void testNotAllowedNestedElements() {
-    UtamElement element = containers.get(2);
-    UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(e.getMessage(), is(CONTAINER.getSupportedPropertiesErr("elementsThrows")));
-  }
-
-  @Test
-  public void testNotAllowedLoad() {
-    UtamElement element = containers.get(3);
-    UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(e.getMessage(), is(CONTAINER.getSupportedPropertiesErr("nullableThrows")));
+  public void testNotAllowedPropertyThrows() {
+    String json = "{\"elements\": [\n"
+        + "    {\n"
+        + "      \"name\": \"test\",\n"
+        + "      \"wrong\": \"test\",\n"
+        + "      \"type\": \"container\""
+        + "    }\n"
+        + "  ]}";
+    Exception e = expectCompilerError(json);
+    assertThat(e.getMessage(),
+        containsString("error UE000: root elements: incorrect format of elements: \n"
+            + "Unrecognized field \"wrong\""));
   }
 }

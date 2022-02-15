@@ -1,0 +1,16 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "selector": {
+        "css": "css"
+      },
+      "filter": {
+        "apply": "isVisible",
+        "matcher": {
+          "type": "isTrue"
+        }
+      }
+    }
+  ]
+}

@@ -7,46 +7,42 @@
  */
 package utam.compiler.grammar;
 
-import static utam.compiler.grammar.UtamShadowElement.ERR_SHADOW_EMPTY_ELEMENTS;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.testng.Assert.expectThrows;
+import static org.hamcrest.core.StringContains.containsString;
+import static utam.compiler.grammar.DeserializerUtilities.expectCompilerErrorFromFile;
 
-import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
+import utam.compiler.JsonBuilderTestUtility;
 
 /**
  * Provides tests for the UtamShadowElement class
- * @author james.evans
  *
+ * @author james.evans
  */
 public class UtamShadowElement_Tests {
 
-  /**
-   * A valid UtamShadowElement should be able to be created
-   */
   @Test
-  public void testUtamShadowElementEmptyArray() {
-    UtamShadowElement shadow = new UtamShadowElement(new UtamElement[] {});
-    assertThat(shadow.elements, is(arrayWithSize(0)));
+  public void testShadowElementsMissingInRoot() {
+    JsonBuilderTestUtility test = new JsonBuilderTestUtility();
+    test.addRawString("shadow", "{} ");
+    Exception e = test.expectCompilerError();
+    assertThat(e.getMessage(), containsString(
+        "error USE000: root shadow: incorrect format of elements inside shadow: \n"
+            + "Missing required creator property 'elements'"));
   }
 
   @Test
-  public void testUtamShadowNestedElement() {
-    UtamShadowElement shadow = new UtamShadowElement(new UtamElement[] { TestUtilities.UtamEntityCreator.createUtamElement("nested")});
-    assertThat(shadow.elements, is(arrayWithSize(1)));
+  public void testNestedShadowMissingElements() {
+    Exception e = expectCompilerErrorFromFile("validate/shadow/nestedElementsMissing");
+    assertThat(e.getMessage(), containsString(
+        "error USE000: element \"parent\" shadow: incorrect format of elements inside shadow: \n"
+            + "Missing required creator property 'elements'"));
   }
 
-
-  /**
-   * A valid UtamShadowElement should throw the proper exception when passed a null
-   * arguments array
-   */
   @Test
-  public void testUtamShadowElementWithNullElementArrayThrows() {
-    UtamError e = expectThrows(
-        UtamError.class,
-        () -> new UtamShadowElement(null));
-    assertThat(e.getMessage(), containsString(ERR_SHADOW_EMPTY_ELEMENTS));
+  public void testNestedShadowElementsEmptyArray() {
+    Exception e = expectCompilerErrorFromFile("validate/shadow/nestedElementsNotArray");
+    assertThat(e.getMessage(), containsString(
+        "error U0004: element \"parent\" shadow: property \"elements\" should not be an empty array"));
   }
 }

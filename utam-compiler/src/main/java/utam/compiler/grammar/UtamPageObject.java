@@ -7,9 +7,12 @@
  */
 package utam.compiler.grammar;
 
-import static utam.compiler.grammar.UtamMethod.ERR_BEFORE_LOAD_HAS_NO_ARGS;
-import static utam.compiler.grammar.UtamMethod.getComposeStatements;
+import static utam.compiler.grammar.JsonDeserializer.readNode;
+import static utam.compiler.grammar.UtamComposeMethod.getComposeStatements;
+import static utam.compiler.grammar.UtamComposeMethod.processComposeNodes;
+import static utam.compiler.grammar.UtamMethod.processMethodsNode;
 import static utam.compiler.grammar.UtamRootDescription.processRootDescriptionNode;
+import static utam.compiler.grammar.UtamShadowElement.processShadowNode;
 import static utam.compiler.helpers.AnnotationUtils.DEPRECATED_ANNOTATION;
 import static utam.compiler.helpers.AnnotationUtils.getPageObjectAnnotation;
 import static utam.compiler.helpers.AnnotationUtils.getPagePlatformAnnotation;
@@ -24,14 +27,18 @@ import static utam.compiler.types.BasicElementUnionType.asBasicOrUnionType;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.function.Function;
 import utam.compiler.UtamCompilationError;
+import utam.compiler.UtamCompilerIntermediateError;
+import utam.compiler.grammar.UtamElement.UtamElementProvider;
+import utam.compiler.grammar.UtamProfile.UtamProfileProvider;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MethodContext;
-import utam.compiler.helpers.ReturnType;
+import utam.compiler.helpers.ReturnType.MethodReturnType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities.FromClass;
 import utam.compiler.representation.BeforeLoadMethod;
@@ -47,6 +54,8 @@ import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.representation.UnionType;
 import utam.core.element.BasicElement;
 import utam.core.element.Locator;
+import utam.core.framework.context.PlatformType;
+import utam.core.framework.context.Profile;
 
 /**
  * mapping for a Page Object JSON
@@ -57,24 +66,23 @@ import utam.core.element.Locator;
 final class UtamPageObject {
 
   static final String BEFORE_LOAD_METHOD_NAME = "load";
-  static final String ERR_ROOT_PROFILE_HAS_NO_INTERFACE =
-      "profile can only be set for a page object that implements an interface";
-  static final String ERR_ROOT_MISSING_SELECTOR =
-      "root page object requires default selector property";
-  static final String ERR_ROOT_REDUNDANT_SELECTOR = "non root page object can't have selector";
-  static final String ERR_ROOT_ABSTRACT = "interface declaration can only have 'methods' property";
-  static final String ERR_PROFILE_IS_REQUIRED = "implementing class should have profiles";
-  String implementsType;
-  final Locator rootLocator;
-  private final UtamMethodAction[] beforeLoad;
+  private static final String INTERFACE_PROPERTIES = String.join(", ", "root",
+      "interface",
+      "methods",
+      "type",
+      "exposeRootElement");
+  final String implementsType;
+  final boolean isAbstract;
+  private final Locator rootLocator;
+  private final JsonNode beforeLoadNode;
+  private final List<UtamMethodAction> beforeLoad;
   private final RootElementHelper rootElementHelper;
-  boolean isAbstract;
-  boolean isRootPageObject;
-  UtamMethod[] methods;
-  String platform;
-  UtamProfile[] profiles;
-  UtamShadowElement shadow;
-  UtamElement[] elements;
+  private final boolean isRootPageObject;
+  private final List<UtamMethod> methods;
+  private final PlatformType platform;
+  private final UtamProfileProvider profileProvider;
+  private final List<UtamElementProvider> elements;
+  private final List<UtamElementProvider> shadowElements;
   private final UtamRootDescription description;
   private final List<String> descriptionText = new ArrayList<>();
 
@@ -82,8 +90,8 @@ final class UtamPageObject {
   UtamPageObject(
       @JsonProperty(value = "implements") String implementsType,
       @JsonProperty(value = "interface", defaultValue = "false") boolean isAbstract,
-      @JsonProperty(value = "platform") String platform,
-      @JsonProperty(value = "profile") UtamProfile[] profiles,
+      @JsonProperty(value = "platform") String platformString,
+      @JsonProperty(value = "profile") JsonNode profilesNode,
       // to expose root element
       @JsonProperty(value = "type", defaultValue = "[]") JsonNode typeNode,
       @JsonProperty(value = "exposeRootElement", defaultValue = "false") boolean isExposeRootElement,
@@ -91,55 +99,63 @@ final class UtamPageObject {
       @JsonProperty(value = "root", defaultValue = "false") boolean isRootPageObject,
       @JsonProperty(value = "selector") UtamRootSelector selector,
       // nested nodes
-      @JsonProperty("shadow") UtamShadowElement shadow,
-      @JsonProperty("elements") UtamElement[] elements,
-      @JsonProperty("methods") UtamMethod[] methods,
-      @JsonProperty("beforeLoad") UtamMethodAction[] beforeLoad,
+      @JsonProperty("shadow") JsonNode shadowNode,
+      @JsonProperty("elements") JsonNode elementsNode,
+      @JsonProperty("methods") JsonNode methodsNode,
+      @JsonProperty("beforeLoad") JsonNode beforeLoadNode,
       @JsonProperty("description") JsonNode descriptionNode) {
-    this.profiles = profiles;
-    this.methods = methods;
+    this.profileProvider = new UtamProfileProvider(profilesNode, implementsType != null);
     this.isAbstract = isAbstract;
-    this.platform = platform;
+    this.methods = processMethodsNode(methodsNode, isAbstract);
+    try {
+      this.platform = PlatformType.fromString(platformString);
+    } catch (Exception e) {
+      throw new UtamCompilerIntermediateError("UPO003", platformString);
+    }
     this.isRootPageObject = isRootPageObject;
     this.implementsType = implementsType;
-    this.shadow = shadow;
-    this.elements = elements;
+    this.shadowElements = processShadowNode(shadowNode, "root shadow");
+    this.elements = processElementsNode(elementsNode, "root elements");
     this.rootElementHelper = new RootElementHelper(typeNode, isExposeRootElement);
-    this.beforeLoad = beforeLoad;
+    this.beforeLoadNode = beforeLoadNode;
+    this.beforeLoad = processComposeNodes(BEFORE_LOAD_METHOD_NAME, beforeLoadNode, true);
     this.rootLocator = selector == null ? null : selector.getLocator();
     this.description = processRootDescriptionNode(descriptionNode);
-    validate();
   }
 
-  // used in tests
-  UtamPageObject(boolean isRoot, UtamSelector selector) {
-    this(null, false, null, null, null, false, isRoot, selector, null, null, null, null, null);
+  /**
+   * parse platform node, separated into stand alone method because of error codes
+   *
+   * @param elementsNode  node with elements
+   * @param parserContext context of the parser
+   * @return list of parsed elements
+   */
+  static List<UtamElementProvider> processElementsNode(JsonNode elementsNode,
+      String parserContext) {
+    List<UtamElementProvider> elements = new ArrayList<>();
+    if (elementsNode == null || elementsNode.isNull()) {
+      return elements;
+    }
+    if (!elementsNode.isArray() || elementsNode.size() == 0) {
+      throw new UtamCompilerIntermediateError(elementsNode, "U0004", parserContext, "elements");
+    }
+    Function<Exception, RuntimeException> parserErrorWrapper = causeErr -> new UtamCompilerIntermediateError(
+        causeErr, elementsNode, "UE000", parserContext, causeErr.getMessage());
+    for (JsonNode elementNode : elementsNode) {
+      UtamElement element = readNode(elementNode, UtamElement.class, parserErrorWrapper);
+      elements.add(new UtamElementProvider(element, elementNode));
+    }
+    return elements;
   }
 
-  // used in tests
-  UtamPageObject() {
-    this(null, false, null, null, null, false, false, null, null, null, null, null, null);
-  }
-
-  void validate() {
-    if (isAbstract) {
-      if (shadow != null || elements != null || rootLocator != null || profiles != null) {
-        throw new UtamCompilationError(ERR_ROOT_ABSTRACT);
-      }
-      return;
-    }
-    if (isRootPageObject && rootLocator == null) {
-      throw new UtamCompilationError(ERR_ROOT_MISSING_SELECTOR);
-    }
-    if (!isRootPageObject && rootLocator != null) {
-      throw new UtamCompilationError(ERR_ROOT_REDUNDANT_SELECTOR);
-    }
-    if (profiles != null && implementsType == null) {
-      throw new UtamCompilationError(ERR_ROOT_PROFILE_HAS_NO_INTERFACE);
-    }
-    if (profiles == null && implementsType != null) {
-      throw new UtamCompilationError(ERR_PROFILE_IS_REQUIRED);
-    }
+  /**
+   * get profiles from context
+   *
+   * @param context translation context
+   * @return list of profiles
+   */
+  List<Profile> getProfiles(TranslationContext context) {
+    return this.profileProvider.getProfiles(context);
   }
 
   List<AnnotationProvider> getAnnotations() {
@@ -164,42 +180,53 @@ final class UtamPageObject {
     return isRootPageObject ? BASE_ROOT_PAGE_OBJECT_CLASS : BASE_PAGE_OBJECT_CLASS;
   }
 
-  final void compile(TranslationContext context) {
+  final void compile(TranslationContext context, JsonParser parser) {
     if (this.isAbstract) {
-      context.setAbstract();
+      if (shadowElements.size() > 0 || elements.size() > 0 || rootLocator != null || profileProvider
+          .isProfilesSet() || beforeLoad.size() > 0 || implementsType != null) {
+        throw new UtamCompilationError(parser,
+            context.getErrorMessage("UPO004", INTERFACE_PROPERTIES));
+      }
+    } else {
+      if (isRootPageObject) {
+        if (rootLocator == null) {
+          throw new UtamCompilationError(parser, context.getErrorMessage("UPO002"));
+        }
+      } else {
+        if (rootLocator != null) {
+          throw new UtamCompilationError(parser, context.getErrorMessage("UPO001"));
+        }
+      }
     }
     if (implementsType != null) {
       context.setImplementedType(implementsType);
     }
     // register element to prevent names collisions
     ElementContext rootElement = rootElementHelper.setRootElementMethod(context, rootLocator);
-    if (elements != null) {
-      for (UtamElement nextElement : elements) {
-        nextElement.traverse(context, rootElement, false);
-      }
+
+    for (UtamElementProvider element : elements) {
+      element.traverse(context, rootElement);
     }
-    if (shadow != null) {
-      for (UtamElement nextElement : shadow.elements) {
-        nextElement.traverse(context, rootElement, true);
-      }
+
+    for (UtamElementProvider element : shadowElements) {
+      element.traverseShadow(context, rootElement);
     }
     // should be before processing methods to ensure unique name
-    if (beforeLoad != null) {
+    if (!beforeLoad.isEmpty()) {
       context.setMethod(setBeforeLoadMethod(context));
     }
-    if (methods != null) {
-      Stream.of(methods).forEach(method -> context.setMethod(method.getMethod(context)));
-    }
+    methods.forEach(method -> context.setMethod(method.getMethod(context)));
   }
 
   private PageObjectMethod setBeforeLoadMethod(TranslationContext context) {
-    String name = BEFORE_LOAD_METHOD_NAME;
-    MethodContext methodContext = new MethodContext(name, new ReturnType(name));
+    String methodName = BEFORE_LOAD_METHOD_NAME;
+    MethodContext methodContext = new MethodContext(methodName, new MethodReturnType(methodName),
+        context, null, false);
     List<ComposeMethodStatement> statements = getComposeStatements(context, methodContext,
         beforeLoad);
-    List<MethodParameter> methodParameters = methodContext.getMethodParameters();
+    List<MethodParameter> methodParameters = methodContext.getParametersContext().getParameters();
     if (!methodParameters.isEmpty()) {
-      throw new UtamCompilationError(ERR_BEFORE_LOAD_HAS_NO_ARGS);
+      throw new UtamCompilationError(beforeLoadNode, context.getErrorMessage("UPO005"));
     }
     return new BeforeLoadMethod(methodContext, statements);
   }
@@ -241,10 +268,15 @@ final class UtamPageObject {
 
     private final String[] rootElementType;
     private final boolean isPublic;
+    private final JsonNode typeNode;
 
     RootElementHelper(JsonNode typeNode, boolean isExposeRootElement) {
-      this.rootElementType = processBasicTypeNode(typeNode, ROOT_ELEMENT_NAME, true);
+      String typeNodeValue = typeNode == null ? "null" : typeNode.toPrettyString();
+      this.rootElementType = processBasicTypeNode(typeNode,
+          node -> new UtamCompilerIntermediateError(node, "UE001",
+              ROOT_ELEMENT_NAME, typeNodeValue));
       this.isPublic = isExposeRootElement;
+      this.typeNode = typeNode;
     }
 
     /**
@@ -276,7 +308,7 @@ final class UtamPageObject {
         }
       }
       ElementContext rootElement = new ElementContext.Root(interfaceType, rootLocator, elementType);
-      context.setElement(rootElement);
+      context.setElement(typeNode, rootElement);
       rootElement.setElementMethod(rootElementMethod);
       return rootElement;
     }

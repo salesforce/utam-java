@@ -7,61 +7,42 @@
  */
 package utam.compiler.grammar;
 
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import utam.compiler.helpers.TypeUtilities;
-import utam.core.framework.consumer.UtamError;
-import org.testng.annotations.Test;
-import utam.compiler.representation.PageObjectValidationTestHelper;
-import utam.compiler.translator.DefaultSourceConfigurationTests;
-import utam.core.declarative.representation.PageObjectClass;
-import utam.core.declarative.representation.PageObjectDeclaration;
-import utam.core.declarative.representation.PageObjectInterface;
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.declarative.translator.TranslationTypesConfig;
-import utam.core.declarative.translator.TranslatorSourceConfig;
-import utam.core.declarative.translator.UnitTestRunner;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static utam.compiler.grammar.TestUtilities.getJsonStringDeserializer;
+import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
+import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static utam.compiler.grammar.TestUtilities.*;
-import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
-import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
-import static utam.compiler.translator.TranslatorMockUtilities.getDefaultConfig;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertThrows;
-import static org.testng.Assert.expectThrows;
+import org.testng.annotations.Test;
+import utam.compiler.representation.PageObjectValidationTestHelper;
+import utam.core.declarative.representation.PageObjectClass;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.declarative.representation.PageObjectInterface;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.translator.UnitTestRunner;
 
 public class JsonDeserializerTests {
 
-  private static final String INTERFACE_PACKAGE_NAME = "declarative.deserialization";
-  private static final String INTERFACE_SIMPLE_NAME = "RootNodeTestsObject";
-  private static final String INTERFACE_FULL_NAME =
-      "declarative.deserialization.RootNodeTestsObject";
-  private static final String IMPL_PACKAGE_NAME = "declarative.deserialization.impl";
-  private static final String IMPL_SIMPLE_NAME = "RootNodeTestsObjectImpl";
-  private static final String IMPL_FULL_NAME =
-      "declarative.deserialization.impl.RootNodeTestsObjectImpl";
-
-  private static TranslationTypesConfig getTypesProvider() {
-    TypeProvider interfaceType = new TypeUtilities.FromString(INTERFACE_FULL_NAME);
-    TypeProvider implementation = new TypeUtilities.FromString(IMPL_FULL_NAME);
-    TranslationTypesConfig provider = mock(TranslationTypesConfig.class);
-    when(provider.getInterfaceType(any())).thenReturn(interfaceType);
-    when(provider.getClassType(any())).thenReturn(implementation);
-    return provider;
-  }
+  private static final String INTERFACE_PACKAGE_NAME = "utam.test.pageobjects.test";
+  private static final String INTERFACE_SIMPLE_NAME = "Test";
+  private static final String INTERFACE_FULL_NAME = "utam.test.pageobjects.test.Test";
+  private static final String IMPL_PACKAGE_NAME = "utam.test.pageobjects.test.impl";
+  private static final String IMPL_SIMPLE_NAME = "TestImpl";
+  private static final String IMPL_FULL_NAME = "utam.test.pageobjects.test.impl.TestImpl";
 
   private static PageObjectDeclaration createRootNode(String json) {
-    JsonDeserializer deserializer =
-        new JsonDeserializer(TEST_URI, json, getDefaultConfig(getTypesProvider()));
-    return deserializer.getObject();
+    return new DeserializerUtilities().getResultFromString(json).getPageObject();
   }
 
   /** A valid root node should be able to be created */
@@ -397,7 +378,7 @@ public class JsonDeserializerTests {
     assertThat(unitTestCode, containsString("import static org.hamcrest.Matchers.*"));
     assertThat(unitTestCode, containsString("import org.testng.annotations.BeforeClass"));
     assertThat(unitTestCode, containsString("import org.testng.annotations.Test"));
-    assertThat(unitTestCode, containsString("public class RootNodeTestsObjectImplTests"));
+    assertThat(unitTestCode, containsString("public class TestImplTests"));
     assertThat(unitTestCode, containsString("public void testComposeMethod()"));
     assertThat(unitTestCode, containsString("public void setupSimulator()"));
     assertThat(
@@ -443,7 +424,7 @@ public class JsonDeserializerTests {
     assertThat(unitTestCode, containsString("import static org.hamcrest.Matchers.*"));
     assertThat(unitTestCode, containsString("import org.junit.BeforeClass"));
     assertThat(unitTestCode, containsString("import org.junit.Test"));
-    assertThat(unitTestCode, containsString("public class RootNodeTestsObjectImplTests"));
+    assertThat(unitTestCode, containsString("public class TestImplTests"));
     assertThat(unitTestCode, containsString("public void testComposeMethod()"));
     assertThat(unitTestCode, containsString("public void setupSimulator()"));
     assertThat(
@@ -457,16 +438,15 @@ public class JsonDeserializerTests {
    * generated Page Object root node
    */
   @Test
-  public void testGetApiCode() {
+  public void testGetGeneratedCode() {
     String json = "{}";
-
     PageObjectInterface node = createRootNode(json).getInterface();
     String apiCode = node.getGeneratedCode();
-    assertThat(apiCode, containsString("package " + INTERFACE_PACKAGE_NAME));
+    assertThat(apiCode, containsString("package utam.test.pageobjects.test"));
     assertThat(apiCode, containsString("import utam.core.framework.base.PageObject"));
     assertThat(
         apiCode,
-        containsString("public interface " + INTERFACE_SIMPLE_NAME + " extends PageObject {}"));
+        containsString("public interface Test extends PageObject {}"));
   }
 
   /**
@@ -510,62 +490,12 @@ public class JsonDeserializerTests {
    */
   @Test
   public void testGetClassAnnotationsWithPlatformProperty() {
-    String json = "{\"platform\": \"native\"" + "}";
+    String json = "{\"platform\": \"native\"}";
     List<String> expectedAnnotations = new ArrayList<>();
     expectedAnnotations.add("@PageMarker.Switch(PlatformType.NATIVE)");
 
     PageObjectClass node = createRootNode(json).getImplementation();
     PageObjectValidationTestHelper.validateAnnotationList(
         node.getClassAnnotations(), expectedAnnotations);
-  }
-
-  /**
-   * Tests that the getObjectFromString method should throw the appropriate exception with invalid
-   * JSON
-   */
-  @Test
-  public void testGetObjectFromStringThrows() {
-    UtamError e =
-        expectThrows(
-            UtamError.class,
-            () -> getDeserializedObject("{ \"foo\": \"bar\" }", UtamPageObject.class));
-    assertThat(e.getCause(), is(instanceOf(UnrecognizedPropertyException.class)));
-  }
-
-  /**
-   * Tests that a JsonDeserializer can be constructed using a Reader object
-   *
-   * @throws IOException exception
-   */
-  @Test
-  public void testConstructorWithReader() throws IOException {
-    TranslatorSourceConfig mockConfig = DefaultSourceConfigurationTests.getSourceConfig("{}");
-    JsonDeserializer deserializer = new JsonDeserializer(getDefaultConfig(), mockConfig, TEST_URI);
-    assertThat(deserializer.getObject(), is(instanceOf(JsonDeserializer.Object.class)));
-  }
-
-  /**
-   * Tests that a JsonDeserializer constructed using a Reader object will throw the proper exception
-   * if the reader throws an IOException
-   */
-  @Test
-  public void testConstructorWithReaderThrows() throws IOException {
-    TranslatorSourceConfig mockConfig = DefaultSourceConfigurationTests.getSourceConfig(null);
-    UtamError e =
-        expectThrows(
-            UtamError.class, () -> new JsonDeserializer(getDefaultConfig(), mockConfig, TEST_URI));
-    assertThat(e.getMessage(), containsString(JsonDeserializer.getErrorPrefix(TEST_URI)));
-  }
-
-  @Test
-  public void testErrorThrownByConstructor() {
-    assertThrows(UtamError.class, () -> new JsonDeserializer("error", "error", getDefaultConfig()));
-  }
-
-  @Test
-  public void testDuplicateKeyThrows() {
-    String json = "{ \"elements\" : [], \"elements\" : [] }";
-    UtamError e = expectThrows(UtamError.class, () -> createRootNode(json));
-    assertThat(e.getCause().getMessage(), containsString("Duplicate field 'elements'"));
   }
 }

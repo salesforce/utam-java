@@ -29,8 +29,6 @@ public enum PlatformType {
    */
   NATIVE;
 
-  static final String ERR_UNKNOWN_PLATFORM = "Unknown platform type '%s'";
-
   /**
    * Gets a platform type from a string value
    *
@@ -41,12 +39,7 @@ public enum PlatformType {
     if (platformStr == null || platformStr.isEmpty()) {
       return null;
     }
-    for (PlatformType type : PlatformType.values()) {
-      if (type.name().equalsIgnoreCase(platformStr)) {
-        return type;
-      }
-    }
-    throw new IllegalArgumentException(String.format(ERR_UNKNOWN_PLATFORM, platformStr));
+    return PlatformType.valueOf(platformStr.toUpperCase());
   }
 
   /**

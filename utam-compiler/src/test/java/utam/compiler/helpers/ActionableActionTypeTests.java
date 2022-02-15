@@ -10,7 +10,6 @@ package utam.compiler.helpers;
 import java.util.Objects;
 import utam.compiler.types.BasicElementInterface;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 import utam.core.element.Actionable;
 
@@ -21,12 +20,10 @@ import java.util.stream.Stream;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.BasicElementActionType.getClassAttribute;
 import static utam.compiler.helpers.BasicElementActionTypeTests.sameType;
-import static utam.compiler.helpers.BasicElementActionType.ERR_UNKNOWN_ACTION;
 import static utam.compiler.types.BasicElementUnionType.asBasicOrUnionType;
 import static utam.core.framework.UtamLogger.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.testng.Assert.expectThrows;
 
 /**
  * Provides tests for the TranslatableAction enum
@@ -67,14 +64,13 @@ public class ActionableActionTypeTests {
   }
 
   private static void validateAction(ActionType action, String returnType) {
-    assertThat(action.getParametersTypes(), is(empty()));
+    assertThat(action.getParametersTypes("test", 0), is(empty()));
     assertThat(action.getReturnType().getSimpleName(), is(equalTo(returnType)));
   }
 
   private static ActionType getActionType(String apply, ElementContext elementContext) {
     TypeProvider elementType = elementContext.getType();
-    String elementName = elementContext.getName();
-    return BasicElementActionType.getActionType(apply, elementType, elementName);
+    return BasicElementActionType.getActionType(apply, elementType);
   }
 
   @Test
@@ -200,53 +196,6 @@ public class ActionableActionTypeTests {
   public void testActionFromStringWrongActionNameError() {
     final String ACTION_NAME = "error";
     ElementContext elementContext = getElementContext(BasicElementInterface.actionable);
-    UtamError e =
-        expectThrows(
-            UtamError.class,
-            () -> getActionType(ACTION_NAME, elementContext));
-    assertThat(
-        e.getMessage(),
-        containsString(
-            String.format(
-                ERR_UNKNOWN_ACTION,
-                ACTION_NAME,
-                ELEMENT_NAME,
-                "declared interfaces [ actionable ]")));
-  }
-
-  @Test
-  public void testActionFromStringForTouchableWrongActionNameError() {
-    final String ACTION_NAME = "error";
-    ElementContext elementContext = getElementContext(BasicElementInterface.touchable);
-    UtamError e =
-        expectThrows(
-            UtamError.class,
-            () -> getActionType(ACTION_NAME, elementContext));
-    assertThat(
-        e.getMessage(),
-        containsString(
-            String.format(
-                ERR_UNKNOWN_ACTION,
-                ACTION_NAME,
-                ELEMENT_NAME,
-                "declared interfaces [ touchable ]")));
-  }
-
-  @Test
-  public void testActionFromStringWrongActionTypeError() {
-    final String ACTION_NAME = ClickableActionType.click.name();
-    ElementContext elementContext = getElementContext(BasicElementInterface.actionable);
-    UtamError e =
-        expectThrows(
-            UtamError.class,
-            () -> getActionType(ACTION_NAME, elementContext));
-    assertThat(
-        e.getMessage(),
-        containsString(
-            String.format(
-                ERR_UNKNOWN_ACTION,
-                ACTION_NAME,
-                ELEMENT_NAME,
-                "declared interfaces [ actionable ]")));
+    assertThat(getActionType(ACTION_NAME, elementContext), is(nullValue()));
   }
 }

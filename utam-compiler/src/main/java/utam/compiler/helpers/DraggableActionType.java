@@ -7,14 +7,15 @@
  */
 package utam.compiler.helpers;
 
+import static utam.compiler.helpers.BasicElementActionType.ERROR_CODE_FOR_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import utam.compiler.grammar.UtamArgument;
-import utam.compiler.grammar.UtamArgument.UtamArgumentLiteralPrimitive;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import utam.compiler.UtamCompilerIntermediateError;
 import utam.core.declarative.representation.TypeProvider;
 
 /**
@@ -34,29 +35,14 @@ public enum DraggableActionType implements ActionType {
    */
   dragAndDropByOffset;
 
-  private static final List<List<TypeProvider>> POSSIBLE_DRAG_AND_DROP_PARAMETERS = new ArrayList<>();
-  private static final List<List<TypeProvider>> POSSIBLE_DRAG_AND_DROP_OFFSET_PARAMETERS = new ArrayList<>();
-  static final String ERR_MULTIPLE_EXPECTED_ARGS_TYPES = "Draggable method supports more than one parameters combination";
-
-  static {
-    // with element
-    final List<TypeProvider> ELEMENT_PARAMETERS = Collections
-        .singletonList(BASIC_ELEMENT);
-    final List<TypeProvider> ELEMENT_WITH_DURATION_PARAMETERS = new ArrayList<>(
-        ELEMENT_PARAMETERS);
-    ELEMENT_WITH_DURATION_PARAMETERS.add(PrimitiveType.NUMBER);
-    POSSIBLE_DRAG_AND_DROP_PARAMETERS.add(ELEMENT_PARAMETERS);
-    POSSIBLE_DRAG_AND_DROP_PARAMETERS.add(ELEMENT_WITH_DURATION_PARAMETERS);
-
-    // with offset
-    final List<TypeProvider> OFFSET_PARAMETERS = new ArrayList<>();
-    OFFSET_PARAMETERS.add(PrimitiveType.NUMBER);
-    OFFSET_PARAMETERS.add(PrimitiveType.NUMBER);
-    final List<TypeProvider> OFFSET_WITH_DURATION_PARAMETERS = new ArrayList<>(OFFSET_PARAMETERS);
-    OFFSET_WITH_DURATION_PARAMETERS.add(PrimitiveType.NUMBER);
-    POSSIBLE_DRAG_AND_DROP_OFFSET_PARAMETERS.add(OFFSET_PARAMETERS);
-    POSSIBLE_DRAG_AND_DROP_OFFSET_PARAMETERS.add(OFFSET_WITH_DURATION_PARAMETERS);
-  }
+  private static final List<TypeProvider> ELEMENT_PARAMETERS = Collections
+      .singletonList(BASIC_ELEMENT);
+  private static final List<TypeProvider> ELEMENT_WITH_DURATION_PARAMETERS =
+      Stream.of(BASIC_ELEMENT, PrimitiveType.NUMBER).collect(Collectors.toList());
+  private static final List<TypeProvider> OFFSET_PARAMETERS =
+      Stream.of(PrimitiveType.NUMBER, PrimitiveType.NUMBER).collect(Collectors.toList());
+  private static final List<TypeProvider> OFFSET_WITH_DURATION_PARAMETERS =
+      Stream.of(PrimitiveType.NUMBER, PrimitiveType.NUMBER, PrimitiveType.NUMBER).collect(Collectors.toList());
 
   @Override
   public TypeProvider getReturnType() {
@@ -64,33 +50,28 @@ public enum DraggableActionType implements ActionType {
   }
 
   @Override
-  public List<TypeProvider> getParametersTypes() {
-    throw new IllegalStateException(ERR_MULTIPLE_EXPECTED_ARGS_TYPES);
-  }
-
-  @Override
-  public List<List<TypeProvider>> getParametersTypesOptions() {
+  public List<TypeProvider> getParametersTypes(String parserContext, int parametersCount) {
     if(this == dragAndDropByOffset) {
-      return POSSIBLE_DRAG_AND_DROP_OFFSET_PARAMETERS;
+      if(parametersCount == 3) {
+        return OFFSET_WITH_DURATION_PARAMETERS;
+      }
+      if(parametersCount == 2) {
+        return OFFSET_PARAMETERS;
+      }
+    } else {
+      if(parametersCount == 2) {
+        return ELEMENT_WITH_DURATION_PARAMETERS;
+      }
+      if(parametersCount == 1) {
+        return ELEMENT_PARAMETERS;
+      }
     }
-    return POSSIBLE_DRAG_AND_DROP_PARAMETERS;
+    throw new UtamCompilerIntermediateError(ERROR_CODE_FOR_PARAMETERS, parserContext, this.name(),
+          "(check documentation)", String.valueOf(parametersCount));
   }
 
   @Override
   public String getApplyString() {
     return this.name();
-  }
-
-  @Override
-  public UtamArgument[] getTransformedArgs(UtamArgument[] args) {
-    if (this == dragAndDrop && args.length == 1) {
-      // add default duration as 0
-      return new UtamArgument[]{args[0], new UtamArgumentLiteralPrimitive(0)};
-    }
-    if (this == dragAndDropByOffset && args.length == 2) {
-      // add default duration as 0
-      return new UtamArgument[]{args[0], args[1], new UtamArgumentLiteralPrimitive(0)};
-    }
-    return args;
   }
 }

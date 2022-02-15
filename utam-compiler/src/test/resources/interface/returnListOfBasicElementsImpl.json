@@ -1,8 +1,10 @@
 {
   "implements": "utam-test/pageObjects/test",
-  "profile" : {
-    "profile" : "test"
-  },
+  "profile": [
+    {
+      "profile": "test"
+    }
+  ],
   "elements": [
     {
       "name": "test",

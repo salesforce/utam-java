@@ -100,11 +100,10 @@ public final class AnnotationUtils {
 
   /**
    * Gets the annotation provider for the page platform
-   * @param platformTypeStr the string representing the platform in JSON file
+   * @param platformType platform in JSON file
    * @return the object providing the annotation for the given platform
    */
-  public static AnnotationProvider getPagePlatformAnnotation(String platformTypeStr) {
-    PlatformType platformType = PlatformType.fromString(platformTypeStr);
+  public static AnnotationProvider getPagePlatformAnnotation(PlatformType platformType) {
     if (platformType == null) {
       return EMPTY_ANNOTATION;
     }

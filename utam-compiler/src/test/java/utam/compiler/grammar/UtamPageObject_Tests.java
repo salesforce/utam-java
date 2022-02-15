@@ -7,236 +7,167 @@
  */
 package utam.compiler.grammar;
 
-import utam.compiler.types.BasicElementInterface;
-import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.TranslationContext;
-import utam.core.declarative.representation.AnnotationProvider;
-import utam.core.framework.consumer.UtamError;
-import org.testng.annotations.Test;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.testng.Assert.expectThrows;
+import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT_CLASS;
+import static utam.compiler.helpers.TypeUtilities.BASE_ROOT_PAGE_OBJECT_CLASS;
+import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
+import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static utam.compiler.grammar.TestUtilities.*;
-import static utam.compiler.grammar.UtamPageObject.*;
-import static utam.compiler.grammar.UtamProfile_Tests.PROFILE_KEY;
-import static utam.compiler.grammar.UtamProfile_Tests.PROFILE_VALUE;
-import static utam.compiler.grammar.UtamSelectorTests.SELECTOR_STRING;
-import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
-import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.testng.Assert.expectThrows;
+import org.testng.annotations.Test;
+import utam.compiler.UtamCompilationError;
+import utam.core.declarative.representation.AnnotationProvider;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.framework.consumer.UtamError;
 
 /**
- * Page Object Root tests
+ * Page Object grammar tests
  *
  * @author james.evans
  */
 public class UtamPageObject_Tests {
 
-  private static final UtamProfile[] MOCK_PROFILES =
-      new UtamProfile[] {new UtamProfile(PROFILE_KEY, PROFILE_VALUE)};
+  private final String PARSER_ERROR_PREFIX = "error UPO000: incorrect format of the page object: \n";
 
-  /** The getBaseType method should return the proper value with the root property set to true */
   @Test
-  public void testGetBaseTypeWithRoot() {
-    UtamPageObject pageObject = new UtamPageObject(true, new UtamSelector("css"));
-    assertThat(pageObject.getBaseType(), is(equalTo(ROOT_PAGE_OBJECT)));
-  }
-
-  /** The getBaseType method should return the proper value with the root property set to false */
-  @Test
-  public void testGetBaseTypeWithNonRoot() {
-    UtamPageObject pageObject = new UtamPageObject(false, null);
-    assertThat(pageObject.getBaseType(), is(equalTo(PAGE_OBJECT)));
-  }
-
-  /** The getAnnotations method should return the proper value with a selector */
-  @Test
-  public void testGetAnnotationsWithSelector() {
-    UtamPageObject pageObject = new UtamPageObject(true, UtamSelectorTests.getUtamCssSelector());
-    List<String> annotations =
-        pageObject.getAnnotations().stream()
-            .filter((annotation) -> !annotation.getAnnotationText().isEmpty())
-            .map(AnnotationProvider::getAnnotationText)
-            .collect(Collectors.toList());
+  public void testRootPageObjectHasCorrectBaseClasses() {
+    PageObjectDeclaration declaration = new DeserializerUtilities()
+        .getResultFromFile("pageobjects/root").getPageObject();
     assertThat(
-        annotations, contains(String.format("@PageMarker.Find(css = \"%s\")", SELECTOR_STRING)));
+        declaration.getImplementation().getBaseClassType().isSameType(BASE_ROOT_PAGE_OBJECT_CLASS),
+        is(true));
+    assertThat(declaration.getInterface().getBaseInterfaceType().isSameType(ROOT_PAGE_OBJECT),
+        is(true));
+    List<String> annotations = declaration.getImplementation()
+        .getClassAnnotations().stream()
+        .map(AnnotationProvider::getAnnotationText)
+        .collect(Collectors.toList());
+    assertThat(annotations, contains("@PageMarker.Find(css = \".css\")"));
   }
 
-  /** The getAnnotations method should return the proper value with a platform property */
   @Test
-  public void testGetAnnotationsWithPlatform() {
-    UtamPageObject pageObject = new UtamPageObject();
-    pageObject.platform = "web";
-    List<String> annotations =
-        pageObject.getAnnotations().stream()
-            .filter((annotation) -> !annotation.getAnnotationText().isEmpty())
-            .map(AnnotationProvider::getAnnotationText)
-            .collect(Collectors.toList());
-    assertThat(annotations, contains("@PageMarker.Switch(PlatformType.WEB)"));
-  }
-
-  /** The getAnnotations method should return the proper value with a platform property */
-  @Test
-  public void testGetAnnotationsWithNoAnnotations() {
-    UtamPageObject pageObject = new UtamPageObject();
-    List<String> annotations =
-        pageObject.getAnnotations().stream()
-            .filter((annotation) -> !annotation.getAnnotationText().isEmpty())
-            .map(AnnotationProvider::getAnnotationText)
-            .collect(Collectors.toList());
+  public void testNonRootPageObjectHasCorrectBaseClasses() {
+    PageObjectDeclaration declaration = new DeserializerUtilities()
+        .getResultFromFile("pageobjects/non_root").getPageObject();
+    assertThat(
+        declaration.getImplementation().getBaseClassType().isSameType(BASE_PAGE_OBJECT_CLASS),
+        is(true));
+    assertThat(declaration.getInterface().getBaseInterfaceType().isSameType(PAGE_OBJECT), is(true));
+    List<String> annotations = declaration.getImplementation()
+        .getClassAnnotations().stream()
+        .map(AnnotationProvider::getAnnotationText)
+        .collect(Collectors.toList());
     assertThat(annotations, is(empty()));
-  }
-
-  /**
-   * The setPublicMethods method should set the proper methods on the TranslatorContext with no
-   * methods specified
-   */
-  @Test
-  public void testSetPublicMethodsWithNullMethodList() {
-    TranslationContext context = getTestTranslationContext();
-    UtamPageObject pageObject = new UtamPageObject();
-    pageObject.compile(context);
-    assertThat(context.getMethods(), is(empty()));
-  }
-
-  /**
-   * The setPublicMethods method should set the proper methods on the TranslatorContext with an
-   * empty method list
-   */
-  @Test
-  public void testSetPublicMethodsWithEmptyMethodList() {
-    TranslationContext context = getTestTranslationContext();
-    UtamPageObject pageObject = new UtamPageObject();
-    pageObject.methods = new UtamMethod[] {};
-    pageObject.compile(context);
-    assertThat(context.getMethods(), is(empty()));
-  }
-
-  /**
-   * The setPublicMethods method should set the proper methods on the TranslatorContext with the
-   * abstract property true and an empty method list
-   */
-  @Test
-  public void testSetPublicMethodsWithAbstractAndEmptyMethodList() {
-    TranslationContext context = getTestTranslationContext();
-    UtamPageObject pageObject = new UtamPageObject();
-    pageObject.methods = new UtamMethod[] {};
-    pageObject.compile(context);
-    assertThat(context.getMethods(), hasSize(0));
-  }
-
-  @Test
-  public void testAbstractPageObjectWithProfile() {
-    UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.profiles = MOCK_PROFILES;
-    utamPageObject.isAbstract = true;
-    UtamError e = expectThrows(UtamError.class, utamPageObject::validate);
-    assertThat(e.getMessage(), is(equalTo(ERR_ROOT_ABSTRACT)));
   }
 
   @Test
   public void testGetProfilesWithNullImplementedTypeThrows() {
-    UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.profiles = MOCK_PROFILES;
-    UtamError e = expectThrows(UtamError.class, utamPageObject::validate);
-    assertThat(e.getMessage(), containsString(ERR_ROOT_PROFILE_HAS_NO_INTERFACE));
+    String json = "{ \"profile\" :  [{\"profile\" : \"test\" }] }";
+    UtamError e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities().getResultFromString(json));
+    assertThat(e.getMessage(), containsString(
+        "error UP005: \"profile\" can only be set for a page object that implements an interface"));
   }
 
   @Test
   public void testImplementationWithoutProfileThrows() {
-    UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.implementsType = "type/to/implement";
-    UtamError e = expectThrows(UtamError.class, utamPageObject::validate);
-    assertThat(e.getMessage(), containsString(ERR_PROFILE_IS_REQUIRED));
-  }
-
-  @Test
-  public void testGetNextScopeForAbstract() {
-    TranslationContext context = getTestTranslationContext();
-    UtamPageObject pageObject = new UtamPageObject();
-    pageObject.isAbstract = true;
-    pageObject.compile(context);
-  }
-
-  @Test
-  public void testRootWithSelector() {
-    TranslationContext context = getTestTranslationContext();
-    UtamSelector rootSelector = UtamSelectorTests.getUtamCssSelector();
-    UtamPageObject pageObject = new UtamPageObject(true, rootSelector);
-    pageObject.compile(context);
-  }
-
-  @Test
-  public void testRootWithAccessIDSelector() {
-    TranslationContext context = TestUtilities.getTestTranslationContext();
-    UtamSelector selector = new UtamSelector(null, "accessid", null, null);
-    UtamPageObject pageObject = new UtamPageObject(true, selector);
-    pageObject.isRootPageObject = true;
-    pageObject.platform = "native";
-    pageObject.compile(context);
-  }
-
-  @Test
-  public void testAbstractWithNonNullShadowThrows() {
-    UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.isAbstract = true;
-    utamPageObject.shadow = new UtamShadowElement(new UtamElement[] {});
-    UtamError e = expectThrows(UtamError.class, utamPageObject::validate);
-    assertThat(e.getMessage(), containsString(ERR_ROOT_ABSTRACT));
-  }
-
-  @Test
-  public void testAbstractWithNonNullSelectorThrows() {
-    UtamPageObject utamPageObject = new UtamPageObject(true, UtamSelectorTests.getUtamCssSelector());
-    utamPageObject.isAbstract = true;
-    UtamError e = expectThrows(UtamError.class, utamPageObject::validate);
-    assertThat(e.getMessage(), containsString(ERR_ROOT_ABSTRACT));
+    String json = "{ \"implements\" : \"type/to/implement\" }";
+    UtamError e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities().getResultFromString(json));
+    assertThat(e.getMessage(),
+        containsString("error UP004: page object with \"implements\" should have \"profile\" property"));
   }
 
   @Test
   public void testAbstractWithNonNullElementsThrows() {
-    UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.elements = new UtamElement[0];
-    utamPageObject.isAbstract = true;
-    UtamError e = expectThrows(UtamError.class, utamPageObject::validate);
-    assertThat(e.getMessage(), containsString(ERR_ROOT_ABSTRACT));
-  }
-
-  @Test
-  public void testRootWithNullSelectorThrows() {
-    UtamPageObject utamPageObject = new UtamPageObject();
-    utamPageObject.isRootPageObject = true;
-    UtamError e = expectThrows(UtamError.class, utamPageObject::validate);
-    assertThat(e.getMessage(), containsString(ERR_ROOT_MISSING_SELECTOR));
-  }
-
-  @Test
-  public void testNonRootWithNonNullSelectorThrows() {
-    UtamError e = expectThrows(UtamError.class, () -> new UtamPageObject(false, UtamSelectorTests.getUtamCssSelector()));
-    assertThat(e.getMessage(), containsString(ERR_ROOT_REDUNDANT_SELECTOR));
-  }
-
-  @Test
-  public void testDefaultRootElementMethod() {
-    UtamPageObject utamPageObject = new UtamPageObject();
-    TranslationContext context = getTestTranslationContext();
-    utamPageObject.compile(context);
-    assertThat(context.getRootElement().getElementMethod(), is(notNullValue()));
+    String json = "{ \"elements\" : [{ \"name\" : \"test\", \"selector\": {\"css\": \"css\"} }], \"interface\" : true }";
+    Exception e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities().getResultFromString(json));
+    assertThat(e.getMessage(),
+        containsString("error UPO004: interface declaration can only have properties"));
   }
 
   @Test
   public void testElementWithRootElementNameThrows() {
-    UtamPageObject utamPageObject = new UtamPageObject();
-    TranslationContext context = getTestTranslationContext();
-    utamPageObject.compile(context);
-    ElementContext notRootWithRootName =
-            new ElementContext.Basic(
-                    "root", BasicElementInterface.clickable, getCssSelector("css"));
-    expectThrows(UtamError.class, () -> context.setElement(notRootWithRootName));
+    String json = "{ \"elements\" : [ { \"name\" : \"root\", \"selector\" : { \"css\" : \"css\" } } ]}";
+    Exception e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities().getResultFromString(json));
+    assertThat(e.getMessage(), containsString(
+        "error UE002: element \"root\": element with same name was already declared"));
+  }
+
+  @Test
+  public void testRootCreationWithoutRootPropertyErr() {
+    String json = "{\"selector\": {\"css\": \"rootSelector\"}}";
+    UtamError e = expectThrows(UtamCompilationError.class,
+        () -> new DeserializerUtilities().getResultFromString(json));
+    assertThat(e.getMessage(),
+        containsString("error UPO001: non root page object can't have selector"));
+  }
+
+  /**
+   * Tests that an element marked as a root element, but without a selector throws the proper
+   * exception
+   */
+  @Test
+  public void testRootNodeWithRootPropertyWithoutSelectorThrows() {
+    String json = "{\"root\": true }";
+    UtamError e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities().getResultFromString(json));
+    assertThat(e.getMessage(),
+        containsString("error UPO002: root page object requires default selector property"));
+  }
+
+  @Test
+  public void testIncorrectFieldType() {
+    String json = "{\"root\": \"invalid\"}";
+    UtamError e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities().getResultFromString(json));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            PARSER_ERROR_PREFIX + "Cannot deserialize value of type `boolean` from String"));
+  }
+
+  @Test
+  public void testUnrecognizedField() {
+    String json = "{\"public\": true}";
+    UtamError e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities().getResultFromString(json));
+    assertThat(e.getMessage(),
+        containsString(PARSER_ERROR_PREFIX + "Unrecognized field \"public\""));
+  }
+
+  @Test
+  public void testDuplicateKeyThrows() {
+    String json = "{ \"elements\" : [], \"elements\" : [] }";
+    UtamError e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities().getResultFromString(json));
+    assertThat(e.getMessage(), containsString(PARSER_ERROR_PREFIX + "Duplicate field 'elements'"));
+  }
+
+  @Test
+  public void testPlatformNotStringThrows() {
+    String json = "{ \"platform\": [] }";
+    Exception e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities().getResultFromString(json));
+    assertThat(e.getMessage(),
+        containsString(PARSER_ERROR_PREFIX + "Cannot deserialize instance of `java.lang.String`"));
+  }
+
+  @Test
+  public void testIncorrectPlatformThrows() {
+    String json = "{ \"platform\": \"webview\" }";
+    Exception e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities().getResultFromString(json));
+    assertThat(e.getMessage(),
+        containsString(
+            "error UPO003: \"platform\" property: platform should be a string with \"web\" or \"native\" value, instead found \"webview\""));
   }
 }

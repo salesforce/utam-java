@@ -13,16 +13,16 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
-import utam.compiler.grammar.ArgsProcessor.ArgsProcessorWithExpectedTypes;
 import utam.compiler.grammar.UtamMethodActionApply.ApplyOperation;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementContext.ElementType;
 import utam.compiler.helpers.MethodContext;
+import utam.compiler.helpers.ParametersContext;
+import utam.compiler.helpers.ParametersContext.StatementParametersContext;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.StatementContext;
 import utam.compiler.helpers.TranslationContext;
@@ -42,80 +42,88 @@ import utam.core.declarative.representation.TypeProvider;
 @JsonDeserialize
 class UtamMethodActionGetter extends UtamMethodAction {
 
-  static final String ERR_RETURN_TYPE_CANT_BE_INFERRED = "method '%s': return type can't be inferred for element '%s', please provide return type";
-  static final String ERR_CONTAINER_INVOCATION_NEEDS_RETURN_TYPE = "method '%s': first statement invokes container method and needs return type";
-
   @JsonCreator
   UtamMethodActionGetter(
       @JsonProperty(value = "element") String elementName,
-      @JsonProperty(value = "args") UtamArgument[] args,
-      @JsonProperty(value = "matcher") UtamMatcher matcher,
+      @JsonProperty(value = "args") JsonNode argsNode,
+      @JsonProperty(value = "matcher") JsonNode matcherNode,
       @JsonProperty(value = "returnType") JsonNode returnType,
       @JsonProperty(value = "returnAll") Boolean isReturnList,
       @JsonProperty(value = "chain", defaultValue = "false") boolean isChain) {
-    super(elementName, null, null, args, matcher, returnType, isReturnList, isChain);
+    super(elementName, argsNode, matcherNode, returnType, isReturnList, isChain);
   }
 
   private GetterInvocation getForeignElementGetter(TranslationContext context,
       MethodContext methodContext,
       StatementContext statementContext) {
-    String methodName = getElementGetterMethodName(elementName, true);
-    ArgsProcessor argsProcessor = new ArgsProcessor(context, methodContext,
-        p -> methodContext.setStatementParameter(p, statementContext));
-    List<MethodParameter> getterParameters;
-    if (args != null) {
-      getterParameters = argsProcessor.getParameters(args);
-    } else {
-      getterParameters = new ArrayList<>();
-    }
+    String parserContext = String.format("method \"%s\"", methodContext.getName());
+    String elementGetterMethodName = getElementGetterMethodName(elementName, true);
+    ParametersContext parametersContext = new StatementParametersContext(parserContext,
+        context,
+        argsNode,
+        methodContext);
+    ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
+    List<UtamArgument> arguments = provider.getArguments(true);
+    arguments
+        .stream()
+        .map(arg -> arg.asParameter(context, methodContext, parametersContext))
+        .forEach(parametersContext::setParameter);
+    List<MethodParameter> parameters = parametersContext.getParameters();
     TypeProvider returnType = statementContext
         .getDeclaredReturnOrDefault(context, methodContext.getDeclaredReturnType(), null);
     if (returnType == null) {
       throw new UtamCompilationError(
-          String.format(ERR_RETURN_TYPE_CANT_BE_INFERRED, methodContext.getName(), elementName));
+          context.getErrorMessage("UMA005", methodContext.getName(), elementName));
     }
-    return new GetterInvocation(methodName, returnType, getterParameters);
+    return new GetterInvocation(elementGetterMethodName, returnType, parameters);
   }
 
   private GetterInvocation getElementGetterFromContext(TranslationContext context,
       MethodContext methodContext,
       StatementContext statementContext) {
-    ElementContext element = context.getElement(elementName);
+    String methodName = methodContext.getName();
+    String parserContext = String.format("method \"%s\"", methodName);
+    ParametersContext parametersContext = new StatementParametersContext(parserContext,
+        context,
+        argsNode,
+        methodContext);
+    ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
+    ElementContext element = provider.getElementArgument(context, elementName);
     element.setElementMethodUsage(context);
-    MethodDeclaration elementGetter = context.getElement(elementName).getElementMethod()
-        .getDeclaration();
+    MethodDeclaration elementGetter = element.getElementMethod().getDeclaration();
     boolean isContainer = element.getElementNodeType() == ElementType.CONTAINER;
     if (isContainer && !statementContext.hasDeclaredReturn()) {
       // for container return type is PageObject
-      throw new UtamCompilationError(
-          String.format(ERR_CONTAINER_INVOCATION_NEEDS_RETURN_TYPE, methodContext.getName()));
+      throw new UtamCompilationError(context.getErrorMessage("UMA004", methodName));
     }
     TypeProvider returnType = statementContext.hasDeclaredReturn() ? statementContext
         .getDeclaredStatementReturnOrNull(context) : elementGetter.getReturnType();
-    if (!isContainer && matcher == null) {
+    if (!isContainer && !hasMatcher) {
       checkDefinedReturnType(elementGetter.getReturnType(), returnType, methodContext.getName());
     }
-    List<MethodParameter> getterParameters;
-    String invocationStr = elementGetter.getName();
-    if (args != null) {
+    List<UtamArgument> arguments = provider.getArguments(true);
+    List<MethodParameter> parameters;
+    if (!arguments.isEmpty()) {
+      arguments
+          .stream()
+          .map(arg -> arg.asParameter(context, methodContext, parametersContext))
+          .forEach(parametersContext::setParameter);
       List<TypeProvider> expectedElementArgsTypes = elementGetter
           .getParameters()
           .stream()
           .map(MethodParameter::getType)
           .collect(Collectors.toList());
-      getterParameters = new ArgsProcessorWithExpectedTypes(context, methodContext,
-          expectedElementArgsTypes, p -> methodContext.setStatementParameter(p, statementContext))
-          .getParameters(args);
+      parameters = parametersContext.getParameters(expectedElementArgsTypes);
     } else if (methodContext.getElementUsageTracker().isReusedElement(elementName)) {
-      getterParameters = elementGetter.getParameters(); // element parameters already added
+      parameters = elementGetter.getParameters();
     } else {
-      getterParameters = elementGetter.getParameters()
-          .stream()
-          .map(p -> methodContext.setStatementParameter(p, statementContext))
-          .collect(Collectors.toList());
+      elementGetter.getParameters().forEach(parametersContext::setParameter);
+      parameters = parametersContext.getParameters();
     }
-    methodContext.getElementUsageTracker().setElementUsage(statementContext.getVariableName(), element);
-    return new GetterInvocation(invocationStr, returnType, getterParameters);
+    String invocationStr = elementGetter.getName();
+    methodContext.getElementUsageTracker()
+        .setElementUsage(statementContext.getVariableName(), element);
+    return new GetterInvocation(invocationStr, returnType, parameters);
   }
 
   @Override
@@ -137,7 +145,8 @@ class UtamMethodActionGetter extends UtamMethodAction {
       operand = SELF_OPERAND;
       getterInvocation = getElementGetterFromContext(context, methodContext, statementContext);
     }
-    Operation operation = getterInvocation.getOperation(matcher);
+
+    Operation operation = getterInvocation.getOperation(getMatcher(validationContextStr));
     checkMatcher(getterInvocation.getterReturnType, validationContextStr);
     return buildStatement(operand, operation, context, methodContext, statementContext);
   }

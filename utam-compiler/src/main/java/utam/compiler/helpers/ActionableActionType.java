@@ -7,10 +7,12 @@
  */
 package utam.compiler.helpers;
 
+import static utam.compiler.helpers.BasicElementActionType.ERROR_CODE_FOR_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import java.util.ArrayList;
 import java.util.List;
+import utam.compiler.UtamCompilerIntermediateError;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Actionable;
 
@@ -68,7 +70,12 @@ public enum ActionableActionType implements ActionType {
   }
 
   @Override
-  public List<TypeProvider> getParametersTypes() {
+  public List<TypeProvider> getParametersTypes(String parserContext, int parameterCount) {
+    int expected = 0;
+    if (0 != parameterCount) {
+      throw new UtamCompilerIntermediateError(ERROR_CODE_FOR_PARAMETERS, parserContext, this.name(),
+          String.valueOf(expected), String.valueOf(parameterCount));
+    }
     return new ArrayList<>();
   }
 

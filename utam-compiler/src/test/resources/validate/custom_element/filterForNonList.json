@@ -1,0 +1,17 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "type": "my/page/type",
+      "selector": {
+        "css": "css"
+      },
+      "filter": {
+        "apply": "isVisible",
+        "matcher": {
+          "type": "isTrue"
+        }
+      }
+    }
+  ]
+}

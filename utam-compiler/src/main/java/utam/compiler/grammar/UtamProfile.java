@@ -7,19 +7,18 @@
  */
 package utam.compiler.grammar;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import utam.compiler.grammar.UtamProfile.Deserializer;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.TranslationContext;
-import utam.core.framework.consumer.UtamError;
+import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.framework.context.Profile;
 
 /**
@@ -29,72 +28,125 @@ import utam.core.framework.context.Profile;
  * @author elizaveta.ivanova
  * @since 228
  */
-@JsonDeserialize(using = Deserializer.class)
 final class UtamProfile {
-
-  static final String ERR_INVALID_ARRAY_TYPES =
-      "Profile '%s': array of profile values must contain only string values";
-  static final String ERR_DUPLICATE_PROFILE_VALUE =
-      "Profile '%s': value '%s' already added";
-  static final String ERR_PROFILE_VALUE_WRONG_FORMAT =
-      "Profile '%s': value can only be string or string array";
 
   private final String name;
   private final List<String> values;
 
-  UtamProfile(String name, String value) {
-    this.name = name;
-    this.values = Collections.singletonList(value);
-  }
-
-  UtamProfile(String name, List<String> values) {
+  private UtamProfile(String name, List<String> values) {
     this.name = name;
     this.values = values;
   }
 
-  static List<Profile> getPageObjectProfiles(UtamProfile[] profiles, TranslationContext context) {
-    if (profiles == null) {
-      return new ArrayList<>();
+  /**
+   * check that profile is configured and transform into profile
+   *
+   * @param profilesNode json node with profiles, passed to print out error
+   * @param context      translation context
+   * @return function to get list of profiles or throw and error is profile is not configured
+   */
+  private Stream<Profile> getProfiles(JsonNode profilesNode, TranslationContext context) {
+    return values.stream()
+        .map(profileValue -> {
+          ProfileConfiguration profileConfiguration = context.getConfiguredProfile(name);
+          if (profileConfiguration == null) {
+            throw new UtamCompilationError(profilesNode,
+                context.getErrorMessage("UP003", name, profileValue));
+          }
+          return profileConfiguration.getFromString(profileValue);
+        });
+  }
+
+  /**
+   * provides instance of compiled profiles list
+   *
+   * @author elizaveta.ivanova
+   * @since 238
+   */
+  static class UtamProfileProvider {
+
+    private final JsonNode profilesNode;
+    private final boolean isProfilesRequired;
+
+    /**
+     * deserialize profiles node
+     *
+     * @param profilesNode Json source
+     * @param isImplOnly   true if page object has "implements" property
+     */
+    UtamProfileProvider(JsonNode profilesNode, boolean isImplOnly) {
+      this.profilesNode = profilesNode;
+      this.isProfilesRequired = isImplOnly;
     }
-    return Stream.of(profiles)
-        .flatMap(profile -> profile.getProfiles(context).stream())
-        .collect(Collectors.toList());
-  }
 
-  List<Profile> getProfiles(TranslationContext translationContext) {
-    return values
-        .stream()
-        .map(value -> translationContext.getProfile(name, value))
-        .collect(Collectors.toList());
-  }
+    /**
+     * check if profiles are set
+     *
+     * @return true if set
+     */
+    boolean isProfilesSet() {
+      return profilesNode != null && !profilesNode.isNull();
+    }
 
-  static class Deserializer extends
-      com.fasterxml.jackson.databind.JsonDeserializer<UtamProfile> {
+    /**
+     * translate declared profiles into configured
+     *
+     * @param context translation context
+     * @return list of profiles
+     */
+    List<Profile> getProfiles(TranslationContext context) {
+      return parseProfileNode(context)
+          .stream()
+          .flatMap(profile -> profile.getProfiles(profilesNode, context))
+          .collect(Collectors.toList());
+    }
 
-    @Override
-    public UtamProfile deserialize(JsonParser jp, DeserializationContext deserializationContext)
-        throws IOException {
-      JsonNode node = jp.getCodec().readTree(jp);
-      String key = node.fieldNames().next();
-      JsonNode valuesNode = node.get(key);
-      if (valuesNode.isArray()) {
-        List<String> values = new ArrayList<>();
-        for (JsonNode valueNode : valuesNode) {
-          if (!valueNode.isTextual()) {
-            throw new UtamError(String.format(ERR_INVALID_ARRAY_TYPES, key));
-          }
-          String textValue = valueNode.textValue();
-          if (values.contains(textValue)) {
-            throw new UtamError(String.format(ERR_DUPLICATE_PROFILE_VALUE, key, textValue));
-          }
-          values.add(textValue);
+    private Collection<UtamProfile> parseProfileNode(TranslationContext context) {
+      if (!isProfilesSet()) {
+        if (isProfilesRequired) {
+          throw new UtamCompilationError(profilesNode, context.getErrorMessage("UP004"));
         }
-        return new UtamProfile(key, values);
-      } else if (valuesNode.isTextual()) {
-        return new UtamProfile(key, valuesNode.asText());
-      } else {
-        throw new UtamError(String.format(ERR_PROFILE_VALUE_WRONG_FORMAT, key));
+        return new ArrayList<>();
       }
+      if (!isProfilesRequired) {
+        throw new UtamCompilationError(profilesNode, context.getErrorMessage("UP005"));
+      }
+      if (!profilesNode.isArray() || profilesNode.size() == 0) {
+        throw new UtamCompilationError(profilesNode, context.getErrorMessage("U0003", "property \"profile\""));
+      }
+      Map<String, UtamProfile> profiles = new HashMap<>();
+      for (JsonNode node : profilesNode) {
+        String profileName = node.fieldNames().next();
+        JsonNode valuesNode = node.get(profileName);
+        String propertyName = String.format("profile \"%s\"", profileName);
+        if (profiles.containsKey(profileName)) {
+          throw new UtamCompilationError(profilesNode,
+              context.getErrorMessage("UP001", profileName));
+        }
+        if (valuesNode.isArray()) {
+          List<String> values = new ArrayList<>();
+          for (JsonNode valueNode : valuesNode) {
+            if (!valueNode.isTextual() || valueNode.textValue().isEmpty()) {
+              throw new UtamCompilationError(profilesNode,
+                  context.getErrorMessage("U0002", propertyName, valuesNode.toPrettyString()));
+            }
+            String profileValue = valueNode.textValue();
+            if (values.contains(profileValue)) {
+              throw new UtamCompilationError(profilesNode,
+                  context.getErrorMessage("UP002", profileName, profileValue));
+            }
+            values.add(profileValue);
+          }
+          profiles.put(profileName, new UtamProfile(profileName, values));
+        } else if (valuesNode.isTextual()) {
+          profiles.put(profileName,
+              new UtamProfile(profileName, Collections.singletonList(valuesNode.textValue())));
+        } else {
+          throw new UtamCompilationError(profilesNode,
+              context.getErrorMessage("UP006", profileName));
+        }
+      }
+      return profiles.values();
     }
   }
 }

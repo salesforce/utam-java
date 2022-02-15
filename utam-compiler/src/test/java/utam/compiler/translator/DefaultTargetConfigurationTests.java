@@ -15,10 +15,8 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.translator.TranslatorMockUtilities.IMPL_ONLY_CLASS_NAME;
-import static utam.compiler.translator.TranslatorMockUtilities.INTERFACE_ONLY_CLASS_NAME;
-import static utam.compiler.translator.TranslatorMockUtilities.PAGE_OBJECT_IMPL_CLASS_NAME;
-import static utam.compiler.translator.TranslatorMockUtilities.PAGE_OBJECT_INTERFACE_CLASS_NAME;
+import static utam.compiler.translator.DefaultTranslatorRunnerTests.IMPL_ONLY_CLASS_NAME;
+import static utam.compiler.translator.DefaultTranslatorRunnerTests.INTERFACE_ONLY_CLASS_NAME;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,6 +35,10 @@ import utam.core.declarative.translator.UnitTestRunner;
 
 public class DefaultTargetConfigurationTests {
 
+  static final String PAGE_OBJECT_INTERFACE_CLASS_NAME =
+      "utam.test.pageobjects.test.TestPageObject";
+  static final String PAGE_OBJECT_IMPL_CLASS_NAME =
+      "utam.test.pageobjects.test.impl.TestPageObjectImpl";
   private static final String FAKE_IO_EXCEPTION_MESSAGE = "throwing fake IO exception";
 
   @Test
@@ -155,7 +157,7 @@ public class DefaultTargetConfigurationTests {
         is(equalTo((currentDir + "/utam/MyPageTests.java").replace("/", File.separator))));
   }
 
-  static class Mock implements TranslatorTargetConfig {
+  public static class Mock implements TranslatorTargetConfig {
 
     final Map<String, Writer> writers = new HashMap<>();
     private final UnitTestRunner unitTestRunnerType;
@@ -165,7 +167,7 @@ public class DefaultTargetConfigurationTests {
       this.unitTestRunnerType = unitTestRunnerType;
     }
 
-    Mock() {
+    public Mock() {
       this(UnitTestRunner.NONE);
     }
 

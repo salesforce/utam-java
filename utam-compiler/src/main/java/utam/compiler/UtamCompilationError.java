@@ -7,6 +7,10 @@
  */
 package utam.compiler;
 
+import static utam.compiler.UtamCompilerIntermediateError.getErrorMessageWithJsonCode;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
 import utam.core.framework.consumer.UtamError;
 
 /**
@@ -32,21 +36,43 @@ public class UtamCompilationError extends UtamError {
   }
 
   /**
-   * Initializes a new instance of the UtamCompilationError class
+   * add json code to message
    *
-   * @param message the message of the error
-   * @param e the inner exception wrapped by the error
+   * @param parser  json parser
+   * @param message original message
    */
-  public UtamCompilationError(String message, Exception e) {
-    super(message, e);
+  public UtamCompilationError(JsonParser parser, String message) {
+    super(getErrorMessageWithJsonCode(parser, message));
+  }
+
+  /**
+   * add json code to message
+   *
+   * @param parser  json parser
+   * @param message original message
+   * @param t       original exception
+   */
+  public UtamCompilationError(JsonParser parser, String message, Throwable t) {
+    super(getErrorMessageWithJsonCode(parser, message), t);
+  }
+
+  /**
+   * add json code to message
+   *
+   * @param node    json node
+   * @param message original message
+   */
+  public UtamCompilationError(JsonNode node, String message) {
+    super(getErrorMessageWithJsonCode(node, message));
   }
 
   /**
    * Initializes a new instance of the UtamCompilationError class
    *
+   * @param message the message of the error
    * @param e the inner exception wrapped by the error
    */
-  public UtamCompilationError(Exception e) {
-    super(e);
+  public UtamCompilationError(String message, Throwable e) {
+    super(message, e);
   }
 }

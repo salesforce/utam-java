@@ -8,17 +8,13 @@
 package utam.compiler.grammar;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
-import static utam.compiler.grammar.UtamArgumentTests.getLiteralArg;
+import static utam.compiler.grammar.DeserializerUtilities.expectCompilerErrorFromFile;
 
 import org.testng.annotations.Test;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.PrimitiveType;
-import utam.core.framework.consumer.UtamError;
 
 /**
  * tests for matcher
@@ -29,36 +25,23 @@ import utam.core.framework.consumer.UtamError;
 public class UtamMatcherTests {
 
   @Test
-  public void testMethodStatementAction() {
-    UtamMatcher matcher = new UtamMatcher(MatcherType.isFalse, null);
-    matcher.getParameters(getTestTranslationContext(), "element");
-
-    matcher = new UtamMatcher(MatcherType.isTrue, new UtamArgument[0]);
-    matcher.getParameters(getTestTranslationContext(), "element");
-  }
-
-  @Test
-  public void testMethodStatementActionWrongArgsNumberThrows() {
-    UtamMatcher matcher = new UtamMatcher(MatcherType.isTrue,
-        new UtamArgument[]{getLiteralArg()});
-    UtamError e = expectThrows(UtamError.class,
-        () -> matcher.getParameters(getTestTranslationContext(), "element"));
-    assertThat(e.getMessage(), is(endsWith("expected 0 parameters, provided 1")));
+  public void testWrongArgsNumberThrows() {
+    Exception e = expectCompilerErrorFromFile("matcher/wrongArgsNumber");
+    assertThat(e.getMessage(), is(containsString(
+        "error UA008: method \"matcherThrows\" statement matcher: expected number of parameters is 1, found 2")));
   }
 
   @Test
   public void testElementFilterWrongArgsTypeThrows() {
-    UtamMatcher matcher = new UtamMatcher(MatcherType.stringContains,
-        new UtamArgument[]{getLiteralArg()});
-    UtamError e = expectThrows(UtamError.class,
-        () -> matcher.getParameters(getTestTranslationContext(), "element"));
-    assertThat(e.getMessage(), is(containsString("expected type is")));
+    Exception e = expectCompilerErrorFromFile("matcher/wrongArgsType");
+    assertThat(e.getMessage(), is(containsString(
+        "error UA009: method \"matcherThrows\" statement matcher: "
+            + "incorrect parameter type [ true ]: expected type \"String\", found \"Boolean\"")));
   }
 
   @Test
   public void testIncorrectMatcherTypeThrowsInCompose() {
-    UtamError e = expectThrows(UtamError.class,
-        () -> new DeserializerUtilities().getContext("matcher/incorrectMatcherInCompose"));
+    Exception e = expectCompilerErrorFromFile("matcher/incorrectMatcherInCompose");
     assertThat(
         e.getMessage(),
         containsString(MatcherType.isTrue.getIncorrectTypeError(PrimitiveType.STRING)));
@@ -66,8 +49,7 @@ public class UtamMatcherTests {
 
   @Test
   public void testIncorrectMatcherTypeThrowsInFilter() {
-    UtamError e = expectThrows(UtamError.class,
-        () -> new DeserializerUtilities().getContext("matcher/incorrectMatcherInFilter"));
+    Exception e = expectCompilerErrorFromFile("matcher/incorrectMatcherInFilter");
     assertThat(
         e.getMessage(),
         containsString(MatcherType.isTrue.getIncorrectTypeError(PrimitiveType.STRING)));

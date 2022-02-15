@@ -29,6 +29,10 @@
     {
       "typeMatch": "generated-comments",
       "pathMatch": ".*/comments"
+    },
+    {
+      "typeMatch": "generated-args",
+      "pathMatch": ".*/args"
     }
   ],
   "copyright" : [
