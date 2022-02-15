@@ -211,7 +211,7 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
       packagesMapping.forEach((key, value) -> {
         // If the file separator for the OS is a backslash, it must be escaped
         // as a double-backslash in the regex.
-        String regexPartSeparator = File.separator == "\\" ? "\\\\" : File.separator;
+        String regexPartSeparator = File.separator.equals("\\") ? "\\\\" : File.separator;
 
         // We can hard-code a forward slash here, as the compiler config JSON
         // must, by definition and convention, use forward slashes as path separators.
