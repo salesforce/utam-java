@@ -20,6 +20,7 @@ import static utam.compiler.translator.TranslatorMockUtilities.INTERFACE_ONLY_CL
 import static utam.compiler.translator.TranslatorMockUtilities.PAGE_OBJECT_IMPL_CLASS_NAME;
 import static utam.compiler.translator.TranslatorMockUtilities.PAGE_OBJECT_INTERFACE_CLASS_NAME;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Writer;
@@ -130,8 +131,10 @@ public class DefaultTargetConfigurationTests {
     assertThat(targetConfig.getInjectionConfigRootFilePath(), is(equalTo(currentDir)));
     String typeName = "utam/MyPage";
     TypeProvider type = new FromString(typeName);
-    assertThat(targetConfig.getPageObjectClassPath(type), is(equalTo(currentDir + "/utam/MyPage.java")));
-    assertThat(targetConfig.getPageObjectTestClassPath(type), is(equalTo(currentDir + "/utam/MyPageTests.java")));
+    assertThat(targetConfig.getPageObjectClassPath(type),
+        is(equalTo((currentDir + "/utam/MyPage.java").replace("/", File.separator))));
+    assertThat(targetConfig.getPageObjectTestClassPath(type),
+        is(equalTo((currentDir + "/utam/MyPageTests.java").replace("/", File.separator))));
   }
 
   @Test
@@ -145,8 +148,10 @@ public class DefaultTargetConfigurationTests {
     assertThat(targetConfig.getInjectionConfigRootFilePath(), is(equalTo(currentDir)));
     String typeName = "utam/MyPage";
     TypeProvider type = new FromString(typeName);
-    assertThat(targetConfig.getPageObjectClassPath(type), is(equalTo(currentDir + "/utam/MyPage.java")));
-    assertThat(targetConfig.getPageObjectTestClassPath(type), is(equalTo(currentDir + "/utam/MyPageTests.java")));
+    assertThat(targetConfig.getPageObjectClassPath(type),
+        is(equalTo((currentDir + "/utam/MyPage.java").replace("/", File.separator))));
+    assertThat(targetConfig.getPageObjectTestClassPath(type),
+        is(equalTo((currentDir + "/utam/MyPageTests.java").replace("/", File.separator))));
   }
 
   static class Mock implements TranslatorTargetConfig {

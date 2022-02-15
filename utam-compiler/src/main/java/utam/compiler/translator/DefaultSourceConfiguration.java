@@ -83,7 +83,7 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
 
   String getPageObjectURI(String packageName, Path filePath, String fileMaskRegex) {
     final Pattern relativePattern = Pattern.compile(
-        fileMaskRegex.replaceAll("/", Matcher.quoteReplacement(File.separator)));
+        fileMaskRegex.replace("/", Matcher.quoteReplacement(File.separator)));
     Matcher matcher = relativePattern.matcher(filePath.toString());
     // gets text inside () of the mask, usually PO file name
     final String relativePath = matcher.find() ? matcher.group(1) : "";
