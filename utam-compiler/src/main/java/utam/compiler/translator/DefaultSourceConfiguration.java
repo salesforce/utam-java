@@ -82,7 +82,8 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
   }
 
   String getPageObjectURI(String packageName, Path filePath, String fileMaskRegex) {
-    final Pattern relativePattern = Pattern.compile(fileMaskRegex);
+    final Pattern relativePattern = Pattern.compile(
+        fileMaskRegex.replaceAll("/", Matcher.quoteReplacement(File.separator)));
     Matcher matcher = relativePattern.matcher(filePath.toString());
     // gets text inside () of the mask, usually PO file name
     final String relativePath = matcher.find() ? matcher.group(1) : "";
@@ -208,18 +209,8 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
      * @param packagesMapping    the map of directories to packages
      */
     public ScannerConfig(String pageObjectFileMask, Map<String, String> packagesMapping) {
-      packagesMapping.forEach((key, value) -> {
-        // If the file separator for the OS is a backslash, it must be escaped
-        // as a double-backslash in the regex.
-        String regexPartSeparator = File.separator.equals("\\") ? "\\\\" : File.separator;
-
-        // We can hard-code a forward slash here, as the compiler config JSON
-        // must, by definition and convention, use forward slashes as path separators.
-        List<String> regexParts = new ArrayList<>(Arrays.asList(value.split("/")));
-        regexParts.add(pageObjectFileMask);
-
-        this.packagesMapping.put(key, String.join(regexPartSeparator, regexParts));
-      });
+      packagesMapping.forEach((key, value) -> this.packagesMapping.put(key,
+          (value + "/" + pageObjectFileMask).replace("/", Matcher.quoteReplacement(File.separator))));
     }
 
     /**

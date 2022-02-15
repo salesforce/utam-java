@@ -30,6 +30,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.regex.Matcher;
+
 import org.testng.annotations.Test;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorSourceConfig;
@@ -59,8 +61,10 @@ public class TranslatorGenerationCommandTests {
     assertThat(foundPageObjects.keySet(),
         containsInAnyOrder("utam-one/pageObjects/first", "utam-two/pageObjects/second"));
     assertThat(foundPageObjects.values(), containsInAnyOrder(
-        USER_ROOT + RESOURCES_PATH + "/spec/one/first.utam.json",
-        USER_ROOT + RESOURCES_PATH + "/spec/two/second.utam.json"));
+        (USER_ROOT + RESOURCES_PATH + "/spec/one/first.utam.json").replaceAll("/",
+            Matcher.quoteReplacement(File.separator)),
+        (USER_ROOT + RESOURCES_PATH + "/spec/two/second.utam.json").replaceAll("/",
+            Matcher.quoteReplacement(File.separator))));
   }
 
   @Test
