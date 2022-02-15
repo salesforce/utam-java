@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
-import java.util.regex.Matcher;
 
 import org.testng.annotations.Test;
 import utam.core.declarative.translator.TranslatorConfig;
