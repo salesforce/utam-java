@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.translator.TranslatorTargetConfig;
@@ -94,7 +95,8 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
   }
 
   private static String replaceWithPath(String in) {
-    return in.replaceAll(Pattern.quote("."), File.separator);
+    return in.replaceAll(Pattern.quote("."), Matcher.quoteReplacement(File.separator))
+        .replaceAll(Pattern.quote("/"), Matcher.quoteReplacement(File.separator));
   }
 
   @Override

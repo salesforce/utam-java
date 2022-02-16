@@ -67,7 +67,7 @@ public class TranslationUtilitiesTests {
   public void testFormat() {
     assertThat(
         applyJavaFormatter(Arrays.asList("class TestClass {", "}")),
-        is(equalTo("class TestClass {}\n")));
+        is(equalTo("class TestClass {}" + System.lineSeparator())));
   }
 
   /**
