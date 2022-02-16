@@ -85,14 +85,17 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
   }
 
   String getPageObjectURI(String packageName, Path filePath, String fileMaskRegex) {
-    final Pattern relativePattern = Pattern.compile(
-        fileMaskRegex.replace("/", Matcher.quoteReplacement(File.separator)));
+    final Pattern relativePattern = Pattern.compile(createPlatformAwareRegex(fileMaskRegex));
     Matcher matcher = relativePattern.matcher(filePath.toString());
     // gets text inside () of the mask, usually PO file name
     final String relativePath = matcher.find() ? matcher.group(1) : "";
     final String relativePageObjectName = relativePath.replaceAll(Pattern.quote("."), "/")
         .replace(File.separator, "/");
     return String.format(PAGE_OBJECT_URI_FORMAT, packageName, relativePageObjectName);
+  }
+
+  private static String createPlatformAwareRegex(String regex) {
+    return regex.replace("/", Matcher.quoteReplacement(File.separator));
   }
 
   final String getPageObjectFileSourcePath(String pageObjectURI) {
@@ -213,8 +216,8 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
      * @param packagesMapping    the map of directories to packages
      */
     public ScannerConfig(String pageObjectFileMask, Map<String, String> packagesMapping) {
-      packagesMapping.forEach((key, value) -> this.packagesMapping.put(key,
-          (value + "/" + pageObjectFileMask).replace("/", Matcher.quoteReplacement(File.separator))));
+      packagesMapping.forEach((key, value) ->
+          this.packagesMapping.put(key, createPlatformAwareRegex(value + "/" + pageObjectFileMask)));
     }
 
     /**
