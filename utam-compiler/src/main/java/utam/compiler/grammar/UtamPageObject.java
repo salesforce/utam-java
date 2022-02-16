@@ -11,13 +11,13 @@ import static utam.compiler.grammar.UtamMethod.ERR_BEFORE_LOAD_HAS_NO_ARGS;
 import static utam.compiler.grammar.UtamMethod.getComposeStatements;
 import static utam.compiler.helpers.AnnotationUtils.getPageObjectAnnotation;
 import static utam.compiler.helpers.AnnotationUtils.getPagePlatformAnnotation;
-import static utam.compiler.types.BasicElementInterface.processBasicTypeNode;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.BASE_ROOT_PAGE_OBJECT_CLASS;
+import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT_IMPL_CLASS;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
-import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT_IMPL_CLASS;
+import static utam.compiler.types.BasicElementInterface.processBasicTypeNode;
 import static utam.compiler.types.BasicElementUnionType.asBasicOrUnionType;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 import utam.compiler.UtamCompilationError;
-import utam.compiler.grammar.UtamMethodAction;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ReturnType;
@@ -74,6 +73,7 @@ final class UtamPageObject {
   UtamProfile[] profiles;
   UtamShadowElement shadow;
   UtamElement[] elements;
+  private final String description;
 
   @JsonCreator
   UtamPageObject(
@@ -91,7 +91,8 @@ final class UtamPageObject {
       @JsonProperty("shadow") UtamShadowElement shadow,
       @JsonProperty("elements") UtamElement[] elements,
       @JsonProperty("methods") UtamMethod[] methods,
-      @JsonProperty("beforeLoad") UtamMethodAction[] beforeLoad) {
+      @JsonProperty("beforeLoad") UtamMethodAction[] beforeLoad,
+      @JsonProperty("description") String description) {
     this.profiles = profiles;
     this.methods = methods;
     this.isAbstract = isAbstract;
@@ -103,17 +104,18 @@ final class UtamPageObject {
     this.rootElementHelper = new RootElementHelper(typeNode, isExposeRootElement);
     this.beforeLoad = beforeLoad;
     this.rootLocator = selector == null ? null : selector.getLocator();
+    this.description = description;
     validate();
   }
 
   // used in tests
   UtamPageObject(boolean isRoot, UtamSelector selector) {
-    this(null, false, null, null, null, false, isRoot, selector, null, null, null, null);
+    this(null, false, null, null, null, false, isRoot, selector, null, null, null, null, null);
   }
 
   // used in tests
   UtamPageObject() {
-    this(null, false, null, null, null, false, false, null, null, null, null, null);
+    this(null, false, null, null, null, false, false, null, null, null, null, null, null);
   }
 
   void validate() {
@@ -191,6 +193,15 @@ final class UtamPageObject {
       throw new UtamCompilationError(ERR_BEFORE_LOAD_HAS_NO_ARGS);
     }
     return new BeforeLoadMethod(methodContext, statements);
+  }
+
+  /**
+   * get page object description
+   *
+   * @return string
+   */
+  String getDescription() {
+    return description == null ? "" : description;
   }
 
   /**

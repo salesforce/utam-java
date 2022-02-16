@@ -211,7 +211,7 @@ public final class JsonDeserializer {
 
     @Override
     public String getComments() {
-      return "";
+      return utamPageObject.getDescription();
     }
 
     @Override
@@ -282,7 +282,7 @@ public final class JsonDeserializer {
 
     @Override
     public String getComments() {
-      return "";
+      return utamPageObject.getDescription();
     }
 
     @Override

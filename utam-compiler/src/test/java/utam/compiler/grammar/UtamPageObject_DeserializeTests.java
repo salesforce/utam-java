@@ -205,4 +205,21 @@ public class UtamPageObject_DeserializeTests {
     assertThat(declaration.getImplementation().getBaseClassType().isSameType(BASE_PAGE_OBJECT_CLASS), is(true));
     assertThat(declaration.getInterface().getBaseInterfaceType().isSameType(PAGE_OBJECT), is(true));
   }
+
+  @Test
+  public void testGetDescription() {
+    String json = "{\"description\": \"my description\"" + "}";
+    UtamPageObject utamPageObject = createRootElementNode(json);
+    assertThat(utamPageObject.getDescription(), is(equalTo("my description")));
+    PageObjectDeclaration declaration = new DeserializerUtilities().getResultFromString(json).getPageObject();
+    assertThat(declaration.getImplementation().getComments(), is(equalTo("my description")));
+    assertThat(declaration.getInterface().getComments(), is(equalTo("my description")));
+  }
+
+  @Test
+  public void testGetDescriptionForNull() {
+    String json = "{}";
+    UtamPageObject utamPageObject = createRootElementNode(json);
+    assertThat(utamPageObject.getDescription(), is(emptyString()));
+  }
 }
