@@ -208,18 +208,23 @@ public class UtamPageObject_DeserializeTests {
 
   @Test
   public void testGetDescription() {
-    String json = "{\"description\": \"my description\"" + "}";
+    String json = "{\"description\": \"my description\"}";
     UtamPageObject utamPageObject = createRootElementNode(json);
-    assertThat(utamPageObject.getDescription(), is(equalTo("my description")));
+    assertThat(utamPageObject.getDescription(), is(hasSize(3)));
+    assertThat(utamPageObject.getDescription().get(0), is(equalTo("my description")));
+    assertThat(utamPageObject.getDescription().get(1), is(containsString("@author UTAM")));
     PageObjectDeclaration declaration = new DeserializerUtilities().getResultFromString(json).getPageObject();
-    assertThat(declaration.getImplementation().getComments(), is(equalTo("my description")));
-    assertThat(declaration.getInterface().getComments(), is(equalTo("my description")));
+    assertThat(declaration.getImplementation().getDescription(), is(hasSize(3)));
+    assertThat(declaration.getInterface().getDescription(), is(hasSize(3)));
+    assertThat(declaration.getImplementation().getDescription().get(0), is(equalTo("my description")));
+    assertThat(declaration.getInterface().getDescription().get(0), is(equalTo("my description")));
   }
 
   @Test
-  public void testGetDescriptionForNull() {
+  public void testRootComments() {
     String json = "{}";
-    UtamPageObject utamPageObject = createRootElementNode(json);
-    assertThat(utamPageObject.getDescription(), is(emptyString()));
+    PageObjectDeclaration declaration = new DeserializerUtilities().getResultFromString(json).getPageObject();
+    assertThat(declaration.getImplementation().getDescription(), is(hasSize(2)));
+    assertThat(declaration.getInterface().getDescription(), is(hasSize(2)));
   }
 }

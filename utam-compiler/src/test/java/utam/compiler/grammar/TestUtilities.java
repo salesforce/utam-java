@@ -73,7 +73,7 @@ public class TestUtilities {
     static UtamElement createUtamElement(String name, String type, UtamSelector selector) {
       return new UtamElement(
           createStringTypeNode(type), name, false, null, selector,
-          null, null, null);
+          null, null, null, null);
     }
 
     private static JsonNode createStringTypeNode(String type) {

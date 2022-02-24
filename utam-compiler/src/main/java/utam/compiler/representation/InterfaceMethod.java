@@ -11,7 +11,7 @@ import static utam.compiler.types.BasicElementUnionType.asUnionTypeOrNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import utam.compiler.helpers.ParameterUtils;
+import utam.compiler.grammar.UtamMethodDescription;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -37,11 +37,12 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
   public InterfaceMethod(
       String methodName,
       TypeProvider returnType,
-      List<MethodParameter> methodParameters) {
+      List<MethodParameter> methodParameters,
+      UtamMethodDescription methodDescription) {
     super(
         methodName,
         methodParameters,
-        returnType);
+        returnType, methodDescription);
   }
 
   @Override
@@ -72,13 +73,6 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
    */
   public static class AbstractBasicElementGetter extends BasicElementGetterMethod {
 
-    private static List<TypeProvider> getImports(TypeProvider returnType, List<MethodParameter> parameters) {
-      List<TypeProvider> imports = new ArrayList<>();
-      ParameterUtils.setImport(imports, returnType);
-      ParameterUtils.setDeclarationImports(imports, parameters);
-      return imports;
-    }
-
     private final MethodDeclaration declaration;
     private final UnionType unionType;
 
@@ -91,8 +85,10 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
     public AbstractBasicElementGetter(
         String methodName,
         List<MethodParameter> parameters,
-        TypeProvider returnType) {
-      declaration = new MethodDeclarationImpl(methodName, parameters, returnType, getImports(returnType, parameters));
+        TypeProvider returnType,
+        UtamMethodDescription description) {
+      super(methodName, true, returnType, description);
+      this.declaration = new MethodDeclarationImpl(methodName, parameters, returnType, description);
       this.unionType = asUnionTypeOrNull(returnType);
     }
 
@@ -109,11 +105,6 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
     @Override
     public List<TypeProvider> getClassImports() {
       return new ArrayList<>();
-    }
-
-    @Override
-    public boolean isPublic() {
-      return true;
     }
 
     @Override

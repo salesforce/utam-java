@@ -3,6 +3,15 @@
   "pageObjectsFilesMask": "(.*)\\.utam\\.json$",
   "pageObjectsOutputDir": "/src/test/java",
   "resourcesOutputDir": "/src/test/resources",
+  "module": "generated",
+  "profiles": [
+    {
+      "name": "name",
+      "values": [
+        "value"
+      ]
+    }
+  ],
   "namespaces": [
     {
       "typeMatch": "generated-basic",
@@ -15,6 +24,10 @@
     {
       "typeMatch": "generated-mobile",
       "pathMatch": ".*/mobile"
+    },
+    {
+      "typeMatch": "generated-comments",
+      "pathMatch": ".*/comments"
     }
   ]
 }

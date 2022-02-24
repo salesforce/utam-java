@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.UtamRootDescription.processRootDescriptionNode;
 import static utam.compiler.grammar.UtamMethod.ERR_BEFORE_LOAD_HAS_NO_ARGS;
 import static utam.compiler.grammar.UtamMethod.getComposeStatements;
 import static utam.compiler.helpers.AnnotationUtils.getPageObjectAnnotation;
@@ -73,7 +74,7 @@ final class UtamPageObject {
   UtamProfile[] profiles;
   UtamShadowElement shadow;
   UtamElement[] elements;
-  private final String description;
+  private final UtamRootDescription description;
 
   @JsonCreator
   UtamPageObject(
@@ -92,7 +93,7 @@ final class UtamPageObject {
       @JsonProperty("elements") UtamElement[] elements,
       @JsonProperty("methods") UtamMethod[] methods,
       @JsonProperty("beforeLoad") UtamMethodAction[] beforeLoad,
-      @JsonProperty("description") String description) {
+      @JsonProperty("description") JsonNode descriptionNode) {
     this.profiles = profiles;
     this.methods = methods;
     this.isAbstract = isAbstract;
@@ -104,7 +105,7 @@ final class UtamPageObject {
     this.rootElementHelper = new RootElementHelper(typeNode, isExposeRootElement);
     this.beforeLoad = beforeLoad;
     this.rootLocator = selector == null ? null : selector.getLocator();
-    this.description = description;
+    this.description = processRootDescriptionNode(descriptionNode);
     validate();
   }
 
@@ -201,10 +202,10 @@ final class UtamPageObject {
   /**
    * get page object description
    *
-   * @return string
+   * @return list of strings
    */
-  String getDescription() {
-    return description == null ? "" : description;
+  List<String> getDescription() {
+    return this.description.getDescription();
   }
 
   /**

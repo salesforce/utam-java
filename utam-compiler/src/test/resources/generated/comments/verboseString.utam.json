@@ -1,0 +1,63 @@
+{
+  "description": "Declarative programming is a high-level programming concept, which is the opposite of imperative programming. It is typically found in databases and configuration management software, paired with a domain-specific language (DSL). Declarative models rely on preconfigured capabilities in the language to accomplish a task without explicit case-by-case instructions on what steps to take.",
+  "implements": "generated-comments/pageObjects/verboseInterface",
+  "profile": {
+    "name": "value"
+  },
+  "methods": [
+    {
+      "name": "myPublicMethod",
+      "description": "public method description",
+      "compose": [
+        {
+          "element": "root",
+          "apply": "getAttribute",
+          "args": [
+            {
+              "name": "attrName",
+              "type": "string",
+              "description": "attribute name to get"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "elements": [
+    {
+      "public": true,
+      "name": "customPublic",
+      "type": "generated-comments/pageObjects/verboseObject",
+      "description": "description",
+      "selector": {
+        "css": "css%s",
+        "args": [
+          {
+            "name": "selectorArg",
+            "type": "string",
+            "description": "selector parameter description"
+          }
+        ]
+      }
+    },
+    {
+      "name": "basicPrivate",
+      "description": "description",
+      "selector": {
+        "css": "css%s",
+        "args": [
+          {
+            "name": "selectorArg",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "container",
+      "type": "container",
+      "description": "description"
+    }
+  ]
+}
+

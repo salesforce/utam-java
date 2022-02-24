@@ -1,0 +1,40 @@
+{
+  "description": {
+    "text": [
+      "interface description"
+    ]
+  },
+  "interface" : true,
+  "methods": [
+    {
+      "name": "myPublicMethod",
+      "description": "public method description",
+      "args": [
+        {
+          "name": "attrName",
+          "type": "string",
+          "description": "attribute name to get"
+        }
+      ],
+      "returnType" : "string"
+    },
+    {
+      "name": "getCustomPublic",
+      "description": {
+        "text": [
+          "description"
+        ],
+        "return": "return something",
+        "throws": "NullPointerException when"
+      },
+      "returnType": "generated-comments/pageObjects/verboseObject",
+      "args": [
+        {
+          "name": "selectorArg",
+          "type": "string",
+          "description": "selector parameter description"
+        }
+      ]
+    }
+  ]
+}

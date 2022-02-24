@@ -50,7 +50,7 @@ public interface PageObjectInterface {
    *
    * @return string
    */
-  String getComments();
+  List<String> getDescription();
 
   /**
    * get all declared public union types

@@ -7,7 +7,6 @@
  */
 package utam.compiler.representation;
 
-import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.wrapAsList;
@@ -17,6 +16,7 @@ import static utam.compiler.types.BasicElementUnionType.asUnionTypeOrNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import utam.compiler.grammar.UtamMethodDescription;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.ParameterUtils;
@@ -39,9 +39,10 @@ public abstract class ElementMethod {
   private static final TypeProvider DOCUMENT_TYPE = new FromClass(Document.class);
   private static final MethodDeclaration DOCUMENT_GETTER_DECLARATION = new MethodDeclarationImpl(
       "getDocument",
-      EMPTY_PARAMETERS,
+      new ArrayList<>(),
       DOCUMENT_TYPE,
-      Collections.emptyList());
+      Collections.emptyList(),
+      new UtamMethodDescription());
 
   /**
    * The Page Object method for a document getter
@@ -125,10 +126,6 @@ public abstract class ElementMethod {
   public static final class Single extends BasicElementGetterMethod {
 
     private final List<String> methodCode;
-    private final TypeProvider returnType;
-    private final List<MethodParameter> parameters;
-    private final String methodName;
-    private final boolean isPublic;
     private final List<TypeProvider> imports = new ArrayList<>();
     private final List<TypeProvider> classImports = new ArrayList<>();
     private final UnionType unionType;
@@ -140,13 +137,12 @@ public abstract class ElementMethod {
      * @param locatorParameters the list of parameters for the locator of the element
      * @param isPublic          a value indicating whether the element is public
      * @param implType          the type provider for the implementation type
+     * @param description       method description in Json
      */
-    public Single(ElementContext element, List<MethodParameter> locatorParameters, boolean isPublic, TypeProvider implType) {
+    public Single(ElementContext element, List<MethodParameter> locatorParameters, boolean isPublic, TypeProvider implType, UtamMethodDescription description) {
+      super(getElementGetterMethodName(element.getName(), isPublic), isPublic, element.getGetterReturnType(), description);
       this.methodCode = getElementMethodCode(element, locatorParameters, implType, false);
-      this.parameters = element.getParameters();
-      this.methodName = getElementGetterMethodName(element.getName(), isPublic);
-      this.returnType = element.getGetterReturnType();
-      this.isPublic = isPublic;
+      this.parametersTracker.setMethodParameters(element.getParameters());
       setInterfaceImports(imports, returnType);
       setClassImports(classImports, returnType, implType);
       this.unionType = asUnionTypeOrNull(implType);
@@ -154,7 +150,7 @@ public abstract class ElementMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, parameters, returnType, imports);
+      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), returnType, imports, description);
     }
 
     @Override
@@ -165,11 +161,6 @@ public abstract class ElementMethod {
     @Override
     public List<String> getCodeLines() {
       return methodCode;
-    }
-
-    @Override
-    public boolean isPublic() {
-      return this.isPublic;
     }
 
     @Override
@@ -190,9 +181,6 @@ public abstract class ElementMethod {
 
     private final List<String> methodCode;
     private final TypeProvider listReturnType;
-    private final List<MethodParameter> parameters;
-    private final String methodName;
-    private final boolean isPublic;
     private final List<TypeProvider> imports = new ArrayList<>();
     private final List<TypeProvider> classImports = new ArrayList<>();
     private final UnionType unionType;
@@ -204,13 +192,13 @@ public abstract class ElementMethod {
      * @param locatorParameters the list of parameters for the locator of the element
      * @param isPublic          a value indicating whether the element is public
      * @param implType          the type provider for the implementation type
+     * @param description       method description in Json
      */
-    public Multiple(ElementContext element, List<MethodParameter> locatorParameters, boolean isPublic, TypeProvider implType) {
+    public Multiple(ElementContext element, List<MethodParameter> locatorParameters, boolean isPublic, TypeProvider implType, UtamMethodDescription description) {
+      super(getElementGetterMethodName(element.getName(), isPublic), isPublic, null, description);
       this.methodCode = getElementMethodCode(element, locatorParameters, implType, true);
-      this.parameters = element.getParameters();
-      this.methodName = getElementGetterMethodName(element.getName(), isPublic);
+      this.parametersTracker.setMethodParameters(element.getParameters());
       this.listReturnType = element.getGetterReturnType();
-      this.isPublic = isPublic;
       setInterfaceImports(imports, listReturnType);
       setClassImports(classImports, listReturnType, implType);
       this.unionType = asUnionTypeOrNull(implType);
@@ -220,9 +208,9 @@ public abstract class ElementMethod {
     public MethodDeclaration getDeclaration() {
       return new MethodDeclarationImpl(
           methodName,
-          parameters,
+          parametersTracker.getMethodParameters(),
           listReturnType,
-          imports);
+          imports, description);
     }
 
     @Override
@@ -233,11 +221,6 @@ public abstract class ElementMethod {
     @Override
     public List<String> getCodeLines() {
       return methodCode;
-    }
-
-    @Override
-    public boolean isPublic() {
-      return this.isPublic;
     }
 
     @Override
@@ -256,10 +239,6 @@ public abstract class ElementMethod {
    */
   public static final class Filtered extends BasicElementGetterMethod {
 
-    private final boolean isPublic;
-    private final String methodName;
-    private final TypeProvider returnType;
-    private final MethodParametersTracker parametersTracker;
     private final List<String> code = new ArrayList<>();
     private final List<TypeProvider> imports = new ArrayList<>();
     private final List<TypeProvider> classImports = new ArrayList<>();
@@ -278,7 +257,8 @@ public abstract class ElementMethod {
      * @param applyParameters   the list of parameters to use in the filter
      * @param matcherType       the type of matcher for the filter
      * @param matcherParameters the list of parameters for the matcher
-     * @param isFindFirstMatch  a value indicting whether to only return the first match of the filter.
+     * @param isFindFirstMatch  a value indicting whether to only return the first match of the filter
+     * @param description       method description in Json
      */
     public Filtered(
         ElementContext scopeElement,
@@ -291,11 +271,10 @@ public abstract class ElementMethod {
         List<MethodParameter> applyParameters,
         MatcherType matcherType,
         List<MethodParameter> matcherParameters,
-        boolean isFindFirstMatch) {
-      this.isPublic = isPublic;
-      this.methodName = getElementGetterMethodName(elementName, isPublic);
-      this.returnType = isFindFirstMatch ? elementType : wrapAsList(elementType);
-      this.parametersTracker = new MethodParametersTracker(String.format("method '%s'", methodName));
+        boolean isFindFirstMatch,
+        UtamMethodDescription description) {
+      super(getElementGetterMethodName(elementName, isPublic), isPublic,
+          isFindFirstMatch ? elementType : wrapAsList(elementType), description);
       parametersTracker.setMethodParameters(scopeElement.getParameters());
       parametersTracker.setMethodParameters(locatorParameters);
       parametersTracker.setMethodParameters(applyParameters);
@@ -319,7 +298,7 @@ public abstract class ElementMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), returnType, imports);
+      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), returnType, imports, description);
     }
 
     @Override
@@ -330,11 +309,6 @@ public abstract class ElementMethod {
     @Override
     public List<TypeProvider> getClassImports() {
       return classImports;
-    }
-
-    @Override
-    public boolean isPublic() {
-      return this.isPublic;
     }
 
     @Override

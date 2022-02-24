@@ -88,7 +88,7 @@ public interface PageObjectClass {
    *
    * @return string
    */
-  String getComments();
+  List<String> getDescription();
 
   /**
    * get all declared union types inside implementing class

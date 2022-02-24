@@ -161,8 +161,8 @@ public class UtamPageObject_Tests {
     String json = "{}";
     JsonDeserializer deserializer = TestUtilities.getJsonStringDeserializer(json);
     PageObjectDeclaration declaration = deserializer.getObject();
-    assertThat(declaration.getImplementation().getComments(), is(emptyString()));
-    assertThat(declaration.getInterface().getComments(), is(emptyString()));
+    assertThat(declaration.getImplementation().getDescription(), is(hasSize(2)));
+    assertThat(declaration.getInterface().getDescription(), is(hasSize(2)));
   }
 
   @Test

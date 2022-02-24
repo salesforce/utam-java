@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.UtamMethodDescription.processMethodDescriptionNode;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.compiler.types.BasicElementInterface.isReturnBasicType;
 import static utam.compiler.types.BasicElementInterface.processBasicTypeNode;
@@ -47,6 +48,7 @@ class UtamMethod {
   private final UtamArgument[] args;
   private final JsonNode returnType;
   private final Boolean isReturnList;
+  private final UtamMethodDescription description;
 
   @JsonCreator
   UtamMethod(
@@ -54,18 +56,19 @@ class UtamMethod {
       @JsonProperty(value = "compose") UtamMethodAction[] compose,
       @JsonProperty(value = "args") UtamArgument[] args,
       @JsonProperty(value = "returnType") JsonNode returnType,
-      @JsonProperty(value = "returnAll") Boolean isReturnList) {
+      @JsonProperty(value = "returnAll") Boolean isReturnList,
+      @JsonProperty("description") JsonNode descriptionNode) {
     this.name = name;
     this.compose = compose;
     this.args = args;
     this.returnType = returnType;
     this.isReturnList = isReturnList;
+    this.description = processMethodDescriptionNode(descriptionNode);
   }
 
   final PageObjectMethod getMethod(TranslationContext context) {
     return context.isAbstractPageObject()? getAbstractMethod(context) : getComposeMethod(context);
   }
-
 
   private PageObjectMethod getAbstractMethod(TranslationContext context) {
     if (compose != null) {
@@ -83,11 +86,8 @@ class UtamMethod {
     TypeProvider methodReturnType = returnTypeObject.getReturnTypeOrDefault(context, VOID);
     MethodContext methodContext = new MethodContext(name, returnTypeObject);
     List<MethodParameter> parameters = new ArgsProcessor(context, methodContext).getParameters(args);
-    return isReturnsBasicType ? new AbstractBasicElementGetter(name, parameters, methodReturnType)
-        : new InterfaceMethod(
-            name,
-            methodReturnType,
-            parameters);
+    return isReturnsBasicType ? new AbstractBasicElementGetter(name, parameters, methodReturnType, description)
+        : new InterfaceMethod(name, methodReturnType, parameters, description);
   }
 
   private PageObjectMethod getComposeMethod(TranslationContext context) {
@@ -112,7 +112,8 @@ class UtamMethod {
         name,
         lastStatementReturnType,
         methodContext.getMethodParameters(),
-        statements
+        statements,
+        description
     );
   }
 
