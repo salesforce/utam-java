@@ -96,8 +96,9 @@ public class UtamLoaderImpl implements UtamLoader {
 
   @Override
   public final void resetContext() {
-    // new factory instance resets page context
-    this.factory = new PageObjectsFactoryImpl(loaderConfig, driver);
+    // reset context
+    PageObjectContext context = loaderConfig.getPageContext();
+    this.factory = new PageObjectsFactoryImpl(context, driver);
     this.document = new DocumentObject(factory);
   }
 
@@ -109,17 +110,6 @@ public class UtamLoaderImpl implements UtamLoader {
   @Override
   public <T extends RootPageObject> T create(Class<T> type) {
     return factory.create(type);
-  }
-
-  /**
-   * gets the java bean for the specified class type, only used by unit tests
-   *
-   * @param type the class object to get
-   * @return the bean for the specified class type
-   */
-  // for tests
-  protected PageObject getBean(Class type) {
-    return factory.getPageContext().getBean(type);
   }
 
   @Override

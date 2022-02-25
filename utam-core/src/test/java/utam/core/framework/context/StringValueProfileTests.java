@@ -7,31 +7,27 @@
  */
 package utam.core.framework.context;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.testng.Assert.expectThrows;
+import static utam.core.framework.context.StringValueProfile.ERR_NAME_REQUIRED;
+import static utam.core.framework.context.StringValueProfile.ERR_VALUE_REQUIRED;
+
 import org.testng.annotations.Test;
 import utam.core.framework.consumer.UtamError;
-
-import static org.testng.Assert.expectThrows;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 
 public class StringValueProfileTests {
   
   @Test
-  public void testStringValueProfileNullModule() {
+  public void testStringValueProfile() {
     StringValueProfile profile = new StringValueProfile("testName", "testValue");
     assertThat(profile.getName(), is(equalTo("testName")));
     assertThat(profile.getValue(), is(equalTo("testValue")));
-    assertThat(profile.getConfigName(null), is(equalTo("testName_testValue_config")));
-    assertThat(profile.getConfigName(""), is(equalTo("testName_testValue_config")));
-    assertThat(profile.hashCode(), is(equalTo("testName_testValue_config".hashCode())));
+    assertThat(profile.getKey(), is(equalTo("testNametestValue")));
   }
 
-  @Test
-  public void testStringValueProfile() {
-    StringValueProfile profile = new StringValueProfile("testName", "testValue");
-    assertThat(profile.getConfigName("module"), is(equalTo("module_testName_testValue_config")));
-  }
-  
   @Test
   public void testStringValueProfileWithNullNameThrows() {
     UtamError e = expectThrows(
@@ -39,7 +35,7 @@ public class StringValueProfileTests {
         () -> new StringValueProfile(null, "testValue"));
     assertThat(
         e.getMessage(),
-        containsString("profile name must not be null or the empty string"));
+        containsString(ERR_NAME_REQUIRED));
   }
   
   @Test
@@ -49,7 +45,7 @@ public class StringValueProfileTests {
         () -> new StringValueProfile("", "testValue"));
     assertThat(
         e.getMessage(),
-        containsString("profile name must not be null or the empty string"));
+        containsString(ERR_NAME_REQUIRED));
   }
   
   @Test
@@ -59,7 +55,7 @@ public class StringValueProfileTests {
         () -> new StringValueProfile("testName", null));
     assertThat(
         e.getMessage(),
-        containsString("profile value must not be null or the empty string"));
+        containsString(ERR_VALUE_REQUIRED));
   }
   
   @Test
@@ -69,7 +65,7 @@ public class StringValueProfileTests {
         () -> new StringValueProfile("testName", ""));
     assertThat(
         e.getMessage(), 
-        containsString("profile value must not be null or the empty string"));
+        containsString(ERR_VALUE_REQUIRED));
   }
 
   @Test

@@ -8,7 +8,7 @@
 package utam.compiler.translator;
 
 import static utam.core.framework.UtamLogger.info;
-import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
+import static utam.core.framework.consumer.JsonInjectionsConfig.CONFIG_FILE_MASK;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -17,7 +17,6 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.JsonDeserializer;
 import utam.compiler.guardrails.GlobalValidation;
@@ -46,15 +45,13 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       "can't write profiles output, profile path '%s' does not exist";
   static final String ERR_PROFILE_PATH_NOT_CONFIGURED = "profile config path is null or empty";
   static final String DUPLICATE_PAGE_OBJECT_NAME = "declaration '%s' already generated";
-  static final String DUPLICATE_IMPL_ERR =
-      "default implementation for type '%s' is already set as '%s'";
   static final String DUPLICATE_IMPL_WITH_PROFILE_ERR =
       "can't set dependency as '%s' for type '%s', it was already set as '%s' for profile %s";
   static final String PROFILE_NOT_CONFIGURED_ERR = "profile '%s' is not configured";
+  static final String ERR_MODULE_NAME = "module name is not configured, can't write dependencies config file";
   private final TranslatorConfig translatorConfig;
   private final Map<String, PageObjectDeclaration> generated = new HashMap<>();
-  private final Map<Profile, Map<String, String>> profilesMapping = new HashMap<>();
-  private final Profile defaultProfile;
+  private final Map<Profile, Map<String, String>> profileDependenciesMapping = new HashMap<>();
   // max number of POs to generate for generator performance measurements
   private int maxPageObjectsCounter = Integer.MAX_VALUE;
 
@@ -68,15 +65,9 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     for (ProfileConfiguration configuration : translatorConfig.getConfiguredProfiles()) {
       for (String value : configuration.getSupportedValues()) {
         Profile profile = configuration.getFromString(value);
-        profilesMapping.put(profile, new HashMap<>());
+        profileDependenciesMapping.put(profile, new HashMap<>());
       }
     }
-    defaultProfile = DEFAULT_PROFILE;
-    profilesMapping.put(defaultProfile, new HashMap<>());
-  }
-
-  final Collection<Profile> getAllProfiles() {
-    return profilesMapping.keySet();
   }
 
   final PageObjectDeclaration getGeneratedObject(String name) {
@@ -210,27 +201,20 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
 
   @Override
   public void writeDependenciesConfigs() {
-    for (Profile profile : getAllProfiles()) {
-      Properties configToWrite = getProfileMapping(profile);
-      if (!configToWrite.isEmpty()) {
-        writeDependenciesConfig(profile, configToWrite);
-      }
-    }
-  }
-
-  /**
-   * Writes the dependencies configuration
-   * @param profile       the profile to use
-   * @param configToWrite the list of properties to write
-   */
-  // possible override in tests classes
-  protected void writeDependenciesConfig(Profile profile, Properties configToWrite) {
+    JsonCompilerOutput jsonCompilerOutput = new JsonCompilerOutput(profileDependenciesMapping);
     String moduleName = translatorConfig.getModuleName();
-    String profileConfigPath = getResourcesRoot() + File.separator + String
-        .format("%s.properties", profile.getConfigName(moduleName));
+    if(moduleName == null || moduleName.isEmpty()) {
+      // if module not set and there is no dependencies - no issue
+      if(profileDependenciesMapping.isEmpty()) {
+        return;
+      }
+      throw new UtamCompilationError(ERR_MODULE_NAME);
+    }
+    String profileConfigPath =
+        getResourcesRoot() + File.separator + String.format(CONFIG_FILE_MASK, moduleName);
     try {
       Writer writer = new FileWriter(profileConfigPath);
-      configToWrite.store(writer, "profile configuration");
+      jsonCompilerOutput.writeConfig(writer);
     } catch (IOException e) {
       throw new UtamCompilationError(
           String.format("error while writing profile configuration '%s'", profileConfigPath),
@@ -238,19 +222,10 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     }
   }
 
-  final Properties getProfileMapping(Profile profile) {
-    if (!profilesMapping.containsKey(profile)) {
-      throw new UtamError(String.format(PROFILE_NOT_CONFIGURED_ERR, profile.getName()));
-    }
-    Properties properties = new Properties();
-    profilesMapping.get(profile).forEach(properties::setProperty);
-    return properties;
-  }
-
   // used from tests and during compilation
   final void setPageObject(String name, PageObjectDeclaration object) {
     if (generated.containsKey(name)) {
-      throw new UtamError(String.format(DUPLICATE_PAGE_OBJECT_NAME, name));
+      throw new UtamCompilationError(String.format(DUPLICATE_PAGE_OBJECT_NAME, name));
     }
     generated.put(name, object);
     String typeName = object.getInterface().getInterfaceType().getFullName();
@@ -259,37 +234,20 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       return;
     }
     String classTypeName = object.getImplementation().getClassType().getFullName();
-    // default case - same file has both api and impl
-    if (object.isClassWithInterface()) {
-      // no profiles are set, it's default case, no need to do anything
-      return;
-    }
-    // class implements other interface and does not have profiles
-    if (!object.isClassWithProfiles()) {
-      setImplOnly(typeName, classTypeName);
-      return;
-    }
-    // class that implements other interface and has profiles
-    for (Profile profile : object.getImplementation().getProfiles()) {
-      setImplOnlyForProfile(profile, typeName, classTypeName);
+    if (!object.isClassWithInterface()) {
+      for (Profile profile : object.getImplementation().getProfiles()) {
+        setImplementation(profile, typeName, classTypeName);
+      }
     }
   }
 
-  final void setImplOnly(String typeName, String classTypeName) {
-    Map<String, String> implMapping = profilesMapping.get(defaultProfile);
-    if (implMapping.containsKey(typeName) && !implMapping.get(typeName).isEmpty()) {
-      throw new UtamError(String.format(DUPLICATE_IMPL_ERR, typeName, implMapping.get(typeName)));
+  final void setImplementation(Profile profile, String typeName, String classTypeName) {
+    if (!profileDependenciesMapping.containsKey(profile)) {
+      throw new UtamCompilationError(String.format(PROFILE_NOT_CONFIGURED_ERR, profile.getName()));
     }
-    implMapping.put(typeName, classTypeName);
-  }
-
-  final void setImplOnlyForProfile(Profile profile, String typeName, String classTypeName) {
-    if (!profilesMapping.containsKey(profile)) {
-      throw new UtamError(String.format(PROFILE_NOT_CONFIGURED_ERR, profile.getName()));
-    }
-    if (profilesMapping.get(profile).containsKey(typeName)) {
+    if (profileDependenciesMapping.get(profile).containsKey(typeName)) {
       String profileValue = String.format("{ %s : %s }", profile.getName(), profile.getValue());
-      String implType = profilesMapping.get(profile).get(typeName);
+      String implType = profileDependenciesMapping.get(profile).get(typeName);
       throw new UtamCompilationError(
           String.format(
               DUPLICATE_IMPL_WITH_PROFILE_ERR,
@@ -298,6 +256,16 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
               implType,
               profileValue));
     }
-    profilesMapping.get(profile).put(typeName, classTypeName);
+    profileDependenciesMapping.get(profile).put(typeName, classTypeName);
+  }
+
+  /**
+   * used in unit tests - get profile mapping
+   *
+   * @param profile profile value
+   * @return map
+   */
+  final Map<String, String> testProfileMapping(Profile profile) {
+    return profileDependenciesMapping.get(profile);
   }
 }

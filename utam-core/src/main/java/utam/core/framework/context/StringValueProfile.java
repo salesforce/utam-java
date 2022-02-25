@@ -17,21 +17,8 @@ import utam.core.framework.consumer.UtamError;
  */
 public class StringValueProfile implements Profile {
 
-  /**
-   * the default profile to use
-   */
-  // profile with default implementations for interfaces in case if modules are not set
-  public static final Profile DEFAULT_PROFILE = new StringValueProfile("default", "impl") {
-    @Override
-    public boolean isDefault() {
-      return true;
-    }
-  };
-  private static final String ERR_NAME_REQUIRED =
-      "profile name must not be null or the empty string";
-  private static final String ERR_VALUES_REQUIRED =
-      "profile value must not be null or the empty string";
-  private static final String PROFILE_CONFIG_PATTERN = "%s_%s_config";
+  static final String ERR_NAME_REQUIRED = "profile name must not be null or the empty string";
+  static final String ERR_VALUE_REQUIRED = "profile value must not be null or the empty string";
   private final String name;
   private final String value;
 
@@ -46,22 +33,11 @@ public class StringValueProfile implements Profile {
     }
 
     if (value == null || value.isEmpty()) {
-      throw new UtamError(ERR_VALUES_REQUIRED);
+      throw new UtamError(ERR_VALUE_REQUIRED);
     }
 
     this.name = profileName;
     this.value = value;
-  }
-
-  private static String getKey(Profile profile) {
-    return String.format(PROFILE_CONFIG_PATTERN, profile.getName(), profile.getValue());
-  }
-
-  static String getProfileConfigName(Profile profile, String moduleName) {
-    if (moduleName == null || moduleName.isEmpty()) {
-      return getKey(profile);
-    }
-    return moduleName + "_" + getKey(profile);
   }
 
   @Override
@@ -75,19 +51,14 @@ public class StringValueProfile implements Profile {
   }
 
   @Override
-  public String getConfigName(String moduleName) {
-    return getProfileConfigName(this, moduleName);
-  }
-
-  @Override
   public int hashCode() {
-    return getKey(this).hashCode();
+    return getKey().hashCode();
   }
 
   @Override //without this can't use Profile as a key in map inside Runner
   public boolean equals(Object obj) {
-    if (obj instanceof StringValueProfile) {
-      return getKey((StringValueProfile) obj).equals(getKey(this));
+    if (obj instanceof Profile) {
+      return ((Profile) obj).getKey().equals(this.getKey());
     }
     return false;
   }

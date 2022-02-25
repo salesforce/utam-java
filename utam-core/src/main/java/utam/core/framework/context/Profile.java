@@ -31,19 +31,11 @@ public interface Profile {
   String getValue();
 
   /**
-   * Each profile can have associated dependencies injection config
+   * profiles are used as a map key, this method should provide unique value
    *
-   * @param moduleName name of the module to distinguish properties
-   * @return name of the config to further use for UTAM Loader Configuration
+   * @return string with key
    */
-  String getConfigName(String moduleName);
-
-  /**
-   * default profile is used to build default dependencies config
-   *
-   * @return true for default profile
-   */
-  default boolean isDefault() {
-    return false;
+  default String getKey() {
+    return getName() + getValue();
   }
 }

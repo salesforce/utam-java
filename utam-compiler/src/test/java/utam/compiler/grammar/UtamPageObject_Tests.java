@@ -149,6 +149,14 @@ public class UtamPageObject_Tests {
   }
 
   @Test
+  public void testImplementationWithoutProfileThrows() {
+    UtamPageObject utamPageObject = new UtamPageObject();
+    utamPageObject.implementsType = "type/to/implement";
+    UtamError e = expectThrows(UtamError.class, utamPageObject::validate);
+    assertThat(e.getMessage(), containsString(ERR_PROFILE_IS_REQUIRED));
+  }
+
+  @Test
   public void testRootComments() {
     String json = "{}";
     JsonDeserializer deserializer = TestUtilities.getJsonStringDeserializer(json);

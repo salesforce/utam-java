@@ -1,0 +1,10 @@
+{
+  "name1": {
+    "value1": [
+      {
+        "interface": "utam.core.framework.consumer.TestLoaderConfigDefault",
+        "implementation": "utam.core.framework.consumer.TestLoaderConfigPageObjectProfile"
+      }
+    ]
+  }
+}

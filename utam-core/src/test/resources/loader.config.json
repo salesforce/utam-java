@@ -1,0 +1,28 @@
+{
+  "modules": [
+    {
+      "name": "module1",
+      "profiles": [
+        {
+          "name": "custom",
+          "values": [
+            "one",
+            "two"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "module2"
+    }
+  ],
+  "profiles": [
+    {
+      "name": "common",
+      "values": [
+        "one",
+        "two"
+      ]
+    }
+  ]
+}
