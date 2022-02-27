@@ -58,4 +58,11 @@ public interface MethodDeclaration {
    * @return list of strings of javadoc compatible format
    */
   List<String> getDescription();
+
+  /**
+   * method can be marked as deprecated
+   *
+   * @return boolean
+   */
+  boolean isDeprecated();
 }

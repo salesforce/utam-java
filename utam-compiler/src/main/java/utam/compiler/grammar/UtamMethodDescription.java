@@ -39,26 +39,29 @@ public class UtamMethodDescription {
   private final List<String> text = new ArrayList<>();
   private final String returnStr;
   private final String throwsStr;
+  private final String deprecatedStr;
 
   /**
    * Initialize object
    *
-   * @param text      text describing what method does
-   * @param returnStr describes meaning of the returned value. by default will be type of the
-   *                  returned value
-   * @param throwsStr if method throws an exception, can add description for it
+   * @param text          text describing what method does
+   * @param returnStr     describes meaning of the returned value. by default will be type of the
+   *                      returned value
+   * @param throwsStr     if method throws an exception, can add description for it
+   * @param deprecatedStr if page object is deprecated, text explains why
    */
   @JsonCreator
   UtamMethodDescription(
       @JsonProperty(value = "text", required = true) List<String> text,
       @JsonProperty("return") String returnStr,
-      @JsonProperty("throws") String throwsStr
-  ) {
+      @JsonProperty("throws") String throwsStr,
+      @JsonProperty("deprecated") String deprecatedStr) {
     if (text != null) {
       this.text.addAll(text);
     }
     this.throwsStr = throwsStr;
     this.returnStr = returnStr;
+    this.deprecatedStr = deprecatedStr;
   }
 
   /**
@@ -73,7 +76,7 @@ public class UtamMethodDescription {
     }
     if (descriptionNode.isTextual()) {
       String value = descriptionNode.textValue();
-      return new UtamMethodDescription(Collections.singletonList(value), null, null);
+      return new UtamMethodDescription(Collections.singletonList(value), null, null, null);
     }
     if (descriptionNode.isObject()) {
       try {
@@ -154,6 +157,18 @@ public class UtamMethodDescription {
     if (description != null && description.throwsStr != null) {
       res.add(String.format("@throws %s", description.throwsStr));
     }
+    if (description != null && description.deprecatedStr != null) {
+      res.add(String.format("@deprecated %s", description.deprecatedStr));
+    }
     return res;
+  }
+
+  /**
+   * check if description has deprecated marker
+   * @param description object with description or null
+   * @return boolean
+   */
+  public static boolean isDeprecated(UtamMethodDescription description) {
+    return description != null && description.deprecatedStr != null;
   }
 }

@@ -58,4 +58,11 @@ public interface PageObjectInterface {
    * @return list of union types
    */
   List<UnionType> getUnionTypes();
+
+  /**
+   * page object can be marked as deprecated
+   *
+   * @return boolean
+   */
+  boolean isDeprecated();
 }

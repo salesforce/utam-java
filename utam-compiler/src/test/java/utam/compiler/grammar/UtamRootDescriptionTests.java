@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -16,6 +17,7 @@ import static utam.compiler.grammar.UtamRootDescription.ERR_FORMAT_ERROR;
 
 import java.util.List;
 import org.testng.annotations.Test;
+import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.framework.consumer.UtamError;
 
@@ -79,19 +81,38 @@ public class UtamRootDescriptionTests {
   public void testDescriptionObject() {
     // for interface
     List<String> description = getInterfaceDescription("generated/comments/verboseObject.utam");
-    assertThat(description, hasSize(4));
+    assertThat(description, hasSize(5));
     assertThat(description.get(0), containsString("one"));
     assertThat(description.get(1), containsString("two"));
     assertThat(description.get(2), containsString("@author records_team"));
     assertThat(description.get(3), containsString("@version"));
+    assertThat(description.get(4), containsString("@deprecated this class is outdated"));
 
     // for impl
     description = getImplementationDescription("generated/comments/verboseObject.utam");
-    assertThat(description, hasSize(4));
+    assertThat(description, hasSize(5));
     assertThat(description.get(0), containsString("one"));
     assertThat(description.get(1), containsString("two"));
     assertThat(description.get(2), containsString("@author records_team"));
     assertThat(description.get(3), containsString("@version"));
+    assertThat(description.get(4), containsString("@deprecated this class is outdated"));
+  }
+
+  @Test
+  public void testDeprecatedAnnotation() {
+    PageObjectDeclaration pageObject = new DeserializerUtilities()
+        .getResultFromFile("generated/comments/verboseObject.utam").getPageObject();
+    List<AnnotationProvider> annotations = pageObject.getImplementation().getClassAnnotations();
+    assertThat(annotations, hasSize(1));
+    assertThat(annotations.get(0).getAnnotationText(), is(equalTo("@Deprecated")));
+    assertThat(pageObject.getInterface().isDeprecated(), is(true));
+  }
+
+  @Test
+  public void testDeprecatedAnnotationForInterface() {
+    PageObjectDeclaration pageObject = new DeserializerUtilities()
+        .getResultFromFile("generated/comments/verboseInterface.utam").getPageObject();
+    assertThat(pageObject.getInterface().isDeprecated(), is(true));
   }
 
   @Test
@@ -111,9 +132,10 @@ public class UtamRootDescriptionTests {
   @Test
   public void testDescriptionObjectForInterfaceWithoutAuthor() {
     List<String> description = getInterfaceDescription("generated/comments/verboseInterface.utam");
-    assertThat(description, hasSize(3));
+    assertThat(description, hasSize(4));
     assertThat(description.get(0), containsString("description"));
     assertThat(description.get(1), containsString("@author UTAM"));
     assertThat(description.get(2), containsString("@version"));
+    assertThat(description.get(3), containsString("@deprecated this class is outdated"));
   }
 }

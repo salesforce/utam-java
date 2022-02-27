@@ -31,25 +31,29 @@ class UtamRootDescription {
       "format of the root comment can be either: \n"
           + "1. \"description\" : \"string\" "
           + "or \n"
-          + "2. \"description\" : { \"text\" : [\"array of strings\"], \"author\" : \"my team\" }";
+          + "2. \"description\" : { \"text\" : [\"array of strings\"], \"author\" : \"my team\", \"deprecated\" : \"why deprecated\" }";
 
   private final List<String> text = new ArrayList<>();
   private final String author;
+  private final String deprecated;
 
   /**
    * Initialize object
    *
    * @param text   text of the page object description
    * @param author name of the team or person who owns a page object, by default UTAM
+   * @param deprecated if page object is deprecated, text explains why
    */
   @JsonCreator
   UtamRootDescription(
       @JsonProperty(value = "text", required = true) List<String> text,
-      @JsonProperty("author") String author) {
+      @JsonProperty("author") String author,
+      @JsonProperty("deprecated") String deprecated) {
     if (text != null) {
       this.text.addAll(text);
     }
     this.author = author;
+    this.deprecated = deprecated;
   }
 
   /**
@@ -60,12 +64,12 @@ class UtamRootDescription {
    */
   static UtamRootDescription processRootDescriptionNode(JsonNode descriptionNode) {
     if (descriptionNode == null || descriptionNode.isNull()) {
-      return new UtamRootDescription(null, null);
+      return new UtamRootDescription(null, null, null);
     }
     // "description" : "text"
     if (descriptionNode.isTextual()) {
       String value = descriptionNode.textValue();
-      return new UtamRootDescription(Collections.singletonList(value), null);
+      return new UtamRootDescription(Collections.singletonList(value), null, null);
     }
     // "description" : {...}
     if (descriptionNode.isObject()) {
@@ -85,12 +89,24 @@ class UtamRootDescription {
    */
   List<String> getDescription() {
     List<String> res = new ArrayList<>(text);
-    // add line "@author team_name"
+    // add line @author team_name
     res.add(String.format("@author %s", (author == null ? "UTAM" : author)));
     // add line @version with timestamp
     res.add(String.format("@version %s",
         LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+    // add line @deprecated
+    if(isDeprecated()) {
+      res.add(String.format("@deprecated %s", this.deprecated));
+    }
     return res;
   }
 
+  /**
+   * check if page object was marked as deprecated
+   *
+   * @return boolean
+   */
+  boolean isDeprecated() {
+    return this.deprecated != null;
+  }
 }

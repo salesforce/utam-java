@@ -7,6 +7,7 @@
  */
 package utam.compiler.translator;
 
+import static utam.compiler.helpers.AnnotationUtils.DEPRECATED_ANNOTATION;
 import static utam.compiler.translator.TranslationUtilities.NEW_LINE;
 import static utam.compiler.translator.TranslationUtilities.applyJavaFormatter;
 import static utam.compiler.translator.TranslationUtilities.getImportStrings;
@@ -53,6 +54,9 @@ public final class InterfaceSerializer {
   private void addMethodDeclaration(List<String> out, MethodDeclaration declaration) {
     out.add(NEW_LINE);
     out.addAll(getWrappedJavadoc(declaration.getDescription()));
+    if (declaration.isDeprecated()) {
+      out.add(DEPRECATED_ANNOTATION.getAnnotationText());
+    }
     out.add(NEW_LINE);
     out.add(getStatement(declaration.getCodeLine()));
   }
@@ -65,6 +69,9 @@ public final class InterfaceSerializer {
     out.addAll(getImports());
     out.add(NEW_LINE);
     out.addAll(getWrappedJavadoc(source.getDescription()));
+    if(source.isDeprecated()) {
+      out.add(DEPRECATED_ANNOTATION.getAnnotationText());
+    }
     out.add(getDeclaration());
     source.getDeclaredApi().forEach(declaration -> addMethodDeclaration(out, declaration));
     source.getUnionTypes()

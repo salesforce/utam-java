@@ -26,14 +26,12 @@ import utam.core.declarative.representation.TypeProvider;
 class MethodDeclarationImpl implements MethodDeclaration {
 
   private final String methodName;
-
   private final List<TypeProvider> imports;
-
   private final List<MethodParameter> parameters;
-
   private final TypeProvider returnType;
-
   private final List<String> description;
+  private final boolean isDeprecated;
+
 
   MethodDeclarationImpl(
       String methodName,
@@ -46,6 +44,7 @@ class MethodDeclarationImpl implements MethodDeclaration {
     this.returnType = returnType;
     this.parameters = parameters;
     this.description = UtamMethodDescription.getDescription(this, description);
+    this.isDeprecated = UtamMethodDescription.isDeprecated(description);
   }
 
   MethodDeclarationImpl(
@@ -118,5 +117,10 @@ class MethodDeclarationImpl implements MethodDeclaration {
   @Override
   public List<String> getDescription() {
     return description;
+  }
+
+  @Override
+  public boolean isDeprecated() {
+    return isDeprecated;
   }
 }

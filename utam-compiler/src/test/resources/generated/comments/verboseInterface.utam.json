@@ -2,7 +2,8 @@
   "description": {
     "text": [
       "interface description"
-    ]
+    ],
+    "deprecated" : "this class is outdated"
   },
   "interface" : true,
   "methods": [
@@ -25,7 +26,8 @@
           "description"
         ],
         "return": "return something",
-        "throws": "NullPointerException when"
+        "throws": "NullPointerException when",
+        "deprecated" : "this element is outdated"
       },
       "returnType": "generated-comments/pageObjects/verboseObject",
       "args": [

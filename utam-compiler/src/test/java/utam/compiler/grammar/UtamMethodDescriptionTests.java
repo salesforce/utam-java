@@ -9,12 +9,14 @@ package utam.compiler.grammar;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.UtamMethodDescription.ERR_FORMAT_ERROR;
 
 import java.util.List;
 import org.testng.annotations.Test;
+import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.framework.consumer.UtamError;
 
 /**
@@ -26,10 +28,13 @@ import utam.core.framework.consumer.UtamError;
 public class UtamMethodDescriptionTests {
 
   private static List<String> getMethodDescription(String jsonFile, String methodName) {
+    return getMethodDeclaration(jsonFile, methodName).getDescription();
+  }
+
+  private static MethodDeclaration getMethodDeclaration(String jsonFile, String methodName) {
     return new DeserializerUtilities().getContext(jsonFile)
         .getMethod(methodName)
-        .getDeclaration()
-        .getDescription();
+        .getDeclaration();
   }
 
   private static void getMethodDescriptionFromString(String jsonString) {
@@ -101,14 +106,17 @@ public class UtamMethodDescriptionTests {
 
   @Test
   public void testDescriptionObjectForCustomGetter() {
-    List<String> description = getMethodDescription("generated/comments/verboseObject.utam",
+    MethodDeclaration declaration = getMethodDeclaration("generated/comments/verboseObject.utam",
         "getCustomPublic");
-    assertThat(description, hasSize(4));
+    assertThat(declaration.isDeprecated(), equalTo(true));
+    List<String> description = declaration.getDescription();
+    assertThat(description, hasSize(5));
     assertThat(description.get(0), containsString("description"));
     assertThat(description.get(1), containsString("@return return something"));
     assertThat(description.get(2),
         containsString("@param selectorArg selector parameter description"));
     assertThat(description.get(3), containsString("@throws NullPointerException when"));
+    assertThat(description.get(4), containsString("@deprecated this element is outdated"));
   }
 
   @Test
@@ -164,13 +172,16 @@ public class UtamMethodDescriptionTests {
 
   @Test
   public void testDescriptionObjectForInterface() {
-    List<String> description = getMethodDescription("generated/comments/verboseInterface.utam",
+    MethodDeclaration declaration = getMethodDeclaration("generated/comments/verboseInterface.utam",
         "getCustomPublic");
-    assertThat(description, hasSize(4));
+    assertThat(declaration.isDeprecated(), equalTo(true));
+    List<String> description = declaration.getDescription();
+    assertThat(description, hasSize(5));
     assertThat(description.get(0), containsString("description"));
     assertThat(description.get(1), containsString("@return return something"));
     assertThat(description.get(2),
         containsString("@param selectorArg selector parameter description"));
     assertThat(description.get(3), containsString("@throws NullPointerException when"));
+    assertThat(description.get(4), containsString("@deprecated this element is outdated"));
   }
 }

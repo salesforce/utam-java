@@ -7,9 +7,10 @@
  */
 package utam.compiler.grammar;
 
-import static utam.compiler.grammar.UtamRootDescription.processRootDescriptionNode;
 import static utam.compiler.grammar.UtamMethod.ERR_BEFORE_LOAD_HAS_NO_ARGS;
 import static utam.compiler.grammar.UtamMethod.getComposeStatements;
+import static utam.compiler.grammar.UtamRootDescription.processRootDescriptionNode;
+import static utam.compiler.helpers.AnnotationUtils.DEPRECATED_ANNOTATION;
 import static utam.compiler.helpers.AnnotationUtils.getPageObjectAnnotation;
 import static utam.compiler.helpers.AnnotationUtils.getPagePlatformAnnotation;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
@@ -148,6 +149,9 @@ final class UtamPageObject {
     if (platform != null) {
       annotations.add(getPagePlatformAnnotation(platform));
     }
+    if (description.isDeprecated()) {
+      annotations.add(DEPRECATED_ANNOTATION);
+    }
     return annotations;
   }
 
@@ -206,6 +210,15 @@ final class UtamPageObject {
    */
   List<String> getDescription() {
     return this.description.getDescription();
+  }
+
+  /**
+   * check if page object was marked as deprecated
+   *
+   * @return boolean
+   */
+  boolean isDeprecated() {
+    return this.description.isDeprecated();
   }
 
   /**

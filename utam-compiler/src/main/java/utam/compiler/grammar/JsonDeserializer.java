@@ -218,6 +218,11 @@ public final class JsonDeserializer {
     public List<UnionType> getUnionTypes() {
       return context.getInterfaceUnionTypes();
     }
+
+    @Override
+    public boolean isDeprecated() {
+      return utamPageObject.isDeprecated();
+    }
   }
 
   static class Implementation implements PageObjectClass {
