@@ -125,6 +125,16 @@ public class UtamMethodDescriptionTests {
   }
 
   @Test
+  public void testDescriptionForArgsReference() {
+    List<String> description = getMethodDescription("generated/comments/verboseObject.utam",
+        "myArgsReference");
+    assertThat(description, hasSize(3));
+    assertThat(description.get(0), containsString("method myArgsReference"));
+    assertThat(description.get(1), containsString("@return String"));
+    assertThat(description.get(2), containsString("@param attrName attribute name to get"));
+  }
+
+  @Test
   public void testFormatIsNotStringOrObject() {
     String json = "{\n"
         + "\"interface\" : true,"

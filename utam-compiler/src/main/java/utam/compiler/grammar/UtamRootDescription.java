@@ -28,9 +28,10 @@ import utam.compiler.UtamCompilationError;
 class UtamRootDescription {
 
   final static String ERR_FORMAT_ERROR =
-      "format of the root comment can be either: \n1. \"description\" : \"string\" "
-          + "or "
-          + "\n2. \"description\" : { \"text\" : [\"array of strings\"], \"author\" : \"my team\" }";
+      "format of the root comment can be either: \n"
+          + "1. \"description\" : \"string\" "
+          + "or \n"
+          + "2. \"description\" : { \"text\" : [\"array of strings\"], \"author\" : \"my team\" }";
 
   private final List<String> text = new ArrayList<>();
   private final String author;

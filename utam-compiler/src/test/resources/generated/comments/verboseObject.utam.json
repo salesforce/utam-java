@@ -30,6 +30,28 @@
           ]
         }
       ]
+    },
+    {
+      "name": "myArgsReference",
+      "args": [
+        {
+          "name": "attrName",
+          "type": "string",
+          "description": "attribute name to get"
+        }
+      ],
+      "compose": [
+        {
+          "element": "root",
+          "apply": "getAttribute",
+          "args": [
+            {
+              "name": "attrName",
+              "type": "argumentReference"
+            }
+          ]
+        }
+      ]
     }
   ],
   "elements": [
@@ -74,7 +96,7 @@
           }
         ]
       },
-      "elements" : [
+      "elements": [
         {
           "public": true,
           "name": "container",
