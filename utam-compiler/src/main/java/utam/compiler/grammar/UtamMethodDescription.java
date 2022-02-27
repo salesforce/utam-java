@@ -62,13 +62,6 @@ public class UtamMethodDescription {
   }
 
   /**
-   * Initialize empty description object
-   */
-  public UtamMethodDescription() {
-    this(null, null, null);
-  }
-
-  /**
    * Process/deserialize description node at the method level
    *
    * @param descriptionNode Json node
@@ -76,7 +69,7 @@ public class UtamMethodDescription {
    */
   static UtamMethodDescription processMethodDescriptionNode(JsonNode descriptionNode) {
     if (descriptionNode == null || descriptionNode.isNull()) {
-      return new UtamMethodDescription();
+      return null;
     }
     if (descriptionNode.isTextual()) {
       String value = descriptionNode.textValue();
@@ -93,47 +86,73 @@ public class UtamMethodDescription {
     throw new UtamCompilationError(ERR_FORMAT_ERROR);
   }
 
-  private static String getParameterText(MethodParameter parameter) {
-    if (parameter.isLiteral()) {
-      return null;
+  /**
+   * if parameter is not literal, add line for javadoc
+   *
+   * @param parameter   passed argument
+   * @param description list with results
+   */
+  private static void setParameterText(MethodParameter parameter, List<String> description) {
+    if (!parameter.isLiteral()) {
+      final String pattern = String.format("@param %s", parameter.getValue()) + " %s";
+      final String javadocStr = parameter.getDescription() == null ?
+          String.format(pattern, parameter.getType().getSimpleName())
+          : String.format(pattern, parameter.getDescription());
+      description.add(javadocStr);
     }
-    final String pattern = String.format("@param %s", parameter.getValue()) + " %s";
-    return parameter.getDescription() == null?
-        String.format(pattern, parameter.getType().getSimpleName())
-        : String.format(pattern, parameter.getDescription());
   }
 
-  private List<String> getText(String methodName) {
-    return this.text.isEmpty() ? Collections.singletonList("method " + methodName) : this.text;
+  /**
+   * add javadoc line with method description, if none set, use method name
+   *
+   * @param methodName  string with method name
+   * @param object      description object, can be null
+   * @param description list with results
+   */
+  private static void setText(String methodName, UtamMethodDescription object,
+      List<String> description) {
+    List<String> text = object == null ? new ArrayList<>() : object.text;
+    if (text.isEmpty()) {
+      description.add("method " + methodName);
+    } else {
+      description.addAll(text);
+    }
   }
 
-  private String getReturnText(TypeProvider returnType) {
-    if (this.returnStr != null) {
-      return String.format("@return %s", returnStr);
+  /**
+   * set return javadoc string
+   *
+   * @param returnType  method return type
+   * @param object      description object, can be null
+   * @param description list with results
+   */
+  private static void setReturnText(TypeProvider returnType, UtamMethodDescription object,
+      List<String> description) {
+    String returnStr = object == null ? null : object.returnStr;
+    if (returnStr != null) {
+      description.add(String.format("@return %s", returnStr));
+    } else if (!returnType.isSameType(VOID)) {
+      description.add(String.format("@return %s", returnType.getSimpleName()));
     }
-    return returnType.isSameType(VOID) ? null : String.format("@return %s", returnType.getSimpleName());
   }
 
   /**
    * Get description as list of strings to wrap into javadoc format
    *
-   * @param declaration declaration
+   * @param declaration method declaration
+   * @param description object with description or null
    * @return list of strings
    */
-  public List<String> getDescription(MethodDeclaration declaration) {
-    List<String> res = new ArrayList<>(getText(declaration.getName()));
-    String returnText = getReturnText(declaration.getReturnType());
-    if (returnText != null) {
-      res.add(returnText);
-    }
+  public static List<String> getDescription(MethodDeclaration declaration,
+      UtamMethodDescription description) {
+    List<String> res = new ArrayList<>();
+    setText(declaration.getName(), description, res);
+    setReturnText(declaration.getReturnType(), description, res);
     for (MethodParameter parameter : declaration.getParameters()) {
-      String parameterText = getParameterText(parameter);
-      if (parameterText != null) {
-        res.add(parameterText);
-      }
+      setParameterText(parameter, res);
     }
-    if (throwsStr != null) {
-      res.add(String.format("@throws %s", throwsStr));
+    if (description != null && description.throwsStr != null) {
+      res.add(String.format("@throws %s", description.throwsStr));
     }
     return res;
   }

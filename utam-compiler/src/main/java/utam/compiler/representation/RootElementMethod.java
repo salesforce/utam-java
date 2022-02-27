@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import utam.compiler.grammar.UtamMethodDescription;
 import utam.compiler.helpers.ParameterUtils;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.TypeProvider;
@@ -46,7 +45,7 @@ public class RootElementMethod {
      * @param returnType the return type
      */
     public ProtectedDefaultType(TypeProvider returnType) {
-      super(BASE_METHOD_NAME, false, returnType, new UtamMethodDescription());
+      super(BASE_METHOD_NAME, false, returnType, null);
     }
 
     @Override
@@ -85,7 +84,7 @@ public class RootElementMethod {
      * @param returnType the default return type
      */
     public PublicDefaultType(TypeProvider returnType) {
-      super(PUBLIC_METHOD_NAME, true, returnType, new UtamMethodDescription());
+      super(PUBLIC_METHOD_NAME, true, returnType, null);
       this.imports = Collections.singletonList(returnType);
     }
 
@@ -127,7 +126,7 @@ public class RootElementMethod {
      * @param unionType the union type that is the return type
      */
     public PublicCustomType(UnionType unionType) {
-      super(PUBLIC_METHOD_NAME, true, unionType, new UtamMethodDescription());
+      super(PUBLIC_METHOD_NAME, true, unionType, null);
       ParameterUtils.setImports(imports, unionType.getExtendedTypes());
       ParameterUtils.setImport(classImports, returnType);
     }
@@ -172,7 +171,7 @@ public class RootElementMethod {
      * @param unionType the union type that is the return type
      */
     public PrivateCustomType(UnionType unionType) {
-      super(PUBLIC_METHOD_NAME, false, unionType, new UtamMethodDescription());
+      super(PUBLIC_METHOD_NAME, false, unionType, null);
     }
 
     @Override

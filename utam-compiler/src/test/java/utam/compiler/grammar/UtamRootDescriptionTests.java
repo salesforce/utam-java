@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
@@ -15,6 +16,7 @@ import static utam.compiler.grammar.UtamRootDescription.ERR_FORMAT_ERROR;
 
 import java.util.List;
 import org.testng.annotations.Test;
+import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.framework.consumer.UtamError;
 
 /**
@@ -33,6 +35,25 @@ public class UtamRootDescriptionTests {
   private static List<String> getImplementationDescription(String jsonFile) {
     return new DeserializerUtilities()
         .getResultFromFile(jsonFile).getPageObject().getImplementation().getDescription();
+  }
+
+  @Test
+  public void testEmptyRootComments() {
+    String json = "{}";
+    PageObjectDeclaration declaration = new DeserializerUtilities().getResultFromString(json).getPageObject();
+    // for interface
+    List<String> description = declaration.getInterface().getDescription();
+    assertThat(description, is(hasSize(2)));
+    assertThat(declaration.getInterface().getDescription(), is(hasSize(2)));
+    assertThat(description.get(0), containsString("@author UTAM"));
+    assertThat(description.get(1), containsString("@version"));
+
+    // for impl
+    description = declaration.getImplementation().getDescription();
+    assertThat(description, is(hasSize(2)));
+    assertThat(declaration.getInterface().getDescription(), is(hasSize(2)));
+    assertThat(description.get(0), containsString("@author UTAM"));
+    assertThat(description.get(1), containsString("@version"));
   }
 
   @Test

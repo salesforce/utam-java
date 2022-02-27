@@ -7,24 +7,29 @@
  */
 package utam.compiler.grammar;
 
-import utam.compiler.helpers.TranslationContext;
-import utam.core.declarative.representation.PageObjectDeclaration;
-import utam.core.framework.consumer.UtamError;
-import org.testng.annotations.Test;
-import utam.core.selenium.element.LocatorBy;
-
-import static utam.compiler.grammar.TestUtilities.*;
-import static utam.compiler.grammar.UtamPageObject.*;
-import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT_CLASS;
-import static utam.compiler.helpers.TypeUtilities.BASE_ROOT_PAGE_OBJECT_CLASS;
-import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.TestUtilities.JACKSON_WRONG_PROPERTY_TYPE;
+import static utam.compiler.grammar.TestUtilities.getDeserializedObject;
+import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
+import static utam.compiler.grammar.UtamPageObject.ERR_ROOT_MISSING_SELECTOR;
+import static utam.compiler.grammar.UtamPageObject.ERR_ROOT_REDUNDANT_SELECTOR;
+import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT_CLASS;
+import static utam.compiler.helpers.TypeUtilities.BASE_ROOT_PAGE_OBJECT_CLASS;
+import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
+
+import org.testng.annotations.Test;
+import utam.compiler.helpers.TranslationContext;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.framework.consumer.UtamError;
+import utam.core.selenium.element.LocatorBy;
 
 /**
  * Provides deserialization tests for the UtamPageObject class
@@ -204,27 +209,5 @@ public class UtamPageObject_DeserializeTests {
     PageObjectDeclaration declaration = new DeserializerUtilities().getResultFromFile("pageobjects/non_root").getPageObject();
     assertThat(declaration.getImplementation().getBaseClassType().isSameType(BASE_PAGE_OBJECT_CLASS), is(true));
     assertThat(declaration.getInterface().getBaseInterfaceType().isSameType(PAGE_OBJECT), is(true));
-  }
-
-  @Test
-  public void testGetDescription() {
-    String json = "{\"description\": \"my description\"}";
-    UtamPageObject utamPageObject = createRootElementNode(json);
-    assertThat(utamPageObject.getDescription(), is(hasSize(3)));
-    assertThat(utamPageObject.getDescription().get(0), is(equalTo("my description")));
-    assertThat(utamPageObject.getDescription().get(1), is(containsString("@author UTAM")));
-    PageObjectDeclaration declaration = new DeserializerUtilities().getResultFromString(json).getPageObject();
-    assertThat(declaration.getImplementation().getDescription(), is(hasSize(3)));
-    assertThat(declaration.getInterface().getDescription(), is(hasSize(3)));
-    assertThat(declaration.getImplementation().getDescription().get(0), is(equalTo("my description")));
-    assertThat(declaration.getInterface().getDescription().get(0), is(equalTo("my description")));
-  }
-
-  @Test
-  public void testRootComments() {
-    String json = "{}";
-    PageObjectDeclaration declaration = new DeserializerUtilities().getResultFromString(json).getPageObject();
-    assertThat(declaration.getImplementation().getDescription(), is(hasSize(2)));
-    assertThat(declaration.getInterface().getDescription(), is(hasSize(2)));
   }
 }

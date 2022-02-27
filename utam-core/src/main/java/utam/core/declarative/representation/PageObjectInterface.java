@@ -46,9 +46,9 @@ public interface PageObjectInterface {
   String getGeneratedCode();
 
   /**
-   * comments to use in a javadoc
+   * get string comments to use in generated javadoc
    *
-   * @return string
+   * @return list of strings
    */
   List<String> getDescription();
 

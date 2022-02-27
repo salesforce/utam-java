@@ -84,9 +84,9 @@ public interface PageObjectClass {
   List<Profile> getProfiles();
 
   /**
-   * comments to use in a javadoc
+   * get string comments to use in generated javadoc
    *
-   * @return string
+   * @return list of strings
    */
   List<String> getDescription();
 

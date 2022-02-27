@@ -9,7 +9,6 @@ package utam.compiler.representation;
 
 import java.util.ArrayList;
 import java.util.List;
-import utam.compiler.grammar.UtamMethodDescription;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.TypeUtilities.UnimportableType;
 import utam.core.declarative.representation.MethodDeclaration;
@@ -53,7 +52,7 @@ public class BeforeLoadMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-        return new MethodDeclarationImpl(name, new ArrayList<>(), OBJECT_RETURN_TYPE, imports, new UtamMethodDescription());
+        return new MethodDeclarationImpl(name, new ArrayList<>(), OBJECT_RETURN_TYPE, imports, null);
     }
 
     @Override

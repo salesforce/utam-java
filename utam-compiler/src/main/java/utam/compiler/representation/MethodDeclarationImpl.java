@@ -45,7 +45,7 @@ class MethodDeclarationImpl implements MethodDeclaration {
     this.imports = imports;
     this.returnType = returnType;
     this.parameters = parameters;
-    this.description = description.getDescription(this);
+    this.description = UtamMethodDescription.getDescription(this, description);
   }
 
   MethodDeclarationImpl(
@@ -61,7 +61,7 @@ class MethodDeclarationImpl implements MethodDeclaration {
       String methodName,
       List<MethodParameter> parameters,
       TypeProvider returnType) {
-    this(methodName, parameters, returnType, new UtamMethodDescription());
+    this(methodName, parameters, returnType, null);
   }
 
   private static List<TypeProvider> buildImports(

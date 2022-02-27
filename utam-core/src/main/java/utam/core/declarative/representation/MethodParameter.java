@@ -59,7 +59,7 @@ public interface MethodParameter {
   /**
    * parameter description is used in generated javadoc
    *
-   * @return string
+   * @return string with description, can be null
    */
   String getDescription();
 }

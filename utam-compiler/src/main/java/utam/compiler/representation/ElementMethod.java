@@ -42,7 +42,7 @@ public abstract class ElementMethod {
       new ArrayList<>(),
       DOCUMENT_TYPE,
       Collections.emptyList(),
-      new UtamMethodDescription());
+      null);
 
   /**
    * The Page Object method for a document getter

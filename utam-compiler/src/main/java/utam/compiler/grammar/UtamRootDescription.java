@@ -62,10 +62,12 @@ class UtamRootDescription {
     if (descriptionNode == null || descriptionNode.isNull()) {
       return new UtamRootDescription(null, null);
     }
+    // "description" : "text"
     if (descriptionNode.isTextual()) {
       String value = descriptionNode.textValue();
       return new UtamRootDescription(Collections.singletonList(value), null);
     }
+    // "description" : {...}
     if (descriptionNode.isObject()) {
       try {
         return new ObjectMapper().readValue(descriptionNode.toString(), UtamRootDescription.class);
@@ -83,7 +85,9 @@ class UtamRootDescription {
    */
   List<String> getDescription() {
     List<String> res = new ArrayList<>(text);
+    // add line "@author team_name"
     res.add(String.format("@author %s", (author == null ? "UTAM" : author)));
+    // add line @version with timestamp
     res.add(String.format("@version %s",
         LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
     return res;
