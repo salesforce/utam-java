@@ -12,6 +12,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.grammar.UtamArgument.ERR_ARGS_WRONG_TYPE;
@@ -55,18 +56,23 @@ public class UtamSelectorTests {
   @Test
   public void testSelectorNonLiteralParameters() {
     UtamSelector selector = new UtamSelector("str[%s] num[%d]", new UtamArgument[]{
-        new UtamArgument.UtamArgumentNonLiteral("strArg", "string"),
-        new UtamArgument.UtamArgumentNonLiteral("numArg", "number")
+        new UtamArgument.UtamArgumentNonLiteral("strArg", "string", null),
+        new UtamArgument.UtamArgumentNonLiteral("numArg", "number", "description")
     });
     LocatorCodeGeneration context = getLocatorContext(selector);
     List<MethodParameter> parameters = context.getParameters();
     assertThat(parameters, hasSize(2));
-    assertThat(parameters.get(0).isLiteral(), is(false));
-    assertThat(parameters.get(0).getValue(), is("strArg"));
-    assertThat(parameters.get(0).getType(), is(equalTo(PrimitiveType.STRING)));
-    assertThat(parameters.get(1).getType(), is(equalTo(PrimitiveType.NUMBER)));
+    MethodParameter strParameter = parameters.get(0);
+    assertThat(strParameter.isLiteral(), is(false));
+    assertThat(strParameter.getValue(), is("strArg"));
+    assertThat(strParameter.getType(), is(equalTo(PrimitiveType.STRING)));
+    assertThat(strParameter.getDescription(), is(nullValue()));
+
+    MethodParameter numberParameter = parameters.get(1);
+    assertThat(numberParameter.getType(), is(equalTo(PrimitiveType.NUMBER)));
     assertThat(context.getBuilderString(),
         is(equalTo("LocatorBy.byCss(String.format(\"str[%s] num[%d]\", strArg, numArg))")));
+    assertThat(numberParameter.getDescription(), is(equalTo("description")));
   }
 
   /**
@@ -84,7 +90,7 @@ public class UtamSelectorTests {
   public void testWrongArgTypeProvided() {
     UtamSelector selector = new UtamSelector("selector[%d]",
         new UtamArgument[]{
-            new UtamArgument.UtamArgumentNonLiteral("name", "string")
+            new UtamArgument.UtamArgumentNonLiteral("name", "string", null)
     });
     UtamError e = expectThrows(UtamError.class, () -> getLocatorContext(selector));
     assertThat(

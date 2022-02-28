@@ -7,7 +7,6 @@
  */
 package utam.compiler.helpers;
 
-import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
 import static utam.compiler.representation.FrameMethod.FRAME_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.wrapAsList;
@@ -243,7 +242,7 @@ public abstract class ElementContext {
      */
     // used in tests
     public Basic(String name, TypeProvider elementType, Locator selector) {
-      this(null, name, elementType, selector, EMPTY_PARAMETERS, false);
+      this(null, name, elementType, selector, new ArrayList<>(), false);
     }
 
     /**
@@ -254,7 +253,7 @@ public abstract class ElementContext {
      */
     // used in tests
     public Basic(TypeProvider elementType, Locator selector) {
-      this(null, "test", elementType, selector, EMPTY_PARAMETERS, false);
+      this(null, "test", elementType, selector, new ArrayList<>(), false);
     }
   }
 
@@ -314,7 +313,7 @@ public abstract class ElementContext {
           name,
           CONTAINER_ELEMENT,
           EMPTY_SELECTOR,
-          EMPTY_PARAMETERS,
+          new ArrayList<>(),
           false);
     }
   }
@@ -369,7 +368,7 @@ public abstract class ElementContext {
      * @param rootType                the type of the root element
      */
     public Root(TypeProvider enclosingPageObjectType, Locator selector, TypeProvider rootType) {
-      super(ElementType.ROOT, null, ROOT_ELEMENT_NAME, rootType, selector, EMPTY_PARAMETERS, false);
+      super(ElementType.ROOT, null, ROOT_ELEMENT_NAME, rootType, selector, new ArrayList<>(), false);
       this.enclosingPageObjectType = enclosingPageObjectType;
     }
 
@@ -444,7 +443,7 @@ public abstract class ElementContext {
      */
     // used in tests
     public Custom(String elementName, TypeProvider type, Locator selector) {
-      this(null, elementName, type, selector, EMPTY_PARAMETERS, false);
+      this(null, elementName, type, selector, new ArrayList<>(), false);
     }
   }
 

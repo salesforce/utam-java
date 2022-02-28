@@ -8,11 +8,11 @@
 package utam.compiler.representation;
 
 import static utam.compiler.helpers.ParameterUtils.setImport;
-import static utam.compiler.translator.TranslationUtilities.EMPTY_COMMENTS;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import utam.compiler.grammar.UtamMethodDescription;
 import utam.compiler.helpers.ParameterUtils;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
@@ -26,41 +26,41 @@ import utam.core.declarative.representation.TypeProvider;
 class MethodDeclarationImpl implements MethodDeclaration {
 
   private final String methodName;
-
   private final List<TypeProvider> imports;
-
   private final List<MethodParameter> parameters;
-
   private final TypeProvider returnType;
+  private final List<String> description;
+  private final boolean isDeprecated;
 
-  private final String comments;
-
-  MethodDeclarationImpl(
-      String methodName,
-      List<MethodParameter> parameters,
-      TypeProvider returnType) {
-    this(methodName, parameters, returnType, buildImports(returnType, parameters));
-  }
 
   MethodDeclarationImpl(
       String methodName,
       List<MethodParameter> parameters,
       TypeProvider returnType,
       List<TypeProvider> imports,
-      String comments) {
+      UtamMethodDescription description) {
     this.methodName = methodName;
     this.imports = imports;
     this.returnType = returnType;
     this.parameters = parameters;
-    this.comments = comments;
+    this.description = UtamMethodDescription.getDescription(this, description);
+    this.isDeprecated = UtamMethodDescription.isDeprecated(description);
   }
 
   MethodDeclarationImpl(
       String methodName,
       List<MethodParameter> parameters,
       TypeProvider returnType,
-      List<TypeProvider> imports) {
-    this(methodName, parameters, returnType, imports, EMPTY_COMMENTS);
+      UtamMethodDescription description) {
+    this(methodName, parameters, returnType, buildImports(returnType, parameters), description);
+  }
+
+  // used in tests
+  MethodDeclarationImpl(
+      String methodName,
+      List<MethodParameter> parameters,
+      TypeProvider returnType) {
+    this(methodName, parameters, returnType, null);
   }
 
   private static List<TypeProvider> buildImports(
@@ -70,6 +70,13 @@ class MethodDeclarationImpl implements MethodDeclaration {
     methodParameters.forEach(p -> ParameterUtils.setDeclarationImport(imports, p));
     setImport(imports, returnType);
     return imports;
+  }
+
+  private static String getParametersDeclarationString(List<MethodParameter> parameters) {
+    return parameters.stream()
+        .map(MethodParameter::getDeclaration)
+        .filter(str -> !str.isEmpty()) // hardcoded values passed as empty string
+        .collect(Collectors.joining(", "));
   }
 
   @Override
@@ -108,14 +115,12 @@ class MethodDeclarationImpl implements MethodDeclaration {
   }
 
   @Override
-  public String getComments() {
-    return comments;
+  public List<String> getDescription() {
+    return description;
   }
 
-  private static String getParametersDeclarationString(List<MethodParameter> parameters) {
-    return parameters.stream()
-        .map(MethodParameter::getDeclaration)
-        .filter(str -> !str.isEmpty()) // hardcoded values passed as empty string
-        .collect(Collectors.joining(", "));
+  @Override
+  public boolean isDeprecated() {
+    return isDeprecated;
   }
 }

@@ -39,6 +39,7 @@ public final class AnnotationUtils {
   private static final String MARKER_CLASS_STRING = PageMarker.class.getSimpleName();
   private static final List<TypeProvider> PLATFORM_ANNOTATION_IMPORTS = Stream.of(
       new TypeUtilities.FromClass(PlatformType.class), MARKER_CLASS).collect(Collectors.toList());
+  public static final AnnotationProvider DEPRECATED_ANNOTATION = () -> "@Deprecated";
 
   /**
    * Gets the provider for the annotation for a given locator

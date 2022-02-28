@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import utam.compiler.grammar.UtamMethodDescription;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ParameterUtils;
 import utam.compiler.helpers.TypeUtilities;
@@ -41,6 +42,7 @@ public class FrameMethod implements PageObjectMethod {
   private final List<String> methodCode = new ArrayList<>();
   private final List<MethodParameter> parameters;
   private final boolean isPublic;
+  private final UtamMethodDescription description;
 
   /**
    * Initializes a new instance of the FrameMethod class
@@ -48,7 +50,7 @@ public class FrameMethod implements PageObjectMethod {
    * @param isPublic          a value indicating whether the element is public
    * @param locatorParameters the list of parameters to use in locating the element
    */
-  public FrameMethod(ElementContext element, boolean isPublic, List<MethodParameter> locatorParameters) {
+  public FrameMethod(ElementContext element, boolean isPublic, List<MethodParameter> locatorParameters, UtamMethodDescription description) {
     methodCode.add(getScopeElementCode(element.getScopeElement()));
     String scopeVariableName = element.getScopeElement().getName();
     String locationWithParameters = getElementLocationCode(element.getName(), locatorParameters);
@@ -58,12 +60,13 @@ public class FrameMethod implements PageObjectMethod {
     this.methodName = getElementGetterMethodName(element.getName(), isPublic);
     this.parameters = element.getParameters();
     this.isPublic = isPublic;
+    this.description = description;
   }
 
   @Override
   public MethodDeclaration getDeclaration() {
     List<TypeProvider> imports = Stream.of(FRAME_ELEMENT).collect(Collectors.toList());
-    return new MethodDeclarationImpl(methodName, parameters, FRAME_ELEMENT, imports);
+    return new MethodDeclarationImpl(methodName, parameters, FRAME_ELEMENT, imports, description);
   }
 
   @Override

@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.UtamMethodDescription.processMethodDescriptionNode;
 import static utam.compiler.helpers.AnnotationUtils.getFindAnnotation;
 import static utam.compiler.types.BasicElementInterface.processBasicTypeNode;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT_IMPL_CLASS;
@@ -66,6 +67,7 @@ public final class UtamElement {
   UtamElementFilter filter;
   private final Boolean isNullable;
   private final Supplier<Traversal> traversalAbstraction;
+  private final UtamMethodDescription description;
 
   @JsonCreator
   UtamElement(
@@ -76,7 +78,8 @@ public final class UtamElement {
       @JsonProperty(value = "selector") UtamSelector selector,
       @JsonProperty(value = "filter") UtamElementFilter filter,
       @JsonProperty("shadow") UtamShadowElement shadow,
-      @JsonProperty("elements") UtamElement[] elements) {
+      @JsonProperty("elements") UtamElement[] elements,
+      @JsonProperty("description") JsonNode descriptionNode) {
     this.name = name;
     this.isPublic = isPublic;
     this.selector = selector;
@@ -87,6 +90,7 @@ public final class UtamElement {
     Entry<Supplier<Traversal>, String[]> elementType = processTypeNode(type);
     this.type = elementType.getValue();
     this.traversalAbstraction = elementType.getKey();
+    this.description = processMethodDescriptionNode(descriptionNode);
   }
 
   private Entry<Supplier<Traversal>, String[]> processTypeNode(JsonNode typeNode) {
@@ -240,7 +244,8 @@ public final class UtamElement {
                 filter.getApplyMethodParameters(),
                 filter.getMatcherType(),
                 filter.getMatcherParameters(),
-                filter.getFindFirst());
+                filter.getFindFirst(),
+                description);
       } else if (selector.isReturnAll()) {
         method =
             new CustomElementMethod.Multiple(
@@ -248,7 +253,8 @@ public final class UtamElement {
                 name,
                 selectorContext.getParameters(),
                 scopeElement,
-                elementType);
+                elementType,
+                description);
       } else {
         method =
             new CustomElementMethod.Single(
@@ -256,7 +262,8 @@ public final class UtamElement {
                 name,
                 selectorContext.getParameters(),
                 scopeElement,
-                elementType);
+                elementType,
+                description);
       }
       translatorContext.setElement(component);
       translatorContext.setMethod(method);
@@ -334,11 +341,12 @@ public final class UtamElement {
                 filter.getApplyMethodParameters(),
                 filter.getMatcherType(),
                 filter.getMatcherParameters(),
-                filter.getFindFirst());
+                filter.getFindFirst(),
+                description);
       } else if (isList) {
-        method = new ElementMethod.Multiple(elementContext, locatorHelper.getParameters(), isPublic(), implType);
+        method = new ElementMethod.Multiple(elementContext, locatorHelper.getParameters(), isPublic(), implType, description);
       } else {
-        method = new ElementMethod.Single(elementContext, locatorHelper.getParameters(), isPublic(), implType);
+        method = new ElementMethod.Single(elementContext, locatorHelper.getParameters(), isPublic(), implType, description);
       }
       context.setClassField(field);
       context.setElement(elementContext);
@@ -384,10 +392,10 @@ public final class UtamElement {
       PageObjectMethod method;
       if (selector.isReturnAll()) {
         method = new ContainerMethod.WithSelectorReturnsList(
-            scopeElement, isExpandScopeShadowRoot, name, selectorContext, isPublic());
+            scopeElement, isExpandScopeShadowRoot, name, selectorContext, isPublic(), description);
       } else {
         method = new ContainerMethod.WithSelector(
-            scopeElement, isExpandScopeShadowRoot, name, selectorContext, isPublic());
+            scopeElement, isExpandScopeShadowRoot, name, selectorContext, isPublic(), description);
       }
       elementContext.setElementMethod(method);
       context.setElement(elementContext);
@@ -423,7 +431,7 @@ public final class UtamElement {
               name, getFindAnnotation(selectorContext.getLocator(),
               isExpandScopeShadowRoot, isNullable()));
       ElementContext elementContext = new ElementContext.Frame(scopeElement, name, selectorContext);
-      PageObjectMethod method = new FrameMethod(elementContext, isPublic(), selectorContext.getParameters());
+      PageObjectMethod method = new FrameMethod(elementContext, isPublic(), selectorContext.getParameters(), description);
       elementContext.setElementMethod(method);
       context.setClassField(field);
       context.setElement(elementContext);

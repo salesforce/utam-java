@@ -7,7 +7,9 @@
  */
 package utam.compiler.representation;
 
+import utam.compiler.grammar.UtamMethodDescription;
 import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.representation.UnionType;
 
 /**
@@ -17,6 +19,20 @@ import utam.core.declarative.representation.UnionType;
  * @since 236
  */
 public abstract class BasicElementGetterMethod implements PageObjectMethod {
+
+  final String methodName;
+  final TypeProvider returnType;
+  private final boolean isPublic;
+  final MethodParametersTracker parametersTracker;
+  final UtamMethodDescription description;
+
+  BasicElementGetterMethod(String methodName, boolean isPublic, TypeProvider returnType, UtamMethodDescription description) {
+    this.methodName = methodName;
+    this.returnType = returnType;
+    this.isPublic = isPublic;
+    this.parametersTracker = new MethodParametersTracker(String.format("method '%s'", methodName));
+    this.description = description;
+  }
 
   /**
    * union type declared for a basic element. Can be null if element does not have one
@@ -34,5 +50,10 @@ public abstract class BasicElementGetterMethod implements PageObjectMethod {
    */
   public UnionType getClassUnionType() {
     return null;
+  }
+
+  @Override
+  public final boolean isPublic() {
+    return isPublic;
   }
 }

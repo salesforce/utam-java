@@ -53,9 +53,16 @@ public interface MethodDeclaration {
   String getCodeLine();
 
   /**
-   * Gets the comments of the method declaration
+   * get text for javadoc
    *
-   * @return the comments of the method declaration
+   * @return list of strings of javadoc compatible format
    */
-  String getComments();
+  List<String> getDescription();
+
+  /**
+   * method can be marked as deprecated
+   *
+   * @return boolean
+   */
+  boolean isDeprecated();
 }

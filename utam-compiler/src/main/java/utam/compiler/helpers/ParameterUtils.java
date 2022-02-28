@@ -15,7 +15,6 @@ import utam.compiler.translator.TranslationUtilities;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,11 +23,6 @@ import java.util.stream.Collectors;
  * @since 228
  */
 public class ParameterUtils {
-
-  /**
-   * An empty parameter list
-   */
-  public static final List<MethodParameter> EMPTY_PARAMETERS = new ArrayList<>();
 
   /**
    * Gets the parameter values string from a list of parameters
@@ -42,22 +36,29 @@ public class ParameterUtils {
   }
 
   /**
-   * Represents a regualar method parameter
+   * Represents a regular method parameter
    */
   public static class Regular implements MethodParameter {
 
     final String valueAsString;
     final TypeProvider type;
+    private final String description;
 
     /**
-     * Initializes a new instance of the Regular class
+     * Initializes a new instance of the Regular method parameter
      *
      * @param valueAsString the value of the parameter
      * @param type          the type of the parameter
+     * @param description description of the parameter role
      */
-    public Regular(String valueAsString, TypeProvider type) {
+    public Regular(String valueAsString, TypeProvider type, String description) {
       this.valueAsString = valueAsString;
       this.type = type;
+      this.description = description;
+    }
+
+    public Regular(String valueAsString, TypeProvider type) {
+      this(valueAsString, type, null);
     }
 
     @Override
@@ -91,6 +92,11 @@ public class ParameterUtils {
     @Override
     public List<MethodParameter> getNestedParameters() {
       return null;
+    }
+
+    @Override
+    public String getDescription() {
+      return description;
     }
   }
 

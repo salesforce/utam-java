@@ -11,6 +11,7 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import java.util.ArrayList;
 import java.util.List;
+import utam.compiler.grammar.UtamMethodDescription;
 import utam.compiler.helpers.ParameterUtils;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -30,6 +31,7 @@ public class ComposeMethod implements PageObjectMethod {
   private final List<TypeProvider> classImports = new ArrayList<>();
   private final List<TypeProvider> imports = new ArrayList<>();
   private final TypeProvider returns;
+  private final UtamMethodDescription description;
 
   /**
    * Initializes a new instance of the ComposeMethod class
@@ -37,11 +39,13 @@ public class ComposeMethod implements PageObjectMethod {
    * @param returnType the return type of the method
    * @param parameters the list of parameters of the method
    * @param statements the list of statments of the method
+   * @param description       method description in Json
    */
   public ComposeMethod(String methodName,
       TypeProvider returnType,
       List<MethodParameter> parameters,
-      List<ComposeMethodStatement> statements) {
+      List<ComposeMethodStatement> statements,
+      UtamMethodDescription description) {
     this.name = methodName;
     this.returns = returnType;
     statements.forEach(
@@ -55,11 +59,12 @@ public class ComposeMethod implements PageObjectMethod {
       ParameterUtils.setImport(imports, returnType);
       ParameterUtils.setImport(classImports, returnType);
     }
+    this.description = description;
   }
 
   @Override
   public MethodDeclarationImpl getDeclaration() {
-    return new MethodDeclarationImpl(name, parameters, returns, imports);
+    return new MethodDeclarationImpl(name, parameters, returns, imports, description);
   }
 
   @Override

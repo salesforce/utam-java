@@ -46,11 +46,11 @@ public interface PageObjectInterface {
   String getGeneratedCode();
 
   /**
-   * comments to use in a javadoc
+   * get string comments to use in generated javadoc
    *
-   * @return string
+   * @return list of strings
    */
-  String getComments();
+  List<String> getDescription();
 
   /**
    * get all declared public union types
@@ -58,4 +58,11 @@ public interface PageObjectInterface {
    * @return list of union types
    */
   List<UnionType> getUnionTypes();
+
+  /**
+   * page object can be marked as deprecated
+   *
+   * @return boolean
+   */
+  boolean isDeprecated();
 }

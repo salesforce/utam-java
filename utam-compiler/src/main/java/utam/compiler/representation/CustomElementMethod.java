@@ -7,6 +7,7 @@
  */
 package utam.compiler.representation;
 
+import utam.compiler.grammar.UtamMethodDescription;
 import utam.compiler.helpers.ParameterUtils;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
@@ -46,6 +47,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     private final String methodName;
     private final MethodParametersTracker parametersTracker;
     private final TypeProvider returnType;
+    private final UtamMethodDescription description;
 
     /**
      * Initializes a new instance of the Single class
@@ -55,13 +57,15 @@ public abstract class CustomElementMethod implements PageObjectMethod {
      * @param locatorParameters the list of parameters of the method
      * @param scopeElement      the scope element of the method
      * @param returnType        the return type of the method
+     * @param description       method description in Json
      */
     public Single(
         boolean isPublic,
         String componentName,
         List<MethodParameter> locatorParameters,
         ElementContext scopeElement,
-        TypeProvider returnType) {
+        TypeProvider returnType,
+        UtamMethodDescription description) {
       String scopeElementLine = getScopeElementCode(scopeElement);
       codeLines.add(scopeElementLine);
       String locationCode = getElementLocationCode(componentName, locatorParameters);
@@ -79,6 +83,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       parametersTracker.setMethodParameters(scopeElement.getParameters());
       parametersTracker.setMethodParameters(locatorParameters);
       this.returnType = returnType;
+      this.description = description;
     }
 
     @Override
@@ -93,7 +98,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), returnType, interfaceImports);
+      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), returnType, interfaceImports, description);
     }
 
     @Override
@@ -115,6 +120,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     private final String methodName;
     private final MethodParametersTracker parametersTracker;
     private final TypeProvider returnType;
+    private final UtamMethodDescription description;
 
     /**
      * Initializes a new instance of the Filtered class
@@ -129,6 +135,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
      * @param matcherType       the type of matcher for the filter
      * @param matcherParameters the list of parameters for the matcher
      * @param isFindFirst       a value indicating whether the filter applies to only the first element found
+     * @param description       method description in Json
      */
     public Filtered(
         boolean isPublic,
@@ -140,7 +147,8 @@ public abstract class CustomElementMethod implements PageObjectMethod {
         List<MethodParameter> applyParameters,
         MatcherType matcherType,
         List<MethodParameter> matcherParameters,
-        boolean isFindFirst) {
+        boolean isFindFirst,
+        UtamMethodDescription description) {
       this.returnType = isFindFirst ? returnType : wrapAsList(returnType);
       ParameterUtils.setImport(interfaceImports, this.returnType);
       ParameterUtils.setImport(classImports, this.returnType);
@@ -164,6 +172,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
           returnType.getSimpleName(),
           predicate);
       codeLines.add(statement);
+      this.description = description;
     }
 
     @Override
@@ -178,7 +187,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), returnType, interfaceImports);
+      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), returnType, interfaceImports, description);
     }
 
     @Override
@@ -200,6 +209,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     private final boolean isPublic;
     private final String methodName;
     private final MethodParametersTracker parametersTracker;
+    private final UtamMethodDescription description;
 
     /**
      * Initializes a new instance of the Multiple class
@@ -209,13 +219,15 @@ public abstract class CustomElementMethod implements PageObjectMethod {
      * @param locatorParameters the list of parameters of the method
      * @param scopeElement      the scope element of the method
      * @param returnType        the return type of the method
+     * @param description       method description in Json
      */
     public Multiple(
         boolean isPublic,
         String componentName,
         List<MethodParameter> locatorParameters,
         ElementContext scopeElement,
-        TypeProvider returnType) {
+        TypeProvider returnType,
+        UtamMethodDescription description) {
       this.returnType = wrapAsList(returnType);
       ParameterUtils.setImport(interfaceImports, this.returnType);
       ParameterUtils.setImport(classImports, this.returnType);
@@ -233,11 +245,12 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       this.parametersTracker = new MethodParametersTracker(String.format("method '%s'", methodName));
       parametersTracker.setMethodParameters(scopeElement.getParameters());
       parametersTracker.setMethodParameters(locatorParameters);
+      this.description = description;
     }
 
     @Override
     public MethodDeclarationImpl getDeclaration() {
-      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), returnType, interfaceImports);
+      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), returnType, interfaceImports, description);
     }
 
     @Override

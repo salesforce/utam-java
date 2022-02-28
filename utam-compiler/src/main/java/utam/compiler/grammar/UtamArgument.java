@@ -103,36 +103,41 @@ public abstract class UtamArgument {
   @JsonDeserialize // reset to default
   static class UtamArgumentNonLiteral extends UtamArgument {
 
+    private final String description;
+
     @JsonCreator
     UtamArgumentNonLiteral(
         @JsonProperty(value = "name", required = true) String name,
-        @JsonProperty(value = "type", required = true) String type) {
+        @JsonProperty(value = "type", required = true) String type,
+        @JsonProperty(value = "description") String description
+    ) {
       super(null, name, type, null, null);
       if (!SUPPORTED_NON_LITERAL_TYPES.contains(type)) {
         throw new UtamCompilationError(getUnsupportedTypeErr(type));
       }
+      this.description = description;
     }
 
     @Override
     MethodParameter asParameter(TranslationContext translationContext,
         Function<MethodParameter, MethodParameter> parameterReferenceTransformer) {
       if (isPrimitiveType(type)) {
-        return new Regular(name, PrimitiveType.fromString(type));
+        return new Regular(name, PrimitiveType.fromString(type), this.description);
       }
       if (SELECTOR_TYPE_PROPERTY.equals(type)) {
-        return new Regular(name, SELECTOR);
+        return new Regular(name, SELECTOR, this.description);
       }
       if (PARAMETER_REFERENCE.getSimpleName().equals(type)) {
-        return new Regular(name, PARAMETER_REFERENCE);
+        return new Regular(name, PARAMETER_REFERENCE, this.description);
       }
       if (FRAME_ELEMENT_TYPE_PROPERTY.equals(type)) {
-        return new Regular(name, FRAME_ELEMENT);
+        return new Regular(name, FRAME_ELEMENT, this.description);
       }
       if (PAGE_OBJECT_TYPE_PROPERTY.equals(type)) {
-        return new Regular(name, PAGE_OBJECT_PARAMETER);
+        return new Regular(name, PAGE_OBJECT_PARAMETER, this.description);
       }
       if (ROOT_PAGE_OBJECT_TYPE_PROPERTY.equals(type)) {
-        return new Regular(name, ROOT_PAGE_OBJECT_PARAMETER);
+        return new Regular(name, ROOT_PAGE_OBJECT_PARAMETER, this.description);
       }
       // this can only mean bug, never thrown
       throw new IllegalStateException(String.format("Bug in %s Unsupported argument type", UtamArgumentDeserializer.class.getName()));

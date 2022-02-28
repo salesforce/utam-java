@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import utam.compiler.helpers.ParameterUtils;
 import utam.core.declarative.representation.MethodDeclaration;
-import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.representation.UnionType;
 
@@ -32,7 +31,6 @@ public class RootElementMethod {
   // this method must exist in BasePageObject
   private final static String BASE_METHOD_NAME = "getRootElement";
   private final static String PUBLIC_METHOD_NAME = "getRoot";
-  private static final List<MethodParameter> EMPTY_PARAMETERS = new ArrayList<>();
 
   /**
    * Protected getter for root element of default type
@@ -41,29 +39,23 @@ public class RootElementMethod {
    */
   public static class ProtectedDefaultType extends BasicElementGetterMethod {
 
-    private final TypeProvider returnType;
-
     /**
      * Initializes a new instance of the ProtectedDefaultType class
      *
      * @param returnType the return type
      */
     public ProtectedDefaultType(TypeProvider returnType) {
-      this.returnType = returnType;
-    }
-
-    @Override
-    public boolean isPublic() {
-      return false;
+      super(BASE_METHOD_NAME, false, returnType, null);
     }
 
     @Override
     public MethodDeclaration getDeclaration() {
       return new MethodDeclarationImpl(
-          BASE_METHOD_NAME,
-          EMPTY_PARAMETERS,
+          methodName,
+          new ArrayList<>(),
           returnType,
-          Stream.of(returnType).collect(Collectors.toList()));
+          Stream.of(returnType).collect(Collectors.toList()),
+          description);
     }
 
     @Override
@@ -85,24 +77,25 @@ public class RootElementMethod {
   public static class PublicDefaultType extends BasicElementGetterMethod {
 
     private final List<TypeProvider> imports;
-    private final TypeProvider returnType;
 
     /**
      * Initializes a new instance of the PublicDefaultType class
+     *
      * @param returnType the default return type
      */
     public PublicDefaultType(TypeProvider returnType) {
-      this.returnType = returnType;
+      super(PUBLIC_METHOD_NAME, true, returnType, null);
       this.imports = Collections.singletonList(returnType);
     }
 
     @Override
     public MethodDeclaration getDeclaration() {
       return new MethodDeclarationImpl(
-          PUBLIC_METHOD_NAME,
-          EMPTY_PARAMETERS,
+          methodName,
+          new ArrayList<>(),
           returnType,
-          imports);
+          imports,
+          description);
     }
 
     @Override
@@ -114,11 +107,6 @@ public class RootElementMethod {
     public List<TypeProvider> getClassImports() {
       return imports;
     }
-
-    @Override
-    public boolean isPublic() {
-      return true;
-    }
   }
 
   /**
@@ -129,7 +117,6 @@ public class RootElementMethod {
   public static class PublicCustomType extends BasicElementGetterMethod {
 
     static final String PROXY_CODE_LINE_TEMPLATE = "return getProxy(this.getRootElement(), %s.class)";
-    private final UnionType returnType;
     private final List<TypeProvider> imports = new ArrayList<>();
     private final List<TypeProvider> classImports = new ArrayList<>();
 
@@ -139,7 +126,7 @@ public class RootElementMethod {
      * @param unionType the union type that is the return type
      */
     public PublicCustomType(UnionType unionType) {
-      this.returnType = unionType;
+      super(PUBLIC_METHOD_NAME, true, unionType, null);
       ParameterUtils.setImports(imports, unionType.getExtendedTypes());
       ParameterUtils.setImport(classImports, returnType);
     }
@@ -147,10 +134,11 @@ public class RootElementMethod {
     @Override
     public MethodDeclaration getDeclaration() {
       return new MethodDeclarationImpl(
-          PUBLIC_METHOD_NAME,
-          EMPTY_PARAMETERS,
-          this.returnType,
-          imports);
+          methodName,
+          new ArrayList<>(),
+          returnType,
+          imports,
+          description);
     }
 
     @Override
@@ -162,11 +150,6 @@ public class RootElementMethod {
     public List<String> getCodeLines() {
       String type = this.returnType.getSimpleName();
       return Collections.singletonList(String.format(PROXY_CODE_LINE_TEMPLATE, type));
-    }
-
-    @Override
-    public boolean isPublic() {
-      return true;
     }
 
     @Override
@@ -182,29 +165,23 @@ public class RootElementMethod {
    */
   public static class PrivateCustomType extends BasicElementGetterMethod {
 
-    private final UnionType returnType;
-
     /**
      * Initializes a new instance of the PrivateCustomtype class
      *
      * @param unionType the union type that is the return type
      */
     public PrivateCustomType(UnionType unionType) {
-      this.returnType = unionType;
-    }
-
-    @Override
-    public boolean isPublic() {
-      return false;
+      super(PUBLIC_METHOD_NAME, false, unionType, null);
     }
 
     @Override
     public MethodDeclaration getDeclaration() {
       return new MethodDeclarationImpl(
-          PUBLIC_METHOD_NAME,
-          EMPTY_PARAMETERS,
+          methodName,
+          new ArrayList<>(),
           this.returnType,
-          new ArrayList<>());
+          new ArrayList<>(),
+          description);
     }
 
     @Override

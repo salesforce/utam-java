@@ -210,13 +210,18 @@ public final class JsonDeserializer {
     }
 
     @Override
-    public String getComments() {
+    public List<String> getDescription() {
       return utamPageObject.getDescription();
     }
 
     @Override
     public List<UnionType> getUnionTypes() {
       return context.getInterfaceUnionTypes();
+    }
+
+    @Override
+    public boolean isDeprecated() {
+      return utamPageObject.isDeprecated();
     }
   }
 
@@ -281,7 +286,7 @@ public final class JsonDeserializer {
     }
 
     @Override
-    public String getComments() {
+    public List<String> getDescription() {
       return utamPageObject.getDescription();
     }
 
