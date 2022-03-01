@@ -29,7 +29,7 @@ import utam.core.framework.context.StringValueProfile;
  * @author elizaveta.ivanova
  * @since 234
  */
-class JsonLoaderConfig {
+public class JsonLoaderConfig {
 
   static final String ERR_READING_LOADER_CONFIG = "error while reading config '%s' for UTAM loader";
   static final String ERR_CANT_FIND_LOADER_CONFIG = "can't find loader config '%s'";
