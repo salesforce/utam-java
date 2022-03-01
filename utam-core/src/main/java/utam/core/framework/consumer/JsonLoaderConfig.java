@@ -65,7 +65,7 @@ public class JsonLoaderConfig {
   /**
    * create empty loader config without JSON file
    */
-  JsonLoaderConfig() {
+  public JsonLoaderConfig() {
     this("", null, new ArrayList<>(), new ArrayList<>());
   }
 
@@ -99,17 +99,16 @@ public class JsonLoaderConfig {
     try {
       return new ObjectMapper().readValue(url, JsonLoaderConfig.class);
     } catch (IOException e) {
-      throw new UtamCoreError(String.format(ERR_READING_LOADER_CONFIG, url.toString()),
-          e);
+      throw new UtamCoreError(String.format(ERR_READING_LOADER_CONFIG, url), e);
     }
   }
 
   /**
-   * get list of configured modules. used in tests
+   * get list of configured modules
    *
    * @return list of modules from config
    */
-  List<Module> getModules() {
+  public List<Module> getModules() {
     return modules;
   }
 
@@ -159,7 +158,7 @@ public class JsonLoaderConfig {
    * @author elizaveta.ivanova
    * @since 234
    */
-  static class Module {
+  public static class Module {
 
     // annotation is required for serializer to write into output
     @JsonProperty(value = "profiles")
@@ -175,7 +174,7 @@ public class JsonLoaderConfig {
      * @param profiles profiles defined for the module
      */
     @JsonCreator
-    Module(
+    public Module(
         @JsonProperty(value = "name", required = true) String name,
         @JsonProperty(value = "profiles") List<Profile> profiles) {
       this.name = name;
@@ -201,7 +200,7 @@ public class JsonLoaderConfig {
      * @param sharedProfiles profiles shared by all modules
      * @return list of both module and shared profiles
      */
-    Set<utam.core.framework.context.Profile> getModuleProfiles(List<Profile> sharedProfiles) {
+    public Set<utam.core.framework.context.Profile> getModuleProfiles(List<Profile> sharedProfiles) {
       List<utam.core.framework.context.Profile> allProfiles = new ArrayList<>();
       this.profiles.stream()
           .flatMap(profile -> profile.getProfiles().stream())
@@ -217,7 +216,7 @@ public class JsonLoaderConfig {
      *
      * @return the name of the module
      */
-    String getName() {
+    public String getName() {
       return name;
     }
 
@@ -238,7 +237,7 @@ public class JsonLoaderConfig {
    * @author elizaveta.ivanova
    * @since 234
    */
-  static class Profile {
+  public static class Profile {
 
     // annotation is required for serializer to write into output
     @JsonProperty(value = "name")
@@ -253,7 +252,7 @@ public class JsonLoaderConfig {
      * @param values array of the values defined in the profile
      */
     @JsonCreator
-    Profile(
+    public Profile(
         @JsonProperty(value = "name", required = true) String name,
         @JsonProperty(value = "values", required = true) String[] values) {
       this.name = name;
