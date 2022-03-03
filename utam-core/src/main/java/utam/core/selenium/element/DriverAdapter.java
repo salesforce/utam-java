@@ -11,6 +11,7 @@ import static utam.core.framework.UtamLogger.error;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,6 +19,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.FluentWait;
 import utam.core.driver.Driver;
@@ -54,6 +56,13 @@ public class DriverAdapter implements Driver {
   public DriverAdapter(WebDriver driver, DriverConfig driverConfig) {
     this.driver = driver;
     this.driverConfig = driverConfig;
+    // set implicit timeout as configured
+    Options options = this.driver.manage();
+    if(options != null) { // for mock can be null
+      options
+          .timeouts()
+          .implicitlyWait(this.driverConfig.getImplicitTimeout().toSeconds(), TimeUnit.SECONDS);
+    }
   }
 
   /**
