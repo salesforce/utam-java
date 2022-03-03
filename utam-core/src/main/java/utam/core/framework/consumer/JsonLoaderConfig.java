@@ -42,17 +42,18 @@ public class JsonLoaderConfig {
   /**
    * Initializes a new instance of the JsonLoaderConfig class
    *
-   * @param bridgeAppTitle mobile only: bridge app title
+   * @param bridgeAppTitleStr mobile only: bridge app title
    * @param timeoutsConfig the driver configuration
    * @param modules      the list of modules
    * @param profiles     the list of profiles
    */
   @JsonCreator
   JsonLoaderConfig(
-      @JsonProperty(value = "bridgeAppTitle") String bridgeAppTitle,
+      @JsonProperty(value = "bridgeAppTitle") String bridgeAppTitleStr,
       @JsonProperty(value = "timeouts") TimeoutsJsonMapping timeoutsConfig,
       @JsonProperty(value = "modules") List<Module> modules,
       @JsonProperty(value = "profiles") List<Profile> profiles) {
+    String bridgeAppTitle = bridgeAppTitleStr == null? "" : bridgeAppTitleStr;
     this.driverConfig = timeoutsConfig == null ? new DriverConfig(bridgeAppTitle) : timeoutsConfig.getDriverConfig(bridgeAppTitle);
     if (modules != null) {
       this.modules.addAll(modules);

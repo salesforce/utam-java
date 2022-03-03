@@ -15,6 +15,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
@@ -159,7 +160,7 @@ public class JsonLoaderConfigTests {
     assertThat(driverConfig.getImplicitTimeout(), is(DEFAULT_IMPLICIT_TIMEOUT));
     assertThat(driverConfig.getExplicitTimeout(), is(DEFAULT_EXPLICIT_TIMEOUT));
     assertThat(driverConfig.getPollingInterval(), is(DEFAULT_POLLING_INTERVAL));
-    assertThat(driverConfig.getBridgeAppTitle(), is(emptyOrNullString()));
+    assertThat(driverConfig.getBridgeAppTitle(), is(emptyString()));
   }
 
   @Test

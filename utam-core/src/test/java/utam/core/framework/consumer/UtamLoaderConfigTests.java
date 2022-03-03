@@ -11,6 +11,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.expectThrows;
@@ -35,6 +36,7 @@ public class UtamLoaderConfigTests {
   @Test
   public void testSetBridgeApp() {
     UtamLoaderConfig config = getDefaultConfig();
+    assertThat(config.getDriverConfig().getBridgeAppTitle(), is(emptyString()));
     config.setBridgeAppTitle("bridge");
     assertThat(config.getDriverConfig().getBridgeAppTitle(), is(equalTo("bridge")));
   }
