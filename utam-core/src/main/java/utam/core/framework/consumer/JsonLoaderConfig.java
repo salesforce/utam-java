@@ -53,6 +53,7 @@ public class JsonLoaderConfig {
       @JsonProperty(value = "timeouts") TimeoutsJsonMapping timeoutsConfig,
       @JsonProperty(value = "modules") List<Module> modules,
       @JsonProperty(value = "profiles") List<Profile> profiles) {
+    // default has to be empty string, not null
     String bridgeAppTitle = bridgeAppTitleStr == null? "" : bridgeAppTitleStr;
     this.driverConfig = timeoutsConfig == null ? new DriverConfig(bridgeAppTitle) : timeoutsConfig.getDriverConfig(bridgeAppTitle);
     if (modules != null) {
