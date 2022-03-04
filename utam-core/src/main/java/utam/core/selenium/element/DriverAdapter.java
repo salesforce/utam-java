@@ -37,9 +37,8 @@ import utam.core.framework.context.PlatformType;
  */
 public class DriverAdapter implements Driver {
 
-  // used in tests to validate right message
   /**
-   * Error prefix for element not found
+   * Error prefix for element not found, used in tests to validate right message
    */
   public static final String ERR_ELEMENT_NOT_FOUND_PREFIX = "can't find element";
   static final String ERR_SUPPORTED_FOR_MOBILE = "method is applicable only for iOS/Android";
@@ -58,7 +57,7 @@ public class DriverAdapter implements Driver {
     this.driverConfig = driverConfig;
     // set implicit timeout as configured
     Options options = this.driver.manage();
-    if(options != null && options.timeouts() != null) { // for mock it can be null
+    if(options != null && options.timeouts() != null) { // for mock both can be null
       options
           .timeouts()
           .implicitlyWait(this.driverConfig.getImplicitTimeout().toSeconds(), TimeUnit.SECONDS);

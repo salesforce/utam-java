@@ -11,6 +11,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -154,6 +155,15 @@ public class UtamLoaderTests {
     loader.getConfig().setBridgeAppTitle("title");
     loader.resetContext();
     assertThat(loader.getDriver().getDriverConfig().getBridgeAppTitle(), is(equalTo("title")));
+  }
+
+  @Test
+  public void testBridgeAppInDriverConfig() {
+    UtamLoaderConfig config = new UtamLoaderConfigImpl();
+    UtamLoaderImpl loader = new UtamLoaderImpl(config, mock(WebDriver.class));
+    assertThat(loader.getDriver().getDriverConfig().getBridgeAppTitle(), is(emptyString()));
+    loader.resetContext();
+    assertThat(loader.getDriver().getDriverConfig().getBridgeAppTitle(), is(emptyString()));
   }
 
   private static class ContainerMock implements Container {
