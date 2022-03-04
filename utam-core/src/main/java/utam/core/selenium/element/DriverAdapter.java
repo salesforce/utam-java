@@ -58,7 +58,7 @@ public class DriverAdapter implements Driver {
     this.driverConfig = driverConfig;
     // set implicit timeout as configured
     Options options = this.driver.manage();
-    if(options != null) { // for mock can be null
+    if(options != null && options.timeouts() != null) { // for mock it can be null
       options
           .timeouts()
           .implicitlyWait(this.driverConfig.getImplicitTimeout().toSeconds(), TimeUnit.SECONDS);
