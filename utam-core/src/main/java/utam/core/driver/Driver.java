@@ -102,6 +102,13 @@ public interface Driver {
   DriverConfig getDriverConfig();
 
   /**
+   * resets the Driver configuration parameters
+   *
+   * @param config the configuration parameters to set
+   */
+  void resetDriverConfig(DriverConfig config);
+
+  /**
    * mobile only: get current context, wraps AppiumDriver.getContext
    *
    * @return string with current context
