@@ -46,7 +46,7 @@ public class DriverAdapter implements Driver {
   static final String ERR_CANT_ENTER_NULL_FRAME = "Can't enter null frame element";
   // not final because can be reset
   private WebDriver driver;
-  private final DriverConfig driverConfig;
+  private DriverConfig driverConfig;
 
   /**
    * Initializes a new instance of the DriverAdapter class
@@ -196,6 +196,11 @@ public class DriverAdapter implements Driver {
   @Override
   public DriverConfig getDriverConfig() {
     return driverConfig;
+  }
+
+  @Override
+  public void resetDriverConfig(DriverConfig config) {
+    this.driverConfig = config;
   }
 
   @Override
