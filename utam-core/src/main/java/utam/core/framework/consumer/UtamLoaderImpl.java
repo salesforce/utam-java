@@ -98,6 +98,7 @@ public class UtamLoaderImpl implements UtamLoader {
   public final void resetContext() {
     // reset context
     PageObjectContext context = loaderConfig.getPageContext();
+    // driver config might have changed, propagate it to the driver
     driver.resetDriverConfig(loaderConfig.getDriverConfig());
     this.factory = new PageObjectsFactoryImpl(context, driver);
     this.document = new DocumentObject(factory);

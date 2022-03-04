@@ -147,6 +147,15 @@ public class UtamLoaderTests {
     assertThat(loader.getConfig(), is(instanceOf(UtamLoaderConfig.class)));
   }
 
+  @Test
+  public void testDriverConfigReset() {
+    UtamLoaderConfig config = new UtamLoaderConfigImpl();
+    UtamLoaderImpl loader = new UtamLoaderImpl(config, mock(WebDriver.class));
+    loader.getConfig().setBridgeAppTitle("title");
+    loader.resetContext();
+    assertThat(loader.getDriver().getDriverConfig().getBridgeAppTitle(), is(equalTo("title")));
+  }
+
   private static class ContainerMock implements Container {
 
     final Supplier<SearchContext> root;
