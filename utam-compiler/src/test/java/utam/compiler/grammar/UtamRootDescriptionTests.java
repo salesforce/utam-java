@@ -83,7 +83,7 @@ public class UtamRootDescriptionTests {
     List<String> description = getInterfaceDescription("generated/comments/verboseObject.utam");
     assertThat(description, hasSize(5));
     assertThat(description.get(0), containsString("one"));
-    assertThat(description.get(1), containsString("two"));
+    assertThat(description.get(1), containsString("&lt;two&gt; &amp; *&#47;"));
     assertThat(description.get(2), containsString("@author records_team"));
     assertThat(description.get(3), containsString("@version"));
     assertThat(description.get(4), containsString("@deprecated this class is outdated"));
@@ -92,7 +92,7 @@ public class UtamRootDescriptionTests {
     description = getImplementationDescription("generated/comments/verboseObject.utam");
     assertThat(description, hasSize(5));
     assertThat(description.get(0), containsString("one"));
-    assertThat(description.get(1), containsString("two"));
+    assertThat(description.get(1), containsString("&lt;two&gt; &amp; *&#47;"));
     assertThat(description.get(2), containsString("@author records_team"));
     assertThat(description.get(3), containsString("@version"));
     assertThat(description.get(4), containsString("@deprecated this class is outdated"));

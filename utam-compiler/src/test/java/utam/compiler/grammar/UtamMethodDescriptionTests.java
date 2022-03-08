@@ -89,7 +89,7 @@ public class UtamMethodDescriptionTests {
     assertThat(description, hasSize(3));
     assertThat(description.get(0), containsString("description"));
     assertThat(description.get(1), containsString("@return PageObject"));
-    assertThat(description.get(2), containsString("@param pageObjectType Class<T>"));
+    assertThat(description.get(2), containsString("@param pageObjectType Class&lt;T&gt;"));
   }
 
   @Test
@@ -128,7 +128,7 @@ public class UtamMethodDescriptionTests {
     assertThat(description.get(1), containsString("@return return something"));
     assertThat(description.get(2),
         containsString("@param selectorArg selector parameter description"));
-    assertThat(description.get(3), containsString("@param pageObjectType Class<T>"));
+    assertThat(description.get(3), containsString("@param pageObjectType Class&lt;T&gt;"));
     assertThat(description.get(4), containsString("@throws NullPointerException when"));
   }
 

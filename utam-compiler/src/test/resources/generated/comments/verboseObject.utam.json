@@ -2,7 +2,7 @@
   "description": {
     "text": [
       "one",
-      "two"
+      "<two> & */"
     ],
     "author": "records_team",
     "deprecated" : "this class is outdated"
