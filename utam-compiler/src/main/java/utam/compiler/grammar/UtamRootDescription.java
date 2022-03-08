@@ -17,6 +17,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import utam.compiler.UtamCompilationError;
 
 /**
@@ -88,16 +90,26 @@ class UtamRootDescription {
    * @return list of strings
    */
   List<String> getDescription() {
-    List<String> res = new ArrayList<>(text);
+    List<String> descriptionLines = new ArrayList<>(text);
     // add line @author team_name
-    res.add(String.format("@author %s", (author == null ? "UTAM" : author)));
+    descriptionLines.add(String.format("@author %s", (author == null ? "UTAM" : author)));
     // add line @version with timestamp
-    res.add(String.format("@version %s",
+    descriptionLines.add(String.format("@version %s",
         LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
     // add line @deprecated
     if(isDeprecated()) {
-      res.add(String.format("@deprecated %s", this.deprecated));
+      descriptionLines.add(String.format("@deprecated %s", this.deprecated));
     }
+    // replace any invalid HTML characters with their appropriate encoded entities.
+    // special note: iOS class chains contain "*/" in their paths, so this must be
+    // escaped for Javadoc generation.
+    List<String> res = descriptionLines.stream()
+        .map((s) -> s
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("*/", "*&#47;"))
+        .collect(Collectors.toList());
     return res;
   }
 

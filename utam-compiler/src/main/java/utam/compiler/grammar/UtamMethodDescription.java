@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import utam.compiler.UtamCompilationError;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
@@ -148,18 +150,28 @@ public class UtamMethodDescription {
    */
   public static List<String> getDescription(MethodDeclaration declaration,
       UtamMethodDescription description) {
-    List<String> res = new ArrayList<>();
-    setText(declaration.getName(), description, res);
-    setReturnText(declaration.getReturnType(), description, res);
+    List<String> descriptionLines = new ArrayList<>();
+    setText(declaration.getName(), description, descriptionLines);
+    setReturnText(declaration.getReturnType(), description, descriptionLines);
     for (MethodParameter parameter : declaration.getParameters()) {
-      setParameterText(parameter, res);
+      setParameterText(parameter, descriptionLines);
     }
     if (description != null && description.throwsStr != null) {
-      res.add(String.format("@throws %s", description.throwsStr));
+      descriptionLines.add(String.format("@throws %s", description.throwsStr));
     }
     if (description != null && description.deprecatedStr != null) {
-      res.add(String.format("@deprecated %s", description.deprecatedStr));
+      descriptionLines.add(String.format("@deprecated %s", description.deprecatedStr));
     }
+    // replace any invalid HTML characters with their appropriate encoded entities.
+    // special note: iOS class chains contain "*/" in their paths, so this must be
+    // escaped for Javadoc generation.
+    List<String> res = descriptionLines.stream()
+        .map((s) -> s
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("*/", "*&#47"))
+        .collect(Collectors.toList());
     return res;
   }
 
