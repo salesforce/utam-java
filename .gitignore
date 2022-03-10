@@ -23,6 +23,7 @@ surefire*
 *.pgp
 out/
 **/test-output/
+release.properties
 # generated tests page objects
 utam-compiler/src/test/java/generated/**
 **/*.config.json
