@@ -90,6 +90,8 @@
                         <version>${maven.release.plugin.version}</version>
                         <configuration>
                             <autoVersionSubmodules>true</autoVersionSubmodules>
+                            <scmReleaseCommitComment>Releasing @{releaseLabel}</scmReleaseCommitComment>
+                            <scmDevelopmentCommitComment>Preparing for next development iteration @{releaseLabel}</scmDevelopmentCommitComment>
                         </configuration>
                     </plugin>
                 </plugins>
