@@ -91,7 +91,7 @@
                         <configuration>
                             <autoVersionSubmodules>true</autoVersionSubmodules>
                             <scmReleaseCommitComment>Releasing @{releaseLabel}</scmReleaseCommitComment>
-                            <scmDevelopmentCommitComment>Preparing for next development iteration @{releaseLabel}</scmDevelopmentCommitComment>
+                            <scmDevelopmentCommitComment>Preparing for next development iteration</scmDevelopmentCommitComment>
                         </configuration>
                     </plugin>
                 </plugins>
