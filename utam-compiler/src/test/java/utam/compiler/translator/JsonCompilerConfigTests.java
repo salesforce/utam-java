@@ -206,7 +206,7 @@ public class JsonCompilerConfigTests {
   @Test
   public void testMissingFields() throws IOException {
     JsonCompilerConfig config = new JsonCompilerConfig(
-        new File(JsonCompilerConfig.class.getClassLoader().getResource("config/nofields.config.json").getFile()),
+        new File(JsonCompilerConfig.class.getClassLoader().getResource("config/nofields.json").getFile()),
         new File(System.getProperty("user.dir")));
     assertThat(config.getModuleName(), is(emptyString()));
     assertThat(config.getVersion(), is(nullValue()));

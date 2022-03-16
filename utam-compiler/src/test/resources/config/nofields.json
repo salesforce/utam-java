@@ -1,0 +1,10 @@
+{
+  "pageObjectsRootDir": "/src/test/resources/spec",
+  "pageObjectsFilesMask": "(.*)\\.utam\\.json$",
+  "pageObjectsOutputDir": "/src/test/java/pageObjects",
+  "resourcesOutputDir": "/src/test/resources",
+  "unitTestsOutputDir": "/src/test/java",
+  "unitTestsRunner": "JUNIT",
+  "extensionsFileMask" : "**/__utam__/**/*.utam.js",
+  "extensionsOutputDir" : "pageObjects/utils"
+}
