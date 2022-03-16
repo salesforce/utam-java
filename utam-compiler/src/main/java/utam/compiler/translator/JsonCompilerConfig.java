@@ -25,9 +25,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import utam.compiler.UtamCompilationError;
-import utam.compiler.translator.DefaultSourceConfiguration.SourceWithoutPackages;
 import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.ScannerConfig;
+import utam.compiler.translator.DefaultSourceConfiguration.SourceWithoutPackages;
 import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorConfig;
@@ -103,7 +103,16 @@ public class JsonCompilerConfig {
    * @return the name of the module
    */
   public String getModuleName() {
-    return moduleConfig.moduleName;
+    return moduleConfig.getName();
+  }
+
+  /**
+   * get version to mark page objects javadocs
+   *
+   * @return version string or null
+   */
+  String getVersion() {
+    return moduleConfig.pageObjectsVersion;
   }
 
   // for tests
@@ -121,7 +130,7 @@ public class JsonCompilerConfig {
     TranslatorSourceConfig sourceConfig = getSourceConfig();
     TranslatorTargetConfig targetConfig = getTargetConfig();
     List<ProfileConfiguration> profiles = getConfiguredProfiles();
-    return new DefaultTranslatorConfiguration(getModuleName(), guardrailsMode, sourceConfig, targetConfig, profiles);
+    return new DefaultTranslatorConfiguration(getModuleName(), getVersion(), guardrailsMode, sourceConfig, targetConfig, profiles);
   }
 
   /**
@@ -143,11 +152,13 @@ public class JsonCompilerConfig {
     private final String resourcesOutputDir;
     private final String unitTestsOutputDir;
     private final UnitTestRunner unitTestRunnerType;
+    private final String pageObjectsVersion;
 
     /**
      * Initializes a new instance of the Module class. Instantiated via JSON deserialization.
      *
      * @param moduleName               the arbitrary name of the module in the source repository
+     * @param pageObjectsVersion       optional name of the version for JavaDoc
      * @param filesMaskRegex           used by scanner to distinguish JSON with page objects
      * @param pageObjectsRootDirectory the directory in the source repository in which to
      *                                 recursively search for UTAM Page Object declarative
@@ -166,6 +177,7 @@ public class JsonCompilerConfig {
     @JsonCreator
     public Module(
         @JsonProperty(value = "module") String moduleName,
+        @JsonProperty(value = "version") String pageObjectsVersion,
         @JsonProperty(value = "pageObjectsFilesMask", defaultValue = DEFAULT_JSON_FILE_MASK_REGEX) String filesMaskRegex,
         @JsonProperty(value = "pageObjectsRootDir", required = true) String pageObjectsRootDirectory,
         @JsonProperty(value = "pageObjectsOutputDir", required = true) String pageObjectsOutputDir,
@@ -184,6 +196,7 @@ public class JsonCompilerConfig {
       this.resourcesOutputDir = resourcesOutputDir;
       this.unitTestsOutputDir = validateUnitTestDirectory(unitTestRunner, unitTestDirectory);
       this.unitTestRunnerType = Objects.requireNonNullElse(unitTestRunner, NONE);
+      this.pageObjectsVersion = pageObjectsVersion;
     }
 
     void setUniqueProfiles(List<Profile> profiles) {
@@ -204,6 +217,7 @@ public class JsonCompilerConfig {
     // used in tests
     Module(String moduleName, String filesMaskRegex, String pageObjectsRootDirectory) {
       this(moduleName,
+          null,
           filesMaskRegex,
           pageObjectsRootDirectory,
           null,
@@ -217,6 +231,7 @@ public class JsonCompilerConfig {
     // used in tests
     Module(String moduleName, String pageObjectsRootDirectory) {
       this(moduleName,
+          null,
           null,
           pageObjectsRootDirectory,
           null,

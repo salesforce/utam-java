@@ -389,4 +389,27 @@ public final class TranslationContext {
     });
     return unionTypes;
   }
+
+  /**
+   * get page objects version from config
+   *
+   * @return string
+   */
+  public String getConfiguredVersion() {
+    return this.translatorConfiguration.getPageObjectsVersion();
+  }
+
+  /**
+   * get JSON path from config
+   *
+   * @return string
+   */
+  public String getJsonPath() {
+    String fullPath = translatorConfiguration.getConfiguredSource().getSourcePath(pageObjectURI);
+    int index = fullPath.indexOf("resources");
+    if(index > 0) { // path can be empty for mocks
+      return fullPath.substring(index);
+    }
+    return fullPath;
+  }
 }

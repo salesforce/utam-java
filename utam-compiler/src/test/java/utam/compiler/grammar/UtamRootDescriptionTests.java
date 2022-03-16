@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.UtamRootDescription.ERR_FORMAT_ERROR;
+import static utam.compiler.grammar.UtamRootDescription.VERSION_TAG;
 
 import java.util.List;
 import org.testng.annotations.Test;
@@ -45,57 +46,62 @@ public class UtamRootDescriptionTests {
     PageObjectDeclaration declaration = new DeserializerUtilities().getResultFromString(json).getPageObject();
     // for interface
     List<String> description = declaration.getInterface().getDescription();
-    assertThat(description, is(hasSize(2)));
-    assertThat(declaration.getInterface().getDescription(), is(hasSize(2)));
-    assertThat(description.get(0), containsString("@author UTAM"));
-    assertThat(description.get(1), containsString("@version"));
+    assertThat(description, is(hasSize(3)));
+    assertThat(declaration.getInterface().getDescription(), is(hasSize(3)));
+    assertThat(description.get(0), containsString("created from JSON"));
+    assertThat(description.get(1), containsString("@author UTAM"));
+    assertThat(description.get(2), containsString(VERSION_TAG));
 
     // for impl
     description = declaration.getImplementation().getDescription();
-    assertThat(description, is(hasSize(2)));
-    assertThat(declaration.getInterface().getDescription(), is(hasSize(2)));
-    assertThat(description.get(0), containsString("@author UTAM"));
-    assertThat(description.get(1), containsString("@version"));
+    assertThat(description, is(hasSize(3)));
+    assertThat(declaration.getInterface().getDescription(), is(hasSize(3)));
+    assertThat(description.get(0), containsString("created from JSON"));
+    assertThat(description.get(1), containsString("@author UTAM"));
+    assertThat(description.get(2), containsString(VERSION_TAG));
   }
 
   @Test
   public void testDescriptionString() {
     // for interface
     List<String> description = getInterfaceDescription("generated/comments/verboseString.utam");
-    assertThat(description, hasSize(3));
+    assertThat(description, hasSize(4));
     assertThat(description.get(0),
         containsString("Declarative programming is a high-level programming concept"));
-    assertThat(description.get(1), containsString("@author UTAM"));
-    assertThat(description.get(2), containsString("@version"));
+    assertThat(description.get(1), containsString("created from JSON"));
+    assertThat(description.get(2), containsString("@author UTAM"));
+    assertThat(description.get(3), containsString(VERSION_TAG));
 
     // for impl
     description = getImplementationDescription("generated/comments/verboseString.utam");
-    assertThat(description, hasSize(3));
     assertThat(description.get(0),
         containsString("Declarative programming is a high-level programming concept"));
-    assertThat(description.get(1), containsString("@author UTAM"));
-    assertThat(description.get(2), containsString("@version"));
+    assertThat(description.get(1), containsString("created from JSON"));
+    assertThat(description.get(2), containsString("@author UTAM"));
+    assertThat(description.get(3), containsString(VERSION_TAG));
   }
 
   @Test
   public void testDescriptionObject() {
     // for interface
     List<String> description = getInterfaceDescription("generated/comments/verboseObject.utam");
-    assertThat(description, hasSize(5));
+    assertThat(description, hasSize(6));
     assertThat(description.get(0), containsString("one"));
     assertThat(description.get(1), containsString("&lt;two&gt; &amp; *&#47;"));
-    assertThat(description.get(2), containsString("@author records_team"));
-    assertThat(description.get(3), containsString("@version"));
-    assertThat(description.get(4), containsString("@deprecated this class is outdated"));
+    assertThat(description.get(2), containsString("created from JSON"));
+    assertThat(description.get(3), containsString("@author records_team"));
+    assertThat(description.get(4), containsString(VERSION_TAG));
+    assertThat(description.get(5), containsString("@deprecated this class is outdated"));
 
     // for impl
     description = getImplementationDescription("generated/comments/verboseObject.utam");
-    assertThat(description, hasSize(5));
+    assertThat(description, hasSize(6));
     assertThat(description.get(0), containsString("one"));
     assertThat(description.get(1), containsString("&lt;two&gt; &amp; *&#47;"));
-    assertThat(description.get(2), containsString("@author records_team"));
-    assertThat(description.get(3), containsString("@version"));
-    assertThat(description.get(4), containsString("@deprecated this class is outdated"));
+    assertThat(description.get(2), containsString("created from JSON"));
+    assertThat(description.get(3), containsString("@author records_team"));
+    assertThat(description.get(4), containsString(VERSION_TAG));
+    assertThat(description.get(5), containsString("@deprecated this class is outdated"));
   }
 
   @Test
@@ -132,10 +138,11 @@ public class UtamRootDescriptionTests {
   @Test
   public void testDescriptionObjectForInterfaceWithoutAuthor() {
     List<String> description = getInterfaceDescription("generated/comments/verboseInterface.utam");
-    assertThat(description, hasSize(4));
+    assertThat(description, hasSize(5));
     assertThat(description.get(0), containsString("description"));
-    assertThat(description.get(1), containsString("@author UTAM"));
-    assertThat(description.get(2), containsString("@version"));
-    assertThat(description.get(3), containsString("@deprecated this class is outdated"));
+    assertThat(description.get(1), containsString("created from JSON"));
+    assertThat(description.get(2), containsString("@author UTAM"));
+    assertThat(description.get(3), containsString(VERSION_TAG));
+    assertThat(description.get(4), containsString("@deprecated this class is outdated"));
   }
 }

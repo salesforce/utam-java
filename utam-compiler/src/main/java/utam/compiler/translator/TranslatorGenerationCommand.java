@@ -94,6 +94,10 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
       description = "Name of the current POs module, when set it's used as a prefix to profile property files.")
   private String moduleName;
 
+  @Option(names = {"-v", "-versionName", "--versionName"},
+      description = "Name of the current POs version, usually matches application version.")
+  private String versionName;
+
   @Option(names = {"-g", "-guardrails", "--guardrails"},
       description = "Defines how strict should be guardrails violations, possible values: 'error' or 'warning'")
   private String validationStrict;
@@ -198,6 +202,7 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
 
       return new DefaultTranslatorConfiguration(
           moduleName,
+          versionName,
           guardrailsMode,
           sourceConfig,
           targetConfig,
