@@ -91,7 +91,8 @@ class UtamRootDescription {
   List<String> getDescription(String version, String sourceFileRelativePath) {
     List<String> descriptionLines = new ArrayList<>(text);
     if(sourceFileRelativePath != null) {
-      descriptionLines.add(String.format("created from JSON %s", sourceFileRelativePath));
+      String addComma = text.isEmpty()? "" : ", ";
+      descriptionLines.add(String.format("%screated from JSON %s", addComma, sourceFileRelativePath));
     }
     // add line @author team_name
     descriptionLines.add(String.format("@author %s", (author == null ? "UTAM" : author)));

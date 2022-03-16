@@ -405,6 +405,11 @@ public final class TranslationContext {
    * @return string
    */
   public String getJsonPath() {
-    return translatorConfiguration.getConfiguredSource().getSourcePath(pageObjectURI);
+    String fullPath = translatorConfiguration.getConfiguredSource().getSourcePath(pageObjectURI);
+    int index = fullPath.indexOf("resources");
+    if(index > 0) { // path can be empty for mocks
+      return fullPath.substring(index);
+    }
+    return fullPath;
   }
 }
