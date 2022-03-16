@@ -389,4 +389,22 @@ public final class TranslationContext {
     });
     return unionTypes;
   }
+
+  /**
+   * get page objects version from config
+   *
+   * @return string
+   */
+  public String getConfiguredVersion() {
+    return this.translatorConfiguration.getPageObjectsVersion();
+  }
+
+  /**
+   * get JSON path from config
+   *
+   * @return string
+   */
+  public String getJsonPath() {
+    return translatorConfiguration.getConfiguredSource().getSourcePath(pageObjectURI);
+  }
 }

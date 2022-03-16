@@ -12,13 +12,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import utam.compiler.UtamCompilationError;
 
 /**
@@ -87,15 +84,19 @@ class UtamRootDescription {
   /**
    * Get description as list of strings to wrap into javadoc format
    *
+   * @param version                page objects with version number
+   * @param sourceFileRelativePath relative path with Json
    * @return list of strings
    */
-  List<String> getDescription() {
+  List<String> getDescription(String version, String sourceFileRelativePath) {
     List<String> descriptionLines = new ArrayList<>(text);
+    if(sourceFileRelativePath != null) {
+      descriptionLines.add(String.format("created from JSON %s", sourceFileRelativePath));
+    }
     // add line @author team_name
     descriptionLines.add(String.format("@author %s", (author == null ? "UTAM" : author)));
     // add line @version with timestamp
-    descriptionLines.add(String.format("@version %s",
-        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+    descriptionLines.add(String.format("@since %s", version));
     // add line @deprecated
     if(isDeprecated()) {
       descriptionLines.add(String.format("@deprecated %s", this.deprecated));

@@ -7,27 +7,35 @@
  */
 package utam.compiler.grammar;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.google.common.io.CharStreams;
-import utam.compiler.helpers.TranslationContext;
-import utam.core.framework.consumer.UtamError;
-import utam.core.framework.context.Profile;
-import utam.compiler.translator.ClassSerializer;
-import utam.compiler.translator.InterfaceSerializer;
-import utam.compiler.translator.UnitTestSerializer;
-import utam.core.declarative.representation.*;
-import utam.core.declarative.translator.TranslatorConfig;
-import utam.core.declarative.translator.TranslatorSourceConfig;
-import utam.core.declarative.translator.UnitTestRunner;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_COMMENTS;
 import static com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION;
 import static com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.common.io.CharStreams;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.List;
+import java.util.stream.Collectors;
+import utam.compiler.helpers.TranslationContext;
+import utam.compiler.translator.ClassSerializer;
+import utam.compiler.translator.InterfaceSerializer;
+import utam.compiler.translator.UnitTestSerializer;
+import utam.core.declarative.representation.AnnotationProvider;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.PageClassField;
+import utam.core.declarative.representation.PageObjectClass;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.declarative.representation.PageObjectInterface;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.representation.UnionType;
+import utam.core.declarative.translator.TranslatorConfig;
+import utam.core.declarative.translator.TranslatorSourceConfig;
+import utam.core.declarative.translator.UnitTestRunner;
+import utam.core.framework.consumer.UtamError;
+import utam.core.framework.context.Profile;
 
 /**
  * entry point for JSON deserialization
@@ -37,25 +45,25 @@ import static com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_SINGL
  */
 public final class JsonDeserializer {
 
-  private final String pageObjectURI;
   private final UtamPageObject utamPageObject;
   private final TranslationContext context;
+  private final String pageObjectURI;
 
   /**
    * Initializes a new instance of the JsonDeserializer class
    *
-   * @param pageObjectURI           the URI of the Page Object to deserialize
-   * @param jsonString              the JSON string describing the Page Object
-   * @param translatorConfiguration the configuration of the translator
+   * @param pageObjectURI    the URI of the Page Object to deserialize
+   * @param jsonString       the JSON string describing the Page Object
+   * @param translatorConfig config
    */
   JsonDeserializer(
       String pageObjectURI,
       String jsonString,
-      TranslatorConfig translatorConfiguration) {
-    this.pageObjectURI = pageObjectURI;
+      TranslatorConfig translatorConfig) {
     try {
+      this.pageObjectURI = pageObjectURI;
+      this.context = new TranslationContext(pageObjectURI, translatorConfig);
       this.utamPageObject = deserialize(UtamPageObject.class, jsonString);
-      this.context = new TranslationContext(pageObjectURI, translatorConfiguration);
       this.utamPageObject.compile(this.context);
       this.context.guardrailsValidation();
     } catch (IOException e) {
@@ -74,16 +82,15 @@ public final class JsonDeserializer {
       TranslatorConfig translatorConfig,
       TranslatorSourceConfig translatorSourceConfig,
       String pageObjectURI) {
-    this(
-        pageObjectURI,
+    this(pageObjectURI,
         getStringFromReader(translatorSourceConfig, pageObjectURI),
         translatorConfig);
   }
 
-  private static String getStringFromReader(
-      TranslatorSourceConfig translatorSourceConfig, String pageObjectURI) {
+  private static String getStringFromReader(TranslatorSourceConfig translatorSourceConfig, String pageObjectURI) {
     try {
-      return CharStreams.toString(translatorSourceConfig.getDeclarationReader(pageObjectURI));
+      Reader reader = translatorSourceConfig.getDeclarationReader(pageObjectURI);
+      return CharStreams.toString(reader);
     } catch (IOException e) {
       throw new UtamError(getErrorPrefix(pageObjectURI), e);
     }
@@ -211,7 +218,7 @@ public final class JsonDeserializer {
 
     @Override
     public List<String> getDescription() {
-      return utamPageObject.getDescription();
+      return utamPageObject.getDescription(context);
     }
 
     @Override
@@ -287,7 +294,7 @@ public final class JsonDeserializer {
 
     @Override
     public List<String> getDescription() {
-      return utamPageObject.getDescription();
+      return utamPageObject.getDescription(context);
     }
 
     @Override

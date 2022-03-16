@@ -36,6 +36,7 @@ public class DefaultTranslatorConfigurationTests {
     ProfileConfiguration profileConfiguration = new StringValueProfileConfig("name", "value");
     TranslatorConfig config = new DefaultTranslatorConfiguration(
         "myModule",
+        "version",
         GuardrailsMode.ERROR,
         typesConfig,
         sourceConfig,
@@ -46,6 +47,7 @@ public class DefaultTranslatorConfigurationTests {
     assertThat(config.getConfiguredTarget(), is(sameInstance(targetConfig)));
     assertThat(config.getConfiguredSource(), is(sameInstance(sourceConfig)));
     assertThat(config.getModuleName(), is(equalTo("myModule")));
+    assertThat(config.getPageObjectsVersion(), is(equalTo("version")));
     assertThat(config.getTranslationTypesConfig(), is(sameInstance(typesConfig)));
     assertThat(config.getConfiguredProfiles().iterator().next(), is(equalTo(profileConfiguration)));
   }

@@ -76,6 +76,7 @@ final class UtamPageObject {
   UtamShadowElement shadow;
   UtamElement[] elements;
   private final UtamRootDescription description;
+  private final List<String> descriptionText = new ArrayList<>();
 
   @JsonCreator
   UtamPageObject(
@@ -206,10 +207,16 @@ final class UtamPageObject {
   /**
    * get page object description
    *
+   * @param context translation context
    * @return list of strings
    */
-  List<String> getDescription() {
-    return this.description.getDescription();
+  List<String> getDescription(TranslationContext context) {
+    // method can be called twice by interface and impl
+    if (this.descriptionText.isEmpty()) {
+      this.descriptionText.addAll(
+          this.description.getDescription(context.getConfiguredVersion(), context.getJsonPath()));
+    }
+    return this.descriptionText;
   }
 
   /**

@@ -10,6 +10,8 @@ package utam.compiler.translator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -39,11 +41,13 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   private final TranslatorTargetConfig translatorTargetConfig;
   private final String moduleName;
   private final GuardrailsMode guardrailsMode;
+  private final String pageObjectsVersion;
 
   /**
    * Initializes a new instance of the translator configuration class
    *
    * @param moduleName         name of the module with page object sources
+   * @param pageObjectsVersion version of page objects to add to javadoc
    * @param guardrailsMode     type of guardrails to apply - with warning or error
    * @param typesConfig        types provider config
    * @param sourceConfig       configuration to scan for page object sources
@@ -53,6 +57,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
    */
   DefaultTranslatorConfiguration(
       String moduleName,
+      String pageObjectsVersion,
       GuardrailsMode guardrailsMode,
       TranslationTypesConfig typesConfig,
       TranslatorSourceConfig sourceConfig,
@@ -66,6 +71,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
       setConfiguredProfile(profileDefinition);
     }
     this.guardrailsMode = guardrailsMode;
+    this.pageObjectsVersion = pageObjectsVersion;
   }
 
   /**
@@ -80,11 +86,12 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
    */
   public DefaultTranslatorConfiguration(
       String moduleName,
+      String pageObjectsVersion,
       GuardrailsMode guardrailsMode,
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig,
       List<ProfileConfiguration> profileDefinitions) {
-    this(moduleName, guardrailsMode, new TranslationTypesConfigJava(), sourceConfig, targetConfig, profileDefinitions);
+    this(moduleName, pageObjectsVersion, guardrailsMode, new TranslationTypesConfigJava(), sourceConfig, targetConfig, profileDefinitions);
   }
 
 
@@ -99,10 +106,11 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
    */
   public DefaultTranslatorConfiguration(
       String moduleName,
+      String pageObjectsVersion,
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig,
       List<ProfileConfiguration> profileDefinitions) {
-    this(moduleName, GuardrailsMode.WARNING, new TranslationTypesConfigJava(), sourceConfig, targetConfig, profileDefinitions);
+    this(moduleName, pageObjectsVersion, GuardrailsMode.WARNING, new TranslationTypesConfigJava(), sourceConfig, targetConfig, profileDefinitions);
   }
 
 
@@ -117,7 +125,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   DefaultTranslatorConfiguration(
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig) {
-    this("", sourceConfig, targetConfig, new ArrayList<>());
+    this("", "" , sourceConfig, targetConfig, new ArrayList<>());
   }
 
   /**
@@ -216,5 +224,13 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   @Override
   public GuardrailsMode getValidationMode() {
     return guardrailsMode;
+  }
+
+  @Override
+  public String getPageObjectsVersion() {
+    if(pageObjectsVersion != null && !pageObjectsVersion.isEmpty()) {
+      return pageObjectsVersion;
+    }
+    return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
   }
 }

@@ -22,7 +22,7 @@ public interface TranslatorSourceConfig {
   /**
    * read declarative file by name of the PO
    *
-   * @param pageObjectURI name of the PO
+   * @param pageObjectURI name of the page object
    * @return reader for file with json declaration
    * @throws IOException if the file does not exist
    */
@@ -40,4 +40,12 @@ public interface TranslatorSourceConfig {
    * traverse and scan input folder to find all files with declarative POs
    */
   void recursiveScan();
+
+  /**
+   * get path to JSON with source
+   *
+   * @param pageObjectURI name of the page object
+   * @return JSON path, will be used in generated JavaDoc
+   */
+  String getSourcePath(String pageObjectURI);
 }

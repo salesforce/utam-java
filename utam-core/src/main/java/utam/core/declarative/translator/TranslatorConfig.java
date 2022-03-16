@@ -58,4 +58,11 @@ public interface TranslatorConfig {
    * @return type of validations
    */
   GuardrailsMode getValidationMode();
+
+  /**
+   * version of the page objects to add to the JavaDoc
+   *
+   * @return not nullable string
+   */
+  String getPageObjectsVersion();
 }

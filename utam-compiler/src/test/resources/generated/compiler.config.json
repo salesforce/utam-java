@@ -4,6 +4,7 @@
   "pageObjectsOutputDir": "/src/test/java",
   "resourcesOutputDir": "/src/test/resources",
   "module": "generated",
+  "version": "Spring'22",
   "profiles": [
     {
       "name": "name",
