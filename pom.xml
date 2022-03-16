@@ -134,7 +134,7 @@
 
     <scm>
         <connection>scm:git:https://github.com/salesforce/utam-java.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com|salesforce/utam-java.git</developerConnection>
+        <developerConnection>scm:git:ssh:git@github.com:salesforce/utam-java.git</developerConnection>
         <url>https://github.com/salesforce/utam-java</url>
         <tag>HEAD</tag>
     </scm>
