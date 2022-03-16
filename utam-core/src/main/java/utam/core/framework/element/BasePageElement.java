@@ -172,7 +172,7 @@ public class BasePageElement extends UtamBaseImpl implements Actionable, Clickab
     } catch (Exception e) {
       if (e.getMessage()
           .contains("javascript error: Cannot read") && e.getMessage()
-              .contains("defaultView")) {
+              .contains("defaultView") && e.getMessage().contains("undefined")) {
         UtamLogger.error(
             "Error from WebElement.click(), attempting to execute javascript click instead...");
         UtamLogger.error(e);
