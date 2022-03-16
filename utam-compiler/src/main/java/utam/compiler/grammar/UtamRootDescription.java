@@ -31,6 +31,7 @@ class UtamRootDescription {
           + "1. \"description\" : \"string\" "
           + "or \n"
           + "2. \"description\" : { \"text\" : [\"array of strings\"], \"author\" : \"my team\", \"deprecated\" : \"why deprecated\" }";
+  final static String VERSION_TAG = "@version";
 
   private final List<String> text = new ArrayList<>();
   private final String author;
@@ -97,7 +98,7 @@ class UtamRootDescription {
     // add line @author team_name
     descriptionLines.add(String.format("@author %s", (author == null ? "UTAM" : author)));
     // add line @version with timestamp
-    descriptionLines.add(String.format("@since %s", version));
+    descriptionLines.add(String.format("%s %s", VERSION_TAG, version));
     // add line @deprecated
     if(isDeprecated()) {
       descriptionLines.add(String.format("@deprecated %s", this.deprecated));

@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.UtamRootDescription.ERR_FORMAT_ERROR;
+import static utam.compiler.grammar.UtamRootDescription.VERSION_TAG;
 
 import java.util.List;
 import org.testng.annotations.Test;
@@ -49,7 +50,7 @@ public class UtamRootDescriptionTests {
     assertThat(declaration.getInterface().getDescription(), is(hasSize(3)));
     assertThat(description.get(0), containsString("created from JSON"));
     assertThat(description.get(1), containsString("@author UTAM"));
-    assertThat(description.get(2), containsString("@since"));
+    assertThat(description.get(2), containsString(VERSION_TAG));
 
     // for impl
     description = declaration.getImplementation().getDescription();
@@ -57,7 +58,7 @@ public class UtamRootDescriptionTests {
     assertThat(declaration.getInterface().getDescription(), is(hasSize(3)));
     assertThat(description.get(0), containsString("created from JSON"));
     assertThat(description.get(1), containsString("@author UTAM"));
-    assertThat(description.get(2), containsString("@since"));
+    assertThat(description.get(2), containsString(VERSION_TAG));
   }
 
   @Test
@@ -69,7 +70,7 @@ public class UtamRootDescriptionTests {
         containsString("Declarative programming is a high-level programming concept"));
     assertThat(description.get(1), containsString("created from JSON"));
     assertThat(description.get(2), containsString("@author UTAM"));
-    assertThat(description.get(3), containsString("@since"));
+    assertThat(description.get(3), containsString(VERSION_TAG));
 
     // for impl
     description = getImplementationDescription("generated/comments/verboseString.utam");
@@ -77,7 +78,7 @@ public class UtamRootDescriptionTests {
         containsString("Declarative programming is a high-level programming concept"));
     assertThat(description.get(1), containsString("created from JSON"));
     assertThat(description.get(2), containsString("@author UTAM"));
-    assertThat(description.get(3), containsString("@since"));
+    assertThat(description.get(3), containsString(VERSION_TAG));
   }
 
   @Test
@@ -89,7 +90,7 @@ public class UtamRootDescriptionTests {
     assertThat(description.get(1), containsString("&lt;two&gt; &amp; *&#47;"));
     assertThat(description.get(2), containsString("created from JSON"));
     assertThat(description.get(3), containsString("@author records_team"));
-    assertThat(description.get(4), containsString("@since"));
+    assertThat(description.get(4), containsString(VERSION_TAG));
     assertThat(description.get(5), containsString("@deprecated this class is outdated"));
 
     // for impl
@@ -99,7 +100,7 @@ public class UtamRootDescriptionTests {
     assertThat(description.get(1), containsString("&lt;two&gt; &amp; *&#47;"));
     assertThat(description.get(2), containsString("created from JSON"));
     assertThat(description.get(3), containsString("@author records_team"));
-    assertThat(description.get(4), containsString("@since"));
+    assertThat(description.get(4), containsString(VERSION_TAG));
     assertThat(description.get(5), containsString("@deprecated this class is outdated"));
   }
 
@@ -141,7 +142,7 @@ public class UtamRootDescriptionTests {
     assertThat(description.get(0), containsString("description"));
     assertThat(description.get(1), containsString("created from JSON"));
     assertThat(description.get(2), containsString("@author UTAM"));
-    assertThat(description.get(3), containsString("@since"));
+    assertThat(description.get(3), containsString(VERSION_TAG));
     assertThat(description.get(4), containsString("@deprecated this class is outdated"));
   }
 }
