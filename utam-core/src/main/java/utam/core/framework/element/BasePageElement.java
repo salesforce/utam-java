@@ -171,7 +171,8 @@ public class BasePageElement extends UtamBaseImpl implements Actionable, Clickab
       getElement().click();
     } catch (Exception e) {
       if (e.getMessage()
-          .contains("javascript error: Cannot read property 'defaultView' of undefined")) {
+          .contains("javascript error: Cannot read") && e.getMessage()
+              .contains("defaultView") && e.getMessage().contains("undefined")) {
         UtamLogger.error(
             "Error from WebElement.click(), attempting to execute javascript click instead...");
         UtamLogger.error(e);
