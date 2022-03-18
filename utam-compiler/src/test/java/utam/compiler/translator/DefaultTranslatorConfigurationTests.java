@@ -9,12 +9,15 @@ package utam.compiler.translator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.sameInstance;
 
 import java.util.Collections;
+import java.util.List;
 import org.testng.annotations.Test;
+import utam.compiler.translator.DefaultTranslatorConfiguration.CompilerOutputOptions;
 import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslationTypesConfig;
@@ -34,9 +37,10 @@ public class DefaultTranslatorConfigurationTests {
     TranslatorSourceConfig sourceConfig = new DefaultSourceConfigurationTests.Mock();
     TranslationTypesConfig typesConfig = new TranslationTypesConfigJava();
     ProfileConfiguration profileConfiguration = new StringValueProfileConfig("name", "value");
+    CompilerOutputOptions options = new CompilerOutputOptions("myModule",
+        "version", Collections.singletonList("copyright"));
     TranslatorConfig config = new DefaultTranslatorConfiguration(
-        "myModule",
-        "version",
+        options,
         GuardrailsMode.ERROR,
         typesConfig,
         sourceConfig,
@@ -50,5 +54,8 @@ public class DefaultTranslatorConfigurationTests {
     assertThat(config.getPageObjectsVersion(), is(equalTo("version")));
     assertThat(config.getTranslationTypesConfig(), is(sameInstance(typesConfig)));
     assertThat(config.getConfiguredProfiles().iterator().next(), is(equalTo(profileConfiguration)));
+    List<String> copyright = config.getCopyright();
+    assertThat(copyright, hasSize(1));
+    assertThat(copyright.get(0), is(equalTo("copyright")));
   }
 }

@@ -65,4 +65,11 @@ public interface PageObjectInterface {
    * @return boolean
    */
   boolean isDeprecated();
+
+  /**
+   * if configured, page object code can have copyright header
+   *
+   * @return list of strings
+   */
+  List<String> getCopyright();
 }

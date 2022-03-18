@@ -27,5 +27,9 @@
         "android"
       ]
     }
+  ],
+  "copyright" : [
+    "copyright",
+    "test"
   ]
 }

@@ -230,6 +230,11 @@ public final class JsonDeserializer {
     public boolean isDeprecated() {
       return utamPageObject.isDeprecated();
     }
+
+    @Override
+    public List<String> getCopyright() {
+      return context.getCopyright();
+    }
   }
 
   static class Implementation implements PageObjectClass {
@@ -300,6 +305,11 @@ public final class JsonDeserializer {
     @Override
     public List<UnionType> getUnionTypes() {
       return context.getClassUnionTypes();
+    }
+
+    @Override
+    public List<String> getCopyright() {
+      return context.getCopyright();
     }
   }
 }

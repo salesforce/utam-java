@@ -8,6 +8,7 @@
 package utam.core.declarative.translator;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * configuration for translator
@@ -65,4 +66,11 @@ public interface TranslatorConfig {
    * @return not nullable string
    */
   String getPageObjectsVersion();
+
+  /**
+   * if configured, page object code can have copyright header
+   *
+   * @return list of strings
+   */
+  List<String> getCopyright();
 }

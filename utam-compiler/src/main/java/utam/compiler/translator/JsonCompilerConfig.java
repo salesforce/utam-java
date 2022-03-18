@@ -28,6 +28,7 @@ import utam.compiler.UtamCompilationError;
 import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.ScannerConfig;
 import utam.compiler.translator.DefaultSourceConfiguration.SourceWithoutPackages;
+import utam.compiler.translator.DefaultTranslatorConfiguration.CompilerOutputOptions;
 import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorConfig;
@@ -107,15 +108,28 @@ public class JsonCompilerConfig {
   }
 
   /**
-   * get version to mark page objects javadocs
+   * get version to mark page objects javaDocs, used only in unit tests
    *
    * @return version string or null
    */
   String getVersion() {
-    return moduleConfig.pageObjectsVersion;
+    return moduleConfig.outputOptions.pageObjectsVersion;
   }
 
-  // for tests
+  /**
+   * get configured copyright, used only in unit tests
+   *
+   * @return list of strings
+   */
+  List<String> getCopyright() {
+    return moduleConfig.outputOptions.configuredCopyright;
+  }
+
+  /**
+   * get module configuration, used only in unit tests
+   *
+   * @return module instance
+   */
   Module getModule() {
     return moduleConfig;
   }
@@ -130,7 +144,7 @@ public class JsonCompilerConfig {
     TranslatorSourceConfig sourceConfig = getSourceConfig();
     TranslatorTargetConfig targetConfig = getTargetConfig();
     List<ProfileConfiguration> profiles = getConfiguredProfiles();
-    return new DefaultTranslatorConfiguration(getModuleName(), getVersion(), guardrailsMode, sourceConfig, targetConfig, profiles);
+    return new DefaultTranslatorConfiguration(moduleConfig.outputOptions, guardrailsMode, sourceConfig, targetConfig, profiles);
   }
 
   /**
@@ -146,13 +160,12 @@ public class JsonCompilerConfig {
     private final List<Profile> profiles = new ArrayList<>();
     final List<Namespace> namespaces = new ArrayList<>();
     private final String pageObjectFileMaskRegex;
-    private final String moduleName;
     private final String pageObjectsRootDirectory;
     private final String pageObjectsOutputDir;
     private final String resourcesOutputDir;
     private final String unitTestsOutputDir;
     private final UnitTestRunner unitTestRunnerType;
-    private final String pageObjectsVersion;
+    private final CompilerOutputOptions outputOptions;
 
     /**
      * Initializes a new instance of the Module class. Instantiated via JSON deserialization.
@@ -173,6 +186,7 @@ public class JsonCompilerConfig {
      *                                 within the module
      * @param profiles                 an array of Profile objects representing the profiles used in
      *                                 JSON files of the module
+     * @param copyright                lines for copyright header
      */
     @JsonCreator
     public Module(
@@ -185,9 +199,9 @@ public class JsonCompilerConfig {
         @JsonProperty(value = "unitTestsOutputDir") final String unitTestDirectory,
         @JsonProperty(value = "unitTestsRunner", defaultValue = "NONE") UnitTestRunner unitTestRunner,
         @JsonProperty(value = "namespaces") List<Namespace> namespaces,
-        @JsonProperty(value = "profiles") List<Profile> profiles
+        @JsonProperty(value = "profiles") List<Profile> profiles,
+        @JsonProperty(value = "copyright") List<String> copyright
     ) {
-      this.moduleName = Objects.requireNonNullElse(moduleName, "");
       this.pageObjectsRootDirectory = pageObjectsRootDirectory;
       this.namespaces.addAll(Objects.requireNonNullElse(namespaces, new ArrayList<>()));
       setUniqueProfiles(profiles);
@@ -196,7 +210,10 @@ public class JsonCompilerConfig {
       this.resourcesOutputDir = resourcesOutputDir;
       this.unitTestsOutputDir = validateUnitTestDirectory(unitTestRunner, unitTestDirectory);
       this.unitTestRunnerType = Objects.requireNonNullElse(unitTestRunner, NONE);
-      this.pageObjectsVersion = pageObjectsVersion;
+      this.outputOptions = new CompilerOutputOptions(
+          Objects.requireNonNullElse(moduleName, ""),
+          Objects.requireNonNullElse(pageObjectsVersion, ""),
+          Objects.requireNonNullElse(copyright, new ArrayList<>()));
     }
 
     void setUniqueProfiles(List<Profile> profiles) {
@@ -225,6 +242,7 @@ public class JsonCompilerConfig {
           null,
           null,
           new ArrayList<>(),
+          new ArrayList<>(),
           new ArrayList<>());
     }
 
@@ -238,6 +256,7 @@ public class JsonCompilerConfig {
           null,
           null,
           null,
+          new ArrayList<>(),
           new ArrayList<>(),
           new ArrayList<>());
     }
@@ -289,7 +308,7 @@ public class JsonCompilerConfig {
      * @return the name of the module
      */
     public String getName() {
-      return moduleName;
+      return outputOptions.moduleName;
     }
 
     /**

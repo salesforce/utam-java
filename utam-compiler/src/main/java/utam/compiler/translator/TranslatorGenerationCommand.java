@@ -16,6 +16,7 @@ import static utam.core.declarative.translator.UnitTestRunner.validateUnitTestDi
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
@@ -23,6 +24,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.ExitCode;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
+import utam.compiler.translator.DefaultTranslatorConfiguration.CompilerOutputOptions;
 import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorRunner;
@@ -200,9 +202,9 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
 
       GuardrailsMode guardrailsMode = validationStrict == null? WARNING : GuardrailsMode.valueOf(validationStrict.toUpperCase());
 
+      CompilerOutputOptions outputOptions = new CompilerOutputOptions(moduleName, versionName, new ArrayList<>());
       return new DefaultTranslatorConfiguration(
-          moduleName,
-          versionName,
+          outputOptions,
           guardrailsMode,
           sourceConfig,
           targetConfig,

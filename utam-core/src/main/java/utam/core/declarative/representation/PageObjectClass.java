@@ -96,4 +96,11 @@ public interface PageObjectClass {
    * @return list of union types
    */
   List<UnionType> getUnionTypes();
+
+  /**
+   * if configured, page object code can have copyright header
+   *
+   * @return list of strings
+   */
+  List<String> getCopyright();
 }
