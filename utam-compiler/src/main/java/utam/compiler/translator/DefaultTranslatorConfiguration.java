@@ -238,7 +238,10 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
    */
   public static class CompilerOutputOptions {
 
-    static final CompilerOutputOptions DEFAULT_COMPILER_OUTPUT_OPTIONS = new CompilerOutputOptions("", "",
+    /**
+     * used in utam-core-util in consumer, so should be public
+     */
+    public static final CompilerOutputOptions DEFAULT_COMPILER_OUTPUT_OPTIONS = new CompilerOutputOptions("", "",
         new ArrayList<String>());
 
     final String moduleName;
