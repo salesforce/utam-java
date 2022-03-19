@@ -16,13 +16,16 @@ import static utam.core.declarative.translator.UnitTestRunner.validateUnitTestDi
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ExitCode;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
+import utam.compiler.translator.DefaultTranslatorConfiguration.CompilerOutputOptions;
 import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorRunner;
@@ -101,6 +104,10 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
   @Option(names = {"-g", "-guardrails", "--guardrails"},
       description = "Defines how strict should be guardrails violations, possible values: 'error' or 'warning'")
   private String validationStrict;
+
+  @Option(names = {"-y", "-copyright", "--copyright"},
+      description = "Lines with a copyright header that should be added to generated page objects")
+  private List<String> copyright;
 
   private Exception thrownError;
   Integer returnCode = CommandLine.ExitCode.OK;
@@ -200,9 +207,10 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
 
       GuardrailsMode guardrailsMode = validationStrict == null? WARNING : GuardrailsMode.valueOf(validationStrict.toUpperCase());
 
+      CompilerOutputOptions outputOptions = new CompilerOutputOptions(moduleName, versionName,
+          Objects.requireNonNullElse(copyright, new ArrayList<>()));
       return new DefaultTranslatorConfiguration(
-          moduleName,
-          versionName,
+          outputOptions,
           guardrailsMode,
           sourceConfig,
           targetConfig,

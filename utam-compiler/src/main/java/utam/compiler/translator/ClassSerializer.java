@@ -87,6 +87,9 @@ public final class ClassSerializer {
   @Override
   public String toString() {
     List<String> out = new ArrayList<>();
+    if(!source.getCopyright().isEmpty()) {
+      out.addAll(getWrappedJavadoc(source.getCopyright()));
+    }
     out.add(getPackageName());
     out.add(NEW_LINE);
     out.addAll(getImports());

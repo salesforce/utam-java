@@ -412,4 +412,13 @@ public final class TranslationContext {
     }
     return fullPath;
   }
+
+  /**
+   * get copyright caption from config
+   *
+   * @return list of strings
+   */
+  public List<String> getCopyright() {
+    return translatorConfiguration.getCopyright();
+  }
 }
