@@ -105,10 +105,6 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
       description = "Defines how strict should be guardrails violations, possible values: 'error' or 'warning'")
   private String validationStrict;
 
-  @Option(names = {"-y", "-copyright", "--copyright"},
-      description = "Lines with a copyright header that should be added to generated page objects")
-  private List<String> copyright;
-
   private Exception thrownError;
   Integer returnCode = CommandLine.ExitCode.OK;
 
@@ -205,17 +201,19 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
           getScannerConfig(packageMappingFile),
           getScanner(inputDirectory, inputFiles));
 
-      GuardrailsMode guardrailsMode = validationStrict == null? WARNING : GuardrailsMode.valueOf(validationStrict.toUpperCase());
+      GuardrailsMode guardrailsMode =
+          validationStrict == null ? WARNING : GuardrailsMode.valueOf(validationStrict.toUpperCase());
 
+      // NOTE: Copyright cannot be set from the command line; you must
+      // use a compiler config JSON settings file.
       CompilerOutputOptions outputOptions = new CompilerOutputOptions(moduleName, versionName,
-          Objects.requireNonNullElse(copyright, new ArrayList<>()));
+          new ArrayList<>());
       return new DefaultTranslatorConfiguration(
           outputOptions,
           guardrailsMode,
           sourceConfig,
           targetConfig,
           getConfiguredProfiles(profileDefinitionsFile));
-
     } catch (IOException e) {
       thrownError = e;
       returnCode = RUNTIME_ERR;
