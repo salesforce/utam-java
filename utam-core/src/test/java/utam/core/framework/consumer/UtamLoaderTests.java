@@ -11,12 +11,12 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.expectThrows;
 import static utam.core.framework.consumer.UtamLoaderConfigTests.getDefaultConfig;
 import static utam.core.framework.consumer.UtamLoaderImpl.getSimulatorLoader;
 
@@ -32,7 +32,7 @@ import utam.core.driver.Driver;
 import utam.core.element.FrameElement;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.RootPageObject;
-import utam.core.framework.context.StringValueProfile;
+import utam.core.framework.consumer.impl.TestLoaderConfigPageObjectImpl;
 import utam.core.selenium.appium.MobileDriverAdapter;
 import utam.core.selenium.element.DriverAdapter;
 import utam.core.selenium.element.LocatorBy;
@@ -57,14 +57,14 @@ public class UtamLoaderTests {
   public void testRootPageObjectCreation() {
     UtamLoader loader = getDefaultLoader();
     RootPageObject rootPageObject = loader.create(TestLoaderConfigPageObject.class);
-    assertThat(rootPageObject, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
+    assertThat(rootPageObject, is(instanceOf(TestLoaderConfigPageObjectImpl.class)));
   }
 
   @Test
   public void testPageObjectLoad() {
     UtamLoader loader = getDefaultLoader();
     RootPageObject rootPageObject = loader.load(TestLoaderConfigPageObject.class);
-    assertThat(rootPageObject, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
+    assertThat(rootPageObject, is(instanceOf(TestLoaderConfigPageObjectImpl.class)));
   }
 
   @Test
@@ -117,19 +117,6 @@ public class UtamLoaderTests {
   }
 
   @Test
-  public void testProfileConfigPickedUpAfterReset() {
-    UtamLoaderConfigImpl config = new UtamLoaderConfigImpl();
-    UtamLoader utamLoader = new UtamLoaderImpl(config, new DriverAdapter(mock(WebDriver.class), null));
-    // only default config is loaded first
-    expectThrows(UtamError.class, () -> config.getPageContext().getBean(TestLoaderConfigDefault.class));
-    config.getModules().add("module1");
-    config.setProfile(new StringValueProfile("custom", "one"));
-    // this line reloads config and overrides previous
-    utamLoader.resetContext();
-    assertThat(utamLoader.create(TestLoaderConfigDefault.class), is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
-  }
-
-  @Test
   public void testEnterFrame() {
     UtamLoader loader = getDefaultLoader();
     FrameElement frameElement = new MockUtilities().getFrameElement();
@@ -153,6 +140,30 @@ public class UtamLoaderTests {
   public void testExitFrame() {
     UtamLoader loader = getDefaultLoader();
     loader.exitFrame();
+  }
+
+  @Test
+  public void testGetConfig() {
+    UtamLoader loader = getDefaultLoader();
+    assertThat(loader.getConfig(), is(instanceOf(UtamLoaderConfig.class)));
+  }
+
+  @Test
+  public void testDriverConfigReset() {
+    UtamLoaderConfig config = new UtamLoaderConfigImpl();
+    UtamLoaderImpl loader = new UtamLoaderImpl(config, mock(WebDriver.class));
+    loader.getConfig().setBridgeAppTitle("title");
+    loader.resetContext();
+    assertThat(loader.getDriver().getDriverConfig().getBridgeAppTitle(), is(equalTo("title")));
+  }
+
+  @Test
+  public void testBridgeAppInDriverConfig() {
+    UtamLoaderConfig config = new UtamLoaderConfigImpl();
+    UtamLoaderImpl loader = new UtamLoaderImpl(config, mock(WebDriver.class));
+    assertThat(loader.getDriver().getDriverConfig().getBridgeAppTitle(), is(emptyString()));
+    loader.resetContext();
+    assertThat(loader.getDriver().getDriverConfig().getBridgeAppTitle(), is(emptyString()));
   }
 
   private static class ContainerMock implements Container {

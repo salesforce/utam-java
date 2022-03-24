@@ -55,4 +55,11 @@ public interface MethodParameter {
    * @return list of nested parameters or null
    */
   List<MethodParameter> getNestedParameters();
+
+  /**
+   * parameter description is used in generated javadoc
+   *
+   * @return string with description, can be null
+   */
+  String getDescription();
 }

@@ -7,14 +7,11 @@
  */
 package utam.compiler.helpers;
 
-import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
-import static utam.compiler.helpers.ParameterUtils.EMPTY_PARAMETERS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
@@ -82,15 +79,6 @@ public class ParameterUtilsTests {
   @Test
   public void testDefaultGetDeclaration() {
     assertThat(new MockMethodParameter("value").getDeclaration(), is(equalTo("FakeType value")));
-  }
-
-  /**
-   * Tests that the EMPTY_PARAMETERS member of the MethodParameter interface returns an empty list
-   * of MethodParameter objects
-   */
-  @Test
-  public void testEmptyParametersMemberReturnsEmptyList() {
-    assertThat(EMPTY_PARAMETERS, is(equalTo(new ArrayList<MethodParameter>())));
   }
 
   @Test

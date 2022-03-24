@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.testng.annotations.Test;
 import utam.compiler.helpers.TypeUtilities.FromString;
+import utam.compiler.translator.DefaultSourceConfigurationTests.TranslatorConfigWithProfile;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorRunner;
@@ -175,7 +176,7 @@ public class DefaultTargetConfigurationTests {
     TranslatorConfig getConfig() {
       DefaultSourceConfigurationTests.Mock sources = new DefaultSourceConfigurationTests.Mock();
       sources.setSources();
-      return new DefaultTranslatorConfiguration(sources, this);
+      return new TranslatorConfigWithProfile(sources, this);
     }
 
     @Override

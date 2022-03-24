@@ -17,6 +17,7 @@ import static utam.compiler.translator.TranslationUtilities.getElementGetterMeth
 
 import java.util.ArrayList;
 import java.util.List;
+import utam.compiler.grammar.UtamMethodDescription;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.ParameterUtils;
@@ -42,14 +43,15 @@ public abstract class ContainerMethod implements PageObjectMethod {
   private final boolean isPublic;
   final MethodParametersTracker parametersTracker;
   final String locatorVariableName;
-
+  final UtamMethodDescription methodDescription;
 
   ContainerMethod(
       ElementContext scopeElement,
       boolean isExpandScope,
       String elementName,
       boolean isPublic,
-      String selectorBuilderString) {
+      String selectorBuilderString,
+      UtamMethodDescription methodDescription) {
     this.locatorVariableName = String.format("%sLocator", elementName);
     this.methodName = getElementGetterMethodName(elementName, isPublic);
     this.parametersTracker = new MethodParametersTracker(
@@ -64,6 +66,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
     codeLines.add(String.format("return this.container(%s, %s).%s",
         scopeVariableName, isExpandScope, getContainerMethodInvocationString()));
     this.isPublic = isPublic;
+    this.methodDescription = methodDescription;
   }
 
   abstract String getContainerMethodInvocationString();
@@ -96,8 +99,8 @@ public abstract class ContainerMethod implements PageObjectMethod {
      * @param isPublic        a value indicating whether the method is public
      */
     public WithSelectorReturnsList(ElementContext scopeElement, boolean isExpandScope,
-        String elementName, LocatorCodeGeneration selectorContext, boolean isPublic) {
-      super(scopeElement, isExpandScope, elementName, isPublic, selectorContext.getBuilderString());
+        String elementName, LocatorCodeGeneration selectorContext, boolean isPublic, UtamMethodDescription methodDescription) {
+      super(scopeElement, isExpandScope, elementName, isPublic, selectorContext.getBuilderString(), methodDescription);
       parametersTracker.setMethodParameters(selectorContext.getParameters());
       parametersTracker.setMethodParameter(PAGE_OBJECT_PARAMETER);
       ParameterUtils.setImport(classImports, BASIC_ELEMENT);
@@ -113,7 +116,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), wrapAsList(PAGE_OBJECT)) {
+      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), wrapAsList(PAGE_OBJECT), methodDescription) {
         @Override
         String getReturnTypeStr() {
           return String.format("<T extends %s> List<T>", PAGE_OBJECT.getSimpleName());
@@ -148,8 +151,9 @@ public abstract class ContainerMethod implements PageObjectMethod {
         boolean isExpandScope,
         String elementName,
         LocatorCodeGeneration selectorContext,
-        boolean isPublic) {
-      super(scopeElement, isExpandScope, elementName, isPublic, selectorContext.getBuilderString());
+        boolean isPublic,
+        UtamMethodDescription methodDescription) {
+      super(scopeElement, isExpandScope, elementName, isPublic, selectorContext.getBuilderString(), methodDescription);
       parametersTracker.setMethodParameters(selectorContext.getParameters());
       parametersTracker.setMethodParameter(PAGE_OBJECT_PARAMETER);
       ParameterUtils.setImport(classImports, BASIC_ELEMENT);
@@ -165,7 +169,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), PAGE_OBJECT) {
+      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), PAGE_OBJECT, methodDescription) {
         @Override
         String getReturnTypeStr() {
           return String.format("<T extends %s> T", PAGE_OBJECT.getSimpleName());

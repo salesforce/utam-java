@@ -64,7 +64,7 @@ public class UtamArgumentTests {
   }
 
   static UtamArgument getNonLiteralArg(String name, String type) {
-    return new UtamArgument.UtamArgumentNonLiteral(name, type);
+    return new UtamArgument.UtamArgumentNonLiteral(name, type, null);
   }
 
   static UtamArgument getLiteralArg() {

@@ -1,5 +1,8 @@
 {
   "implements": "utam-tests/pageObjects/root/exposeRootNoTypes",
+  "profile" : {
+    "profile" : "test"
+  },
   "exposeRootElement": true,
   "elements": [
     {

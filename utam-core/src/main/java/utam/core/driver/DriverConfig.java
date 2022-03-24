@@ -63,7 +63,8 @@ public class DriverConfig {
     this.implicitTimeout = implicitTimeout;
     this.explicitTimeout = explicitTimeout;
     this.pollingInterval = pollingInterval;
-    this.bridgeAppTitle = bridgeAppTitle;
+    // default has to be empty string, not null
+    this.bridgeAppTitle = bridgeAppTitle == null? "" : bridgeAppTitle;
   }
 
   /**

@@ -12,20 +12,20 @@ import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.expectThrows;
 import static utam.core.driver.DriverConfig.DEFAULT_EXPLICIT_TIMEOUT;
 import static utam.core.driver.DriverConfig.DEFAULT_IMPLICIT_TIMEOUT;
 import static utam.core.driver.DriverConfig.DEFAULT_POLLING_INTERVAL;
+import static utam.core.framework.consumer.JsonLoaderConfig.ERR_CANT_FIND_LOADER_CONFIG;
+import static utam.core.framework.consumer.JsonLoaderConfig.ERR_DUPLICATE_PROFILE;
 import static utam.core.framework.consumer.JsonLoaderConfig.ERR_READING_LOADER_CONFIG;
 import static utam.core.framework.consumer.JsonLoaderConfig.loadConfig;
-import static utam.core.framework.consumer.UtamLoaderConfigImpl.ERR_DUPLICATE_PROFILE;
-import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -50,36 +50,24 @@ public class JsonLoaderConfigTests {
     return new JsonLoaderConfig();
   }
 
-  private static JsonLoaderConfig fromResource(String name) {
-    return loadConfig(name);
-  }
-
   @Test
   public void testExistingJson() {
-    JsonLoaderConfig config = fromResource("module.loader.json");
-    assertThat(config.getModules(), hasSize(3));
+    JsonLoaderConfig config = loadConfig("module.loader.json");
+    assertThat(config.getModules(), hasSize(2));
     StringValueProfile sharedProfile = new StringValueProfile("platform", "ios");
 
-    Module first = config.getModules().get(0);
-    assertThat(first.getName(), is(nullValue()));
-    assertThat(first.getRawProfiles(), is(emptyIterable()));
-    assertThat(first.getModuleProfiles(config.profiles), hasSize(2));
-    assertThat(first.getModuleProfiles(config.profiles), hasItems(DEFAULT_PROFILE, sharedProfile));
-
-    Module second = config.getModules().get(1);
-    assertThat(second.getName(), is(equalTo("module1")));
-    assertThat(second.getModuleProfiles(config.profiles), hasSize(4));
-    assertThat(second.getModuleProfiles(config.profiles), hasItems(DEFAULT_PROFILE,
+    Module module1 = config.getModules().get(0);
+    assertThat(module1.getName(), is(equalTo("module1")));
+    assertThat(config.getModuleProfiles(module1), hasSize(3));
+    assertThat(config.getModuleProfiles(module1), hasItems(
         new StringValueProfile("custom", "one"),
         new StringValueProfile("custom", "two"),
         sharedProfile));
 
-    Module third = config.getModules().get(2);
-    assertThat(third.getName(), is(equalTo("module2")));
-    assertThat(third.getModuleProfiles(config.profiles), hasSize(2));
-    assertThat(third.getModuleProfiles(config.profiles), hasItems(DEFAULT_PROFILE, sharedProfile));
-
-    assertThat(config.profiles, hasSize(1));
+    Module module2 = config.getModules().get(1);
+    assertThat(module2.getName(), is(equalTo("module2")));
+    assertThat(config.getModuleProfiles(module2), hasSize(1));
+    assertThat(config.getModuleProfiles(module2), hasItems(sharedProfile));
   }
 
   @Test
@@ -99,11 +87,11 @@ public class JsonLoaderConfigTests {
   public void testDuplicateSharedProfiles() {
     JsonLoaderConfig config = getEmptyConfig();
     Profile profile = new Profile("same", new String[]{"name"});
-    config.profiles.add(profile);
-    config.profiles.add(profile);
+    config.setProfile(profile);
+    config.setProfile(profile);
     Module module = new Module("name", new ArrayList<>());
     config.getModules().add(module);
-    UtamError e = expectThrows(UtamError.class, () -> config.getModules().get(0).getModuleProfiles(config.profiles));
+    UtamError e = expectThrows(UtamError.class, () -> config.getModuleProfiles(config.getModules().get(0)));
     assertThat(e.getMessage(),
         is(equalTo(String.format(ERR_DUPLICATE_PROFILE, "same", "name"))));
   }
@@ -112,8 +100,8 @@ public class JsonLoaderConfigTests {
   public void testDuplicateProfilesInModule() {
     Module module = new Module("name", new ArrayList<>());
     Profile profile = new Profile("same", new String[]{"name"});
-    module.profiles.add(profile);
-    module.profiles.add(profile);
+    module.setProfile(profile);
+    module.setProfile(profile);
     UtamError e = expectThrows(UtamError.class, () -> module.getModuleProfiles(new ArrayList<>()));
     assertThat(e.getMessage(),
         is(equalTo(String.format(ERR_DUPLICATE_PROFILE, "same", "name"))));
@@ -123,9 +111,9 @@ public class JsonLoaderConfigTests {
   public void testDuplicateProfilesInLoader() {
     JsonLoaderConfig config = getEmptyConfig();
     Profile profile = new Profile("same", new String[]{"name"});
-    config.profiles.add(profile);
+    config.setProfile(profile);
     Module module = new Module("module", new ArrayList<>());
-    module.profiles.add(profile);
+    module.setProfile(profile);
     config.getModules().add(module);
     UtamError e = expectThrows(UtamError.class,
         () -> new UtamLoaderConfigImpl(config));
@@ -143,8 +131,8 @@ public class JsonLoaderConfigTests {
 
   @Test
   public void testExistingJsonWithEmptyTimeoutsAndBridgeApp() {
-    JsonLoaderConfig config = fromResource("empty_timeouts.loader.json");
-    assertThat(config.getModules(), hasSize(1));
+    JsonLoaderConfig config = loadConfig("empty_timeouts.loader.json");
+    assertThat(config.getModules(), is(emptyIterable()));
     DriverConfig driverConfig = config.driverConfig;
     assertThat(driverConfig, is(notNullValue()));
     assertThat(driverConfig.getImplicitTimeout(), is(DEFAULT_IMPLICIT_TIMEOUT));
@@ -155,7 +143,7 @@ public class JsonLoaderConfigTests {
 
   @Test
   public void testExistingJsonWithTimeoutsAndBridgeApp() {
-    JsonLoaderConfig config = fromResource("timeouts.loader.json");
+    JsonLoaderConfig config = loadConfig("timeouts.loader.json");
     DriverConfig driverConfig = config.driverConfig;
     assertThat(driverConfig, is(notNullValue()));
     assertThat(driverConfig.getImplicitTimeout(), is(Duration.ofMillis(1)));
@@ -166,12 +154,20 @@ public class JsonLoaderConfigTests {
 
   @Test
   public void testExistingJsonDefaultTimeouts() {
-    JsonLoaderConfig config = fromResource("module.loader.json");
+    JsonLoaderConfig config = loadConfig("module.loader.json");
     DriverConfig driverConfig = config.driverConfig;
     assertThat(driverConfig, is(notNullValue()));
     assertThat(driverConfig.getImplicitTimeout(), is(DEFAULT_IMPLICIT_TIMEOUT));
     assertThat(driverConfig.getExplicitTimeout(), is(DEFAULT_EXPLICIT_TIMEOUT));
     assertThat(driverConfig.getPollingInterval(), is(DEFAULT_POLLING_INTERVAL));
-    assertThat(driverConfig.getBridgeAppTitle(), is(emptyOrNullString()));
+    assertThat(driverConfig.getBridgeAppTitle(), is(emptyString()));
+  }
+
+  @Test
+  public void testNonExistingLoaderConfigThrows() {
+    final String config = "i.do.not.exist";
+    UtamError e = expectThrows(UtamError.class, () -> loadConfig(config));
+    final String message = e.getMessage();
+    assertThat(message, containsString(String.format(ERR_CANT_FIND_LOADER_CONFIG, config)));
   }
 }

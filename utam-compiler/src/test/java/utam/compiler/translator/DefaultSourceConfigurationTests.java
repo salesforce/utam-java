@@ -41,9 +41,13 @@ import org.hamcrest.CoreMatchers;
 import org.testng.annotations.Test;
 import utam.compiler.translator.DefaultSourceConfiguration.FilesScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
+import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorSourceConfig;
+import utam.core.declarative.translator.TranslatorTargetConfig;
 import utam.core.framework.consumer.UtamError;
+import utam.core.framework.context.Profile;
+import utam.core.framework.context.StringValueProfile;
 
 /**
  * @author elizaveta.ivanova
@@ -65,6 +69,7 @@ public class DefaultSourceConfigurationTests {
   private static final String IMPL_ONLY_SOURCE =
       "{"
           + "  \"implements\": \"utam-test/pageObjects/test/testAbstractObject\",\n"
+          + "\"profile\":[{\"profile\": [\"test\"]}],\n"
           + "  \"methods\": [\n"
           + "    {\n"
           + "      \"name\" : \"testMethod\",\n"
@@ -82,7 +87,7 @@ public class DefaultSourceConfigurationTests {
 
   @Test
   public void testRunWithDuplicatePageObjectsThrows() {
-    TranslatorConfig configuration = new DefaultTranslatorConfiguration(new DuplicatePageObjects(),
+    TranslatorConfig configuration = new TranslatorConfigWithProfile(new DuplicatePageObjects(),
         new DefaultTargetConfiguration());
     DefaultTranslatorRunner translator = new DefaultTranslatorRunner(configuration);
     UtamError e = expectThrows(UtamError.class, translator::run);
@@ -96,7 +101,7 @@ public class DefaultSourceConfigurationTests {
     UtamError e =
         expectThrows(
             UtamError.class, () -> new DefaultSourceConfiguration() {
-            }.getPageObjectFileSourcePath(PAGE_OBJECT));
+            }.getSourcePath(PAGE_OBJECT));
     assertThat(e.getMessage(), containsString(String.format(ERR_MISSING_SOURCE_PATH, PAGE_OBJECT)));
   }
 
@@ -107,7 +112,7 @@ public class DefaultSourceConfigurationTests {
         System.getProperty("user.dir") + "/src/test/resources/spec");
     DefaultSourceConfiguration config = new DefaultSourceConfiguration(scannerConfig, scanner);
     config.recursiveScan();
-    assertThat(config.getPageObjectFileSourcePath("package/pageObjects/first"),
+    assertThat(config.getSourcePath("package/pageObjects/first"),
         is(CoreMatchers.notNullValue()));
   }
 
@@ -122,7 +127,7 @@ public class DefaultSourceConfigurationTests {
     test.accept(pathString);
     String expectedURI = "utam-one/pageObjects/test";
     assertThat(config.getPageObjects().iterator().next(), is(equalTo(expectedURI)));
-    assertThat(config.getPageObjectFileSourcePath(expectedURI), is(equalTo(pathString)));
+    assertThat(config.getSourcePath(expectedURI), is(equalTo(pathString)));
     // duplicate throws!
     UtamError e = expectThrows(UtamError.class, () -> test.accept(pathString));
     assertThat(e.getMessage(), is(equalTo(String.format(ERR_DUPLICATE_PAGE_OBJECT, expectedURI))));
@@ -155,8 +160,25 @@ public class DefaultSourceConfigurationTests {
     DefaultSourceConfiguration configuration = new DefaultSourceConfiguration(
         scannerConfig, filesScanner);
     configuration.recursiveScan();
-    assertThat(configuration.getPageObjectFileSourcePath("package/pageObjects/first"),
+    assertThat(configuration.getSourcePath("package/pageObjects/first"),
         is(CoreMatchers.notNullValue()));
+  }
+
+  /**
+   * config with preset profile, used in tests
+   */
+  static class TranslatorConfigWithProfile extends DefaultTranslatorConfiguration {
+
+    static final Profile TEST_PROFILE = new StringValueProfile("profile", "test");
+    static final ProfileConfiguration TEST_PROFILE_CONFIG = new StringValueProfileConfig(
+        TEST_PROFILE);
+
+    TranslatorConfigWithProfile(
+        TranslatorSourceConfig sourceConfig,
+        TranslatorTargetConfig targetConfig) {
+      super(sourceConfig, targetConfig);
+      setConfiguredProfile(TEST_PROFILE_CONFIG);
+    }
   }
 
   static class Mock extends DefaultSourceConfiguration implements TranslatorSourceConfig {
@@ -181,6 +203,14 @@ public class DefaultSourceConfigurationTests {
       setJSONSource(PAGE_OBJECT_URI, PAGE_OBJECT_SOURCE);
       setJSONSource(INTERFACE_ONLY_URI, INTERFACE_ONLY_SOURCE);
       setJSONSource(IMPL_ONLY_URI, IMPL_ONLY_SOURCE);
+    }
+
+    @Override
+    public String getSourcePath(String pageObjectURI) {
+      if(!pageObjectsJSONString.containsKey(pageObjectURI)) {
+        return "";
+      }
+      return pageObjectsJSONString.get(pageObjectURI);
     }
   }
 

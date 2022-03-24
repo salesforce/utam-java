@@ -98,16 +98,9 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
     return regex.replace("/", Matcher.quoteReplacement(File.separator));
   }
 
-  final String getPageObjectFileSourcePath(String pageObjectURI) {
-    if (!sourcePath.containsKey(pageObjectURI)) {
-      throw new UtamError(String.format(ERR_MISSING_SOURCE_PATH, pageObjectURI));
-    }
-    return sourcePath.get(pageObjectURI);
-  }
-
   @Override
   public Reader getDeclarationReader(String pageObjectURI) throws IOException {
-    String path = getPageObjectFileSourcePath(pageObjectURI);
+    String path = getSourcePath(pageObjectURI);
     return new InputStreamReader(new FileInputStream(path));
   }
 
@@ -122,6 +115,14 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
       String fileMaskRegex = scannerConfig.getFileMask(packageName);
       scanner.scan(this, packageName, fileMaskRegex);
     }
+  }
+
+  @Override
+  public String getSourcePath(String pageObjectURI) {
+    if (!sourcePath.containsKey(pageObjectURI)) {
+      throw new UtamError(String.format(ERR_MISSING_SOURCE_PATH, pageObjectURI));
+    }
+    return sourcePath.get(pageObjectURI);
   }
 
   // for tests

@@ -25,9 +25,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import utam.compiler.UtamCompilationError;
-import utam.compiler.translator.DefaultSourceConfiguration.SourceWithoutPackages;
 import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.ScannerConfig;
+import utam.compiler.translator.DefaultSourceConfiguration.SourceWithoutPackages;
+import utam.compiler.translator.DefaultTranslatorConfiguration.CompilerOutputOptions;
 import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorConfig;
@@ -76,7 +77,7 @@ public class JsonCompilerConfig {
    *
    * @return the list of configured profiles
    */
-  public List<ProfileConfiguration> getConfiguredProfiles() {
+  private List<ProfileConfiguration> getConfiguredProfiles() {
     return moduleConfig.getConfiguredProfiles();
   }
 
@@ -85,7 +86,7 @@ public class JsonCompilerConfig {
    *
    * @return the target configuration
    */
-  public TranslatorTargetConfig getTargetConfig() {
+  private TranslatorTargetConfig getTargetConfig() {
     return moduleConfig.getTargetConfig(filePathsRoot);
   }
 
@@ -103,10 +104,32 @@ public class JsonCompilerConfig {
    * @return the name of the module
    */
   public String getModuleName() {
-    return moduleConfig.moduleName;
+    return moduleConfig.getName();
   }
 
-  // for tests
+  /**
+   * get version to mark page objects javaDocs, used only in unit tests
+   *
+   * @return version string or null
+   */
+  String getVersion() {
+    return moduleConfig.outputOptions.pageObjectsVersion;
+  }
+
+  /**
+   * get configured copyright, used only in unit tests
+   *
+   * @return list of strings
+   */
+  List<String> getCopyright() {
+    return moduleConfig.outputOptions.configuredCopyright;
+  }
+
+  /**
+   * get module configuration, used only in unit tests
+   *
+   * @return module instance
+   */
   Module getModule() {
     return moduleConfig;
   }
@@ -121,7 +144,7 @@ public class JsonCompilerConfig {
     TranslatorSourceConfig sourceConfig = getSourceConfig();
     TranslatorTargetConfig targetConfig = getTargetConfig();
     List<ProfileConfiguration> profiles = getConfiguredProfiles();
-    return new DefaultTranslatorConfiguration(getModuleName(), guardrailsMode, sourceConfig, targetConfig, profiles);
+    return new DefaultTranslatorConfiguration(moduleConfig.outputOptions, guardrailsMode, sourceConfig, targetConfig, profiles);
   }
 
   /**
@@ -137,17 +160,18 @@ public class JsonCompilerConfig {
     private final List<Profile> profiles = new ArrayList<>();
     final List<Namespace> namespaces = new ArrayList<>();
     private final String pageObjectFileMaskRegex;
-    private final String moduleName;
     private final String pageObjectsRootDirectory;
     private final String pageObjectsOutputDir;
     private final String resourcesOutputDir;
     private final String unitTestsOutputDir;
     private final UnitTestRunner unitTestRunnerType;
+    private final CompilerOutputOptions outputOptions;
 
     /**
      * Initializes a new instance of the Module class. Instantiated via JSON deserialization.
      *
      * @param moduleName               the arbitrary name of the module in the source repository
+     * @param pageObjectsVersion       optional name of the version for JavaDoc
      * @param filesMaskRegex           used by scanner to distinguish JSON with page objects
      * @param pageObjectsRootDirectory the directory in the source repository in which to
      *                                 recursively search for UTAM Page Object declarative
@@ -162,10 +186,12 @@ public class JsonCompilerConfig {
      *                                 within the module
      * @param profiles                 an array of Profile objects representing the profiles used in
      *                                 JSON files of the module
+     * @param copyright                lines for copyright header
      */
     @JsonCreator
     public Module(
         @JsonProperty(value = "module") String moduleName,
+        @JsonProperty(value = "version") String pageObjectsVersion,
         @JsonProperty(value = "pageObjectsFilesMask", defaultValue = DEFAULT_JSON_FILE_MASK_REGEX) String filesMaskRegex,
         @JsonProperty(value = "pageObjectsRootDir", required = true) String pageObjectsRootDirectory,
         @JsonProperty(value = "pageObjectsOutputDir", required = true) String pageObjectsOutputDir,
@@ -173,9 +199,9 @@ public class JsonCompilerConfig {
         @JsonProperty(value = "unitTestsOutputDir") final String unitTestDirectory,
         @JsonProperty(value = "unitTestsRunner", defaultValue = "NONE") UnitTestRunner unitTestRunner,
         @JsonProperty(value = "namespaces") List<Namespace> namespaces,
-        @JsonProperty(value = "profiles") List<Profile> profiles
+        @JsonProperty(value = "profiles") List<Profile> profiles,
+        @JsonProperty(value = "copyright") List<String> copyright
     ) {
-      this.moduleName = Objects.requireNonNullElse(moduleName, "");
       this.pageObjectsRootDirectory = pageObjectsRootDirectory;
       this.namespaces.addAll(Objects.requireNonNullElse(namespaces, new ArrayList<>()));
       setUniqueProfiles(profiles);
@@ -184,6 +210,10 @@ public class JsonCompilerConfig {
       this.resourcesOutputDir = resourcesOutputDir;
       this.unitTestsOutputDir = validateUnitTestDirectory(unitTestRunner, unitTestDirectory);
       this.unitTestRunnerType = Objects.requireNonNullElse(unitTestRunner, NONE);
+      this.outputOptions = new CompilerOutputOptions(
+          Objects.requireNonNullElse(moduleName, ""),
+          Objects.requireNonNullElse(pageObjectsVersion, ""),
+          Objects.requireNonNullElse(copyright, new ArrayList<>()));
     }
 
     void setUniqueProfiles(List<Profile> profiles) {
@@ -204,12 +234,14 @@ public class JsonCompilerConfig {
     // used in tests
     Module(String moduleName, String filesMaskRegex, String pageObjectsRootDirectory) {
       this(moduleName,
+          null,
           filesMaskRegex,
           pageObjectsRootDirectory,
           null,
           null,
           null,
           null,
+          new ArrayList<>(),
           new ArrayList<>(),
           new ArrayList<>());
     }
@@ -218,11 +250,13 @@ public class JsonCompilerConfig {
     Module(String moduleName, String pageObjectsRootDirectory) {
       this(moduleName,
           null,
+          null,
           pageObjectsRootDirectory,
           null,
           null,
           null,
           null,
+          new ArrayList<>(),
           new ArrayList<>(),
           new ArrayList<>());
     }
@@ -274,7 +308,7 @@ public class JsonCompilerConfig {
      * @return the name of the module
      */
     public String getName() {
-      return moduleName;
+      return outputOptions.moduleName;
     }
 
     /**

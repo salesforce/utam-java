@@ -9,10 +9,13 @@ package utam.compiler.translator;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyIterable;
+import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.testng.Assert.expectThrows;
@@ -26,6 +29,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +62,7 @@ public class JsonCompilerConfigTests {
   public void testValuesFromJsonFile() throws IOException {
     JsonCompilerConfig config = getTestConfig();
     assertThat(config.getModuleName(), is(equalTo("myModule")));
+    assertThat(config.getVersion(), is(equalTo("myVersion")));
 
     Module module = config.getModule();
     assertThat(module.getPageObjectsRootDirectory(), is(equalTo("/src/test/resources/spec")));
@@ -196,5 +201,39 @@ public class JsonCompilerConfigTests {
     UtamError e = expectThrows(UtamError.class, () -> module.setUniqueProfiles(List.of(profile, profile)));
     assertThat(e.getMessage(),
         is(equalTo(String.format(ERR_DUPLICATE_PROFILE, "platform"))));
+  }
+
+  @Test
+  public void testMissingFields() throws IOException {
+    JsonCompilerConfig config = new JsonCompilerConfig(
+        new File(JsonCompilerConfig.class.getClassLoader().getResource("config/nofields.json").getFile()),
+        new File(System.getProperty("user.dir")));
+    assertThat(config.getModuleName(), is(emptyString()));
+    assertThat(config.getVersion(), startsWith(String.valueOf(LocalDate.now().getYear())));
+    assertThat(config.getCopyright(), is(empty()));
+
+    Module module = config.getModule();
+    assertThat(module.getPageObjectsRootDirectory(), is(equalTo("/src/test/resources/spec")));
+    assertThat(module.getPageObjectsOutputDir(), is(equalTo("/src/test/java/pageObjects")));
+    assertThat(module.getResourcesOutputDir(), is(equalTo("/src/test/resources")));
+    assertThat(module.getUnitTestsOutputDir(), is(equalTo("/src/test/java")));
+    assertThat(module.getUnitTestRunnerType(), is(equalTo(UnitTestRunner.JUNIT)));
+    assertThat(module.getPageObjectFileMaskRegex(), is(equalTo("(.*)\\.utam\\.json$")));
+    assertThat(module.getName(), is(emptyString()));
+
+    Map<String,String> namespaces = module.getPackagesMapping();
+    assertThat(namespaces.keySet(), is(empty()));
+
+    List<Profile> profiles = module.getRawProfiles();
+    assertThat(profiles, is(empty()));
+  }
+
+  @Test
+  public void testCopyrightInJson() throws IOException {
+    JsonCompilerConfig config = getTestConfig();
+    List<String> copyright = config.getCopyright();
+    assertThat(copyright, hasSize(2));
+    assertThat(copyright.get(0), is(equalTo("copyright")));
+    assertThat(copyright.get(1), is(equalTo("test")));
   }
 }

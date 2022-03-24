@@ -10,6 +10,8 @@ package utam.compiler.translator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -37,13 +39,13 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   private final TranslatorSourceConfig translatorSourceConfig;
   private final TranslationTypesConfig translatorTypesConfig;
   private final TranslatorTargetConfig translatorTargetConfig;
-  private final String moduleName;
   private final GuardrailsMode guardrailsMode;
+  private final CompilerOutputOptions outputOptions;
 
   /**
    * Initializes a new instance of the translator configuration class
    *
-   * @param moduleName         name of the module with page object sources
+   * @param outputOptions      compiler output options
    * @param guardrailsMode     type of guardrails to apply - with warning or error
    * @param typesConfig        types provider config
    * @param sourceConfig       configuration to scan for page object sources
@@ -52,13 +54,13 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
    * @param profileDefinitions list of known profiles and their values
    */
   DefaultTranslatorConfiguration(
-      String moduleName,
+      CompilerOutputOptions outputOptions,
       GuardrailsMode guardrailsMode,
       TranslationTypesConfig typesConfig,
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig,
       List<ProfileConfiguration> profileDefinitions) {
-    this.moduleName = moduleName;
+    this.outputOptions = outputOptions;
     this.translatorSourceConfig = sourceConfig;
     this.translatorTargetConfig = targetConfig;
     this.translatorTypesConfig = typesConfig;
@@ -71,7 +73,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   /**
    * Initializes a new instance of the translator configuration class
    *
-   * @param moduleName         name of the module with page object sources
+   * @param outputOptions      compiler output options
    * @param guardrailsMode     type of guardrails to apply - with warning or error
    * @param sourceConfig       configuration to scan for page object sources
    * @param targetConfig       information about output folders for page objects, configs and unit
@@ -79,30 +81,30 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
    * @param profileDefinitions list of known profiles and their values
    */
   public DefaultTranslatorConfiguration(
-      String moduleName,
+      CompilerOutputOptions outputOptions,
       GuardrailsMode guardrailsMode,
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig,
       List<ProfileConfiguration> profileDefinitions) {
-    this(moduleName, guardrailsMode, new TranslationTypesConfigJava(), sourceConfig, targetConfig, profileDefinitions);
+    this(outputOptions, guardrailsMode, new TranslationTypesConfigJava(), sourceConfig, targetConfig, profileDefinitions);
   }
 
 
   /**
    * Initializes a new instance of the translator configuration class
    *
-   * @param moduleName         name of the module with page object sources
+   * @param outputOptions      compiler output options
    * @param sourceConfig       configuration to scan for page object sources
    * @param targetConfig       information about output folders for page objects, configs and unit
    *                           tests
    * @param profileDefinitions list of known profiles and their values
    */
   public DefaultTranslatorConfiguration(
-      String moduleName,
+      CompilerOutputOptions outputOptions,
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig,
       List<ProfileConfiguration> profileDefinitions) {
-    this(moduleName, GuardrailsMode.WARNING, new TranslationTypesConfigJava(), sourceConfig, targetConfig, profileDefinitions);
+    this(outputOptions, GuardrailsMode.WARNING, new TranslationTypesConfigJava(), sourceConfig, targetConfig, profileDefinitions);
   }
 
 
@@ -117,7 +119,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   DefaultTranslatorConfiguration(
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig) {
-    this("", sourceConfig, targetConfig, new ArrayList<>());
+    this(CompilerOutputOptions.DEFAULT_COMPILER_OUTPUT_OPTIONS , sourceConfig, targetConfig, new ArrayList<>());
   }
 
   /**
@@ -210,11 +212,53 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
 
   @Override
   public String getModuleName() {
-    return moduleName;
+    return outputOptions.moduleName;
   }
 
   @Override
   public GuardrailsMode getValidationMode() {
     return guardrailsMode;
+  }
+
+  @Override
+  public String getPageObjectsVersion() {
+    return outputOptions.pageObjectsVersion;
+  }
+
+  @Override
+  public List<String> getCopyright() {
+    return outputOptions.configuredCopyright;
+  }
+
+  /**
+   * helper class to collect parameters related to page object output
+   *
+   * @author elizaveta.ivanova
+   * @since 238
+   */
+  public static class CompilerOutputOptions {
+
+    /**
+     * used in utam-core-util in consumer, so should be public
+     */
+    public static final CompilerOutputOptions DEFAULT_COMPILER_OUTPUT_OPTIONS = new CompilerOutputOptions("", "",
+        new ArrayList<String>());
+
+    final String moduleName;
+    final String pageObjectsVersion;
+    final List<String> configuredCopyright;
+
+    /**
+     * @param moduleName          name of the module with page object sources
+     * @param pageObjectsVersion  version of page objects to add to javadoc
+     * @param configuredCopyright copyright lines from compiler config
+     */
+    public CompilerOutputOptions(String moduleName, String pageObjectsVersion,
+        List<String> configuredCopyright) {
+      this.moduleName = moduleName;
+      this.pageObjectsVersion = (pageObjectsVersion == null || pageObjectsVersion.isEmpty())?
+          LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : pageObjectsVersion;
+      this.configuredCopyright = configuredCopyright;
+    }
   }
 }

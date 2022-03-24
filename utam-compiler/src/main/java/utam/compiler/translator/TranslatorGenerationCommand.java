@@ -16,13 +16,16 @@ import static utam.core.declarative.translator.UnitTestRunner.validateUnitTestDi
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.ExitCode;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
+import utam.compiler.translator.DefaultTranslatorConfiguration.CompilerOutputOptions;
 import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorRunner;
@@ -93,6 +96,10 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
   @Option(names = {"-n", "-moduleName", "--moduleName"},
       description = "Name of the current POs module, when set it's used as a prefix to profile property files.")
   private String moduleName;
+
+  @Option(names = {"-v", "-versionName", "--versionName"},
+      description = "Name of the current POs version, usually matches application version.")
+  private String versionName;
 
   @Option(names = {"-g", "-guardrails", "--guardrails"},
       description = "Defines how strict should be guardrails violations, possible values: 'error' or 'warning'")
@@ -194,15 +201,19 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
           getScannerConfig(packageMappingFile),
           getScanner(inputDirectory, inputFiles));
 
-      GuardrailsMode guardrailsMode = validationStrict == null? WARNING : GuardrailsMode.valueOf(validationStrict.toUpperCase());
+      GuardrailsMode guardrailsMode =
+          validationStrict == null ? WARNING : GuardrailsMode.valueOf(validationStrict.toUpperCase());
 
+      // NOTE: Copyright cannot be set from the command line; you must
+      // use a compiler config JSON settings file.
+      CompilerOutputOptions outputOptions = new CompilerOutputOptions(moduleName, versionName,
+          new ArrayList<>());
       return new DefaultTranslatorConfiguration(
-          moduleName,
+          outputOptions,
           guardrailsMode,
           sourceConfig,
           targetConfig,
           getConfiguredProfiles(profileDefinitionsFile));
-
     } catch (IOException e) {
       thrownError = e;
       returnCode = RUNTIME_ERR;

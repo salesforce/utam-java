@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.Profile;
@@ -93,6 +92,15 @@ public class StringValueProfileConfig implements ProfileConfiguration {
   // used in tests
   public StringValueProfileConfig(String name, String value) {
     this(name, new String[] { value } );
+  }
+
+  /**
+   * initializes profile configuration from profile. used in tests
+   *
+   * @param profile profile instance
+   */
+  public StringValueProfileConfig(Profile profile) {
+    this(profile.getName(), profile.getValue());
   }
 
   @Override

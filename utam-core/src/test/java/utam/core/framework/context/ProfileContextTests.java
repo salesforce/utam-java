@@ -13,7 +13,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.expectThrows;
 import static utam.core.framework.consumer.PageObjectContextImpl.ERR_GET_CLASS_BY_NAME;
-import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
 
 import org.testng.annotations.Test;
 import utam.core.framework.consumer.TestLoaderConfigPageObject;
@@ -25,7 +24,7 @@ public class ProfileContextTests {
 
   @Test
   public void testEmptyProfileContextSetupOverride() {
-    DefaultProfileContext profile = new DefaultProfileContext(null, DEFAULT_PROFILE);
+    DefaultProfileContext profile = new DefaultProfileContext(null, new StringValueProfile("name", "value"));
     assertThat(profile.getBeanName(null), is(nullValue()));
     profile.setBean(TestLoaderConfigPageObject.class, "class");
     assertThat(profile.getBeanName(TestLoaderConfigPageObject.class),
@@ -68,7 +67,7 @@ public class ProfileContextTests {
 
   @Test
   public void testNonExistingClassThrows() {
-    // utam.test.Error=utam.test.ErrorImpl
+    // properties have utam.test.Error=utam.test.ErrorImpl
     UtamError error = expectThrows(UtamError.class,
         () -> new DefaultProfileContext(null, new StringValueProfile("test", "error")));
     assertThat(error.getMessage(), is(equalTo(String.format(ERR_GET_CLASS_BY_NAME, "utam.test.Error"))));

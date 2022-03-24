@@ -11,7 +11,6 @@ import utam.compiler.types.BasicElementInterface;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.core.declarative.representation.AnnotationProvider;
-import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
@@ -149,12 +148,11 @@ public class UtamPageObject_Tests {
   }
 
   @Test
-  public void testRootComments() {
-    String json = "{}";
-    JsonDeserializer deserializer = TestUtilities.getJsonStringDeserializer(json);
-    PageObjectDeclaration declaration = deserializer.getObject();
-    assertThat(declaration.getImplementation().getComments(), is(emptyString()));
-    assertThat(declaration.getInterface().getComments(), is(emptyString()));
+  public void testImplementationWithoutProfileThrows() {
+    UtamPageObject utamPageObject = new UtamPageObject();
+    utamPageObject.implementsType = "type/to/implement";
+    UtamError e = expectThrows(UtamError.class, utamPageObject::validate);
+    assertThat(e.getMessage(), containsString(ERR_PROFILE_IS_REQUIRED));
   }
 
   @Test

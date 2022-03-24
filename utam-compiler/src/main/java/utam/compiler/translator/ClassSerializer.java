@@ -10,16 +10,16 @@ package utam.compiler.translator;
 import static utam.compiler.translator.TranslationUtilities.NEW_LINE;
 import static utam.compiler.translator.TranslationUtilities.applyJavaFormatter;
 import static utam.compiler.translator.TranslationUtilities.getImportStrings;
-import static utam.compiler.translator.TranslationUtilities.getMethodWrappedJavadoc;
 import static utam.compiler.translator.TranslationUtilities.getPackageDeclaration;
 import static utam.compiler.translator.TranslationUtilities.getStatement;
-import static utam.compiler.translator.TranslationUtilities.getWrappedClassJavadoc;
+import static utam.compiler.translator.TranslationUtilities.getWrappedJavadoc;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import utam.compiler.helpers.AnnotationUtils;
 import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.PageClassField;
@@ -49,10 +49,13 @@ public final class ClassSerializer {
     MethodDeclaration declaration = method.getDeclaration();
     List<String> out = new ArrayList<>();
     out.add(NEW_LINE);
-    out.addAll(getMethodWrappedJavadoc(method.getDeclaration()));
+    out.addAll(getWrappedJavadoc(declaration.getDescription()));
     out.add(NEW_LINE);
     if (method.isPublic()) {
       out.add("@Override");
+    }
+    if (method.getDeclaration().isDeprecated()) {
+      out.add(AnnotationUtils.DEPRECATED_ANNOTATION.getAnnotationText());
     }
     out.add(String.format("%sfinal %s {", (method.isPublic()? "public " : ""), declaration.getCodeLine()));
     for (int i = 0; i < method.getCodeLines().size(); i++) {
@@ -84,11 +87,14 @@ public final class ClassSerializer {
   @Override
   public String toString() {
     List<String> out = new ArrayList<>();
+    if(!source.getCopyright().isEmpty()) {
+      out.addAll(getWrappedJavadoc(source.getCopyright()));
+    }
     out.add(getPackageName());
     out.add(NEW_LINE);
     out.addAll(getImports());
     out.add(NEW_LINE);
-    out.addAll(getWrappedClassJavadoc(source.getComments()));
+    out.addAll(getWrappedJavadoc(source.getDescription()));
     getClassAnnotations().stream()
         .map(AnnotationProvider::getAnnotationText)
         .filter(s -> !s.isEmpty())

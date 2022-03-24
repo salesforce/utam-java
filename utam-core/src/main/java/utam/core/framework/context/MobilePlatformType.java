@@ -7,8 +7,6 @@
  */
 package utam.core.framework.context;
 
-import static utam.core.framework.context.StringValueProfile.getProfileConfigName;
-
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
@@ -119,11 +117,6 @@ public enum MobilePlatformType implements Profile {
   @Override
   public String getValue() {
     return name().toLowerCase();
-  }
-
-  @Override
-  public String getConfigName(String moduleName) {
-    return getProfileConfigName(this, moduleName);
   }
 
   private static boolean isIPad(WebDriver driver) {

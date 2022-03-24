@@ -8,6 +8,7 @@
 package utam.core.declarative.translator;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * configuration for translator
@@ -58,4 +59,18 @@ public interface TranslatorConfig {
    * @return type of validations
    */
   GuardrailsMode getValidationMode();
+
+  /**
+   * version of the page objects to add to the JavaDoc
+   *
+   * @return not nullable string
+   */
+  String getPageObjectsVersion();
+
+  /**
+   * if configured, page object code can have copyright header
+   *
+   * @return list of strings
+   */
+  List<String> getCopyright();
 }

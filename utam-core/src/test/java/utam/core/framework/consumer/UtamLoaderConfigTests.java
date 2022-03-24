@@ -11,29 +11,32 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.expectThrows;
-import static utam.core.framework.consumer.UtamLoaderConfigImpl.ERR_DUPLICATE_PROFILE;
-import static utam.core.framework.context.StringValueProfile.DEFAULT_PROFILE;
 
 import java.io.File;
 import java.time.Duration;
+import org.openqa.selenium.WebDriver;
 import org.testng.annotations.Test;
 import utam.core.framework.base.PageObject;
+import utam.core.framework.consumer.impl.TestLoaderConfigPageObjectImpl;
 import utam.core.framework.context.Profile;
 import utam.core.framework.context.StringValueProfile;
+import utam.core.selenium.element.DriverAdapter;
 
 public class UtamLoaderConfigTests {
 
   static UtamLoaderConfigImpl getDefaultConfig() {
     return new UtamLoaderConfigImpl();
   }
+  private static final Profile TEST_PROFILE = new StringValueProfile("test", "profiles");
 
   @Test
   public void testSetBridgeApp() {
     UtamLoaderConfig config = getDefaultConfig();
+    assertThat(config.getDriverConfig().getBridgeAppTitle(), is(emptyString()));
     config.setBridgeAppTitle("bridge");
     assertThat(config.getDriverConfig().getBridgeAppTitle(), is(equalTo("bridge")));
   }
@@ -50,20 +53,9 @@ public class UtamLoaderConfigTests {
   }
 
   @Test
-  public void testDefaultJsonConfig() {
-    UtamLoaderConfigImpl config = getDefaultConfig();
-    assertThat(config.getModules().iterator().next(), is(nullValue()));
-    assertThat(config.getConfiguredProfiles().size(), is(equalTo(1)));
-    assertThat(config.getConfiguredProfiles().iterator().next(), is(equalTo(DEFAULT_PROFILE)));
-    PageObject pageObject = config.getPageContext().getBean(TestLoaderConfigPageObject.class);
-    assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
-  }
-
-  @Test
   public void testSettingActiveProfile() {
     UtamLoaderConfigImpl config = getDefaultConfig();
-    Profile testProfile = new StringValueProfile("test", "profiles");
-    config.setProfile(testProfile);
+    config.setProfile(TEST_PROFILE);
     PageObject pageObject = config.getPageContext().getBean(
         TestLoaderConfigPageObject.class);
     assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
@@ -73,8 +65,7 @@ public class UtamLoaderConfigTests {
   public void testCustomJSONConfig() {
     UtamLoaderConfig config = new UtamLoaderConfigImpl("module.loader.json");
     PageObject pageObject = config.getPageContext().getBean(TestLoaderConfigPageObject.class);
-    // from default_impl_config
-    assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
+    assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectImpl.class)));
   }
 
   @Test
@@ -82,56 +73,23 @@ public class UtamLoaderConfigTests {
     File file = new File(this.getClass().getClassLoader().getResource("module.loader.json").getFile());
     UtamLoaderConfig config = new UtamLoaderConfigImpl(file);
     PageObject pageObject = config.getPageContext().getBean(TestLoaderConfigPageObject.class);
-    // from default_impl_config
-    assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
+    assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectImpl.class)));
   }
 
   @Test
   public void testCustomJSONConfigSetProfile() {
     UtamLoaderConfig config = new UtamLoaderConfigImpl("module.loader.json");
-    Profile testProfile = new StringValueProfile("test", "profiles");
-    config.setProfile(testProfile);
+    config.setProfile(TEST_PROFILE);
     PageObject pageObject = config.getPageContext().getBean(TestLoaderConfigPageObject.class);
     assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
   }
 
   @Test
-  public void testSettingSameActiveProfileThrows() {
+  public void testSettingSameActiveProfileDifferentValue() {
     UtamLoaderConfigImpl config = getDefaultConfig();
-    Profile testProfile = new StringValueProfile("test", "profiles");
-    config.setProfile(testProfile);
-    UtamError e = expectThrows(UtamError.class, () -> config.setProfile(testProfile));
-    assertThat(e.getMessage(),
-        is(equalTo(String.format(ERR_DUPLICATE_PROFILE, "test", "profiles"))));
-  }
-
-  @Test
-  public void testSettingSameConfiguredProfileThrows() {
-    UtamLoaderConfigImpl config = getDefaultConfig();
-    Profile testProfile = new StringValueProfile("test", "profiles");
-    config.setConfiguredProfile(null, testProfile);
-    UtamError e = expectThrows(UtamError.class,
-        () -> config.setConfiguredProfile(null, testProfile));
-    assertThat(e.getMessage(),
-        is(equalTo(String.format(ERR_DUPLICATE_PROFILE, "test", "profiles"))));
-  }
-
-  @Test
-  public void testConfiguredActiveProfile() {
-    UtamLoaderConfigImpl config = getDefaultConfig();
-    Profile testProfile = new StringValueProfile("test", "profiles");
-    config.setConfiguredProfile(null, testProfile);
-    config.setProfile(testProfile);
-    assertThat(config.getConfiguredProfiles().size(), is(equalTo(2)));
-  }
-
-  @Test
-  public void testNullConfig() {
-    UtamLoaderConfigImpl config = getDefaultConfig();
-    assertThat(config.getConfiguredProfiles(), hasSize(1));
-    assertThat(config.getConfiguredProfiles().iterator().next(), is(equalTo(DEFAULT_PROFILE)));
-    assertThat(config.getModules(), hasSize(1));
-    assertThat(config.getModules().get(0), is(nullValue()));
+    config.setProfile(TEST_PROFILE);
+    config.setProfile(new StringValueProfile("test", "profile2"));
+    config.getPageContext();
   }
 
   @Test
@@ -141,5 +99,21 @@ public class UtamLoaderConfigTests {
     UtamError e = expectThrows(UtamError.class,
         () -> context.getBean(TestLoaderConfigDefault.class));
     assertThat(e.getMessage(), containsString("can't find class"));
+  }
+
+  @Test
+  public void testProfileConfigPickedUpAfterReset() {
+    UtamLoaderConfig config = new UtamLoaderConfigImpl();
+    config.setLoaderConfig("module1");
+    UtamLoader utamLoader = new UtamLoaderImpl(config,
+        new DriverAdapter(mock(WebDriver.class), null));
+    PageObject instance = config.getPageContext().getBean(TestLoaderConfigPageObject.class);
+    // first load default class
+    assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectImpl.class)));
+    config.setProfile(TEST_PROFILE);
+    // this line reloads config and overrides previous
+    utamLoader.resetContext();
+    instance = utamLoader.create(TestLoaderConfigPageObject.class);
+    assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
   }
 }

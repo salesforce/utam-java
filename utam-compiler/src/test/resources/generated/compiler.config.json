@@ -3,6 +3,16 @@
   "pageObjectsFilesMask": "(.*)\\.utam\\.json$",
   "pageObjectsOutputDir": "/src/test/java",
   "resourcesOutputDir": "/src/test/resources",
+  "module": "generated",
+  "version": "Spring'22",
+  "profiles": [
+    {
+      "name": "name",
+      "values": [
+        "value"
+      ]
+    }
+  ],
   "namespaces": [
     {
       "typeMatch": "generated-basic",
@@ -15,6 +25,16 @@
     {
       "typeMatch": "generated-mobile",
       "pathMatch": ".*/mobile"
+    },
+    {
+      "typeMatch": "generated-comments",
+      "pathMatch": ".*/comments"
     }
+  ],
+  "copyright" : [
+    "Copyright (c) 2022, salesforce.com, inc.",
+    "All rights reserved.",
+    "SPDX-License-Identifier: MIT",
+    "For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT"
   ]
 }

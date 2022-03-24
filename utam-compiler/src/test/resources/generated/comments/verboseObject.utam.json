@@ -1,0 +1,117 @@
+{
+  "description": {
+    "text": [
+      "one",
+      "<two> & */"
+    ],
+    "author": "records_team",
+    "deprecated" : "this class is outdated"
+  },
+  "methods": [
+    {
+      "name": "myPublicMethod",
+      "description": {
+        "text": [
+          "one",
+          "two"
+        ],
+        "return": "return something",
+        "throws": "NullPointerException when"
+      },
+      "compose": [
+        {
+          "element": "root",
+          "apply": "getAttribute",
+          "args": [
+            {
+              "name": "attrName",
+              "type": "string",
+              "description": "attribute name to get"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "myArgsReference",
+      "args": [
+        {
+          "name": "attrName",
+          "type": "string",
+          "description": "attribute name to get"
+        }
+      ],
+      "compose": [
+        {
+          "element": "root",
+          "apply": "getAttribute",
+          "args": [
+            {
+              "name": "attrName",
+              "type": "argumentReference"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "elements": [
+    {
+      "public": true,
+      "name": "customPublic",
+      "type": "generated-comments/pageObjects/verboseInterface",
+      "description": {
+        "text": [
+          "description"
+        ],
+        "return": "return something",
+        "throws": "NullPointerException when",
+        "deprecated" : "this element is outdated"
+      },
+      "selector": {
+        "css": "css%s",
+        "args": [
+          {
+            "name": "selectorArg",
+            "type": "string",
+            "description": "selector parameter description"
+          }
+        ]
+      }
+    },
+    {
+      "name": "basicPrivate",
+      "description": {
+        "text": [
+          "description"
+        ],
+        "return": "return something",
+        "throws": "NullPointerException when"
+      },
+      "selector": {
+        "css": "css%s",
+        "args": [
+          {
+            "name": "selectorArg",
+            "type": "string",
+            "description": "selector parameter description"
+          }
+        ]
+      },
+      "elements": [
+        {
+          "public": true,
+          "name": "container",
+          "type": "container",
+          "description": {
+            "text": [
+              "description"
+            ],
+            "return": "return something",
+            "throws": "NullPointerException when"
+          }
+        }
+      ]
+    }
+  ]
+}

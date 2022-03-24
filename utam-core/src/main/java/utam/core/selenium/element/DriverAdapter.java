@@ -11,6 +11,7 @@ import static utam.core.framework.UtamLogger.error;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,6 +19,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.FluentWait;
 import utam.core.driver.Driver;
@@ -35,16 +37,15 @@ import utam.core.framework.context.PlatformType;
  */
 public class DriverAdapter implements Driver {
 
-  // used in tests to validate right message
   /**
-   * Error prefix for element not found
+   * Error prefix for element not found, used in tests to validate right message
    */
   public static final String ERR_ELEMENT_NOT_FOUND_PREFIX = "can't find element";
   static final String ERR_SUPPORTED_FOR_MOBILE = "method is applicable only for iOS/Android";
   static final String ERR_CANT_ENTER_NULL_FRAME = "Can't enter null frame element";
   // not final because can be reset
   private WebDriver driver;
-  private final DriverConfig driverConfig;
+  private DriverConfig driverConfig;
 
   /**
    * Initializes a new instance of the DriverAdapter class
@@ -54,6 +55,13 @@ public class DriverAdapter implements Driver {
   public DriverAdapter(WebDriver driver, DriverConfig driverConfig) {
     this.driver = driver;
     this.driverConfig = driverConfig;
+    // set implicit timeout as configured
+    Options options = this.driver.manage();
+    if(options != null && options.timeouts() != null) { // for mock both can be null
+      options
+          .timeouts()
+          .implicitlyWait(this.driverConfig.getImplicitTimeout().toSeconds(), TimeUnit.SECONDS);
+    }
   }
 
   /**
@@ -187,6 +195,11 @@ public class DriverAdapter implements Driver {
   @Override
   public DriverConfig getDriverConfig() {
     return driverConfig;
+  }
+
+  @Override
+  public void resetDriverConfig(DriverConfig config) {
+    this.driverConfig = config;
   }
 
   @Override

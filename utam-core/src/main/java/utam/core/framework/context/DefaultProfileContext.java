@@ -33,8 +33,6 @@ public class DefaultProfileContext implements ProfileContext {
 
   // map with configured beans
   final Map<Class<? extends PageObject>, String> beans = new HashMap<>();
-  private final Profile profile;
-  private final String moduleName;
 
   /**
    * Initializes a new instance of the DefaultProfileContext class
@@ -42,9 +40,7 @@ public class DefaultProfileContext implements ProfileContext {
    * @param profile    profile used in the module
    */
   public DefaultProfileContext(String moduleName, Profile profile) {
-    this.profile = profile;
-    this.moduleName = moduleName;
-    Properties properties = getBeansFromResource();
+    Properties properties = getBeansFromResource(moduleName, profile);
     properties.stringPropertyNames().forEach(type -> {
       String implClassName = properties.getProperty(type);
       // default config can have empty lines
@@ -56,16 +52,12 @@ public class DefaultProfileContext implements ProfileContext {
 
   /**
    * Initializes a new instance of the DefaultProfileContext class, only used in unit tests
-   * @param moduleName name of the module
-   * @param profile    profile used in the module
-   * @param properties properties to map class types
+   * @param mapping map for class types
    */
   // used in tests
-  protected DefaultProfileContext(String moduleName, Profile profile, Properties properties) {
-    this.profile = profile;
-    this.moduleName = moduleName;
-    properties.stringPropertyNames().forEach(type -> {
-      String implClassName = properties.getProperty(type);
+  public DefaultProfileContext(Map<String, String> mapping) {
+    mapping.keySet().forEach(type -> {
+      String implClassName = mapping.get(type);
       // default config can have empty lines
       if (!implClassName.isEmpty()) {
         beans.put(getClassFromName(type), implClassName);
@@ -73,9 +65,14 @@ public class DefaultProfileContext implements ProfileContext {
     });
   }
 
-  private Properties getBeansFromResource() {
+  private static String getProfileConfigName(Profile profile, String moduleName) {
+    String prefix = (moduleName == null || moduleName.isEmpty()) ? "" : (moduleName + "_");
+    return String.format("%s%s_%s_config.properties", prefix, profile.getName(), profile.getValue());
+  }
+
+  private Properties getBeansFromResource(String moduleName, Profile profile) {
     ClassLoader classLoader = getClass().getClassLoader();
-    String configName = profile.getConfigName(moduleName) + ".properties";
+    String configName = getProfileConfigName(profile, moduleName);
     Properties properties = new Properties();
     try {
       List<URL> configs = Collections.list(classLoader.getResources(configName));

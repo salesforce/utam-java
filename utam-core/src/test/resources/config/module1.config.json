@@ -1,0 +1,32 @@
+{
+  "name": {
+    "value1": [
+      {
+        "interface": "utam.core.framework.consumer.TestLoaderConfigPageObject",
+        "implementation": "utam.core.framework.consumer.TestLoaderConfigPageObjectProfile"
+      }
+    ]
+  },
+  "name2": {
+    "value2": [
+      {
+        "interface": "utam.core.framework.consumer.TestLoaderConfigPageObject",
+        "implementation": "utam.core.framework.consumer.TestLoaderConfigPageObjectOverride"
+      }
+    ]
+  },
+  "test": {
+    "one": [
+      {
+        "interface": "utam.core.framework.consumer.TestLoaderConfigDefault",
+        "implementation": "utam.core.framework.consumer.TestLoaderConfigPageObjectProfile"
+      }
+    ],
+    "two": [
+      {
+        "interface": "utam.core.framework.consumer.TestLoaderConfigDefault",
+        "implementation": "utam.core.framework.consumer.TestLoaderConfigPageObjectOverride"
+      }
+    ]
+  }
+}
