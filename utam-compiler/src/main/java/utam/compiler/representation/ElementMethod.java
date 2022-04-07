@@ -304,8 +304,6 @@ public abstract class ElementMethod {
       // For non-primitive method parameters added by a filter, we must add class imports
       // for those types or the generated code will not be compilable by javac.
       parametersTracker.getMethodParameters().stream()
-          .filter(param -> Arrays.stream(PrimitiveType.values())
-              .noneMatch(primitiveType -> primitiveType.isSameType(param.getType())))
           .forEach(param -> ParameterUtils.setImport(classImports, param.getType()));
     }
 
