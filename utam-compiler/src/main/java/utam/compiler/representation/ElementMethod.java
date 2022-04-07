@@ -14,12 +14,17 @@ import static utam.compiler.translator.TranslationUtilities.getElementGetterMeth
 import static utam.compiler.types.BasicElementUnionType.asUnionTypeOrNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.deser.impl.CreatorCandidate;
 import utam.compiler.grammar.UtamMethodDescription;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.ParameterUtils;
+import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TypeUtilities.FromClass;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
@@ -281,6 +286,13 @@ public abstract class ElementMethod {
       parametersTracker.setMethodParameters(matcherParameters);
       setInterfaceImports(imports, returnType);
       setClassImports(classImports, returnType, implType);
+      parametersTracker.getMethodParameters().forEach(param -> {
+        if (Arrays.stream(PrimitiveType.values())
+                .filter(primitiveType -> primitiveType.equals(param))
+                .collect(Collectors.toList()).isEmpty()) {
+          ParameterUtils.setImport(classImports, param.getType());
+        }
+      });
       String predicateCode = getPredicateCode(applyMethod, applyParameters, matcherType, matcherParameters);
       code.add(getScopeElementCode(scopeElement));
       String scopeVariableName = scopeElement.getName();

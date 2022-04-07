@@ -317,4 +317,24 @@ public class ElementMethodTests {
         + "build(TestElement.class, TestElementImpl.class, elm -> Boolean.FALSE.equals(elm.isVisible()))");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
+
+  @Test
+  public void testFilterWithContainsElementSelectorArgument() {
+    TranslationContext context = new DeserializerUtilities()
+        .getContext("filter/customWithFilterContainsElement");
+    PageObjectMethod method = context.getMethod(ELEMENT_METHOD_NAME);
+    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "BasicElement");
+    expected.addParameter(new MethodParameterInfo("value", "String"));
+    expected.addParameter(new MethodParameterInfo("LocatorBy.byCss(String.format(\"input[value='%s']\", value))", "LocatorBy"));
+    expected.addParameter(new MethodParameterInfo("false", "Boolean"));
+    expected.addCodeLine("BasicElement root = this.getRootElement()");
+    expected.addCodeLine("return basic(root, this.test)."
+        + "build(BasicElement.class, BasePageElement.class, "
+        + "elm -> Boolean.TRUE.equals(elm.containsElement(LocatorBy.byCss(String.format(\"input[value='%s']\", value)), false)))");
+    expected.addImportedTypes("utam.core.element.BasicElement");
+    expected.addImpliedImportedTypes("utam.core.element.BasicElement");
+    expected.addImpliedImportedTypes("utam.core.framework.element.BasePageElement");
+    expected.addImpliedImportedTypes("utam.core.selenium.element.LocatorBy");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
 }
