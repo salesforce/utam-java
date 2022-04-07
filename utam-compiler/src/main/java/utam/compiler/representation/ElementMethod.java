@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.deser.impl.CreatorCandidate;
 import utam.compiler.grammar.UtamMethodDescription;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MatcherType;
@@ -286,13 +285,7 @@ public abstract class ElementMethod {
       parametersTracker.setMethodParameters(matcherParameters);
       setInterfaceImports(imports, returnType);
       setClassImports(classImports, returnType, implType);
-      parametersTracker.getMethodParameters().forEach(param -> {
-        if (Arrays.stream(PrimitiveType.values())
-                .filter(primitiveType -> primitiveType.equals(param))
-                .collect(Collectors.toList()).isEmpty()) {
-          ParameterUtils.setImport(classImports, param.getType());
-        }
-      });
+      setFilterParameterClassImports();
       String predicateCode = getPredicateCode(applyMethod, applyParameters, matcherType, matcherParameters);
       code.add(getScopeElementCode(scopeElement));
       String scopeVariableName = scopeElement.getName();
@@ -306,6 +299,18 @@ public abstract class ElementMethod {
           implType.getSimpleName(),
           predicateCode));
       this.unionType = asUnionTypeOrNull(implType);
+    }
+
+    private void setFilterParameterClassImports() {
+      // For non-primitive method parameters added by a filter, we must add class imports
+      // for those types or the generated code will not be compilable by javac.
+      parametersTracker.getMethodParameters().forEach(param -> {
+        if (Arrays.stream(PrimitiveType.values())
+                .filter(primitiveType -> primitiveType.equals(param))
+                .collect(Collectors.toList()).isEmpty()) {
+          ParameterUtils.setImport(classImports, param.getType());
+        }
+      });
     }
 
     @Override
