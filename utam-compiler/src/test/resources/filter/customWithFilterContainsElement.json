@@ -1,0 +1,33 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "public": true,
+      "selector": {
+        "css": "my-custom-element[with-attribute='attr-value']",
+        "returnAll": true
+      },
+      "filter": {
+        "apply": "containsElement",
+        "args": [
+          {
+            "type": "locator",
+            "value": {
+              "css": "input[value='%s']",
+              "args": [
+                {
+                  "name": "value",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "findFirst": true,
+        "matcher": {
+          "type": "isTrue"
+        }
+      }
+    }
+  ]
+}
