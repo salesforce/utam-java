@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import utam.compiler.grammar.UtamMethodDescription;
 import utam.compiler.helpers.ElementContext;
@@ -304,13 +303,10 @@ public abstract class ElementMethod {
     private void setFilterParameterClassImports() {
       // For non-primitive method parameters added by a filter, we must add class imports
       // for those types or the generated code will not be compilable by javac.
-      parametersTracker.getMethodParameters().forEach(param -> {
-        if (Arrays.stream(PrimitiveType.values())
-                .filter(primitiveType -> primitiveType.equals(param))
-                .collect(Collectors.toList()).isEmpty()) {
-          ParameterUtils.setImport(classImports, param.getType());
-        }
-      });
+      parametersTracker.getMethodParameters().stream()
+          .filter(param -> Arrays.stream(PrimitiveType.values())
+              .noneMatch(primitiveType -> ((TypeProvider) primitiveType).equals(param.getType())))
+          .forEach(param -> ParameterUtils.setImport(classImports, param.getType()));
     }
 
     @Override
