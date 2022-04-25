@@ -403,7 +403,7 @@ public class JsonDeserializerTests {
     assertThat(
         unitTestCode,
         containsString(
-            "//.withChild(simulator.registerElement(\"childElement\", \"childSelector\"))"));
+            "// .withChild(simulator.registerElement(\"childElement\", \"childSelector\"))"));
   }
 
   /**
@@ -449,7 +449,7 @@ public class JsonDeserializerTests {
     assertThat(
         unitTestCode,
         containsString(
-            "//.withChild(simulator.registerElement(\"childElement\", \"childSelector\"))"));
+            "// .withChild(simulator.registerElement(\"childElement\", \"childSelector\"))"));
   }
 
   /**
