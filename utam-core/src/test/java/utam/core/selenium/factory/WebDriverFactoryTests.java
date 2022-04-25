@@ -36,46 +36,46 @@ import static utam.core.selenium.factory.WebDriverFactory.getAdapter;
  */
 public class WebDriverFactoryTests {
 
-    @Test
-    void testChromeOptions() {
-        WebDriverFactory.defaultChromeOptions(false);
-        WebDriverFactory.defaultChromeOptions(true);
-        assertThrows(() -> WebDriverFactory.getWebDriver(mock(DriverType.class)));
-    }
+  @Test
+  void testChromeOptions() {
+    WebDriverFactory.defaultChromeOptions(false);
+    WebDriverFactory.defaultChromeOptions(true);
+    assertThrows(() -> WebDriverFactory.getWebDriver(mock(DriverType.class)));
+  }
 
-    @Test
-    void testGetDriverError() {
-        IllegalArgumentException e = expectThrows(IllegalArgumentException.class, () -> WebDriverFactory.getWebDriver(null));
-        assertThat(e.getMessage(), is(equalTo(String.format(ERR_UNKNOWN_DRIVER_TYPE, "null"))));
-    }
+  @Test
+  void testGetDriverError() {
+    IllegalArgumentException e =
+        expectThrows(IllegalArgumentException.class, () -> WebDriverFactory.getWebDriver(null));
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_UNKNOWN_DRIVER_TYPE, "null"))));
+  }
 
-    private static Driver getAdapterForTest(WebDriver driver) {
-        return getAdapter(driver, null);
-    }
+  private static Driver getAdapterForTest(WebDriver driver) {
+    return getAdapter(driver, null);
+  }
 
-    @Test
-    public void testGetAdapter() {
-    	final String DEVICE_SCREEN_SIZE_NAME = "deviceScreenSize";
-    	final String DEVICE_SCREEN_DENSITY_NAME = "deviceScreenDensity";
-    	final String DEVICE_SCREEN_SIZE_VALUE_PHONE = "1080x1920";
-    	final String DEVICE_SCREEN_DENSITY_VALUE_PHONE = "480";
+  @Test
+  public void testGetAdapter() {
+    final String DEVICE_SCREEN_SIZE_NAME = "deviceScreenSize";
+    final String DEVICE_SCREEN_DENSITY_NAME = "deviceScreenDensity";
+    final String DEVICE_SCREEN_SIZE_VALUE_PHONE = "1080x1920";
+    final String DEVICE_SCREEN_DENSITY_VALUE_PHONE = "480";
 
-        IOSDriver iosDriver = mock(IOSDriver.class);
-        when(iosDriver.getSessionDetail("device")).thenReturn("iphone");
-        assertThat(getAdapterForTest(iosDriver), instanceOf(
-            MobileDriverAdapter.class));
+    IOSDriver iosDriver = mock(IOSDriver.class);
+    when(iosDriver.getSessionDetail("device")).thenReturn("iphone");
+    assertThat(getAdapterForTest(iosDriver), instanceOf(MobileDriverAdapter.class));
 
-        AndroidDriver androidDriver = mock(AndroidDriver.class);
-        DesiredCapabilities desiredCaps = new DesiredCapabilities();
-        desiredCaps.setCapability(DEVICE_SCREEN_SIZE_NAME, DEVICE_SCREEN_SIZE_VALUE_PHONE);
-        desiredCaps.setCapability(DEVICE_SCREEN_DENSITY_NAME, DEVICE_SCREEN_DENSITY_VALUE_PHONE);
-        when(androidDriver.getCapabilities()).thenReturn(desiredCaps);
-        assertThat(getAdapterForTest(androidDriver), instanceOf(MobileDriverAdapter.class));
+    AndroidDriver androidDriver = mock(AndroidDriver.class);
+    DesiredCapabilities desiredCaps = new DesiredCapabilities();
+    desiredCaps.setCapability(DEVICE_SCREEN_SIZE_NAME, DEVICE_SCREEN_SIZE_VALUE_PHONE);
+    desiredCaps.setCapability(DEVICE_SCREEN_DENSITY_NAME, DEVICE_SCREEN_DENSITY_VALUE_PHONE);
+    when(androidDriver.getCapabilities()).thenReturn(desiredCaps);
+    assertThat(getAdapterForTest(androidDriver), instanceOf(MobileDriverAdapter.class));
 
-        AppiumDriver appiumDriver = mock(AppiumDriver.class);
-        assertThat(getAdapterForTest(appiumDriver), instanceOf(MobileDriverAdapter.class));
+    AppiumDriver appiumDriver = mock(AppiumDriver.class);
+    assertThat(getAdapterForTest(appiumDriver), instanceOf(MobileDriverAdapter.class));
 
-        WebDriver driver = mock(WebDriver.class);
-        assertThat(getAdapterForTest(driver), instanceOf(DriverAdapter.class));
-    }
+    WebDriver driver = mock(WebDriver.class);
+    assertThat(getAdapterForTest(driver), instanceOf(DriverAdapter.class));
+  }
 }

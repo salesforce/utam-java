@@ -130,9 +130,9 @@ public enum MobilePlatformType implements Profile {
   }
 
   private static boolean isTablet(WebDriver driver) {
-	Capabilities caps = ((AppiumDriver)driver).getCapabilities();
-	Object deviceScreenSizeObject = caps.getCapability("deviceScreenSize");
-	Object deviceScreenDensityObject = caps.getCapability("deviceScreenDensity");
+    Capabilities caps = ((AppiumDriver)driver).getCapabilities();
+    Object deviceScreenSizeObject = caps.getCapability("deviceScreenSize");
+    Object deviceScreenDensityObject = caps.getCapability("deviceScreenDensity");
 
     // For android, based on https://developer.android.com/training/multiscreen/screensizes
     // when device's dp is equal or bigger than 600, will be treated as tablet, otherwise will be phone

@@ -39,12 +39,12 @@ public class MobilePlatformTypeTests {
 
   @Test
   public void testGetActivePlatform() {
-	final String DEVICE_SCREEN_SIZE_NAME = "deviceScreenSize";
-	final String DEVICE_SCREEN_DENSITY_NAME = "deviceScreenDensity";
-	final String DEVICE_SCREEN_SIZE_VALUE_TABLET = "1200x1920";
-	final String DEVICE_SCREEN_DENSITY_VALUE_TABLET = "320";
-	final String DEVICE_SCREEN_SIZE_VALUE_PHONE = "1080x1920";
-	final String DEVICE_SCREEN_DENSITY_VALUE_PHONE = "480";
+    final String DEVICE_SCREEN_SIZE_NAME = "deviceScreenSize";
+    final String DEVICE_SCREEN_DENSITY_NAME = "deviceScreenDensity";
+    final String DEVICE_SCREEN_SIZE_VALUE_TABLET = "1200x1920";
+    final String DEVICE_SCREEN_DENSITY_VALUE_TABLET = "320";
+    final String DEVICE_SCREEN_SIZE_VALUE_PHONE = "1080x1920";
+    final String DEVICE_SCREEN_DENSITY_VALUE_PHONE = "480";
 
     AppiumDriver driver = mock(IOSDriver.class);
     when(driver.getSessionDetail("device")).thenReturn("iphone");
