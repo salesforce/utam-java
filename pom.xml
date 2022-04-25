@@ -125,7 +125,7 @@
         <appium.version>7.6.0</appium.version>
         <slf4j.version>1.7.36</slf4j.version>
         <jackson.version>2.13.2</jackson.version>
-        <google.java.format.version>1.7</google.java.format.version>
+        <google.java.format.version>1.15.0</google.java.format.version>
         <picocli-version>4.6.3</picocli-version>
         <testng.version>7.5</testng.version>
         <junit.version>4.13.2</junit.version>
