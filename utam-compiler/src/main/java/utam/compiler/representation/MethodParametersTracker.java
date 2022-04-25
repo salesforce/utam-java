@@ -47,6 +47,9 @@ public class MethodParametersTracker {
       }
       parameterNames.add(parameterName);
     }
+    if (parameter.getNestedParameters() != null) {
+      parameter.getNestedParameters().forEach(this::setMethodParameter);
+    }
     methodParameters.add(parameter);
   }
 

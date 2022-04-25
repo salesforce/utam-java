@@ -10,6 +10,8 @@ package utam.core.framework.context;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
+
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 
@@ -128,8 +130,9 @@ public enum MobilePlatformType implements Profile {
   }
 
   private static boolean isTablet(WebDriver driver) {
-    Object deviceScreenSizeObject = ((AppiumDriver)driver).getSessionDetail("deviceScreenSize");
-    Object deviceScreenDensityObject = ((AppiumDriver)driver).getSessionDetail("deviceScreenDensity");
+    Capabilities caps = ((AppiumDriver)driver).getCapabilities();
+    Object deviceScreenSizeObject = caps.getCapability("deviceScreenSize");
+    Object deviceScreenDensityObject = caps.getCapability("deviceScreenDensity");
 
     // For android, based on https://developer.android.com/training/multiscreen/screensizes
     // when device's dp is equal or bigger than 600, will be treated as tablet, otherwise will be phone
