@@ -233,8 +233,8 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   }
 
   @Override
-  public String getErrorMessage(String code, String... args) {
-    return jsonErrorsConfig.getErrorMessage(code, args);
+  public String getErrorMessage(Object code, String... args) {
+    return jsonErrorsConfig.getErrorMessage((Integer) code, args);
   }
 
   /**

@@ -54,7 +54,7 @@ public class UtamMethodActionGetterTests {
   @Test
   public void unknownElementNameThrows() {
     testThrows("unknownElementName",
-        "error UA001: method \"test\": unknown element with name \"test\" is referenced");
+        "error 101: method \"test\": unknown element with name \"test\" is referenced");
   }
 
   @Test
@@ -67,7 +67,7 @@ public class UtamMethodActionGetterTests {
   @Test
   public void redundantArgsThrows() {
     testThrows("redundantArgs",
-        "error UA008: method \"test\": expected number of parameters is 0, found 1");
+        "error 108: method \"test\": expected number of parameters is 0, found 1");
   }
 
   @Test
@@ -93,13 +93,13 @@ public class UtamMethodActionGetterTests {
   @Test
   public void testChainNeedsReturn() {
     testThrows("chainNeedsReturn",
-        "error UMA005: method \"test\" statement: can't infer return type for \"element\", please provide a \"returnType\"");
+        "error 605: method \"test\" statement: can't infer return type for \"element\", please provide a \"returnType\"");
   }
 
   @Test
   public void testContainerElementNeedsReturn() {
     testThrows("containerNeedsReturn",
-        "error UMA004: method \"test\" statement: statement that invokes container method needs a \"returnType\"");
+        "error 604: method \"test\" statement: statement that invokes container method needs a \"returnType\"");
   }
 
   @Test

@@ -134,7 +134,7 @@ public abstract class UtamMethodAction {
    */
   final void checkChainElementRedundant(TranslationContext context, String methodName) {
     if (isChain && elementName != null) {
-      String message = context.getErrorMessage("UMA006", methodName);
+      String message = context.getErrorMessage(606, methodName);
       throw new UtamCompilationError(message);
     }
   }
@@ -148,7 +148,7 @@ public abstract class UtamMethodAction {
   final void checkBeforeLoadElements(TranslationContext context, MethodContext methodContext) {
     if (BEFORE_LOAD_METHOD_NAME.equals(methodContext.getName()) && elementName != null
         && !BEFORE_LOAD_ELEMENTS.contains(elementName)) {
-      String message = context.getErrorMessage("UMA007");
+      String message = context.getErrorMessage(607);
       throw new UtamCompilationError(message);
     }
   }
@@ -321,7 +321,7 @@ public abstract class UtamMethodAction {
     ElementContext getElementArgument(TranslationContext context, String elementName) {
       ElementContext element = context.getElement(elementName);
       if (element == null) {
-        String message = context.getErrorMessage("UA001", argsParserContext, elementName);
+        String message = context.getErrorMessage(101, argsParserContext, elementName);
         throw new UtamCompilationError(argsNode, message);
       }
       return element;

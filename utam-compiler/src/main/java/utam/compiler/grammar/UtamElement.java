@@ -112,7 +112,7 @@ public final class UtamElement {
     }
     String typeNodeContent = typeNode == null ? "null" : typeNode.toPrettyString();
     String[] type = processBasicTypeNode(typeNode,
-        node -> new UtamCompilerIntermediateError(node, "UE001", name, typeNodeContent));
+        node -> new UtamCompilerIntermediateError(node, 201, name, typeNodeContent));
     return new SimpleEntry<>(new Basic(), type);
   }
 
@@ -241,7 +241,7 @@ public final class UtamElement {
         throw new UtamCompilationError(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, name));
       }
       if (filter != null && !selector.isReturnAll()) {
-        throw new UtamCompilerIntermediateError("UEF002", name);
+        throw new UtamCompilerIntermediateError(302, name);
       }
       if (elements.size() > 0 || shadow.size() > 0) {
         throw new UtamCompilationError(Type.CUSTOM.getSupportedPropertiesErr(name));
@@ -344,7 +344,7 @@ public final class UtamElement {
         throw new UtamCompilationError(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, name));
       }
       if (filter != null && !selector.isReturnAll()) {
-        throw new UtamCompilerIntermediateError("UEF002", name);
+        throw new UtamCompilerIntermediateError(302, name);
       }
       if (selector.isReturnAll() && (elements.size() > 0 || shadow.size() > 0)) {
         throw new UtamCompilationError(String.format(ERR_ELEMENT_NESTED_ELEMENTS, name));

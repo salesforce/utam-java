@@ -162,7 +162,7 @@ public final class TranslationContext {
    */
   public void setElement(JsonNode currentNode, ElementContext element) {
     if (elementContextMap.containsKey(element.getName())) {
-      throw new UtamCompilationError(currentNode, getErrorMessage("UE002", element.getName()));
+      throw new UtamCompilationError(currentNode, getErrorMessage(202, element.getName()));
     }
     elementContextMap.put(element.getName(), element);
   }
@@ -403,7 +403,7 @@ public final class TranslationContext {
    * @param args replacement for part of the messages that are context dependent
    * @return string with message or throws an error
    */
-  public String getErrorMessage(String code, String... args) {
+  public String getErrorMessage(Integer code, String... args) {
     String message = translatorConfiguration.getErrorMessage(code, args);
     return getRawErrorMessage(message);
   }

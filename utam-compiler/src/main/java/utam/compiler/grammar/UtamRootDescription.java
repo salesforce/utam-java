@@ -67,7 +67,7 @@ class UtamRootDescription {
       return new UtamRootDescription(Collections.singletonList(value), null, null);
     }
     Function<Exception, RuntimeException> parserErrorWrapper = causeErr -> new UtamCompilerIntermediateError(
-        causeErr, descriptionNode, "URD000", causeErr.getMessage());
+        causeErr, descriptionNode, 906, causeErr.getMessage());
     return readNode(descriptionNode, UtamRootDescription.class, parserErrorWrapper);
   }
 

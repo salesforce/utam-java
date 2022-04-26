@@ -1,8 +1,9 @@
-{
-  "1": {
-    "type": "warning",
+[
+  {
+    "code": 1,
+    "category": "warning",
     "message": "message",
     "docs": "docs",
     "tip": "tip"
   }
-}
+]

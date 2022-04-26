@@ -254,7 +254,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
 
   final void setImplementation(Profile profile, String typeName, String classTypeName) {
     if (!profileDependenciesMapping.containsKey(profile)) {
-      throw new UtamCompilationError(translatorConfig.getErrorMessage("UP003", profile.getName(), profile.getValue()));
+      throw new UtamCompilationError(translatorConfig.getErrorMessage(803, profile.getName(), profile.getValue()));
     }
     if (profileDependenciesMapping.get(profile).containsKey(typeName)) {
       String profileValue = String.format("{ %s : %s }", profile.getName(), profile.getValue());

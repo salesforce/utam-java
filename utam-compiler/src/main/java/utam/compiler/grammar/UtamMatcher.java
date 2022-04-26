@@ -49,7 +49,7 @@ class UtamMatcher {
   static UtamMatcher processMatcherNode(JsonNode node, String parserContext) {
     return JsonDeserializer.readNode(node,
         UtamMatcher.class,
-        cause -> new UtamCompilerIntermediateError(cause, node, "UEF000", parserContext,
+        cause -> new UtamCompilerIntermediateError(cause, node, 300, parserContext,
             cause.getMessage()));
   }
 

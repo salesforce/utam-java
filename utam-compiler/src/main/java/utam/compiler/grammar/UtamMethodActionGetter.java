@@ -73,7 +73,7 @@ class UtamMethodActionGetter extends UtamMethodAction {
         .getDeclaredReturnOrDefault(context, methodContext.getDeclaredReturnType(), null);
     if (returnType == null) {
       throw new UtamCompilationError(
-          context.getErrorMessage("UMA005", methodContext.getName(), elementName));
+          context.getErrorMessage(605, methodContext.getName(), elementName));
     }
     return new GetterInvocation(elementGetterMethodName, returnType, parameters);
   }
@@ -94,7 +94,7 @@ class UtamMethodActionGetter extends UtamMethodAction {
     boolean isContainer = element.getElementNodeType() == ElementType.CONTAINER;
     if (isContainer && !statementContext.hasDeclaredReturn()) {
       // for container return type is PageObject
-      throw new UtamCompilationError(context.getErrorMessage("UMA004", methodName));
+      throw new UtamCompilationError(context.getErrorMessage(604, methodName));
     }
     TypeProvider returnType = statementContext.hasDeclaredReturn() ? statementContext
         .getDeclaredStatementReturnOrNull(context) : elementGetter.getReturnType();

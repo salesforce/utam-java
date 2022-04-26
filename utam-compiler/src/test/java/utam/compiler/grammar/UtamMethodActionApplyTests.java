@@ -217,14 +217,16 @@ public class UtamMethodActionApplyTests {
   public void testWrongArgsBasicActionThrows() {
     Exception e = expectCompilerErrorFromFile("validate/apply/wrongArgType");
     assertThat(e.getMessage(), containsString(
-        "error UA009: method \"test\": incorrect parameter type [ str ]: expected type \"BasicElement\", found \"String\""));
+        "error 109: method \"test\": "
+            + "incorrect parameter type [ str ]: expected type \"BasicElement\", found \"String\""));
   }
 
   @Test
   public void testChainWithElementThrows() {
     Exception e = expectCompilerErrorFromFile("validate/apply/redundantElementForChain");
     assertThat(e.getMessage(), containsString(
-        "error UMA006: method \"test\" statement: \"element\" property is redundant because statement marked as chain"));
+        "error 606: method \"test\" statement: "
+            + "\"element\" property is redundant because statement marked as chain"));
   }
 
   @Test
@@ -371,6 +373,7 @@ public class UtamMethodActionApplyTests {
         "[{ \"name\" : \"test\", \"compose\" : [ {\"element\": \"error\", \"apply\": \"action\"} ]}]");
     Exception e = test.expectCompilerError();
     assertThat(e.getMessage(), containsString(
-        "error UMA001: method \"test\" statement: unknown element with name \"error\" is referenced in a compose statement"));
+        "error 601: method \"test\" statement: "
+            + "unknown element with name \"error\" is referenced in a compose statement"));
   }
 }

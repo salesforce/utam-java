@@ -77,9 +77,9 @@ public interface TranslatorConfig {
   /**
    * read error message by code and replace patterns by args if any
    *
-   * @param code string code
+   * @param code code value
    * @param args replacement for part of the messages that are context dependent
    * @return string with message or throws an error
    */
-  String getErrorMessage(String code, String... args);
+  String getErrorMessage(Object code, String... args);
 }

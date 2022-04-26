@@ -42,7 +42,7 @@ public class UtamElementFilter_Tests {
   public void testBasicElementFilterWithoutMatcherThrows() {
     Exception e = expectCompilerErrorFromFile("validate/filter/basicFilterNoMatcher");
     assertThat(e.getMessage(), containsString(
-        "error UEF000: element \"test\" filter: incorrect format of element filter: \n"
+        "error 300: element \"test\" filter: incorrect format of element filter: \n"
             + "Missing required creator property 'matcher'"));
   }
 
@@ -50,21 +50,21 @@ public class UtamElementFilter_Tests {
   public void testBasicElementWrongMethodInFilterThrows() {
     Exception e = expectCompilerErrorFromFile("validate/filter/basicFilterWrongMethod");
     assertThat(e.getMessage(), containsString(
-        "error UEF001: element \"test\" filter: unknown method \"wrong\" for basic element"));
+        "error 301: element \"test\" filter: unknown method \"wrong\" for basic element"));
   }
 
   @Test
   public void testCustomElementGetTextFilterWithWrongArgThrows() {
     Exception e = expectCompilerErrorFromFile("validate/filter/customWrongMatcherArg");
     assertThat(e.getMessage(), containsString(
-        "error UA008: element \"test\" matcher: expected number of parameters is 0, found 1"));
+        "error 108: element \"test\" matcher: expected number of parameters is 0, found 1"));
   }
 
   @Test
   public void testCustomFilterNonListThrows() {
     Exception e = expectCompilerErrorFromFile("validate/custom_element/filterForNonList");
     assertThat(e.getMessage(), containsString(
-        "error UEF002: element \"test\" filter: filter can only be set for list"));
+        "error 302: element \"test\" filter: filter can only be set for list"));
   }
 
   @Test

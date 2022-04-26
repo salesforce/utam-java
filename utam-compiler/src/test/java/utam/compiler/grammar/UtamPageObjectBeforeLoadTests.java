@@ -103,20 +103,20 @@ public class UtamPageObjectBeforeLoadTests {
   public void testCantHaveArgs() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("withArgs"));
     assertThat(e.getMessage(),
-        containsString("error UPO005: method \"beforeLoad\" cannot have parameters"));
+        containsString("error 905: method \"beforeLoad\" cannot have parameters"));
   }
 
   @Test
   public void testUnallowedElement() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("wrongElement"));
     assertThat(e.getMessage(), containsString(
-        "error UMA007: method \"beforeLoad\" statement: only \"document\" or \"root\" elements are allowed"));
+        "error 607: method \"beforeLoad\" statement: only \"document\" or \"root\" elements are allowed"));
   }
 
   @Test
   public void testUnallowedElementInsidePredicate() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("wrongPredicateElement"));
     assertThat(e.getMessage(), containsString(
-        "error UMA007: method \"beforeLoad\" statement: only \"document\" or \"root\" elements are allowed"));
+        "error 607: method \"beforeLoad\" statement: only \"document\" or \"root\" elements are allowed"));
   }
 }

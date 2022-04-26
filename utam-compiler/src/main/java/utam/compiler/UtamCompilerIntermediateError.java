@@ -24,7 +24,7 @@ public class UtamCompilerIntermediateError extends RuntimeException {
 
   private static final String JSON_SOURCE_SUBSTRING = "[Source:";
 
-  private final String errCode;
+  private final Integer errCode;
   private final String[] args;
   private final JsonNode currentNode;
   private final Throwable nullableCause;
@@ -34,10 +34,10 @@ public class UtamCompilerIntermediateError extends RuntimeException {
    *
    * @param cause       original error
    * @param currentNode json node to print out source
-   * @param errCode     string code
+   * @param errCode     code
    * @param args        replacement for part of the messages that are context dependent
    */
-  public UtamCompilerIntermediateError(Throwable cause, JsonNode currentNode, String errCode,
+  public UtamCompilerIntermediateError(Throwable cause, JsonNode currentNode, Integer errCode,
       String... args) {
     this.nullableCause = cause;
     this.currentNode = currentNode;
@@ -49,20 +49,20 @@ public class UtamCompilerIntermediateError extends RuntimeException {
    * Initialize exception that will be used to produce meaningful error
    *
    * @param currentNode json node to print out source
-   * @param errCode     string code
+   * @param errCode     code
    * @param args        replacement for part of the messages that are context dependent
    */
-  public UtamCompilerIntermediateError(JsonNode currentNode, String errCode, String... args) {
+  public UtamCompilerIntermediateError(JsonNode currentNode, Integer errCode, String... args) {
     this(null, currentNode, errCode, args);
   }
 
   /**
    * Initialize exception that will be used to produce meaningful error
    *
-   * @param errCode string code
+   * @param errCode code
    * @param args    replacement for part of the messages that are context dependent
    */
-  public UtamCompilerIntermediateError(String errCode, String... args) {
+  public UtamCompilerIntermediateError(Integer errCode, String... args) {
     this(null, null, errCode, args);
   }
 

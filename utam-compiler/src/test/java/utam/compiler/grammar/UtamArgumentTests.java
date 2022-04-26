@@ -37,7 +37,7 @@ public class UtamArgumentTests {
     String json = "{\"name\":\"name\", \"type\":\"string\"}, {\"name\":\"name\", \"type\":\"string\"}";
     Exception e = expectThrows(UtamCompilationError.class, () -> testArgs(json));
     assertThat(e.getMessage(), containsString(
-        "error UA007: method \"test\": parameter with name \"name\" is already declared"));
+        "error 107: method \"test\": parameter with name \"name\" is already declared"));
 
   }
 
@@ -46,7 +46,7 @@ public class UtamArgumentTests {
     String json = "{  \"name\" :  \"name\",  \"type\" : \"type\" }";
     Exception e = expectThrows(UtamCompilationError.class, () -> testArgs(json));
     assertThat(e.getMessage(), containsString(
-        "error UA003: method \"test\": unsupported argument type \"type\", supported are"));
+        "error 103: method \"test\": unsupported argument type \"type\", supported are"));
   }
 
   @Test
@@ -94,7 +94,8 @@ public class UtamArgumentTests {
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
         containsString(
-            "error UA001: method \"test\", element \"argName\" reference: unknown element with name \"argName\" is referenced"));
+            "error 101: method \"test\", element \"argName\" reference: "
+                + "unknown element with name \"argName\" is referenced"));
   }
 
   @Test
@@ -102,7 +103,7 @@ public class UtamArgumentTests {
     String json = "{ \"type\" : \"string\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error UA000: method \"test\": incorrect argument format: \n"
+        containsString("error 100: method \"test\": incorrect argument format: \n"
             + "Missing required creator property 'name'"));
   }
 
@@ -111,7 +112,7 @@ public class UtamArgumentTests {
     String json = "{ \"name\" : \"name\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error UA000: method \"test\": incorrect argument format: \n"
+        containsString("error 100: method \"test\": incorrect argument format: \n"
             + "Missing required creator property 'type'"));
   }
 
@@ -121,7 +122,7 @@ public class UtamArgumentTests {
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
         containsString(
-            "error UA002: method \"test\": unsupported literal argument type \"1.024\""));
+            "error 102: method \"test\": unsupported literal argument type \"1.024\""));
   }
 
   @Test
@@ -129,7 +130,7 @@ public class UtamArgumentTests {
     String json = "{ \"value\" : true, \"type\" : \"string\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error UA000: method \"test\": incorrect argument format: \n"
+        containsString("error 100: method \"test\": incorrect argument format: \n"
             + "Unrecognized field \"type\""));
   }
 
@@ -138,7 +139,7 @@ public class UtamArgumentTests {
     String json = "{ \"value\" : true, \"name\" : \"name\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error UA000: method \"test\": incorrect argument format: \n"
+        containsString("error 100: method \"test\": incorrect argument format: \n"
             + "Unrecognized field \"name\""));
   }
 
@@ -147,7 +148,7 @@ public class UtamArgumentTests {
     String json = "{  \"name\" :  \"name\",  \"type\" : \"function\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error UA004: method \"test\": incorrect predicate format: \n"
+        containsString("error 104: method \"test\": incorrect predicate format: \n"
             + "Missing required creator property 'predicate'"));
   }
 
@@ -156,7 +157,7 @@ public class UtamArgumentTests {
     String json = "{  \"value\" : { \"extra\" : true } }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error UA002: method \"test\": unsupported literal argument type"));
+        containsString("error 102: method \"test\": unsupported literal argument type"));
   }
 
   @Test
@@ -164,7 +165,7 @@ public class UtamArgumentTests {
     String json = "{  \"value\" :  \"element\",  \"type\" : \"elementReference\", \"predicate\" : [] }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(), containsString(
-        "error UA006: method \"test\": incorrect format of elementReference argument: \n"
+        "error 106: method \"test\": incorrect format of elementReference argument: \n"
             + "Unrecognized field \"predicate\""));
   }
 
@@ -174,7 +175,7 @@ public class UtamArgumentTests {
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
         containsString(
-            "error UA003: method \"test\": unsupported argument type \"elementReference\""));
+            "error 103: method \"test\": unsupported argument type \"elementReference\""));
   }
 
   @Test
@@ -182,7 +183,7 @@ public class UtamArgumentTests {
     String json = "{  \"error\" : \"text\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error UA000: method \"test\": incorrect argument format: \n"
+        containsString("error 100: method \"test\": incorrect argument format: \n"
             + "Missing required creator property 'name'"));
   }
 
@@ -192,16 +193,17 @@ public class UtamArgumentTests {
     Exception e = expectThrows(UtamCompilationError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
         containsString(
-            "error U0001: method \"test\": property \"type\" should be a non empty string, instead found object"));
+            "error 10: method \"test\": property \"type\" should be a non empty string, instead found object"));
   }
 
   @Test
   public void testEmptyNestedArgsThrows() {
     String json = "{  \"value\" :  \"root\",  \"type\" : \"elementReference\", \"args\": [] }";
+    //testArgs(json);
     Exception e = expectThrows(UtamCompilationError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
         containsString(
-            "error U0004: method \"test\", element \"root\" reference: property \"args\" should not be an empty array"));
+            "error 13: method \"test\", element \"root\" reference: property \"args\" should be a not empty array"));
   }
 
   @Test
@@ -210,7 +212,7 @@ public class UtamArgumentTests {
     Exception e = expectThrows(UtamCompilationError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
         containsString(
-            "error U0005: method \"test\": argument should be a non empty object"));
+            "error 14: method \"test\": argument should be a non empty object"));
   }
 
   @Test

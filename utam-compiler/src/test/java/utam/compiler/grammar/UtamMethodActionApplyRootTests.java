@@ -89,7 +89,7 @@ public class UtamMethodActionApplyRootTests {
     UtamError e = expectThrows(UtamError.class,
         () -> getResult("publicRootWrongAction"));
     assertThat(e.getMessage(),
-        containsString("error UMA012: method \"test\" statement: unknown method \"click\" for basic element"));
+        containsString("error 612: method \"test\" statement: unknown method \"click\" for basic element"));
   }
 
   @Test
@@ -97,7 +97,7 @@ public class UtamMethodActionApplyRootTests {
     UtamError e = expectThrows(UtamError.class,
         () -> getResult("privateRootWrongAction"));
     assertThat(e.getMessage(),
-        containsString("error UMA012: method \"test\" statement: unknown method \"click\" for basic element"));
+        containsString("error 612: method \"test\" statement: unknown method \"click\" for basic element"));
   }
 
   @Test
@@ -146,7 +146,7 @@ public class UtamMethodActionApplyRootTests {
         "[{ \"name\" : \"test\", \"compose\" : [ {\"element\": \"root\", \"apply\": []} ]}]");
     Exception e = test.expectCompilerError();
     assertThat(e.getMessage(), containsString(
-        "error UMA000: method \"test\" statement: incorrect compose statement format"));
+        "error 600: method \"test\" statement: incorrect compose statement format"));
   }
 
   @Test
@@ -156,6 +156,6 @@ public class UtamMethodActionApplyRootTests {
         "[{ \"name\" : \"test\", \"compose\" : [ true ]}]");
     Exception e = test.expectCompilerError();
     assertThat(e.getMessage(), containsString(
-        "error UMA008: method \"test\" statement: compose statement should be a non empty object"));
+        "error 608: method \"test\" statement: compose statement should be a non empty object"));
   }
 }

@@ -7,6 +7,7 @@ import static utam.compiler.helpers.TypeUtilities.wrapAsList;
 import static utam.compiler.translator.TranslationTypesConfigJava.isPageObjectType;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.function.Supplier;
 import utam.compiler.UtamCompilerIntermediateError;
 import utam.core.declarative.representation.TypeProvider;
 
@@ -98,14 +99,14 @@ public abstract class ReturnType {
     }
 
     @Override
-    RuntimeException getReturnAllError() {
-      return new UtamCompilerIntermediateError(returnTypeJsonNode, "UIM002", methodName);
+    Supplier<RuntimeException> getReturnAllError() {
+      return () -> new UtamCompilerIntermediateError(returnTypeJsonNode, 402, methodName);
     }
 
     @Override
-    RuntimeException getTypeProcessingError() {
-      String value = returnTypeJsonNode == null? "null" : returnTypeJsonNode.toPrettyString();
-      return new UtamCompilerIntermediateError(returnTypeJsonNode, "UM001", methodName, value);
+    Supplier<RuntimeException> getTypeProcessingError() {
+      String value = returnTypeJsonNode == null ? "null" : returnTypeJsonNode.toPrettyString();
+      return () -> new UtamCompilerIntermediateError(returnTypeJsonNode, 501, methodName, value);
     }
   }
 
@@ -164,16 +165,17 @@ public abstract class ReturnType {
       this.returnTypeJsonNode = typeNode;
       this.methodName = methodName;
       if (isReturnList != null && !isReturnTypeSet()) {
-        throw getReturnAllError();
+        throw getReturnAllError().get();
       }
     }
 
-    RuntimeException getReturnAllError() {
-      return new UtamCompilerIntermediateError(returnTypeJsonNode, "UMA003", methodName);
+    Supplier<RuntimeException> getReturnAllError() {
+      return () -> new UtamCompilerIntermediateError(returnTypeJsonNode, 603, methodName);
     }
 
-    RuntimeException getTypeProcessingError() {
-      return new UtamCompilerIntermediateError(returnTypeJsonNode, "UMA002", methodName, returnTypeJsonNode.toPrettyString());
+    Supplier<RuntimeException> getTypeProcessingError() {
+      return () -> new UtamCompilerIntermediateError(returnTypeJsonNode, 602, methodName,
+          returnTypeJsonNode.toPrettyString());
     }
 
     @Override
@@ -197,10 +199,10 @@ public abstract class ReturnType {
         if (VOID.getSimpleName().equals(typeValue)) {
           return VOID;
         }
-        throw getTypeProcessingError();
+        throw getTypeProcessingError().get();
       } else {
         String validationContext = String.format("method \"%s\"", methodName);
-        throw new UtamCompilerIntermediateError(returnTypeJsonNode, "U0001", validationContext,
+        throw new UtamCompilerIntermediateError(returnTypeJsonNode, 10, validationContext,
             "returnType", getJsonNodeType(returnTypeJsonNode));
       }
     }

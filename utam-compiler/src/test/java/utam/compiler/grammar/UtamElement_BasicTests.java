@@ -49,14 +49,14 @@ public class UtamElement_BasicTests {
   public void testBasicElementWithFilterAndNonListSelectorThrows() {
     UtamError e = expectThrows(UtamCompilationError.class, () -> getContext("filterForNonList"));
     assertThat(
-        e.getMessage(), containsString("error UEF002: element \"test\" filter: filter can only be set for list"));
+        e.getMessage(), containsString("error 302: element \"test\" filter: filter can only be set for list"));
   }
 
   @Test
   public void testEmptyNestedElementsThrows() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("emptyNestedElementsArray"));
     assertThat(e.getMessage(),
-        containsString("error U0004: element \"test\" elements: property \"elements\" should not be an empty array"));
+        containsString("error 13: element \"test\" elements: property \"elements\" should be a not empty array"));
   }
 
   @Test
@@ -68,18 +68,18 @@ public class UtamElement_BasicTests {
   @Test
   public void testElementNodeWithInvalidArrayElementTypeThrows() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("wrongBasicTypeArray"));
-    assertThat(e.getMessage(), containsString("error UE001: element \"test\": basic type \"[ true ]\" is not supported"));
+    assertThat(e.getMessage(), containsString("error 201: element \"test\": basic type \"[ true ]\" is not supported"));
   }
 
   @Test
   public void testElementTypeAsStringWithInvalidValueThrows() {
     UtamError e = expectThrows(UtamCompilationError.class, () -> getContext("wrongBasicType"));
-    assertThat(e.getMessage(), containsString("error UE001: element \"test\": basic type \"\"wrong\"\" is not supported"));
+    assertThat(e.getMessage(), containsString("error 201: element \"test\": basic type \"\"wrong\"\" is not supported"));
   }
 
   @Test
   public void testElementNodeWithInvalidArrayElementThrows() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("wrongBasicTypeArrayElement"));
-    assertThat(e.getMessage(), containsString("error UE001: element \"test\": basic type \"[ \"wrong\" ]\" is not supported"));
+    assertThat(e.getMessage(), containsString("error 201: element \"test\": basic type \"[ \"wrong\" ]\" is not supported"));
   }
 }

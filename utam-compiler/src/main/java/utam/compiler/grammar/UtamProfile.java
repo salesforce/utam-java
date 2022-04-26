@@ -51,7 +51,7 @@ final class UtamProfile {
           ProfileConfiguration profileConfiguration = context.getConfiguredProfile(name);
           if (profileConfiguration == null) {
             throw new UtamCompilationError(profilesNode,
-                context.getErrorMessage("UP003", name, profileValue));
+                context.getErrorMessage(803, name, profileValue));
           }
           return profileConfiguration.getFromString(profileValue);
         });
@@ -104,15 +104,15 @@ final class UtamProfile {
     private Collection<UtamProfile> parseProfileNode(TranslationContext context) {
       if (!isProfilesSet()) {
         if (isProfilesRequired) {
-          throw new UtamCompilationError(profilesNode, context.getErrorMessage("UP004"));
+          throw new UtamCompilationError(profilesNode, context.getErrorMessage(804));
         }
         return new ArrayList<>();
       }
       if (!isProfilesRequired) {
-        throw new UtamCompilationError(profilesNode, context.getErrorMessage("UP005"));
+        throw new UtamCompilationError(profilesNode, context.getErrorMessage(805));
       }
       if (!profilesNode.isArray() || profilesNode.size() == 0) {
-        throw new UtamCompilationError(profilesNode, context.getErrorMessage("U0003", "property \"profile\""));
+        throw new UtamCompilationError(profilesNode, context.getErrorMessage(13, "page object root", "profile"));
       }
       Map<String, UtamProfile> profiles = new HashMap<>();
       for (JsonNode node : profilesNode) {
@@ -121,19 +121,19 @@ final class UtamProfile {
         String propertyName = String.format("profile \"%s\"", profileName);
         if (profiles.containsKey(profileName)) {
           throw new UtamCompilationError(profilesNode,
-              context.getErrorMessage("UP001", profileName));
+              context.getErrorMessage(801, profileName));
         }
         if (valuesNode.isArray()) {
           List<String> values = new ArrayList<>();
           for (JsonNode valueNode : valuesNode) {
             if (!valueNode.isTextual() || valueNode.textValue().isEmpty()) {
               throw new UtamCompilationError(profilesNode,
-                  context.getErrorMessage("U0002", propertyName, valuesNode.toPrettyString()));
+                  context.getErrorMessage(11, propertyName, valuesNode.toPrettyString()));
             }
             String profileValue = valueNode.textValue();
             if (values.contains(profileValue)) {
               throw new UtamCompilationError(profilesNode,
-                  context.getErrorMessage("UP002", profileName, profileValue));
+                  context.getErrorMessage(802, profileName, profileValue));
             }
             values.add(profileValue);
           }
@@ -143,7 +143,7 @@ final class UtamProfile {
               new UtamProfile(profileName, Collections.singletonList(valuesNode.textValue())));
         } else {
           throw new UtamCompilationError(profilesNode,
-              context.getErrorMessage("UP006", profileName));
+              context.getErrorMessage(806, profileName));
         }
       }
       return profiles.values();

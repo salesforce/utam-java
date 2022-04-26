@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParametersContext;
@@ -63,10 +64,10 @@ class UtamComposeMethod extends UtamMethod {
       if (isCanBeEmpty) {
         return new ArrayList<>();
       }
-      throw new UtamCompilerIntermediateError(composeNodes, "UM005", methodName);
+      throw new UtamCompilerIntermediateError(composeNodes, 505, methodName);
     }
     if (!composeNodes.isArray() || composeNodes.size() == 0) {
-      throw new UtamCompilerIntermediateError(composeNodes, "UM005", methodName);
+      throw new UtamCompilerIntermediateError(composeNodes, 505, methodName);
     }
     List<UtamMethodAction> res = new ArrayList<>();
     for (JsonNode composeNode : composeNodes) {
@@ -79,7 +80,7 @@ class UtamComposeMethod extends UtamMethod {
   private static UtamMethodAction processComposeStatementNode(String methodName,
       JsonNode composeNode) {
     if (composeNode == null || composeNode.isNull() || !composeNode.isObject()) {
-      throw new UtamCompilerIntermediateError(composeNode, "UMA008", methodName);
+      throw new UtamCompilerIntermediateError(composeNode, 608, methodName);
     }
 
     JsonNode applyNode = composeNode.get("apply");
@@ -92,33 +93,31 @@ class UtamComposeMethod extends UtamMethod {
 
     if (apply == null && applyExternal == null) {
       if (elementName == null) {
-        throw new UtamCompilerIntermediateError(composeNode, "UMA009", methodName);
+        throw new UtamCompilerIntermediateError(composeNode, 609, methodName);
       }
       return readNode(composeNode, UtamMethodActionGetter.class,
-          e -> new UtamCompilerIntermediateError(composeNode, "UMA000", methodName, e.getMessage()));
+          e -> new UtamCompilerIntermediateError(composeNode, 600, methodName, e.getMessage()));
     }
 
     if (apply != null && applyExternal != null) {
-      throw new UtamCompilerIntermediateError(composeNode, "UMA010", methodName);
+      throw new UtamCompilerIntermediateError(composeNode, 610, methodName);
     }
 
+    Function<Exception, RuntimeException> error = e -> new UtamCompilerIntermediateError(e,
+        composeNode, 600, methodName, e.getMessage());
     if (applyExternal != null) {
       if (elementName != null) {
-        throw new UtamCompilerIntermediateError(composeNode, "UMA011", methodName);
+        throw new UtamCompilerIntermediateError(composeNode, 611, methodName);
       }
-      return readNode(composeNode, UtamMethodActionUtility.class,
-          e -> new UtamCompilerIntermediateError(e, composeNode, "UMA000", methodName, e.getMessage()));
+      return readNode(composeNode, UtamMethodActionUtility.class, error);
     }
     if (WAIT_FOR.equals(apply)) {
-      return readNode(composeNode, UtamMethodActionWaitFor.class,
-          e -> new UtamCompilerIntermediateError(e, composeNode, "UMA000", methodName, e.getMessage()));
+      return readNode(composeNode, UtamMethodActionWaitFor.class, error);
     }
     if (RETURN_SELF.equals(apply)) {
-      return readNode(composeNode, UtamMethodActionReturnSelf.class,
-          e -> new UtamCompilerIntermediateError(e, composeNode, "UMA000", methodName, e.getMessage()));
+      return readNode(composeNode, UtamMethodActionReturnSelf.class, error);
     }
-    return readNode(composeNode, UtamMethodActionApply.class,
-        e -> new UtamCompilerIntermediateError(e, composeNode, "UMA000", methodName, e.getMessage()));
+    return readNode(composeNode, UtamMethodActionApply.class, error);
   }
 
   /**
@@ -170,7 +169,8 @@ class UtamComposeMethod extends UtamMethod {
   @Override
   final PageObjectMethod getMethod(TranslationContext context) {
     ReturnType returnTypeObject = new MethodReturnType(name);
-    MethodContext methodContext = new MethodContext(name, returnTypeObject, context, argsNode, false);
+    MethodContext methodContext = new MethodContext(name, returnTypeObject, context, argsNode,
+        false);
     ParametersContext parametersContext = methodContext.getParametersContext();
     setMethodLevelParameters(context, methodContext);
     List<ComposeMethodStatement> statements = getComposeStatements(context, methodContext,

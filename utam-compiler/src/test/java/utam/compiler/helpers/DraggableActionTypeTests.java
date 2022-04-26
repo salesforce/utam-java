@@ -58,7 +58,7 @@ public class DraggableActionTypeTests {
         () -> action.getParametersTypes("test", 0));
     assertThat(e.getCompilationError(getTestTranslationContext(), null, null).get().getMessage(),
         containsString(
-            "error UA010: \"test\": incorrect number of parameters for action \"dragAndDrop\": "
+            "error 110: \"test\": incorrect number of parameters for action \"dragAndDrop\": "
                 + "expected (check documentation), provided 0"));
   }
 

@@ -28,14 +28,14 @@ public class UtamMatcherTests {
   public void testWrongArgsNumberThrows() {
     Exception e = expectCompilerErrorFromFile("matcher/wrongArgsNumber");
     assertThat(e.getMessage(), is(containsString(
-        "error UA008: method \"matcherThrows\" statement matcher: expected number of parameters is 1, found 2")));
+        "error 108: method \"matcherThrows\" statement matcher: expected number of parameters is 1, found 2")));
   }
 
   @Test
   public void testElementFilterWrongArgsTypeThrows() {
     Exception e = expectCompilerErrorFromFile("matcher/wrongArgsType");
     assertThat(e.getMessage(), is(containsString(
-        "error UA009: method \"matcherThrows\" statement matcher: "
+        "error 109: method \"matcherThrows\" statement matcher: "
             + "incorrect parameter type [ true ]: expected type \"String\", found \"Boolean\"")));
   }
 

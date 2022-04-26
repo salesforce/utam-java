@@ -118,7 +118,7 @@ public enum BasicElementActionType implements ActionType {
     this.returnType = Objects.requireNonNullElse(returnType, VOID);
   }
 
-  static final String ERROR_CODE_FOR_PARAMETERS = "UA010";
+  static final Integer ERROR_CODE_FOR_PARAMETERS = 110;
 
   /**
    * Gets the object representing the action type for the element

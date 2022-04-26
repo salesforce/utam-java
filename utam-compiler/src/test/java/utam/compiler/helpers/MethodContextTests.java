@@ -63,7 +63,7 @@ public class MethodContextTests {
     UtamError e = expectThrows(UtamError.class,
         () -> context.setParameter(new Regular("name", STRING)));
     assertThat(e.getMessage(),
-        containsString("error UA007: method \"test\": parameter with name \"name\" is already declared"));
+        containsString("error 107: method \"test\": parameter with name \"name\" is already declared"));
   }
 
   @Test
@@ -74,7 +74,7 @@ public class MethodContextTests {
     UtamError e = expectThrows(UtamError.class,
         () -> setStatementParameter(context, new Regular("name", STRING)));
     assertThat(e.getMessage(),
-        containsString("error UA007: method \"test\": parameter with name \"name\" is already declared"));
+        containsString("error 107: method \"test\": parameter with name \"name\" is already declared"));
   }
 
   @Test
@@ -84,7 +84,7 @@ public class MethodContextTests {
     UtamError e = expectThrows(UtamError.class,
         () -> context.setParameter(new Literal(true, BOOLEAN)));
     assertThat(e.getMessage(),
-        containsString("error UA005: method \"test\": literal arguments are not allowed"));
+        containsString("error 105: method \"test\": literal arguments are not allowed"));
   }
 
   @Test
@@ -94,7 +94,7 @@ public class MethodContextTests {
     context.setParameter(new Regular("arg", STRING));
     UtamError e = expectThrows(UtamError.class, context::getParameters);
     assertThat(e.getMessage(),
-        containsString("error UM003: method \"test\": declared parameter \"arg\" is never used"));
+        containsString("error 503: method \"test\": declared parameter \"arg\" is never used"));
   }
 
   @Test
@@ -104,7 +104,7 @@ public class MethodContextTests {
     UtamError e = expectThrows(UtamError.class,
         () -> setStatementParameter(context, new Regular("arg", PARAMETER_REFERENCE)));
     assertThat(e.getMessage(), containsString(
-        "error UM002: method \"test\": statement parameter \"arg\" is not found in declared method args"));
+        "error 502: method \"test\": statement parameter \"arg\" is not found in declared method args"));
   }
 
   @Test
@@ -113,17 +113,17 @@ public class MethodContextTests {
     UtamError e = expectThrows(UtamError.class,
         () -> context.setParameter(new Regular("arg", PARAMETER_REFERENCE)));
     assertThat(e.getMessage(), containsString(
-        "error UM004: method \"test\": parameter \"arg\" at method level can't have type \"argumentReference\""));
+        "error 504: method \"test\": parameter \"arg\" at method level can't have type \"argumentReference\""));
   }
 
   @Test
   public void testSameParameterReusedThrows() {
-    test("sameArgsNames", "error UA007: method \"test\": parameter with name \"arg1\" is already declared");
+    test("sameArgsNames", "error 107: method \"test\": parameter with name \"arg1\" is already declared");
   }
 
   @Test
   public void testRedundantMethodLevelParameterThrows() {
     test("redundantParameters",
-        "error UM003: method \"test\": declared parameter \"arg\" is never used");
+        "error 503: method \"test\": declared parameter \"arg\" is never used");
   }
 }

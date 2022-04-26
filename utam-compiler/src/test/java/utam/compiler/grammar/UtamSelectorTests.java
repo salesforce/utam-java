@@ -83,7 +83,7 @@ public class UtamSelectorTests {
     assertThat(
         e.getMessage(),
         containsString(
-            "error UA009: element \"test\" selector \"str[%s]\": incorrect parameter type [ num ]: "
+            "error 109: element \"test\" selector \"str[%s]\": incorrect parameter type [ num ]: "
                 + "expected type \"String\", found \"Integer\""));
   }
 
@@ -92,7 +92,7 @@ public class UtamSelectorTests {
     Exception e = expectCompilerErrorFromFile("selector/selectorSameArgs");
     assertThat(e.getMessage(),
         containsString(
-            "error UA007: element \"test\" selector \"str[%s] num[%s]\": parameter with name \"str\" is already declared"));
+            "error 107: element \"test\" selector \"str[%s] num[%s]\": parameter with name \"str\" is already declared"));
   }
 
   @Test
@@ -119,6 +119,6 @@ public class UtamSelectorTests {
     Exception e = expectCompilerErrorFromFile("selector/wrongFormat");
     assertThat(e.getMessage(),
         containsString(
-            "error US000: element \"test\": format of selector is incorrect"));
+            "error 1000: element \"test\": format of selector is incorrect"));
   }
 }

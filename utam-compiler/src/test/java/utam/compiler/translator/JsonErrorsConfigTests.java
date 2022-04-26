@@ -30,7 +30,7 @@ public class JsonErrorsConfigTests {
   @Test
   public void testCorrectConfig() {
     JsonErrorsConfig config = JsonErrorsConfig.getErrorsConfig("config/test_error_config.json");
-    String errorMsg = config.getErrorMessage("1");
+    String errorMsg = config.getErrorMessage(1);
     assertThat(errorMsg, equalTo("warning 1: message; \nsee documentation docs; \ntip: tip"));
   }
 
@@ -38,8 +38,8 @@ public class JsonErrorsConfigTests {
   public void testNotExistingCode() {
     JsonErrorsConfig config = JsonErrorsConfig.getErrorsConfigWithDefaultName();
     Exception e = expectThrows(IllegalArgumentException.class,
-        () -> config.getErrorMessage("error"));
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_CODE_NOT_CONFIGURED, "error"))));
+        () -> config.getErrorMessage(-100));
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_CODE_NOT_CONFIGURED, -100))));
   }
 
   @Test

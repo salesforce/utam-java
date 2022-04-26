@@ -145,7 +145,7 @@ public class UtamMethodDescriptionTests {
     testUtility.addRawString("methods", "[{\"name\": \"test\", \"description\": true}]");
     UtamError e = expectThrows(UtamError.class, testUtility::getDeserializedJson);
     assertThat(e.getMessage(),
-        containsString("error UMD001: method \"test\": format of the description is incorrect"));
+        containsString("error 700: method \"test\": format of the description is incorrect"));
   }
 
   @Test
@@ -155,7 +155,7 @@ public class UtamMethodDescriptionTests {
         "[{\"name\": \"test\", \"description\": true, \"selector\": {\"css\": \"css\"}}]");
     Exception e = test.expectCompilerError();
     assertThat(e.getMessage(),
-        containsString("error UMD001: element \"test\": format of the description is incorrect"));
+        containsString("error 700: element \"test\": format of the description is incorrect"));
   }
 
   @Test

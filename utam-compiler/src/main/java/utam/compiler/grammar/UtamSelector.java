@@ -87,7 +87,7 @@ class UtamSelector extends UtamRootSelector {
     String parserContext = String.format("element \"%s\"", elementName);
     return JsonDeserializer.readNode(node,
         UtamSelector.class,
-        cause -> new UtamCompilerIntermediateError(cause, node, "US000", parserContext,
+        cause -> new UtamCompilerIntermediateError(cause, node, 1000, parserContext,
             cause.getMessage()));
   }
 

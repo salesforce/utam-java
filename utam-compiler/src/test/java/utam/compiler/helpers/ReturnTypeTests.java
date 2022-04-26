@@ -24,36 +24,36 @@ public class ReturnTypeTests {
   @Test
   public void testReturnThrowsForObject() {
     test("returnObject",
-        "error U0001: method \"test\": property \"returnType\" should be a non empty string, instead found object");
+        "error 10: method \"test\": property \"returnType\" should be a non empty string, instead found object");
   }
 
   @Test
   public void testReturnAllRedundant() {
     test("returnAllRedundant",
-        "error UMA003: method \"test\" statement: \"returnAll\" property can't be set without setting return type in a compose statement");
+        "error 603: method \"test\" statement: \"returnAll\" property can't be set without setting return type in a compose statement");
   }
 
   @Test
   public void testReturnStringUnsupported() {
     test("returnIncorrectString",
-        "error UMA002: method \"test\" statement: return type \"container\" is not supported in a compose statement");
+        "error 602: method \"test\" statement: return type \"container\" is not supported in a compose statement");
   }
 
   @Test
   public void testReturnAllRedundantForMethodThrows() {
     test("returnMethodAllRedundant",
-        "error UIM002: abstract method \"test\": \"returnAll\" property can't be set without setting return type");
+        "error 402: abstract method \"test\": \"returnAll\" property can't be set without setting return type");
   }
 
   @Test
   public void testReturnTypeNotAllowedThrows() {
     test("returnTypeMethodNotAllowed",
-        "error UM000: incorrect format of compose methods: \nUnrecognized field \"returnType\"");
+        "error 500: incorrect format of compose method: \nUnrecognized field \"returnType\"");
   }
 
   @Test
   public void testReturnStringUnsupportedForMethodThrows() {
     test("returnMethodIncorrectString",
-        "error UM001: method \"test\": return type \"container\" is not supported");
+        "error 501: method \"test\": return type \"container\" is not supported");
   }
 }

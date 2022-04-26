@@ -54,11 +54,11 @@ abstract class UtamMethod {
       return methods;
     }
     if (!methodsNode.isArray()) {
-      throw new UtamCompilerIntermediateError(methodsNode, "P001", "page object root", "methods");
+      throw new UtamCompilerIntermediateError(methodsNode, 13, "page object root", "methods");
     }
     Class<? extends UtamMethod> methodType =
         isAbstract ? UtamInterfaceMethod.class : UtamComposeMethod.class;
-    String errCode = isAbstract? "UIM000" : "UM000";
+    Integer errCode = isAbstract? 400 : 500;
     Function<Exception, RuntimeException> parserErrorWrapper = causeErr -> new UtamCompilerIntermediateError(
         causeErr, methodsNode, errCode, causeErr.getMessage());
     for (JsonNode methodNode : methodsNode) {

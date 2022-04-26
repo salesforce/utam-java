@@ -79,7 +79,7 @@ class UtamMethodActionApply extends UtamMethodAction {
   private ElementContext getElementByName(TranslationContext context, String methodName) {
     ElementContext element = context.getElement(elementName);
     if (element == null) {
-      String message = context.getErrorMessage("UMA001", methodName, elementName);
+      String message = context.getErrorMessage(601, methodName, elementName);
       throw new UtamCompilationError(message);
     }
     return element;
@@ -158,7 +158,7 @@ class UtamMethodActionApply extends UtamMethodAction {
         .forEach(parametersContext::setParameter);
     ActionType action = getActionType(apply, element.getType());
     if (action == null) {
-      String message = context.getErrorMessage("UMA012", methodName, this.apply);
+      String message = context.getErrorMessage(612, methodName, this.apply);
       throw new UtamCompilationError(message);
     }
     TypeProvider expectedReturn =

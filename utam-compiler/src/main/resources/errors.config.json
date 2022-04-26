@@ -1,198 +1,258 @@
-{
-  "U0001": {
-    "message": "%s: property \"%s\" should be a non empty string, instead found %s"
+[
+  {
+    "message": "%s: property \"%s\" should be a non empty string, instead found %s",
+    "code": 10
   },
-  "U0002": {
-    "message": "%s: array value should be a non empty string, instead found %s"
+  {
+    "message": "%s: array value should be a non empty string, instead found %s",
+    "code": 11
   },
-  "U0003": {
-    "message": "%s: should not be an empty array"
+  {
+    "message": "%s: should not be an empty array",
+    "code": 12
   },
-  "U0004": {
-    "message": "%s: property \"%s\" should not be an empty array"
+  {
+    "message": "%s: property \"%s\" should be a not empty array",
+    "code": 13
   },
-  "U0005": {
-    "message": "%s: %s should be a non empty object"
+  {
+    "message": "%s: %s should be a non empty object",
+    "code": 14
   },
-  "UA000": {
+  {
     "message": "%s: incorrect argument format: \n%s",
-    "docs": "https://utam.dev/grammar/spec#supported-argument-types"
+    "docs": "https://utam.dev/grammar/spec#supported-argument-types",
+    "code": 100
   },
-  "UA001": {
-    "message": "%s: unknown element with name \"%s\" is referenced as an argument"
+  {
+    "message": "%s: unknown element with name \"%s\" is referenced as an argument",
+    "code": 101
   },
-  "UA002": {
-    "message": "%s: unsupported literal argument type \"%s\", supported are: { %s }"
+  {
+    "message": "%s: unsupported literal argument type \"%s\", supported are: { %s }",
+    "code": 102
   },
-  "UA003": {
+  {
+    "code": 103,
     "message": "%s: unsupported argument type \"%s\", supported are: { %s }"
   },
-  "UA004": {
+  {
+    "code": 104,
     "message": "%s: incorrect predicate format: \n%s",
     "docs": "https://utam.dev/grammar/spec#explicit-waits"
   },
-  "UA005": {
+  {
+    "code": 105,
     "message": "%s: literal arguments are not allowed",
     "tip": "use \"name\", not \"value\""
   },
-  "UA006": {
+  {
+    "code": 106,
     "message": "%s: incorrect format of elementReference argument: \n%s",
     "docs": "https://utam.dev/grammar/spec#element-reference"
   },
-  "UA007": {
+  {
+    "code": 107,
     "message": "%s: parameter with name \"%s\" is already declared"
   },
-  "UA008": {
+  {
+    "code": 108,
     "message": "%s: expected number of parameters is %s, found %s"
   },
-  "UA009": {
+  {
+    "code": 109,
     "message": "%s: incorrect parameter type [ %s ]: expected type \"%s\", found \"%s\""
   },
-  "UA010": {
+  {
+    "code": 110,
     "message": "\"%s\": incorrect number of parameters for action \"%s\": expected %s, provided %s"
   },
-  "UE000": {
+  {
+    "code": 200,
     "message": "%s: incorrect format of elements: \n%s"
   },
-  "UE001": {
+  {
+    "code": 201,
     "message": "element \"%s\": basic type \"%s\" is not supported, valid values are: actionable, clickable, draggable, editable, touchable"
   },
-  "UE002": {
+  {
+    "code": 202,
     "message": "element \"%s\": element with same name was already declared"
   },
-  "UEF000": {
+  {
+    "code": 300,
     "message": "element \"%s\" filter: incorrect format of element filter: \n%s",
     "docs": "https://utam.dev/grammar/spec#element-filter"
   },
-  "UEF001": {
+  {
+    "code": 301,
     "message": "element \"%s\" filter: unknown method \"%s\" for basic element"
   },
-  "UEF002": {
-    "message" : "element \"%s\" filter: filter can only be set for list"
+  {
+    "code": 302,
+    "message": "element \"%s\" filter: filter can only be set for list"
   },
-  "UIM000": {
-    "message": "incorrect format of abstract methods: \n%s",
+  {
+    "code": 400,
+    "message": "incorrect format of abstract method: \n%s",
     "docs": "https://utam.dev/grammar/spec#interfaces"
   },
-  "UIM001": {
+  {
+    "code": 401,
     "message": "abstract method \"%s\": return basic type \"%s\" is incorrect, valid values are: actionable, clickable, draggable, editable, touchable"
   },
-  "UIM002": {
+  {
+    "code": 402,
     "message": "abstract method \"%s\": \"returnAll\" property can't be set without setting return type"
   },
-  "UM000": {
-    "message": "incorrect format of compose methods: \n%s",
+  {
+    "code": 500,
+    "message": "incorrect format of compose method: \n%s",
     "docs": "https://utam.dev/grammar/spec#compose-method"
   },
-  "UM001": {
+  {
+    "code": 501,
     "message": "method \"%s\": return type %s is not supported"
   },
-  "UM002": {
+  {
+    "code": 502,
     "message": "%s: statement parameter \"%s\" is not found in declared method args"
   },
-  "UM003": {
+  {
+    "code": 503,
     "message": "%s: declared parameter \"%s\" is never used"
   },
-  "UM004": {
+  {
+    "code": 504,
     "message": "%s: parameter \"%s\" at method level can't have type \"argumentReference\""
   },
-  "UM005": {
+  {
+    "code": 505,
     "message": "method \"%s\": compose statements should be a non empty array",
-    "docs" : "https://utam.dev/grammar/spec#compose-method"
+    "docs": "https://utam.dev/grammar/spec#compose-method"
   },
-  "UMA000" : {
+  {
+    "code": 600,
     "message": "method \"%s\" statement: incorrect compose statement format: \n%s",
-    "docs" : "https://utam.dev/grammar/spec#compose-method"
+    "docs": "https://utam.dev/grammar/spec#compose-method"
   },
-  "UMA001": {
+  {
+    "code": 601,
     "message": "method \"%s\" statement: unknown element with name \"%s\" is referenced in a compose statement as operand"
   },
-  "UMA002": {
+  {
+    "code": 602,
     "message": "method \"%s\" statement: return type %s is not supported in a compose statement",
     "docs": "https://utam.dev/grammar/spec#return-type-for-a-compose-statement"
   },
-  "UMA003": {
+  {
+    "code": 603,
     "message": "method \"%s\" statement: \"returnAll\" property can't be set without setting return type in a compose statement"
   },
-  "UMA004": {
+  {
+    "code": 604,
     "message": "method \"%s\" statement: statement that invokes container method needs a \"returnType\""
   },
-  "UMA005": {
+  {
+    "code": 605,
     "message": "method \"%s\" statement: can't infer return type for \"%s\", please provide a \"returnType\""
   },
-  "UMA006": {
+  {
+    "code": 606,
     "message": "method \"%s\" statement: \"element\" property is redundant because statement marked as chain"
   },
-  "UMA007" : {
+  {
+    "code": 607,
     "message": "method \"beforeLoad\" statement: only \"document\" or \"root\" elements are allowed"
   },
-  "UMA008" : {
+  {
+    "code": 608,
     "message": "method \"%s\" statement: compose statement should be a non empty object"
   },
-  "UMA009" : {
+  {
+    "code": 609,
     "message": "method \"%s\" statement: either \"element\" or \"apply\" or \"applyExternal\" should be defined"
   },
-  "UMA010" : {
+  {
+    "code": 610,
     "message": "method \"%s\" statement: either \"apply\" or \"applyExternal\" should be defined"
   },
-  "UMA011" : {
+  {
+    "code": 611,
     "message": "method \"%s\" utility statement: either \"element\" is redundant"
   },
-  "UMA012": {
+  {
+    "code": 612,
     "message": "method \"%s\" statement: unknown method \"%s\" for basic element"
   },
-  "UMD001": {
+  {
+    "code": 700,
     "message": "%s: format of the description is incorrect: \n%s",
     "docs": "https://utam.dev/grammar/spec#method-description"
   },
-  "UP001": {
+  {
+    "code": 801,
     "message": "\"profile\": duplicate profile name \"%s\""
   },
-  "UP002": {
+  {
+    "code": 802,
     "message": "profile \"%s\": duplicate profile value \"%s\""
   },
-  "UP003": {
+  {
+    "code": 803,
     "message": "profile { \"%s\": \"%s\" } is not configured, make sure it's in compiler config"
   },
-  "UP004": {
+  {
+    "code": 804,
     "message": "page object with \"implements\" should have \"profile\" property"
   },
-  "UP005": {
+  {
+    "code": 805,
     "message": "\"profile\" can only be set for a page object that implements an interface, please add \"implements\" property"
   },
-  "UP006": {
+  {
+    "code": 806,
     "message": "profile \"%s\": values can either be string or non empty string array"
   },
-  "UPO000": {
-    "message" : "incorrect format of the page object: \n%s"
+  {
+    "code": 900,
+    "message": "incorrect format of the page object: \n%s"
   },
-  "UPO001": {
+  {
+    "code": 901,
     "message": "non root page object can't have selector",
     "docs": "https://utam.dev/grammar/spec#root-element",
     "tip": "either remove \"selector\" property or remove [\"root\" : true]"
   },
-  "UPO002": {
+  {
+    "code": 902,
     "message": "root page object requires default selector property",
     "tip": "either remove [\"root\" : true] or add \"selector\" property"
   },
-  "UPO003": {
+  {
+    "code": 903,
     "message": "\"platform\" property: platform should be a string with \"web\" or \"native\" value, instead found \"%s\""
   },
-  "UPO004": {
+  {
+    "code": 904,
     "message": "interface declaration can only have properties: [ %s ]"
   },
-  "UPO005": {
+  {
+    "code": 905,
     "message": "method \"beforeLoad\" cannot have parameters"
   },
-  "URD000": {
+  {
     "message": "format of the root description is incorrect",
-    "docs": "https://utam.dev/grammar/spec#page-object-description"
+    "docs": "https://utam.dev/grammar/spec#page-object-description",
+    "code": 906
   },
-  "US000": {
+  {
     "message": "%s: format of selector is incorrect: \n%s",
-    "docs": "https://utam.dev/grammar/spec#element-selector"
+    "docs": "https://utam.dev/grammar/spec#element-selector",
+    "code": 1000
   },
-  "USE000": {
-    "message": "%s: incorrect format of elements inside shadow: \n%s"
+  {
+    "message": "%s: incorrect format of elements inside shadow: \n%s",
+    "code": 1100
   }
-}
+]

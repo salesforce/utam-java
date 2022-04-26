@@ -106,11 +106,11 @@ abstract class UtamArgument {
       return args;
     }
     if (!argsNode.isArray() || argsNode.size() == 0) {
-      throw new UtamCompilerIntermediateError(argsNode, "U0004", parserContext, "args");
+      throw new UtamCompilerIntermediateError(argsNode, 13, parserContext, "args");
     }
     for (JsonNode argNode : argsNode) {
       if (argNode == null || argNode.isNull() || !argNode.isObject()) {
-        throw new UtamCompilerIntermediateError("U0005", parserContext, "argument");
+        throw new UtamCompilerIntermediateError(14, parserContext, "argument");
       }
       UtamArgument arg = processArgNode(argNode, parserContext, isLiteralsAllowed);
       args.add(arg);
@@ -123,26 +123,26 @@ abstract class UtamArgument {
     boolean hasType = argNode.has("type");
     boolean isLiteral = argNode.has("value");
     if (isLiteral && !isLiteralsAllowed) {
-      throw new UtamCompilerIntermediateError(argNode, "UA005", parserContext);
+      throw new UtamCompilerIntermediateError(argNode, 105, parserContext);
     }
     String type;
     if (hasType) {
       JsonNode typeNode = argNode.get("type");
       if (!typeNode.isTextual() || typeNode.textValue().isEmpty()) {
-        throw new UtamCompilerIntermediateError(argNode, "U0001", parserContext, "type",
+        throw new UtamCompilerIntermediateError(argNode, 10, parserContext, "type",
             getJsonNodeType(typeNode));
       }
       type = argNode.get("type").textValue();
       if (FUNCTION_TYPE_PROPERTY.equals(type)) {
         return readNode(argNode, UtamArgumentPredicate.class, e ->
-            new UtamCompilerIntermediateError(e, argNode, "UA004", parserContext, e.getMessage()));
+            new UtamCompilerIntermediateError(e, argNode, 104, parserContext, e.getMessage()));
       }
       if (isLiteral && !getSupportedLiteralTypes().contains(type)) {
-        throw new UtamCompilerIntermediateError(argNode, "UA002", parserContext, type,
+        throw new UtamCompilerIntermediateError(argNode, 102, parserContext, type,
             SUPPORTED_LITERALS);
       }
       if (!isLiteral && !getSupportedNonLiteralTypes().contains(type)) {
-        throw new UtamCompilerIntermediateError(argNode, "UA003", parserContext, type,
+        throw new UtamCompilerIntermediateError(argNode, 103, parserContext, type,
             SUPPORTED_NON_LITERALS);
       }
     } else {
@@ -152,7 +152,7 @@ abstract class UtamArgument {
       return processLiteralNode(argNode, type, parserContext);
     }
     return readNode(argNode, UtamArgumentNonLiteral.class, e ->
-        new UtamCompilerIntermediateError(e, argNode, "UA000", parserContext, e.getMessage()));
+        new UtamCompilerIntermediateError(e, argNode, 100, parserContext, e.getMessage()));
   }
 
   private static UtamArgument processLiteralNode(JsonNode argNode, String typeStr,
@@ -167,22 +167,22 @@ abstract class UtamArgument {
         }
         if (ELEMENT_REFERENCE_TYPE_PROPERTY.equals(typeStr)) {
           return readNode(argNode, UtamArgumentElementReference.class,
-              e -> new UtamCompilerIntermediateError(e, argNode, "UA006", parserContext,
+              e -> new UtamCompilerIntermediateError(e, argNode, 106, parserContext,
                   e.getMessage()));
         }
       }
     }
     if (SELECTOR_TYPE_PROPERTY.equals(typeStr)) {
       UtamSelector selector = readNode(valueNode, UtamSelector.class,
-          e -> new UtamCompilerIntermediateError(e, valueNode, "US000", parserContext));
+          e -> new UtamCompilerIntermediateError(e, valueNode, 1000, parserContext));
       return new UtamArgumentLiteralSelector(selector, parserContext);
     }
     if (valueNode.isBoolean() || valueNode.isInt() || valueNode.isTextual()) {
       return readNode(argNode, UtamArgumentLiteralPrimitive.class,
-          e -> new UtamCompilerIntermediateError(e, argNode, "UA000", parserContext,
+          e -> new UtamCompilerIntermediateError(e, argNode, 100, parserContext,
               e.getMessage()));
     }
-    throw new UtamCompilerIntermediateError(argNode, "UA002", parserContext,
+    throw new UtamCompilerIntermediateError(argNode, 102, parserContext,
         valueNode.toPrettyString(), SUPPORTED_LITERALS);
   }
 

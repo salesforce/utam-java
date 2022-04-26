@@ -212,7 +212,7 @@ public class DefaultTranslatorRunnerTests {
     DefaultTranslatorRunner runner = getRunner();
     Profile profile = new StringValueProfile("my", "test");
     Exception e = expectThrows(UtamCompilationError.class, () -> runner.setImplementation(profile, "type", "type"));
-    assertThat(e.getMessage(), containsString("is not configured, make sure it's in compiler config"));
+    assertThat(e.getMessage(), containsString("error 803: profile { \"my\": \"test\" } is not configured, make sure it's in compiler config"));
   }
 
   @Test

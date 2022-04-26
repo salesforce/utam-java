@@ -75,7 +75,7 @@ public class UtamMethodDescription {
       return new UtamMethodDescription(Collections.singletonList(value), null, null, null);
     }
     Function<Exception, RuntimeException> parserErrorWrapper = causeErr -> new UtamCompilerIntermediateError(
-        causeErr, descriptionNode, "UMD001", parserContext, causeErr.getMessage());
+        causeErr, descriptionNode, 700, parserContext, causeErr.getMessage());
     return readNode(descriptionNode, UtamMethodDescription.class,
         parserErrorWrapper);
   }

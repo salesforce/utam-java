@@ -13,6 +13,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.DeserializerUtilities.expectCompilerError;
 import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.BASE_ROOT_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
@@ -33,7 +34,7 @@ import utam.core.framework.consumer.UtamError;
  */
 public class UtamPageObject_Tests {
 
-  private final String PARSER_ERROR_PREFIX = "error UPO000: incorrect format of the page object: \n";
+  private final String PARSER_ERROR_PREFIX = "error 900: incorrect format of the page object: \n";
 
   @Test
   public void testRootPageObjectHasCorrectBaseClasses() {
@@ -72,7 +73,7 @@ public class UtamPageObject_Tests {
     UtamError e = expectThrows(UtamError.class,
         () -> new DeserializerUtilities().getResultFromString(json));
     assertThat(e.getMessage(), containsString(
-        "error UP005: \"profile\" can only be set for a page object that implements an interface"));
+        "error 805: \"profile\" can only be set for a page object that implements an interface"));
   }
 
   @Test
@@ -81,7 +82,7 @@ public class UtamPageObject_Tests {
     UtamError e = expectThrows(UtamError.class,
         () -> new DeserializerUtilities().getResultFromString(json));
     assertThat(e.getMessage(),
-        containsString("error UP004: page object with \"implements\" should have \"profile\" property"));
+        containsString("error 804: page object with \"implements\" should have \"profile\" property"));
   }
 
   @Test
@@ -90,7 +91,7 @@ public class UtamPageObject_Tests {
     Exception e = expectThrows(UtamError.class,
         () -> new DeserializerUtilities().getResultFromString(json));
     assertThat(e.getMessage(),
-        containsString("error UPO004: interface declaration can only have properties"));
+        containsString("error 904: interface declaration can only have properties"));
   }
 
   @Test
@@ -99,7 +100,7 @@ public class UtamPageObject_Tests {
     Exception e = expectThrows(UtamError.class,
         () -> new DeserializerUtilities().getResultFromString(json));
     assertThat(e.getMessage(), containsString(
-        "error UE002: element \"root\": element with same name was already declared"));
+        "error 202: element \"root\": element with same name was already declared"));
   }
 
   @Test
@@ -108,7 +109,7 @@ public class UtamPageObject_Tests {
     UtamError e = expectThrows(UtamCompilationError.class,
         () -> new DeserializerUtilities().getResultFromString(json));
     assertThat(e.getMessage(),
-        containsString("error UPO001: non root page object can't have selector"));
+        containsString("error 901: non root page object can't have selector"));
   }
 
   /**
@@ -121,7 +122,7 @@ public class UtamPageObject_Tests {
     UtamError e = expectThrows(UtamError.class,
         () -> new DeserializerUtilities().getResultFromString(json));
     assertThat(e.getMessage(),
-        containsString("error UPO002: root page object requires default selector property"));
+        containsString("error 902: root page object requires default selector property"));
   }
 
   @Test
@@ -168,6 +169,22 @@ public class UtamPageObject_Tests {
         () -> new DeserializerUtilities().getResultFromString(json));
     assertThat(e.getMessage(),
         containsString(
-            "error UPO003: \"platform\" property: platform should be a string with \"web\" or \"native\" value, instead found \"webview\""));
+            "error 903: \"platform\" property: "
+                + "platform should be a string with \"web\" or \"native\" value, instead found \"webview\""));
+  }
+
+  @Test
+  public void testNotAllowedPropertyThrows() {
+    String json = "{\"elements\": [\n"
+        + "    {\n"
+        + "      \"name\": \"test\",\n"
+        + "      \"wrong\": \"test\",\n"
+        + "      \"type\": \"container\""
+        + "    }\n"
+        + "  ]}";
+    Exception e = expectCompilerError(json);
+    assertThat(e.getMessage(),
+        containsString("error 200: root elements: incorrect format of elements: \n"
+            + "Unrecognized field \"wrong\""));
   }
 }

@@ -110,7 +110,7 @@ final class UtamPageObject {
     try {
       this.platform = PlatformType.fromString(platformString);
     } catch (Exception e) {
-      throw new UtamCompilerIntermediateError("UPO003", platformString);
+      throw new UtamCompilerIntermediateError(903, platformString);
     }
     this.isRootPageObject = isRootPageObject;
     this.implementsType = implementsType;
@@ -137,10 +137,10 @@ final class UtamPageObject {
       return elements;
     }
     if (!elementsNode.isArray() || elementsNode.size() == 0) {
-      throw new UtamCompilerIntermediateError(elementsNode, "U0004", parserContext, "elements");
+      throw new UtamCompilerIntermediateError(elementsNode, 13, parserContext, "elements");
     }
     Function<Exception, RuntimeException> parserErrorWrapper = causeErr -> new UtamCompilerIntermediateError(
-        causeErr, elementsNode, "UE000", parserContext, causeErr.getMessage());
+        causeErr, elementsNode, 200, parserContext, causeErr.getMessage());
     for (JsonNode elementNode : elementsNode) {
       UtamElement element = readNode(elementNode, UtamElement.class, parserErrorWrapper);
       elements.add(new UtamElementProvider(element, elementNode));
@@ -185,16 +185,16 @@ final class UtamPageObject {
       if (shadowElements.size() > 0 || elements.size() > 0 || rootLocator != null || profileProvider
           .isProfilesSet() || beforeLoad.size() > 0 || implementsType != null) {
         throw new UtamCompilationError(parser,
-            context.getErrorMessage("UPO004", INTERFACE_PROPERTIES));
+            context.getErrorMessage(904, INTERFACE_PROPERTIES));
       }
     } else {
       if (isRootPageObject) {
         if (rootLocator == null) {
-          throw new UtamCompilationError(parser, context.getErrorMessage("UPO002"));
+          throw new UtamCompilationError(parser, context.getErrorMessage(902));
         }
       } else {
         if (rootLocator != null) {
-          throw new UtamCompilationError(parser, context.getErrorMessage("UPO001"));
+          throw new UtamCompilationError(parser, context.getErrorMessage(901));
         }
       }
     }
@@ -226,7 +226,7 @@ final class UtamPageObject {
         beforeLoad);
     List<MethodParameter> methodParameters = methodContext.getParametersContext().getParameters();
     if (!methodParameters.isEmpty()) {
-      throw new UtamCompilationError(beforeLoadNode, context.getErrorMessage("UPO005"));
+      throw new UtamCompilationError(beforeLoadNode, context.getErrorMessage(905));
     }
     return new BeforeLoadMethod(methodContext, statements);
   }
@@ -273,7 +273,7 @@ final class UtamPageObject {
     RootElementHelper(JsonNode typeNode, boolean isExposeRootElement) {
       String typeNodeValue = typeNode == null ? "null" : typeNode.toPrettyString();
       this.rootElementType = processBasicTypeNode(typeNode,
-          node -> new UtamCompilerIntermediateError(node, "UE001",
+          node -> new UtamCompilerIntermediateError(node, 101,
               ROOT_ELEMENT_NAME, typeNodeValue));
       this.isPublic = isExposeRootElement;
       this.typeNode = typeNode;

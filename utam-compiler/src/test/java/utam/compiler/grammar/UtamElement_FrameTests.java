@@ -94,6 +94,6 @@ public class UtamElement_FrameTests {
     Exception e = expectCompilerError(json);
     assertThat(e.getMessage(),
         containsString(
-            "error U0004: element \"test\" shadow: property \"elements\" should not be an empty array"));
+            "error 13: element \"test\" shadow: property \"elements\" should be a not empty array"));
   }
 }

@@ -27,7 +27,7 @@ public class UtamShadowElement_Tests {
     test.addRawString("shadow", "{} ");
     Exception e = test.expectCompilerError();
     assertThat(e.getMessage(), containsString(
-        "error USE000: root shadow: incorrect format of elements inside shadow: \n"
+        "error 1100: root shadow: incorrect format of elements inside shadow: \n"
             + "Missing required creator property 'elements'"));
   }
 
@@ -35,7 +35,7 @@ public class UtamShadowElement_Tests {
   public void testNestedShadowMissingElements() {
     Exception e = expectCompilerErrorFromFile("validate/shadow/nestedElementsMissing");
     assertThat(e.getMessage(), containsString(
-        "error USE000: element \"parent\" shadow: incorrect format of elements inside shadow: \n"
+        "error 1100: element \"parent\" shadow: incorrect format of elements inside shadow: \n"
             + "Missing required creator property 'elements'"));
   }
 
@@ -43,6 +43,6 @@ public class UtamShadowElement_Tests {
   public void testNestedShadowElementsEmptyArray() {
     Exception e = expectCompilerErrorFromFile("validate/shadow/nestedElementsNotArray");
     assertThat(e.getMessage(), containsString(
-        "error U0004: element \"parent\" shadow: property \"elements\" should not be an empty array"));
+        "error 13: element \"parent\" shadow: property \"elements\" should be a not empty array"));
   }
 }

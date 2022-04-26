@@ -31,27 +31,27 @@ public class UtamMethodActionDeserializerTests {
   public void testRedundantApplyThrows() {
     Exception e = getError("validate/compose/redundantApply");
     assertThat(e.getMessage(), containsString(
-        "error UMA010: method \"test\" statement: either \"apply\" or \"applyExternal\" should be defined"));
+        "error 610: method \"test\" statement: either \"apply\" or \"applyExternal\" should be defined"));
   }
 
   @Test
   public void testEmptyStatementThrows() {
     Exception e = getError("validate/compose/emptyComposeStatement");
     assertThat(e.getMessage(), containsString(
-        "error UMA009: method \"test\" statement: either \"element\" or \"apply\" or \"applyExternal\" should be defined"));
+        "error 609: method \"test\" statement: either \"element\" or \"apply\" or \"applyExternal\" should be defined"));
   }
 
   @Test
   public void testIncorrectPredicateThrows() {
     Exception e = getError("validate/compose/incorrectPredicate");
     assertThat(e.getMessage(), containsString(
-        "error UMA009: method \"predicate\" statement: either \"element\" or \"apply\" or \"applyExternal\" should be defined"));
+        "error 609: method \"predicate\" statement: either \"element\" or \"apply\" or \"applyExternal\" should be defined"));
   }
 
   @Test
   public void testRedundantElementThrows() {
     Exception e = getError("validate/compose/redundantElement");
     assertThat(e.getMessage(), containsString(
-        "error UMA011: method \"test\" utility statement: either \"element\" is redundant"));
+        "error 611: method \"test\" utility statement: either \"element\" is redundant"));
   }
 }

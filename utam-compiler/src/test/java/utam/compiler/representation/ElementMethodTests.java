@@ -18,6 +18,7 @@ import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT_IMPL_CLASS;
 import static utam.compiler.representation.ElementMethod.DOCUMENT_GETTER;
 
 import java.util.List;
+import java.util.Objects;
 import org.hamcrest.CoreMatchers;
 import org.testng.annotations.Test;
 import utam.compiler.grammar.DeserializerUtilities;
@@ -47,7 +48,7 @@ public class ElementMethodTests {
   private static final String LIST_TYPE = List.class.getName();
 
   private static BasicElementGetterMethod getElementMethod(TranslationContext context) {
-    return (BasicElementGetterMethod) context.getElement(ELEMENT_NAME).getElementMethod();
+    return (BasicElementGetterMethod) Objects.requireNonNull(context.getElement(ELEMENT_NAME)).getElementMethod();
   }
 
   @Test
@@ -275,11 +276,10 @@ public class ElementMethodTests {
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "BasicElement");
     expected.addParameter(new MethodParameterInfo("value", "String"));
     expected.addParameter(new MethodParameterInfo("LocatorBy.byCss(String.format(\"input[value='%s']\", value))", "LocatorBy"));
-    expected.addParameter(new MethodParameterInfo("false", "Boolean"));
     expected.addCodeLine("BasicElement root = this.getRootElement()");
     expected.addCodeLine("return basic(root, this.test)."
         + "build(BasicElement.class, BasePageElement.class, "
-        + "elm -> Boolean.TRUE.equals(elm.containsElement(LocatorBy.byCss(String.format(\"input[value='%s']\", value)), false)))");
+        + "elm -> Boolean.TRUE.equals(elm.containsElement(LocatorBy.byCss(String.format(\"input[value='%s']\", value)))))");
     expected.addImportedTypes("utam.core.element.BasicElement");
     expected.addImpliedImportedTypes("utam.core.element.BasicElement");
     expected.addImpliedImportedTypes("utam.core.framework.element.BasePageElement");

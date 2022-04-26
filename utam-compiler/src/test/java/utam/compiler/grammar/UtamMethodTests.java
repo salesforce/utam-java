@@ -36,18 +36,18 @@ public class UtamMethodTests {
   public void testGetAbstractMethodWithComposeThrows() {
     Exception e = expectCompilerErrorFromFile("interface/nonEmptyMethod");
     assertThat(e.getMessage(),
-        containsString("error UIM000: incorrect format of abstract methods: \n"
+        containsString("error 400: incorrect format of abstract method: \n"
             + "Unrecognized field \"compose\""));
   }
 
   @Test
   public void testComposeEmptyStatementsThrows() {
-    test("emptyCompose", "error UM005: method \"test\": compose statements should be a non empty array;");
+    test("emptyCompose", "error 505: method \"test\": compose statements should be a non empty array;");
   }
 
   @Test
   public void testComposeNullStatementsThrows() {
-    test("nullCompose", "error UM005: method \"test\": compose statements should be a non empty array");
+    test("nullCompose", "error 505: method \"test\": compose statements should be a non empty array");
   }
 
   @Test
@@ -57,6 +57,6 @@ public class UtamMethodTests {
     test.addRawString("methods", "[{\"name\":\"test\", \"returnType\":[\"wrong\"]}]");
     Exception e = test.expectCompilerError();
     assertThat(e.getMessage(),
-        containsString("error UIM001: abstract method \"test\": return basic type \"[ \"wrong\" ]\" is incorrect"));
+        containsString("error 401: abstract method \"test\": return basic type \"[ \"wrong\" ]\" is incorrect"));
   }
 }

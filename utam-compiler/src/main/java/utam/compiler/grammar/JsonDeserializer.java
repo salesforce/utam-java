@@ -154,7 +154,7 @@ public final class JsonDeserializer extends
       String message = error.getMessage();
       int index = message.contains(errSplitMarker) ? message.indexOf(errSplitMarker)
           + errSplitMarker.length() : 0;
-      String errorStr = context.getErrorMessage("UPO000", message.substring(index));
+      String errorStr = context.getErrorMessage(900, message.substring(index));
       return () -> new UtamCompilationError(parser, errorStr, error);
     }
     return () -> new UtamCompilationError(parser, context.getRawErrorMessage(error.getMessage()),

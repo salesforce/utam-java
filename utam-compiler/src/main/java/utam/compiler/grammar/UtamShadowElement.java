@@ -48,7 +48,7 @@ class UtamShadowElement {
       return elements;
     }
     Function<Exception, RuntimeException> parserErrorWrapper = causeErr -> new UtamCompilerIntermediateError(
-        causeErr, shadowNode, "USE000", parserContext, causeErr.getMessage());
+        causeErr, shadowNode, 1100, parserContext, causeErr.getMessage());
     UtamShadowElement shadowElement = readNode(shadowNode, UtamShadowElement.class, parserErrorWrapper);
     return processElementsNode(Objects.requireNonNull(shadowElement).elementsNode, parserContext);
   }

@@ -59,7 +59,7 @@ final class UtamElementFilter {
   static UtamElementFilter processFilterNode(JsonNode node, String elementName) {
     return JsonDeserializer.readNode(node,
         UtamElementFilter.class,
-        cause -> new UtamCompilerIntermediateError(cause, node, "UEF000", elementName,
+        cause -> new UtamCompilerIntermediateError(cause, node, 300, elementName,
             cause.getMessage()));
   }
 
@@ -78,7 +78,7 @@ final class UtamElementFilter {
     if (elementNodeType == UtamElement.Type.BASIC) {
       ActionType actionType = getActionType(this.applyMethod, elementType);
       if (actionType == null) {
-        String message = context.getErrorMessage("UEF001", elementName, this.applyMethod);
+        String message = context.getErrorMessage(301, elementName, this.applyMethod);
         throw new UtamCompilationError(message);
       }
       matcher.getMatcherType().checkOperandForMatcher(actionType.getReturnType(), parserContext);

@@ -45,7 +45,7 @@ public class UtamProfile_Tests {
     test.addString("implements", "my/pageobjects/type");
     Exception e = test.expectCompilerError();
     assertThat(e.getMessage(), containsString(
-        "error UP006: profile \"name\": values can either be string or non empty string array"));
+        "error 806: profile \"name\": values can either be string or non empty string array"));
   }
 
   @Test
@@ -55,7 +55,7 @@ public class UtamProfile_Tests {
     jsonTest.addString("implements", "my/pageobjects/type");
     Exception e = jsonTest.expectCompilerError();
     assertThat(e.getMessage(),
-        containsString("error U0002: profile \"name\": array value should be a non empty string, instead found [ 1 ]"));
+        containsString("error 11: profile \"name\": array value should be a non empty string, instead found [ 1 ]"));
   }
 
   @Test
@@ -64,14 +64,14 @@ public class UtamProfile_Tests {
     jsonTest.addRawString("profile", "[ { \"name\" : [\"same\", \"same\"] } ]");
     jsonTest.addString("implements", "my/pageobjects/type");
     Exception e = jsonTest.expectCompilerError();
-    assertThat(e.getMessage(), containsString("error UP002: profile \"name\": duplicate profile value \"same\""));
+    assertThat(e.getMessage(), containsString("error 802: profile \"name\": duplicate profile value \"same\""));
   }
 
   @Test
   public void testDeserializerDuplicateNameThrows() {
     String json = "{ \"profile\" : [ { \"name\" : \"value\" }, { \"name\" : \"value\" } ] , \"implements\": \"my/pageobjects/type\"}";
     Exception e = expectCompilerError(json);
-    assertThat(e.getMessage(), containsString("error UP001: \"profile\": duplicate profile name \"name\""));
+    assertThat(e.getMessage(), containsString("error 801: \"profile\": duplicate profile name \"name\""));
   }
 
   @Test
@@ -80,7 +80,8 @@ public class UtamProfile_Tests {
     jsonTest.addRawString("profile", "[]");
     jsonTest.addString("implements", "my/pageobjects/type");
     Exception e = jsonTest.expectCompilerError();
-    assertThat(e.getMessage(), containsString("error U0003: property \"profile\": should not be an empty array"));
+    assertThat(e.getMessage(), containsString("error 13: page object root: "
+        + "property \"profile\" should be a not empty array"));
   }
 
   @Test
@@ -100,6 +101,6 @@ public class UtamProfile_Tests {
     String json = "{ \"profile\" : [ { \"name1\" : \"value1\" } ] , \"implements\": \"my/pageobjects/type\"}";
     Exception e = expectCompilerError(json);
     assertThat(e.getMessage(), containsString(
-        "error UP003: profile { \"name1\": \"value1\" } is not configured, make sure it's in compiler config"));
+        "error 803: profile { \"name1\": \"value1\" } is not configured, make sure it's in compiler config"));
   }
 }

@@ -96,7 +96,7 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
 
   private void checkFunctionParameter(TranslationContext context, String contextString, List<MethodParameter> parameters) {
     if (parameters.size() != 1) {
-      String message = context.getErrorMessage("UA008", contextString, "1", String.valueOf(parameters.size()));
+      String message = context.getErrorMessage(108, contextString, "1", String.valueOf(parameters.size()));
       throw new UtamCompilationError(argsNode, message);
     }
     MethodParameter parameter = parameters.get(0);
@@ -104,7 +104,7 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
       String actualType = parameter.getType().getSimpleName();
       String parameterValue = parameter.getValue();
       String message = context
-          .getErrorMessage("UA009", contextString, parameterValue, "function", actualType);
+          .getErrorMessage(109, contextString, parameterValue, "function", actualType);
       throw new UtamCompilationError(argsNode, message);
     }
   }

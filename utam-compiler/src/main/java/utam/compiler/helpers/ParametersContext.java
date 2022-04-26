@@ -121,7 +121,7 @@ public abstract class ParametersContext {
       int actualCount = parameters.size();
       if (expectedCount != actualCount) {
         String message = context
-            .getErrorMessage("UA008", contextString, String.valueOf(expectedCount),
+            .getErrorMessage(108, contextString, String.valueOf(expectedCount),
                 String.valueOf(actualCount));
         throw new UtamCompilationError(argsNode, message);
       }
@@ -139,7 +139,7 @@ public abstract class ParametersContext {
       String name = parameter.getValue();
       if (parameterNames.contains(name)) {
         // unclear how to test - by this time already validated from method action
-        String message = context.getErrorMessage("UA007", contextString, name);
+        String message = context.getErrorMessage(107, contextString, name);
         throw new UtamCompilationError(argsNode, message);
       }
       parameterNames.add(name);
@@ -165,7 +165,7 @@ public abstract class ParametersContext {
       String actualType = parameter.getType().getSimpleName();
       String parameterValue = parameter.getValue();
       String message = context
-          .getErrorMessage("UA009", contextString, parameterValue, expectedType, actualType);
+          .getErrorMessage(109, contextString, parameterValue, expectedType, actualType);
       throw new UtamCompilationError(argsNode, message);
     }
   }
@@ -230,7 +230,7 @@ public abstract class ParametersContext {
           return parameter;
         }
       }
-      String message = context.getErrorMessage("UM002", contextString, parameterName);
+      String message = context.getErrorMessage(502, contextString, parameterName);
       throw new UtamCompilationError(argsNode, message);
     }
 
@@ -244,12 +244,12 @@ public abstract class ParametersContext {
       String parameterName = parameter.getValue();
       if (isArgReference(parameter)) {
         // can't set at method level type of reference
-        String message = context.getErrorMessage("UM004", contextString, parameterName);
+        String message = context.getErrorMessage(504, contextString, parameterName);
         throw new UtamCompilationError(argsNode, message);
       }
       if (parameter.isLiteral()) {
         // can't set at method level literal
-        String message = context.getErrorMessage("UA005", contextString);
+        String message = context.getErrorMessage(105, contextString);
         throw new UtamCompilationError(argsNode, message);
       }
       setParameterUniqueName(parameter, argsNode);
@@ -273,7 +273,7 @@ public abstract class ParametersContext {
           }
         }
         // cant find declared parameter
-        String message = context.getErrorMessage("UM002", contextString, parameterName);
+        String message = context.getErrorMessage(502, contextString, parameterName);
         throw new UtamCompilationError(argsNode, message);
       }
       setParameterUniqueName(p, argsNode);
@@ -289,7 +289,7 @@ public abstract class ParametersContext {
       return declaredMethodParams.stream().map(p -> {
         // check that each parameter was used in statements
         if (!p.getKey()) {
-          String message = context.getErrorMessage("UM003", contextString, p.getValue().getValue());
+          String message = context.getErrorMessage(503, contextString, p.getValue().getValue());
           throw new UtamCompilationError(message);
         }
         return p.getValue();
@@ -349,7 +349,7 @@ public abstract class ParametersContext {
     MethodParameter getUnwrappedParameter(MethodParameter parameter) {
       if (isArgReference(parameter)) {
         if (methodParameters == null) {
-          String message = context.getErrorMessage("UM002", contextString, parameter.getValue());
+          String message = context.getErrorMessage(502, contextString, parameter.getValue());
           throw new UtamCompilationError(argsNode, message);
         }
         return methodParameters.getReferencedParameter(parameter, argsNode);
@@ -369,7 +369,7 @@ public abstract class ParametersContext {
       }
       if (isArgReference(parameter)) {
         if (methodParameters == null) {
-          String message = context.getErrorMessage("UM002", contextString, parameter.getValue());
+          String message = context.getErrorMessage(502, contextString, parameter.getValue());
           throw new UtamCompilationError(argsNode, message);
         }
         MethodParameter referenced = methodParameters.getReferencedParameter(parameter, argsNode);
