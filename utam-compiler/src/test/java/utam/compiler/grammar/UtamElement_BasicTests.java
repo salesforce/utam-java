@@ -56,7 +56,7 @@ public class UtamElement_BasicTests {
   public void testEmptyNestedElementsThrows() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("emptyNestedElementsArray"));
     assertThat(e.getMessage(),
-        containsString("error 13: element \"test\" elements: property \"elements\" should be a not empty array"));
+        containsString("error 12: element \"test\" elements: property \"elements\" should be a not empty array"));
   }
 
   @Test

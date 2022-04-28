@@ -106,11 +106,11 @@ abstract class UtamArgument {
       return args;
     }
     if (!argsNode.isArray() || argsNode.size() == 0) {
-      throw new UtamCompilerIntermediateError(argsNode, 13, parserContext, "args");
+      throw new UtamCompilerIntermediateError(argsNode, 12, parserContext, "args");
     }
     for (JsonNode argNode : argsNode) {
       if (argNode == null || argNode.isNull() || !argNode.isObject()) {
-        throw new UtamCompilerIntermediateError(14, parserContext, "argument");
+        throw new UtamCompilerIntermediateError(13, parserContext, "argument");
       }
       UtamArgument arg = processArgNode(argNode, parserContext, isLiteralsAllowed);
       args.add(arg);

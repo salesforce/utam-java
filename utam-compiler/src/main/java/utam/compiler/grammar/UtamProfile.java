@@ -112,7 +112,7 @@ final class UtamProfile {
         throw new UtamCompilationError(profilesNode, context.getErrorMessage(805));
       }
       if (!profilesNode.isArray() || profilesNode.size() == 0) {
-        throw new UtamCompilationError(profilesNode, context.getErrorMessage(13, "page object root", "profile"));
+        throw new UtamCompilationError(profilesNode, context.getErrorMessage(12, "page object root", "profile"));
       }
       Map<String, UtamProfile> profiles = new HashMap<>();
       for (JsonNode node : profilesNode) {

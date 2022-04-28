@@ -8,16 +8,12 @@
     "code": 11
   },
   {
-    "message": "%s: should not be an empty array",
+    "message": "%s: property \"%s\" should be a not empty array",
     "code": 12
   },
   {
-    "message": "%s: property \"%s\" should be a not empty array",
-    "code": 13
-  },
-  {
     "message": "%s: %s should be a non empty object",
-    "code": 14
+    "code": 13
   },
   {
     "message": "%s: incorrect argument format: \n%s",

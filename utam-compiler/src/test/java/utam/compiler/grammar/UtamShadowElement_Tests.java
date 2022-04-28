@@ -43,6 +43,6 @@ public class UtamShadowElement_Tests {
   public void testNestedShadowElementsEmptyArray() {
     Exception e = expectCompilerErrorFromFile("validate/shadow/nestedElementsNotArray");
     assertThat(e.getMessage(), containsString(
-        "error 13: element \"parent\" shadow: property \"elements\" should be a not empty array"));
+        "error 12: element \"parent\" shadow: property \"elements\" should be a not empty array"));
   }
 }

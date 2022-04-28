@@ -137,7 +137,7 @@ final class UtamPageObject {
       return elements;
     }
     if (!elementsNode.isArray() || elementsNode.size() == 0) {
-      throw new UtamCompilerIntermediateError(elementsNode, 13, parserContext, "elements");
+      throw new UtamCompilerIntermediateError(elementsNode, 12, parserContext, "elements");
     }
     Function<Exception, RuntimeException> parserErrorWrapper = causeErr -> new UtamCompilerIntermediateError(
         causeErr, elementsNode, 200, parserContext, causeErr.getMessage());

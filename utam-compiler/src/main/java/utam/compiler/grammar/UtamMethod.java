@@ -54,7 +54,7 @@ abstract class UtamMethod {
       return methods;
     }
     if (!methodsNode.isArray()) {
-      throw new UtamCompilerIntermediateError(methodsNode, 13, "page object root", "methods");
+      throw new UtamCompilerIntermediateError(methodsNode, 12, "page object root", "methods");
     }
     Class<? extends UtamMethod> methodType =
         isAbstract ? UtamInterfaceMethod.class : UtamComposeMethod.class;
