@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import utam.compiler.UtamCompilationError;
+import utam.compiler.translator.DefaultSourceConfiguration.FilesScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.ScannerConfig;
 import utam.compiler.translator.DefaultSourceConfiguration.SourceWithoutPackages;
@@ -48,6 +49,7 @@ public class JsonCompilerConfig {
 
   private final Module moduleConfig;
   private final String filePathsRoot;
+  private final List<File> inputFiles;
 
   private static ObjectMapper getJsonCompilerMapper() {
     ObjectMapper mapper = new ObjectMapper();
@@ -61,15 +63,30 @@ public class JsonCompilerConfig {
    * Initializes a new instance of the JsonCompilerConfig class
    * @param configFile   the configuration file
    * @param compilerRoot the root directory for the compiler
+   * @param fileList     the explicit list of Page Object files for compilation
    * @throws IOException thrown if there is an exception during the execution
    */
-  public JsonCompilerConfig(File configFile, File compilerRoot) throws IOException {
+  public JsonCompilerConfig(File configFile, File compilerRoot, List<File> fileList) throws IOException {
     try {
       moduleConfig = getJsonCompilerMapper().readValue(configFile, Module.class);
       filePathsRoot = compilerRoot.toString();
+      inputFiles = new ArrayList<>();
+      if (fileList != null) {
+        inputFiles.addAll(fileList);
+      }
     } catch (IOException e) {
       throw new IOException(String.format(ERR_READING_COMPILER_CONFIG, configFile.toString()), e);
     }
+  }
+
+  /**
+   * Gets a value indicating whether the list source files to compile is valid
+   * @return true if a root directory for recursive scanning is specified, or a list of input files
+   * is specified, but not both.
+   */
+  public boolean isValidSourceFileSpecification() {
+    return moduleConfig.pageObjectsRootDirectory != null && inputFiles.isEmpty() ||
+        moduleConfig.pageObjectsRootDirectory == null && !inputFiles.isEmpty();
   }
 
   /**
@@ -96,7 +113,7 @@ public class JsonCompilerConfig {
    * @return the source configuration
    */
   public TranslatorSourceConfig getSourceConfig() {
-    return moduleConfig.getSourceConfig(filePathsRoot);
+    return moduleConfig.getSourceConfig(filePathsRoot, inputFiles);
   }
 
   /**
@@ -157,6 +174,8 @@ public class JsonCompilerConfig {
 
     static final String DEFAULT_JSON_FILE_MASK_REGEX = "(.*)\\.utam\\.json$";
     static final String ERR_DUPLICATE_PROFILE = "Profile '%s' is already configured";
+    static final String ERR_FILES_WITHOUT_NAMESPACE =
+        "Must use namespaces when explicitly setting input file list";
     private final List<Profile> profiles = new ArrayList<>();
     final List<Namespace> namespaces = new ArrayList<>();
     private final String pageObjectFileMaskRegex;
@@ -193,7 +212,7 @@ public class JsonCompilerConfig {
         @JsonProperty(value = "module") String moduleName,
         @JsonProperty(value = "version") String pageObjectsVersion,
         @JsonProperty(value = "pageObjectsFilesMask", defaultValue = DEFAULT_JSON_FILE_MASK_REGEX) String filesMaskRegex,
-        @JsonProperty(value = "pageObjectsRootDir", required = true) String pageObjectsRootDirectory,
+        @JsonProperty(value = "pageObjectsRootDir") String pageObjectsRootDirectory,
         @JsonProperty(value = "pageObjectsOutputDir", required = true) String pageObjectsOutputDir,
         @JsonProperty(value = "resourcesOutputDir", required = true) String resourcesOutputDir,
         @JsonProperty(value = "unitTestsOutputDir") final String unitTestDirectory,
@@ -265,13 +284,19 @@ public class JsonCompilerConfig {
      * Gets the translator source configuration
      *
      * @param compilerRootFolderName the name of the root folder for the compiler
+     * @param inputFiles the explicit list of files to compile, if specified
      * @return the translator source configuration
      */
-    public TranslatorSourceConfig getSourceConfig(String compilerRootFolderName) {
+    public TranslatorSourceConfig getSourceConfig(String compilerRootFolderName, List<File> inputFiles) {
       if(namespaces.isEmpty()) {
+        if (inputFiles != null && !inputFiles.isEmpty()) {
+          throw new UtamCompilationError(ERR_FILES_WITHOUT_NAMESPACE);
+        }
         return new SourceWithoutPackages(compilerRootFolderName + pageObjectsRootDirectory, pageObjectFileMaskRegex);
       }
-      RecursiveScanner scanner = new RecursiveScanner(compilerRootFolderName + pageObjectsRootDirectory);
+      RecursiveScanner scanner = inputFiles != null && !inputFiles.isEmpty()
+          ? new FilesScanner(inputFiles)
+          : new RecursiveScanner(compilerRootFolderName + pageObjectsRootDirectory);
       return new DefaultSourceConfiguration(
           new ScannerConfig(pageObjectFileMaskRegex, getPackagesMapping()),
           scanner);

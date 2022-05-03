@@ -1,0 +1,34 @@
+{
+  "module": "myModule",
+  "version": "myVersion",
+  "pageObjectsFilesMask": "(.*)\\.utam\\.json$",
+  "pageObjectsOutputDir": "/src/test/java/pageObjects",
+  "resourcesOutputDir": "/src/test/resources",
+  "unitTestsOutputDir": "/src/test/java",
+  "unitTestsRunner": "JUNIT",
+  "extensionsFileMask" : "**/__utam__/**/*.utam.js",
+  "extensionsOutputDir" : "pageObjects/utils",
+  "namespaces" : [
+    {
+      "typeMatch" : "utam-one",
+      "pathMatch": ".*/one"
+    },
+    {
+      "typeMatch" : "utam-two",
+      "pathMatch": ".*/two"
+    }
+  ],
+  "profiles": [
+    {
+      "name": "platform",
+      "values": [
+        "ios",
+        "android"
+      ]
+    }
+  ],
+  "copyright" : [
+    "copyright",
+    "test"
+  ]
+}

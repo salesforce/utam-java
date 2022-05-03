@@ -28,6 +28,7 @@ import static utam.compiler.translator.TranslatorGenerationCommand.TOO_MANY_INPU
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 
@@ -62,6 +63,29 @@ public class TranslatorGenerationCommandTests {
     assertThat(foundPageObjects.values(), containsInAnyOrder(
         (USER_ROOT + RESOURCES_PATH + "/spec/one/first.utam.json").replace("/", File.separator),
         (USER_ROOT + RESOURCES_PATH + "/spec/two/second.utam.json").replace("/", File.separator)));
+  }
+
+  @Test
+  public void testJsonConfigWithSourceDirAndInputFiles() {
+    TranslatorGenerationCommand command = new TranslatorGenerationCommand();
+    command.jsonConfig = new File(USER_ROOT + RESOURCES_PATH + "/config/utam.config.json");
+    command.compilerRoot = new File(USER_ROOT);
+    command.inputFiles = Collections.singletonList(new File("test"));
+    TranslatorConfig config = command.getTranslationConfig();
+    assertThat(command.returnCode, is(equalTo(CONFIG_ERR)));
+    assertThat(command.getThrownError(), is(instanceOf(UnsupportedOperationException.class)));
+    assertThat(config, is(nullValue()));
+  }
+
+  @Test
+  public void testJsonConfigWithInputFiles() {
+    TranslatorGenerationCommand command = new TranslatorGenerationCommand();
+    command.jsonConfig = new File(USER_ROOT + RESOURCES_PATH + "/config/utam.nodirectory.config.json");
+    command.compilerRoot = new File(USER_ROOT);
+    command.inputFiles = Collections.singletonList(new File("test"));
+    TranslatorConfig config = command.getTranslationConfig();
+    assertThat(command.returnCode, is(equalTo(0)));
+    assertThat(config, is(not(nullValue())));
   }
 
   @Test

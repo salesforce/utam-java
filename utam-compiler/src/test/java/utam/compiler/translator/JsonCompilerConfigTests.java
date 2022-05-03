@@ -22,6 +22,7 @@ import static org.testng.Assert.expectThrows;
 import static utam.compiler.translator.JsonCompilerConfig.ERR_READING_COMPILER_CONFIG;
 import static utam.compiler.translator.JsonCompilerConfig.Module.DEFAULT_JSON_FILE_MASK_REGEX;
 import static utam.compiler.translator.JsonCompilerConfig.Module.ERR_DUPLICATE_PROFILE;
+import static utam.compiler.translator.JsonCompilerConfig.Module.ERR_FILES_WITHOUT_NAMESPACE;
 import static utam.compiler.translator.JsonCompilerConfig.Namespace.ERR_DUPLICATE_MAPPING;
 import static utam.compiler.translator.JsonCompilerConfig.Profile.ERR_DUPLICATE_PROFILE_DIFF_VALUES;
 
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +57,8 @@ public class JsonCompilerConfigTests {
   private static JsonCompilerConfig getTestConfig() throws IOException {
     return new JsonCompilerConfig(
         new File(JsonCompilerConfig.class.getClassLoader().getResource("config/utam.config.json").getFile()),
-        new File(System.getProperty("user.dir")));
+        new File(System.getProperty("user.dir")),
+        null);
   }
 
   @Test
@@ -118,8 +121,18 @@ public class JsonCompilerConfigTests {
     assertThat(module.getPageObjectsRootDirectory(), is(equalTo("pageObjectsDirectory")));
     assertThat(module.getConfiguredProfiles(), is(emptyIterable()));
     assertThat(module.getPackagesMapping(), is(anEmptyMap()));
-    module.getSourceConfig("");
+    module.getSourceConfig("", null);
     module.getTargetConfig("");
+  }
+
+  @Test
+  public void testRootDirectoryWithFileList() {
+    Module module = new Module("name", "pageObjectsDirectory");
+    List<File> inputFiles = new ArrayList<>();
+    inputFiles.add(new File("foo.utam.json"));
+    UtamError e = expectThrows(UtamError.class, () -> module.getSourceConfig("", inputFiles));
+    assertThat(e.getMessage(),
+        is(equalTo(ERR_FILES_WITHOUT_NAMESPACE)));
   }
 
   @Test
@@ -140,7 +153,7 @@ public class JsonCompilerConfigTests {
   @Test
   public void testNonExistingFile() {
     File wrongFile = new File("error");
-    IOException e = expectThrows(IOException.class, () -> new JsonCompilerConfig(wrongFile, wrongFile));
+    IOException e = expectThrows(IOException.class, () -> new JsonCompilerConfig(wrongFile, wrongFile, null));
     assertThat(e.getMessage(),
         is(CoreMatchers.equalTo(String.format(ERR_READING_COMPILER_CONFIG, "error"))));
   }
@@ -207,7 +220,8 @@ public class JsonCompilerConfigTests {
   public void testMissingFields() throws IOException {
     JsonCompilerConfig config = new JsonCompilerConfig(
         new File(JsonCompilerConfig.class.getClassLoader().getResource("config/nofields.json").getFile()),
-        new File(System.getProperty("user.dir")));
+        new File(System.getProperty("user.dir")),
+        null);
     assertThat(config.getModuleName(), is(emptyString()));
     assertThat(config.getVersion(), startsWith(String.valueOf(LocalDate.now().getYear())));
     assertThat(config.getCopyright(), is(empty()));
