@@ -10,22 +10,21 @@ package utam.compiler.grammar;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.UtamMethodActionApply.ERR_ELEMENT_REDUNDANT_FOR_CHAIN;
+import static utam.compiler.grammar.DeserializerUtilities.expectCompilerErrorFromFile;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.COLLECTOR_IMPORT;
-import static utam.compiler.representation.FrameMethod.FRAME_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
+import static utam.compiler.representation.FrameMethod.FRAME_ELEMENT;
 
 import java.util.List;
 import org.testng.annotations.Test;
+import utam.compiler.JsonBuilderTestUtility;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
 import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.framework.consumer.UtamError;
 
 /**
  * test composed methods
@@ -161,7 +160,8 @@ public class UtamMethodActionApplyTests {
     MethodInfo expected = new MethodInfo(methodName, "Integer");
     expected.addCodeLine("List<BasicElement> basic0 = this.getBasicElement()");
     expected.addCodeLine("if (basic0 == null) { return null; }");
-    expected.addCodeLine("basic0.stream().map(element -> element.getText()).collect(Collectors.toList())");
+    expected.addCodeLine(
+        "basic0.stream().map(element -> element.getText()).collect(Collectors.toList())");
     expected.addCodeLine("Integer statement1 = basic0.size()");
     expected.addCodeLine("return statement1");
     PageObjectValidationTestHelper.validateMethod(actualMethod, expected);
@@ -214,11 +214,19 @@ public class UtamMethodActionApplyTests {
   }
 
   @Test
+  public void testWrongArgsBasicActionThrows() {
+    Exception e = expectCompilerErrorFromFile("validate/apply/wrongArgType");
+    assertThat(e.getMessage(), containsString(
+        "error 109: method \"test\": "
+            + "incorrect parameter type [ str ]: expected type \"BasicElement\", found \"String\""));
+  }
+
+  @Test
   public void testChainWithElementThrows() {
-    String expectedError = String.format(ERR_ELEMENT_REDUNDANT_FOR_CHAIN, "method 'test'");
-    UtamError e = expectThrows(UtamError.class,
-        () -> new DeserializerUtilities().getContext("validate/apply/redundantElementForChain"));
-    assertThat(e.getMessage(), containsString(expectedError));
+    Exception e = expectCompilerErrorFromFile("validate/apply/redundantElementForChain");
+    assertThat(e.getMessage(), containsString(
+        "error 606: method \"test\" statement: "
+            + "\"element\" property is redundant because statement marked as chain"));
   }
 
   @Test
@@ -241,7 +249,7 @@ public class UtamMethodActionApplyTests {
     methodInfo.addParameter(new MethodParameterInfo("x", PrimitiveType.NUMBER));
     methodInfo.addParameter(new MethodParameterInfo("y", PrimitiveType.NUMBER));
     methodInfo.addCodeLine("SimplePublicElement simplePublic0 = this.getSimplePublic()");
-    methodInfo.addCodeLine("simplePublic0.dragAndDropByOffset(x, y, 0)");
+    methodInfo.addCodeLine("simplePublic0.dragAndDropByOffset(x, y)");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 
@@ -352,8 +360,20 @@ public class UtamMethodActionApplyTests {
     expected.addParameter(new MethodParameterInfo("row", "Integer"));
     expected.addParameter(new MethodParameterInfo("column"));
     expected.addCodeLine("List<BasicElement> element0 = this.getElementElement(row, column)");
-    expected.addCodeLine("List<String> statement0 = element0.stream().map(element -> element.getText()).collect(Collectors.toList())");
+    expected.addCodeLine(
+        "List<String> statement0 = element0.stream().map(element -> element.getText()).collect(Collectors.toList())");
     expected.addCodeLine("return statement0");
     PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
+
+  @Test
+  public void incorrectComposeFormatMissingElementThrows() {
+    JsonBuilderTestUtility test = new JsonBuilderTestUtility();
+    test.addRawString("methods",
+        "[{ \"name\" : \"test\", \"compose\" : [ {\"element\": \"error\", \"apply\": \"action\"} ]}]");
+    Exception e = test.expectCompilerError();
+    assertThat(e.getMessage(), containsString(
+        "error 601: method \"test\" statement: "
+            + "unknown element with name \"error\" is referenced in a compose statement"));
   }
 }

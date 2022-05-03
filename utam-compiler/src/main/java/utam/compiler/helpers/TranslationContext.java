@@ -13,6 +13,7 @@ import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.SELF_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.Self.SELF_ELEMENT;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.guardrails.GlobalValidation;
 import utam.compiler.guardrails.PageObjectValidation;
 import utam.compiler.helpers.ElementContext.Document;
@@ -34,27 +36,18 @@ import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.framework.consumer.UtamError;
-import utam.core.framework.context.Profile;
 
 /**
- * instance is created for every Page Object that is being translated <br> contains reference to the
- * Page Object context and translator context
+ * Instance of this type is created for every Page Object that is being translated, contains
+ * reference to the Page Object context and translator context
  *
  * @author elizaveta.ivanova
  * @since 228
  */
 public final class TranslationContext {
 
-  /**
-   * The error template string for an element not found in the context
-   */
-  public static final String ERR_CONTEXT_ELEMENT_NOT_FOUND =
-      "referenced element '%s' not found in context";
   static final String ERR_CONTEXT_DUPLICATE_METHOD = "duplicate method '%s'";
   static final String ERR_CONTEXT_DUPLICATE_FIELD = "duplicate field '%s'";
-  static final String ERR_CONTEXT_DUPLICATE_ELEMENT_NAME =
-      "element with name '%s' already exists in same JSON";
-  static final String ERR_PROFILE_NOT_CONFIGURED = "profile '%s' is not configured";
   private final List<PageClassField> pageObjectFields = new ArrayList<>();
   private final List<PageObjectMethod> pageObjectMethods = new ArrayList<>();
   private final List<BasicElementGetterMethod> elementGetters = new ArrayList<>();
@@ -66,7 +59,6 @@ public final class TranslationContext {
   private final TranslatorConfig translatorConfiguration;
   private final Set<String> usedPrivateMethods = new HashSet<>();
   private final Map<String, ElementUnitTestHelper> testableElements = new HashMap<>();
-  private boolean isAbstractPageObject = false;
   private boolean isImplementationPageObject = false;
   private final TypeProvider pageObjectClassType;
   private TypeProvider pageObjectInterfaceType;
@@ -82,8 +74,8 @@ public final class TranslationContext {
     this.translationTypesConfig = translatorConfiguration.getTranslationTypesConfig();
     this.translatorConfiguration = translatorConfiguration;
     // register elements to prevent names collisions
-    setElement(Document.DOCUMENT_ELEMENT);
-    setElement(Self.SELF_ELEMENT);
+    setElement(null, Document.DOCUMENT_ELEMENT);
+    setElement(null, Self.SELF_ELEMENT);
     // has impl prefixes
     this.pageObjectClassType = translationTypesConfig.getClassType(pageObjectURI);
     this.pageObjectInterfaceType = translationTypesConfig.getInterfaceType(pageObjectURI);
@@ -105,22 +97,6 @@ public final class TranslationContext {
    */
   public void setGlobalGuardrailsContext(GlobalValidation validation) {
     validation.setPageObjectElements(pageObjectURI, elementContextMap.values());
-  }
-
-  /**
-   * Sets that the Page Object is abstract
-   */
-  public void setAbstract() {
-    this.isAbstractPageObject = true;
-  }
-
-  /**
-   * Gets a value indicating that the Page Object is abstract
-   *
-   * @return true if the Page Object is abstract; otherwise, false
-   */
-  public boolean isAbstractPageObject() {
-    return isAbstractPageObject;
   }
 
   /**
@@ -184,9 +160,9 @@ public final class TranslationContext {
    *
    * @param element the element context to set
    */
-  public void setElement(ElementContext element) {
+  public void setElement(JsonNode currentNode, ElementContext element) {
     if (elementContextMap.containsKey(element.getName())) {
-      throw new UtamError(String.format(ERR_CONTEXT_DUPLICATE_ELEMENT_NAME, element.getName()));
+      throw new UtamCompilationError(currentNode, getErrorMessage(202, element.getName()));
     }
     elementContextMap.put(element.getName(), element);
   }
@@ -236,7 +212,7 @@ public final class TranslationContext {
    * Gets an element by name in this Page Object
    *
    * @param name the name of the element to get
-   * @return the element in the Page Object
+   * @return the element in the Page Object or null if none found
    */
   public ElementContext getElement(String name) {
     if (name == null || SELF_ELEMENT_NAME.equals(name)) {
@@ -246,7 +222,7 @@ public final class TranslationContext {
       return DOCUMENT_ELEMENT;
     }
     if (!elementContextMap.containsKey(name)) {
-      throw new UtamError(String.format(ERR_CONTEXT_ELEMENT_NOT_FOUND, name));
+      return null;
     }
     return elementContextMap.get(name);
   }
@@ -274,19 +250,17 @@ public final class TranslationContext {
   }
 
   /**
-   * Gets a profile
-   * @param jsonKey the key specified in the JSON for the profile
-   * @param value   the value of the profile
+   * Get a profile configuration
    *
-   * @return the profile
+   * @param name the key specified in the JSON for the profile
+   * @return the profile configuration or null
    */
-  public Profile getProfile(String jsonKey, String value) {
-    ProfileConfiguration profileConfiguration = translatorConfiguration.getConfiguredProfiles()
+  public ProfileConfiguration getConfiguredProfile(String name) {
+    return translatorConfiguration.getConfiguredProfiles()
         .stream()
-        .filter(configuration -> configuration.getPropertyKey().equals(jsonKey))
+        .filter(configuration -> configuration.getPropertyKey().equals(name))
         .findAny()
-        .orElseThrow(() -> new UtamError(String.format(ERR_PROFILE_NOT_CONFIGURED, jsonKey)));
-    return profileConfiguration.getFromString(value);
+        .orElse(null);
   }
 
   /**
@@ -407,7 +381,7 @@ public final class TranslationContext {
   public String getJsonPath() {
     String fullPath = translatorConfiguration.getConfiguredSource().getSourcePath(pageObjectURI);
     int index = fullPath.indexOf("resources");
-    if(index > 0) { // path can be empty for mocks
+    if (index > 0) { // path can be empty for mocks
       return fullPath.substring(index);
     }
     return fullPath;
@@ -420,5 +394,28 @@ public final class TranslationContext {
    */
   public List<String> getCopyright() {
     return translatorConfiguration.getCopyright();
+  }
+
+  /**
+   * read error message by code and replace %s by args if any
+   *
+   * @param code string error code
+   * @param args replacement for part of the messages that are context dependent
+   * @return string with message or throws an error
+   */
+  public String getErrorMessage(Integer code, String... args) {
+    String message = translatorConfiguration.getErrorMessage(code, args);
+    return getRawErrorMessage(message);
+  }
+
+  /**
+   * utility function to add prefix with page object name to the error
+   *
+   * @param message original message
+   * @return message concatenated with prefix
+   */
+  public String getRawErrorMessage(String message) {
+    String prefix = String.format("error in page object '%s'", pageObjectURI);
+    return String.format("%s: \n%s", prefix, message);
   }
 }

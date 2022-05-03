@@ -73,7 +73,7 @@ public class UtamMethodActionReturnSelfTests {
   @Test
   public void returnSelfRedundantAttributes() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("returnSelfError"));
-    assertThat(e.getCause().getMessage(), containsString("Unrecognized field \"element\""));
+    assertThat(e.getMessage(), containsString("Unrecognized field \"element\""));
   }
 
   @Test

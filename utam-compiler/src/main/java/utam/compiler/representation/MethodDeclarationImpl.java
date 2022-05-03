@@ -57,10 +57,9 @@ class MethodDeclarationImpl implements MethodDeclaration {
 
   // used in tests
   MethodDeclarationImpl(
-      String methodName,
       List<MethodParameter> parameters,
       TypeProvider returnType) {
-    this(methodName, parameters, returnType, null);
+    this("test", parameters, returnType, null);
   }
 
   private static List<TypeProvider> buildImports(

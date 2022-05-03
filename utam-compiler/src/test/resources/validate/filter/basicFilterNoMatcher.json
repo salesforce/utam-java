@@ -1,0 +1,26 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "selector": {
+        "css": "selector %s",
+        "returnAll": true,
+        "args": [
+          {
+            "name": "arg1",
+            "type": "string"
+          }
+        ]
+      },
+      "filter": {
+        "apply": "wrong",
+        "args": [
+          {
+            "name": "arg1",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}

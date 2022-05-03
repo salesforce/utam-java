@@ -10,23 +10,18 @@ package utam.compiler.helpers;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.helpers.MethodContext.ERR_ARG_DUPLICATE_NAME;
-import static utam.compiler.helpers.MethodContext.ERR_ARG_TYPE_MISMATCH;
-import static utam.compiler.helpers.MethodContext.ERR_LITERAL_PARAMETER_NOT_ALLOWED;
-import static utam.compiler.helpers.MethodContext.ERR_METHOD_REFERENCE_ARGS;
-import static utam.compiler.helpers.MethodContext.ERR_PARAMETER_NEVER_USED;
-import static utam.compiler.helpers.MethodContext.ERR_REFERENCE_MISSING;
-import static utam.compiler.helpers.MethodContext.ERR_REFERENCE_REQUIRED;
+import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.helpers.PrimitiveType.BOOLEAN;
 import static utam.compiler.helpers.PrimitiveType.STRING;
 import static utam.compiler.helpers.TypeUtilities.PARAMETER_REFERENCE;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.hamcrest.core.StringContains;
 import org.testng.annotations.Test;
 import utam.compiler.grammar.DeserializerUtilities;
 import utam.compiler.helpers.ParameterUtils.Literal;
 import utam.compiler.helpers.ParameterUtils.Regular;
+import utam.compiler.helpers.ParametersContext.StatementParametersContext;
+import utam.compiler.helpers.ReturnType.MethodReturnType;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.framework.consumer.UtamError;
 
@@ -38,10 +33,16 @@ import utam.core.framework.consumer.UtamError;
  */
 public class MethodContextTests {
 
-  private static final String ERR_MESSAGE_PREFIX = "method 'test'";
+  private static MethodContext getMethodContext() {
+    return new MethodContext("test", new MethodReturnType("test"),
+        getTestTranslationContext(),
+        null, false);
+  }
 
-  private static MethodContext getTestMethodContext() {
-    return new MethodContext("test", new ReturnType((JsonNode) null, null, "test"));
+  private static ParametersContext getParametersContext(MethodContext methodContext) {
+    return new StatementParametersContext("test", getTestTranslationContext(), null,
+        methodContext);
+
   }
 
   private static void test(String jsonFile, String expectedError) {
@@ -50,99 +51,79 @@ public class MethodContextTests {
     assertThat(e.getMessage(), StringContains.containsString(expectedError));
   }
 
+  private static void setStatementParameter(ParametersContext context, MethodParameter p) {
+    context.setParameter(p);
+  }
+
   @Test
-  public void testDuplicateArgNameInMethod() {
-    MethodContext methodContext = getTestMethodContext();
-    methodContext.setDeclaredParameter(new Regular("name", STRING));
+  public void testDuplicateArgNameInMethodThrows() {
+    MethodContext methodContext = getMethodContext();
+    ParametersContext context = methodContext.getParametersContext();
+    context.setParameter(new Regular("name", STRING));
     UtamError e = expectThrows(UtamError.class,
-        () -> methodContext.setDeclaredParameter(new Regular("name", STRING)));
+        () -> context.setParameter(new Regular("name", STRING)));
     assertThat(e.getMessage(),
-        containsString(String.format(ERR_ARG_DUPLICATE_NAME, ERR_MESSAGE_PREFIX, "name")));
+        containsString("error 107: method \"test\": parameter with name \"name\" is already declared"));
   }
 
   @Test
-  public void testDuplicateArgNameInStmnt() {
-    MethodContext methodContext = getTestMethodContext();
-    StatementContext statementContext = new StatementContext();
-    methodContext.setStatementParameter(new Regular("name", STRING), statementContext);
+  public void testDuplicateArgNameInStmntThrows() {
+    MethodContext methodContext = getMethodContext();
+    ParametersContext context = getParametersContext(methodContext);
+    setStatementParameter(context, new Regular("name", STRING));
     UtamError e = expectThrows(UtamError.class,
-        () -> methodContext.setStatementParameter(new Regular("name", STRING), statementContext));
+        () -> setStatementParameter(context, new Regular("name", STRING)));
     assertThat(e.getMessage(),
-        containsString(String.format(ERR_ARG_DUPLICATE_NAME, ERR_MESSAGE_PREFIX, "name")));
+        containsString("error 107: method \"test\": parameter with name \"name\" is already declared"));
   }
 
   @Test
-  public void testLiteralMethodParameter() {
-    MethodContext methodContext = getTestMethodContext();
+  public void testLiteralMethodParameterThrows() {
+    MethodContext methodContext = getMethodContext();
+    ParametersContext context = methodContext.getParametersContext();
     UtamError e = expectThrows(UtamError.class,
-        () -> methodContext.setDeclaredParameter(new Literal(true, BOOLEAN)));
+        () -> context.setParameter(new Literal(true, BOOLEAN)));
     assertThat(e.getMessage(),
-        containsString(
-            String.format(ERR_LITERAL_PARAMETER_NOT_ALLOWED, ERR_MESSAGE_PREFIX, "true")));
+        containsString("error 105: method \"test\": literal arguments are not allowed"));
   }
 
   @Test
-  public void testArgNotReferenced() {
-    MethodContext methodContext = getTestMethodContext();
-    methodContext.setDeclaredParameter(new Regular("arg", STRING));
-    StatementContext statementContext = new StatementContext();
-    UtamError e = expectThrows(UtamError.class,
-        () -> methodContext.setStatementParameter(new Regular("arg1", STRING), statementContext));
+  public void testArgNotReferencedThrows() {
+    MethodContext methodContext = getMethodContext();
+    ParametersContext context = methodContext.getParametersContext();
+    context.setParameter(new Regular("arg", STRING));
+    UtamError e = expectThrows(UtamError.class, context::getParameters);
     assertThat(e.getMessage(),
-        containsString(String.format(ERR_REFERENCE_REQUIRED, ERR_MESSAGE_PREFIX, "arg1")));
+        containsString("error 503: method \"test\": declared parameter \"arg\" is never used"));
   }
 
   @Test
-  public void testArgWrongType() {
-    MethodContext methodContext = getTestMethodContext();
-    methodContext.setDeclaredParameter(new Regular("arg", STRING));
-    StatementContext statementContext = new StatementContext();
+  public void testComposeWithInvalidArgReferenceThrows() {
+    MethodContext methodContext = getMethodContext();
+    ParametersContext context = getParametersContext(methodContext);
     UtamError e = expectThrows(UtamError.class,
-        () -> methodContext.setStatementParameter(new Regular("arg", BOOLEAN), statementContext));
-    assertThat(e.getMessage(),
-        containsString(String.format(ERR_ARG_TYPE_MISMATCH, ERR_MESSAGE_PREFIX, "arg", "Boolean")));
-  }
-
-  @Test
-  public void testArgRightType() {
-    MethodContext methodContext = getTestMethodContext();
-    MethodParameter parameter = new Regular("arg", STRING);
-    StatementContext statementContext = new StatementContext();
-    methodContext.setDeclaredParameter(parameter);
-    methodContext.setStatementParameter(parameter, statementContext);
-  }
-
-  @Test
-  public void testComposeWithInvalidArgReference() {
-    MethodContext methodContext = getTestMethodContext();
-    StatementContext statementContext = new StatementContext();
-    UtamError e = expectThrows(UtamError.class,
-        () -> methodContext
-            .setStatementParameter(new Regular("arg", PARAMETER_REFERENCE), statementContext));
-    assertThat(
-        e.getMessage(),
-        containsString(String.format(ERR_REFERENCE_MISSING, ERR_MESSAGE_PREFIX, "arg")));
+        () -> setStatementParameter(context, new Regular("arg", PARAMETER_REFERENCE)));
+    assertThat(e.getMessage(), containsString(
+        "error 502: method \"test\": statement parameter \"arg\" is not found in declared method args"));
   }
 
   @Test
   public void testReferenceTypeNotAllowed() {
-    MethodContext methodContext = getTestMethodContext();
+    ParametersContext context = getMethodContext().getParametersContext();
     UtamError e = expectThrows(UtamError.class,
-        () -> methodContext.setDeclaredParameter(new Regular("arg",
-            PARAMETER_REFERENCE)));
-    assertThat(e.getMessage(),
-        containsString(String.format(ERR_METHOD_REFERENCE_ARGS, ERR_MESSAGE_PREFIX, "arg")));
+        () -> context.setParameter(new Regular("arg", PARAMETER_REFERENCE)));
+    assertThat(e.getMessage(), containsString(
+        "error 504: method \"test\": parameter \"arg\" at method level can't have type \"argumentReference\""));
   }
 
   @Test
   public void testSameParameterReusedThrows() {
-    String expectedErr = String.format(ERR_ARG_DUPLICATE_NAME, ERR_MESSAGE_PREFIX, "arg1");
-    test("sameArgsNames", expectedErr);
+    test("sameArgsNames", "error 107: method \"test\": parameter with name \"arg1\" is already declared");
   }
 
   @Test
   public void testRedundantMethodLevelParameterThrows() {
-    String expectedErr = String.format(ERR_PARAMETER_NEVER_USED, ERR_MESSAGE_PREFIX, "arg");
-    test("redundantParameters", expectedErr);
+    test("redundantParameters",
+        "error 503: method \"test\": declared parameter \"arg\" is never used");
   }
 }

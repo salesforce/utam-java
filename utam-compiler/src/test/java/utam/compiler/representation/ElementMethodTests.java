@@ -9,7 +9,6 @@ package utam.compiler.representation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -19,6 +18,7 @@ import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT_IMPL_CLASS;
 import static utam.compiler.representation.ElementMethod.DOCUMENT_GETTER;
 
 import java.util.List;
+import java.util.Objects;
 import org.hamcrest.CoreMatchers;
 import org.testng.annotations.Test;
 import utam.compiler.grammar.DeserializerUtilities;
@@ -48,7 +48,7 @@ public class ElementMethodTests {
   private static final String LIST_TYPE = List.class.getName();
 
   private static BasicElementGetterMethod getElementMethod(TranslationContext context) {
-    return (BasicElementGetterMethod) context.getElement(ELEMENT_NAME).getElementMethod();
+    return (BasicElementGetterMethod) Objects.requireNonNull(context.getElement(ELEMENT_NAME)).getElementMethod();
   }
 
   @Test
@@ -211,43 +211,6 @@ public class ElementMethodTests {
   }
 
   @Test
-  public void testFilterBasicPublicElementUnionType() {
-    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "TestElement");
-    Result result = new DeserializerUtilities().getResultFromFile("filter/basicFilterPublicUnion");
-    TranslationContext context = result.getContext();
-    BasicElementGetterMethod method = getElementMethod(context);
-    expected.addParameter(new MethodParameterInfo("text"));
-    expected.addImpliedImportedTypes(BASIC_ELEMENT_TYPE);
-    assertThat(method.getDeclaration().getImports(), is(emptyIterable()));
-    expected.addCodeLine("BasicElement root = this.getRootElement()");
-    expected.addCodeLine("return basic(root, this.test).build(TestElement.class, "
-        + "TestElementImpl.class, elm -> text.equals(elm.getText()))");
-    PageObjectValidationTestHelper.validateMethod(method, expected);
-    String unionClass = context.getClassUnionTypes().get(0).getDeclarationCode().get(0);
-    assertThat(unionClass, is(equalTo(
-        "public static class TestElementImpl extends BasePageElement implements TestElement {}")));
-    String unionType = context.getInterfaceUnionTypes().get(0).getDeclarationCode()
-        .get(0);
-    assertThat(unionType, is(equalTo("interface TestElement extends Editable, Clickable {}")));
-  }
-
-  @Test
-  public void testFilterBasicPublicElementDefaultType() {
-    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "List<BasicElement>");
-    Result result = new DeserializerUtilities().getResultFromFile("filter/basicFilterPublic");
-    TranslationContext context = result.getContext();
-    BasicElementGetterMethod method = getElementMethod(context);
-    expected.addParameter(new MethodParameterInfo("text"));
-    expected.addImportedTypes(LIST_TYPE, BASIC_ELEMENT_TYPE);
-    expected.addImpliedImportedTypes(LIST_TYPE, BASIC_ELEMENT_TYPE_IMPL);
-    expected.addCodeLine("BasicElement root = this.getRootElement()");
-    expected.addCodeLine("return basic(root, this.test).buildList(BasicElement.class, BasePageElement.class, elm -> text.equals(elm.getText()))");
-    PageObjectValidationTestHelper.validateMethod(method, expected);
-    assertThat(context.getInterfaceUnionTypes(), is(emptyIterable()));
-    assertThat(context.getClassUnionTypes(), is(emptyIterable()));
-  }
-
-  @Test
   public void testNullableList() {
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "List<BasicElement>");
     expected.addCodeLine("BasicElement parent = this.getParentElement()");
@@ -259,19 +222,6 @@ public class ElementMethodTests {
         new PageObjectValidationTestHelper.FieldInfo(ELEMENT_NAME);
     fieldInfo.addAnnotations("@ElementMarker.Find(css = \".css\", nullable = true)");
     fieldInfo.validateField(context.getFields().get(1));
-    BasicElementGetterMethod method = getElementMethod(context);
-    PageObjectValidationTestHelper.validateMethod(method, expected);
-  }
-
-  @Test
-  public void testNullableListWithFilter() {
-    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "BasicElement");
-    expected.addCodeLine("BasicElement root = this.getRootElement()");
-    expected.addCodeLine("return basic(root, this.test)"
-        + ".build(BasicElement.class, BasePageElement.class, "
-        + "elm -> Boolean.TRUE.equals(elm.isVisible()))");
-    Result result = new DeserializerUtilities().getResultFromFile("filter/basicElementFilter");
-    TranslationContext context = result.getContext();
     BasicElementGetterMethod method = getElementMethod(context);
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
@@ -326,11 +276,10 @@ public class ElementMethodTests {
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "BasicElement");
     expected.addParameter(new MethodParameterInfo("value", "String"));
     expected.addParameter(new MethodParameterInfo("LocatorBy.byCss(String.format(\"input[value='%s']\", value))", "LocatorBy"));
-    expected.addParameter(new MethodParameterInfo("false", "Boolean"));
     expected.addCodeLine("BasicElement root = this.getRootElement()");
     expected.addCodeLine("return basic(root, this.test)."
         + "build(BasicElement.class, BasePageElement.class, "
-        + "elm -> Boolean.TRUE.equals(elm.containsElement(LocatorBy.byCss(String.format(\"input[value='%s']\", value)), false)))");
+        + "elm -> Boolean.TRUE.equals(elm.containsElement(LocatorBy.byCss(String.format(\"input[value='%s']\", value)))))");
     expected.addImportedTypes("utam.core.element.BasicElement");
     expected.addImpliedImportedTypes("utam.core.element.BasicElement");
     expected.addImpliedImportedTypes("utam.core.framework.element.BasePageElement");

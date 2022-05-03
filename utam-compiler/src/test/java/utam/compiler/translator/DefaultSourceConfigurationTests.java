@@ -11,9 +11,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.translator.DefaultSourceConfiguration.ERR_DUPLICATE_PAGE_OBJECT;
 import static utam.compiler.translator.DefaultSourceConfiguration.ERR_IO_DURING_SCAN;
@@ -21,10 +18,6 @@ import static utam.compiler.translator.DefaultSourceConfiguration.ERR_MISSING_SO
 import static utam.compiler.translator.DefaultSourceConfiguration.ScannerConfig;
 import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_PAGE_OBJECT_NAME;
 import static utam.compiler.translator.JsonCompilerConfig.Module.DEFAULT_JSON_FILE_MASK_REGEX;
-import static utam.compiler.translator.TranslatorMockUtilities.IMPL_ONLY_URI;
-import static utam.compiler.translator.TranslatorMockUtilities.INTERFACE_ONLY_URI;
-import static utam.compiler.translator.TranslatorMockUtilities.PAGE_OBJECT_SOURCE;
-import static utam.compiler.translator.TranslatorMockUtilities.PAGE_OBJECT_URI;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,6 +48,7 @@ import utam.core.framework.context.StringValueProfile;
  */
 public class DefaultSourceConfigurationTests {
 
+  private static final String PAGE_OBJECT_URI = "utam-test/pageObjects/test/testPageObject";
   private static final String FAKE_IO_EXCEPTION_MESSAGE = "throwing fake IO exception";
   private static final String INTERFACE_ONLY_SOURCE =
       "{"
@@ -77,13 +71,6 @@ public class DefaultSourceConfigurationTests {
           + "    }"
           + "  ]\n"
           + "}";
-
-  public static TranslatorSourceConfig getSourceConfig(String jsonString) throws IOException {
-    TranslatorSourceConfig mockConfig = mock(TranslatorSourceConfig.class);
-    when(mockConfig.getPageObjects()).thenReturn(Collections.singletonList("test"));
-    when(mockConfig.getDeclarationReader(any())).thenReturn(new JsonStringReaderMock(jsonString));
-    return mockConfig;
-  }
 
   @Test
   public void testRunWithDuplicatePageObjectsThrows() {
@@ -181,7 +168,7 @@ public class DefaultSourceConfigurationTests {
     }
   }
 
-  static class Mock extends DefaultSourceConfiguration implements TranslatorSourceConfig {
+  public static class Mock extends DefaultSourceConfiguration implements TranslatorSourceConfig {
 
     private final Map<String, String> pageObjectsJSONString = new HashMap<>();
 
@@ -200,9 +187,9 @@ public class DefaultSourceConfigurationTests {
     }
 
     final void setSources() {
-      setJSONSource(PAGE_OBJECT_URI, PAGE_OBJECT_SOURCE);
-      setJSONSource(INTERFACE_ONLY_URI, INTERFACE_ONLY_SOURCE);
-      setJSONSource(IMPL_ONLY_URI, IMPL_ONLY_SOURCE);
+      setJSONSource(PAGE_OBJECT_URI, "{}");
+      setJSONSource("utam-test/pageObjects/test/testAbstractObject", INTERFACE_ONLY_SOURCE);
+      setJSONSource("utam-test/pageObjects/test/testImplObject", IMPL_ONLY_SOURCE);
     }
 
     @Override

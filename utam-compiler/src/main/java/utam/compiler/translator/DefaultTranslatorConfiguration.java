@@ -41,6 +41,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   private final TranslatorTargetConfig translatorTargetConfig;
   private final GuardrailsMode guardrailsMode;
   private final CompilerOutputOptions outputOptions;
+  private final JsonErrorsConfig jsonErrorsConfig;
 
   /**
    * Initializes a new instance of the translator configuration class
@@ -68,6 +69,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
       setConfiguredProfile(profileDefinition);
     }
     this.guardrailsMode = guardrailsMode;
+    this.jsonErrorsConfig = JsonErrorsConfig.getErrorsConfigWithDefaultName();
   }
 
   /**
@@ -230,6 +232,11 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
     return outputOptions.configuredCopyright;
   }
 
+  @Override
+  public String getErrorMessage(Object code, String... args) {
+    return jsonErrorsConfig.getErrorMessage((Integer) code, args);
+  }
+
   /**
    * helper class to collect parameters related to page object output
    *
@@ -242,7 +249,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
      * used in utam-core-util in consumer, so should be public
      */
     public static final CompilerOutputOptions DEFAULT_COMPILER_OUTPUT_OPTIONS = new CompilerOutputOptions("", "",
-        new ArrayList<String>());
+        new ArrayList<>());
 
     final String moduleName;
     final String pageObjectsVersion;

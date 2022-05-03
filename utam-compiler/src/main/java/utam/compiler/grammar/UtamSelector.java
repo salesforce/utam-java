@@ -12,14 +12,21 @@ import static utam.core.element.Locator.SELECTOR_STRING_PARAMETER;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
-import utam.compiler.grammar.ArgsProcessor.ArgsProcessorWithExpectedTypes;
+import java.util.stream.Collectors;
+import utam.compiler.UtamCompilationError;
+import utam.compiler.UtamCompilerIntermediateError;
+import utam.compiler.grammar.UtamMethodAction.ArgumentsProvider;
 import utam.compiler.helpers.LocatorCodeGeneration;
+import utam.compiler.helpers.MethodContext;
+import utam.compiler.helpers.ParametersContext;
+import utam.compiler.helpers.ParametersContext.StatementParametersContext;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
+import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.UtamError;
 
 /**
  * selector object mapping class and methods are public to be used in tests
@@ -27,13 +34,13 @@ import utam.core.framework.consumer.UtamError;
  * @author elizaveta.ivanova
  * @since 228
  */
-public class UtamSelector extends UtamRootSelector {
+class UtamSelector extends UtamRootSelector {
 
   static final String ERR_SELECTOR_PARAM_UNKNOWN_TYPE =
       "unknown selector parameter type '%s', only string and number are supported";
   private final boolean isReturnAll;
-  private final UtamArgument[] args;
-  private LocatorCodeGeneration context;
+  private final JsonNode argsNode;
+  private LocatorCodeGeneration locatorContext;
 
   @JsonCreator
   UtamSelector(
@@ -42,10 +49,10 @@ public class UtamSelector extends UtamRootSelector {
       @JsonProperty(value = "classchain") String classchain,
       @JsonProperty(value = "uiautomator") String uiautomator,
       @JsonProperty(value = "returnAll", defaultValue = "false") boolean isReturnAll,
-      @JsonProperty(value = "args") UtamArgument[] args) {
+      @JsonProperty(value = "args") JsonNode argsNode) {
     super(css, accessid, classchain, uiautomator);
     this.isReturnAll = isReturnAll;
-    this.args = args;
+    this.argsNode = argsNode;
   }
 
   /**
@@ -56,38 +63,40 @@ public class UtamSelector extends UtamRootSelector {
    * @param classchain  the iOS class chain
    * @param uiautomator the Android UI automator ID
    */
-  // used in tests
-  public UtamSelector(String css, String accessid, String classchain, String uiautomator) {
+  UtamSelector(String css, String accessid, String classchain, String uiautomator) {
     this(css, accessid, classchain, uiautomator, false, null);
   }
 
   /**
    * Initializes a new instance of the UtamSelector class, only used in unit tests
    *
-   * @param cssSelector  the CSS selector
+   * @param cssSelector the CSS selector
    */
-  // used in tests
-  public UtamSelector(String cssSelector) {
+  UtamSelector(String cssSelector) {
     this(cssSelector, null, null, null);
   }
 
   /**
-   * Initializes a new instance of the UtamSelector class, only used in unit tests
+   * process node
    *
-   * @param cssSelector  the CSS selector
-   * @param isList       a value indicating whether this selector returns a list
+   * @param node        json node
+   * @param elementName element for context
+   * @return object of selector
    */
-  // used in tests
-  public UtamSelector(String cssSelector, boolean isList) {
-    this(cssSelector, null, null, null, isList, null);
+  static UtamSelector processSelectorNode(JsonNode node, String elementName) {
+    String parserContext = String.format("element \"%s\"", elementName);
+    return JsonDeserializer.readNode(node,
+        UtamSelector.class,
+        cause -> new UtamCompilerIntermediateError(cause, node, 1000, parserContext,
+            cause.getMessage()));
   }
 
-  // used in tests
-  UtamSelector(String cssSelector, UtamArgument[] args) {
-    this(cssSelector, null, null, null, false, args);
-  }
-
-  // parse selector string to find parameters %s or %d
+  /**
+   * parse selector string to find parameters %s or %d
+   *
+   * @param str selector string
+   * @return list of types of selector args
+   */
   private static List<TypeProvider> getParametersTypes(String str) {
     List<TypeProvider> res = new ArrayList<>();
     while (str.contains("%")) {
@@ -99,7 +108,7 @@ public class UtamSelector extends UtamRootSelector {
         res.add(PrimitiveType.STRING);
         str = str.replaceFirst(SELECTOR_STRING_PARAMETER, "");
       } else {
-        throw new UtamError(
+        throw new UtamCompilationError(
             String.format(ERR_SELECTOR_PARAM_UNKNOWN_TYPE, str.substring(index, index + 2)));
       }
     }
@@ -109,18 +118,29 @@ public class UtamSelector extends UtamRootSelector {
   /**
    * get instance of code generation helper. helper needs context to process args.
    *
-   * @param translationContext instance of context
+   * @param selectorHolder name of the structure that has selector
+   * @param context        instance of context
+   * @param methodContext  selector can be used as an argument, then we need method context
    * @return helper instance used further for code generation
    */
-  public LocatorCodeGeneration getCodeGenerationHelper(TranslationContext translationContext) {
-    if (context == null) {
-      ArgsProcessor argsProcessor = new ArgsProcessorWithExpectedTypes(translationContext,
-          String.format("selector '%s'", getLocator().getStringValue()),
-          getParametersTypes(getLocator().getStringValue()));
-      context = new LocatorCodeGeneration(getSelectorType(), getLocator(),
-          argsProcessor.getParameters(args));
+  LocatorCodeGeneration getCodeGenerationHelper(String selectorHolder, TranslationContext context,
+      MethodContext methodContext) {
+    if (this.locatorContext == null) {
+      String parserContext = String
+          .format("%s selector \"%s\"", selectorHolder, getLocator().getStringValue());
+      List<TypeProvider> expectedArgsTypes = getParametersTypes(getLocator().getStringValue());
+      ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
+      ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
+          argsNode, methodContext);
+      List<UtamArgument> arguments = provider.getArguments(true);
+      List<MethodParameter> parameters = arguments
+          .stream()
+          .map(arg -> arg.asParameter(context, methodContext, parametersContext))
+          .collect(Collectors.toList());
+      parametersContext.setNestedParameters(parameters, expectedArgsTypes);
+      this.locatorContext = new LocatorCodeGeneration(getSelectorType(), getLocator(), parameters);
     }
-    return context;
+    return this.locatorContext;
   }
 
   boolean isReturnAll() {

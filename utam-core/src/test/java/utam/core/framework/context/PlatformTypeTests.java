@@ -15,7 +15,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.expectThrows;
-import static utam.core.framework.context.PlatformType.ERR_UNKNOWN_PLATFORM;
 import static utam.core.framework.context.PlatformType.NATIVE;
 import static utam.core.framework.context.PlatformType.WEB;
 
@@ -53,10 +52,10 @@ public class PlatformTypeTests {
    */
   @Test
   public void testFromStringWithUnknownTypeThrows() {
-    IllegalArgumentException e = expectThrows(
+    Exception e = expectThrows(
         IllegalArgumentException.class,
         () -> PlatformType.fromString("illegal"));
-    assertThat(e.getMessage(), containsString(String.format(ERR_UNKNOWN_PLATFORM, "illegal")));
+    assertThat(e.getMessage(), containsString("No enum constant"));
   }
 
   @Test

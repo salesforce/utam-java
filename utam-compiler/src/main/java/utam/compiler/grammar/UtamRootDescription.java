@@ -7,16 +7,17 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.JsonDeserializer.readNode;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import utam.compiler.UtamCompilationError;
+import utam.compiler.UtamCompilerIntermediateError;
 
 /**
  * Description at the level of the page object root, added as JavaDoc for generated page object
@@ -26,13 +27,7 @@ import utam.compiler.UtamCompilationError;
  */
 class UtamRootDescription {
 
-  final static String ERR_FORMAT_ERROR =
-      "format of the root comment can be either: \n"
-          + "1. \"description\" : \"string\" "
-          + "or \n"
-          + "2. \"description\" : { \"text\" : [\"array of strings\"], \"author\" : \"my team\", \"deprecated\" : \"why deprecated\" }";
   final static String VERSION_TAG = "@version";
-
   private final List<String> text = new ArrayList<>();
   private final String author;
   private final String deprecated;
@@ -71,15 +66,9 @@ class UtamRootDescription {
       String value = descriptionNode.textValue();
       return new UtamRootDescription(Collections.singletonList(value), null, null);
     }
-    // "description" : {...}
-    if (descriptionNode.isObject()) {
-      try {
-        return new ObjectMapper().readValue(descriptionNode.toString(), UtamRootDescription.class);
-      } catch (IOException e) {
-        throw new UtamCompilationError(ERR_FORMAT_ERROR, e);
-      }
-    }
-    throw new UtamCompilationError(ERR_FORMAT_ERROR);
+    Function<Exception, RuntimeException> parserErrorWrapper = causeErr -> new UtamCompilerIntermediateError(
+        causeErr, descriptionNode, 906, causeErr.getMessage());
+    return readNode(descriptionNode, UtamRootDescription.class, parserErrorWrapper);
   }
 
   /**
@@ -106,14 +95,13 @@ class UtamRootDescription {
     // replace any invalid HTML characters with their appropriate encoded entities.
     // special note: iOS class chains contain "*/" in their paths, so this must be
     // escaped for Javadoc generation.
-    List<String> res = descriptionLines.stream()
+    return descriptionLines.stream()
         .map((s) -> s
             .replace("&", "&amp;")
             .replace("<", "&lt;")
             .replace(">", "&gt;")
             .replace("*/", "*&#47;"))
         .collect(Collectors.toList());
-    return res;
   }
 
   /**

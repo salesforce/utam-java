@@ -10,12 +10,10 @@ package utam.compiler.grammar;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.UtamMethod.ERR_METHOD_EMPTY_STATEMENTS;
-import static utam.compiler.grammar.UtamMethod.ERR_METHOD_SHOULD_BE_ABSTRACT;
-import static utam.compiler.grammar.UtamMethod.ERR_RETURN_TYPE_ABSTRACT_ONLY;
+import static utam.compiler.grammar.DeserializerUtilities.expectCompilerErrorFromFile;
 
-import org.hamcrest.core.StringContains;
 import org.testng.annotations.Test;
+import utam.compiler.JsonBuilderTestUtility;
 import utam.core.framework.consumer.UtamError;
 
 /**
@@ -24,12 +22,10 @@ import utam.core.framework.consumer.UtamError;
  */
 public class UtamMethodTests {
 
-  private static final String METHOD_NAME = "test";
-
   private static void test(String jsonFile, String expectedError) {
     UtamError e = expectThrows(UtamError.class,
         () -> new DeserializerUtilities().getContext("validate/compose/" + jsonFile));
-    assertThat(e.getMessage(), StringContains.containsString(expectedError));
+    assertThat(e.getMessage(), containsString(expectedError));
   }
 
   /**
@@ -38,27 +34,29 @@ public class UtamMethodTests {
    */
   @Test
   public void testGetAbstractMethodWithComposeThrows() {
-    UtamError e = expectThrows(UtamError.class,
-        () -> new DeserializerUtilities().getResultFromFile("interface/nonEmptyMethod"));
+    Exception e = expectCompilerErrorFromFile("interface/nonEmptyMethod");
     assertThat(e.getMessage(),
-        containsString(String.format(ERR_METHOD_SHOULD_BE_ABSTRACT, METHOD_NAME)));
+        containsString("error 400: incorrect format of abstract method: \n"
+            + "Unrecognized field \"compose\""));
   }
 
   @Test
   public void testComposeEmptyStatementsThrows() {
-    String expectedErr = String.format(ERR_METHOD_EMPTY_STATEMENTS, METHOD_NAME);
-    test("emptyCompose", expectedErr);
+    test("emptyCompose", "error 505: method \"test\": compose statements should be a non empty array;");
   }
 
   @Test
   public void testComposeNullStatementsThrows() {
-    String expectedErr = String.format(ERR_METHOD_EMPTY_STATEMENTS, METHOD_NAME);
-    test("nullCompose", expectedErr);
+    test("nullCompose", "error 505: method \"test\": compose statements should be a non empty array");
   }
 
   @Test
-  public void testComposeReturnNotMatch() {
-    String expectedErr = String.format(ERR_RETURN_TYPE_ABSTRACT_ONLY, METHOD_NAME);
-    test("returnNotSupported", expectedErr);
+  public void testIncorrectReturnTypeForInterface() {
+    JsonBuilderTestUtility test = new JsonBuilderTestUtility();
+    test.addRawString("interface", "true");
+    test.addRawString("methods", "[{\"name\":\"test\", \"returnType\":[\"wrong\"]}]");
+    Exception e = test.expectCompilerError();
+    assertThat(e.getMessage(),
+        containsString("error 401: abstract method \"test\": return basic type \"[ \"wrong\" ]\" is incorrect"));
   }
 }

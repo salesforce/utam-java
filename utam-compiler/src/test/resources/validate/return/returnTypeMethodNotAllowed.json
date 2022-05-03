@@ -2,10 +2,10 @@
   "methods" : [
     {
       "name" : "test",
+      "returnType" : "container",
       "compose" : [
         {
-          "element" : "root",
-          "returnType" : [ "frame" ]
+          "element" : "root"
         }
       ]
     }

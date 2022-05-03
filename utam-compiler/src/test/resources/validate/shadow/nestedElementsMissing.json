@@ -1,0 +1,12 @@
+{
+  "elements": [
+    {
+      "name": "parent",
+      "selector": {
+        "css": ".css"
+      },
+      "shadow": {
+      }
+    }
+  ]
+}

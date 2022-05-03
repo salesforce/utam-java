@@ -11,20 +11,23 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
-import utam.compiler.grammar.ArgsProcessor.ArgsProcessorPredicate;
 import utam.compiler.grammar.UtamMethodActionApply.ApplyOperation;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParameterUtils;
+import utam.compiler.helpers.ParametersContext;
+import utam.compiler.helpers.ParametersContext.StatementParametersContext;
 import utam.compiler.helpers.StatementContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.compiler.representation.ComposeMethodStatement.Operation;
+import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
 /**
@@ -42,49 +45,68 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
   @JsonCreator
   UtamMethodActionWaitFor(
       @JsonProperty(value = "element") String elementName,
-      @JsonProperty(value = "apply") String apply,
-      @JsonProperty(value = "args") UtamArgument[] args,
-      @JsonProperty(value = "matcher") UtamMatcher matcher,
+      @JsonProperty(value = "apply") String apply, // always waitFor
+      @JsonProperty(value = "args") JsonNode argsNode,
+      @JsonProperty(value = "matcher") JsonNode matcherNode,
       @JsonProperty(value = "chain", defaultValue = "false") boolean isChain) {
-    super(elementName, apply, null, args, matcher, null, null, isChain);
+    super(elementName, argsNode, matcherNode, null, null, isChain);
   }
 
   @Override
   ComposeMethodStatement getComposeAction(TranslationContext context,
       MethodContext methodContext, StatementContext statementContext) {
     String methodName = methodContext.getName();
-    String validationContextStr = String.format("method '%s'", methodName);
+    String parserContext = String.format("method \"%s\"", methodName);
 
     // if statement is marked as a chain, it should be applied to previous result, so "element" is redundant
-    if (isChain && elementName != null) {
-      throw new UtamCompilationError(
-          String.format(ERR_ELEMENT_REDUNDANT_FOR_CHAIN, validationContextStr));
-    }
+    checkChainElementRedundant(context, methodName);
+
     if (statementContext.isInsidePredicate()) {
       throw new UtamCompilationError(
-          String.format(ERR_NESTED_PREDICATE_PROHIBITED, validationContextStr));
+          String.format(ERR_NESTED_PREDICATE_PROHIBITED, parserContext));
     }
     // first statement can't be marked as chain
     checkFirsStatementCantBeChain(statementContext, methodName);
     // previous return should be custom
     checkChainAllowed(statementContext, methodName);
-
-    // check that only one arg is provided
-    new ArgsProcessorPredicate(context, methodContext).getParameters(args);
     TypeProvider defaultReturnType = statementContext.isLastStatement() ?
         methodContext.getDeclaredReturnType().getReturnTypeOrDefault(context, VOID) : VOID;
     TypeProvider declaredStatementReturnType = statementContext
         .getDeclaredReturnOrDefault(context, methodContext.getDeclaredReturnType(),
             defaultReturnType);
-    ActionType action = new CustomActionType(apply, declaredStatementReturnType);
+    ActionType action = new CustomActionType(WAIT_FOR, declaredStatementReturnType);
     methodContext.enterPredicateContext();
-    List<ComposeMethodStatement> predicate = args[0].getPredicate(context, methodContext);
+    ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
+    ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
+        argsNode, methodContext);
+    List<UtamArgument> arguments = argumentsProvider.getArguments(false);
+    List<MethodParameter> parameters = arguments
+        .stream()
+        .map(arg -> arg.asParameter(context, methodContext, parametersContext))
+        .collect(Collectors.toList());
+    checkFunctionParameter(context, parserContext, parameters);
+    List<ComposeMethodStatement> predicate = arguments.get(0).getPredicate(context, methodContext);
     methodContext.exitPredicateContext();
     TypeProvider operationReturnType = predicate.get(predicate.size() - 1).getReturnType();
     Operation operation = new OperationWithPredicate(action, operationReturnType, predicate);
-    checkMatcher(operationReturnType, validationContextStr);
+    checkMatcher(operationReturnType, parserContext);
 
     return buildStatement(SELF_OPERAND, operation, context, methodContext, statementContext);
+  }
+
+  private void checkFunctionParameter(TranslationContext context, String contextString, List<MethodParameter> parameters) {
+    if (parameters.size() != 1) {
+      String message = context.getErrorMessage(108, contextString, "1", String.valueOf(parameters.size()));
+      throw new UtamCompilationError(argsNode, message);
+    }
+    MethodParameter parameter = parameters.get(0);
+    if(parameter != null) {
+      String actualType = parameter.getType().getSimpleName();
+      String parameterValue = parameter.getValue();
+      String message = context
+          .getErrorMessage(109, contextString, parameterValue, "function", actualType);
+      throw new UtamCompilationError(argsNode, message);
+    }
   }
 
   /**

@@ -32,7 +32,7 @@ public class TranslationTypesConfigJava implements TranslationTypesConfig {
     return String.format(INCORRECT_PAGE_OBJECT_OR_UTILITY_TYPE, pageObjectURI);
   }
 
-  static String getJavaTypeName(String pageObjectURI) {
+  private static String getJavaTypeName(String pageObjectURI) {
     String[] str = pageObjectURI.split(Pattern.quote("/"));
     if (str.length < 3) {
       throw new UtamError(getWrongTypeError(pageObjectURI));

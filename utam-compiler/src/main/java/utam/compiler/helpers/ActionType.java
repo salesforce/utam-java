@@ -7,9 +7,7 @@
  */
 package utam.compiler.helpers;
 
-import java.util.Collections;
 import java.util.List;
-import utam.compiler.grammar.UtamArgument;
 import utam.core.declarative.representation.TypeProvider;
 
 /**
@@ -30,18 +28,11 @@ public interface ActionType {
   /**
    * list of expected parameters types
    *
-   * @return list
+   * @param parserContext  parser context to validate parameters
+   * @param parameterCount number of expected parameters
+   * @return list of expected types
    */
-  List<TypeProvider> getParametersTypes();
-
-  /**
-   * some actions might have more than one possible set of parameters
-   *
-   * @return all possible combinations of parameter types
-   */
-  default List<List<TypeProvider>> getParametersTypesOptions() {
-    return Collections.singletonList(getParametersTypes());
-  }
+  List<TypeProvider> getParametersTypes(String parserContext, int parameterCount);
 
   /**
    * value of "apply" property in JSON, ex. "click"
@@ -49,14 +40,4 @@ public interface ActionType {
    * @return string with apply property
    */
   String getApplyString();
-
-  /**
-   * some actions can add default value to parameters, hence transforming originally passed args
-   *
-   * @param args declared args
-   * @return array or args
-   */
-  default UtamArgument[] getTransformedArgs(UtamArgument[] args) {
-    return args;
-  }
 }

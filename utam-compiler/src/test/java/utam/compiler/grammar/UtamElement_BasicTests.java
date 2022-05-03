@@ -10,18 +10,12 @@ package utam.compiler.grammar;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.TestUtilities.JACKSON_MISSING_REQUIRED_PROPERTY_ERROR;
-import static utam.compiler.grammar.TestUtilities.UtamEntityCreator;
-import static utam.compiler.grammar.TestUtilities.getDeserializedObject;
-import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_FILTER_NEEDS_LIST;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_MISSING_SELECTOR_PROPERTY;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_NESTED_ELEMENTS;
-import static utam.compiler.grammar.UtamElementFilter_Tests.getInnerTextFilter;
-import static utam.compiler.grammar.UtamSelectorTests.getListCssSelector;
-import static utam.compiler.grammar.UtamSelectorTests.getUtamCssSelector;
-import static utam.compiler.types.BasicElementInterface.ERR_UNSUPPORTED_ELEMENT_TYPE;
 
 import org.testng.annotations.Test;
+import utam.compiler.JsonBuilderTestUtility;
+import utam.compiler.UtamCompilationError;
 import utam.core.framework.consumer.UtamError;
 
 /**
@@ -33,25 +27,15 @@ public class UtamElement_BasicTests {
 
   private static final String ELEMENT_NAME = "test";
 
-  private static void testElement(UtamSelector selector, UtamElementFilter filter) {
-    UtamElement utamElement = UtamEntityCreator.createUtamElement(ELEMENT_NAME);
-    utamElement.selector = selector;
-    utamElement.filter = filter;
-    utamElement.isPublic = true;
-    utamElement.getAbstraction();
-  }
-
   private static void getContext(String fileName) {
-    new DeserializerUtilities().getContext("element/" + fileName);
+    new DeserializerUtilities().getContext("validate/basic_element/" + fileName);
   }
 
-  /**
-   * The validateSimpleElement method with a filter and a null selector should throw the appropriate
-   * exception
-   */
   @Test
-  public void testValidateSimpleElementWithFilterAndNullSelectorThrows() {
-    UtamError e = expectThrows(UtamError.class, () -> testElement(null, null));
+  public void testWithNullSelectorThrows() {
+    JsonBuilderTestUtility test = new JsonBuilderTestUtility();
+    test.addRawString("elements", "[ {\"name\": \"test\" }]");
+    UtamError e = expectThrows(UtamCompilationError.class, test::getDeserializedJson);
     assertThat(
         e.getMessage(),
         containsString(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, ELEMENT_NAME)));
@@ -62,48 +46,40 @@ public class UtamElement_BasicTests {
    * appropriate exception
    */
   @Test
-  public void testValidateSimpleElementWithFilterAndNonListSelectorThrows() {
-    UtamError e = expectThrows(UtamError.class, () -> testElement(getUtamCssSelector(), getInnerTextFilter()));
+  public void testBasicElementWithFilterAndNonListSelectorThrows() {
+    UtamError e = expectThrows(UtamCompilationError.class, () -> getContext("filterForNonList"));
     assertThat(
-        e.getMessage(), containsString(String.format(ERR_ELEMENT_FILTER_NEEDS_LIST, ELEMENT_NAME)));
+        e.getMessage(), containsString("error 302: element \"test\" filter: filter can only be set for list"));
+  }
+
+  @Test
+  public void testEmptyNestedElementsThrows() {
+    UtamError e = expectThrows(UtamError.class, () -> getContext("emptyNestedElementsArray"));
+    assertThat(e.getMessage(),
+        containsString("error 12: element \"test\" elements: property \"elements\" should be a not empty array"));
   }
 
   @Test
   public void testElementWithListCantHaveNestedElements() {
-    UtamElement element = UtamEntityCreator.createUtamElement(ELEMENT_NAME);
-    element.selector = getListCssSelector();
-    element.elements = new UtamElement[0];
-    UtamError e = expectThrows(UtamError.class, element::getAbstraction);
-    assertThat(
-        e.getMessage(), containsString(String.format(ERR_ELEMENT_NESTED_ELEMENTS, ELEMENT_NAME)));
-  }
-
-  @Test
-  public void testDeserializationWithoutNameThrows() {
-    String json = "{}";
-    UtamError e =
-        expectThrows(UtamError.class, () -> getDeserializedObject(json, UtamElement.class));
-    assertThat(e.getCause().getMessage(), containsString(JACKSON_MISSING_REQUIRED_PROPERTY_ERROR));
+    UtamError e = expectThrows(UtamError.class, () -> getContext("listWithNestedElements"));
+    assertThat(e.getMessage(), containsString(String.format(ERR_ELEMENT_NESTED_ELEMENTS, "test")));
   }
 
   @Test
   public void testElementNodeWithInvalidArrayElementTypeThrows() {
-    String expectedError = String.format(ERR_UNSUPPORTED_ELEMENT_TYPE, ELEMENT_NAME, "[ true ]");
     UtamError e = expectThrows(UtamError.class, () -> getContext("wrongBasicTypeArray"));
-    assertThat(e.getCause().getMessage(), containsString(expectedError));
+    assertThat(e.getMessage(), containsString("error 201: element \"test\": basic type \"[ true ]\" is not supported"));
   }
 
   @Test
   public void testElementTypeAsStringWithInvalidValueThrows() {
-    String expectedError = String.format(ERR_UNSUPPORTED_ELEMENT_TYPE, ELEMENT_NAME, "\"wrong\"");
-    UtamError e = expectThrows(UtamError.class, () -> getContext("wrongBasicType"));
-    assertThat(e.getCause().getMessage(), containsString(expectedError));
+    UtamError e = expectThrows(UtamCompilationError.class, () -> getContext("wrongBasicType"));
+    assertThat(e.getMessage(), containsString("error 201: element \"test\": basic type \"\"wrong\"\" is not supported"));
   }
 
   @Test
   public void testElementNodeWithInvalidArrayElementThrows() {
-    String expectedError = String.format(ERR_UNSUPPORTED_ELEMENT_TYPE, ELEMENT_NAME, "\"wrong\"");
     UtamError e = expectThrows(UtamError.class, () -> getContext("wrongBasicTypeArrayElement"));
-    assertThat(e.getCause().getMessage(), containsString(expectedError));
+    assertThat(e.getMessage(), containsString("error 201: element \"test\": basic type \"[ \"wrong\" ]\" is not supported"));
   }
 }

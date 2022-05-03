@@ -12,10 +12,10 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.UtamMethodDescription.ERR_FORMAT_ERROR;
 
 import java.util.List;
 import org.testng.annotations.Test;
+import utam.compiler.JsonBuilderTestUtility;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.framework.consumer.UtamError;
 
@@ -35,10 +35,6 @@ public class UtamMethodDescriptionTests {
     return new DeserializerUtilities().getContext(jsonFile)
         .getMethod(methodName)
         .getDeclaration();
-  }
-
-  private static void getMethodDescriptionFromString(String jsonString) {
-    new DeserializerUtilities().getResultFromString(jsonString).getContext();
   }
 
   @Test
@@ -143,31 +139,23 @@ public class UtamMethodDescriptionTests {
   }
 
   @Test
-  public void testFormatIsNotStringOrObject() {
-    String json = "{\n"
-        + "\"interface\" : true,"
-        + "  \"methods\": [\n"
-        + "    {\n"
-        + "      \"name\": \"myPublicMethod\",\n"
-        + "      \"description\": true"
-        + "}]}";
-    UtamError e = expectThrows(UtamError.class,
-        () -> getMethodDescriptionFromString(json));
-    assertThat(e.getCause().getMessage(), containsString(ERR_FORMAT_ERROR));
+  public void testFormatIsNotStringOrObjectForMethodThrows() {
+    JsonBuilderTestUtility testUtility = new JsonBuilderTestUtility();
+    testUtility.addRawString("interface", "true");
+    testUtility.addRawString("methods", "[{\"name\": \"test\", \"description\": true}]");
+    UtamError e = expectThrows(UtamError.class, testUtility::getDeserializedJson);
+    assertThat(e.getMessage(),
+        containsString("error 700: method \"test\": format of the description is incorrect"));
   }
 
   @Test
-  public void testIncorrectFormatOfDesscriptionObject() {
-    String json = "{\n"
-        + "\"interface\" : true,"
-        + "  \"methods\": [\n"
-        + "    {\n"
-        + "      \"name\": \"myPublicMethod\",\n"
-        + "      \"description\": { \"text\" : true } "
-        + "}]}";
-    UtamError e = expectThrows(UtamError.class,
-        () -> getMethodDescriptionFromString(json));
-    assertThat(e.getCause().getMessage(), containsString(ERR_FORMAT_ERROR));
+  public void testFormatIsNotStringOrObjectForElementThrows() {
+    JsonBuilderTestUtility test = new JsonBuilderTestUtility();
+    test.addRawString("elements",
+        "[{\"name\": \"test\", \"description\": true, \"selector\": {\"css\": \"css\"}}]");
+    Exception e = test.expectCompilerError();
+    assertThat(e.getMessage(),
+        containsString("error 700: element \"test\": format of the description is incorrect"));
   }
 
   @Test

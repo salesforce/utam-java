@@ -7,21 +7,23 @@
  */
 package utam.compiler.helpers;
 
-import utam.core.declarative.representation.AnnotationProvider;
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.element.Locator;
-import utam.core.framework.base.PageMarker;
-import org.testng.annotations.Test;
-import utam.core.framework.base.ElementMarker;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static utam.compiler.grammar.TestUtilities.getCssSelector;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.testng.annotations.Test;
+import utam.core.declarative.representation.AnnotationProvider;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.element.Locator;
+import utam.core.framework.base.ElementMarker;
+import utam.core.framework.base.PageMarker;
+import utam.core.framework.context.PlatformType;
 import utam.core.selenium.element.LocatorBy;
-
-import static utam.compiler.grammar.TestUtilities.getCssSelector;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.testng.Assert.expectThrows;
 
 /**
  * Provides tests for the ClassAnnotationProvider class
@@ -147,14 +149,14 @@ public class AnnotationUtilsTests {
   @Test
   public void testGetPagePlatformAnnotiationWithWeb() {
     assertThat(
-        AnnotationUtils.getPagePlatformAnnotation("web").getAnnotationText(),
+        AnnotationUtils.getPagePlatformAnnotation(PlatformType.WEB).getAnnotationText(),
         is(equalTo("@PageMarker.Switch(PlatformType.WEB)")));
   }
 
   @Test
   public void testGetPagePlatformAnnotiationWithNative() {
     assertThat(
-        AnnotationUtils.getPagePlatformAnnotation("native")
+        AnnotationUtils.getPagePlatformAnnotation(PlatformType.NATIVE)
             .getAnnotationText(),
         is(equalTo("@PageMarker.Switch(PlatformType.NATIVE)")));
   }
@@ -162,18 +164,7 @@ public class AnnotationUtilsTests {
   @Test
   public void testGetPagePlatformAnnotiationWithEmptyValue() {
     assertThat(
-        AnnotationUtils.getPagePlatformAnnotation("").getAnnotationText(), is(emptyString()));
-    assertThat(
         AnnotationUtils.getPagePlatformAnnotation(null).getAnnotationText(), is(emptyString()));
-  }
-
-  @Test
-  public void testGetPagePlatformAnnotiationWithInvalidValueThrows() {
-    IllegalArgumentException e =
-        expectThrows(
-            IllegalArgumentException.class,
-            () -> AnnotationUtils.getPagePlatformAnnotation("unknown"));
-    assertThat(e.getMessage(), containsString("Unknown platform type 'unknown'"));
   }
 
   private Set<String> getImportedTypes(AnnotationProvider provider) {

@@ -350,7 +350,7 @@ public class PageObjectValidationTestHelper {
       return isPublic;
     }
 
-    public void setIsPublic(boolean isPublic) {
+    void setIsPublic(boolean isPublic) {
       this.isPublic = isPublic;
     }
 

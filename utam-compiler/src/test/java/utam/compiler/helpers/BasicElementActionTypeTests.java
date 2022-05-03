@@ -43,7 +43,7 @@ public class BasicElementActionTypeTests {
   }
 
   private static void validateAction(ActionType action, String returnType) {
-    assertThat(action.getParametersTypes(), is(empty()));
+    assertThat(action.getParametersTypes("test", 0), is(empty()));
     assertThat(action.getReturnType().getSimpleName(), is(equalTo(returnType)));
   }
 
@@ -105,7 +105,7 @@ public class BasicElementActionTypeTests {
   public void testGetAttribute() {
     ActionType action = BasicElementActionType.getAttribute;
     Set<String> parameterTypeStrings =
-        action.getParametersTypes().stream()
+        action.getParametersTypes("test", 1).stream()
             .filter((type) -> !type.getSimpleName().isEmpty())
             .map(TypeProvider::getSimpleName)
             .collect(Collectors.toSet());

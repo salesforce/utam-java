@@ -36,7 +36,7 @@ public class UtamMethodActionWaitForTests {
 
   @Test
   public void nestedPredicateThrows() {
-    String expectedError = String.format(ERR_NESTED_PREDICATE_PROHIBITED, "method 'test'");
+    String expectedError = String.format(ERR_NESTED_PREDICATE_PROHIBITED, "method \"test\"");
     UtamError e = expectThrows(UtamError.class,
         () -> new DeserializerUtilities().getContext("validate/compose/nestedWait"));
     assertThat(e.getMessage(), containsString(expectedError));

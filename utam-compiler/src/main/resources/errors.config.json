@@ -1,0 +1,254 @@
+[
+  {
+    "message": "%s: property \"%s\" should be a non empty string, instead found %s",
+    "code": 10
+  },
+  {
+    "message": "%s: array value should be a non empty string, instead found %s",
+    "code": 11
+  },
+  {
+    "message": "%s: property \"%s\" should be a not empty array",
+    "code": 12
+  },
+  {
+    "message": "%s: %s should be a non empty object",
+    "code": 13
+  },
+  {
+    "message": "%s: incorrect argument format: \n%s",
+    "docs": "https://utam.dev/grammar/spec#supported-argument-types",
+    "code": 100
+  },
+  {
+    "message": "%s: unknown element with name \"%s\" is referenced as an argument",
+    "code": 101
+  },
+  {
+    "message": "%s: unsupported literal argument type \"%s\", supported are: { %s }",
+    "code": 102
+  },
+  {
+    "code": 103,
+    "message": "%s: unsupported argument type \"%s\", supported are: { %s }"
+  },
+  {
+    "code": 104,
+    "message": "%s: incorrect predicate format: \n%s",
+    "docs": "https://utam.dev/grammar/spec#explicit-waits"
+  },
+  {
+    "code": 105,
+    "message": "%s: literal arguments are not allowed",
+    "tip": "use \"name\", not \"value\""
+  },
+  {
+    "code": 106,
+    "message": "%s: incorrect format of elementReference argument: \n%s",
+    "docs": "https://utam.dev/grammar/spec#element-reference"
+  },
+  {
+    "code": 107,
+    "message": "%s: parameter with name \"%s\" is already declared"
+  },
+  {
+    "code": 108,
+    "message": "%s: expected number of parameters is %s, found %s"
+  },
+  {
+    "code": 109,
+    "message": "%s: incorrect parameter type [ %s ]: expected type \"%s\", found \"%s\""
+  },
+  {
+    "code": 110,
+    "message": "\"%s\": incorrect number of parameters for action \"%s\": expected %s, provided %s"
+  },
+  {
+    "code": 200,
+    "message": "%s: incorrect format of elements: \n%s"
+  },
+  {
+    "code": 201,
+    "message": "element \"%s\": basic type \"%s\" is not supported, valid values are: actionable, clickable, draggable, editable, touchable"
+  },
+  {
+    "code": 202,
+    "message": "element \"%s\": element with same name was already declared"
+  },
+  {
+    "code": 300,
+    "message": "element \"%s\" filter: incorrect format of element filter: \n%s",
+    "docs": "https://utam.dev/grammar/spec#element-filter"
+  },
+  {
+    "code": 301,
+    "message": "element \"%s\" filter: unknown method \"%s\" for basic element"
+  },
+  {
+    "code": 302,
+    "message": "element \"%s\" filter: filter can only be set for list"
+  },
+  {
+    "code": 400,
+    "message": "incorrect format of abstract method: \n%s",
+    "docs": "https://utam.dev/grammar/spec#interfaces"
+  },
+  {
+    "code": 401,
+    "message": "abstract method \"%s\": return basic type \"%s\" is incorrect, valid values are: actionable, clickable, draggable, editable, touchable"
+  },
+  {
+    "code": 402,
+    "message": "abstract method \"%s\": \"returnAll\" property can't be set without setting return type"
+  },
+  {
+    "code": 500,
+    "message": "incorrect format of compose method: \n%s",
+    "docs": "https://utam.dev/grammar/spec#compose-method"
+  },
+  {
+    "code": 501,
+    "message": "method \"%s\": return type %s is not supported"
+  },
+  {
+    "code": 502,
+    "message": "%s: statement parameter \"%s\" is not found in declared method args"
+  },
+  {
+    "code": 503,
+    "message": "%s: declared parameter \"%s\" is never used"
+  },
+  {
+    "code": 504,
+    "message": "%s: parameter \"%s\" at method level can't have type \"argumentReference\""
+  },
+  {
+    "code": 505,
+    "message": "method \"%s\": compose statements should be a non empty array",
+    "docs": "https://utam.dev/grammar/spec#compose-method"
+  },
+  {
+    "code": 600,
+    "message": "method \"%s\" statement: incorrect compose statement format: \n%s",
+    "docs": "https://utam.dev/grammar/spec#compose-method"
+  },
+  {
+    "code": 601,
+    "message": "method \"%s\" statement: unknown element with name \"%s\" is referenced in a compose statement as operand"
+  },
+  {
+    "code": 602,
+    "message": "method \"%s\" statement: return type %s is not supported in a compose statement",
+    "docs": "https://utam.dev/grammar/spec#return-type-for-a-compose-statement"
+  },
+  {
+    "code": 603,
+    "message": "method \"%s\" statement: \"returnAll\" property can't be set without setting return type in a compose statement"
+  },
+  {
+    "code": 604,
+    "message": "method \"%s\" statement: statement that invokes container method needs a \"returnType\""
+  },
+  {
+    "code": 605,
+    "message": "method \"%s\" statement: can't infer return type for \"%s\", please provide a \"returnType\""
+  },
+  {
+    "code": 606,
+    "message": "method \"%s\" statement: \"element\" property is redundant because statement marked as chain"
+  },
+  {
+    "code": 607,
+    "message": "method \"beforeLoad\" statement: only \"document\" or \"root\" elements are allowed"
+  },
+  {
+    "code": 608,
+    "message": "method \"%s\" statement: compose statement should be a non empty object"
+  },
+  {
+    "code": 609,
+    "message": "method \"%s\" statement: either \"element\" or \"apply\" or \"applyExternal\" should be defined"
+  },
+  {
+    "code": 610,
+    "message": "method \"%s\" statement: either \"apply\" or \"applyExternal\" should be defined"
+  },
+  {
+    "code": 611,
+    "message": "method \"%s\" utility statement: either \"element\" is redundant"
+  },
+  {
+    "code": 612,
+    "message": "method \"%s\" statement: unknown method \"%s\" for basic element"
+  },
+  {
+    "code": 700,
+    "message": "%s: format of the description is incorrect: \n%s",
+    "docs": "https://utam.dev/grammar/spec#method-description"
+  },
+  {
+    "code": 801,
+    "message": "\"profile\": duplicate profile name \"%s\""
+  },
+  {
+    "code": 802,
+    "message": "profile \"%s\": duplicate profile value \"%s\""
+  },
+  {
+    "code": 803,
+    "message": "profile { \"%s\": \"%s\" } is not configured, make sure it's in compiler config"
+  },
+  {
+    "code": 804,
+    "message": "page object with \"implements\" should have \"profile\" property"
+  },
+  {
+    "code": 805,
+    "message": "\"profile\" can only be set for a page object that implements an interface, please add \"implements\" property"
+  },
+  {
+    "code": 806,
+    "message": "profile \"%s\": values can either be string or non empty string array"
+  },
+  {
+    "code": 900,
+    "message": "incorrect format of the page object: \n%s"
+  },
+  {
+    "code": 901,
+    "message": "non root page object can't have selector",
+    "docs": "https://utam.dev/grammar/spec#root-element",
+    "tip": "either remove \"selector\" property or remove [\"root\" : true]"
+  },
+  {
+    "code": 902,
+    "message": "root page object requires default selector property",
+    "tip": "either remove [\"root\" : true] or add \"selector\" property"
+  },
+  {
+    "code": 903,
+    "message": "\"platform\" property: platform should be a string with \"web\" or \"native\" value, instead found \"%s\""
+  },
+  {
+    "code": 904,
+    "message": "interface declaration can only have properties: [ %s ]"
+  },
+  {
+    "code": 905,
+    "message": "method \"beforeLoad\" cannot have parameters"
+  },
+  {
+    "message": "format of the root description is incorrect",
+    "docs": "https://utam.dev/grammar/spec#page-object-description",
+    "code": 906
+  },
+  {
+    "message": "%s: format of selector is incorrect: \n%s",
+    "docs": "https://utam.dev/grammar/spec#element-selector",
+    "code": 1000
+  },
+  {
+    "message": "%s: incorrect format of elements inside shadow: \n%s",
+    "code": 1100
+  }
+]

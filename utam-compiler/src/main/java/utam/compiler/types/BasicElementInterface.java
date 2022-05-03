@@ -11,10 +11,8 @@ import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import utam.compiler.UtamCompilationError;
+import java.util.function.Function;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.representation.UnionType;
 import utam.core.element.Actionable;
@@ -55,20 +53,13 @@ public enum BasicElementInterface implements TypeProvider {
    */
   touchable(Touchable.class);
 
-  /**
-   * Error template string for an unsupported element type
-   */
-  public static final String ERR_UNSUPPORTED_ELEMENT_TYPE =
-      "element '%s': type %s is not supported, "
-          + "valid values are: " + Arrays.stream(values()).map(Enum::name)
-          .collect(Collectors.joining(", "));
   private final Class type;
 
   BasicElementInterface(Class type) {
     this.type = type;
   }
 
-  private static boolean isBasicType(String jsonString) {
+  public static boolean isBasicType(String jsonString) {
     for (BasicElementInterface type : BasicElementInterface.values()) {
       if (type.name().equals(jsonString)) {
         return true;
@@ -97,17 +88,14 @@ public enum BasicElementInterface implements TypeProvider {
   /**
    * process Json node with basic types, applicable to root or basic elements
    *
-   * @param typeNode    Json node
-   * @param elementName name of the element, used in error message
-   * @param isThrowAnError if set to true, non basic type will throw an error
+   * @param typeNode Json node
+   * @param error    error message supplier
    * @return string array with basic types or empty array
    */
-  public static String[] processBasicTypeNode(JsonNode typeNode, String elementName, boolean isThrowAnError) {
+  public static String[] processBasicTypeNode(JsonNode typeNode, Function<JsonNode, RuntimeException> error) {
     if (typeNode == null || typeNode.isNull()) {
       return new String[]{};
     }
-    final String typeNodeValueError = String
-        .format(ERR_UNSUPPORTED_ELEMENT_TYPE, elementName, typeNode.toPrettyString());
     if (typeNode.isTextual() && isBasicType(typeNode.textValue())) {
       return new String[]{typeNode.textValue()};
     }
@@ -115,43 +103,17 @@ public enum BasicElementInterface implements TypeProvider {
       List<String> values = new ArrayList<>();
       for (JsonNode valueNode : typeNode) {
         if (!valueNode.isTextual()) {
-          if(isThrowAnError) {
-            throw new UtamCompilationError(typeNodeValueError);
-          } else {
-            return null;
-          }
+          throw error.apply(typeNode);
         }
         String valueStr = valueNode.textValue();
         if (!isBasicType(valueStr)) {
-          if(isThrowAnError) {
-            throw new UtamCompilationError(String
-                .format(ERR_UNSUPPORTED_ELEMENT_TYPE, elementName, "\"" + valueStr + "\""));
-          } else {
-            return null;
-          }
+          throw error.apply(typeNode);
         }
         values.add(valueStr);
       }
       return values.toArray(String[]::new);
     }
-    if(isThrowAnError) {
-      throw new UtamCompilationError(typeNodeValueError);
-    } else {
-      return null;
-    }
-  }
-
-  /**
-   * check if "returnType" in an interface method returns basic type
-   *
-   * @param returnTypeNode the node containing the return type
-   * @return true if it is
-   */
-  public static boolean isReturnBasicType(JsonNode returnTypeNode) {
-    if (returnTypeNode == null || returnTypeNode.isNull()) {
-      return false;
-    }
-    return processBasicTypeNode(returnTypeNode, "returnType", false) != null;
+    throw error.apply(typeNode);
   }
 
   @Override

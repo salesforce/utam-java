@@ -15,7 +15,6 @@ import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.LocatorCodeGeneration.SelectorType;
 import utam.core.element.Locator;
-import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -58,7 +57,7 @@ class UtamRootSelector {
       locator = LocatorBy.byUiAutomator(uiautomator);
       selectorType = SelectorType.uiautomator;
     } else {
-      throw new UtamError(ERR_SELECTOR_MISSING);
+      throw new UtamCompilationError(ERR_SELECTOR_MISSING);
     }
     if (Stream.of(css, classchain, uiautomator, accessid)
         .filter(Objects::nonNull).toArray().length > 1) {

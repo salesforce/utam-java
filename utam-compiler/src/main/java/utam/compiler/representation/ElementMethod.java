@@ -14,7 +14,6 @@ import static utam.compiler.translator.TranslationUtilities.getElementGetterMeth
 import static utam.compiler.types.BasicElementUnionType.asUnionTypeOrNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,7 +21,6 @@ import utam.compiler.grammar.UtamMethodDescription;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.ParameterUtils;
-import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TypeUtilities.FromClass;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
@@ -303,7 +301,7 @@ public abstract class ElementMethod {
     private void setFilterParameterClassImports() {
       // For non-primitive method parameters added by a filter, we must add class imports
       // for those types or the generated code will not be compilable by javac.
-      parametersTracker.getMethodParameters().stream()
+      parametersTracker.getMethodParameters()
           .forEach(param -> ParameterUtils.setImport(classImports, param.getType()));
     }
 

@@ -1,0 +1,28 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "type": "draggable",
+      "selector": {
+        "css": "css"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "test",
+          "apply": "dragAndDrop",
+          "args": [
+            {
+              "name": "str",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

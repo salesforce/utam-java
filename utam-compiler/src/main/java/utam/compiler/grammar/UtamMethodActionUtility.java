@@ -40,14 +40,16 @@ import utam.core.framework.base.UtamUtilitiesContext;
 @JsonDeserialize
 class UtamMethodActionUtility extends UtamMethodAction {
 
+  private final UtamUtilityMethodAction applyExternal;
+
   @JsonCreator
   UtamMethodActionUtility(
-      @JsonProperty(value = "args") UtamArgument[] args,
       @JsonProperty(value = "applyExternal", required = true) UtamUtilityMethodAction applyExternal,
       @JsonProperty(value = "returnType") JsonNode returnType,
       @JsonProperty(value = "returnAll") Boolean isReturnList) {
     // utility can't be marked as chain
-    super(null, null, applyExternal, args, null, returnType, isReturnList, false);
+    super(null, null, null, returnType, isReturnList, false);
+    this.applyExternal = applyExternal;
   }
 
   /**
@@ -62,9 +64,7 @@ class UtamMethodActionUtility extends UtamMethodAction {
     checkChainAllowed(statementContext, methodContext.getName());
     TypeProvider utilityType = context.getUtilityType(applyExternal.getExternalClassPath());
     Operand operand = new UtilityOperand(utilityType);
-    List<MethodParameter> parameters = new ArgsProcessor(context, methodContext,
-        p -> methodContext.setStatementParameter(p, statementContext))
-        .getParameters(applyExternal.args);
+    List<MethodParameter> parameters = applyExternal.getParameters(context, methodContext);
     ReturnType returnTypeObject = getDeclaredReturnType(methodContext.getName());
     TypeProvider defaultReturnType = statementContext.isLastStatement() ?
         methodContext.getDeclaredReturnType().getReturnTypeOrDefault(context, VOID) : VOID;

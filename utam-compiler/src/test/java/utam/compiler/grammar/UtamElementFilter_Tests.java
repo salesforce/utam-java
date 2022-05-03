@@ -7,27 +7,22 @@
  */
 package utam.compiler.grammar;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.testng.Assert.assertThrows;
-import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
-import static utam.compiler.grammar.UtamArgumentTests.getNonLiteralArg;
-import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_FILTER_NEEDS_LIST;
-import static utam.compiler.types.BasicElementInterface.actionable;
+import static org.hamcrest.Matchers.emptyIterable;
+import static utam.compiler.grammar.DeserializerUtilities.expectCompilerErrorFromFile;
+import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
+import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT_IMPL_CLASS;
 
 import java.util.List;
+import org.hamcrest.Matchers;
 import org.testng.annotations.Test;
-import utam.compiler.helpers.MatcherType;
-import utam.compiler.helpers.ParameterUtils;
-import utam.compiler.helpers.PrimitiveType;
-import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.UtamError;
+import utam.compiler.grammar.DeserializerUtilities.Result;
+import utam.compiler.helpers.TranslationContext;
+import utam.compiler.representation.PageObjectValidationTestHelper;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
+import utam.core.declarative.representation.PageObjectMethod;
 
 /**
  * Provides tests of UtamElementFilter for basic and custom elements
@@ -38,133 +33,128 @@ import utam.core.framework.consumer.UtamError;
 public class UtamElementFilter_Tests {
 
   private static final String ELEMENT_NAME = "test";
-  private static final TypeProvider ACTIONABLE_TYPE = actionable;
-  private static final UtamArgument[] ONE_STRING_ARGS =
-      new UtamArgument[]{
-          getNonLiteralArg("text", "string")
-      };
-  private static final UtamArgument[] ONE_BOOLEAN_ARGS =
-      new UtamArgument[]{
-          getNonLiteralArg("bool", "boolean")
-      };
-
-  static UtamElementFilter getInnerTextFilter() {
-    return new UtamElementFilter(
-        "getText", new UtamMatcher(MatcherType.stringContains, ONE_STRING_ARGS));
-  }
-
-  private static void setElementFilter(UtamElementFilter filter, UtamElement.Type elementNodeType) {
-    filter.setElementFilter(getTestTranslationContext(), elementNodeType, ACTIONABLE_TYPE,
-        ELEMENT_NAME);
-  }
+  private static final String ELEMENT_METHOD_NAME = "getTest";
+  private static final String BASIC_ELEMENT_TYPE_IMPL = BASIC_ELEMENT_IMPL_CLASS.getFullName();
+  private static final String BASIC_ELEMENT_TYPE = BASIC_ELEMENT.getFullName();
+  private static final String LIST_TYPE = List.class.getName();
 
   @Test
-  public void testBasicElementGetTextFilter() {
-    UtamElementFilter filter =
-        new UtamElementFilter(
-            "getText", new UtamMatcher(MatcherType.stringContains, ONE_STRING_ARGS));
-    setElementFilter(filter, UtamElement.Type.BASIC);
-    List<MethodParameter> applyMethodParams = filter.getApplyMethodParameters();
-    assertThat(applyMethodParams, is(empty()));
-    assertThat(filter.getMatcherType(), is(equalTo(MatcherType.stringContains)));
-    List<MethodParameter> matcherParameters = filter.getMatcherParameters();
-    assertThat(
-        matcherParameters,
-        is(containsInAnyOrder(new ParameterUtils.Regular("text", PrimitiveType.STRING))));
-  }
-
-  @Test
-  public void testBasicElementGetTextWithArgsFilterThrows() {
-    UtamElementFilter filter =
-        new UtamElementFilter(
-            "getText",
-            ONE_STRING_ARGS,
-            new UtamMatcher(MatcherType.stringContains, ONE_STRING_ARGS),
-            false);
-    assertThrows(
-        () -> setElementFilter(filter, UtamElement.Type.BASIC));
+  public void testBasicElementFilterWithoutMatcherThrows() {
+    Exception e = expectCompilerErrorFromFile("validate/filter/basicFilterNoMatcher");
+    assertThat(e.getMessage(), containsString(
+        "error 300: element \"test\" filter: incorrect format of element filter: \n"
+            + "Missing required creator property 'matcher'"));
   }
 
   @Test
   public void testBasicElementWrongMethodInFilterThrows() {
-    UtamElementFilter filter =
-        new UtamElementFilter(
-            "wrongMethod",
-            ONE_STRING_ARGS,
-            new UtamMatcher(MatcherType.stringContains, ONE_STRING_ARGS),
-            false);
-    UtamError e =
-        expectThrows(
-            UtamError.class,
-            () -> setElementFilter(filter, UtamElement.Type.BASIC));
-    assertThat(e.getMessage(), containsString("wrongMethod"));
-  }
-
-  @Test
-  public void testCustomElementGetTextFilter() {
-    UtamElementFilter filter =
-        new UtamElementFilter(
-            "getCustomText",
-            ONE_STRING_ARGS,
-            new UtamMatcher(MatcherType.stringEquals, ONE_STRING_ARGS),
-            false);
-    setElementFilter(filter, UtamElement.Type.CUSTOM);
-    List<MethodParameter> applyMethodParams = filter.getApplyMethodParameters();
-    assertThat(
-        applyMethodParams,
-        is(containsInAnyOrder(new ParameterUtils.Regular("text", PrimitiveType.STRING))));
-    assertThat(filter.getMatcherType(), is(equalTo(MatcherType.stringEquals)));
+    Exception e = expectCompilerErrorFromFile("validate/filter/basicFilterWrongMethod");
+    assertThat(e.getMessage(), containsString(
+        "error 301: element \"test\" filter: unknown method \"wrong\" for basic element"));
   }
 
   @Test
   public void testCustomElementGetTextFilterWithWrongArgThrows() {
-    UtamElementFilter filter =
-        new UtamElementFilter(
-            "getCustomText",
-            ONE_STRING_ARGS,
-            new UtamMatcher(MatcherType.isTrue, ONE_STRING_ARGS),
-            false);
-    assertThrows(
-        () -> setElementFilter(filter, UtamElement.Type.CUSTOM));
+    Exception e = expectCompilerErrorFromFile("validate/filter/customWrongMatcherArg");
+    assertThat(e.getMessage(), containsString(
+        "error 108: element \"test\" matcher: expected number of parameters is 0, found 1"));
   }
 
   @Test
-  public void testCustomElementGetTextFilterWithWrongArgTypeThrows() {
-    UtamElementFilter filter =
-        new UtamElementFilter(
-            "getCustomText",
-            null,
-            new UtamMatcher(MatcherType.stringContains, ONE_BOOLEAN_ARGS),
-            false);
-    assertThrows(() -> setElementFilter(filter, UtamElement.Type.CUSTOM));
+  public void testCustomFilterNonListThrows() {
+    Exception e = expectCompilerErrorFromFile("validate/custom_element/filterForNonList");
+    assertThat(e.getMessage(), containsString(
+        "error 302: element \"test\" filter: filter can only be set for list"));
   }
 
   @Test
-  public void testBasicFilterWithoutListThrows() {
-    UtamElement utamElement = TestUtilities.UtamEntityCreator.createUtamElement("element");
-    utamElement.selector = new UtamSelector("css");
-    utamElement.filter = getInnerTextFilter();
-    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
-    assertThat(
-        e.getMessage(), containsString(String.format(ERR_ELEMENT_FILTER_NEEDS_LIST, "element")));
+  public void testDuplicateArgsNamesThrows() {
+    Exception e = expectCompilerErrorFromFile("validate/filter/basicFilterDuplicateArgs");
+    assertThat(e.getMessage(),
+        containsString("duplicate parameters with name 'arg1' in the element \"element\""));
   }
 
   @Test
-  public void testCustomFilterWithoutListThrows() {
-    UtamElement utamElement = TestUtilities.UtamEntityCreator.createUtamElement("element");
-    utamElement.type = new String[]{TestUtilities.TEST_URI};
-    utamElement.selector = new UtamSelector("css");
-    utamElement.filter = getInnerTextFilter();
-    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
-    assertThat(
-        e.getMessage(), containsString(String.format(ERR_ELEMENT_FILTER_NEEDS_LIST, "element")));
+  public void testFilterBasicPublicElementUnionType() {
+    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "TestElement");
+    Result result = new DeserializerUtilities().getResultFromFile("filter/basicFilterPublicUnion");
+    TranslationContext context = result.getContext();
+    PageObjectMethod method = context.getElement(ELEMENT_NAME).getElementMethod();
+    expected.addParameter(new MethodParameterInfo("text"));
+    expected.addImpliedImportedTypes(BASIC_ELEMENT_TYPE);
+    assertThat(method.getDeclaration().getImports(), Matchers.is(emptyIterable()));
+    expected.addCodeLine("BasicElement root = this.getRootElement()");
+    expected.addCodeLine("return basic(root, this.test).build(TestElement.class, "
+        + "TestElementImpl.class, elm -> text.equals(elm.getText()))");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+    String unionClass = context.getClassUnionTypes().get(0).getDeclarationCode().get(0);
+    assertThat(unionClass, Matchers.is(Matchers.equalTo(
+        "public static class TestElementImpl extends BasePageElement implements TestElement {}")));
+    String unionType = context.getInterfaceUnionTypes().get(0).getDeclarationCode()
+        .get(0);
+    assertThat(unionType,
+        Matchers.is(Matchers.equalTo("interface TestElement extends Editable, Clickable {}")));
   }
 
   @Test
-  public void testDuplicateArgsNames() {
-    UtamError e =
-        expectThrows(UtamError.class,
-            () -> new DeserializerUtilities().getResultFromFile("filter/basicFilterDuplicateArgs"));
-    assertThat(e.getMessage(), containsString("duplicate parameters"));
+  public void testFilterBasicPublicElementDefaultType() {
+    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "List<BasicElement>");
+    Result result = new DeserializerUtilities().getResultFromFile("filter/basicFilterPublic");
+    TranslationContext context = result.getContext();
+    PageObjectMethod method = context.getElement(ELEMENT_NAME).getElementMethod();
+    expected.addParameter(new MethodParameterInfo("text"));
+    expected.addImportedTypes(LIST_TYPE, BASIC_ELEMENT_TYPE);
+    expected.addImpliedImportedTypes(LIST_TYPE, BASIC_ELEMENT_TYPE_IMPL);
+    expected.addCodeLine("BasicElement root = this.getRootElement()");
+    expected.addCodeLine(
+        "return basic(root, this.test).buildList(BasicElement.class, BasePageElement.class, elm -> text.equals(elm.getText()))");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+    assertThat(context.getInterfaceUnionTypes(), Matchers.is(emptyIterable()));
+    assertThat(context.getClassUnionTypes(), Matchers.is(emptyIterable()));
+  }
+
+  @Test
+  public void testNullableListWithFilter() {
+    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "BasicElement");
+    expected.addCodeLine("BasicElement root = this.getRootElement()");
+    expected.addCodeLine("return basic(root, this.test)"
+        + ".build(BasicElement.class, BasePageElement.class, "
+        + "elm -> Boolean.TRUE.equals(elm.isVisible()))");
+    Result result = new DeserializerUtilities().getResultFromFile("filter/basicElementFilter");
+    TranslationContext context = result.getContext();
+    PageObjectMethod method = context.getElement(ELEMENT_NAME).getElementMethod();
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
+
+  @Test
+  public void testFilterByGetAttribute() {
+    TranslationContext context = new DeserializerUtilities()
+        .getContext("filter/basicFilterGetAttribute");
+    PageObjectMethod method = context.getMethod(ELEMENT_METHOD_NAME);
+    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "List<BasicElement>");
+    expected.addParameter(new MethodParameterInfo("scopeArg"));
+    expected.addParameter(new MethodParameterInfo("selectorArg"));
+    expected.addParameter(new MethodParameterInfo("applyArg"));
+    expected.addParameter(new MethodParameterInfo("matcherArg"));
+    expected.addCodeLine("BasicElement scope = this.getScopeElement(scopeArg)");
+    expected.addCodeLines(
+        "return basic(scope, this.test.setParameters(selectorArg))"
+            + ".buildList(BasicElement.class, BasePageElement.class, "
+            + "elm -> (elm.getAttribute(applyArg)!= null && elm.getAttribute(applyArg).contains(matcherArg)))");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
+
+  @Test
+  public void testFilterByIsVisibleFalseFindFirst() {
+    TranslationContext context = new DeserializerUtilities()
+        .getContext("filter/basicFilterIsVisible");
+    PageObjectMethod method = context.getMethod(ELEMENT_METHOD_NAME);
+    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "TestElement");
+    expected.addParameter(new MethodParameterInfo("scopeArg"));
+    expected.addParameter(new MethodParameterInfo("selectorArg"));
+    expected.addCodeLine("BasicElement scope = this.getScopeElement(scopeArg)");
+    expected.addCodeLines("return basic(scope, this.test.setParameters(selectorArg))."
+        + "build(TestElement.class, TestElementImpl.class, elm -> Boolean.FALSE.equals(elm.isVisible()))");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 }

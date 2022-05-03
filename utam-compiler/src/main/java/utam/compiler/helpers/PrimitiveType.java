@@ -67,6 +67,9 @@ public enum PrimitiveType implements TypeProvider {
    * @return true if the JSON string represents a primitive type; otherwise false
    */
   public static boolean isPrimitiveType(String jsonString) {
+    if(jsonString == null) {
+      return false;
+    }
     for (PrimitiveType primitive : PrimitiveType.values()) {
       if (jsonString.equals(primitive.typeFromJson)) {
         return true;

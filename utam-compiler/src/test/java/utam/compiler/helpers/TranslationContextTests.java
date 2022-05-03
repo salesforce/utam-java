@@ -10,31 +10,26 @@ package utam.compiler.helpers;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
-import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_DUPLICATE_ELEMENT_NAME;
 import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_DUPLICATE_FIELD;
 import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_DUPLICATE_METHOD;
-import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_ELEMENT_NOT_FOUND;
-import static utam.compiler.helpers.TranslationContext.ERR_PROFILE_NOT_CONFIGURED;
 import static utam.compiler.types.BasicElementInterface.editable;
 
-import org.hamcrest.CoreMatchers;
 import org.testng.annotations.Test;
 import utam.compiler.grammar.DeserializerUtilities;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.framework.consumer.UtamError;
-import utam.core.selenium.element.LocatorBy;
 
 public class TranslationContextTests {
 
@@ -56,13 +51,12 @@ public class TranslationContextTests {
 
   @Test
   public void testGetElement() {
-    assertThat(context.getElement(TEST_ELEMENT_NAME), is(CoreMatchers.notNullValue()));
+    assertThat(context.getElement(TEST_ELEMENT_NAME), is(notNullValue()));
   }
 
   @Test
-  public void testGetElementWithMissingElementThrows() {
-    UtamError e = expectThrows(UtamError.class, () -> context.getElement("error"));
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_CONTEXT_ELEMENT_NOT_FOUND, "error"))));
+  public void testGetElementWithMissingElementReturnsNull() {
+    assertThat(context.getElement("error"), is(nullValue()));
   }
 
   @Test
@@ -100,19 +94,6 @@ public class TranslationContextTests {
   }
 
   @Test
-  public void testSetElement() {
-    TranslationContext context = getTestTranslationContext();
-    ElementContext elementContext = new ElementContext.Basic(TEST_ELEMENT_NAME,
-        mock(TypeProvider.class), mock(LocatorBy.class));
-    context.setElement(elementContext);
-    assertThat(context.getElement(TEST_ELEMENT_NAME), is(not(nullValue())));
-    UtamError e = expectThrows(UtamError.class, () -> context.setElement(elementContext));
-    assertThat(
-        e.getMessage(),
-        containsString(String.format(ERR_CONTEXT_DUPLICATE_ELEMENT_NAME, TEST_ELEMENT_NAME)));
-  }
-
-  @Test
   public void testMethodWithDuplicateNamesThrows() {
     PageObjectMethod method = mock(PageObjectMethod.class);
     MethodDeclaration declaration = mock(MethodDeclaration.class);
@@ -129,7 +110,7 @@ public class TranslationContextTests {
   public void testGetRootElement() {
     TranslationContext context = getTestTranslationContext();
     ElementContext defaultRoot = new ElementContext.Root(editable, null, editable);
-    context.setElement(defaultRoot);
+    context.setElement(null, defaultRoot);
     assertThat(context.getRootElement().getName(), is(equalTo(ElementContext.ROOT_ELEMENT_NAME)));
   }
 
@@ -154,11 +135,14 @@ public class TranslationContextTests {
   }
 
   @Test
-  public void testNonExistingProfileThrows() {
-    TranslationContext translationInstantContext = getTestTranslationContext();
-    UtamError e =
-        expectThrows(
-            UtamError.class, () -> translationInstantContext.getProfile("driver", "chrome"));
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_PROFILE_NOT_CONFIGURED, "driver"))));
+  public void testNonExistingProfileReturnsNull() {
+    ProfileConfiguration profile = getTestTranslationContext().getConfiguredProfile("not");
+    assertThat(profile, is(nullValue()));
+  }
+
+  @Test
+  public void testSetPublicMethodsWithNullMethodList() {
+    TranslationContext context = new DeserializerUtilities().getResultFromString("{}").getContext();
+    assertThat(context.getMethods(), is(empty()));
   }
 }

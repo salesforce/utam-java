@@ -9,14 +9,10 @@ package utam.compiler.helpers;
 
 import static utam.compiler.helpers.StatementContext.StatementType.PREDICATE_LAST_STATEMENT;
 import static utam.compiler.helpers.StatementContext.StatementType.PREDICATE_STATEMENT;
-import static utam.compiler.helpers.StatementContext.StatementType.REGULAR_STATEMENT;
 
-import java.util.HashMap;
-import java.util.Map;
 import utam.compiler.grammar.UtamMethodAction.ConstOperand;
 import utam.compiler.helpers.TypeUtilities.ListOf;
 import utam.compiler.representation.ComposeMethodStatement.Operand;
-import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
 /**
@@ -29,8 +25,6 @@ public class StatementContext {
 
   private final StatementType statementType;
   private final ReturnType declaredStatementReturn;
-  // accumulates statement args
-  private final Map<String, MethodParameter> statementArgs = new HashMap<>();
   // statement index in the compose method, starting from 0
   private final int statementIndex;
   private final TypeProvider previousStatementReturn;
@@ -56,11 +50,6 @@ public class StatementContext {
     this.declaredStatementReturn = declaredStatementReturn;
     this.previousStatementReturn = previousStatementReturn;
     this.isUsedAsChain = isUsedAsChain;
-  }
-
-  // for testing
-  StatementContext() {
-    this(null, 0, false, REGULAR_STATEMENT, new ReturnType("dummy"));
   }
 
   /**
@@ -176,10 +165,6 @@ public class StatementContext {
       return declaredMethodReturn.getReturnTypeOrDefault(context, defaultReturnType);
     }
     return defaultReturnType;
-  }
-
-  Map<String, MethodParameter> getStatementArgsMap() {
-    return statementArgs;
   }
 
   /**

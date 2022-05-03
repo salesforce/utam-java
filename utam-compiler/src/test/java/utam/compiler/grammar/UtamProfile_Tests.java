@@ -11,147 +11,96 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.TestUtilities.TEST_URI;
-import static utam.compiler.grammar.TestUtilities.getDeserializedObject;
-import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
-import static utam.compiler.grammar.UtamProfile.ERR_DUPLICATE_PROFILE_VALUE;
-import static utam.compiler.grammar.UtamProfile.ERR_INVALID_ARRAY_TYPES;
-import static utam.compiler.grammar.UtamProfile.ERR_PROFILE_VALUE_WRONG_FORMAT;
-import static utam.compiler.grammar.UtamProfile.getPageObjectProfiles;
-import static utam.compiler.translator.TranslatorMockUtilities.getDefaultConfig;
+import static utam.compiler.grammar.DeserializerUtilities.expectCompilerError;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.hamcrest.Matchers;
 import org.testng.annotations.Test;
-import utam.compiler.grammar.DeserializerUtilities.Result;
-import utam.compiler.helpers.TranslationContext;
-import utam.compiler.translator.DefaultTranslatorConfiguration;
+import utam.compiler.JsonBuilderTestUtility;
 import utam.compiler.translator.StringValueProfileConfig;
-import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorConfig;
-import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.Profile;
 import utam.core.framework.context.StringValueProfile;
 
 /**
+ * tests for profile deserializer
+ *
  * @author elizaveta.ivanova
  * @since 228
  */
 public class UtamProfile_Tests {
 
-  static final String PROFILE_KEY = "profileConfigKey";
-  static final String PROFILE_VALUE = "profileConfigValue";
-
-  private static final ProfileConfiguration DRIVER_PROFILE =
-      new StringValueProfileConfig("driver", new String[]{"chrome", "firefox"});
-
-  private static void deserialize(String json) {
-    getDeserializedObject(json, UtamProfile.class);
-  }
-
-  @Test
-  public void testGetProfileWhenConfigured() {
-    DefaultTranslatorConfiguration config = getDefaultConfig();
-    config.setConfiguredProfile(DRIVER_PROFILE);
-    TranslationContext translationInstantContext = new TranslationContext(TEST_URI, config);
-    final String DRIVER_KEY = "driver";
-    final String CHROME_VALUE = "chrome";
-    List<Profile> profiles = new UtamProfile(DRIVER_KEY, CHROME_VALUE)
-        .getProfiles(translationInstantContext);
-    assertThat(profiles.size(), is(1));
-    Profile profile = profiles.get(0);
-    assertThat(profile.getName(), is(equalTo(DRIVER_KEY)));
-    assertThat(profile.getValue(), is(equalTo(CHROME_VALUE)));
-  }
-
-  @Test
-  public void testGetDefaultProfile() {
-    Profile mockProfile = mock(Profile.class);
-    ProfileConfiguration profileConfiguration = mock(ProfileConfiguration.class);
-    when(profileConfiguration.getPropertyKey()).thenReturn(PROFILE_KEY);
-    when(profileConfiguration.getFromString(PROFILE_VALUE)).thenReturn(mockProfile);
-    DefaultTranslatorConfiguration translatorConfig = getDefaultConfig();
-    translatorConfig.setConfiguredProfile(profileConfiguration);
-    TranslationContext context = new TranslationContext(TEST_URI, translatorConfig);
-    assertThat(
-        context.getProfile(PROFILE_KEY, PROFILE_VALUE), Matchers.is(sameInstance(mockProfile)));
-  }
-
   @Test
   public void testGetPageObjectProfilesWithNullProfile() {
-    TranslationContext context = getTestTranslationContext();
-    UtamPageObject pageObject = new UtamPageObject();
-    assertThat(getPageObjectProfiles(pageObject.profiles, context), hasSize(0));
-  }
-
-  @Test
-  public void testDeserializerWithCorrectProfiles() {
-    DeserializerUtilities utilities = new DeserializerUtilities();
-    TranslatorConfig translatorConfig = utilities.getTranslatorConfig();
-    ProfileConfiguration platform = new StringValueProfileConfig("platform", "android");
-    translatorConfig.getConfiguredProfiles().add(platform);
-    ProfileConfiguration devices = new StringValueProfileConfig("device",
-        new String[]{"phone", "tablet"});
-    translatorConfig.getConfiguredProfiles().add(devices);
-    Result res = utilities.getResultFromFile("pageobjects/profiles");
-    List<Profile> profiles = res.getPageObject().getImplementation().getProfiles();
-    assertThat(profiles, hasSize(3));
-    Profile platformProfile = profiles.get(0);
-    assertThat(platformProfile, is(equalTo(new StringValueProfile("platform", "android"))));
-    Profile devicePhone = profiles.get(1);
-    assertThat(devicePhone, is(equalTo(new StringValueProfile("device", "phone"))));
-    Profile deviceTablet = profiles.get(2);
-    assertThat(deviceTablet, is(equalTo(new StringValueProfile("device", "tablet"))));
-  }
-
-  @Test
-  public void testDeserializerWrongFormatThrows() {
-    UtamError e = expectThrows(UtamError.class, () -> deserialize("error"));
-    assertThat(e.getCause().getMessage(), containsString("Unrecognized token"));
+    List<Profile> profiles = new DeserializerUtilities().getResultFromString("{}").getPageObject()
+        .getImplementation().getProfiles();
+    assertThat(profiles, is(empty()));
   }
 
   @Test
   public void testDeserializerWrongValueFormatThrows() {
-    String json = " { \"name\" : {}}";
-    UtamError e = expectThrows(UtamError.class, () -> deserialize(json));
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_PROFILE_VALUE_WRONG_FORMAT, "name"))));
+    JsonBuilderTestUtility test = new JsonBuilderTestUtility();
+    test.addRawString("profile", "[ { \"name\" : {}} ]");
+    test.addString("implements", "my/pageobjects/type");
+    Exception e = test.expectCompilerError();
+    assertThat(e.getMessage(), containsString(
+        "error 806: profile \"name\": values can either be string or non empty string array"));
   }
 
   @Test
   public void testDeserializerWrongValueArrayFormatThrows() {
-    String json = " { \"name\" : [1] }";
-    UtamError e = expectThrows(UtamError.class, () -> deserialize(json));
-    assertThat(e.getMessage(), is(equalTo(String.format(ERR_INVALID_ARRAY_TYPES, "name"))));
+    JsonBuilderTestUtility jsonTest = new JsonBuilderTestUtility();
+    jsonTest.addRawString("profile", "[ { \"name\" : [1]} ]");
+    jsonTest.addString("implements", "my/pageobjects/type");
+    Exception e = jsonTest.expectCompilerError();
+    assertThat(e.getMessage(),
+        containsString("error 11: profile \"name\": array value should be a non empty string, instead found [ 1 ]"));
   }
 
   @Test
   public void testDeserializerDuplicateValueThrows() {
-    String json = new JsonStringBuilder("same", "same").getJsonString();
-    UtamError e = expectThrows(UtamError.class, () -> deserialize(json));
-    assertThat(e.getMessage(),
-        is(equalTo(String.format(ERR_DUPLICATE_PROFILE_VALUE, "name", "same"))));
+    JsonBuilderTestUtility jsonTest = new JsonBuilderTestUtility();
+    jsonTest.addRawString("profile", "[ { \"name\" : [\"same\", \"same\"] } ]");
+    jsonTest.addString("implements", "my/pageobjects/type");
+    Exception e = jsonTest.expectCompilerError();
+    assertThat(e.getMessage(), containsString("error 802: profile \"name\": duplicate profile value \"same\""));
   }
 
-  private static class JsonStringBuilder {
+  @Test
+  public void testDeserializerDuplicateNameThrows() {
+    String json = "{ \"profile\" : [ { \"name\" : \"value\" }, { \"name\" : \"value\" } ] , \"implements\": \"my/pageobjects/type\"}";
+    Exception e = expectCompilerError(json);
+    assertThat(e.getMessage(), containsString("error 801: \"profile\": duplicate profile name \"name\""));
+  }
 
-    private final String jsonString;
+  @Test
+  public void testDeserializerEmptyArrayThrows() {
+    JsonBuilderTestUtility jsonTest = new JsonBuilderTestUtility();
+    jsonTest.addRawString("profile", "[]");
+    jsonTest.addString("implements", "my/pageobjects/type");
+    Exception e = jsonTest.expectCompilerError();
+    assertThat(e.getMessage(), containsString("error 12: page object root: "
+        + "property \"profile\" should be a not empty array"));
+  }
 
-    private JsonStringBuilder(String... values) {
-      String valuesStr = Stream.of(values).map(str -> String.format("\"%s\"", str)).collect(
-          Collectors.joining(", "));
-      String content = String.format("\"name\" : [ %s ] ", valuesStr);
-      jsonString = String.format("{ %s }", content);
-    }
+  @Test
+  public void testDeserializerProfileValueAsString() {
+    String json = "{ \"profile\" : [ { \"name\" : \"value\" } ] , \"implements\": \"my/pageobjects/type\"}";
+    DeserializerUtilities utilities = new DeserializerUtilities();
+    TranslatorConfig translatorConfig = utilities.getTranslatorConfig();
+    translatorConfig.getConfiguredProfiles().add(new StringValueProfileConfig("name", "value"));
+    List<Profile> profiles = utilities.getResultFromString(json).getPageObject()
+        .getImplementation().getProfiles();
+    assertThat(profiles, hasSize(1));
+    assertThat(profiles.get(0), is(equalTo(new StringValueProfile("name", "value"))));
+  }
 
-    String getJsonString() {
-      return jsonString;
-    }
+  @Test
+  public void testDeserializerNotConfiguredProfileThrows() {
+    String json = "{ \"profile\" : [ { \"name1\" : \"value1\" } ] , \"implements\": \"my/pageobjects/type\"}";
+    Exception e = expectCompilerError(json);
+    assertThat(e.getMessage(), containsString(
+        "error 803: profile { \"name1\": \"value1\" } is not configured, make sure it's in compiler config"));
   }
 }

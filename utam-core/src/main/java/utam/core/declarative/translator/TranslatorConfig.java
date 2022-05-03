@@ -73,4 +73,13 @@ public interface TranslatorConfig {
    * @return list of strings
    */
   List<String> getCopyright();
+
+  /**
+   * read error message by code and replace patterns by args if any
+   *
+   * @param code code value
+   * @param args replacement for part of the messages that are context dependent
+   * @return string with message or throws an error
+   */
+  String getErrorMessage(Object code, String... args);
 }

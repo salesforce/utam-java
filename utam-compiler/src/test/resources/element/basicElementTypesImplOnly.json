@@ -1,8 +1,10 @@
 {
   "implements": "utam-test/pageObjects/customInterface",
-  "profile" : {
-    "profile" : "test"
-  },
+  "profile" : [
+    {
+      "profile" : "test"
+    }
+  ],
   "elements": [
     {
       "type": "actionable",

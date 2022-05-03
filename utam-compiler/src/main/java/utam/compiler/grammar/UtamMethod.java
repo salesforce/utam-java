@@ -7,143 +7,82 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.JsonDeserializer.readNode;
+import static utam.compiler.grammar.UtamArgument.processArgsNode;
 import static utam.compiler.grammar.UtamMethodDescription.processMethodDescriptionNode;
-import static utam.compiler.helpers.TypeUtilities.VOID;
-import static utam.compiler.types.BasicElementInterface.isReturnBasicType;
-import static utam.compiler.types.BasicElementInterface.processBasicTypeNode;
-import static utam.compiler.types.BasicElementUnionType.asBasicOrUnionType;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
-import utam.compiler.UtamCompilationError;
+import java.util.function.Function;
+import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.helpers.MethodContext;
-import utam.compiler.helpers.ReturnType;
-import utam.compiler.helpers.StatementContext;
+import utam.compiler.helpers.ParametersContext;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.representation.ComposeMethod;
-import utam.compiler.representation.ComposeMethodStatement;
-import utam.compiler.representation.InterfaceMethod;
-import utam.compiler.representation.InterfaceMethod.AbstractBasicElementGetter;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.declarative.representation.TypeProvider;
 
 /**
- * public method declared at PO level
+ * base class for public method declared at PO level (interface or compose)
  *
  * @author elizaveta.ivanova
  * @since 228
  */
-class UtamMethod {
+abstract class UtamMethod {
 
-  static final String ERR_METHOD_EMPTY_STATEMENTS = "method '%s' has no statements";
-  static final String ERR_METHOD_SHOULD_BE_ABSTRACT = "method '%s' is abstract and cannot have statements";
-  static final String ERR_BEFORE_LOAD_HAS_NO_ARGS = "method beforeLoad cannot have parameters";
-  static final String ERR_RETURN_TYPE_ABSTRACT_ONLY = "method '%s': return type should be set inside last statement instead method level";
-  private final String name;
-  private final UtamMethodAction[] compose;
-  private final UtamArgument[] args;
-  private final JsonNode returnType;
-  private final Boolean isReturnList;
-  private final UtamMethodDescription description;
+  final String name;
+  final UtamMethodDescription description;
+  final JsonNode argsNode;
 
-  @JsonCreator
-  UtamMethod(
-      @JsonProperty(value = "name", required = true) String name,
-      @JsonProperty(value = "compose") UtamMethodAction[] compose,
-      @JsonProperty(value = "args") UtamArgument[] args,
-      @JsonProperty(value = "returnType") JsonNode returnType,
-      @JsonProperty(value = "returnAll") Boolean isReturnList,
-      @JsonProperty("description") JsonNode descriptionNode) {
+  UtamMethod(String name, JsonNode descriptionNode, JsonNode argsNode) {
     this.name = name;
-    this.compose = compose;
-    this.args = args;
-    this.returnType = returnType;
-    this.isReturnList = isReturnList;
-    this.description = processMethodDescriptionNode(descriptionNode);
+    String validationContext = String.format("method \"%s\"", name);
+    this.description = processMethodDescriptionNode(descriptionNode, validationContext);
+    this.argsNode = argsNode;
   }
 
-  final PageObjectMethod getMethod(TranslationContext context) {
-    return context.isAbstractPageObject()? getAbstractMethod(context) : getComposeMethod(context);
+  /**
+   * process json node "methods"
+   *
+   * @param methodsNode json node
+   * @param isAbstract  true if page object is an interface
+   * @return list of declared methods
+   */
+  static List<UtamMethod> processMethodsNode(JsonNode methodsNode, boolean isAbstract) {
+    List<UtamMethod> methods = new ArrayList<>();
+    if (methodsNode == null || methodsNode.isNull()) {
+      return methods;
+    }
+    if (!methodsNode.isArray()) {
+      throw new UtamCompilerIntermediateError(methodsNode, 12, "page object root", "methods");
+    }
+    Class<? extends UtamMethod> methodType =
+        isAbstract ? UtamInterfaceMethod.class : UtamComposeMethod.class;
+    Integer errCode = isAbstract? 400 : 500;
+    Function<Exception, RuntimeException> parserErrorWrapper = causeErr -> new UtamCompilerIntermediateError(
+        causeErr, methodsNode, errCode, causeErr.getMessage());
+    for (JsonNode methodNode : methodsNode) {
+      UtamMethod method = readNode(methodNode, methodType, parserErrorWrapper);
+      methods.add(method);
+    }
+    return methods;
   }
 
-  private PageObjectMethod getAbstractMethod(TranslationContext context) {
-    if (compose != null) {
-      throw new UtamCompilationError(String.format(ERR_METHOD_SHOULD_BE_ABSTRACT, name));
-    }
-    boolean isReturnsBasicType = isReturnBasicType(returnType);
-    final ReturnType returnTypeObject;
-    if (isReturnsBasicType) {
-      String[] basicUnionType = processBasicTypeNode(returnType, name, true);
-      TypeProvider unionReturnType = asBasicOrUnionType(name, basicUnionType, false);
-      returnTypeObject = new ReturnType(unionReturnType, isReturnList, name);
-    } else {
-      returnTypeObject = new ReturnType(returnType, isReturnList, name);
-    }
-    TypeProvider methodReturnType = returnTypeObject.getReturnTypeOrDefault(context, VOID);
-    MethodContext methodContext = new MethodContext(name, returnTypeObject);
-    List<MethodParameter> parameters = new ArgsProcessor(context, methodContext).getParameters(args);
-    return isReturnsBasicType ? new AbstractBasicElementGetter(name, parameters, methodReturnType, description)
-        : new InterfaceMethod(name, methodReturnType, parameters, description);
-  }
+  /**
+   * compile declared method
+   *
+   * @param context translation context
+   * @return method instance
+   */
+  abstract PageObjectMethod getMethod(TranslationContext context);
 
-  private PageObjectMethod getComposeMethod(TranslationContext context) {
-    if(compose == null || compose.length == 0) {
-      throw new UtamCompilationError(String.format(ERR_METHOD_EMPTY_STATEMENTS, name));
-    }
-    ReturnType returnTypeObject = new ReturnType(returnType, isReturnList, name);
-    if(returnTypeObject.isReturnTypeSet()) {
-      throw new UtamCompilationError(String.format(ERR_RETURN_TYPE_ABSTRACT_ONLY, name));
-    }
-    MethodContext methodContext = new MethodContext(name, returnTypeObject);
-    if (args != null) {
-      new ArgsProcessor(context, methodContext)
-          .getParameters(args)
-          .forEach(methodContext::setDeclaredParameter);
-    }
-    List<ComposeMethodStatement> statements = getComposeStatements(context, methodContext, compose);
-    ComposeMethodStatement lastStatement = statements.get(statements.size()-1);
-    TypeProvider lastStatementReturnType = lastStatement.getReturnType();
-    methodContext.checkAllParametersWereUsed();
-    return new ComposeMethod(
-        name,
-        lastStatementReturnType,
-        methodContext.getMethodParameters(),
-        statements,
-        description
-    );
-  }
-
-  static List<ComposeMethodStatement> getComposeStatements(
-      TranslationContext context,
-      MethodContext methodContext,
-      UtamMethodAction[] compose) {
-    List<ComposeMethodStatement> statements = new ArrayList<>();
-    String name = methodContext.getName();
-    TypeProvider previousStatementReturn = null;
-    for (int i = 0; i < compose.length; i ++) {
-      UtamMethodAction statementDeclaration = compose[i];
-      StatementContext statementContext = new StatementContext(
-          previousStatementReturn,
-          i,
-          isUsedAsChain(compose, i),
-          statementDeclaration.getStatementType(i, compose.length),
-          statementDeclaration.getDeclaredReturnType(name));
-      statementDeclaration.checkBeforeLoadElements(methodContext);
-      ComposeMethodStatement statement = statementDeclaration.getComposeAction(context, methodContext, statementContext);
-      previousStatementReturn = statement.getReturnType();
-      statements.add(statement);
-    }
-    return statements;
-  }
-
-  static boolean isUsedAsChain(UtamMethodAction[] compose, int index) {
-    if(index == compose.length -1) {
-      return false;
-    }
-    return compose[index + 1].isChain;
+  final void setMethodLevelParameters(TranslationContext context, MethodContext methodContext) {
+    ParametersContext parametersContext = methodContext.getParametersContext();
+    String parserContext = String.format("method \"%s\"", name);
+    List<UtamArgument> arguments = processArgsNode(argsNode, parserContext, false);
+    arguments.forEach(arg -> {
+      MethodParameter parameter = arg.asParameter(context, methodContext, parametersContext);
+      parametersContext.setParameter(parameter);
+    });
   }
 }

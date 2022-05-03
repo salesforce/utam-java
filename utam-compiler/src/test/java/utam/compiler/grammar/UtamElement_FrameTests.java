@@ -7,18 +7,14 @@
  */
 package utam.compiler.grammar;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.testng.Assert.expectThrows;
+import static utam.compiler.grammar.DeserializerUtilities.expectCompilerError;
 import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_MISSING_SELECTOR_PROPERTY;
 import static utam.compiler.grammar.UtamElement.ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED;
-import static utam.compiler.grammar.UtamElement.Type;
 
-import java.util.List;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import utam.core.framework.consumer.UtamError;
+import utam.compiler.grammar.UtamElement.Type;
 
 /**
  * test reads JSON file with declared frames
@@ -27,54 +23,77 @@ import utam.core.framework.consumer.UtamError;
  */
 public class UtamElement_FrameTests {
 
-  private List<UtamElement> frames;
-
-  @BeforeClass
-  public void prepareData() {
-    frames = DeserializerUtilities.getDeserializedObjects(UtamElement.class, "element/frameValidations");
-  }
+  private static final String ELEMENT_NAME = "test";
 
   @Test
   public void testFrameElementWithReturnAllSelectorThrows() {
-    UtamElement utamElement = frames.get(0);
-    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
+    String json = "{\"elements\": [\n"
+        + "    {\n"
+        + "      \"name\": \"test\",\n"
+        + "      \"selector\": {\"css\" : \"css\", \"returnAll\": true},\n"
+        + "      \"type\": \"frame\""
+        + "    }\n"
+        + "  ]}";
+    Exception e = expectCompilerError(json);
     assertThat(e.getMessage(),
-        is(equalTo(String.format(ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED, "returnAllThrows"))));
+        containsString(String.format(ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED, "test")));
   }
 
   @Test
   public void testFrameElementWithNoSelectorThrows() {
-    UtamElement utamElement = frames.get(1);
-    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
+    String json = "{\"elements\": [\n"
+        + "    {\n"
+        + "      \"name\": \"test\",\n"
+        + "      \"type\": \"frame\""
+        + "    }\n"
+        + "  ]}";
+    Exception e = expectCompilerError(json);
     assertThat(e.getMessage(),
-        is(equalTo(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, "noSelectorThrows"))));
+        containsString(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, ELEMENT_NAME)));
   }
 
   @Test
   public void testFrameElementWithNullableThrows() {
-    UtamElement utamElement = frames.get(2);
-    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(Type.FRAME.getSupportedPropertiesErr("nullableThrows"))));
+    String json = "{\"elements\": [\n"
+        + "    {\n"
+        + "      \"name\": \"test\",\n"
+        + "      \"selector\": {\"css\" : \"css\"},\n"
+        + "      \"type\": \"frame\","
+        + "      \"nullable\": true"
+        + "    }\n"
+        + "  ]}";
+    Exception e = expectCompilerError(json);
+    assertThat(e.getMessage(), containsString(Type.FRAME.getSupportedPropertiesErr("test")));
   }
 
   @Test
   public void testFrameElementWithElementsThrows() {
-    UtamElement utamElement = frames.get(3);
-    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(Type.FRAME.getSupportedPropertiesErr("elementsThrows"))));
+    String json = "{\"elements\": [\n"
+        + "    {\n"
+        + "      \"name\": \"test\",\n"
+        + "      \"selector\": {\"css\" : \"css\"},\n"
+        + "      \"type\": \"frame\","
+        + "      \"elements\": [{ \"name\": \"nested\", \"type\": \"container\" }]"
+        + "    }\n"
+        + "  ]}";
+    Exception e = expectCompilerError(json);
+    assertThat(e.getMessage(),
+        containsString(Type.FRAME.getSupportedPropertiesErr("test")));
   }
 
   @Test
   public void testFrameElementWithShadowThrows() {
-    UtamElement utamElement = frames.get(4);
-    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(Type.FRAME.getSupportedPropertiesErr("shadowThrows"))));
-  }
-
-  @Test
-  public void testFrameElementWithFilterThrows() {
-    UtamElement utamElement = frames.get(5);
-    UtamError e = expectThrows(UtamError.class, utamElement::getAbstraction);
-    assertThat(e.getMessage(), is(equalTo(Type.FRAME.getSupportedPropertiesErr("filterThrows"))));
+    String json = "{\"elements\": [\n"
+        + "    {\n"
+        + "      \"name\": \"test\",\n"
+        + "      \"selector\": {\"css\" : \"css\"},\n"
+        + "      \"type\": \"frame\","
+        + "      \"shadow\": { \"elements\": []}"
+        + "    }\n"
+        + "  ]}";
+    Exception e = expectCompilerError(json);
+    assertThat(e.getMessage(),
+        containsString(
+            "error 12: element \"test\" shadow: property \"elements\" should be a not empty array"));
   }
 }

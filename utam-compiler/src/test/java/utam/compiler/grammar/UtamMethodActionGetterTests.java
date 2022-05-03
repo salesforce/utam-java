@@ -10,13 +10,9 @@ package utam.compiler.grammar;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.UtamArgument.ERR_ARGS_WRONG_COUNT;
 import static utam.compiler.grammar.UtamMethodAction.ERR_CHAIN_REQUIRES_CUSTOM_RETURN;
 import static utam.compiler.grammar.UtamMethodAction.ERR_FIRST_STATEMENT_CANT_BE_MARKED_AS_CHAIN;
 import static utam.compiler.grammar.UtamMethodAction.ERR_INCORRECT_RETURN_TYPE;
-import static utam.compiler.grammar.UtamMethodActionGetter.ERR_CONTAINER_INVOCATION_NEEDS_RETURN_TYPE;
-import static utam.compiler.grammar.UtamMethodActionGetter.ERR_RETURN_TYPE_CANT_BE_INFERRED;
-import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_ELEMENT_NOT_FOUND;
 import static utam.compiler.helpers.TypeUtilities.COLLECTOR_IMPORT;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT_PARAMETER;
 
@@ -57,8 +53,8 @@ public class UtamMethodActionGetterTests {
 
   @Test
   public void unknownElementNameThrows() {
-    testThrows("unknownElementName", String.format(ERR_CONTEXT_ELEMENT_NOT_FOUND,
-        methodName));
+    testThrows("unknownElementName",
+        "error 101: method \"test\": unknown element with name \"test\" is referenced");
   }
 
   @Test
@@ -71,7 +67,7 @@ public class UtamMethodActionGetterTests {
   @Test
   public void redundantArgsThrows() {
     testThrows("redundantArgs",
-        String.format(ERR_ARGS_WRONG_COUNT, "method 'test'", 0, 1));
+        "error 108: method \"test\": expected number of parameters is 0, found 1");
   }
 
   @Test
@@ -96,16 +92,14 @@ public class UtamMethodActionGetterTests {
 
   @Test
   public void testChainNeedsReturn() {
-    String expectedError = String
-        .format(ERR_RETURN_TYPE_CANT_BE_INFERRED, methodName, "element");
-    testThrows("chainNeedsReturn", expectedError);
+    testThrows("chainNeedsReturn",
+        "error 605: method \"test\" statement: can't infer return type for \"element\", please provide a \"returnType\"");
   }
 
   @Test
   public void testContainerElementNeedsReturn() {
-    String expectedError = String
-        .format(ERR_CONTAINER_INVOCATION_NEEDS_RETURN_TYPE, methodName);
-    testThrows("containerNeedsReturn", expectedError);
+    testThrows("containerNeedsReturn",
+        "error 604: method \"test\" statement: statement that invokes container method needs a \"returnType\"");
   }
 
   @Test
@@ -280,7 +274,8 @@ public class UtamMethodActionGetterTests {
     TranslationContext context = getContext("containerNonLiteralArg");
     PageObjectMethod method = context.getMethod(methodName);
     MethodInfo expected = new MethodInfo(methodName, "Foo");
-    expected.addParameter(new MethodParameterInfo("pageObjectType", PAGE_OBJECT_PARAMETER.getSimpleName()));
+    expected.addParameter(
+        new MethodParameterInfo("pageObjectType", PAGE_OBJECT_PARAMETER.getSimpleName()));
     String importedType = PAGE_OBJECT_PARAMETER.getImportableTypes().get(0).getFullName();
     expected.addImpliedImportedTypes(CUSTOM_TYPE_IMPORT, importedType);
     expected.addImportedTypes(CUSTOM_TYPE_IMPORT, importedType);
@@ -310,7 +305,8 @@ public class UtamMethodActionGetterTests {
     MethodInfo expected = new MethodInfo(methodName, "List<Foo>");
     expected.addParameter(new MethodParameterInfo("elementArg"));
     expected.addCodeLine("List<Foo> statement0 = this.getSections(elementArg)");
-    expected.addCodeLine("List<Foo> statement1 = statement0.stream().flatMap(element -> element.getRows(elementArg).stream()).collect(Collectors.toList())");
+    expected.addCodeLine(
+        "List<Foo> statement1 = statement0.stream().flatMap(element -> element.getRows(elementArg).stream()).collect(Collectors.toList())");
     expected.addCodeLine("return statement1");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
