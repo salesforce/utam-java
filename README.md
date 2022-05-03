@@ -1,5 +1,10 @@
 # UTAM Java Repository
 
+![Maven Central](https://img.shields.io/maven-central/v/com.salesforce.utam/utam-java?style=for-square)
+![GitHub](https://img.shields.io/github/license/salesforce/utam-java)
+![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/salesforce/utam-java?style=for-square)
+[![Snyk](https://snyk-widget.herokuapp.com/badge/mvn/com.salesforce.utam/utam-java/badge.svg)](https://snyk.io/vuln/maven:com.salesforce.utam:utam-java?utm_medium=referral&utm_source=badge&utm_campaign=snyk-widget)
+
 Welcome to the **UTAM Java Repository**!
 
 The [UI Test Automation Model (UTAM) project](https://utam.dev) allows a
