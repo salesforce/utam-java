@@ -44,6 +44,8 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
       "You must specify an input directory with the --inputDirectory argument or a list of files";
   static final String TOO_MANY_INPUTS =
       "You cannot specify both an input directory with the --inputDirectory argument and a list of files";
+  static final String INVALID_FILE_LIST =
+      "You cannot specify both an input directory in the compiler configuration file and a list of files";
   static final String INVALID_UNIT_TEST_CONFIG =
       "You cannot specify a unit test runner without a destination directory for unit tests";
   static final String OUTPUT_DIRECTORY_MISSING = "Output directory is not configured";
@@ -120,7 +122,6 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
     if (outputDirectory != null
         || packageMappingFile != null
         || testRunner != null
-        || inputFiles != null
         || inputDirectory != null
         || profileDirectory != null
         || profileDefinitionsFile != null
@@ -136,7 +137,13 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
       return null;
     }
     try {
-      JsonCompilerConfig jsonConfig = new JsonCompilerConfig(this.jsonConfig, this.compilerRoot);
+      JsonCompilerConfig jsonConfig =
+          new JsonCompilerConfig(this.jsonConfig, this.compilerRoot, this.inputFiles);
+      if (!jsonConfig.isValidSourceFileSpecification()) {
+        returnCode = CONFIG_ERR;
+        thrownError = new UnsupportedOperationException(INVALID_FILE_LIST);
+        return null;
+      }
       return jsonConfig.getTranslatorConfig(WARNING);
     } catch (IOException e) {
       thrownError = e;

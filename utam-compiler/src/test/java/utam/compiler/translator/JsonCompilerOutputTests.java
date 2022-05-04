@@ -37,7 +37,8 @@ public class JsonCompilerOutputTests {
   private static void runCompiler() throws IOException {
     JsonCompilerConfig jsonConfig = new JsonCompilerConfig(
         new File(USER_ROOT + "/src/test/resources/compiler/" + "test.compiler.json"),
-        new File(USER_ROOT)
+        new File(USER_ROOT),
+        null
     );
     TranslatorConfig config = jsonConfig.getTranslatorConfig(GuardrailsMode.WARNING);
     TranslatorRunner translator = new DefaultTranslatorRunner(config);
