@@ -158,6 +158,7 @@ public final class TranslationContext {
   /**
    * Sets the element context for this Page Object
    *
+   * @param currentNode the current JSON node
    * @param element the element context to set
    */
   public void setElement(JsonNode currentNode, ElementContext element) {

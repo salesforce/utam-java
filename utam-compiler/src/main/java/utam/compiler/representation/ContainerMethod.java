@@ -92,11 +92,12 @@ public abstract class ContainerMethod implements PageObjectMethod {
     /**
      * Initializes a new instance of the WithSelectorReturnsList class
      *
-     * @param scopeElement    the scope element
-     * @param isExpandScope   a value indicating whether the method introspects into shadow roots
-     * @param elementName     the name of the element
-     * @param selectorContext the context for the selector
-     * @param isPublic        a value indicating whether the method is public
+     * @param scopeElement      the scope element
+     * @param isExpandScope     a value indicating whether the method introspects into shadow roots
+     * @param elementName       the name of the element
+     * @param selectorContext   the context for the selector
+     * @param isPublic          a value indicating whether the method is public
+     * @param methodDescription the method description
      */
     public WithSelectorReturnsList(ElementContext scopeElement, boolean isExpandScope,
         String elementName, LocatorCodeGeneration selectorContext, boolean isPublic, UtamMethodDescription methodDescription) {
@@ -141,11 +142,12 @@ public abstract class ContainerMethod implements PageObjectMethod {
     /**
      * Initializes a new instance of the WithSelector class
      *
-     * @param scopeElement    the scope element
-     * @param isExpandScope   a value indicating whether the method introspects into shadow roots
-     * @param elementName     the name of the element
-     * @param selectorContext the context for the selector
-     * @param isPublic        a value indicating whether the method is public
+     * @param scopeElement      the scope element
+     * @param isExpandScope     a value indicating whether the method introspects into shadow roots
+     * @param elementName       the name of the element
+     * @param selectorContext   the context for the selector
+     * @param isPublic          a value indicating whether the method is public
+     * @param methodDescription the method description
      */
     public WithSelector(ElementContext scopeElement,
         boolean isExpandScope,

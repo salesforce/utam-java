@@ -52,7 +52,7 @@ public abstract class ParametersContext {
   }
 
   /**
-   * check that all parameters were used, trows an error if there was not
+   * check that all parameters were used, throws an error if there was not
    *
    * @return list of parameters
    */
@@ -69,6 +69,7 @@ public abstract class ParametersContext {
    * check that parameters types and number match expected, return parameters
    *
    * @param expectedTypes expected types
+   * @return list of parameters
    */
   public List<MethodParameter> getParameters(List<TypeProvider> expectedTypes) {
     List<MethodParameter> parameters = this.getParameters()

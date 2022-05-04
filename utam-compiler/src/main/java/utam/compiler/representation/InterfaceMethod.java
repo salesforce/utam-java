@@ -30,9 +30,10 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
 
   /**
    * Initializes a new instance of the InterfaceMethod class
-   * @param methodName       the name of the method
-   * @param returnType       the return type of the method
-   * @param methodParameters the list of parameters for the method
+   * @param methodName        the name of the method
+   * @param returnType        the return type of the method
+   * @param methodParameters  the list of parameters for the method
+   * @param methodDescription the method description
    */
   public InterfaceMethod(
       String methodName,
@@ -78,9 +79,10 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
 
     /**
      * Initializes a new instance of the AbstractBasicElementGetter class
-     * @param methodName the name of the method
-     * @param parameters the list of parameters of the method
-     * @param returnType the return type of the method
+     * @param methodName  the name of the method
+     * @param parameters  the list of parameters of the method
+     * @param returnType  the return type of the method
+     * @param description the method description
      */
     public AbstractBasicElementGetter(
         String methodName,

@@ -49,6 +49,7 @@ public class FrameMethod implements PageObjectMethod {
    * @param element           the element
    * @param isPublic          a value indicating whether the element is public
    * @param locatorParameters the list of parameters to use in locating the element
+   * @param description       the description of the method
    */
   public FrameMethod(ElementContext element, boolean isPublic, List<MethodParameter> locatorParameters, UtamMethodDescription description) {
     methodCode.add(getScopeElementCode(element.getScopeElement()));
