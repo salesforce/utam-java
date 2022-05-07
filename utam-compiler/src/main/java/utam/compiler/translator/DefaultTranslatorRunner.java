@@ -9,6 +9,7 @@ package utam.compiler.translator;
 
 import static utam.core.framework.UtamLogger.info;
 import static utam.core.framework.consumer.JsonInjectionsConfig.CONFIG_FILE_MASK;
+import static utam.core.framework.consumer.UtamLoaderConfigImpl.DEFAULT_PROFILE;
 
 import com.google.common.io.CharStreams;
 import java.io.File;
@@ -17,8 +18,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.JsonDeserializer;
 import utam.compiler.guardrails.GlobalValidation;
 import utam.compiler.helpers.TranslationContext;
@@ -32,7 +33,6 @@ import utam.core.declarative.translator.TranslatorRunner;
 import utam.core.declarative.translator.TranslatorSourceConfig;
 import utam.core.declarative.translator.TranslatorTargetConfig;
 import utam.core.declarative.translator.UnitTestRunner;
-import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.Profile;
 
 /**
@@ -43,14 +43,13 @@ import utam.core.framework.context.Profile;
  */
 public class DefaultTranslatorRunner implements TranslatorRunner {
 
-  static final String ERR_PROFILE_PATH_DOES_NOT_EXIST =
+  private static final String ERR_PROFILE_PATH_DOES_NOT_EXIST =
       "can't write profiles output, profile path '%s' does not exist and cannot be created";
   static final String ERR_PROFILE_PATH_NOT_CONFIGURED = "profile config path is null or empty";
   static final String DUPLICATE_PAGE_OBJECT_NAME = "declaration '%s' already generated";
   static final String DUPLICATE_IMPL_WITH_PROFILE_ERR =
       "can't set dependency as '%s' for type '%s', it was already set as '%s' for profile %s";
-  private static final String ERR_MODULE_NAME =
-      "module name is not configured, can't write dependencies config file";
+  static final String ERR_MODULE_NAME_NOT_CONFIGURED = "module name is not configured, can't write dependencies config file";
   private final TranslatorConfig translatorConfig;
   private final Map<String, PageObjectDeclaration> generated = new HashMap<>();
   private final Map<Profile, Map<String, String>> profileDependenciesMapping = new HashMap<>();
@@ -61,7 +60,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     try {
       return CharStreams.toString(translatorSourceConfig.getDeclarationReader(pageObjectURI));
     } catch (IOException e) {
-      throw new UtamCompilationError(String.format("Error in the page object '%s'", pageObjectURI), e);
+      throw new UtamRunnerError(String.format("Error in the page object '%s'", pageObjectURI), e);
     }
   }
 
@@ -78,6 +77,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
         profileDependenciesMapping.put(profile, new HashMap<>());
       }
     }
+    profileDependenciesMapping.put(DEFAULT_PROFILE, new HashMap<>());
   }
 
   final PageObjectDeclaration getGeneratedObject(String name) {
@@ -103,9 +103,6 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       PageObjectDeclaration object = getGeneratedObject(name);
       PageObjectInterface pageObjectInterface = object.getInterface();
       if (object.isClassWithInterface()) {
-        info(
-            String.format(
-                "write interface %s", pageObjectInterface.getInterfaceType().getFullName()));
         write(pageObjectInterface.getInterfaceType(), pageObjectInterface.getGeneratedCode());
         filesCounter++;
       } else {
@@ -115,9 +112,6 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
                 pageObjectInterface.getInterfaceType().getFullName()));
       }
       if (!object.isInterfaceOnly()) {
-        info(
-            String.format(
-                "write class %s", object.getImplementation().getClassType().getFullName()));
         write(object.getImplementation().getClassType(), object.getImplementation().getGeneratedCode());
         filesCounter++;
         if (writeUnitTest(object.getImplementation())) {
@@ -162,12 +156,14 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
   }
 
   private void write(TypeProvider typeProvider, String code) throws IOException {
+    String name = String.format("page object %s", typeProvider.getFullName());
+    info("write " + name);
     Writer writer = getTargetConfig().getClassWriter(typeProvider);
     try {
       writer.write(code);
       writer.flush();
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new UtamRunnerError("error while writing " + name, e);
     }
   }
 
@@ -200,45 +196,59 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
         System.currentTimeMillis() - timer));
   }
 
-  final String getResourcesRoot() {
+  /**
+   * build string with dependencies config path
+   *
+   * @param moduleName name of the module
+   * @return full path
+   */
+  final String buildDependenciesConfigPath(String moduleName) {
+    if(moduleName == null || moduleName.isEmpty()) {
+      throw new UtamRunnerError(ERR_MODULE_NAME_NOT_CONFIGURED);
+    }
     String profilesRoot = getTargetConfig().getInjectionConfigRootFilePath();
     if (profilesRoot == null || profilesRoot.isEmpty()) {
-      throw new UtamError(ERR_PROFILE_PATH_NOT_CONFIGURED);
+      throw new UtamRunnerError(ERR_PROFILE_PATH_NOT_CONFIGURED);
     }
-    return profilesRoot;
+    File resourcesRoot = new File(profilesRoot);
+    if (!resourcesRoot.exists() && !resourcesRoot.mkdirs()) {
+      throw new UtamRunnerError(String.format(ERR_PROFILE_PATH_DOES_NOT_EXIST, resourcesRoot));
+    }
+    return resourcesRoot + File.separator + String.format(CONFIG_FILE_MASK, moduleName);
   }
 
   @Override
   public void writeDependenciesConfigs() {
-    JsonCompilerOutput jsonCompilerOutput = new JsonCompilerOutput(profileDependenciesMapping);
+    if(profileDependenciesMapping.isEmpty()) {
+      return;
+    }
     String moduleName = translatorConfig.getModuleName();
-    if(moduleName == null || moduleName.isEmpty()) {
-      // if module not set and there is no dependencies - no issue
-      if(profileDependenciesMapping.isEmpty()) {
-        return;
-      }
-      throw new UtamCompilationError(ERR_MODULE_NAME);
-    }
-    File resourcesRoot = new File(getResourcesRoot());
-    if (!resourcesRoot.exists() && !resourcesRoot.mkdirs()) {
-      throw new UtamError(String.format(ERR_PROFILE_PATH_DOES_NOT_EXIST, resourcesRoot));
-    }
-    String profileConfigPath =
-        resourcesRoot + File.separator + String.format(CONFIG_FILE_MASK, moduleName);
+    String configPath = buildDependenciesConfigPath(moduleName);
+    info("write dependencies config " + configPath);
+    Writer writer;
     try {
-      Writer writer = new FileWriter(profileConfigPath);
+      writer = new FileWriter(configPath);
+    } catch (IOException e) {
+      String err = String.format("error creating dependencies config %s", configPath);
+      throw new UtamRunnerError(err, e);
+    }
+    writeDependenciesConfigs(writer);
+  }
+
+  // separate method to trigger from tests
+  final void writeDependenciesConfigs(Writer writer) {
+    JsonCompilerOutput jsonCompilerOutput = new JsonCompilerOutput(profileDependenciesMapping);
+    try {
       jsonCompilerOutput.writeConfig(writer);
     } catch (IOException e) {
-      throw new UtamCompilationError(
-          String.format("error while writing profile configuration '%s'", profileConfigPath),
-          e);
+      throw new UtamRunnerError("error while writing dependencies config", e);
     }
   }
 
   // used from tests and during compilation
   final void setPageObject(String name, PageObjectDeclaration object) {
     if (generated.containsKey(name)) {
-      throw new UtamCompilationError(String.format(DUPLICATE_PAGE_OBJECT_NAME, name));
+      throw new UtamRunnerError(String.format(DUPLICATE_PAGE_OBJECT_NAME, name));
     }
     generated.put(name, object);
     String typeName = object.getInterface().getInterfaceType().getFullName();
@@ -248,20 +258,25 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     }
     String classTypeName = object.getImplementation().getClassType().getFullName();
     if (!object.isClassWithInterface()) {
-      for (Profile profile : object.getImplementation().getProfiles()) {
-        setImplementation(profile, typeName, classTypeName);
+      List<Profile> profiles = object.getImplementation().getProfiles();
+      if(profiles.isEmpty()) {
+        setImplementation(DEFAULT_PROFILE, typeName, classTypeName);
+      } else {
+        for (Profile profile : profiles) {
+          setImplementation(profile, typeName, classTypeName);
+        }
       }
     }
   }
 
   final void setImplementation(Profile profile, String typeName, String classTypeName) {
     if (!profileDependenciesMapping.containsKey(profile)) {
-      throw new UtamCompilationError(translatorConfig.getErrorMessage(803, profile.getName(), profile.getValue()));
+      throw new UtamRunnerError(translatorConfig.getErrorMessage(803, profile.getName(), profile.getValue()));
     }
     if (profileDependenciesMapping.get(profile).containsKey(typeName)) {
       String profileValue = String.format("{ %s : %s }", profile.getName(), profile.getValue());
       String implType = profileDependenciesMapping.get(profile).get(typeName);
-      throw new UtamCompilationError(
+      throw new UtamRunnerError(
           String.format(
               DUPLICATE_IMPL_WITH_PROFILE_ERR,
               classTypeName,

@@ -12,7 +12,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.expectThrows;
-import static utam.core.framework.consumer.PageObjectContextImpl.ERR_GET_CLASS_BY_NAME;
+import static utam.core.framework.context.DefaultProfileContext.ERR_GET_CLASS_BY_NAME;
 
 import org.testng.annotations.Test;
 import utam.core.framework.consumer.TestLoaderConfigPageObject;

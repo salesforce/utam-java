@@ -28,7 +28,6 @@ import static utam.compiler.translator.TranslatorGenerationCommand.TOO_MANY_INPU
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 

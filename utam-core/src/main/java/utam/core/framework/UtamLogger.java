@@ -71,8 +71,6 @@ public class UtamLogger {
         UTAM_LOGGER.error(message);
       } else if (priority == Level.TRACE) {
         UTAM_LOGGER.trace(message);
-      } else if (priority == Level.ERROR) {
-        UTAM_LOGGER.error(message);
       }
     }
   }

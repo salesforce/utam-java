@@ -46,7 +46,7 @@ public class JsonInjectionsConfig {
    * read JSON config with a given module name
    *
    * @param moduleName name of the module to use as a file name
-   * @return map of profiles mapping
+   * @return map: key is profile key (ex."platformmobile")
    */
   Map<String, ProfileContext> readDependenciesConfig(String moduleName) {
     Map<String, ProfileContext> map = new HashMap<>();
@@ -100,7 +100,7 @@ public class JsonInjectionsConfig {
         ProfileImplementations mappingProfile = mapping.get(profileName);
         for (String profileValue : mappingProfile.getProfileValues()) {
           String profileKey = new StringValueProfile(profileName, profileValue).getKey();
-          Map<String, String> map = mappingProfile.getPairs(profileValue)
+          Map<Object, Object> map = mappingProfile.getPairs(profileValue)
               .stream()
               .collect(
                   Collectors.toMap(ImplementationPair::getInterface,

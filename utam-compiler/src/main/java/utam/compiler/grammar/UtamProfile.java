@@ -7,15 +7,14 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
+import static utam.compiler.grammar.JsonDeserializer.isNonEmptyArray;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Set;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.TranslationContext;
 import utam.core.declarative.translator.ProfileConfiguration;
@@ -30,123 +29,123 @@ import utam.core.framework.context.Profile;
  */
 final class UtamProfile {
 
-  private final String name;
-  private final List<String> values;
-
-  private UtamProfile(String name, List<String> values) {
-    this.name = name;
-    this.values = values;
-  }
+  private final String profileName;
+  private final Set<String> values;
+  private final JsonNode jsonNode;
 
   /**
-   * check that profile is configured and transform into profile
+   * instance of the profile
    *
-   * @param profilesNode json node with profiles, passed to print out error
-   * @param context      translation context
-   * @return function to get list of profiles or throw and error is profile is not configured
+   * @param node        profiles node
+   * @param profileName name of the profile
+   * @param context     compilation context
    */
-  private Stream<Profile> getProfiles(JsonNode profilesNode, TranslationContext context) {
-    return values.stream()
-        .map(profileValue -> {
-          ProfileConfiguration profileConfiguration = context.getConfiguredProfile(name);
-          if (profileConfiguration == null) {
-            throw new UtamCompilationError(profilesNode,
-                context.getErrorMessage(803, name, profileValue));
-          }
-          return profileConfiguration.getFromString(profileValue);
-        });
+  UtamProfile(JsonNode node, String profileName, TranslationContext context) {
+    this.jsonNode = node;
+    this.profileName = profileName;
+    this.values = new HashSet<>();
+    JsonNode valuesNode = node.get(profileName);
+    String propertyName = String.format("profile \"%s\"", profileName);
+    if (valuesNode.isArray()) {
+      for (JsonNode valueNode : valuesNode) {
+        if (!valueNode.isTextual() || valueNode.textValue().isEmpty()) {
+          throw new UtamCompilationError(valueNode,
+              context.getErrorMessage(11, propertyName, valuesNode.toPrettyString()));
+        }
+        String profileValue = valueNode.textValue();
+        if (values.contains(profileValue)) {
+          throw new UtamCompilationError(valueNode,
+              context.getErrorMessage(802, profileName, profileValue));
+        }
+        values.add(profileValue);
+      }
+    } else if (valuesNode.isTextual()) {
+      String profileValue = valuesNode.textValue();
+      values.add(profileValue);
+    } else {
+      throw new UtamCompilationError(valuesNode,
+          context.getErrorMessage(806, profileName));
+    }
   }
 
   /**
-   * provides instance of compiled profiles list
+   * get list of profiles from the page object
+   *
+   * @param context compiler context
+   * @return list of profiles
+   */
+  private List<Profile> getProfiles(TranslationContext context) {
+    List<Profile> profiles = new ArrayList<>();
+    ProfileConfiguration configuration = context.getConfiguredProfile(profileName);
+    if (configuration == null) {
+      throw new UtamCompilationError(jsonNode, context.getErrorMessage(804, profileName));
+    }
+    values.forEach(profileValue -> {
+      Profile profile = configuration.getFromString(profileValue);
+      if (profile == null) {
+        throw new UtamCompilationError(jsonNode,
+            context.getErrorMessage(803, profileName, profileValue));
+      }
+      profiles.add(profile);
+    });
+    return profiles;
+  }
+
+  /**
+   * Helper class that provides list of compiled profiles
    *
    * @author elizaveta.ivanova
    * @since 238
    */
   static class UtamProfileProvider {
 
-    private final JsonNode profilesNode;
-    private final boolean isProfilesRequired;
+    final JsonNode node;
 
     /**
      * deserialize profiles node
      *
-     * @param profilesNode Json source
-     * @param isImplOnly   true if page object has "implements" property
+     * @param node Json source
      */
-    UtamProfileProvider(JsonNode profilesNode, boolean isImplOnly) {
-      this.profilesNode = profilesNode;
-      this.isProfilesRequired = isImplOnly;
+    UtamProfileProvider(JsonNode node) {
+      this.node = node;
     }
 
     /**
      * check if profiles are set
      *
-     * @return true if set
+     * @return true if set, used in PO validations
      */
-    boolean isProfilesSet() {
-      return profilesNode != null && !profilesNode.isNull();
+    boolean isEmpty() {
+      return isEmptyNode(node);
     }
 
     /**
-     * translate declared profiles into configured
+     * deserialize profiles node
      *
      * @param context translation context
-     * @return list of profiles
+     * @return list of Json objects
      */
     List<Profile> getProfiles(TranslationContext context) {
-      return parseProfileNode(context)
-          .stream()
-          .flatMap(profile -> profile.getProfiles(profilesNode, context))
-          .collect(Collectors.toList());
-    }
-
-    private Collection<UtamProfile> parseProfileNode(TranslationContext context) {
-      if (!isProfilesSet()) {
-        if (isProfilesRequired) {
-          throw new UtamCompilationError(profilesNode, context.getErrorMessage(804));
-        }
+      // profiles can be empty for default implementation
+      if (isEmptyNode(node)) {
         return new ArrayList<>();
       }
-      if (!isProfilesRequired) {
-        throw new UtamCompilationError(profilesNode, context.getErrorMessage(805));
+      if (!isNonEmptyArray(node)) {
+        String message = context.getErrorMessage(12, "page object root", "profile");
+        throw new UtamCompilationError(node, message);
       }
-      if (!profilesNode.isArray() || profilesNode.size() == 0) {
-        throw new UtamCompilationError(profilesNode, context.getErrorMessage(12, "page object root", "profile"));
-      }
-      Map<String, UtamProfile> profiles = new HashMap<>();
-      for (JsonNode node : profilesNode) {
+      Set<String> profilesNames = new HashSet<>();
+      List<Profile> profiles = new ArrayList<>();
+      for (JsonNode node : node) {
         String profileName = node.fieldNames().next();
-        JsonNode valuesNode = node.get(profileName);
-        String propertyName = String.format("profile \"%s\"", profileName);
-        if (profiles.containsKey(profileName)) {
-          throw new UtamCompilationError(profilesNode,
-              context.getErrorMessage(801, profileName));
+        if (profilesNames.contains(profileName)) {
+          throw new UtamCompilationError(this.node, context.getErrorMessage(801, profileName));
         }
-        if (valuesNode.isArray()) {
-          List<String> values = new ArrayList<>();
-          for (JsonNode valueNode : valuesNode) {
-            if (!valueNode.isTextual() || valueNode.textValue().isEmpty()) {
-              throw new UtamCompilationError(profilesNode,
-                  context.getErrorMessage(11, propertyName, valuesNode.toPrettyString()));
-            }
-            String profileValue = valueNode.textValue();
-            if (values.contains(profileValue)) {
-              throw new UtamCompilationError(profilesNode,
-                  context.getErrorMessage(802, profileName, profileValue));
-            }
-            values.add(profileValue);
-          }
-          profiles.put(profileName, new UtamProfile(profileName, values));
-        } else if (valuesNode.isTextual()) {
-          profiles.put(profileName,
-              new UtamProfile(profileName, Collections.singletonList(valuesNode.textValue())));
-        } else {
-          throw new UtamCompilationError(profilesNode,
-              context.getErrorMessage(806, profileName));
-        }
+        profilesNames.add(profileName);
+        UtamProfile utamProfile = new UtamProfile(node, profileName, context);
+        profiles.addAll(utamProfile.getProfiles(context));
       }
-      return profiles.values();
+      return profiles;
     }
   }
 }

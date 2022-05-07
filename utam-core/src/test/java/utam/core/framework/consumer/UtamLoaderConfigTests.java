@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.expectThrows;
+import static utam.core.framework.consumer.PageObjectContextImpl.ERR_GET_IMPL_BY_NAME;
 
 import java.io.File;
 import java.time.Duration;
@@ -98,7 +99,8 @@ public class UtamLoaderConfigTests {
     PageObjectContext context = config.getPageContext();
     UtamError e = expectThrows(UtamError.class,
         () -> context.getBean(TestLoaderConfigDefault.class));
-    assertThat(e.getMessage(), containsString("can't find class"));
+    String error = String.format(ERR_GET_IMPL_BY_NAME, TestLoaderConfigDefault.class.getName());
+    assertThat(e.getMessage(), containsString(error));
   }
 
   @Test
@@ -115,5 +117,23 @@ public class UtamLoaderConfigTests {
     utamLoader.resetContext();
     instance = utamLoader.create(TestLoaderConfigPageObject.class);
     assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
+  }
+
+  @Test
+  public void testDefaultConfigFromOneModule() {
+    UtamLoaderConfigImpl config = new UtamLoaderConfigImpl("testconfig/loader1.config.json");
+    PageObjectContext context = config.getPageContext();
+    PageObject bean1 = context.getBean(TestLoaderConfigPageObject.class);
+    assertThat(bean1, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
+  }
+
+  @Test
+  public void testDefaultConfigMergedFromTwoModules() {
+    UtamLoaderConfigImpl config = new UtamLoaderConfigImpl("testconfig/loader2.config.json");
+    PageObjectContext context = config.getPageContext();
+    PageObject bean1 = context.getBean(TestLoaderConfigDefault.class);
+    assertThat(bean1, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
+    PageObject bean2 = context.getBean(TestLoaderConfigPageObject.class);
+    assertThat(bean2, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
   }
 }
