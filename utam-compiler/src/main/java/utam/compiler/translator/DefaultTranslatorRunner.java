@@ -44,12 +44,13 @@ import utam.core.framework.context.Profile;
 public class DefaultTranslatorRunner implements TranslatorRunner {
 
   static final String ERR_PROFILE_PATH_DOES_NOT_EXIST =
-      "can't write profiles output, profile path '%s' does not exist";
+      "can't write profiles output, profile path '%s' does not exist and cannot be created";
   static final String ERR_PROFILE_PATH_NOT_CONFIGURED = "profile config path is null or empty";
   static final String DUPLICATE_PAGE_OBJECT_NAME = "declaration '%s' already generated";
   static final String DUPLICATE_IMPL_WITH_PROFILE_ERR =
       "can't set dependency as '%s' for type '%s', it was already set as '%s' for profile %s";
-  private static final String ERR_MODULE_NAME = "module name is not configured, can't write dependencies config file";
+  private static final String ERR_MODULE_NAME =
+      "module name is not configured, can't write dependencies config file";
   private final TranslatorConfig translatorConfig;
   private final Map<String, PageObjectDeclaration> generated = new HashMap<>();
   private final Map<Profile, Map<String, String>> profileDependenciesMapping = new HashMap<>();
@@ -204,9 +205,6 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     if (profilesRoot == null || profilesRoot.isEmpty()) {
       throw new UtamError(ERR_PROFILE_PATH_NOT_CONFIGURED);
     }
-    if (!new File(profilesRoot).exists()) {
-      throw new UtamError(String.format(ERR_PROFILE_PATH_DOES_NOT_EXIST, profilesRoot));
-    }
     return profilesRoot;
   }
 
@@ -221,8 +219,12 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       }
       throw new UtamCompilationError(ERR_MODULE_NAME);
     }
+    File resourcesRoot = new File(getResourcesRoot());
+    if (!resourcesRoot.exists() && !resourcesRoot.mkdirs()) {
+      throw new UtamError(String.format(ERR_PROFILE_PATH_DOES_NOT_EXIST, resourcesRoot));
+    }
     String profileConfigPath =
-        getResourcesRoot() + File.separator + String.format(CONFIG_FILE_MASK, moduleName);
+        resourcesRoot + File.separator + String.format(CONFIG_FILE_MASK, moduleName);
     try {
       Writer writer = new FileWriter(profileConfigPath);
       jsonCompilerOutput.writeConfig(writer);

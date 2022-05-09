@@ -257,10 +257,6 @@ public class DefaultTranslatorRunnerTests {
     targetConfig.setConfigPath("");
     e = expectThrows(UtamError.class, runner::getResourcesRoot);
     assertThat(e.getMessage(), is(equalTo(ERR_PROFILE_PATH_NOT_CONFIGURED)));
-    targetConfig.setConfigPath("err.err");
-    e = expectThrows(UtamError.class, runner::getResourcesRoot);
-    assertThat(
-        e.getMessage(), is(equalTo(String.format(ERR_PROFILE_PATH_DOES_NOT_EXIST, "err.err"))));
   }
 
   @Test
