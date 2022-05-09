@@ -376,7 +376,7 @@ public class DefaultTranslatorRunnerTests {
     translator.setPageObject("name", object);
     Writer w = new StringWriter();
     translator.writeDependenciesConfigs(w);
-    String expectedConfigStr = getCompilerOutputAsString("compiler/default.config.json");
+    String expectedConfigStr = getCompilerOutputAsString("compiler/default.expected.json");
     assertThat(w.toString(), is(equalTo(expectedConfigStr)));
   }
 

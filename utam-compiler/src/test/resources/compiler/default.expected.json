@@ -1,0 +1,10 @@
+{
+  "default" : {
+    "impl" : [
+      {
+        "interface" : "my.object.MyClass",
+        "implementation" : "my.object.MyClassImpl"
+      }
+    ]
+  }
+}
