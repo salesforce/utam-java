@@ -31,7 +31,17 @@ final class UtamProfile {
 
   private final String profileName;
   private final Set<String> values;
-  private final JsonNode jsonNode;
+
+  /**
+   * instance of the profile
+   *
+   * @param profileName name of the profile
+   * @param values      profile values
+   */
+  private UtamProfile(String profileName, Set<String> values) {
+    this.profileName = profileName;
+    this.values = values;
+  }
 
   /**
    * instance of the profile
@@ -40,10 +50,9 @@ final class UtamProfile {
    * @param profileName name of the profile
    * @param context     compilation context
    */
-  UtamProfile(JsonNode node, String profileName, TranslationContext context) {
-    this.jsonNode = node;
-    this.profileName = profileName;
-    this.values = new HashSet<>();
+  private static UtamProfile processProfileNode(JsonNode node, String profileName,
+      TranslationContext context) {
+    Set<String> values = new HashSet<>();
     JsonNode valuesNode = node.get(profileName);
     String propertyName = String.format("profile \"%s\"", profileName);
     if (valuesNode.isArray()) {
@@ -66,6 +75,7 @@ final class UtamProfile {
       throw new UtamCompilationError(valuesNode,
           context.getErrorMessage(806, profileName));
     }
+    return new UtamProfile(profileName, values);
   }
 
   /**
@@ -74,7 +84,7 @@ final class UtamProfile {
    * @param context compiler context
    * @return list of profiles
    */
-  private List<Profile> getProfiles(TranslationContext context) {
+  private List<Profile> getProfiles(TranslationContext context, JsonNode jsonNode) {
     List<Profile> profiles = new ArrayList<>();
     ProfileConfiguration configuration = context.getConfiguredProfile(profileName);
     if (configuration == null) {
@@ -142,8 +152,8 @@ final class UtamProfile {
           throw new UtamCompilationError(this.node, context.getErrorMessage(801, profileName));
         }
         profilesNames.add(profileName);
-        UtamProfile utamProfile = new UtamProfile(node, profileName, context);
-        profiles.addAll(utamProfile.getProfiles(context));
+        UtamProfile utamProfile = processProfileNode(node, profileName, context);
+        profiles.addAll(utamProfile.getProfiles(context, node));
       }
       return profiles;
     }

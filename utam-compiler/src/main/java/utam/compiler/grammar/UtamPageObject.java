@@ -80,7 +80,7 @@ final class UtamPageObject {
   private final boolean isRootPageObject;
   private final List<UtamMethod> methods;
   private final PlatformType platform;
-  private final UtamProfileProvider profilesProvider;
+  private final UtamProfileProvider profileProvider;
   private final List<UtamElementProvider> elements;
   private final List<UtamElementProvider> shadowElements;
   private final UtamRootDescription description;
@@ -104,7 +104,7 @@ final class UtamPageObject {
       @JsonProperty("methods") JsonNode methodsNode,
       @JsonProperty("beforeLoad") JsonNode beforeLoadNode,
       @JsonProperty("description") JsonNode descriptionNode) {
-    this.profilesProvider = new UtamProfileProvider(profilesNode);
+    this.profileProvider = new UtamProfileProvider(profilesNode);
     this.isAbstract = isAbstract;
     this.methods = processMethodsNode(methodsNode, isAbstract);
     try {
@@ -155,7 +155,7 @@ final class UtamPageObject {
    * @return list of profiles
    */
   List<Profile> getProfiles(TranslationContext context) {
-    return profilesProvider.getProfiles(context);
+    return this.profileProvider.getProfiles(context);
   }
 
   List<AnnotationProvider> getAnnotations() {
@@ -182,7 +182,7 @@ final class UtamPageObject {
 
   private void validateAbstract(TranslationContext context, JsonParser parser) {
     if (shadowElements.size() > 0 || elements.size() > 0 || rootLocator != null
-        || !profilesProvider.isEmpty() || beforeLoad.size() > 0 || implementsType != null) {
+        || !profileProvider.isEmpty() || beforeLoad.size() > 0 || implementsType != null) {
       throw new UtamCompilationError(parser,
           context.getErrorMessage(904, INTERFACE_PROPERTIES));
     }
@@ -197,8 +197,8 @@ final class UtamPageObject {
     }
     if (implementsType != null) {
       context.setImplementedType(implementsType);
-    } else if(!profilesProvider.isEmpty()){
-      throw new UtamCompilationError(profilesProvider.node, context.getErrorMessage(805));
+    } else if(!profileProvider.isEmpty()){
+      throw new UtamCompilationError(profileProvider.node, context.getErrorMessage(805));
     }
   }
 
