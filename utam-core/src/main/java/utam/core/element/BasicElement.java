@@ -61,10 +61,9 @@ public interface BasicElement extends UtamBase {
   String getValue();
 
   /**
-   * checks if current element has focus <br>
-   * uses Selenium WebDriver.switchTo().activeElement().equals(WebDriver) <br>
-   * Throws exception if element not found within timeout
-   * @return true if current element has focus
+   * Check if element has focus (is active) inside document or its parent shadow root
+   *
+   * @return true if current element is active
    */
   boolean isFocused();
 }

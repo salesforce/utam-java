@@ -27,6 +27,8 @@ import static utam.core.selenium.element.ElementAdapter.BLUR_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.ElementAdapter.CLICK_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.ElementAdapter.ERR_NULL_ELEMENT;
 import static utam.core.selenium.element.ElementAdapter.FOCUS_VIA_JAVASCRIPT;
+import static utam.core.selenium.element.ElementAdapter.IS_PARENT_NODE_SHADOW_ROOT_JS;
+import static utam.core.selenium.element.ElementAdapter.ROOT_NODE_GET_ACTIVE_ELEMENT_JS;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_CENTER_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_TOP_VIA_JAVASCRIPT;
 import static utam.core.selenium.element.LocatorBy.byCss;
@@ -39,6 +41,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
+import utam.core.driver.Driver;
 import utam.core.element.DragAndDropOptions;
 import utam.core.element.Element;
 import utam.core.element.Element.ScrollOptions;
@@ -172,6 +175,18 @@ public class ElementAdapterTests {
     when(targetLocator.activeElement()).thenReturn(mock(WebElement.class));
     assertThat("element has no focus", element.hasFocus(), is(false));
     when(targetLocator.activeElement()).thenReturn(mock.getWebElementMock());
+    assertThat("element has focus", element.hasFocus(), is(true));
+  }
+
+  @Test
+  public void testHasFocusInsideShadowRoot() {
+    MockUtilities mockUtils = new MockUtilities();
+    WebElement elementMock = mockUtils.getWebElementMock();
+    Driver driverAdapterMock = mockUtils.getDriverAdapter();
+    Element element = mockUtils.getElementAdapter();
+    when(driverAdapterMock.executeScript(contains(IS_PARENT_NODE_SHADOW_ROOT_JS), refEq(elementMock))).thenReturn(true);
+    assertThat("element has no focus", element.hasFocus(), is(false));
+    when(driverAdapterMock.executeScript(contains(ROOT_NODE_GET_ACTIVE_ELEMENT_JS), refEq(elementMock))).thenReturn(elementMock);
     assertThat("element has focus", element.hasFocus(), is(true));
   }
 

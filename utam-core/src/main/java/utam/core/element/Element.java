@@ -116,9 +116,9 @@ public interface Element {
   void moveTo();
 
   /**
-   * check if element has focus
+   * Check if element has focus (is active) inside document or its parent shadow root
    *
-   * @return boolean
+   * @return true if current element is active
    */
   boolean hasFocus();
 
