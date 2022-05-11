@@ -182,7 +182,7 @@ final class UtamPageObject {
 
   private void validateAbstract(TranslationContext context, JsonParser parser) {
     if (shadowElements.size() > 0 || elements.size() > 0 || rootLocator != null
-        || !profileProvider.isEmpty() || beforeLoad.size() > 0 || implementsType != null) {
+        || profileProvider.isNotEmpty() || beforeLoad.size() > 0 || implementsType != null) {
       throw new UtamCompilationError(parser,
           context.getErrorMessage(904, INTERFACE_PROPERTIES));
     }
@@ -197,7 +197,7 @@ final class UtamPageObject {
     }
     if (implementsType != null) {
       context.setImplementedType(implementsType);
-    } else if(!profileProvider.isEmpty()){
+    } else if(profileProvider.isNotEmpty()){
       throw new UtamCompilationError(profileProvider.node, context.getErrorMessage(805));
     }
   }

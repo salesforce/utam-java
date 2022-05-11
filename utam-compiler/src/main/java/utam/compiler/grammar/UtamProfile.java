@@ -49,6 +49,7 @@ final class UtamProfile {
    * @param node        profiles node
    * @param profileName name of the profile
    * @param context     compilation context
+   * @return instance of UtamProfile
    */
   private static UtamProfile processProfileNode(JsonNode node, String profileName,
       TranslationContext context) {
@@ -125,8 +126,8 @@ final class UtamProfile {
      *
      * @return true if set, used in PO validations
      */
-    boolean isEmpty() {
-      return isEmptyNode(node);
+    boolean isNotEmpty() {
+      return !isEmptyNode(node);
     }
 
     /**
