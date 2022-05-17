@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.DeserializerUtilities.expectCompilerError;
 
 import java.util.List;
@@ -20,6 +21,7 @@ import org.testng.annotations.Test;
 import utam.compiler.JsonBuilderTestUtility;
 import utam.compiler.translator.StringValueProfileConfig;
 import utam.core.declarative.translator.TranslatorConfig;
+import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.Profile;
 import utam.core.framework.context.StringValueProfile;
 
@@ -101,6 +103,18 @@ public class UtamProfile_Tests {
     String json = "{ \"profile\" : [ { \"name1\" : \"value1\" } ] , \"implements\": \"my/pageobjects/type\"}";
     Exception e = expectCompilerError(json);
     assertThat(e.getMessage(), containsString(
-        "error 803: profile { \"name1\": \"value1\" } is not configured, make sure it's in compiler config"));
+        "error 804: profile with name \"name1\" is not configured, make sure it's in compiler config"));
+  }
+
+  @Test
+  public void testNonConfiguredProfileValueThrows() {
+    String json = "{ \"profile\" : [ { \"name\" : \"error\" } ] , \"implements\": \"my/pageobjects/type\"}";
+    DeserializerUtilities utilities = new DeserializerUtilities();
+    TranslatorConfig translatorConfig = utilities.getTranslatorConfig();
+    translatorConfig.getConfiguredProfiles().add(new StringValueProfileConfig("name", "value"));
+    Exception e = expectThrows(UtamError.class, () -> utilities.getResultFromString(json).getPageObject()
+        .getImplementation().getProfiles());
+    assertThat(e.getMessage(), containsString("error 803: "
+        + "profile { \"name\": \"error\" } is not configured, make sure it's in compiler config"));
   }
 }

@@ -16,27 +16,35 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.TEST_URI;
 import static utam.compiler.grammar.TestUtilities.getJsonStringDeserializer;
 import static utam.compiler.translator.DefaultSourceConfigurationTests.TranslatorConfigWithProfile.TEST_PROFILE;
-import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_IMPL_WITH_PROFILE_ERR;
-import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_PAGE_OBJECT_NAME;
-import static utam.compiler.translator.DefaultTranslatorRunner.ERR_PROFILE_PATH_DOES_NOT_EXIST;
-import static utam.compiler.translator.DefaultTranslatorRunner.ERR_PROFILE_PATH_NOT_CONFIGURED;
 import static utam.compiler.translator.DefaultTargetConfigurationTests.PAGE_OBJECT_IMPL_CLASS_NAME;
 import static utam.compiler.translator.DefaultTargetConfigurationTests.PAGE_OBJECT_INTERFACE_CLASS_NAME;
+import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_IMPL_WITH_PROFILE_ERR;
+import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_PAGE_OBJECT_NAME;
+import static utam.compiler.translator.DefaultTranslatorRunner.ERR_MODULE_NAME_NOT_CONFIGURED;
+import static utam.compiler.translator.DefaultTranslatorRunner.ERR_PROFILE_PATH_NOT_CONFIGURED;
+import static utam.compiler.translator.JsonCompilerOutputTests.getCompilerOutputAsString;
+import static utam.compiler.translator.JsonCompilerOutputTests.getConfig;
+import static utam.core.framework.consumer.UtamLoaderConfigImpl.DEFAULT_PROFILE;
 
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hamcrest.Matchers;
 import org.testng.annotations.Test;
-import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.TestUtilities;
+import utam.compiler.helpers.TypeUtilities.FromString;
 import utam.compiler.translator.DefaultSourceConfigurationTests.TranslatorConfigWithProfile;
+import utam.core.declarative.representation.PageObjectClass;
 import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.declarative.representation.PageObjectInterface;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorRunner;
@@ -211,7 +219,7 @@ public class DefaultTranslatorRunnerTests {
   public void testSetImplProfileConfigNotSet() {
     DefaultTranslatorRunner runner = getRunner();
     Profile profile = new StringValueProfile("my", "test");
-    Exception e = expectThrows(UtamCompilationError.class, () -> runner.setImplementation(profile, "type", "type"));
+    Exception e = expectThrows(UtamError.class, () -> runner.setImplementation(profile, "type", "type"));
     assertThat(e.getMessage(), containsString("error 803: profile { \"my\": \"test\" } is not configured, make sure it's in compiler config"));
   }
 
@@ -252,10 +260,10 @@ public class DefaultTranslatorRunnerTests {
   public void testGetResourcesRootThrows() {
     DefaultTargetConfigurationTests.Mock targetConfig = new DefaultTargetConfigurationTests.Mock();
     DefaultTranslatorRunner runner = targetConfig.getRunner();
-    UtamError e = expectThrows(UtamError.class, runner::getResourcesRoot);
+    UtamError e = expectThrows(UtamError.class, () -> runner.buildDependenciesConfigPath("module"));
     assertThat(e.getMessage(), is(equalTo(ERR_PROFILE_PATH_NOT_CONFIGURED)));
     targetConfig.setConfigPath("");
-    e = expectThrows(UtamError.class, runner::getResourcesRoot);
+    e = expectThrows(UtamError.class, () -> runner.buildDependenciesConfigPath("module"));
     assertThat(e.getMessage(), is(equalTo(ERR_PROFILE_PATH_NOT_CONFIGURED)));
   }
 
@@ -348,5 +356,37 @@ public class DefaultTranslatorRunnerTests {
             "utam.test.pageobjects.test.TestInterface",
             implName,
             "{ color : red }"))));
+  }
+
+  /**
+   * check content of dependencies config for default profile
+   */
+  @Test
+  public void testDefaultInterfaceDependencyConfig() throws IOException {
+    TranslatorConfig config = getConfig();
+    DefaultTranslatorRunner translator = new DefaultTranslatorRunner(config);
+    PageObjectDeclaration object = mock(PageObjectDeclaration.class);
+    PageObjectClass classMock = mock(PageObjectClass.class);
+    PageObjectInterface intMock = mock(PageObjectInterface.class);
+    when(classMock.getClassType()).thenReturn(new FromString("my.object.MyClassImpl"));
+    when(intMock.getInterfaceType()).thenReturn(new FromString("my.object.MyClass"));
+    when(object.getInterface()).thenReturn(intMock);
+    when(object.isClassWithInterface()).thenReturn(false);
+    when(object.getImplementation()).thenReturn(classMock);
+    translator.setPageObject("name", object);
+    Writer w = new StringWriter();
+    translator.writeDependenciesConfigs(w);
+    String expectedConfigStr = getCompilerOutputAsString("compiler/default.expected.json");
+    assertThat(w.toString(), is(equalTo(expectedConfigStr)));
+  }
+
+  @Test
+  public void testNonEmptyDependenciesWithoutModuleNameThrows() {
+    TranslatorConfig config = mock(TranslatorConfig.class);
+    when(config.getModuleName()).thenReturn(null);
+    DefaultTranslatorRunner translator = new DefaultTranslatorRunner(config);
+    translator.setImplementation(DEFAULT_PROFILE, "type1", "type2");
+    Exception e = expectThrows(UtamRunnerError.class, translator::writeDependenciesConfigs);
+    assertThat(e.getMessage(), containsString(ERR_MODULE_NAME_NOT_CONFIGURED));
   }
 }

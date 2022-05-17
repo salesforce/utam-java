@@ -249,23 +249,6 @@ public class JsonDeserializerTests {
     assertThat(rootNode.isInterfaceOnly(), is(equalTo(true)));
   }
 
-  /**
-   * Tests that the isClassWithProfiles method returns false when the root node describes a page
-   * object with no profiles
-   */
-  @Test
-  public void testIsClassWithProfilesReturnsFalseForPageObjectWithoutProfiles() {
-    String json =
-        "{"
-            + "  \"selector\": {"
-            + "    \"css\": \"rootSelector\""
-            + "  },"
-            + "  \"root\": true"
-            + "}";
-    PageObjectDeclaration rootNode = createRootNode(json);
-    assertThat(rootNode.isClassWithProfiles(), is(equalTo(false)));
-  }
-
   /** Tests that the getClassType method returns a correct TypeProvider object */
   @Test
   public void testGetClassType() {

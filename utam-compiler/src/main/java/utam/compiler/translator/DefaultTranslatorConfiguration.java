@@ -15,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import utam.compiler.translator.DefaultSourceConfiguration.FilesScanner;
@@ -68,7 +69,8 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
     for (ProfileConfiguration profileDefinition : profileDefinitions) {
       setConfiguredProfile(profileDefinition);
     }
-    this.guardrailsMode = guardrailsMode;
+    // if passed as null - set to warning by default
+    this.guardrailsMode = Objects.requireNonNullElse(guardrailsMode, GuardrailsMode.WARNING);
     this.jsonErrorsConfig = JsonErrorsConfig.getErrorsConfigWithDefaultName();
   }
 

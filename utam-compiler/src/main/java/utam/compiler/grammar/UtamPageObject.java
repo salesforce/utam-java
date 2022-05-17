@@ -104,7 +104,7 @@ final class UtamPageObject {
       @JsonProperty("methods") JsonNode methodsNode,
       @JsonProperty("beforeLoad") JsonNode beforeLoadNode,
       @JsonProperty("description") JsonNode descriptionNode) {
-    this.profileProvider = new UtamProfileProvider(profilesNode, implementsType != null);
+    this.profileProvider = new UtamProfileProvider(profilesNode);
     this.isAbstract = isAbstract;
     this.methods = processMethodsNode(methodsNode, isAbstract);
     try {
@@ -180,26 +180,33 @@ final class UtamPageObject {
     return isRootPageObject ? BASE_ROOT_PAGE_OBJECT_CLASS : BASE_PAGE_OBJECT_CLASS;
   }
 
-  final void compile(TranslationContext context, JsonParser parser) {
-    if (this.isAbstract) {
-      if (shadowElements.size() > 0 || elements.size() > 0 || rootLocator != null || profileProvider
-          .isProfilesSet() || beforeLoad.size() > 0 || implementsType != null) {
-        throw new UtamCompilationError(parser,
-            context.getErrorMessage(904, INTERFACE_PROPERTIES));
-      }
-    } else {
-      if (isRootPageObject) {
-        if (rootLocator == null) {
-          throw new UtamCompilationError(parser, context.getErrorMessage(902));
-        }
-      } else {
-        if (rootLocator != null) {
-          throw new UtamCompilationError(parser, context.getErrorMessage(901));
-        }
-      }
+  private void validateAbstract(TranslationContext context, JsonParser parser) {
+    if (shadowElements.size() > 0 || elements.size() > 0 || rootLocator != null
+        || profileProvider.isNotEmpty() || beforeLoad.size() > 0 || implementsType != null) {
+      throw new UtamCompilationError(parser,
+          context.getErrorMessage(904, INTERFACE_PROPERTIES));
+    }
+  }
+
+  private void validateRegular(TranslationContext context, JsonParser parser) {
+    if (isRootPageObject && rootLocator == null) {
+      throw new UtamCompilationError(parser, context.getErrorMessage(902));
+    }
+    if (!isRootPageObject && rootLocator != null) {
+      throw new UtamCompilationError(parser, context.getErrorMessage(901));
     }
     if (implementsType != null) {
       context.setImplementedType(implementsType);
+    } else if(profileProvider.isNotEmpty()){
+      throw new UtamCompilationError(profileProvider.node, context.getErrorMessage(805));
+    }
+  }
+
+  final void compile(TranslationContext context, JsonParser parser) {
+    if (this.isAbstract) {
+      validateAbstract(context, parser);
+    } else {
+      validateRegular(context, parser);
     }
     // register element to prevent names collisions
     ElementContext rootElement = rootElementHelper.setRootElementMethod(context, rootLocator);

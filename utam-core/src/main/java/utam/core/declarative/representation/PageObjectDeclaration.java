@@ -28,13 +28,6 @@ public interface PageObjectDeclaration {
   boolean isClassWithInterface();
 
   /**
-   * Gets a value indicating whether the Page Object contains a class with profiles
-   *
-   * @return true if the Page Object contains a class with profiles; otherwise false
-   */
-  boolean isClassWithProfiles();
-
-  /**
    * Gets the implementation of the Page Object
    *
    * @return the implementation of the Page Object

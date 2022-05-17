@@ -8,6 +8,22 @@
       "selector": {
         "css": "css"
       }
+    },
+    {
+      "name": "testWithFilter",
+      "nullable": true,
+      "public": true,
+      "type": "generated-basic/pageObjects/testBasicTypes",
+      "selector": {
+        "css": "css",
+        "returnAll" : true
+      },
+      "filter": {
+        "apply": "isVisible",
+        "matcher": {
+          "type": "isTrue"
+        }
+      }
     }
   ]
 }

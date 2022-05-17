@@ -9,6 +9,7 @@ package utam.core.framework.consumer;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.Map;
 import utam.core.framework.UtamCoreError;
 import utam.core.framework.base.BasePageObject;
@@ -22,34 +23,47 @@ import utam.core.framework.base.PageObject;
  */
 public class PageObjectContextImpl implements PageObjectContext {
 
-  /**
-   * Error template for not being able to find a class by name
-   */
-  public static final String ERR_GET_CLASS_BY_NAME = "can't find class with name %s";
+  static final String ERR_GET_IMPL_BY_NAME = "can't find implementation for %s";
   static final String ERR_GET_INSTANCE_BY_NAME = "can't create instance of type '%s'";
 
   private final Map<Class<? extends PageObject>, Class> activeBeans;
+  private final Map<Class<? extends PageObject>, Class> defaultBeans;
 
   /**
    * Initializes a new instance of the PageObjectContextImpl class
    *
-   * @param activeBeans the active beans in the Page Object
+   * @param activeBeans  the active beans in the Page Object
+   * @param defaultBeans beans for default profile
    */
-  public PageObjectContextImpl(Map<Class<? extends PageObject>, Class> activeBeans) {
+  public PageObjectContextImpl(
+      Map<Class<? extends PageObject>, Class> activeBeans,
+      Map<Class<? extends PageObject>, Class> defaultBeans
+  ) {
     this.activeBeans = activeBeans;
+    this.defaultBeans = defaultBeans;
   }
 
   /**
-   * Gets the class from the name
+   * Initializes a new instance of the PageObjectContextImpl class, left for compatibility with older versions
    *
-   * @param className name of the class to retrieve
+   * @param activeBeans the active beans in the Page Object
+   */
+  public PageObjectContextImpl(Map<Class<? extends PageObject>, Class> activeBeans) {
+    this(activeBeans, new HashMap<>());
+  }
+
+  /**
+   * build default impl name (with prefix Impl) and try to find proper class
+   *
+   * @param interfaceName         name of the interface
    * @return the class
    */
-  public static Class getClassFromName(String className) {
+  private static Class getDefaultImplementation(String interfaceName) {
+    String className = getDefaultImplType(interfaceName)[1];
     try {
       return Class.forName(className);
     } catch (ClassNotFoundException e) {
-      throw new UtamCoreError(String.format(ERR_GET_CLASS_BY_NAME, className));
+      throw new UtamCoreError(String.format(ERR_GET_IMPL_BY_NAME, interfaceName));
     }
   }
 
@@ -72,9 +86,10 @@ public class PageObjectContextImpl implements PageObjectContext {
       implementingClass = type;
     } else if (activeBeans.containsKey(type)) {
       implementingClass = activeBeans.get(type);
+    } else if(defaultBeans.containsKey(type)) {
+      implementingClass = defaultBeans.get(type);
     } else {
-      String className = getDefaultImplType(type.getName())[1];
-      implementingClass = getClassFromName(className);
+      implementingClass = getDefaultImplementation(type.getName());
     }
     try {
       Constructor<? extends T> constructor = implementingClass.getConstructor();

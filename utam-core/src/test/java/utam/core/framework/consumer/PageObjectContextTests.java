@@ -12,7 +12,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
-import static utam.core.framework.consumer.PageObjectContextImpl.ERR_GET_CLASS_BY_NAME;
+import static utam.core.framework.consumer.PageObjectContextImpl.ERR_GET_IMPL_BY_NAME;
 import static utam.core.framework.consumer.PageObjectContextImpl.ERR_GET_INSTANCE_BY_NAME;
 
 import java.util.Collections;
@@ -42,9 +42,8 @@ public class PageObjectContextTests {
     PageObjectContext context = new PageObjectContextImpl(new HashMap<>());
     UtamError e = expectThrows(UtamError.class,
         () -> context.getBean(PageObjectWithoutImplementation.class));
-    assertThat(e.getMessage(), is(equalTo(
-        String.format(ERR_GET_CLASS_BY_NAME,
-            "utam.core.framework.consumer.impl.PageObjectContextTests$PageObjectWithoutImplementationImpl"))));
+    String message = String.format(ERR_GET_IMPL_BY_NAME, PageObjectWithoutImplementation.class.getName());
+    assertThat(e.getMessage(), is(equalTo(message)));
   }
 
   @Test

@@ -8,11 +8,9 @@
 package utam.compiler.translator;
 
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import utam.core.declarative.translator.ProfileConfiguration;
-import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.Profile;
 import utam.core.framework.context.StringValueProfile;
 
@@ -24,15 +22,7 @@ import utam.core.framework.context.StringValueProfile;
  */
 public class StringValueProfileConfig implements ProfileConfiguration {
 
-  static final String ERR_NAME_REQUIRED =
-      "profile must contain a name that is not null or empty";
-  static final String ERR_VALUES_REQUIRED =
-      "profile must contain at least one non-null, non-empty value";
-  static final String ERR_PROFILE_VALUE_INCORRECT =
-          "profile '%s' does not support value '%s'";
-
   private final String jsonKey;
-  private final Function<String, Profile> profileValueProvider;
   private final Set<String> values;
 
   /**
@@ -42,35 +32,8 @@ public class StringValueProfileConfig implements ProfileConfiguration {
    * @param values      the list of values making up the profile
    */
   public StringValueProfileConfig(String profileName, String[] values) {
-    if (profileName == null || profileName.isEmpty()) {
-      throw new UtamError(ERR_NAME_REQUIRED);
-    }
-
-    if (values == null || values.length == 0) {
-      throw new UtamError(ERR_VALUES_REQUIRED);
-    }
-
-    Set<String> profileValues = Stream.of(values)
-        .filter(value -> value != null && !value.isEmpty())
-        .collect(Collectors.toSet());
-
-    if (profileValues.size() == 0) {
-      throw new UtamError(ERR_VALUES_REQUIRED);
-    }
-
     this.jsonKey = profileName;
-    this.values = profileValues;
-    this.profileValueProvider =
-        string -> profileValues.stream()
-            .filter(string::equals)
-            .map(value -> new StringValueProfile(profileName, value))
-            .findAny()
-            .orElseThrow(
-                () -> new UtamError(
-                    String.format(
-                        ERR_PROFILE_VALUE_INCORRECT,
-                        jsonKey,
-                        string)));
+    this.values = Stream.of(values).collect(Collectors.toSet());
   }
 
   /**
@@ -89,7 +52,6 @@ public class StringValueProfileConfig implements ProfileConfiguration {
    * @param name  the name of the profile
    * @param value the value making up the profile
    */
-  // used in tests
   public StringValueProfileConfig(String name, String value) {
     this(name, new String[] { value } );
   }
@@ -110,7 +72,11 @@ public class StringValueProfileConfig implements ProfileConfiguration {
 
   @Override
   public Profile getFromString(String value) {
-    return profileValueProvider.apply(value);
+    if(!this.values.contains(value)) {
+      // error should be handled by caller because of different context
+      return null;
+    }
+    return new StringValueProfile(jsonKey, value);
   }
 
   @Override

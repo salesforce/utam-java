@@ -33,6 +33,10 @@
     {
       "typeMatch": "generated-args",
       "pathMatch": ".*/args"
+    },
+    {
+      "typeMatch": "generated-profiles",
+      "pathMatch": ".*/profiles"
     }
   ],
   "copyright" : [

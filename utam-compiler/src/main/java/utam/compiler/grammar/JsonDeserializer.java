@@ -196,6 +196,26 @@ public final class JsonDeserializer extends
     return new Object(utamPageObject, context);
   }
 
+  /**
+   * utility method to check if node is empty
+   *
+   * @param node JSON node
+   * @return true if null or empty
+   */
+  static boolean isEmptyNode(JsonNode node) {
+    return node == null || node.isNull();
+  }
+
+  /**
+   * check if node is a non empty array
+   *
+   * @param node JSON node
+   * @return true if non empty array
+   */
+  static boolean isNonEmptyArray(JsonNode node) {
+    return node.isArray() && node.size() > 0;
+  }
+
   static class Object implements PageObjectDeclaration {
 
     private final UtamPageObject utamPageObject;
@@ -216,11 +236,6 @@ public final class JsonDeserializer extends
     @Override
     public boolean isClassWithInterface() {
       return utamPageObject.implementsType == null;
-    }
-
-    @Override
-    public boolean isClassWithProfiles() {
-      return !pageObjectClass.getProfiles().isEmpty();
     }
 
     @Override

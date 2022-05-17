@@ -77,12 +77,9 @@ public class UtamPageObject_Tests {
   }
 
   @Test
-  public void testImplementationWithoutProfileThrows() {
+  public void testImplementationWithoutProfile() {
     String json = "{ \"implements\" : \"type/to/implement\" }";
-    UtamError e = expectThrows(UtamError.class,
-        () -> new DeserializerUtilities().getResultFromString(json));
-    assertThat(e.getMessage(),
-        containsString("error 804: page object with \"implements\" should have \"profile\" property"));
+    new DeserializerUtilities().getResultFromString(json);
   }
 
   @Test

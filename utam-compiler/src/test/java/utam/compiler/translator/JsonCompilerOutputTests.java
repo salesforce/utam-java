@@ -34,20 +34,24 @@ public class JsonCompilerOutputTests {
   private static final Profile DUMMY_PROFILE = new StringValueProfile("name", "value");
   private static final String USER_ROOT = System.getProperty("user.dir");
 
-  private static void runCompiler() throws IOException {
+  static TranslatorConfig getConfig() throws IOException {
     JsonCompilerConfig jsonConfig = new JsonCompilerConfig(
         new File(USER_ROOT + "/src/test/resources/compiler/" + "test.compiler.json"),
         new File(USER_ROOT),
         null
     );
-    TranslatorConfig config = jsonConfig.getTranslatorConfig(GuardrailsMode.WARNING);
+    return jsonConfig.getTranslatorConfig(GuardrailsMode.WARNING);
+  }
+
+  private static void runCompiler() throws IOException {
+    TranslatorConfig config = getConfig();
     TranslatorRunner translator = new DefaultTranslatorRunner(config);
     translator.run();
     // do not write classes!
     translator.writeDependenciesConfigs();
   }
 
-  private static String getCompilerOutputAsString(String compilerOutputFile) throws IOException {
+  static String getCompilerOutputAsString(String compilerOutputFile) throws IOException {
     return new String(Files.readAllBytes(
         new File(USER_ROOT + "/src/test/resources/" + compilerOutputFile)
             .toPath()));
