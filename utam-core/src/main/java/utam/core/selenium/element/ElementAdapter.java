@@ -59,6 +59,8 @@ public class ElementAdapter implements Element {
       "element is still not visible or clickable after scroll into view";
   private static final String SCROLL_TO_DOCUMENT_ORIGIN_JS =
       "window.scrollTo(0,0);";
+  static final String IS_PARENT_NODE_SHADOW_ROOT_JS = "return arguments[0].getRootNode() instanceof ShadowRoot;";
+  static final String ROOT_NODE_GET_ACTIVE_ELEMENT_JS = "return arguments[0].getRootNode().activeElement";
 
   /**
    * The driver instance driving this element
@@ -232,10 +234,21 @@ public class ElementAdapter implements Element {
 
   @Override
   public boolean hasFocus() {
-    return driver
-        .switchTo()
-        .activeElement()
-        .equals(getWebElement());
+    WebElement self = getWebElement();
+    // 1. check if current element's parent is shadowRoot
+    // return arguments[0].getRootNode() instanceof ShadowRoot";
+    Object isShadowHost = driverAdapter.executeScript(IS_PARENT_NODE_SHADOW_ROOT_JS, self);
+    Object activeElement;
+    if(Boolean.TRUE.equals(isShadowHost)) {
+      // 2. get active element from shadowRoot
+      // return arguments[0].getRootNode().activeElement;
+      activeElement = driverAdapter.executeScript(ROOT_NODE_GET_ACTIVE_ELEMENT_JS, self);
+    } else {
+      // 2. or get active element from driver
+      activeElement = driver.switchTo().activeElement();
+    }
+    // check if current element is same as active element
+    return self.equals(activeElement);
   }
 
   @Override
