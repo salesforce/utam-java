@@ -231,7 +231,7 @@
   },
   {
     "code": 904,
-    "message": "interface declaration can only have properties: [ %s ]"
+    "message": "property \"%s\" is not supported, interface declaration can only have properties: [ %s ]"
   },
   {
     "code": 905,

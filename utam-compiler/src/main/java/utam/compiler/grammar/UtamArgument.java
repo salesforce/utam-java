@@ -352,7 +352,7 @@ abstract class UtamArgument {
         @JsonProperty(value = "description") String description,
         @JsonProperty(value = "predicate", required = true) JsonNode conditionsNode) {
       super(name, type, description);
-      this.conditions = processComposeNodes("predicate", conditionsNode, false);
+      this.conditions = processComposeNodes("predicate", conditionsNode);
     }
 
     @Override

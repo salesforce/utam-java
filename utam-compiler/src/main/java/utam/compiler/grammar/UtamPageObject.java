@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.compiler.grammar.UtamComposeMethod.getComposeStatements;
 import static utam.compiler.grammar.UtamComposeMethod.processComposeNodes;
@@ -66,7 +67,7 @@ import utam.core.framework.context.Profile;
 final class UtamPageObject {
 
   static final String BEFORE_LOAD_METHOD_NAME = "load";
-  private static final String INTERFACE_PROPERTIES = String.join(", ", "root",
+  static final String INTERFACE_PROPERTIES = String.join(", ", "root",
       "interface",
       "methods",
       "type",
@@ -114,26 +115,47 @@ final class UtamPageObject {
     }
     this.isRootPageObject = isRootPageObject;
     this.implementsType = implementsType;
-    this.shadowElements = processShadowNode(shadowNode, "root shadow");
-    this.elements = processElementsNode(elementsNode, "root elements");
+    this.shadowElements = processShadowNode(isAbstract, shadowNode, "root shadow");
+    this.elements = processElementsNode(isAbstract, elementsNode, "root elements");
     this.rootElementHelper = new RootElementHelper(typeNode, isExposeRootElement);
     this.beforeLoadNode = beforeLoadNode;
-    this.beforeLoad = processComposeNodes(BEFORE_LOAD_METHOD_NAME, beforeLoadNode, true);
+    this.beforeLoad = processBeforeLoadNodes(isAbstract, beforeLoadNode);
     this.rootLocator = selector == null ? null : selector.getLocator();
     this.description = processRootDescriptionNode(descriptionNode);
   }
 
   /**
+   * process beforeLoad method nodes
+   *
+   * @param isAbstract boolean to indicate if page object is an interface
+   * @param beforeLoadNodes json nodes
+   * @return list of statements
+   */
+  static List<UtamMethodAction> processBeforeLoadNodes(boolean isAbstract, JsonNode beforeLoadNodes) {
+    if (isAbstract && !isEmptyNode(beforeLoadNodes)) {
+      throw new UtamCompilerIntermediateError(904, "beforeLoad", INTERFACE_PROPERTIES);
+    }
+    if(isEmptyNode(beforeLoadNodes)) {
+      return new ArrayList<>();
+    }
+    return processComposeNodes(BEFORE_LOAD_METHOD_NAME, beforeLoadNodes);
+  }
+
+  /**
    * parse platform node, separated into stand alone method because of error codes
    *
+   * @param isAbstract boolean to indicate if page object is an interface
    * @param elementsNode  node with elements
    * @param parserContext context of the parser
    * @return list of parsed elements
    */
-  static List<UtamElementProvider> processElementsNode(JsonNode elementsNode,
+  static List<UtamElementProvider> processElementsNode(boolean isAbstract, JsonNode elementsNode,
       String parserContext) {
+    if(isAbstract && !isEmptyNode(elementsNode)) {
+      throw new UtamCompilerIntermediateError(904, "elements", INTERFACE_PROPERTIES);
+    }
     List<UtamElementProvider> elements = new ArrayList<>();
-    if (elementsNode == null || elementsNode.isNull()) {
+    if (isEmptyNode(elementsNode)) {
       return elements;
     }
     if (!elementsNode.isArray() || elementsNode.size() == 0) {
@@ -181,10 +203,22 @@ final class UtamPageObject {
   }
 
   private void validateAbstract(TranslationContext context, JsonParser parser) {
-    if (shadowElements.size() > 0 || elements.size() > 0 || rootLocator != null
-        || profileProvider.isNotEmpty() || beforeLoad.size() > 0 || implementsType != null) {
-      throw new UtamCompilationError(parser,
-          context.getErrorMessage(904, INTERFACE_PROPERTIES));
+    /*
+    @JsonProperty("shadow") JsonNode shadowNode,
+      @JsonProperty("beforeLoad") JsonNode beforeLoadNode,
+      @JsonProperty("description") JsonNode descriptionNode
+     */
+    if (rootLocator != null) {
+      throw new UtamCompilationError(parser, context.getErrorMessage(904, "selector", INTERFACE_PROPERTIES));
+    }
+    if (platform != null) {
+      throw new UtamCompilationError(parser, context.getErrorMessage(904, "platform", INTERFACE_PROPERTIES));
+    }
+    if(profileProvider.isNotEmpty()) {
+      throw new UtamCompilationError(parser, context.getErrorMessage(904, "profile", INTERFACE_PROPERTIES));
+    }
+    if(implementsType != null) {
+      throw new UtamCompilationError(parser, context.getErrorMessage(904, "implements", INTERFACE_PROPERTIES));
     }
   }
 
