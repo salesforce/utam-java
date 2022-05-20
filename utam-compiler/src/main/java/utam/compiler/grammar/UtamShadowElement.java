@@ -9,7 +9,6 @@ package utam.compiler.grammar;
 
 import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
-import static utam.compiler.grammar.UtamPageObject.INTERFACE_PROPERTIES;
 import static utam.compiler.grammar.UtamPageObject.processElementsNode;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -19,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
-import utam.compiler.UtamCompilationError;
 import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.grammar.UtamElement.UtamElementProvider;
 
@@ -41,15 +39,11 @@ class UtamShadowElement {
   /**
    * process shadow boundary node
    *
-   * @param isAbstract boolean to indicate if page object is an interface
    * @param shadowNode    node
    * @param parserContext parser context
    * @return list of elements inside shadow
    */
-  static List<UtamElementProvider> processShadowNode(boolean isAbstract, JsonNode shadowNode, String parserContext) {
-    if(isAbstract && !isEmptyNode(shadowNode)) {
-      throw new UtamCompilerIntermediateError(904, "shadow", INTERFACE_PROPERTIES);
-    }
+  static List<UtamElementProvider> processShadowNode(JsonNode shadowNode, String parserContext) {
     List<UtamElementProvider> elements = new ArrayList<>();
     if (isEmptyNode(shadowNode)) {
       return elements;
@@ -57,6 +51,6 @@ class UtamShadowElement {
     Function<Exception, RuntimeException> parserErrorWrapper = causeErr -> new UtamCompilerIntermediateError(
         causeErr, shadowNode, 1100, parserContext, causeErr.getMessage());
     UtamShadowElement shadowElement = readNode(shadowNode, UtamShadowElement.class, parserErrorWrapper);
-    return processElementsNode(false, Objects.requireNonNull(shadowElement).elementsNode, parserContext);
+    return processElementsNode(Objects.requireNonNull(shadowElement).elementsNode, parserContext);
   }
 }

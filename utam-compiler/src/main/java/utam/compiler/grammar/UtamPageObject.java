@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.JsonDeserializer.isNotArrayOrEmptyArray;
 import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.compiler.grammar.UtamComposeMethod.getComposeStatements;
@@ -67,7 +68,7 @@ import utam.core.framework.context.Profile;
 final class UtamPageObject {
 
   static final String BEFORE_LOAD_METHOD_NAME = "load";
-  static final String INTERFACE_PROPERTIES = String.join(", ", "root",
+  private static final String INTERFACE_PROPERTIES = String.join(", ", "root",
       "interface",
       "methods",
       "type",
@@ -115,8 +116,14 @@ final class UtamPageObject {
     }
     this.isRootPageObject = isRootPageObject;
     this.implementsType = implementsType;
-    this.shadowElements = processShadowNode(isAbstract, shadowNode, "root shadow");
-    this.elements = processElementsNode(isAbstract, elementsNode, "root elements");
+    if(isAbstract && !isEmptyNode(shadowNode)) {
+      throw new UtamCompilerIntermediateError(904, "shadow", INTERFACE_PROPERTIES);
+    }
+    this.shadowElements = processShadowNode(shadowNode, "root shadow");
+    if(isAbstract && !isEmptyNode(elementsNode)) {
+      throw new UtamCompilerIntermediateError(904, "elements", INTERFACE_PROPERTIES);
+    }
+    this.elements = processElementsNode(elementsNode, "root elements");
     this.rootElementHelper = new RootElementHelper(typeNode, isExposeRootElement);
     this.beforeLoadNode = beforeLoadNode;
     this.beforeLoad = processBeforeLoadNodes(isAbstract, beforeLoadNode);
@@ -131,7 +138,8 @@ final class UtamPageObject {
    * @param beforeLoadNodes json nodes
    * @return list of statements
    */
-  static List<UtamMethodAction> processBeforeLoadNodes(boolean isAbstract, JsonNode beforeLoadNodes) {
+  private static List<UtamMethodAction> processBeforeLoadNodes(boolean isAbstract,
+      JsonNode beforeLoadNodes) {
     if (isAbstract && !isEmptyNode(beforeLoadNodes)) {
       throw new UtamCompilerIntermediateError(904, "beforeLoad", INTERFACE_PROPERTIES);
     }
@@ -144,21 +152,17 @@ final class UtamPageObject {
   /**
    * parse platform node, separated into stand alone method because of error codes
    *
-   * @param isAbstract boolean to indicate if page object is an interface
    * @param elementsNode  node with elements
    * @param parserContext context of the parser
    * @return list of parsed elements
    */
-  static List<UtamElementProvider> processElementsNode(boolean isAbstract, JsonNode elementsNode,
+  static List<UtamElementProvider> processElementsNode(JsonNode elementsNode,
       String parserContext) {
-    if(isAbstract && !isEmptyNode(elementsNode)) {
-      throw new UtamCompilerIntermediateError(904, "elements", INTERFACE_PROPERTIES);
-    }
     List<UtamElementProvider> elements = new ArrayList<>();
-    if (isEmptyNode(elementsNode)) {
+    if(isEmptyNode(elementsNode)) {
       return elements;
     }
-    if (!elementsNode.isArray() || elementsNode.size() == 0) {
+    if (isNotArrayOrEmptyArray(elementsNode)) {
       throw new UtamCompilerIntermediateError(elementsNode, 12, parserContext, "elements");
     }
     Function<Exception, RuntimeException> parserErrorWrapper = causeErr -> new UtamCompilerIntermediateError(

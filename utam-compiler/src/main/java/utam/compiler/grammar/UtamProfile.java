@@ -8,7 +8,7 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
-import static utam.compiler.grammar.JsonDeserializer.isNonEmptyArray;
+import static utam.compiler.grammar.JsonDeserializer.isNotArrayOrEmptyArray;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
@@ -141,7 +141,7 @@ final class UtamProfile {
       if (isEmptyNode(node)) {
         return new ArrayList<>();
       }
-      if (!isNonEmptyArray(node)) {
+      if (isNotArrayOrEmptyArray(node)) {
         String message = context.getErrorMessage(12, "page object root", "profile");
         throw new UtamCompilationError(node, message);
       }

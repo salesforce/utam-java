@@ -87,8 +87,8 @@ public final class UtamElement {
     String validationContext = String.format("element \"%s\"", name);
     this.isPublic = isPublic;
     this.selector = processSelectorNode(selectorNode, name);
-    this.shadow = processShadowNode(false, shadowNode, validationContext + " shadow");
-    this.elements = processElementsNode(false, elementsNode, validationContext + " elements");
+    this.shadow = processShadowNode(shadowNode, validationContext + " shadow");
+    this.elements = processElementsNode(elementsNode, validationContext + " elements");
     this.filter = processFilterNode(filterNode, name);
     this.isNullable = isNullable;
     Entry<Traversal, String[]> elementType = processTypeNode(type);

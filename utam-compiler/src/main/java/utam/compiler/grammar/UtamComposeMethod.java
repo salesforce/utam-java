@@ -11,7 +11,6 @@ import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.compiler.grammar.UtamMethodActionReturnSelf.RETURN_SELF;
 import static utam.compiler.grammar.UtamMethodActionWaitFor.WAIT_FOR;
-import static utam.compiler.grammar.UtamPageObject.INTERFACE_PROPERTIES;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
