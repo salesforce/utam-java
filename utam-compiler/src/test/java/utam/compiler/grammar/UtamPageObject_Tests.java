@@ -83,15 +83,6 @@ public class UtamPageObject_Tests {
   }
 
   @Test
-  public void testAbstractWithNonNullElementsThrows() {
-    String json = "{ \"elements\" : [{ \"name\" : \"test\", \"selector\": {\"css\": \"css\"} }], \"interface\" : true }";
-    Exception e = expectThrows(UtamError.class,
-        () -> new DeserializerUtilities().getResultFromString(json));
-    assertThat(e.getMessage(),
-        containsString("error 904: interface declaration can only have properties"));
-  }
-
-  @Test
   public void testElementWithRootElementNameThrows() {
     String json = "{ \"elements\" : [ { \"name\" : \"root\", \"selector\" : { \"css\" : \"css\" } } ]}";
     Exception e = expectThrows(UtamError.class,

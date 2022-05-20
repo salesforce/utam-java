@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.compiler.grammar.UtamMethodActionReturnSelf.RETURN_SELF;
 import static utam.compiler.grammar.UtamMethodActionWaitFor.WAIT_FOR;
@@ -47,7 +48,7 @@ class UtamComposeMethod extends UtamMethod {
       @JsonProperty(value = "args") JsonNode argsNode,
       @JsonProperty("description") JsonNode descriptionNode) {
     super(name, descriptionNode, argsNode);
-    this.composeList = processComposeNodes(name, composeNodes, false);
+    this.composeList = processComposeNodes(name, composeNodes);
   }
 
   /**
@@ -55,15 +56,10 @@ class UtamComposeMethod extends UtamMethod {
    *
    * @param methodName   name of the method
    * @param composeNodes json nodes
-   * @param isCanBeEmpty true for beforeLoad
    * @return list of statements
    */
-  static List<UtamMethodAction> processComposeNodes(String methodName, JsonNode composeNodes,
-      boolean isCanBeEmpty) {
-    if (composeNodes == null || composeNodes.isNull()) {
-      if (isCanBeEmpty) {
-        return new ArrayList<>();
-      }
+  static List<UtamMethodAction> processComposeNodes(String methodName, JsonNode composeNodes) {
+    if (isEmptyNode(composeNodes)) {
       throw new UtamCompilerIntermediateError(composeNodes, 505, methodName);
     }
     if (!composeNodes.isArray() || composeNodes.size() == 0) {

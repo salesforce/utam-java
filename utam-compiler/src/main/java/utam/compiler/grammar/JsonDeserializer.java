@@ -212,8 +212,8 @@ public final class JsonDeserializer extends
    * @param node JSON node
    * @return true if non empty array
    */
-  static boolean isNonEmptyArray(JsonNode node) {
-    return node.isArray() && node.size() > 0;
+  static boolean isNotArrayOrEmptyArray(JsonNode node) {
+    return !node.isArray() || node.size() == 0;
   }
 
   static class Object implements PageObjectDeclaration {

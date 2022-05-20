@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.compiler.grammar.UtamPageObject.processElementsNode;
 
@@ -44,7 +45,7 @@ class UtamShadowElement {
    */
   static List<UtamElementProvider> processShadowNode(JsonNode shadowNode, String parserContext) {
     List<UtamElementProvider> elements = new ArrayList<>();
-    if (shadowNode == null || shadowNode.isNull()) {
+    if (isEmptyNode(shadowNode)) {
       return elements;
     }
     Function<Exception, RuntimeException> parserErrorWrapper = causeErr -> new UtamCompilerIntermediateError(
