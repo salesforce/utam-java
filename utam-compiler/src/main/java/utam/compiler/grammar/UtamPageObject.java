@@ -207,11 +207,6 @@ final class UtamPageObject {
   }
 
   private void validateAbstract(TranslationContext context, JsonParser parser) {
-    /*
-    @JsonProperty("shadow") JsonNode shadowNode,
-      @JsonProperty("beforeLoad") JsonNode beforeLoadNode,
-      @JsonProperty("description") JsonNode descriptionNode
-     */
     if (rootLocator != null) {
       throw new UtamCompilationError(parser, context.getErrorMessage(904, "selector", INTERFACE_PROPERTIES));
     }
