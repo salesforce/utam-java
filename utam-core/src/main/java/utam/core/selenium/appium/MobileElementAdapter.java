@@ -8,6 +8,7 @@
 package utam.core.selenium.appium;
 
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.PerformsTouchActions;
 import io.appium.java_client.TouchAction;
 import io.appium.java_client.touch.WaitOptions;
 import io.appium.java_client.touch.offset.PointOption;
@@ -53,7 +54,7 @@ public class MobileElementAdapter extends ElementAdapter {
     Point start = movement[0];
     Point end = movement[1];
     // simulate flick using touch control
-    new TouchAction(appiumDriver)
+    new TouchAction((PerformsTouchActions) appiumDriver)
         .press(PointOption.point(start.getX(), start.getY()))
         .waitAction(WaitOptions.waitOptions(DEFAULT_FLICK_ACTION_WAIT_MILLISECONDS))
         .moveTo(PointOption.point(end.getX(), end.getY()))

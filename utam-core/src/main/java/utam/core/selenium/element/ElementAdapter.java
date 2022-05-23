@@ -13,8 +13,9 @@ import static utam.core.selenium.element.DriverAdapter.getSeleniumDriver;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.openqa.selenium.By;
-import org.openqa.selenium.ElementNotVisibleException;
+import org.openqa.selenium.InvalidElementStateException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
@@ -163,7 +164,7 @@ public class ElementAdapter implements Element {
         driverAdapter.executeScript(SCROLL_TOP_VIA_JAVASCRIPT, getWebElement());
       }
       if (!isDisplayed()) {
-        throw new ElementNotVisibleException(SCROLL_INTO_VIEW_ERR);
+        throw new InvalidElementStateException(SCROLL_INTO_VIEW_ERR);
       }
     } else {
       driverAdapter.executeScript(SCROLL_CENTER_VIA_JAVASCRIPT, getWebElement());

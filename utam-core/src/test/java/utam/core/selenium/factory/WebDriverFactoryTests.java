@@ -10,6 +10,7 @@ package utam.core.selenium.factory;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
@@ -61,8 +62,10 @@ public class WebDriverFactoryTests {
     final String DEVICE_SCREEN_SIZE_VALUE_PHONE = "1080x1920";
     final String DEVICE_SCREEN_DENSITY_VALUE_PHONE = "480";
 
+    Capabilities capabilities = mock(Capabilities.class);
+    when(capabilities.getCapability("deviceName")).thenReturn("iPhone");
     IOSDriver iosDriver = mock(IOSDriver.class);
-    when(iosDriver.getSessionDetail("device")).thenReturn("iphone");
+    when(iosDriver.getCapabilities()).thenReturn(capabilities);
     assertThat(getAdapterForTest(iosDriver), instanceOf(MobileDriverAdapter.class));
 
     AndroidDriver androidDriver = mock(AndroidDriver.class);

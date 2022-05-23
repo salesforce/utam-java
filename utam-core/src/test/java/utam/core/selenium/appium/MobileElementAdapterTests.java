@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
+import io.appium.java_client.remote.SupportsContextSwitching;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
@@ -32,7 +33,7 @@ public class MobileElementAdapterTests {
     when(mock.getWebElementMock().getSize()).thenReturn(new Dimension(10, 20));
     String title = "title";
     when(mock.getAppiumDriverMock().getTitle()).thenReturn(title);
-    when(mock.getAppiumDriverMock().getContext()).thenReturn(title);
+    when(((SupportsContextSwitching)mock.getAppiumDriverMock()).getContext()).thenReturn(title);
     mock.getElementAdapter().flick(1, 1);
   }
 
@@ -45,7 +46,7 @@ public class MobileElementAdapterTests {
     when(mock.getWebElementMock().getSize()).thenReturn(new Dimension(10, 20));
     String title = "title";
     when(mock.getAppiumDriverMock().getTitle()).thenReturn(title);
-    when(mock.getAppiumDriverMock().getContext()).thenReturn(title);
+    when(((SupportsContextSwitching)mock.getAppiumDriverMock()).getContext()).thenReturn(title);
     mock.getElementAdapter().flick(1, 1);
   }
 }

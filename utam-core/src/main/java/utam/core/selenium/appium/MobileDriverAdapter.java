@@ -8,8 +8,12 @@
 package utam.core.selenium.appium;
 
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.remote.SupportsContextSwitching;
+
+import java.util.Collections;
 import java.util.Set;
 import java.util.function.Supplier;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import utam.core.driver.Driver;
@@ -26,7 +30,6 @@ import utam.core.selenium.element.DriverAdapter;
  * @author qren
  * @since 232
  */
-@SuppressWarnings("rawtypes")
 public class MobileDriverAdapter extends DriverAdapter implements Driver {
 
   static final String WEBVIEW_CONTEXT_HANDLE_PREFIX = "WEBVIEW";
@@ -59,9 +62,12 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
 
   final Boolean isWebViewAvailable() {
     AppiumDriver appiumDriver = getAppiumDriver();
-    Set<String> contextHandles = appiumDriver.getContextHandles();
-    return contextHandles.stream().
-        anyMatch(handle -> handle.contains(WEBVIEW_CONTEXT_HANDLE_PREFIX));
+    if (appiumDriver instanceof SupportsContextSwitching) {
+      Set<String> contextHandles = getContextHandles();
+      return contextHandles.stream().
+          anyMatch(handle -> handle.contains(WEBVIEW_CONTEXT_HANDLE_PREFIX));
+    }
+    return false;
   }
 
   final AppiumDriver switchToWebView(String title) {
@@ -72,10 +78,11 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
         // from the return of getContextHandles. This is Android unique. 
         setPageContextToNative();
     }
-    Set<String> contextHandles = appiumDriver.getContextHandles();
+    Set<String> contextHandles = getContextHandles();
     for (String contextHandle : contextHandles) {
       if (!contextHandle.equals(NATIVE_CONTEXT_HANDLE)) {
-        AppiumDriver newDriver = (AppiumDriver) appiumDriver.context(contextHandle);
+        AppiumDriver newDriver =
+            (AppiumDriver)((SupportsContextSwitching)appiumDriver).context(contextHandle);
         String newTitle = newDriver.getTitle();
         if (!newTitle.isEmpty() && newTitle.equalsIgnoreCase(title)) {
           return newDriver;
@@ -126,7 +133,7 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
 
   @Override
   public String getPageContext() {
-    return getAppiumDriver().getContext();
+    return ((SupportsContextSwitching)getAppiumDriver()).getContext();
   }
 
   final WebElement getWebViewElement() {
@@ -153,5 +160,13 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
   @Override
   protected Element wrapElement(WebElement element) {
     return new MobileElementAdapter(element, this);
+  }
+
+  private Set<String> getContextHandles() {
+    AppiumDriver appiumDriver = getAppiumDriver();
+    if (appiumDriver instanceof SupportsContextSwitching) {
+      return ((SupportsContextSwitching) appiumDriver).getContextHandles();
+    }
+    return Collections.emptySet();
   }
 }

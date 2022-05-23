@@ -24,7 +24,7 @@ import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_INTO_VIEW_JS;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_TOP_VIA_JAVASCRIPT;
 
-import org.openqa.selenium.ElementNotVisibleException;
+import org.openqa.selenium.InvalidElementStateException;
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -178,7 +178,7 @@ public class BasePageElementTests {
   @Test
   public void testScrollIntoViewIfElementNotVisibleThrows() {
     MockUtilities mock = new MockUtilities();
-    assertThrows(ElementNotVisibleException.class, () -> mock.getUtamElement().scrollToTop());
+    assertThrows(InvalidElementStateException.class, () -> mock.getUtamElement().scrollToTop());
   }
 
   @Test
@@ -246,10 +246,10 @@ public class BasePageElementTests {
   @Test
   public void testJavascriptClick() {
     MockUtilities mock = new MockUtilities();
-    when(mock.getExecutorMock().executeScript(any(), any())).thenReturn(true);
+    when(mock.getExecutorMock().executeScript((String) any(), any())).thenReturn(true);
     mock.getUtamElement().javascriptClick();
     verify(mock.getExecutorMock(), times(1))
-        .executeScript(any(), any());
+        .executeScript((String) any(), any());
   }
 
   @Test

@@ -12,6 +12,7 @@ import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 
 import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 
@@ -96,10 +97,10 @@ public enum MobilePlatformType implements Profile {
     }
     if (driver instanceof AppiumDriver) {
       // mock passed from test
-      if(((AppiumDriver) driver).getCapabilities() == null) {
+      if(((HasCapabilities)driver).getCapabilities() == null) {
         return WEB;
       }
-      Platform platform = ((AppiumDriver) driver).getCapabilities().getPlatform();
+      Platform platform = ((HasCapabilities)driver).getCapabilities().getPlatform();
       if (platform == Platform.LINUX) {
         return isTablet(driver) ? ANDROID_TABLET : ANDROID_PHONE;
       }
@@ -122,15 +123,15 @@ public enum MobilePlatformType implements Profile {
   }
 
   private static boolean isIPad(WebDriver driver) {
-    Object deviceObject = ((AppiumDriver) driver).getSessionDetail("device");
+    Object deviceObject = ((HasCapabilities)driver).getCapabilities().getCapability("deviceName");
     if (deviceObject != null) {
-        return "iPad".equalsIgnoreCase(deviceObject.toString());
+      return deviceObject.toString().toLowerCase().contains("ipad");
     }
     return false;
   }
 
   private static boolean isTablet(WebDriver driver) {
-    Capabilities caps = ((AppiumDriver)driver).getCapabilities();
+    Capabilities caps = ((HasCapabilities)driver).getCapabilities();
     Object deviceScreenSizeObject = caps.getCapability("deviceScreenSize");
     Object deviceScreenDensityObject = caps.getCapability("deviceScreenDensity");
 

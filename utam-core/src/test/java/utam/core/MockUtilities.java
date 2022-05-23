@@ -17,7 +17,13 @@ import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QU
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
+
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import io.appium.java_client.remote.SupportsContextSwitching;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Platform;
@@ -44,6 +50,8 @@ import utam.core.selenium.element.ElementAdapter;
 import utam.core.selenium.element.ShadowRootWebElement;
 import utam.core.selenium.factory.WebDriverFactory;
 
+import javax.annotation.Nullable;
+
 /**
  * @author elizaveta.ivanova
  * @since 234
@@ -59,9 +67,13 @@ public class MockUtilities {
   private final FrameElement frameElement;
 
   public MockUtilities(Class<? extends WebDriver> driverType) {
-    webDriverMock = mock(driverType, withSettings().extraInterfaces(
-        JavascriptExecutor.class,
-        SearchContext.class));
+    List<Class<?>> extraInterfaceList = new ArrayList<>();
+    extraInterfaceList.add(JavascriptExecutor.class);
+    extraInterfaceList.add(SearchContext.class);
+    if (isMobileMock(driverType)) {
+      extraInterfaceList.add(SupportsContextSwitching.class);
+    }
+    webDriverMock = mock(driverType, withSettings().extraInterfaces(extraInterfaceList.toArray(new Class[0])));
     webElementMock = mock(WebElement.class, withSettings().extraInterfaces(WrapsDriver.class));
     when(((WrapsDriver) webElementMock).getWrappedDriver()).thenReturn(webDriverMock);
     driverAdapter = setDriverAdapter(driverType);
@@ -110,10 +122,8 @@ public class MockUtilities {
     AppiumDriver driver = (AppiumDriver) webDriverMock;
     Capabilities capabilities = mock(Capabilities.class);
     when(capabilities.getPlatform()).thenReturn(platform);
+    when(capabilities.getCapability("deviceName")).thenReturn("iPhone");
     when(driver.getCapabilities()).thenReturn(capabilities);
-    when(driver.getSessionDetail("device")).thenReturn("iphone");
-    when(driver.getSessionDetail("deviceScreenSize")).thenReturn("1080x1920");
-    when(driver.getSessionDetail("deviceScreenDensity")).thenReturn("480");
   }
 
   public void setShadowMock(WebElement element, String cssSelector) {
