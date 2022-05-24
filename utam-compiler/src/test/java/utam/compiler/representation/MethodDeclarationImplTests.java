@@ -31,11 +31,12 @@ import utam.core.declarative.representation.TypeProvider;
  */
 public class MethodDeclarationImplTests {
 
+  private static final TypeProvider TEST_RETURN_TYPE = new TypeUtilities.FromString("test.ReturnType");
+
   /** A MethodDeclaration object should be able to be constructed without parameters */
   @Test
   public void testMethodDeclarationCreation() {
-    TypeProvider returnType = new TypeUtilities.FromString("ReturnType", "test.ReturnType");
-
+    TypeProvider returnType = TEST_RETURN_TYPE;
     MethodDeclarationImpl declaration =
         new MethodDeclarationImpl(
             new ArrayList<>(),
@@ -50,7 +51,7 @@ public class MethodDeclarationImplTests {
   @Test
   public void testMethodDeclarationCreationWithParameters() {
     MethodParameter param1 = new Regular("param1", PrimitiveType.STRING);
-    TypeProvider returnType = new TypeUtilities.FromString("ReturnType", "test.ReturnType");
+    TypeProvider returnType = TEST_RETURN_TYPE;
     List<MethodParameter> parameters = Collections.singletonList(param1);
 
     MethodDeclarationImpl declaration =
@@ -68,8 +69,7 @@ public class MethodDeclarationImplTests {
   public void testMethodDeclarationCreationWithParametersAndImports() {
     MethodParameter param1 = new Regular("param1", PrimitiveType.STRING);
     MethodParameter param2 = new Regular("param2", PrimitiveType.STRING);
-
-    TypeProvider returnType = new TypeUtilities.FromString("ReturnType", "test.ReturnType");
+    TypeProvider returnType = TEST_RETURN_TYPE;
     List<MethodParameter> parameters = Arrays.asList(param1, param2);
 
     MethodDeclarationImpl declaration =

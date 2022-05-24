@@ -7,6 +7,7 @@
  */
 package utam.compiler.helpers;
 
+import static utam.compiler.helpers.ParameterUtils.isExpectedType;
 import static utam.compiler.helpers.TypeUtilities.PARAMETER_REFERENCE;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -158,10 +159,7 @@ public abstract class ParametersContext {
       JsonNode argsNode,
       MethodParameter parameter,
       TypeProvider expected) {
-    if (parameter == null) { //function
-      return;
-    }
-    if (!expected.isSameType(parameter.getType())) {
+    if (!isExpectedType(parameter, expected)) {
       String expectedType = expected.getSimpleName();
       String actualType = parameter.getType().getSimpleName();
       String parameterValue = parameter.getValue();

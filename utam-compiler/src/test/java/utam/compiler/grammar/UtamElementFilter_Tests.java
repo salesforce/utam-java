@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyIterable;
@@ -102,15 +103,16 @@ public class UtamElementFilter_Tests {
     Result result = new DeserializerUtilities().getResultFromFile("filter/basicFilterPublic");
     TranslationContext context = result.getContext();
     PageObjectMethod method = context.getElement(ELEMENT_NAME).getElementMethod();
+    assertThat(method.getDeclaration().getCodeLine(), is("List<BasicElement> getTest(String text)"));
     expected.addParameter(new MethodParameterInfo("text"));
     expected.addImportedTypes(LIST_TYPE, BASIC_ELEMENT_TYPE);
-    expected.addImpliedImportedTypes(LIST_TYPE, BASIC_ELEMENT_TYPE_IMPL);
+    expected.addImpliedImportedTypes(LIST_TYPE, BASIC_ELEMENT_TYPE_IMPL, BASIC_ELEMENT_TYPE);
     expected.addCodeLine("BasicElement root = this.getRootElement()");
     expected.addCodeLine(
         "return basic(root, this.test).buildList(BasicElement.class, BasePageElement.class, elm -> text.equals(elm.getText()))");
     PageObjectValidationTestHelper.validateMethod(method, expected);
-    assertThat(context.getInterfaceUnionTypes(), Matchers.is(emptyIterable()));
-    assertThat(context.getClassUnionTypes(), Matchers.is(emptyIterable()));
+    assertThat(context.getInterfaceUnionTypes(), is(emptyIterable()));
+    assertThat(context.getClassUnionTypes(), is(emptyIterable()));
   }
 
   @Test

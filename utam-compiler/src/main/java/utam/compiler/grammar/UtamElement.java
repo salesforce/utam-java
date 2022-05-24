@@ -36,6 +36,7 @@ import utam.compiler.representation.CustomElementMethod;
 import utam.compiler.representation.ElementField;
 import utam.compiler.representation.ElementMethod;
 import utam.compiler.representation.FrameMethod;
+import utam.compiler.representation.MatcherObject;
 import utam.compiler.representation.MethodParametersTracker;
 import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.compiler.types.BasicElementUnionTypeImpl;
@@ -261,7 +262,7 @@ public final class UtamElement {
           String.format("element '%s' getter", name));
       parameters.setMethodParameters(selectorContext.getParameters());
       TypeProvider elementType = translatorContext.getType(type[0]);
-      UtamMatcher filterMatcher = null;
+      MatcherObject filterMatcher = null;
       if (filter != null) {
         filterMatcher = filter.setElementFilter(translatorContext, Type.CUSTOM, elementType, name);
         parameters.setMethodParameters(filter.getApplyMethodParameters());
@@ -367,7 +368,7 @@ public final class UtamElement {
           new ElementField(
               name, getFindAnnotation(locatorHelper.getLocator(),
               isExpandScopeShadowRoot, isNullable()));
-      UtamMatcher filterMatcher = null;
+      MatcherObject filterMatcher = null;
       if (filter != null) {
         filterMatcher = filter.setElementFilter(context, Type.BASIC, elementType, name);
         addedParameters.setMethodParameters(filter.getApplyMethodParameters());

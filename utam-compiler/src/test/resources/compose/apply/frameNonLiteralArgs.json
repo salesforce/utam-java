@@ -13,6 +13,7 @@
       "name": "test",
       "compose" : [
         {
+          "returnType" : "rootPageObject",
           "element": "document",
           "apply": "enterFrameAndLoad",
           "args" : [

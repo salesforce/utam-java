@@ -8,7 +8,6 @@
 package utam.compiler.translator;
 
 import utam.compiler.types.BasicElementInterface;
-import utam.compiler.helpers.TypeUtilities.ListOf;
 import utam.core.declarative.translator.UnitTestRunner;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
@@ -24,6 +23,7 @@ import java.util.stream.Collectors;
 
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
+import static utam.compiler.helpers.TypeUtilities.isListType;
 import static utam.compiler.helpers.TypeUtilities.wrapAsList;
 import static utam.compiler.translator.TranslationUtilities.*;
 
@@ -201,7 +201,7 @@ public final class UnitTestSerializer {
     if(BasicElementInterface.isBasicType(returnType)) {
       return ".isPresent(), is(equalTo(true))";
     }
-    if (returnType instanceof ListOf) {
+    if (isListType(returnType)) {
       return ", hasSize(-1)";
     }
     return ", is(not(nullValue()))";

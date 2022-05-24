@@ -1,0 +1,51 @@
+{
+  "elements": [
+    {
+      "name": "container",
+      "public": true,
+      "type": "container"
+    },
+    {
+      "name": "containerList",
+      "public": true,
+      "type": "container",
+      "selector": {
+        "css": "css",
+        "returnAll": true
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test1",
+      "compose": [
+        {
+          "apply": "getContainer",
+          "returnType": "generated-basic/pageObjects/testDuplicates",
+          "args": [
+            {
+              "type": "pageObject",
+              "value": "generated-basic/pageObjects/testDuplicates"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "test2",
+      "compose": [
+        {
+          "element": "containerList",
+          "returnAll": true,
+          "returnType": "generated-duplicate/pageObjects/testDuplicates",
+          "args": [
+            {
+              "type": "pageObject",
+              "value": "generated-duplicate/pageObjects/testDuplicates"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

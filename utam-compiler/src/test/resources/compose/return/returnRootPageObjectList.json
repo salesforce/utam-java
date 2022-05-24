@@ -1,0 +1,14 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "returnType": "rootPageObject",
+          "returnAll": true,
+          "apply": "myPrivateMethod"
+        }
+      ]
+    }
+  ]
+}

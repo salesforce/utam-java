@@ -12,7 +12,6 @@ import static utam.compiler.helpers.TypeUtilities.JAVA_OBJECT_TYPE;
 
 import java.util.Collections;
 import java.util.List;
-import utam.compiler.UtamCompilationError;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
@@ -50,8 +49,6 @@ public enum MatcherType {
    * a matcher for an object being not null
    */
   notNull("%s != null", Collections.emptyList(), JAVA_OBJECT_TYPE);
-
-  private static final String ERR_INCORRECT_MATCHER_FOR_METHOD = ": matcher '%s' requires applied method to return type '%s', returned is '%s'";
 
   private final String methodCodeMask;
   private final List<TypeProvider> expectedParametersTypes;
@@ -101,29 +98,15 @@ public enum MatcherType {
   }
 
   /**
-   * Gets the error for an incorrect matcher type
-   *
-   * @param operandType the type of the operand
-   * @return the error for an incorrect matcher type
-   */
-  public String getIncorrectTypeError(TypeProvider operandType) {
-    return String.format(ERR_INCORRECT_MATCHER_FOR_METHOD,
-        name(),
-        getOperandType().getSimpleName(), operandType.getSimpleName());
-  }
-
-  /**
    * Checks the operand is of the valid type
-   * @param operandType       the operand type
-   * @param validationContext the validation context for checking
+   *
+   * @param operandType the operand type
    */
-  public void checkOperandForMatcher(TypeProvider operandType, String validationContext) {
+  public boolean isCorrectOperandType(TypeProvider operandType) {
     if (this == notNull) { // not null allows any type
-      return;
+      return true;
     }
     TypeProvider expectedType = getOperandType();
-    if (!operandType.isSameType(expectedType)) {
-      throw new UtamCompilationError(validationContext + getIncorrectTypeError(operandType));
-    }
+    return operandType.isSameType(expectedType);
   }
 }

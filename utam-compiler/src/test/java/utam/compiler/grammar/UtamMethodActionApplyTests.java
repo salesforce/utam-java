@@ -210,6 +210,7 @@ public class UtamMethodActionApplyTests {
     expected.addCodeLine("Row statement1 = statement0.getRow(rowIndex)");
     expected.addCodeLine("List<Item> statement2 = statement1.getItems()");
     expected.addCodeLine("return statement2");
+    assertThat(method.getDeclaration().getCodeLine(), is("List<Item> test(Integer rowIndex)"));
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 
@@ -218,7 +219,7 @@ public class UtamMethodActionApplyTests {
     Exception e = expectCompilerErrorFromFile("validate/apply/wrongArgType");
     assertThat(e.getMessage(), containsString(
         "error 109: method \"test\": "
-            + "incorrect parameter type [ str ]: expected type \"BasicElement\", found \"String\""));
+            + "parameter \"str\" has incorrect type: expected \"BasicElement\", found \"String\""));
   }
 
   @Test
@@ -278,9 +279,10 @@ public class UtamMethodActionApplyTests {
   }
 
   @Test
-  public void testPageObjectTypeLiteralParameter() {
-    TranslationContext context = getContext("frameLiteralArgs");
+  public void testRootPageObjectTypeLiteralParameter() {
+    TranslationContext context = getContext("frameLiteralArgsVoid");
     PageObjectMethod method = context.getMethod(methodName);
+    assertThat(method.getDeclaration().getCodeLine(), is("void test()"));
     MethodInfo methodInfo = new MethodInfo(methodName);
     String importPageObjectType = "my.lightning.Button";
     methodInfo.addImpliedImportedTypes(importPageObjectType);
@@ -290,8 +292,38 @@ public class UtamMethodActionApplyTests {
   }
 
   @Test
+  public void testRootPageObjectTypeLiteralParameterWithReturn() {
+    TranslationContext context = getContext("frameLiteralArgs");
+    PageObjectMethod method = context.getMethod(methodName);
+    assertThat(method.getDeclaration().getCodeLine(), is("Button test()"));
+    MethodInfo methodInfo = new MethodInfo(methodName, "Button");
+    String importPageObjectType = "my.lightning.Button";
+    methodInfo.addImpliedImportedTypes(importPageObjectType);
+    methodInfo.addCodeLine("Button statement0 = this.getDocument().enterFrameAndLoad(this.getMyFrameElement(), Button.class)");
+    methodInfo.addCodeLine("return statement0");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
   public void testPageObjectTypeNonLiteralParameter() {
     TranslationContext context = getContext("frameNonLiteralArgs");
+    PageObjectMethod method = context.getMethod(methodName);
+    assertThat(method.getDeclaration().getCodeLine(),
+        is("<T extends RootPageObject> T test(FrameElement myFrame, Class<T> pageObject)"));
+    MethodInfo methodInfo = new MethodInfo(methodName, "T");
+    methodInfo.addParameter(new MethodParameterInfo("myFrame", "FrameElement"));
+    methodInfo
+        .addParameter(new MethodParameterInfo("pageObject", "Class<T>"));
+    methodInfo.addImportedTypes(ROOT_PAGE_OBJECT.getFullName(), FRAME_ELEMENT.getFullName());
+    methodInfo.addImpliedImportedTypes(ROOT_PAGE_OBJECT.getFullName(), FRAME_ELEMENT.getFullName());
+    methodInfo.addCodeLine("T statement0 = this.getDocument().enterFrameAndLoad(myFrame, pageObject)");
+    methodInfo.addCodeLine("return statement0");
+    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+  }
+
+  @Test
+  public void testPageObjectTypeNonLiteralParameterReturnsVoid() {
+    TranslationContext context = getContext("frameNonLiteralArgsVoid");
     PageObjectMethod method = context.getMethod(methodName);
     MethodInfo methodInfo = new MethodInfo(methodName);
     methodInfo.addParameter(new MethodParameterInfo("myFrame", "FrameElement"));

@@ -105,34 +105,25 @@ public class TranslationUtilitiesTests {
   @Test
   public void testGetImportString() {
     TypeProvider classProvider =
-        new TypeUtilities.FromString("testPageObject", "test.testPageObject");
+        new TypeUtilities.FromString("test.testPageObject");
     assertThat(isImportableType(classProvider, "current.package"), is(true));
   }
 
   @Test
-  public void testGetImportStringWithEmptyFullName() {
-    TypeProvider classProvider =
-        new TypeUtilities.FromString("testPageObject", "");
-    assertThat(isImportableType(classProvider, "current.package"), is(false));
-  }
-
-  @Test
   public void testGetImportStringWithEmptyPackage() {
-    TypeProvider classProvider =
-        new TypeUtilities.FromString("TestPageObject", "TestPageObject");
+    TypeProvider classProvider = new TypeUtilities.UnimportableType("PageObject");
     assertThat(isImportableType(classProvider, "current.package"), is(false));
   }
 
   @Test
   public void testGetImportStringWithJavaPackage() {
-    TypeProvider importedProvider = new TypeUtilities.FromString("String", "java.lang.String");
+    TypeProvider importedProvider = new TypeUtilities.FromString("java.lang.String");
     assertThat(isImportableType(importedProvider, "current.package"), is(false));
   }
 
   @Test
   public void testGetImportStringWithSamePackage() {
-    TypeProvider classProvider =
-        new TypeUtilities.FromString("testPageObject", "test.testPageObject");
+    TypeProvider classProvider = new TypeUtilities.FromString("test.testPageObject");
     assertThat(isImportableType(classProvider, "test"), is(false));
   }
 

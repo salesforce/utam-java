@@ -59,7 +59,7 @@ public class PageObjectContextImpl implements PageObjectContext {
    * @return the class
    */
   private static Class getDefaultImplementation(String interfaceName) {
-    String className = getDefaultImplType(interfaceName)[1];
+    String className = getDefaultImplType(interfaceName);
     try {
       return Class.forName(className);
     } catch (ClassNotFoundException e) {
@@ -73,10 +73,10 @@ public class PageObjectContextImpl implements PageObjectContext {
    * @param fullInterfaceName full interface name for which to get the default implementation
    * @return the default implementation
    */
-  public static String[] getDefaultImplType(String fullInterfaceName) {
+  public static String getDefaultImplType(String fullInterfaceName) {
     String packageName = fullInterfaceName.substring(0, fullInterfaceName.lastIndexOf("."));
     String typeName = fullInterfaceName.substring(fullInterfaceName.lastIndexOf(".") + 1) + "Impl";
-    return new String[] {typeName, String.format("%s.impl.%s", packageName, typeName)};
+    return String.format("%s.impl.%s", packageName, typeName);
   }
 
   @Override

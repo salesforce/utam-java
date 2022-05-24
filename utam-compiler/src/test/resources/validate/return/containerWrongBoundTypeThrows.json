@@ -1,0 +1,31 @@
+{
+  "elements": [
+    {
+      "name": "containerList",
+      "public": true,
+      "type": "container",
+      "selector": {
+        "css": "css",
+        "returnAll": true
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "containerList",
+          "returnType": "string",
+          "returnAll": true,
+          "args": [
+            {
+              "type": "pageObject",
+              "value": "my/pack/Foo"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

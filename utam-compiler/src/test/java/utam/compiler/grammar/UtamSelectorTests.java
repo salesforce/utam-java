@@ -83,8 +83,8 @@ public class UtamSelectorTests {
     assertThat(
         e.getMessage(),
         containsString(
-            "error 109: element \"test\" selector \"str[%s]\": incorrect parameter type [ num ]: "
-                + "expected type \"String\", found \"Integer\""));
+            "error 109: element \"test\" selector \"str[%s]\": parameter \"num\" has incorrect type: "
+                + "expected \"String\", found \"Integer\""));
   }
 
   @Test

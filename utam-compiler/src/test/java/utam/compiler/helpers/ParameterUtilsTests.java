@@ -7,14 +7,16 @@
  */
 package utam.compiler.helpers;
 
-import utam.core.declarative.representation.TypeProvider;
-import org.testng.annotations.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.*;
+import org.testng.annotations.Test;
+import utam.core.declarative.representation.TypeProvider;
 
 /**
  * Provides tests for the Parameter class and the nested Parameter.Regular and Parameter.Literal
@@ -51,7 +53,6 @@ public class ParameterUtilsTests {
     ParameterUtils.Regular param = new ParameterUtils.Literal("\"paramName\"", PrimitiveType.STRING);
     assertThat(param.getDeclaration(), is(emptyString()));
     assertThat(param.isLiteral(), is(equalTo(true)));
-    assertThat(param.getType().getSimpleName(), is(equalTo("String")));
     assertThat(param.getValue(), is(equalTo("\"paramName\"")));
   }
 
@@ -79,16 +80,6 @@ public class ParameterUtilsTests {
   @Test
   public void testDefaultGetDeclaration() {
     assertThat(new MockMethodParameter("value").getDeclaration(), is(equalTo("FakeType value")));
-  }
-
-  @Test
-  public void testEquals() {
-    ParameterUtils.Regular param = new ParameterUtils.Regular("paramName", PrimitiveType.STRING);
-    ParameterUtils.Regular equalParam = new ParameterUtils.Regular("paramName", PrimitiveType.STRING);
-    ParameterUtils.Regular otherParam = new ParameterUtils.Regular("otherParamName", PrimitiveType.NUMBER);
-    assertThat(param.equals(equalParam), is(equalTo(true)));
-    assertThat(param.equals(otherParam), is(equalTo(false)));
-    assertThat(param.equals("notEqual"), is(equalTo(false)));
   }
 
   private static TypeProvider getTypeProvider() {

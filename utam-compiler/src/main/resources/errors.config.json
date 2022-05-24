@@ -57,7 +57,7 @@
   },
   {
     "code": 109,
-    "message": "%s: incorrect parameter type [ %s ]: expected type \"%s\", found \"%s\""
+    "message": "%s: parameter \"%s\" has incorrect type: expected \"%s\", found \"%s\""
   },
   {
     "code": 110,
@@ -76,6 +76,10 @@
     "message": "element \"%s\": element with same name was already declared"
   },
   {
+    "code": 203,
+    "message": "element \"%s\" matcher: expected type to match is \"%s\", found \"%s\""
+  },
+  {
     "code": 300,
     "message": "element \"%s\" filter: incorrect format of element filter: \n%s",
     "docs": "https://utam.dev/grammar/spec#element-filter"
@@ -87,6 +91,11 @@
   {
     "code": 302,
     "message": "element \"%s\" filter: filter can only be set for list"
+  },
+  {
+    "code": 303,
+    "message": "method \"%s\": incorrect format of statement filter: \n%s",
+    "docs": "https://utam.dev/grammar/spec#element-filter"
   },
   {
     "code": 400,
@@ -102,13 +111,13 @@
     "message": "abstract method \"%s\": \"returnAll\" property can't be set without setting return type"
   },
   {
+    "code": 403,
+    "message": "abstract method \"%s\": return type %s is not supported"
+  },
+  {
     "code": 500,
     "message": "incorrect format of compose method: \n%s",
     "docs": "https://utam.dev/grammar/spec#compose-method"
-  },
-  {
-    "code": 501,
-    "message": "method \"%s\": return type %s is not supported"
   },
   {
     "code": 502,
@@ -180,6 +189,14 @@
   {
     "code": 612,
     "message": "method \"%s\" statement: unknown method \"%s\" for basic element"
+  },
+  {
+    "code": 613,
+    "message": "method \"%s\" statement: incorrect return type; expected \"%s\", provided is \"%s\""
+  },
+  {
+    "code": 614,
+    "message": "method \"%s\" statement: expected type to match is \"%s\", found \"%s\""
   },
   {
     "code": 700,

@@ -12,20 +12,16 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.UtamMethodAction.ERR_CHAIN_REQUIRES_CUSTOM_RETURN;
 import static utam.compiler.grammar.UtamMethodAction.ERR_FIRST_STATEMENT_CANT_BE_MARKED_AS_CHAIN;
-import static utam.compiler.grammar.UtamMethodAction.ERR_INCORRECT_RETURN_TYPE;
 import static utam.compiler.helpers.TypeUtilities.COLLECTOR_IMPORT;
-import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT_PARAMETER;
+import static utam.compiler.representation.PageObjectValidationTestHelper.validateMethodEmptyImports;
 
+import java.util.List;
 import org.testng.annotations.Test;
-import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.helpers.TypeUtilities;
-import utam.compiler.helpers.TypeUtilities.FromString;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
 import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
 
 /**
@@ -37,7 +33,7 @@ import utam.core.framework.consumer.UtamError;
 public class UtamMethodActionGetterTests {
 
   private static final String methodName = "test";
-  private static final String LIST_IMPORT = TypeUtilities.LIST_IMPORT.getFullName();
+  private static final String LIST_IMPORT = List.class.getName();
   private static final String CUSTOM_TYPE_IMPORT = "my.pageobject.Foo";
   private static final String COLLECTOR_IMPORT_STR = COLLECTOR_IMPORT.getFullName();
 
@@ -59,9 +55,8 @@ public class UtamMethodActionGetterTests {
 
   @Test
   public void incorrectMatcherThrows() {
-    TypeProvider returnedType = new FromString("BasicElement");
-    testThrows("incorrectMatcherType",
-        MatcherType.isTrue.getIncorrectTypeError(returnedType));
+    testThrows("incorrectMatcherType", "error 614: method \"test\" statement: "
+        + "expected type to match is \"Boolean\", found \"BasicElement\"");
   }
 
   @Test
@@ -72,8 +67,7 @@ public class UtamMethodActionGetterTests {
 
   @Test
   public void testIncorrectStatementReturn() {
-    String expectedError = String
-        .format(ERR_INCORRECT_RETURN_TYPE, methodName, "ElementElement", "String");
+    String expectedError = "error 613: method \"test\" statement: incorrect return type; expected \"ElementElement\", provided is \"String\"";
     testThrows("incorrectStatementReturn", expectedError);
   }
 
@@ -270,18 +264,22 @@ public class UtamMethodActionGetterTests {
   }
 
   @Test
-  public void testContainerWithNonLiteralArg() {
-    TranslationContext context = getContext("containerNonLiteralArg");
-    PageObjectMethod method = context.getMethod(methodName);
-    MethodInfo expected = new MethodInfo(methodName, "Foo");
-    expected.addParameter(
-        new MethodParameterInfo("pageObjectType", PAGE_OBJECT_PARAMETER.getSimpleName()));
-    String importedType = PAGE_OBJECT_PARAMETER.getImportableTypes().get(0).getFullName();
-    expected.addImpliedImportedTypes(CUSTOM_TYPE_IMPORT, importedType);
-    expected.addImportedTypes(CUSTOM_TYPE_IMPORT, importedType);
-    expected.addCodeLine("Foo statement0 = this.getContentElement(pageObjectType)");
-    expected.addCodeLine("return statement0");
-    PageObjectValidationTestHelper.validateMethod(method, expected);
+  public void testContainerElementWithTypeNamesCollision() {
+    TranslationContext context = getContext("containerNamesCollision");
+    PageObjectMethod method1 = context.getMethod(methodName);
+    MethodInfo expected1 = new MethodInfo(methodName, "Foo");
+    expected1.addImpliedImportedTypes("my1.pageobject.Foo");
+    expected1.addImportedTypes("my1.pageobject.Foo");
+    expected1.addCodeLine("Foo statement0 = this.getContentElement(Foo.class)");
+    expected1.addCodeLine("return statement0");
+    PageObjectValidationTestHelper.validateMethod(method1, expected1);
+
+    PageObjectMethod method2 = context.getMethod("test2");
+    MethodInfo expected2 = new MethodInfo("test2", "my2.pageobject.Foo");
+    validateMethodEmptyImports(method2);
+    expected2.addCodeLine("my2.pageobject.Foo statement0 = this.getContentElement(my2.pageobject.Foo.class)");
+    expected2.addCodeLine("return statement0");
+    PageObjectValidationTestHelper.validateMethod(method2, expected2);
   }
 
   @Test

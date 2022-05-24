@@ -10,7 +10,7 @@ package utam.compiler.translator;
 import static utam.core.framework.consumer.PageObjectContextImpl.getDefaultImplType;
 
 import utam.compiler.helpers.TypeUtilities.FromString;
-import utam.compiler.helpers.TypeUtilities.ListOf;
+import utam.compiler.helpers.TypeUtilities.PageObjectType;
 import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.framework.consumer.UtamError;
@@ -73,46 +73,17 @@ public class TranslationTypesConfigJava implements TranslationTypesConfig {
 
   @Override
   public TypeProvider getClassType(String pageObjectURI) {
-    String[] implType = getDefaultImplType(getInterfaceType(pageObjectURI).getFullName());
-    return new CustomType(implType[0], implType[1]);
+    String implType = getDefaultImplType(getInterfaceType(pageObjectURI).getFullName());
+    return new PageObjectType(implType);
   }
 
   @Override
   public TypeProvider getInterfaceType(String pageObjectURI) {
-    return new CustomType(getJavaTypeName(pageObjectURI));
+    return new PageObjectType(getJavaTypeName(pageObjectURI));
   }
 
   @Override
   public TypeProvider getUtilityType(String utilityURI) {
-    return new CustomType(getJavaTypeName(utilityURI));
-  }
-
-  static class CustomType extends FromString {
-
-    CustomType(String fullName) {
-      super(fullName);
-    }
-
-    CustomType(String name, String fullName) {
-      super(name, fullName);
-    }
-  }
-
-  /**
-   * Gets a value indicating whether a given type provider is a custom type
-   * @param type the type provider to check
-   * @return true if the type provider is a custom type; otherwise failse
-   */
-  public static boolean isCustomType(TypeProvider type) {
-    if(type == null) {
-      return false;
-    }
-    if(type instanceof CustomType) {
-      return true;
-    }
-    if(type instanceof ListOf) {
-      return type.getBoundTypes().get(0) instanceof CustomType;
-    }
-    return false;
+    return new FromString(getJavaTypeName(utilityURI));
   }
 }

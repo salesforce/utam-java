@@ -7,20 +7,22 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.helpers.BasicElementActionType.getActionType;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
-import java.util.function.Function;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.UtamCompilerIntermediateError;
+import utam.compiler.grammar.UtamMatcher.ElementFilterMatcherProvider;
 import utam.compiler.grammar.UtamMethodAction.ArgumentsProvider;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.ParametersContext;
 import utam.compiler.helpers.ParametersContext.StatementParametersContext;
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.representation.MatcherObject;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
@@ -32,7 +34,7 @@ final class UtamElementFilter {
 
   final String applyMethod;
   private final JsonNode argsNode;
-  private final Function<String, UtamMatcher> matcherProvider;
+  private final JsonNode matcherNode;
   private final boolean isFindFirst;
   private List<MethodParameter> matcherParameters;
   private List<MethodParameter> applyMethodParameters;
@@ -44,7 +46,7 @@ final class UtamElementFilter {
       @JsonProperty(value = "matcher", required = true) JsonNode matcherNode,
       @JsonProperty(value = "findFirst", defaultValue = "true") boolean isFindFirst) {
     this.argsNode = argsNode;
-    this.matcherProvider = str -> UtamMatcher.processMatcherNode(matcherNode, str);
+    this.matcherNode = matcherNode;
     this.applyMethod = apply;
     this.isFindFirst = isFindFirst;
   }
@@ -63,7 +65,7 @@ final class UtamElementFilter {
             cause.getMessage()));
   }
 
-  UtamMatcher setElementFilter(TranslationContext context, UtamElement.Type elementNodeType,
+  MatcherObject setElementFilter(TranslationContext context, UtamElement.Type elementNodeType,
       TypeProvider elementType, String elementName) {
     String parserContext = String.format("element '%s' filter", elementName);
     ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
@@ -74,21 +76,22 @@ final class UtamElementFilter {
         .stream()
         .map(arg -> arg.asParameter(context, null, parametersContext))
         .forEach(parametersContext::setParameter);
-    UtamMatcher matcher = matcherProvider.apply(parserContext);
+    MatcherObject matcher = isEmptyNode(matcherNode) ? null
+        : new ElementFilterMatcherProvider(matcherNode, elementName).getMatcherObject(context);
     if (elementNodeType == UtamElement.Type.BASIC) {
       ActionType actionType = getActionType(this.applyMethod, elementType);
       if (actionType == null) {
         String message = context.getErrorMessage(301, elementName, this.applyMethod);
         throw new UtamCompilationError(message);
       }
-      matcher.getMatcherType().checkOperandForMatcher(actionType.getReturnType(), parserContext);
+      matcher.checkMatcherOperand(context, actionType.getReturnType());
       List<TypeProvider> expectedArgsTypes = actionType
           .getParametersTypes(parserContext, arguments.size());
       this.applyMethodParameters = parametersContext.getParameters(expectedArgsTypes);
     } else {
       this.applyMethodParameters = parametersContext.getParameters();
     }
-    this.matcherParameters = matcher.getParameters(context, elementName);
+    this.matcherParameters = matcher.getParameters();
     return matcher;
   }
 

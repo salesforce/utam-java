@@ -130,9 +130,4 @@ public enum BasicElementInterface implements TypeProvider {
   public String getPackageName() {
     return type.getPackageName();
   }
-
-  @Override
-  public Class getClassType() {
-    return type;
-  }
 }
