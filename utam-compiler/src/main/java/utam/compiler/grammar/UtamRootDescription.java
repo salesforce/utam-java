@@ -81,8 +81,14 @@ class UtamRootDescription {
   List<String> getDescription(String version, String sourceFileRelativePath) {
     List<String> descriptionLines = new ArrayList<>(text);
     if(sourceFileRelativePath != null) {
+      // On Windows, sourceFileRelativePath may contain backslashes ("\"), which will
+      // be misinterpreted in Javadoc comments by the Java source code formatter.
+      // Replacing them with forward slashes ("/") ensures consistent generation of
+      // Java files cross-platform.
       String addComma = text.isEmpty()? "" : ", ";
-      descriptionLines.add(String.format("%screated from JSON %s", addComma, sourceFileRelativePath));
+      descriptionLines.add(
+          String.format("%screated from JSON %s", addComma,
+              sourceFileRelativePath.replace("\\", "/")));
     }
     // add line @author team_name
     descriptionLines.add(String.format("@author %s", (author == null ? "UTAM" : author)));
