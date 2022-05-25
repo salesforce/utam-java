@@ -56,12 +56,11 @@ public enum TouchableActionType implements ActionType {
   Class[] getParameterClasses() { // used in unit tests
     List<Class> paramTypeList = new ArrayList<>();
     Stream.of(actionParameters)
-        .map(PrimitiveType::getClassType)
-        .forEach(
-            (k) -> {
+        .map(TypeUtilities::getClassFromFullName)
+        .forEach(clazz -> {
               // Map to argument type in Touchable interface
               // flick method takes int primitives as arguments
-              if (k.getTypeName().contains("Integer")) {
+              if (clazz.getTypeName().contains("Integer")) {
                 paramTypeList.add(int.class);
               }
             });

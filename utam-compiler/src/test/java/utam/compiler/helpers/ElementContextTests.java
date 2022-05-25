@@ -51,8 +51,7 @@ public class ElementContextTests {
 
   private static final String ELEMENT_NAME = "fakeElementName";
   private static final Locator SELECTOR_VALUE = getCssSelector(".fakeSelector");
-  private static final TypeProvider DUMMY_TYPE = new TypeUtilities.FromString("FakeElementType",
-      "test.FakeElementType");
+  private static final TypeProvider DUMMY_TYPE = new TypeUtilities.FromString("test.FakeElementType");
   private static final TypeProvider BASIC_ELEMENT_TYPE = actionable;
 
   private static ElementContext.Basic getSingleElementContext() {

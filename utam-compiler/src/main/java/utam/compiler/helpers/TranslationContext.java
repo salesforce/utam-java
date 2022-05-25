@@ -27,6 +27,7 @@ import utam.compiler.guardrails.GlobalValidation;
 import utam.compiler.guardrails.PageObjectValidation;
 import utam.compiler.helpers.ElementContext.Document;
 import utam.compiler.helpers.ElementContext.Self;
+import utam.compiler.helpers.TypeUtilities.PageObjectWithNamesCollisionType;
 import utam.compiler.representation.BasicElementGetterMethod;
 import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -62,6 +63,10 @@ public final class TranslationContext {
   private boolean isImplementationPageObject = false;
   private final TypeProvider pageObjectClassType;
   private TypeProvider pageObjectInterfaceType;
+  /**
+   * track possible names collisions for custom elements types
+   */
+  private final Map<String,TypeProvider> customTypesMap = new HashMap<>();
 
   /**
    * Initializes a new instance of the TranslationContext class
@@ -137,12 +142,24 @@ public final class TranslationContext {
   }
 
   /**
-   * Gets the specified type provider
-   * @param type the type to get
+   * Gets the specified type provider. If type with same name already exists, wrap into new type
+   *
+   * @param typeStr string with type name
    * @return the type provider of the specified type
    */
-  public TypeProvider getType(String type) {
-    return translationTypesConfig.getInterfaceType(type);
+  public TypeProvider getType(String typeStr) {
+    TypeProvider type = translationTypesConfig.getInterfaceType(typeStr);
+    if(customTypesMap.containsKey(type.getSimpleName())) {
+      TypeProvider alreadyDeclared = customTypesMap.get(type.getSimpleName());
+      // if simple name is same, but full is not - resolve collision by using full name instead short name
+      // this allows to avoid importing class with simple names twice
+      if(!alreadyDeclared.getFullName().equals(type.getFullName())) {
+        type = new PageObjectWithNamesCollisionType(type);
+      }
+    } else {
+      customTypesMap.put(type.getSimpleName(), type);
+    }
+    return type;
   }
 
   /**

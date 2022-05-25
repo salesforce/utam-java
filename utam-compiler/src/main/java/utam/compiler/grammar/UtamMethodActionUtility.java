@@ -113,8 +113,7 @@ class UtamMethodActionUtility extends UtamMethodAction {
      */
     UtilityOperation(ActionType action, TypeProvider returnType,
         List<MethodParameter> actionParameters) {
-      super(action, returnType, actionParameters);
-
+      super(action, returnType, actionParameters, null);
     }
 
     /**

@@ -7,7 +7,7 @@
  */
 package utam.core.declarative.representation;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,11 +26,21 @@ public interface TypeProvider {
   String getFullName();
 
   /**
-   * Simple class name to be used in field declaration
+   * Simple class name to be used in declaration
    *
    * @return simple class name
    */
   String getSimpleName();
+
+  /**
+   * When using type as return in method declaration, string can be different for "bounded class"
+   * types
+   *
+   * @return string, by default it's simple name
+   */
+  default String getReturnString() {
+    return getSimpleName();
+  }
 
   /**
    * name of the package, used in translator to declare package
@@ -40,16 +50,11 @@ public interface TypeProvider {
   String getPackageName();
 
   /**
-   * returns Class of the type if possible
-   *
-   * @return class
-   */
-  Class getClassType();
-
-  /**
    * gets a value indicating whether a type provider represents the same type as this type provider
+   *
    * @param anotherType the type provider to declare
-   * @return true if the type provider represents the same type as this type provider; otherwise, false
+   * @return true if the type provider represents the same type as this type provider; otherwise,
+   * false
    */
   default boolean isSameType(TypeProvider anotherType) {
     return this.getFullName().equals(anotherType.getFullName())
@@ -66,13 +71,12 @@ public interface TypeProvider {
   }
 
   /**
-   * some types require more than one import because they set bound, for example
-   * List&lt;PageObject&gt;
+   * Get "bound" type, for example for List&lt;PageObject&gt; the returned type would be PageObject
    *
-   * @return list of bound types, by default empty
+   * @return bound type or null
    */
-  default List<TypeProvider> getBoundTypes() {
-    return new ArrayList<>();
+  default TypeProvider getBoundType() {
+    return null;
   }
 
   /**
@@ -81,8 +85,6 @@ public interface TypeProvider {
    * @return list of all types to import
    */
   default List<TypeProvider> getImportableTypes() {
-    List<TypeProvider> typesToImport = new ArrayList<>(getBoundTypes());
-    typesToImport.add(this);
-    return typesToImport;
+    return Collections.singletonList(this);
   }
 }

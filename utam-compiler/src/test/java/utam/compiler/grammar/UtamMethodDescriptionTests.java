@@ -84,7 +84,7 @@ public class UtamMethodDescriptionTests {
         "getContainerElement");
     assertThat(description, hasSize(3));
     assertThat(description.get(0), containsString("description"));
-    assertThat(description.get(1), containsString("@return PageObject"));
+    assertThat(description.get(1), containsString("@return T"));
     assertThat(description.get(2), containsString("@param pageObjectType Class&lt;T&gt;"));
   }
 

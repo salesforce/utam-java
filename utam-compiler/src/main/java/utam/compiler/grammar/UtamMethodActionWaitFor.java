@@ -26,7 +26,6 @@ import utam.compiler.helpers.ParametersContext.StatementParametersContext;
 import utam.compiler.helpers.StatementContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethodStatement;
-import utam.compiler.representation.ComposeMethodStatement.Operation;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
@@ -88,10 +87,8 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
     List<ComposeMethodStatement> predicate = arguments.get(0).getPredicate(context, methodContext);
     methodContext.exitPredicateContext();
     TypeProvider operationReturnType = predicate.get(predicate.size() - 1).getReturnType();
-    Operation operation = new OperationWithPredicate(action, operationReturnType, predicate);
-    checkMatcher(operationReturnType, parserContext);
-
-    return buildStatement(SELF_OPERAND, operation, context, methodContext, statementContext);
+    ApplyOperation operation = new OperationWithPredicate(action, operationReturnType, predicate);
+    return buildStatement(SELF_OPERAND, operation, statementContext);
   }
 
   private void checkFunctionParameter(TranslationContext context, String contextString, List<MethodParameter> parameters) {
@@ -119,7 +116,7 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
 
     OperationWithPredicate(ActionType action, TypeProvider returnType,
         List<ComposeMethodStatement> predicate) {
-      super(action, returnType, new ArrayList<>());
+      super(action, returnType, new ArrayList<>(), null);
       for (ComposeMethodStatement statement : predicate) {
         predicateCode.addAll(statement.getCodeLines());
         ParameterUtils.setImports(classImports, statement.getClassImports());

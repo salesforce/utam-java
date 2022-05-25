@@ -31,12 +31,14 @@ import utam.compiler.helpers.MethodContext.ElementsUsageTracker;
 import utam.compiler.helpers.ParameterUtils;
 import utam.compiler.helpers.ParametersContext;
 import utam.compiler.helpers.ParametersContext.StatementParametersContext;
+import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.ReturnType;
 import utam.compiler.helpers.StatementContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.compiler.representation.ComposeMethodStatement.Operand;
 import utam.compiler.representation.ComposeMethodStatement.Operation;
+import utam.compiler.representation.MatcherObject;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
@@ -116,11 +118,10 @@ class UtamMethodActionApply extends UtamMethodAction {
     return operand.isApplyToList() && !size.getApplyString().equals(apply);
   }
 
-  private Operation getCustomApplyOperation(
+  private ApplyOperation getCustomApplyOperation(
       TranslationContext context,
       MethodContext methodContext,
-      StatementContext statementContext
-  ) {
+      StatementContext statementContext) {
     // in case of self invocations make sure that private method is declared because it's being called from another method
     context.setMethodUsage(apply);
     String parserContext = String.format("method \"%s\"", methodContext.getName());
@@ -139,10 +140,11 @@ class UtamMethodActionApply extends UtamMethodAction {
             defaultReturnType);
     ActionType action = new CustomActionType(apply, operationReturnType);
     List<MethodParameter> parameters = parametersContext.getParameters();
-    return new ApplyOperation(action, operationReturnType, parameters);
+    MatcherObject matcher = matcherProvider.apply(context, methodContext);
+    return new ApplyOperation(action, operationReturnType, parameters, matcher);
   }
 
-  private Operation getBasicActionOperation(
+  private ApplyOperation getBasicActionOperation(
       ElementContext element,
       TranslationContext context,
       MethodContext methodContext) {
@@ -161,18 +163,26 @@ class UtamMethodActionApply extends UtamMethodAction {
       String message = context.getErrorMessage(612, methodName, this.apply);
       throw new UtamCompilationError(message);
     }
-    TypeProvider expectedReturn =
-        element.isReturnAll() ? wrapAsList(action.getReturnType()) : action.getReturnType();
     ReturnType declaredReturnType = getDeclaredReturnType(methodName);
     if (declaredReturnType.isReturnTypeSet()) {
-      TypeProvider declaredReturn = getDeclaredReturnType(methodName)
-          .getReturnTypeOrNull(context);
-      checkDefinedReturnType(expectedReturn, declaredReturn, methodName);
+      // if "returnType" is set - check if it's correct
+      TypeProvider declaredReturn = declaredReturnType.getReturnType(context);
+      TypeProvider expectedReturn = hasMatcher? PrimitiveType.BOOLEAN :
+          (element.isReturnAll() ? wrapAsList(action.getReturnType()) : action.getReturnType());
+      if (!expectedReturn.isSameType(declaredReturn)) {
+        String errorMsg = context.getErrorMessage(613, methodName,
+            expectedReturn.getSimpleName(),
+            declaredReturn.getSimpleName());
+        throw new UtamCompilationError(errorMsg);
+      }
     }
     List<TypeProvider> expectedTypes = action.getParametersTypes(parserContext, arguments.size());
     List<MethodParameter> parameters = parametersContext.getParameters(expectedTypes);
-    checkMatcher(expectedReturn, parserContext);
-    return new ApplyOperation(action, action.getReturnType(), parameters);
+    MatcherObject matcher = matcherProvider.apply(context, methodContext);
+    if(matcher != null) {
+      matcher.checkMatcherOperand(context, action.getReturnType());
+    }
+    return new ApplyOperation(action, action.getReturnType(), parameters, matcher);
   }
 
   @Override
@@ -202,15 +212,14 @@ class UtamMethodActionApply extends UtamMethodAction {
     }
 
     // set operation
-    Operation operation;
+    ApplyOperation operation;
     if (isBasicElement(context, methodName)) {
       ElementContext element = ((ElementOperand) operand).elementContext;
       operation = getBasicActionOperation(element, context, methodContext);
     } else {
       operation = getCustomApplyOperation(context, methodContext, statementContext);
     }
-
-    return buildStatement(operand, operation, context, methodContext, statementContext);
+    return buildStatement(operand, operation, statementContext);
   }
 
   /**
@@ -304,17 +313,22 @@ class UtamMethodActionApply extends UtamMethodAction {
     private final List<MethodParameter> actionParameters = new ArrayList<>();
     private final ActionType action;
     private final TypeProvider returnType;
+    final MatcherObject matcher;
 
     /**
      * @param action           method to invoke
      * @param returnType       returnType from action, for waitFor it's last predicate
      * @param actionParameters parameters for method invocation
+     * @param matcher matcher object
      */
-    ApplyOperation(ActionType action, TypeProvider returnType,
-        List<MethodParameter> actionParameters) {
+    ApplyOperation(ActionType action,
+        TypeProvider returnType,
+        List<MethodParameter> actionParameters,
+        MatcherObject matcher) {
       this.action = action;
       this.actionParameters.addAll(actionParameters);
       this.returnType = returnType;
+      this.matcher = matcher;
     }
 
     @Override

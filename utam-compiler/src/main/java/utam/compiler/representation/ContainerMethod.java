@@ -8,10 +8,10 @@
 package utam.compiler.representation;
 
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
-import static utam.compiler.helpers.TypeUtilities.BOUNDED_PAGE_OBJECT_PARAMETER;
-import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
+import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT_RETURN;
+import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT_RETURN_LIST;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
-import static utam.compiler.helpers.TypeUtilities.wrapAsList;
+import static utam.compiler.helpers.TypeUtilities.T_PAGE_OBJECT_TYPE_PARAMETER;
 import static utam.compiler.representation.ElementMethod.getScopeElementCode;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
@@ -37,7 +37,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
 
   private static final String PAGE_OBJECT_TYPE_PARAMETER_NAME = "pageObjectType";
   static final MethodParameter PAGE_OBJECT_PARAMETER =
-      new Regular(PAGE_OBJECT_TYPE_PARAMETER_NAME, BOUNDED_PAGE_OBJECT_PARAMETER);
+      new Regular(PAGE_OBJECT_TYPE_PARAMETER_NAME, T_PAGE_OBJECT_TYPE_PARAMETER);
   private final List<String> codeLines = new ArrayList<>();
   final String methodName;
   private final boolean isPublic;
@@ -117,12 +117,8 @@ public abstract class ContainerMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), wrapAsList(PAGE_OBJECT), methodDescription) {
-        @Override
-        String getReturnTypeStr() {
-          return String.format("<T extends %s> List<T>", PAGE_OBJECT.getSimpleName());
-        }
-      };
+      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(),
+          PAGE_OBJECT_RETURN_LIST, methodDescription);
     }
 
     @Override
@@ -171,12 +167,8 @@ public abstract class ContainerMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), PAGE_OBJECT, methodDescription) {
-        @Override
-        String getReturnTypeStr() {
-          return String.format("<T extends %s> T", PAGE_OBJECT.getSimpleName());
-        }
-      };
+      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(),
+          PAGE_OBJECT_RETURN, methodDescription);
     }
 
     @Override

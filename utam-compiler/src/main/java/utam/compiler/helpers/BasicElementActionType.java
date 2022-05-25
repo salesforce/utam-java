@@ -178,7 +178,7 @@ public enum BasicElementActionType implements ActionType {
   // used in unit tests
   @SuppressWarnings("rawtypes")
   Class[] getParameterClasses() {
-    return Stream.of(actionParameters).map(TypeProvider::getClassType).toArray(Class[]::new);
+    return Stream.of(actionParameters).map(TypeUtilities::getClassFromFullName).toArray(Class[]::new);
   }
 
   // used in unit tests

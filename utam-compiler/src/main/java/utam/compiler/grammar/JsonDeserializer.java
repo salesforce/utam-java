@@ -202,7 +202,7 @@ public final class JsonDeserializer extends
    * @param node JSON node
    * @return true if null or empty
    */
-  static boolean isEmptyNode(JsonNode node) {
+  public static boolean isEmptyNode(JsonNode node) {
     return node == null || node.isNull();
   }
 

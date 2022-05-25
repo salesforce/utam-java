@@ -37,6 +37,10 @@
     {
       "typeMatch": "generated-profiles",
       "pathMatch": ".*/profiles"
+    },
+    {
+      "typeMatch": "generated-duplicate",
+      "pathMatch": ".*/duplicate"
     }
   ],
   "copyright" : [

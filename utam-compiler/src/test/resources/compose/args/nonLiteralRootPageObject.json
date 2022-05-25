@@ -1,0 +1,18 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "apply": "something",
+          "args": [
+            {
+              "type": "rootPageObject",
+              "name": "param"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

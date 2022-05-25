@@ -7,24 +7,25 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.UtamArgument.processArgsNode;
-import static utam.compiler.grammar.UtamMatcher.processMatcherNode;
 import static utam.compiler.grammar.UtamPageObject.BEFORE_LOAD_METHOD_NAME;
 import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
-import static utam.compiler.translator.TranslationTypesConfigJava.isCustomType;
+import static utam.compiler.helpers.TypeUtilities.isCustomType;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import utam.compiler.UtamCompilationError;
+import utam.compiler.grammar.UtamMatcher.ComposeStatementMatcherProvider;
+import utam.compiler.grammar.UtamMethodActionApply.ApplyOperation;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MethodContext;
-import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.ReturnType;
 import utam.compiler.helpers.ReturnType.StatementReturnType;
 import utam.compiler.helpers.StatementContext;
@@ -34,9 +35,8 @@ import utam.compiler.representation.ComposeMethodStatement;
 import utam.compiler.representation.ComposeMethodStatement.FlatMapEach;
 import utam.compiler.representation.ComposeMethodStatement.ForEach;
 import utam.compiler.representation.ComposeMethodStatement.MapEach;
-import utam.compiler.representation.ComposeMethodStatement.Matcher;
 import utam.compiler.representation.ComposeMethodStatement.Operand;
-import utam.compiler.representation.ComposeMethodStatement.Operation;
+import utam.compiler.representation.MatcherObject;
 import utam.core.declarative.representation.TypeProvider;
 
 /**
@@ -48,7 +48,6 @@ import utam.core.declarative.representation.TypeProvider;
 public abstract class UtamMethodAction {
 
   static final String ERR_FIRST_STATEMENT_CANT_BE_MARKED_AS_CHAIN = "method '%s': first statement can't be marked as chain";
-  static final String ERR_INCORRECT_RETURN_TYPE = "method '%s' incorrect statement return type: expected '%s', provided is '%s'";
   static final String ERR_CHAIN_REQUIRES_CUSTOM_RETURN = "method '%s': to use chain, "
       + "previous statement should return custom type, but it returns '%s'";
   static final Operand SELF_OPERAND = new ConstOperand("this");
@@ -59,10 +58,10 @@ public abstract class UtamMethodAction {
   // if set to true, action should be applied to the result of the previous statement
   final boolean isChain;
   final JsonNode argsNode;
-  final boolean hasMatcher;
-  private final Function<String, UtamMatcher> matcherProvider;
+  final BiFunction<TranslationContext, MethodContext, MatcherObject> matcherProvider;
   private final JsonNode returnTypeJsonNode;
   private final Boolean isReturnList;
+  final boolean hasMatcher;
 
   UtamMethodAction(
       String elementName,
@@ -72,39 +71,19 @@ public abstract class UtamMethodAction {
       Boolean isReturnList,
       boolean isChain) {
     this.argsNode = argsNode;
-    this.matcherProvider = str -> processMatcherNode(matcherNode, str);
+    this.hasMatcher = !isEmptyNode(matcherNode);
+    this.matcherProvider = (context, methodContext) ->
+        isEmptyNode(matcherNode) ? null
+            : new ComposeStatementMatcherProvider(matcherNode, methodContext)
+                .getMatcherObject(context);
     this.elementName = elementName;
     this.isChain = isChain;
     this.isReturnList = isReturnList;
     this.returnTypeJsonNode = returnTypeJsonNode;
-    this.hasMatcher = matcherNode != null && !matcherNode.isNull();
   }
 
   final ReturnType getDeclaredReturnType(String methodName) {
     return new StatementReturnType(returnTypeJsonNode, isReturnList, methodName);
-  }
-
-  final void checkMatcher(TypeProvider operandType, String validationContextStr) {
-    if (hasMatcher) {
-      UtamMatcher matcher = getMatcher(validationContextStr);
-      matcher.getMatcherType().checkOperandForMatcher(operandType, validationContextStr);
-    }
-  }
-
-  final UtamMatcher getMatcher(String parserContext) {
-    return matcherProvider.apply(parserContext);
-  }
-
-  final void checkDefinedReturnType(TypeProvider expectedType, TypeProvider declaredType,
-      String methodName) {
-    TypeProvider adjustedExpectedType = hasMatcher ? PrimitiveType.BOOLEAN : expectedType;
-    if (!adjustedExpectedType.isSameType(declaredType)) {
-      throw new UtamCompilationError(String
-          .format(ERR_INCORRECT_RETURN_TYPE,
-              methodName,
-              adjustedExpectedType.getSimpleName(),
-              declaredType.getSimpleName()));
-    }
   }
 
   final void checkFirsStatementCantBeChain(StatementContext statementContext, String methodName) {
@@ -170,19 +149,9 @@ public abstract class UtamMethodAction {
 
   final ComposeMethodStatement buildStatement(
       Operand operand,
-      Operation operation,
-      TranslationContext context,
-      MethodContext methodContext,
+      ApplyOperation operation,
       StatementContext statementContext) {
-    ComposeMethodStatement.Matcher matcher;
-    if (hasMatcher) {
-      String parserContext = String.format("method \"%s\"", methodContext.getName());
-      UtamMatcher utamMatcher = getMatcher(parserContext);
-      matcher = new Matcher(utamMatcher.getMatcherType(),
-          utamMatcher.getParameters(context, methodContext));
-    } else {
-      matcher = null;
-    }
+    MatcherObject matcher = operation.matcher;
     if (isApplyToList(operand)) {
       if (operation.isReturnsVoid() && !hasMatcher) {
         return new ForEach(operand, operation, statementContext);

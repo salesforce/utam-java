@@ -9,9 +9,9 @@ package utam.compiler.helpers;
 
 import static utam.compiler.helpers.StatementContext.StatementType.PREDICATE_LAST_STATEMENT;
 import static utam.compiler.helpers.StatementContext.StatementType.PREDICATE_STATEMENT;
+import static utam.compiler.helpers.TypeUtilities.isListType;
 
 import utam.compiler.grammar.UtamMethodAction.ConstOperand;
-import utam.compiler.helpers.TypeUtilities.ListOf;
 import utam.compiler.representation.ComposeMethodStatement.Operand;
 import utam.core.declarative.representation.TypeProvider;
 
@@ -59,7 +59,7 @@ public class StatementContext {
    */
   public Operand getChainOperand() {
     String operandString = getVariableName(statementIndex - 1);
-    boolean isList = previousStatementReturn instanceof ListOf;
+    boolean isList = isListType(previousStatementReturn);
     return new ConstOperand(operandString, isList);
   }
 
@@ -133,7 +133,7 @@ public class StatementContext {
    * @return the declared return type of the statement if one is declared; otherwise null
    */
   public TypeProvider getDeclaredStatementReturnOrNull(TranslationContext context) {
-    return declaredStatementReturn.getReturnTypeOrNull(context);
+    return declaredStatementReturn.getReturnType(context);
   }
 
   /**
@@ -156,8 +156,7 @@ public class StatementContext {
   public TypeProvider getDeclaredReturnOrDefault(TranslationContext context,
       ReturnType declaredMethodReturn,
       TypeProvider defaultReturnType) {
-    TypeProvider declaredStatementReturn = this.declaredStatementReturn
-        .getReturnTypeOrNull(context);
+    TypeProvider declaredStatementReturn = this.declaredStatementReturn.getReturnType(context);
     if (declaredStatementReturn != null) {
       return declaredStatementReturn;
     }
@@ -200,7 +199,7 @@ public class StatementContext {
    * @return true if the statement is a flat map; otherwise, false
    */
   public boolean isFlatMap() {
-    return previousStatementReturn instanceof ListOf
+    return isListType(previousStatementReturn)
         && this.declaredStatementReturn.isReturnAllSet();
   }
 

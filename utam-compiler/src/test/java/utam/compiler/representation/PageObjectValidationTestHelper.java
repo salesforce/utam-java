@@ -9,6 +9,7 @@ package utam.compiler.representation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -149,8 +150,8 @@ public class PageObjectValidationTestHelper {
       String assertionStr = String.format("method '%s' class imports are: %s", info.name, imports);
       assertThat(
           assertionStr,
-          info.allImportedTypes(),
-          containsInAnyOrder(actualImports.toArray()));
+          actualImports,
+          containsInAnyOrder(info.impliedImportedTypes.toArray()));
     }
   }
 
@@ -211,11 +212,28 @@ public class PageObjectValidationTestHelper {
     }
   }
 
+  /**
+   * helper method to make sure no imports in interface or the class for the given method
+   *
+   * @param method actual method
+   */
+  public static void validateMethodEmptyImports(PageObjectMethod method) {
+    MethodDeclaration methodDeclaration = method.getDeclaration();
+    String methodName = methodDeclaration.getName();
+    Set<String> declarationImports = getAllImports(methodDeclaration.getImports());
+    String assertionStr = String.format("method '%s' interface imports are empty", methodName);
+    assertThat(assertionStr, declarationImports, is(emptyIterable()));
+
+    Set<String> classImports = getAllImports(method.getClassImports());
+    assertionStr = String.format("method '%s' class imports are empty", methodName);
+    assertThat(assertionStr, classImports, is(emptyIterable()));
+  }
+
   private static Set<String> getAllImports(List<TypeProvider> imports) {
     Set<String> res = new HashSet<>();
     imports.forEach(i -> {
       res.add(i.getFullName());
-      i.getBoundTypes().forEach(t -> res.add(t.getFullName()));
+      i.getImportableTypes().forEach(t -> res.add(t.getFullName()));
     });
     return res;
   }

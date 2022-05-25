@@ -1,0 +1,20 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "apply": "myPrivateMethod",
+          "returnType": "my1/pack/Foo",
+          "returnAll": true
+        },
+        {
+          "chain": true,
+          "apply": "myPrivateMethod",
+          "returnType": "my2/pack/Foo",
+          "returnAll": true
+        }
+      ]
+    }
+  ]
+}

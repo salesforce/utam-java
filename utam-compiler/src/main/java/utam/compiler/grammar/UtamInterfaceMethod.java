@@ -20,8 +20,8 @@ import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParametersContext;
 import utam.compiler.helpers.ReturnType;
-import utam.compiler.helpers.ReturnType.MethodBasicReturnType;
-import utam.compiler.helpers.ReturnType.MethodReturnType;
+import utam.compiler.helpers.ReturnType.AbstractMethodBasicReturnType;
+import utam.compiler.helpers.ReturnType.AbstractMethodReturnType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.InterfaceMethod;
 import utam.compiler.representation.InterfaceMethod.AbstractBasicElementGetter;
@@ -87,9 +87,9 @@ class UtamInterfaceMethod extends UtamMethod {
           node -> new UtamCompilerIntermediateError(node, 401,
               name, typeNodeValue));
       TypeProvider unionReturnType = asBasicOrUnionType(name, basicUnionType, false);
-      returnTypeObject = new MethodBasicReturnType(unionReturnType, isReturnList);
+      returnTypeObject = new AbstractMethodBasicReturnType(unionReturnType, isReturnList);
     } else {
-      returnTypeObject = new MethodReturnType(returnTypeNode, isReturnList, name);
+      returnTypeObject = new AbstractMethodReturnType(returnTypeNode, isReturnList, name);
     }
     TypeProvider methodReturnType = returnTypeObject.getReturnTypeOrDefault(context, VOID);
     MethodContext methodContext = new MethodContext(name, returnTypeObject, context, argsNode, true);

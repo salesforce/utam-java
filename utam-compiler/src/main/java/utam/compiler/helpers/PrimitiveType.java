@@ -88,18 +88,13 @@ public enum PrimitiveType implements TypeProvider {
   }
 
   @Override
-  public Class getClassType() {
-    return type;
-  }
-
-  @Override
   public String getFalsyValue() {
     return BOOLEAN == this ? "false" : "null";
   }
 
   @Override
   public String getFullName() {
-    return getClassType().getName();
+    return type.getName();
   }
 
   @Override
@@ -109,8 +104,6 @@ public enum PrimitiveType implements TypeProvider {
 
   @Override
   public String getPackageName() {
-    return getClassType().getPackageName();
+    return type.getPackageName();
   }
-
-
 }
