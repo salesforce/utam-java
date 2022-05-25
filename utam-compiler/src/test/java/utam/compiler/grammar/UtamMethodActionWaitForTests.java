@@ -10,7 +10,6 @@ package utam.compiler.grammar;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.UtamMethodActionWaitFor.ERR_NESTED_PREDICATE_PROHIBITED;
 
 import org.testng.annotations.Test;
 import utam.compiler.helpers.TranslationContext;
@@ -36,7 +35,7 @@ public class UtamMethodActionWaitForTests {
 
   @Test
   public void nestedPredicateThrows() {
-    String expectedError = String.format(ERR_NESTED_PREDICATE_PROHIBITED, "method \"test\"");
+    String expectedError = "error 615: method \"test\" statement: nested waitFor is not supported";
     UtamError e = expectThrows(UtamError.class,
         () -> new DeserializerUtilities().getContext("validate/compose/nestedWait"));
     assertThat(e.getMessage(), containsString(expectedError));

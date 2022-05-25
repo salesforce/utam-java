@@ -52,6 +52,12 @@ class UtamMethodActionUtility extends UtamMethodAction {
     this.applyExternal = applyExternal;
   }
 
+  @Override
+  Statement getStatement(TranslationContext context, MethodContext methodContext,
+      StatementContext statementContext) {
+    throw new IllegalStateException("Compose statement is set without intermittent object");
+  }
+
   /**
    * Create an Operation for a utility statement. For imperative extension, an operation is a custom
    * action specified in the invoke property in the JSON file. We access the value of the invoke

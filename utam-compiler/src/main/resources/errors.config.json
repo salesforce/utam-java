@@ -199,6 +199,10 @@
     "message": "method \"%s\" statement: expected type to match is \"%s\", found \"%s\""
   },
   {
+    "code": 615,
+    "message": "method \"%s\" statement: nested waitFor is not supported"
+  },
+  {
     "code": 700,
     "message": "%s: format of the description is incorrect: \n%s",
     "docs": "https://utam.dev/grammar/spec#method-description"

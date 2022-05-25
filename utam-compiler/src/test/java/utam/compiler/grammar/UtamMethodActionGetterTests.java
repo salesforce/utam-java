@@ -8,6 +8,7 @@
 package utam.compiler.grammar;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.UtamMethodAction.ERR_CHAIN_REQUIRES_CUSTOM_RETURN;
@@ -209,6 +210,7 @@ public class UtamMethodActionGetterTests {
   public void testBasicElementWithFilterFindFirst() {
     TranslationContext context = getContext("basicFindFirst");
     PageObjectMethod method = context.getMethod(methodName);
+    assertThat(method.getDeclaration().getCodeLine(), is("Foo test(String filterArg)"));
     MethodInfo expected = new MethodInfo(methodName, "BasicElement");
     expected.addParameter(new MethodParameterInfo("filterArg"));
     expected.addCodeLine("BasicElement statement0 = this.getFilterFindFirstElement(filterArg)");

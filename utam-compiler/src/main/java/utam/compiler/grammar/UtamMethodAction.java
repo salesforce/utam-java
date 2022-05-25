@@ -132,6 +132,8 @@ public abstract class UtamMethodAction {
     }
   }
 
+  abstract Statement getStatement(TranslationContext context, MethodContext methodContext, StatementContext statementContext);
+
   /**
    * Create a compose statement object from mapped Java entity. This method creates a structure that
    * will be used to generate the code for a given object in the `compose` array. Each object in the
@@ -142,15 +144,11 @@ public abstract class UtamMethodAction {
    * @param statementContext statement context to collect args
    * @return compose method statement
    */
-  abstract ComposeMethodStatement getComposeAction(
-      TranslationContext context,
-      MethodContext methodContext,
-      StatementContext statementContext);
-
-  final ComposeMethodStatement buildStatement(
-      Operand operand,
-      ApplyOperation operation,
-      StatementContext statementContext) {
+  ComposeMethodStatement getComposeAction(TranslationContext context, MethodContext methodContext, StatementContext statementContext) {
+    Statement statement = getStatement(context, methodContext, statementContext);
+    // operand should be invoked first because of order of parameters
+    Operand operand = statement.getOperand();
+    ApplyOperation operation = statement.getApplyOperation();
     MatcherObject matcher = operation.matcher;
     if (isApplyToList(operand)) {
       if (operation.isReturnsVoid() && !hasMatcher) {
@@ -162,6 +160,24 @@ public abstract class UtamMethodAction {
       return new MapEach(operand, operation, matcher, statementContext);
     }
     return new ComposeMethodStatement.Single(operand, operation, matcher, statementContext);
+  }
+
+  static abstract class Statement {
+
+    final TranslationContext context;
+    final MethodContext methodContext;
+    final StatementContext statementContext;
+
+    Statement(TranslationContext context, MethodContext methodContext, StatementContext statementContext) {
+      this.statementContext = statementContext;
+      this.context = context;
+      this.methodContext = methodContext;
+    }
+
+    abstract ApplyOperation getApplyOperation();
+
+    abstract Operand getOperand();
+
   }
 
   /**

@@ -354,6 +354,7 @@ public class UtamMethodActionApplyTests {
     String importStr = "my.pageobject.Foo";
     TranslationContext context = getContext("customWithFilterFindFirst");
     PageObjectMethod method = context.getMethod(methodName);
+    assertThat(method.getDeclaration().getCodeLine(), is("Foo test(String filterArg, String applyArg)"));
     MethodInfo expected = new MethodInfo(methodName, "Foo");
     expected.addParameter(new MethodParameterInfo("filterArg"));
     expected.addParameter(new MethodParameterInfo("applyArg"));
