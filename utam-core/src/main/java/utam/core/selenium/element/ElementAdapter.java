@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.InvalidElementStateException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
@@ -25,6 +24,7 @@ import utam.core.driver.Driver;
 import utam.core.element.DragAndDropOptions;
 import utam.core.element.Element;
 import utam.core.element.Locator;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * implementation for selenium element
@@ -164,7 +164,7 @@ public class ElementAdapter implements Element {
         driverAdapter.executeScript(SCROLL_TOP_VIA_JAVASCRIPT, getWebElement());
       }
       if (!isDisplayed()) {
-        throw new InvalidElementStateException(SCROLL_INTO_VIEW_ERR);
+        throw new UtamError(SCROLL_INTO_VIEW_ERR);
       }
     } else {
       driverAdapter.executeScript(SCROLL_CENTER_VIA_JAVASCRIPT, getWebElement());
