@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.expectThrows;
@@ -45,6 +46,7 @@ public class UtamMethodActionWaitForTests {
   public void testWaitForCustomElement() {
     TranslationContext context = getContext("waitForCustom");
     PageObjectMethod method = context.getMethod(methodName);
+    assertThat(method.getDeclaration().getCodeLine(), is("Boolean test(LocatorBy selectorArg, String matcherArg)"));
     MethodInfo methodInfo = new MethodInfo(methodName, "Boolean");
     methodInfo.addParameter(new MethodParameterInfo("selectorArg", "LocatorBy"));
     methodInfo.addParameter(new MethodParameterInfo("matcherArg", "String"));

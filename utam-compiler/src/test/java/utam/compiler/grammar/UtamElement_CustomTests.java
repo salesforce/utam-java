@@ -10,7 +10,6 @@ package utam.compiler.grammar;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_MISSING_SELECTOR_PROPERTY;
 
 import org.testng.annotations.Test;
 import utam.compiler.JsonBuilderTestUtility;
@@ -19,7 +18,6 @@ import utam.core.framework.consumer.UtamError;
 
 public class UtamElement_CustomTests {
 
-  private static final String ELEMENT_NAME = "test";
   private static final String METHOD_NAME = "getTest";
 
   /**
@@ -32,9 +30,7 @@ public class UtamElement_CustomTests {
     test.addRawString("elements",
         "[ {\"name\": \"test\", \"type\" : \"my/page/type\" }]");
     UtamError e = expectThrows(UtamCompilationError.class, test::getDeserializedJson);
-    assertThat(
-        e.getMessage(),
-        containsString(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, ELEMENT_NAME)));
+    assertThat(e.getMessage(), containsString("error 204: element \"test\": property \"selector\" is mandatory"));
   }
 
   @Test

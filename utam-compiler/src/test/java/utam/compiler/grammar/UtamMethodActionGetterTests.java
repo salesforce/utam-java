@@ -11,8 +11,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.UtamMethodAction.ERR_CHAIN_REQUIRES_CUSTOM_RETURN;
-import static utam.compiler.grammar.UtamMethodAction.ERR_FIRST_STATEMENT_CANT_BE_MARKED_AS_CHAIN;
 import static utam.compiler.helpers.TypeUtilities.COLLECTOR_IMPORT;
 import static utam.compiler.representation.PageObjectValidationTestHelper.validateMethodEmptyImports;
 
@@ -51,13 +49,13 @@ public class UtamMethodActionGetterTests {
   @Test
   public void unknownElementNameThrows() {
     testThrows("unknownElementName",
-        "error 101: method \"test\": unknown element with name \"test\" is referenced");
+        "error 601: method \"test\" statement: unknown element with name \"test\" is referenced in a compose statement");
   }
 
   @Test
   public void incorrectMatcherThrows() {
     testThrows("incorrectMatcherType", "error 614: method \"test\" statement: "
-        + "expected type to match is \"Boolean\", found \"BasicElement\"");
+        + "expected type for matcher is \"Boolean\", found \"BasicElement\"");
   }
 
   @Test
@@ -74,14 +72,13 @@ public class UtamMethodActionGetterTests {
 
   @Test
   public void testFirstChainStatement() {
-    String expectedError = String.format(ERR_FIRST_STATEMENT_CANT_BE_MARKED_AS_CHAIN, methodName);
+    String expectedError = "error 616: method \"test\" statement: first statement can't be marked as chain";
     testThrows("firstChain", expectedError);
   }
 
   @Test
   public void testChainCantBeApplied() {
-    String expectedError = String
-        .format(ERR_CHAIN_REQUIRES_CUSTOM_RETURN, methodName, "BasicElement");
+    String expectedError = "error 617: method \"test\" statement: to use chain previous statement should return custom type, but it returns \"BasicElement\"";
     testThrows("chainNotAllowed", expectedError);
   }
 
@@ -210,7 +207,7 @@ public class UtamMethodActionGetterTests {
   public void testBasicElementWithFilterFindFirst() {
     TranslationContext context = getContext("basicFindFirst");
     PageObjectMethod method = context.getMethod(methodName);
-    assertThat(method.getDeclaration().getCodeLine(), is("Foo test(String filterArg)"));
+    assertThat(method.getDeclaration().getCodeLine(), is("BasicElement test(String filterArg)"));
     MethodInfo expected = new MethodInfo(methodName, "BasicElement");
     expected.addParameter(new MethodParameterInfo("filterArg"));
     expected.addCodeLine("BasicElement statement0 = this.getFilterFindFirstElement(filterArg)");

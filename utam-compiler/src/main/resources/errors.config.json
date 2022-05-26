@@ -64,6 +64,10 @@
     "message": "\"%s\": incorrect number of parameters for action \"%s\": expected %s, provided %s"
   },
   {
+    "code": 111,
+    "message": "%s: unknown selector parameter type \"%s\", only string and number are supported"
+  },
+  {
     "code": 200,
     "message": "%s: incorrect format of elements: \n%s"
   },
@@ -77,7 +81,15 @@
   },
   {
     "code": 203,
-    "message": "element \"%s\" matcher: expected type to match is \"%s\", found \"%s\""
+    "message": "element \"%s\" matcher: expected type for matcher is \"%s\", found \"%s\""
+  },
+  {
+    "code": 204,
+    "message": "element \"%s\": property \"%s\" is mandatory"
+  },
+  {
+    "code": 205,
+    "message": "element \"%s\": %s element can't have nested elements"
   },
   {
     "code": 300,
@@ -143,7 +155,7 @@
   },
   {
     "code": 601,
-    "message": "method \"%s\" statement: unknown element with name \"%s\" is referenced in a compose statement as operand"
+    "message": "method \"%s\" statement: unknown element with name \"%s\" is referenced in a compose statement"
   },
   {
     "code": 602,
@@ -164,7 +176,7 @@
   },
   {
     "code": 606,
-    "message": "method \"%s\" statement: \"element\" property is redundant because statement marked as chain"
+    "message": "method \"%s\" statement: \"element\" property is redundant because statement is marked as a chain"
   },
   {
     "code": 607,
@@ -196,11 +208,23 @@
   },
   {
     "code": 614,
-    "message": "method \"%s\" statement: expected type to match is \"%s\", found \"%s\""
+    "message": "method \"%s\" statement: expected type for matcher is \"%s\", found \"%s\""
   },
   {
     "code": 615,
     "message": "method \"%s\" statement: nested waitFor is not supported"
+  },
+  {
+    "code" : 616,
+    "message": "method \"%s\" statement: first statement can't be marked as chain"
+  },
+  {
+    "code" : 617,
+    "message": "method \"%s\" statement: to use chain previous statement should return custom type, but it returns \"%s\""
+  },
+  {
+    "code" : 618,
+    "message": "method \"%s\" statement: \"returnSelf\" can only be invoked from a last statement"
   },
   {
     "code": 700,
@@ -267,6 +291,10 @@
     "message": "%s: format of selector is incorrect: \n%s",
     "docs": "https://utam.dev/grammar/spec#element-selector",
     "code": 1000
+  },
+  {
+    "code": 1001,
+    "message": "element \"%s\" selector: unknown selector parameter type \"%s\", only string and number are supported"
   },
   {
     "message": "%s: incorrect format of elements inside shadow: \n%s",

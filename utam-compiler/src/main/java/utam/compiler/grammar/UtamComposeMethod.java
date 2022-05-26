@@ -24,6 +24,7 @@ import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParametersContext;
 import utam.compiler.helpers.ReturnType;
 import utam.compiler.helpers.StatementContext;
+import utam.compiler.helpers.StatementContext.StatementType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethod;
 import utam.compiler.representation.ComposeMethodStatement;
@@ -137,7 +138,7 @@ class UtamComposeMethod extends UtamMethod {
           previousStatementReturn,
           i,
           isUsedAsChain(compose, i),
-          statementDeclaration.getStatementType(i, compose.size()),
+          i == compose.size() - 1 ? StatementType.LAST_STATEMENT : StatementType.REGULAR_STATEMENT,
           statementDeclaration.getDeclaredReturnType(name));
       statementDeclaration.checkBeforeLoadElements(context, methodContext);
       ComposeMethodStatement statement = statementDeclaration

@@ -10,7 +10,6 @@ package utam.compiler.grammar;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static utam.compiler.grammar.DeserializerUtilities.expectCompilerError;
-import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_MISSING_SELECTOR_PROPERTY;
 import static utam.compiler.grammar.UtamElement.ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED;
 
 import org.testng.annotations.Test;
@@ -22,8 +21,6 @@ import utam.compiler.grammar.UtamElement.Type;
  * @since 236
  */
 public class UtamElement_FrameTests {
-
-  private static final String ELEMENT_NAME = "test";
 
   @Test
   public void testFrameElementWithReturnAllSelectorThrows() {
@@ -49,7 +46,7 @@ public class UtamElement_FrameTests {
         + "  ]}";
     Exception e = expectCompilerError(json);
     assertThat(e.getMessage(),
-        containsString(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, ELEMENT_NAME)));
+        containsString("error 204: element \"test\": property \"selector\" is mandatory"));
   }
 
   @Test

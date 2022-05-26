@@ -29,7 +29,6 @@ import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ReturnType;
 import utam.compiler.helpers.ReturnType.StatementReturnType;
 import utam.compiler.helpers.StatementContext;
-import utam.compiler.helpers.StatementContext.StatementType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.compiler.representation.ComposeMethodStatement.FlatMapEach;
@@ -47,9 +46,6 @@ import utam.core.declarative.representation.TypeProvider;
  */
 public abstract class UtamMethodAction {
 
-  static final String ERR_FIRST_STATEMENT_CANT_BE_MARKED_AS_CHAIN = "method '%s': first statement can't be marked as chain";
-  static final String ERR_CHAIN_REQUIRES_CUSTOM_RETURN = "method '%s': to use chain, "
-      + "previous statement should return custom type, but it returns '%s'";
   static final Operand SELF_OPERAND = new ConstOperand("this");
   private static final Set<String> BEFORE_LOAD_ELEMENTS = Stream
       .of(DOCUMENT_ELEMENT_NAME, ROOT_ELEMENT_NAME).collect(
@@ -59,9 +55,9 @@ public abstract class UtamMethodAction {
   final boolean isChain;
   final JsonNode argsNode;
   final BiFunction<TranslationContext, MethodContext, MatcherObject> matcherProvider;
+  final boolean hasMatcher;
   private final JsonNode returnTypeJsonNode;
   private final Boolean isReturnList;
-  final boolean hasMatcher;
 
   UtamMethodAction(
       String elementName,
@@ -86,35 +82,24 @@ public abstract class UtamMethodAction {
     return new StatementReturnType(returnTypeJsonNode, isReturnList, methodName);
   }
 
-  final void checkFirsStatementCantBeChain(StatementContext statementContext, String methodName) {
-    if (statementContext.isFirstStatement() && isChain) {
-      throw new UtamCompilationError(
-          String.format(ERR_FIRST_STATEMENT_CANT_BE_MARKED_AS_CHAIN, methodName));
-    }
-  }
+  final void chainValidations(TranslationContext context,
+      StatementContext statementContext,
+      String methodName) {
+    if (isChain) {
+      // first statement can't be chain
+      if (statementContext.isFirstStatement()) {
+        String message = context.getErrorMessage(616, methodName);
+        throw new UtamCompilationError(message);
+      }
 
-  // chain should only be allowed if previous statement returned custom type
-  final void checkChainAllowed(StatementContext statementContext, String methodName) {
-    TypeProvider previousStatementReturn = statementContext.getPreviousStatementReturnType();
-    if (isChain && !isCustomType(previousStatementReturn)) {
-      String returnType =
-          previousStatementReturn == null ? "void" : previousStatementReturn.getSimpleName();
-      throw new UtamCompilationError(
-          String.format(ERR_CHAIN_REQUIRES_CUSTOM_RETURN, methodName, returnType));
-    }
-  }
-
-  /**
-   * if statement is marked as a chain, it should be applied to previous result, so "element" is
-   * redundant
-   *
-   * @param context    translation context
-   * @param methodName string with method name
-   */
-  final void checkChainElementRedundant(TranslationContext context, String methodName) {
-    if (isChain && elementName != null) {
-      String message = context.getErrorMessage(606, methodName);
-      throw new UtamCompilationError(message);
+      // chain should only be allowed if previous statement returned custom type
+      TypeProvider previousStatementReturn = statementContext.getPreviousStatementReturnType();
+      if (!isCustomType(previousStatementReturn)) {
+        String returnType =
+            previousStatementReturn == null ? "void" : previousStatementReturn.getSimpleName();
+        String message = context.getErrorMessage(617, methodName, returnType);
+        throw new UtamCompilationError(message);
+      }
     }
   }
 
@@ -132,7 +117,16 @@ public abstract class UtamMethodAction {
     }
   }
 
-  abstract Statement getStatement(TranslationContext context, MethodContext methodContext, StatementContext statementContext);
+  /**
+   * Get abstraction object between JSON and statement representation
+   *
+   * @param context          translation context
+   * @param methodContext    method context
+   * @param statementContext statement context
+   * @return object
+   */
+  abstract Statement getStatement(TranslationContext context, MethodContext methodContext,
+      StatementContext statementContext);
 
   /**
    * Create a compose statement object from mapped Java entity. This method creates a structure that
@@ -144,7 +138,8 @@ public abstract class UtamMethodAction {
    * @param statementContext statement context to collect args
    * @return compose method statement
    */
-  ComposeMethodStatement getComposeAction(TranslationContext context, MethodContext methodContext, StatementContext statementContext) {
+  ComposeMethodStatement getComposeAction(TranslationContext context, MethodContext methodContext,
+      StatementContext statementContext) {
     Statement statement = getStatement(context, methodContext, statementContext);
     // operand should be invoked first because of order of parameters
     Operand operand = statement.getOperand();
@@ -162,38 +157,48 @@ public abstract class UtamMethodAction {
     return new ComposeMethodStatement.Single(operand, operation, matcher, statementContext);
   }
 
+  /**
+   * Check if operand is a list. Override for basic action - for "apply" : "size" returns false
+   *
+   * @param operand operand
+   * @return boolean true if apply action to list
+   */
+  boolean isApplyToList(Operand operand) {
+    return operand.isApplyToList();
+  }
+
+  /**
+   * Abstraction that connects JSON object and operand/operation in statement
+   *
+   * @author elizaveta.ivanova
+   * @since 240
+   */
   static abstract class Statement {
 
     final TranslationContext context;
     final MethodContext methodContext;
     final StatementContext statementContext;
 
-    Statement(TranslationContext context, MethodContext methodContext, StatementContext statementContext) {
+    Statement(TranslationContext context, MethodContext methodContext,
+        StatementContext statementContext) {
       this.statementContext = statementContext;
       this.context = context;
       this.methodContext = methodContext;
     }
 
+    /**
+     * get operation object to construct statement
+     *
+     * @return object
+     */
     abstract ApplyOperation getApplyOperation();
 
+    /**
+     * get operand object to construct statement
+     *
+     * @return object
+     */
     abstract Operand getOperand();
-
-  }
-
-  /**
-   * override for basic action - operation "size" changes it
-   *
-   * @param operand operand
-   * @return boolean
-   */
-  boolean isApplyToList(Operand operand) {
-    return operand.isApplyToList();
-  }
-
-  // overridden for beforeLoad which is not supposed to return value ever
-  StatementType getStatementType(int index, int numberOfStatements) {
-    return index == numberOfStatements - 1 ? StatementType.LAST_STATEMENT
-        : StatementType.REGULAR_STATEMENT;
   }
 
   /**

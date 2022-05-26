@@ -10,8 +10,6 @@ package utam.compiler.grammar;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_MISSING_SELECTOR_PROPERTY;
-import static utam.compiler.grammar.UtamElement.ERR_ELEMENT_NESTED_ELEMENTS;
 
 import org.testng.annotations.Test;
 import utam.compiler.JsonBuilderTestUtility;
@@ -25,8 +23,6 @@ import utam.core.framework.consumer.UtamError;
  */
 public class UtamElement_BasicTests {
 
-  private static final String ELEMENT_NAME = "test";
-
   private static void getContext(String fileName) {
     new DeserializerUtilities().getContext("validate/basic_element/" + fileName);
   }
@@ -36,9 +32,7 @@ public class UtamElement_BasicTests {
     JsonBuilderTestUtility test = new JsonBuilderTestUtility();
     test.addRawString("elements", "[ {\"name\": \"test\" }]");
     UtamError e = expectThrows(UtamCompilationError.class, test::getDeserializedJson);
-    assertThat(
-        e.getMessage(),
-        containsString(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, ELEMENT_NAME)));
+    assertThat(e.getMessage(), containsString("error 204: element \"test\": property \"selector\" is mandatory"));
   }
 
   /**
@@ -62,7 +56,7 @@ public class UtamElement_BasicTests {
   @Test
   public void testElementWithListCantHaveNestedElements() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("listWithNestedElements"));
-    assertThat(e.getMessage(), containsString(String.format(ERR_ELEMENT_NESTED_ELEMENTS, "test")));
+    assertThat(e.getMessage(), containsString("error 205: element \"test\": basic element can't have nested elements"));
   }
 
   @Test

@@ -227,7 +227,7 @@ public class UtamMethodActionApplyTests {
     Exception e = expectCompilerErrorFromFile("validate/apply/redundantElementForChain");
     assertThat(e.getMessage(), containsString(
         "error 606: method \"test\" statement: "
-            + "\"element\" property is redundant because statement marked as chain"));
+            + "\"element\" property is redundant because statement is marked as a chain"));
   }
 
   @Test

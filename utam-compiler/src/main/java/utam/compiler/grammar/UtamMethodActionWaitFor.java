@@ -54,71 +54,12 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
   @Override
   Statement getStatement(TranslationContext context, MethodContext methodContext,
       StatementContext statementContext) {
-    // if statement is marked as a chain, it should be applied to previous result, so "element" is redundant
-    checkChainElementRedundant(context, methodContext.getName());
+    chainValidations(context, statementContext, methodContext.getName());
     if (statementContext.isInsidePredicate()) {
       String message = context.getErrorMessage(615, methodContext.getName());
       throw new UtamCompilationError(message);
     }
-    // first statement can't be marked as chain
-    checkFirsStatementCantBeChain(statementContext, methodContext.getName());
-    // previous return should be custom
-    checkChainAllowed(statementContext, methodContext.getName());
     return new PredicateStatement(context, methodContext, statementContext);
-  }
-
-  class PredicateStatement extends Statement {
-
-    PredicateStatement(TranslationContext context, MethodContext methodContext,
-        StatementContext statementContext) {
-      super(context, methodContext, statementContext);
-    }
-
-    private void checkFunctionParameter(TranslationContext context, String contextString, List<MethodParameter> parameters) {
-      if (parameters.size() != 1) {
-        String message = context.getErrorMessage(108, contextString, "1", String.valueOf(parameters.size()));
-        throw new UtamCompilationError(argsNode, message);
-      }
-      MethodParameter parameter = parameters.get(0);
-      if(parameter != null) {
-        String actualType = parameter.getType().getSimpleName();
-        String parameterValue = parameter.getValue();
-        String message = context
-            .getErrorMessage(109, contextString, parameterValue, "function", actualType);
-        throw new UtamCompilationError(argsNode, message);
-      }
-    }
-
-    @Override
-    ApplyOperation getApplyOperation() {
-      String methodName = methodContext.getName();
-      String parserContext = String.format("method \"%s\"", methodName);
-      TypeProvider defaultReturnType = statementContext.isLastStatement() ?
-          methodContext.getDeclaredReturnType().getReturnTypeOrDefault(context, VOID) : VOID;
-      TypeProvider declaredStatementReturnType = statementContext
-          .getDeclaredReturnOrDefault(context, methodContext.getDeclaredReturnType(),
-              defaultReturnType);
-      ActionType action = new CustomActionType(WAIT_FOR, declaredStatementReturnType);
-      methodContext.enterPredicateContext();
-      ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
-      ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
-          argsNode, methodContext);
-      List<UtamArgument> arguments = argumentsProvider.getArguments(false);
-      List<MethodParameter> parameters = arguments
-          .stream()
-          .map(arg -> arg.asParameter(context, methodContext, parametersContext))
-          .collect(Collectors.toList());
-      checkFunctionParameter(context, parserContext, parameters);
-      List<ComposeMethodStatement> predicate = arguments.get(0).getPredicate(context, methodContext);
-      methodContext.exitPredicateContext();
-      TypeProvider operationReturnType = predicate.get(predicate.size() - 1).getReturnType();
-      return new OperationWithPredicate(action, operationReturnType, predicate);
-    }
-
-    @Override
-    Operand getOperand() {
-      return SELF_OPERAND;
-    }
   }
 
   /**
@@ -152,6 +93,69 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
     @Override
     protected List<TypeProvider> getAddedClassImports() {
       return classImports;
+    }
+  }
+
+  /**
+   * Non static class that transforms JSON to a predicate statement
+   *
+   * @author elizaveta.ivanova
+   * @since 240
+   */
+  class PredicateStatement extends Statement {
+
+    PredicateStatement(TranslationContext context, MethodContext methodContext,
+        StatementContext statementContext) {
+      super(context, methodContext, statementContext);
+    }
+
+    private void checkFunctionParameter(TranslationContext context, String contextString,
+        List<MethodParameter> parameters) {
+      if (parameters.size() != 1) {
+        String message = context
+            .getErrorMessage(108, contextString, "1", String.valueOf(parameters.size()));
+        throw new UtamCompilationError(argsNode, message);
+      }
+      MethodParameter parameter = parameters.get(0);
+      if (parameter != null) {
+        String actualType = parameter.getType().getSimpleName();
+        String parameterValue = parameter.getValue();
+        String message = context
+            .getErrorMessage(109, contextString, parameterValue, "function", actualType);
+        throw new UtamCompilationError(argsNode, message);
+      }
+    }
+
+    @Override
+    ApplyOperation getApplyOperation() {
+      String methodName = methodContext.getName();
+      String parserContext = String.format("method \"%s\"", methodName);
+      TypeProvider defaultReturnType = statementContext.isLastStatement() ?
+          methodContext.getDeclaredReturnType().getReturnTypeOrDefault(context, VOID) : VOID;
+      TypeProvider declaredStatementReturnType = statementContext
+          .getDeclaredReturnOrDefault(context, methodContext.getDeclaredReturnType(),
+              defaultReturnType);
+      ActionType action = new CustomActionType(WAIT_FOR, declaredStatementReturnType);
+      methodContext.enterPredicateContext();
+      ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
+      ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
+          argsNode, methodContext);
+      List<UtamArgument> arguments = argumentsProvider.getArguments(false);
+      List<MethodParameter> parameters = arguments
+          .stream()
+          .map(arg -> arg.asParameter(context, methodContext, parametersContext))
+          .collect(Collectors.toList());
+      checkFunctionParameter(context, parserContext, parameters);
+      List<ComposeMethodStatement> predicate = arguments.get(0)
+          .getPredicate(context, methodContext);
+      methodContext.exitPredicateContext();
+      TypeProvider operationReturnType = predicate.get(predicate.size() - 1).getReturnType();
+      return new OperationWithPredicate(action, operationReturnType, predicate);
+    }
+
+    @Override
+    Operand getOperand() {
+      return SELF_OPERAND;
     }
   }
 }

@@ -56,14 +56,24 @@ class UtamMethodActionGetter extends UtamMethodAction {
   Statement getStatement(TranslationContext context, MethodContext methodContext,
       StatementContext statementContext) {
     if (isChain) {
-      checkChainAllowed(statementContext, methodContext.getName());
-      // first statement can't be marked as chain
-      checkFirsStatementCantBeChain(statementContext, methodContext.getName());
+      chainValidations(context, statementContext, methodContext.getName());
       return new ForeignElementStatement(context, methodContext, statementContext);
+    } else {
+      ElementContext elementContext = context.getElement(elementName);
+      if (elementContext == null) {
+        String message = context.getErrorMessage(601, methodContext.getName(), elementName);
+        throw new UtamCompilationError(message);
+      }
+      return new SelfElementStatement(context, methodContext, statementContext, elementContext);
     }
-    return new SelfElementStatement(context, methodContext, statementContext);
   }
 
+  /**
+   * Non static class that transforms JSON to statement for "element" invoked from "chain"
+   *
+   * @author elizaveta.ivanova
+   * @since 240
+   */
   class ForeignElementStatement extends Statement {
 
     ForeignElementStatement(TranslationContext context,
@@ -96,6 +106,7 @@ class UtamMethodActionGetter extends UtamMethodAction {
         throw new UtamCompilationError(
             context.getErrorMessage(605, methodContext.getName(), elementName));
       }
+      // matcher parameters should be set after action parameters
       MatcherObject matcher = matcherProvider.apply(context, methodContext);
       ActionType action = new CustomActionType(getterMethodName, returnType);
       return new ApplyOperation(action, hasMatcher ? PrimitiveType.BOOLEAN : returnType, parameters,
@@ -108,16 +119,30 @@ class UtamMethodActionGetter extends UtamMethodAction {
     }
   }
 
+  /**
+   * Non static class that transforms JSON to a statement for "element" of same page object
+   * (parameters and return can be validated)
+   *
+   * @author elizaveta.ivanova
+   * @since 240
+   */
   class SelfElementStatement extends Statement {
 
+    private final ElementContext elementContext;
+
     SelfElementStatement(TranslationContext context,
-        MethodContext methodContext, StatementContext statementContext) {
+        MethodContext methodContext,
+        StatementContext statementContext,
+        ElementContext elementContext) {
       super(context, methodContext, statementContext);
+      this.elementContext = elementContext;
     }
 
-    private List<MethodParameter> getParameters(MethodDeclaration elementGetter,
-        List<UtamArgument> arguments) {
+    private List<MethodParameter> getParameters() {
       String parserContext = String.format("method \"%s\"", methodContext.getName());
+      ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
+      List<UtamArgument> arguments = provider.getArguments(true);
+      MethodDeclaration elementGetter = elementContext.getElementMethod().getDeclaration();
       ParametersContext parametersContext = new StatementParametersContext(parserContext,
           context,
           argsNode,
@@ -145,13 +170,10 @@ class UtamMethodActionGetter extends UtamMethodAction {
 
     @Override
     ApplyOperation getApplyOperation() {
+      elementContext.setElementMethodUsage(context);
       String methodName = methodContext.getName();
-      String parserContext = String.format("method \"%s\"", methodName);
-      ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
-      ElementContext element = provider.getElementArgument(context, elementName);
-      element.setElementMethodUsage(context);
-      MethodDeclaration elementGetter = element.getElementMethod().getDeclaration();
-      boolean isContainer = element.getElementNodeType() == ElementType.CONTAINER;
+      MethodDeclaration elementGetter = elementContext.getElementMethod().getDeclaration();
+      boolean isContainer = elementContext.getElementNodeType() == ElementType.CONTAINER;
       if (isContainer && !statementContext.hasDeclaredReturn()) {
         // for container return type is PageObject
         throw new UtamCompilationError(context.getErrorMessage(604, methodName));
@@ -169,15 +191,16 @@ class UtamMethodActionGetter extends UtamMethodAction {
           throw new UtamCompilationError(errorMsg);
         }
       }
-      methodContext.getElementUsageTracker()
-          .setElementUsage(statementContext.getVariableName(), element);
+      List<MethodParameter> parameters = getParameters();
+      // matcher parameters should be set after action parameters
       MatcherObject matcher = matcherProvider.apply(context, methodContext);
       if (matcher != null && !statementContext.hasDeclaredReturn()) {
         matcher.checkMatcherOperand(context, returnType);
       }
-      List<UtamArgument> arguments = provider.getArguments(true);
-      List<MethodParameter> parameters = getParameters(elementGetter, arguments);
       ActionType action = new CustomActionType(elementGetter.getName(), returnType);
+      // should be after all other lines!
+      methodContext.getElementUsageTracker()
+          .setElementUsage(statementContext.getVariableName(), elementContext);
       return new ApplyOperation(action, hasMatcher ? PrimitiveType.BOOLEAN : returnType, parameters,
           matcher);
     }

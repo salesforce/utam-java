@@ -27,7 +27,6 @@ import utam.compiler.representation.ComposeMethodStatement.ReturnSelf;
 class UtamMethodActionReturnSelf extends UtamMethodAction {
 
   static final String RETURN_SELF = "returnSelf";
-  static final String ERR_SHOULD_BE_LAST_STATEMENT = "method '%s': 'returnSelf' should be last statement";
 
   @JsonCreator
   UtamMethodActionReturnSelf(@JsonProperty(value = "apply", required = true) String apply) {
@@ -43,8 +42,9 @@ class UtamMethodActionReturnSelf extends UtamMethodAction {
   @Override
   ComposeMethodStatement getComposeAction(TranslationContext context,
       MethodContext methodContext, StatementContext statementContext) {
-    if(!statementContext.isLastStatement() && !statementContext.isLastPredicateStatement()) {
-      throw new UtamCompilationError(String.format(ERR_SHOULD_BE_LAST_STATEMENT, methodContext.getName()));
+    if (!statementContext.isLastStatement() && !statementContext.isLastPredicateStatement()) {
+      String message = context.getErrorMessage(618, methodContext.getName());
+      throw new UtamCompilationError(message);
     }
     return new ReturnSelf(context.getSelfType());
   }

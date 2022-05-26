@@ -233,8 +233,7 @@ abstract class UtamArgument {
 
     @Override
     MethodParameter asParameter(TranslationContext context, MethodContext methodContext, ParametersContext parametersContext) {
-      LocatorCodeGeneration locatorCode = selector
-          .getCodeGenerationHelper(parserContext, context, methodContext);
+      LocatorCodeGeneration locatorCode = selector.getArgCodeGenerationHelper(parserContext, methodContext, context);
       return locatorCode.getLiteralParameter();
     }
   }
