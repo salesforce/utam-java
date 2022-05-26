@@ -41,13 +41,13 @@ public class UtamMatcherTests {
   public void testIncorrectMatcherTypeThrowsInCompose() {
     Exception e = expectCompilerErrorFromFile("matcher/incorrectMatcherInCompose");
     assertThat(e.getMessage(), containsString("error 614: method \"matcherThrows\" statement: "
-        + "expected type to match is \"Boolean\", found \"String\""));
+        + "expected type for matcher is \"Boolean\", found \"String\""));
   }
 
   @Test
   public void testIncorrectMatcherTypeThrowsInFilter() {
     Exception e = expectCompilerErrorFromFile("matcher/incorrectMatcherInFilter");
     assertThat(e.getMessage(), containsString("error 203: element \"test\" matcher: "
-        + "expected type to match is \"Boolean\", found \"String\""));
+        + "expected type for matcher is \"Boolean\", found \"String\""));
   }
 }

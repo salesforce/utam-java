@@ -79,11 +79,7 @@ final class UtamElementFilter {
     MatcherObject matcher = isEmptyNode(matcherNode) ? null
         : new ElementFilterMatcherProvider(matcherNode, elementName).getMatcherObject(context);
     if (elementNodeType == UtamElement.Type.BASIC) {
-      ActionType actionType = getActionType(this.applyMethod, elementType);
-      if (actionType == null) {
-        String message = context.getErrorMessage(301, elementName, this.applyMethod);
-        throw new UtamCompilationError(message);
-      }
+      ActionType actionType = getActionType(this.applyMethod, elementType, context.getErrorMessage(301, elementName, this.applyMethod));
       matcher.checkMatcherOperand(context, actionType.getReturnType());
       List<TypeProvider> expectedArgsTypes = actionType
           .getParametersTypes(parserContext, arguments.size());

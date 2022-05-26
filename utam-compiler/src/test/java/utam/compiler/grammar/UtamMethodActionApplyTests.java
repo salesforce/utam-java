@@ -227,7 +227,7 @@ public class UtamMethodActionApplyTests {
     Exception e = expectCompilerErrorFromFile("validate/apply/redundantElementForChain");
     assertThat(e.getMessage(), containsString(
         "error 606: method \"test\" statement: "
-            + "\"element\" property is redundant because statement marked as chain"));
+            + "\"element\" property is redundant because statement is marked as a chain"));
   }
 
   @Test
@@ -354,6 +354,7 @@ public class UtamMethodActionApplyTests {
     String importStr = "my.pageobject.Foo";
     TranslationContext context = getContext("customWithFilterFindFirst");
     PageObjectMethod method = context.getMethod(methodName);
+    assertThat(method.getDeclaration().getCodeLine(), is("Foo test(String filterArg, String applyArg)"));
     MethodInfo expected = new MethodInfo(methodName, "Foo");
     expected.addParameter(new MethodParameterInfo("filterArg"));
     expected.addParameter(new MethodParameterInfo("applyArg"));

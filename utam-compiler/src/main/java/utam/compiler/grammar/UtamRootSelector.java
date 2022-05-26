@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import java.util.stream.Stream;
-import utam.compiler.UtamCompilationError;
+import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.LocatorCodeGeneration.SelectorType;
 import utam.core.element.Locator;
@@ -27,13 +27,6 @@ import utam.core.selenium.element.LocatorBy;
  */
 class UtamRootSelector {
 
-  static final String ERR_SELECTOR_MISSING =
-      String.format("one of { %s } should be set for selector",
-          LocatorCodeGeneration.SUPPORTED_SELECTOR_TYPES_STRING);
-
-  static final String ERR_SELECTOR_REDUNDANT =
-      String.format("only one of selector types { %s } can be set",
-          LocatorCodeGeneration.SUPPORTED_SELECTOR_TYPES_STRING);
   private final Locator locator;
 
   private final SelectorType selectorType;
@@ -57,11 +50,11 @@ class UtamRootSelector {
       locator = LocatorBy.byUiAutomator(uiautomator);
       selectorType = SelectorType.uiautomator;
     } else {
-      throw new UtamCompilationError(ERR_SELECTOR_MISSING);
+      throw new UtamCompilerIntermediateError(1002,  LocatorCodeGeneration.SUPPORTED_SELECTOR_TYPES_STRING);
     }
     if (Stream.of(css, classchain, uiautomator, accessid)
         .filter(Objects::nonNull).toArray().length > 1) {
-      throw new UtamCompilationError(ERR_SELECTOR_REDUNDANT);
+      throw new UtamCompilerIntermediateError(1003, LocatorCodeGeneration.SUPPORTED_SELECTOR_TYPES_STRING);
     }
   }
 

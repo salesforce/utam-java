@@ -16,26 +16,25 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.DeserializerUtilities.expectCompilerErrorFromFile;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
-import static utam.compiler.grammar.UtamSelector.ERR_SELECTOR_PARAM_UNKNOWN_TYPE;
 
 import java.util.List;
 import java.util.Objects;
 import org.testng.annotations.Test;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.PrimitiveType;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.LocatorBy;
 
 public class UtamSelectorTests {
 
   private static LocatorCodeGeneration getLocatorContext(UtamSelector utamSelector) {
-    return utamSelector.getCodeGenerationHelper("test", getTestTranslationContext(), null);
+    return utamSelector.getElementCodeGenerationHelper("test", getTestTranslationContext());
   }
 
   private static String getBuilderString(UtamSelector selector) {
-    return selector.getCodeGenerationHelper("test", getTestTranslationContext(), null).getBuilderString();
+    return selector.getElementCodeGenerationHelper("test", getTestTranslationContext()).getBuilderString();
   }
 
   @Test
@@ -72,9 +71,10 @@ public class UtamSelectorTests {
   @Test
   public void testGetParametersWithInvalidArgThrows() {
     UtamSelector selector = new UtamSelector("selector[%f]");
-    UtamError e = expectThrows(UtamError.class, () -> getLocatorContext(selector));
-    assertThat(
-        e.getMessage(), containsString(String.format(ERR_SELECTOR_PARAM_UNKNOWN_TYPE, "%f")));
+    RuntimeException e = expectThrows(UtamCompilationError.class, () ->
+        selector.getElementCodeGenerationHelper("test", getTestTranslationContext()));
+    assertThat(e.getMessage(), containsString("error 1001: element \"test\" selector: "
+        + "unknown selector parameter type \"%f\", only string and number are supported"));
   }
 
   @Test

@@ -2,6 +2,7 @@
   "elements" : [
     {
       "name" : "element",
+      "type" : "my/custom/type",
       "selector" : {
         "css" : "css"
       }
