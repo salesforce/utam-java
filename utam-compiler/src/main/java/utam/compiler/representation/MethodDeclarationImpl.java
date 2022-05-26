@@ -7,13 +7,13 @@
  */
 package utam.compiler.representation;
 
+import static utam.compiler.helpers.ParameterUtils.getParametersDeclarationString;
+import static utam.compiler.helpers.ParameterUtils.setDeclarationImports;
 import static utam.compiler.helpers.ParameterUtils.setImport;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import utam.compiler.grammar.UtamMethodDescription;
-import utam.compiler.helpers.ParameterUtils;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
@@ -66,16 +66,9 @@ class MethodDeclarationImpl implements MethodDeclaration {
       TypeProvider returnType,
       List<MethodParameter> methodParameters) {
     List<TypeProvider> imports = new ArrayList<>();
-    methodParameters.forEach(p -> ParameterUtils.setDeclarationImport(imports, p));
+    setDeclarationImports(imports, methodParameters);
     setImport(imports, returnType);
     return imports;
-  }
-
-  private static String getParametersDeclarationString(List<MethodParameter> parameters) {
-    return parameters.stream()
-        .map(MethodParameter::getDeclaration)
-        .filter(str -> !str.isEmpty()) // hardcoded values passed as empty string
-        .collect(Collectors.joining(", "));
   }
 
   @Override
@@ -105,12 +98,7 @@ class MethodDeclarationImpl implements MethodDeclaration {
   @Override
   public final String getCodeLine() {
     String parametersStr = getParametersDeclarationString(parameters);
-    return String.format("%s %s(%s)", getReturnTypeStr(), methodName, parametersStr);
-  }
-
-  // method can be overridden if return type is a bounded generic
-  String getReturnTypeStr() {
-    return getReturnType().getSimpleName();
+    return String.format("%s %s(%s)", getReturnType().getReturnString(), methodName, parametersStr);
   }
 
   @Override

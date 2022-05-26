@@ -147,7 +147,7 @@ public class UtamPageObject_Tests {
     Exception e = expectThrows(UtamError.class,
         () -> new DeserializerUtilities().getResultFromString(json));
     assertThat(e.getMessage(),
-        containsString(PARSER_ERROR_PREFIX + "Cannot deserialize instance of `java.lang.String`"));
+        containsString(PARSER_ERROR_PREFIX + "Cannot deserialize value of type `java.lang.String`"));
   }
 
   @Test

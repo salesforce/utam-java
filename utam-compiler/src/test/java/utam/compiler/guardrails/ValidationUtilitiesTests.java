@@ -39,8 +39,7 @@ import utam.core.selenium.element.LocatorBy;
 public class ValidationUtilitiesTests {
 
   private static final String ELEMENT_SELECTOR = ".fakeSelector";
-  private static final TypeProvider ELEMENT_TYPE =
-      new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
+  private static final TypeProvider ELEMENT_TYPE = new TypeUtilities.FromString("test.FakeElementType");
   private static final String ELEMENT_NAME = "fakeElementName";
 
   private static ElementContext.Root getRoot(String type, Locator selector) {
@@ -148,8 +147,7 @@ public class ValidationUtilitiesTests {
 
   @Test
   public void testValidateCustomSameTypeDifferentSelectors() {
-    TypeProvider elementType =
-        new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
+    TypeProvider elementType = ELEMENT_TYPE;
     ElementContext element =
         new ElementContext.Custom(
             "fakeElementName", elementType, getCssSelector(ELEMENT_SELECTOR));
@@ -181,8 +179,7 @@ public class ValidationUtilitiesTests {
 
   @Test
   public void testValidateBasicListWithCustomHavingSameSelector() {
-    TypeProvider elementType =
-        new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
+    TypeProvider elementType = ELEMENT_TYPE;
     ElementContext list =
         new ElementContext.BasicReturnsAll(elementType, getCssSelector(ELEMENT_SELECTOR));
 
@@ -197,8 +194,7 @@ public class ValidationUtilitiesTests {
 
   @Test
   public void testValidateBasicListWithBasicElementHavingSameSelector() {
-    TypeProvider elementType =
-        new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
+    TypeProvider elementType = ELEMENT_TYPE;
     ElementContext list =
         new ElementContext.BasicReturnsAll(elementType, getCssSelector(ELEMENT_SELECTOR));
 
@@ -209,8 +205,7 @@ public class ValidationUtilitiesTests {
 
   @Test
   public void testValidateBasicListWithElementListHavingSameSelector() {
-    TypeProvider elementType =
-        new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
+    TypeProvider elementType = ELEMENT_TYPE;
     ElementContext element =
         new ElementContext.BasicReturnsAll(elementType, getCssSelector(ELEMENT_SELECTOR));
 

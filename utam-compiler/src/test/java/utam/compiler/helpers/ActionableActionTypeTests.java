@@ -7,23 +7,24 @@
  */
 package utam.compiler.helpers;
 
-import java.util.Objects;
-import utam.compiler.types.BasicElementInterface;
-import utam.core.declarative.representation.TypeProvider;
-import org.testng.annotations.Test;
-import utam.core.element.Actionable;
-
-import java.lang.reflect.Method;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.BasicElementActionType.getClassAttribute;
 import static utam.compiler.helpers.BasicElementActionTypeTests.sameType;
 import static utam.compiler.types.BasicElementUnionType.asBasicOrUnionType;
 import static utam.core.framework.UtamLogger.info;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+
+import java.lang.reflect.Method;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.testng.annotations.Test;
+import utam.compiler.types.BasicElementInterface;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.element.Actionable;
 
 /**
  * Provides tests for the TranslatableAction enum
@@ -70,7 +71,7 @@ public class ActionableActionTypeTests {
 
   private static ActionType getActionType(String apply, ElementContext elementContext) {
     TypeProvider elementType = elementContext.getType();
-    return BasicElementActionType.getActionType(apply, elementType);
+    return BasicElementActionType.getActionType(apply, elementType, "error");
   }
 
   @Test
@@ -190,12 +191,5 @@ public class ActionableActionTypeTests {
     ElementContext elementContext = getElementContext(BasicElementInterface.touchable);
     assertThat(getActionType(ACTION.getApplyString(), elementContext),
         is(equalTo(ACTION)));
-  }
-
-  @Test
-  public void testActionFromStringWrongActionNameError() {
-    final String ACTION_NAME = "error";
-    ElementContext elementContext = getElementContext(BasicElementInterface.actionable);
-    assertThat(getActionType(ACTION_NAME, elementContext), is(nullValue()));
   }
 }

@@ -26,7 +26,6 @@ public class PrimitiveTypeTests {
     assertThat(provider.getSimpleName(), is(equalTo("String")));
     assertThat(provider.getFullName(), is(equalTo(String.class.getName())));
     assertThat(provider.getPackageName(), is(equalTo(String.class.getPackageName())));
-    assertThat(provider.getClassType(), is(equalTo(String.class)));
   }
 
   /** Test that INTEGER member of the PrimitiveType enumerated type returns the expected values */
@@ -36,7 +35,6 @@ public class PrimitiveTypeTests {
     assertThat(provider.getSimpleName(), is(equalTo(Integer.class.getSimpleName())));
     assertThat(provider.getFullName(), is(equalTo(Integer.class.getName())));
     assertThat(provider.getPackageName(), is(equalTo(Integer.class.getPackageName())));
-    assertThat(provider.getClassType(), is(equalTo(Integer.class)));
   }
 
   /** Test that BOOLEAN member of the PrimitiveType enumerated type returns the expected values */
@@ -46,7 +44,6 @@ public class PrimitiveTypeTests {
     assertThat(provider.getSimpleName(), is(equalTo("Boolean")));
     assertThat(provider.getFullName(), is(equalTo(Boolean.class.getName())));
     assertThat(provider.getPackageName(), is(equalTo(Boolean.class.getPackageName())));
-    assertThat(provider.getClassType(), is(equalTo(Boolean.class)));
   }
 
   /**

@@ -10,10 +10,12 @@ package utam.compiler.helpers;
 import static utam.compiler.helpers.AnnotationUtils.getWrappedString;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
+import static utam.compiler.helpers.TypeUtilities.isCustomType;
+import static utam.compiler.translator.TranslationUtilities.isImportableType;
 
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import utam.compiler.translator.TranslationUtilities;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
@@ -36,16 +38,33 @@ public class ParameterUtils {
   }
 
   /**
-   * translates method parameters into a list of types to import in interface
-   *
-   * @param imports   list of existing imports
-   * @param parameter method parameter
+   * Get comma separated string of non literal parameters for a method
+   * @param parameters list of parameters
+   * @return string to use in a method declaration
    */
-  public static void setDeclarationImport(List<TypeProvider> imports, MethodParameter parameter) {
-    TypeProvider type = getDeclarationImport(parameter);
-    if (type != null) {
-      setImport(imports, type);
+  public static String getParametersDeclarationString(List<MethodParameter> parameters) {
+    return parameters.stream()
+        .filter(p -> !p.isLiteral())
+        .map(MethodParameter::getDeclaration)
+        .collect(Collectors.joining(", "));
+  }
+
+  /**
+   * Check if parameter has expected type. For literal parameters logic can be different than just
+   * comparing types
+   *
+   * @param parameter    parameter in question, can be null
+   * @param expectedType type to compare with, can be null
+   * @return true if type is as expected
+   */
+  static boolean isExpectedType(MethodParameter parameter, TypeProvider expectedType) {
+    if (parameter == null || expectedType == null) {
+      return true;
     }
+    if (parameter instanceof LiteralPageObjectTypeParameter) {
+      return ((LiteralPageObjectTypeParameter) parameter).isSameType(expectedType);
+    }
+    return parameter.getType().isSameType(expectedType);
   }
 
   /**
@@ -54,23 +73,11 @@ public class ParameterUtils {
    * @param imports    list of existing imports
    * @param parameters method parameters
    */
-  public static void setDeclarationImports(List<TypeProvider> imports,
-      List<MethodParameter> parameters) {
-    parameters.forEach(p -> setDeclarationImport(imports, p));
-  }
-
-  /**
-   * translates method parameters into a list of types to import in class
-   *
-   * @param imports   list of existing imports
-   * @param parameter method parameter
-   */
-  private static void setImplementationImport(List<TypeProvider> imports,
-      MethodParameter parameter) {
-    TypeProvider type = getImplementationImport(parameter);
-    if (type != null) {
-      setImport(imports, type);
-    }
+  public static void setDeclarationImports(List<TypeProvider> imports, List<MethodParameter> parameters) {
+    parameters
+        .stream()
+        .filter(p -> !p.isLiteral())
+        .forEach(p -> setImport(imports, p.getType()));
   }
 
   /**
@@ -81,7 +88,19 @@ public class ParameterUtils {
    */
   public static void setImplementationImports(List<TypeProvider> imports,
       List<MethodParameter> parameters) {
-    parameters.forEach(p -> setImplementationImport(imports, p));
+    parameters
+        .forEach(parameter -> {
+          if (parameter.isLiteral()) { // literal selector and custom type require class imports
+            TypeProvider literalParameterType = parameter.getType();
+            if (SELECTOR.isSameType(literalParameterType)) {
+              setImport(imports, SELECTOR);
+            } else if (isCustomType(literalParameterType)) {
+              setImport(imports, literalParameterType);
+            }
+          } else {
+            setImport(imports, parameter.getType());
+          }
+        });
   }
 
   /**
@@ -94,14 +113,16 @@ public class ParameterUtils {
     if (type == null || type.isSameType(VOID)) {
       return;
     }
-    type.getImportableTypes()
+    // predicate to check that this type was not already added to imports
+    Predicate<TypeProvider> unique = typeProvider -> imports
         .stream()
-        // only if importable
-        .filter(TranslationUtilities::isImportableType)
-        // and was not already added
-        .filter(t -> imports.stream().map(TypeProvider::getFullName)
-            .noneMatch(iStr -> iStr.equals(t.getFullName())))
-        .forEach(imports::add);
+        .map(TypeProvider::getFullName)
+        .noneMatch(name -> name.equals(typeProvider.getFullName()));
+    for(TypeProvider importable : type.getImportableTypes()) {
+      if(isImportableType(importable) && unique.test(importable)) {
+        imports.add(importable);
+      }
+    }
   }
 
   /**
@@ -112,26 +133,6 @@ public class ParameterUtils {
    */
   public static void setImports(List<TypeProvider> imports, List<TypeProvider> types) {
     types.forEach(t -> setImport(imports, t));
-  }
-
-  private static TypeProvider getDeclarationImport(MethodParameter parameter) {
-    if (parameter.isLiteral()) {
-      return null;
-    }
-    return parameter.getType();
-  }
-
-  private static TypeProvider getImplementationImport(MethodParameter parameter) {
-    // selector literal requires imports
-    if (parameter.isLiteral()) {
-      if (SELECTOR.isSameType(parameter.getType())) {
-        return SELECTOR;
-      } else if (parameter instanceof LiteralPageObjectClass) {
-        return parameter.getType();
-      }
-      return null;
-    }
-    return parameter.getType();
   }
 
   /**
@@ -178,14 +179,6 @@ public class ParameterUtils {
     @Override
     public TypeProvider getType() {
       return type;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (!(obj instanceof MethodParameter)) {
-        return false;
-      }
-      return this.getDeclaration().equals(((MethodParameter) obj).getDeclaration());
     }
 
     @Override
@@ -237,11 +230,6 @@ public class ParameterUtils {
     }
 
     @Override
-    public String getDeclaration() {
-      return "";
-    }
-
-    @Override
     public boolean isLiteral() {
       return true;
     }
@@ -250,20 +238,32 @@ public class ParameterUtils {
     public List<MethodParameter> getNestedParameters() {
       return nestedParameters;
     }
+
+    @Override
+    public String getDeclaration() {
+      return "";
+    }
   }
 
   /**
    * a literal class, for example utam.pageobjects.MyButton.class
    */
-  public static class LiteralPageObjectClass extends Literal {
+  public static class LiteralPageObjectTypeParameter extends Literal {
+
+    private final TypeProvider baseType;
 
     /**
      * Initializes a new instance of the LiteralPageObjectClass class
      *
      * @param type the type of the Page object
      */
-    public LiteralPageObjectClass(TypeProvider type) {
+    public LiteralPageObjectTypeParameter(TypeProvider type, TypeProvider baseType) {
       super(String.format("%s.class", type.getSimpleName()), type);
+      this.baseType = baseType;
+    }
+
+    boolean isSameType(TypeProvider expectedType) {
+      return this.baseType.isSameType(expectedType);
     }
   }
 }

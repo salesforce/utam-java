@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.types.BasicElementInterface;
 import utam.core.declarative.representation.TypeProvider;
@@ -122,11 +123,13 @@ public enum BasicElementActionType implements ActionType {
 
   /**
    * Gets the object representing the action type for the element
+   *
    * @param apply       the string value of the action to retrieve
    * @param elementType the type of the element
-   * @return            the object representing the action type for the element
+   * @param error       error message to throw if action not found
+   * @return the object representing the action type for the element
    */
-  public static ActionType getActionType(String apply, TypeProvider elementType) {
+  public static ActionType getActionType(String apply, TypeProvider elementType, String error) {
     // Element type is BaseElement, with no other actionable methods available.
     for (BasicElementActionType action : values()) {
       if (action.getApplyString().equals(apply)) {
@@ -134,7 +137,7 @@ public enum BasicElementActionType implements ActionType {
       }
     }
     if (!(elementType instanceof UnionType)) {
-      return null;
+      throw new UtamCompilationError(error);
     }
     List<TypeProvider> actionableTypes = ((UnionType) elementType).getExtendedTypes();
     for (TypeProvider actionableType : actionableTypes) {
@@ -172,13 +175,13 @@ public enum BasicElementActionType implements ActionType {
         }
       }
     }
-    return null;
+    throw new UtamCompilationError(error);
   }
 
   // used in unit tests
   @SuppressWarnings("rawtypes")
   Class[] getParameterClasses() {
-    return Stream.of(actionParameters).map(TypeProvider::getClassType).toArray(Class[]::new);
+    return Stream.of(actionParameters).map(TypeUtilities::getClassFromFullName).toArray(Class[]::new);
   }
 
   // used in unit tests

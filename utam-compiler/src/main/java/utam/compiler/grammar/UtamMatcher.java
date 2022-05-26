@@ -11,17 +11,20 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
-import utam.compiler.UtamCompilerIntermediateError;
+import java.util.Objects;
+import java.util.function.Function;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.UtamMethodAction.ArgumentsProvider;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParametersContext;
 import utam.compiler.helpers.ParametersContext.StatementParametersContext;
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.representation.MatcherObject;
 import utam.core.declarative.representation.MethodParameter;
 
 /**
- * result matcher is used in compose statements or in element filter
+ * Matcher is used in compose statements or in element filter
  *
  * @author elizaveta.ivanova
  * @since 232
@@ -40,66 +43,100 @@ class UtamMatcher {
   }
 
   /**
-   * process node
+   * Translates JsonNode to UtamMatcher and then to MatcherObject
    *
-   * @param node          json node
-   * @param parserContext parser context
-   * @return object of selector
+   * @author elizaveta.ivanova
+   * @since 240
    */
-  static UtamMatcher processMatcherNode(JsonNode node, String parserContext) {
-    return JsonDeserializer.readNode(node,
-        UtamMatcher.class,
-        cause -> new UtamCompilerIntermediateError(cause, node, 300, parserContext,
-            cause.getMessage()));
+  static abstract class MatcherProvider {
+
+    final JsonNode matcherNode;
+
+    MatcherProvider(JsonNode node) {
+      this.matcherNode = node;
+    }
+
+    /**
+     * get matcher object
+     *
+     * @param context context is used for error messages
+     * @return matcher object (type and parameters)
+     */
+    abstract MatcherObject getMatcherObject(TranslationContext context);
   }
 
   /**
-   * get parameters for a matcher inside element's filter
+   * Matcher provider for an element filter
    *
-   * @param context     translation context
-   * @param elementName element name
-   * @return list of parameters
+   * @author elizaveta.ivanova
+   * @since 240
    */
-  List<MethodParameter> getParameters(TranslationContext context, String elementName) {
-    String parserContext = String.format("element \"%s\" matcher", elementName);
-    ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
-    ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
-        argsNode, null);
-    List<UtamArgument> arguments = provider.getArguments(true);
-    arguments
-        .stream()
-        .map(arg -> arg.asParameter(context, null, parametersContext))
-        .forEach(parametersContext::setParameter);
-    return parametersContext.getParameters(getMatcherType().getExpectedParametersTypes());
+  static class ElementFilterMatcherProvider extends MatcherProvider {
+
+    private final String elementName;
+
+    ElementFilterMatcherProvider(JsonNode matcherNode, String elementName) {
+      super(matcherNode);
+      this.elementName = elementName;
+    }
+
+    @Override
+    MatcherObject getMatcherObject(TranslationContext context) {
+      Function<Exception, RuntimeException> errorProducer = cause ->
+          new UtamCompilationError(matcherNode,
+              context.getErrorMessage(300, elementName, cause.getMessage()));
+      UtamMatcher matcher = Objects.requireNonNull(JsonDeserializer
+          .readNode(matcherNode, UtamMatcher.class, errorProducer));
+      String parserContext = String.format("element \"%s\" matcher", elementName);
+      ArgumentsProvider provider = new ArgumentsProvider(matcher.argsNode, parserContext);
+      ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
+          matcher.argsNode, null);
+      List<UtamArgument> arguments = provider.getArguments(true);
+      arguments
+          .stream()
+          .map(arg -> arg.asParameter(context, null, parametersContext))
+          .forEach(parametersContext::setParameter);
+      List<MethodParameter> parameters = parametersContext
+          .getParameters(matcher.matcherType.getExpectedParametersTypes());
+      return new MatcherObject(matcher.matcherType, parameters, 203, elementName);
+    }
   }
 
   /**
-   * get parameters for a matcher inside element's filter
+   * Matcher provider for compose statement
    *
-   * @param context       get parameters for a matcher inside method statement
-   * @param methodContext method context
-   * @return list of parameters
+   * @author elizaveta.ivanova
+   * @since 240
    */
-  List<MethodParameter> getParameters(TranslationContext context, MethodContext methodContext) {
-    String parserContext = String
-        .format("method \"%s\" statement matcher", methodContext.getName());
-    ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
-    ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
-        argsNode, methodContext);
-    List<UtamArgument> arguments = provider.getArguments(true);
-    arguments
-        .stream()
-        .map(arg -> arg.asParameter(context, methodContext, parametersContext))
-        .forEach(parametersContext::setParameter);
-    return parametersContext.getParameters(getMatcherType().getExpectedParametersTypes());
-  }
+  static class ComposeStatementMatcherProvider extends MatcherProvider {
 
-  /**
-   * get matcher type
-   *
-   * @return enum
-   */
-  MatcherType getMatcherType() {
-    return this.matcherType;
+    private final MethodContext methodContext;
+
+    ComposeStatementMatcherProvider(JsonNode matcherNode, MethodContext methodContext) {
+      super(matcherNode);
+      this.methodContext = methodContext;
+    }
+
+    @Override
+    MatcherObject getMatcherObject(TranslationContext context) {
+      Function<Exception, RuntimeException> errorProducer = cause ->
+          new UtamCompilationError(matcherNode,
+              context.getErrorMessage(303, methodContext.getName(), cause.getMessage()));
+      UtamMatcher matcher = JsonDeserializer
+          .readNode(matcherNode, UtamMatcher.class, errorProducer);
+      String parserContext = String
+          .format("method \"%s\" statement matcher", methodContext.getName());
+      ArgumentsProvider provider = new ArgumentsProvider(matcher.argsNode, parserContext);
+      ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
+          matcher.argsNode, methodContext);
+      List<UtamArgument> arguments = provider.getArguments(true);
+      arguments
+          .stream()
+          .map(arg -> arg.asParameter(context, methodContext, parametersContext))
+          .forEach(parametersContext::setParameter);
+      List<MethodParameter> parameters = parametersContext
+          .getParameters(matcher.matcherType.getExpectedParametersTypes());
+      return new MatcherObject(matcher.matcherType, parameters, 614, methodContext.getName());
+    }
   }
 }

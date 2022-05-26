@@ -58,7 +58,7 @@ public enum EditableActionType implements ActionType {
   }
 
   Class[] getParameterClasses() { // used in unit tests
-    return Stream.of(actionParameters).map(PrimitiveType::getClassType).toArray(Class[]::new);
+    return Stream.of(actionParameters).map(TypeUtilities::getClassFromFullName).toArray(Class[]::new);
   }
 
   Class getElementClass() {

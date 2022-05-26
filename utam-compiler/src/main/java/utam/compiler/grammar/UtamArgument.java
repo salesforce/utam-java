@@ -18,10 +18,14 @@ import static utam.compiler.helpers.PrimitiveType.STRING;
 import static utam.compiler.helpers.PrimitiveType.isPrimitiveType;
 import static utam.compiler.helpers.StatementContext.StatementType.PREDICATE_LAST_STATEMENT;
 import static utam.compiler.helpers.StatementContext.StatementType.PREDICATE_STATEMENT;
-import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT_PARAMETER;
+import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT_TYPE_NAME;
 import static utam.compiler.helpers.TypeUtilities.PARAMETER_REFERENCE;
-import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT_PARAMETER;
+import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT_TYPE_NAME;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
+import static utam.compiler.helpers.TypeUtilities.W_PAGE_OBJECT_TYPE_PARAMETER;
+import static utam.compiler.helpers.TypeUtilities.W_ROOT_PAGE_OBJECT_TYPE_PARAMETER;
+import static utam.compiler.helpers.TypeUtilities.getPageObjectTypeParameter;
+import static utam.compiler.helpers.TypeUtilities.getRootPageObjectTypeParameter;
 import static utam.compiler.representation.FrameMethod.FRAME_ELEMENT;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -38,7 +42,7 @@ import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParameterUtils.Literal;
-import utam.compiler.helpers.ParameterUtils.LiteralPageObjectClass;
+import utam.compiler.helpers.ParameterUtils.LiteralPageObjectTypeParameter;
 import utam.compiler.helpers.ParameterUtils.Regular;
 import utam.compiler.helpers.ParametersContext;
 import utam.compiler.helpers.PrimitiveType;
@@ -59,8 +63,6 @@ abstract class UtamArgument {
 
   private static final String FUNCTION_TYPE_PROPERTY = "function";
   private static final String SELECTOR_TYPE_PROPERTY = "locator";
-  private static final String PAGE_OBJECT_TYPE_PROPERTY = "pageObject";
-  private static final String ROOT_PAGE_OBJECT_TYPE_PROPERTY = "rootPageObject";
   private static final String ELEMENT_REFERENCE_TYPE_PROPERTY = "elementReference";
   private static final String FRAME_ELEMENT_TYPE_PROPERTY = "frame";
   private static final String SUPPORTED_LITERALS = String.join(", ", getSupportedLiteralTypes());
@@ -74,8 +76,8 @@ abstract class UtamArgument {
     supported.add(SELECTOR_TYPE_PROPERTY);
     supported.add(FUNCTION_TYPE_PROPERTY);
     supported.add(ELEMENT_REFERENCE_TYPE_PROPERTY);
-    supported.add(PAGE_OBJECT_TYPE_PROPERTY);
-    supported.add(ROOT_PAGE_OBJECT_TYPE_PROPERTY);
+    supported.add(PAGE_OBJECT_TYPE_NAME);
+    supported.add(ROOT_PAGE_OBJECT_TYPE_NAME);
     return supported;
   }
 
@@ -85,8 +87,8 @@ abstract class UtamArgument {
         .collect(Collectors.toSet());
     supported.add(SELECTOR_TYPE_PROPERTY);
     supported.add(PARAMETER_REFERENCE.getSimpleName());
-    supported.add(PAGE_OBJECT_TYPE_PROPERTY);
-    supported.add(ROOT_PAGE_OBJECT_TYPE_PROPERTY);
+    supported.add(PAGE_OBJECT_TYPE_NAME);
+    supported.add(ROOT_PAGE_OBJECT_TYPE_NAME);
     supported.add(FRAME_ELEMENT_TYPE_PROPERTY);
     return supported;
   }
@@ -146,6 +148,7 @@ abstract class UtamArgument {
             SUPPORTED_NON_LITERALS);
       }
     } else {
+      // acceptable for predicate
       type = null;
     }
     if (isLiteral) {
@@ -161,9 +164,11 @@ abstract class UtamArgument {
     if (valueNode.isTextual()) {
       String valueStr = valueNode.asText();
       if (typeStr != null) {
-        if (PAGE_OBJECT_TYPE_PROPERTY.equals(typeStr) || ROOT_PAGE_OBJECT_TYPE_PROPERTY
-            .equals(typeStr)) {
-          return new UtamArgumentLiteralPageObject(valueStr);
+        if (PAGE_OBJECT_TYPE_NAME.equals(typeStr)) {
+          return new UtamArgumentLiteralPageObject(valueStr, W_PAGE_OBJECT_TYPE_PARAMETER);
+        }
+        if (ROOT_PAGE_OBJECT_TYPE_NAME.equals(typeStr)) {
+          return new UtamArgumentLiteralPageObject(valueStr, W_ROOT_PAGE_OBJECT_TYPE_PARAMETER);
         }
         if (ELEMENT_REFERENCE_TYPE_PROPERTY.equals(typeStr)) {
           return readNode(argNode, UtamArgumentElementReference.class,
@@ -228,8 +233,7 @@ abstract class UtamArgument {
 
     @Override
     MethodParameter asParameter(TranslationContext context, MethodContext methodContext, ParametersContext parametersContext) {
-      LocatorCodeGeneration locatorCode = selector
-          .getCodeGenerationHelper(parserContext, context, methodContext);
+      LocatorCodeGeneration locatorCode = selector.getArgCodeGenerationHelper(parserContext, methodContext, context);
       return locatorCode.getLiteralParameter();
     }
   }
@@ -243,15 +247,17 @@ abstract class UtamArgument {
   static class UtamArgumentLiteralPageObject extends UtamArgument {
 
     private final String pageObjectType;
+    private final TypeProvider baseType;
 
-    UtamArgumentLiteralPageObject(String pageObjectType) {
+    UtamArgumentLiteralPageObject(String pageObjectType, TypeProvider baseType) {
       this.pageObjectType = pageObjectType;
+      this.baseType = baseType;
     }
 
     @Override
     MethodParameter asParameter(TranslationContext context, MethodContext methodContext, ParametersContext parametersContext) {
       TypeProvider literalType = context.getType(pageObjectType);
-      return new LiteralPageObjectClass(literalType);
+      return new LiteralPageObjectTypeParameter(literalType, baseType);
     }
   }
 
@@ -324,11 +330,17 @@ abstract class UtamArgument {
       if (FRAME_ELEMENT_TYPE_PROPERTY.equals(type)) {
         return new Regular(name, FRAME_ELEMENT, this.description);
       }
-      if (PAGE_OBJECT_TYPE_PROPERTY.equals(type)) {
-        return new Regular(name, PAGE_OBJECT_PARAMETER, this.description);
+      if (PAGE_OBJECT_TYPE_NAME.equals(type)) {
+        // if return type is not page object itself, use Class with wildcards
+        // void test(Class<? extends PageObject> param), but T test(Class<T extends PageObject> param)
+        TypeProvider type = getPageObjectTypeParameter(methodContext.getDeclaredReturnType());
+        return new Regular(name, type, this.description);
       }
-      if (ROOT_PAGE_OBJECT_TYPE_PROPERTY.equals(type)) {
-        return new Regular(name, ROOT_PAGE_OBJECT_PARAMETER, this.description);
+      if (ROOT_PAGE_OBJECT_TYPE_NAME.equals(type)) {
+        // if return type is not page object itself, use Class with wildcards
+        // void test(Class<? extends RootPageObject> param), but T test(Class<T extends RootPageObject> param)
+        TypeProvider type = getRootPageObjectTypeParameter(methodContext.getDeclaredReturnType());
+        return new Regular(name, type, this.description);
       }
       // this can only mean bug, never thrown
       throw new IllegalStateException(String.format("Unsupported argument type %s", type));

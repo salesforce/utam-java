@@ -13,8 +13,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static utam.compiler.grammar.DeserializerUtilities.expectCompilerErrorFromFile;
 
 import org.testng.annotations.Test;
-import utam.compiler.helpers.MatcherType;
-import utam.compiler.helpers.PrimitiveType;
 
 /**
  * tests for matcher
@@ -36,22 +34,20 @@ public class UtamMatcherTests {
     Exception e = expectCompilerErrorFromFile("matcher/wrongArgsType");
     assertThat(e.getMessage(), is(containsString(
         "error 109: method \"matcherThrows\" statement matcher: "
-            + "incorrect parameter type [ true ]: expected type \"String\", found \"Boolean\"")));
+            + "parameter \"true\" has incorrect type: expected \"String\", found \"Boolean\"")));
   }
 
   @Test
   public void testIncorrectMatcherTypeThrowsInCompose() {
     Exception e = expectCompilerErrorFromFile("matcher/incorrectMatcherInCompose");
-    assertThat(
-        e.getMessage(),
-        containsString(MatcherType.isTrue.getIncorrectTypeError(PrimitiveType.STRING)));
+    assertThat(e.getMessage(), containsString("error 614: method \"matcherThrows\" statement: "
+        + "expected type for matcher is \"Boolean\", found \"String\""));
   }
 
   @Test
   public void testIncorrectMatcherTypeThrowsInFilter() {
     Exception e = expectCompilerErrorFromFile("matcher/incorrectMatcherInFilter");
-    assertThat(
-        e.getMessage(),
-        containsString(MatcherType.isTrue.getIncorrectTypeError(PrimitiveType.STRING)));
+    assertThat(e.getMessage(), containsString("error 203: element \"test\" matcher: "
+        + "expected type for matcher is \"Boolean\", found \"String\""));
   }
 }

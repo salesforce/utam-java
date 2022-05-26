@@ -19,6 +19,7 @@ import static utam.compiler.helpers.AnnotationUtils.DEPRECATED_ANNOTATION;
 import static utam.compiler.helpers.AnnotationUtils.getPageObjectAnnotation;
 import static utam.compiler.helpers.AnnotationUtils.getPagePlatformAnnotation;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
+import static utam.compiler.helpers.ReturnType.getVoidReturn;
 import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.BASE_ROOT_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT_IMPL_CLASS;
@@ -40,7 +41,6 @@ import utam.compiler.grammar.UtamElement.UtamElementProvider;
 import utam.compiler.grammar.UtamProfile.UtamProfileProvider;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MethodContext;
-import utam.compiler.helpers.ReturnType.MethodReturnType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities.FromClass;
 import utam.compiler.representation.BeforeLoadMethod;
@@ -260,7 +260,7 @@ final class UtamPageObject {
 
   private PageObjectMethod setBeforeLoadMethod(TranslationContext context) {
     String methodName = BEFORE_LOAD_METHOD_NAME;
-    MethodContext methodContext = new MethodContext(methodName, new MethodReturnType(methodName),
+    MethodContext methodContext = new MethodContext(methodName, getVoidReturn(methodName),
         context, null, false);
     List<ComposeMethodStatement> statements = getComposeStatements(context, methodContext,
         beforeLoad);

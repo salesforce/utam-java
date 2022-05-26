@@ -16,7 +16,6 @@ import static utam.compiler.helpers.TypeUtilities.wrapAsList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParameterUtils;
 import utam.compiler.helpers.PrimitiveType;
@@ -55,10 +54,10 @@ public abstract class ComposeMethodStatement {
       Operand operand,
       Operation operation,
       TypeProvider declaredReturnType,
-      Matcher matcher,
+      MatcherObject matcher,
       StatementContext statementContext) {
     this.actionReturnType = declaredReturnType;
-    this.matcherOperandType = matcher != null ? matcher.matcherType.getOperandType() : null;
+    this.matcherOperandType = matcher != null ? matcher.getOperandType() : null;
     this.statementContext = statementContext;
     this.statementReturns = getReturn(matcher, declaredReturnType);
     setImports(operation, operand);
@@ -83,11 +82,11 @@ public abstract class ComposeMethodStatement {
     this.actionReturnType = null;
   }
 
-  private void setCodeLines(Matcher matcher) {
+  private void setCodeLines(MatcherObject matcher) {
     String statementVariable = statementContext.getVariableName();
     if (matcher != null) {
       codeLines.add(getMethodCallString(true));
-      String matcherCode = matcher.matcherType.getCode(statementVariable, matcher.matcherParameters);
+      String matcherCode = matcher.getCode(statementVariable);
       String matcherVariable = statementContext.getMatcherVariableName();
       if (statementContext.isLastStatement() || statementContext.isLastPredicateStatement()) {
         codeLines.add(String.format("Boolean %s = %s", matcherVariable, matcherCode));
@@ -131,7 +130,7 @@ public abstract class ComposeMethodStatement {
     return this.statementReturns.isSameType(VOID);
   }
 
-  private TypeProvider getReturn(Matcher matcher, TypeProvider declaredReturnType) {
+  private TypeProvider getReturn(MatcherObject matcher, TypeProvider declaredReturnType) {
     if (matcher != null) {
       return PrimitiveType.BOOLEAN;
     }
@@ -150,11 +149,11 @@ public abstract class ComposeMethodStatement {
     ParameterUtils.setImport(this.classImports, statementReturns);
   }
 
-  private void setParameters(Operation operation, Operand operand, Matcher matcher) {
+  private void setParameters(Operation operation, Operand operand, MatcherObject matcher) {
     this.parameters.addAll(operand.getElementParameters());
     this.parameters.addAll(operation.getActionParameters());
     if(matcher != null) {
-      this.parameters.addAll(matcher.matcherParameters);
+      this.parameters.addAll(matcher.getParameters());
     }
   }
 
@@ -222,7 +221,7 @@ public abstract class ComposeMethodStatement {
      * @param matcher            a matcher for the statement
      * @param statementContext   the context of the statement
      */
-    public Single(Operand operand, Operation operation, Matcher matcher, StatementContext statementContext) {
+    public Single(Operand operand, Operation operation, MatcherObject matcher, StatementContext statementContext) {
       super(operand, operation, operation.getReturnType(), matcher, statementContext);
     }
 
@@ -273,7 +272,7 @@ public abstract class ComposeMethodStatement {
      * @param matcher            a matcher for the statement
      * @param statementContext   the context of the statement
      */
-    public MapEach(Operand operand, Operation operation, Matcher matcher, StatementContext statementContext) {
+    public MapEach(Operand operand, Operation operation, MatcherObject matcher, StatementContext statementContext) {
       super(operand, operation, wrapAsList(operation.getReturnType()), matcher, statementContext);
       ParameterUtils.setImport(getClassImports(), COLLECTOR_IMPORT);
     }
@@ -303,7 +302,7 @@ public abstract class ComposeMethodStatement {
      * @param matcher            a matcher for the statement
      * @param statementContext   the context of the statement
      */
-    public FlatMapEach(Operand operand, Operation operation, Matcher matcher, StatementContext statementContext) {
+    public FlatMapEach(Operand operand, Operation operation, MatcherObject matcher, StatementContext statementContext) {
       super(operand, operation, wrapAsList(operation.getReturnType()), matcher, statementContext);
       ParameterUtils.setImport(getClassImports(), COLLECTOR_IMPORT);
     }
@@ -411,26 +410,6 @@ public abstract class ComposeMethodStatement {
      * @return the operation invocation string
      */
     protected abstract String getInvocationString();
-  }
-
-  /**
-   * information about matcher
-   */
-  public static class Matcher {
-
-    private final MatcherType matcherType;
-    private final List<MethodParameter> matcherParameters;
-
-    /**
-     * Initializes a new instance of the Matcher class
-     * @param matcherType       the type of matcher to create
-     * @param matcherParameters the list of parameters for the matcher
-     */
-    public Matcher(MatcherType matcherType,
-        List<MethodParameter> matcherParameters) {
-      this.matcherType = matcherType;
-      this.matcherParameters = matcherParameters;
-    }
   }
 
   /**

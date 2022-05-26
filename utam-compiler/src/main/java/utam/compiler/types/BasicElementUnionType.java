@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import utam.compiler.helpers.TypeUtilities.FromString;
-import utam.compiler.helpers.TypeUtilities.ListOf;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.representation.UnionType;
 
@@ -79,8 +78,9 @@ public class BasicElementUnionType extends FromString implements UnionType {
     if (type instanceof UnionType) {
       return (UnionType) type;
     }
-    if (type instanceof ListOf) {
-      return asUnionTypeOrNull(type.getBoundTypes().get(0));
+    TypeProvider boundType = type.getBoundType();
+    if(boundType != null) {
+      return asUnionTypeOrNull(boundType);
     }
     return null;
   }

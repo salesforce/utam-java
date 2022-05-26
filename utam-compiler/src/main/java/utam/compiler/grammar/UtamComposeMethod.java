@@ -8,6 +8,7 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
+import static utam.compiler.grammar.JsonDeserializer.isNotArrayOrEmptyArray;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.compiler.grammar.UtamMethodActionReturnSelf.RETURN_SELF;
 import static utam.compiler.grammar.UtamMethodActionWaitFor.WAIT_FOR;
@@ -22,8 +23,8 @@ import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParametersContext;
 import utam.compiler.helpers.ReturnType;
-import utam.compiler.helpers.ReturnType.MethodReturnType;
 import utam.compiler.helpers.StatementContext;
+import utam.compiler.helpers.StatementContext.StatementType;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethod;
 import utam.compiler.representation.ComposeMethodStatement;
@@ -62,7 +63,7 @@ class UtamComposeMethod extends UtamMethod {
     if (isEmptyNode(composeNodes)) {
       throw new UtamCompilerIntermediateError(composeNodes, 505, methodName);
     }
-    if (!composeNodes.isArray() || composeNodes.size() == 0) {
+    if (isNotArrayOrEmptyArray(composeNodes)) {
       throw new UtamCompilerIntermediateError(composeNodes, 505, methodName);
     }
     List<UtamMethodAction> res = new ArrayList<>();
@@ -137,7 +138,7 @@ class UtamComposeMethod extends UtamMethod {
           previousStatementReturn,
           i,
           isUsedAsChain(compose, i),
-          statementDeclaration.getStatementType(i, compose.size()),
+          i == compose.size() - 1 ? StatementType.LAST_STATEMENT : StatementType.REGULAR_STATEMENT,
           statementDeclaration.getDeclaredReturnType(name));
       statementDeclaration.checkBeforeLoadElements(context, methodContext);
       ComposeMethodStatement statement = statementDeclaration
@@ -164,8 +165,9 @@ class UtamComposeMethod extends UtamMethod {
 
   @Override
   final PageObjectMethod getMethod(TranslationContext context) {
-    ReturnType returnTypeObject = new MethodReturnType(name);
-    MethodContext methodContext = new MethodContext(name, returnTypeObject, context, argsNode,
+    // return type at method level is not supported, so infer from last statement
+    ReturnType lastStatementReturn = composeList.get(composeList.size()-1).getDeclaredReturnType(name);
+    MethodContext methodContext = new MethodContext(name, lastStatementReturn, context, argsNode,
         false);
     ParametersContext parametersContext = methodContext.getParametersContext();
     setMethodLevelParameters(context, methodContext);

@@ -7,13 +7,20 @@
  */
 package utam.compiler.grammar;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
+import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 
 import org.testng.annotations.Test;
 import utam.compiler.JsonBuilderTestUtility;
 import utam.compiler.UtamCompilationError;
+import utam.compiler.representation.PageObjectValidationTestHelper;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.framework.consumer.UtamError;
 
 /**
@@ -216,7 +223,48 @@ public class UtamArgumentTests {
   }
 
   @Test
-  public void testElementReference() {
-    new DeserializerUtilities().getContext("generated/args/elementReference.utam");
+  public void testPageObjectNonLiteralParameterWhenReturningVoid() {
+    PageObjectMethod method = new DeserializerUtilities()
+        .getContext("compose/args/nonLiteralPageObject").getMethod("test");
+    MethodInfo expected = new MethodInfo("test");
+    // if return type is not page object itself, use Class with wildcards
+    // void test(Class<? extends PageObject> param), but T test(Class<T extends PageObject> param)
+    assertThat(method.getDeclaration().getCodeLine(), is("void test(Class<? extends PageObject> param)"));
+    expected.addParameter(new MethodParameterInfo("param", "Class<? extends PageObject>"));
+    expected.addImpliedImportedTypes(PAGE_OBJECT.getFullName());
+    expected.addImportedTypes(PAGE_OBJECT.getFullName());
+    expected.addCodeLine("this.something(param)");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
+
+  @Test
+  public void testRootPageObjectNonLiteralParameterWhenReturningVoid() {
+    PageObjectMethod method = new DeserializerUtilities()
+        .getContext("compose/args/nonLiteralRootPageObject").getMethod("test");
+    MethodInfo expected = new MethodInfo("test");
+    // if return type is not page object itself, use Class with wildcards
+    // void test(Class<? extends RootPageObject> param), but T test(Class<T extends RootPageObject> param)
+    assertThat(method.getDeclaration().getCodeLine(), is("void test(Class<? extends RootPageObject> param)"));
+    expected.addParameter(new MethodParameterInfo("param", "Class<? extends RootPageObject>"));
+    expected.addImpliedImportedTypes(ROOT_PAGE_OBJECT.getFullName());
+    expected.addImportedTypes(ROOT_PAGE_OBJECT.getFullName());
+    expected.addCodeLine("this.something(param)");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
+
+  @Test
+  public void testRootPageObjectNonLiteralParameterWhenReturningNonVoid() {
+    PageObjectMethod method = new DeserializerUtilities()
+        .getContext("compose/args/nonLiteralRootPageObjectReturns").getMethod("test");
+    MethodInfo expected = new MethodInfo("test", "T");
+    // if return type is not page object itself, use Class with wildcards
+    // void test(Class<? extends RootPageObject> param), but T test(Class<T extends RootPageObject> param)
+    assertThat(method.getDeclaration().getCodeLine(), is("<T extends RootPageObject> T test(Class<T> param)"));
+    expected.addParameter(new MethodParameterInfo("param", "Class<T>"));
+    expected.addImpliedImportedTypes(ROOT_PAGE_OBJECT.getFullName());
+    expected.addImportedTypes(ROOT_PAGE_OBJECT.getFullName());
+    expected.addCodeLine("T statement0 = this.something(param)");
+    expected.addCodeLine("return statement0");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 }

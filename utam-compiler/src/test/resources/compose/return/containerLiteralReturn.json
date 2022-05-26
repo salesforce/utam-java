@@ -1,0 +1,26 @@
+{
+  "elements": [
+    {
+      "name": "container",
+      "public": true,
+      "type": "container"
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "container",
+          "returnType": "my/pack/Foo",
+          "args": [
+            {
+              "type": "pageObject",
+              "value": "my/pack/Foo"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

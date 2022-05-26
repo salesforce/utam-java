@@ -36,6 +36,7 @@ import utam.compiler.representation.CustomElementMethod;
 import utam.compiler.representation.ElementField;
 import utam.compiler.representation.ElementMethod;
 import utam.compiler.representation.FrameMethod;
+import utam.compiler.representation.MatcherObject;
 import utam.compiler.representation.MethodParametersTracker;
 import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.compiler.types.BasicElementUnionTypeImpl;
@@ -55,11 +56,6 @@ public final class UtamElement {
    * The default CSS selector for a container
    */
   public static final String DEFAULT_CONTAINER_SELECTOR_CSS = ":scope > *:first-child";
-  static final String ERR_ELEMENT_MISSING_SELECTOR_PROPERTY =
-      "element '%s': missing 'selector' property";
-  static final String ERR_ELEMENT_NESTED_ELEMENTS = "element '%s' can't have nested elements";
-  static final String ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED =
-      "element '%s': frame selector cannot return all";
 
   private final String name;
   private final List<UtamElementProvider> shadow;
@@ -238,7 +234,7 @@ public final class UtamElement {
 
     private Custom() {
       if (selector == null) {
-        throw new UtamCompilationError(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, name));
+        throw new UtamCompilerIntermediateError(204, name, "selector");
       }
       if (filter != null && !selector.isReturnAll()) {
         throw new UtamCompilerIntermediateError(302, name);
@@ -250,20 +246,19 @@ public final class UtamElement {
 
     @Override
     final ElementContext[] traverse(
-        TranslationContext translatorContext,
+        TranslationContext context,
         ElementContext scopeElement,
         JsonNode elementNode,
         boolean isExpandScopeShadowRoot) {
       boolean isReturnList = selector.isReturnAll() && (filter == null || !filter.getFindFirst());
-      LocatorCodeGeneration selectorContext = selector
-          .getCodeGenerationHelper(String.format("element \"%s\"", name), translatorContext, null);
+      LocatorCodeGeneration selectorContext = selector.getElementCodeGenerationHelper(name, context);
       MethodParametersTracker parameters = new MethodParametersTracker(
           String.format("element '%s' getter", name));
       parameters.setMethodParameters(selectorContext.getParameters());
-      TypeProvider elementType = translatorContext.getType(type[0]);
-      UtamMatcher filterMatcher = null;
+      TypeProvider elementType = context.getType(type[0]);
+      MatcherObject filterMatcher = null;
       if (filter != null) {
-        filterMatcher = filter.setElementFilter(translatorContext, Type.CUSTOM, elementType, name);
+        filterMatcher = filter.setElementFilter(context, Type.CUSTOM, elementType, name);
         parameters.setMethodParameters(filter.getApplyMethodParameters());
         parameters.setMethodParameters(filter.getMatcherParameters());
       }
@@ -316,10 +311,10 @@ public final class UtamElement {
                 elementType,
                 description);
       }
-      translatorContext.setElement(elementNode, component);
-      translatorContext.setMethod(method);
+      context.setElement(elementNode, component);
+      context.setMethod(method);
       component.setElementMethod(method);
-      translatorContext.setTestableElement(
+      context.setTestableElement(
           name,
           new ElementUnitTestHelper(
               selectorContext.getLocator().getStringValue(),
@@ -330,9 +325,9 @@ public final class UtamElement {
           new ElementField(
               name, getFindAnnotation(selectorContext.getLocator(),
               isExpandScopeShadowRoot, isNullable()));
-      translatorContext.setClassField(field);
+      context.setClassField(field);
       // scope element method is invoked
-      component.getScopeElement().setElementMethodUsage(translatorContext);
+      component.getScopeElement().setElementMethodUsage(context);
       return new ElementContext[]{null, component};
     }
   }
@@ -341,13 +336,13 @@ public final class UtamElement {
 
     private Basic() {
       if (selector == null) {
-        throw new UtamCompilationError(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, name));
+        throw new UtamCompilerIntermediateError(204, name, "selector");
       }
       if (filter != null && !selector.isReturnAll()) {
         throw new UtamCompilerIntermediateError(302, name);
       }
       if (selector.isReturnAll() && (elements.size() > 0 || shadow.size() > 0)) {
-        throw new UtamCompilationError(String.format(ERR_ELEMENT_NESTED_ELEMENTS, name));
+        throw new UtamCompilerIntermediateError(205, name, "basic");
       }
     }
 
@@ -360,14 +355,14 @@ public final class UtamElement {
       boolean isPublicImplementationOnlyElement =
           isPublic() && context.isImplementationPageObject();
       TypeProvider elementType = asBasicOrUnionType(name, type, isPublicImplementationOnlyElement);
-      LocatorCodeGeneration locatorHelper = selector.getCodeGenerationHelper(parserContext, context, null);
+      LocatorCodeGeneration locatorHelper = selector.getElementCodeGenerationHelper(name, context);
       MethodParametersTracker addedParameters = new MethodParametersTracker(parserContext);
       addedParameters.setMethodParameters(locatorHelper.getParameters());
       ElementField field =
           new ElementField(
               name, getFindAnnotation(locatorHelper.getLocator(),
               isExpandScopeShadowRoot, isNullable()));
-      UtamMatcher filterMatcher = null;
+      MatcherObject filterMatcher = null;
       if (filter != null) {
         filterMatcher = filter.setElementFilter(context, Type.BASIC, elementType, name);
         addedParameters.setMethodParameters(filter.getApplyMethodParameters());
@@ -447,8 +442,7 @@ public final class UtamElement {
         ElementContext scopeElement,
         JsonNode elementNode,
         boolean isExpandScopeShadowRoot) {
-      LocatorCodeGeneration selectorContext = selector
-          .getCodeGenerationHelper(String.format("element \"%s\"", name), context, null);
+      LocatorCodeGeneration selectorContext = selector.getElementCodeGenerationHelper(name, context);
       ElementContext elementContext = new ElementContext.Container(scopeElement, name);
       PageObjectMethod method;
       if (selector.isReturnAll()) {
@@ -477,10 +471,10 @@ public final class UtamElement {
         throw new UtamCompilationError(Type.FRAME.getSupportedPropertiesErr(name));
       }
       if (selector == null) {
-        throw new UtamCompilationError(String.format(ERR_ELEMENT_MISSING_SELECTOR_PROPERTY, name));
+        throw new UtamCompilerIntermediateError(204, name, "selector");
       }
       if (selector.isReturnAll()) {
-        throw new UtamCompilationError(String.format(ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED, name));
+        throw new UtamCompilerIntermediateError(206, name);
       }
     }
 
@@ -489,8 +483,7 @@ public final class UtamElement {
         ElementContext scopeElement,
         JsonNode elementNode,
         boolean isExpandScopeShadowRoot) {
-      LocatorCodeGeneration selectorContext = selector
-          .getCodeGenerationHelper(String.format("element \"%s\"", name), context, null);
+      LocatorCodeGeneration selectorContext = selector.getElementCodeGenerationHelper(name, context);
       ElementField field =
           new ElementField(
               name, getFindAnnotation(selectorContext.getLocator(),

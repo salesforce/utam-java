@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static utam.compiler.helpers.TypeUtilities.VOID;
+import static utam.compiler.helpers.TypeUtilities.getClassFromFullName;
 import static utam.core.framework.UtamLogger.info;
 
 public class BasicElementActionTypeTests {
@@ -149,7 +150,7 @@ public class BasicElementActionTypeTests {
     if(actual.isSameType(VOID)) {
       return expected.getName().toLowerCase().contains("void");
     }
-    if(expected.equals(actual.getClassType())) {
+    if(expected.equals(getClassFromFullName(actual))) {
       return true;
     }
     if(actual == PrimitiveType.NUMBER) {

@@ -52,9 +52,13 @@ public class JsonCompilerOutputTests {
   }
 
   static String getCompilerOutputAsString(String compilerOutputFile) throws IOException {
+    // On Windows systems, Git and other source control systems may modify files to have
+    // platform-specific line endings ("\r\n"). Normalize the line endings by removing
+    // carriage return ("\r") characters, since this method is only used for verification
+    // in unit tests.
     return new String(Files.readAllBytes(
         new File(USER_ROOT + "/src/test/resources/" + compilerOutputFile)
-            .toPath()));
+            .toPath())).replace("\r", "");
   }
 
   @Test

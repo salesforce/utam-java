@@ -109,6 +109,7 @@ public class ElementAdapter implements Element {
   }
 
   @Override
+  @SuppressWarnings("rawtypes")
   public Element findElement(Locator locator) {
     By by = ((LocatorBy) locator).getValue();
     WebElement res = getWebElement().findElement(by);
@@ -119,13 +120,14 @@ public class ElementAdapter implements Element {
   }
 
   @Override
+  @SuppressWarnings("rawtypes")
   public List<Element> findElements(Locator locator) {
     By by = ((LocatorBy) locator).getValue();
     List<WebElement> found = getWebElement().findElements(by);
     if (found == null || found.isEmpty()) {
       throw new NoSuchElementException(getNotFoundErr(locator));
     }
-    return found.stream().map(el -> wrapElement(el)).collect(Collectors.toList());
+    return found.stream().map(this::wrapElement).collect(Collectors.toList());
   }
 
   @Override
@@ -206,6 +208,7 @@ public class ElementAdapter implements Element {
   }
 
   @Override
+  @SuppressWarnings("rawtypes")
   public int containsElements(Locator locator) {
     By by = ((LocatorBy) locator).getValue();
     return getWebElement().findElements(by).size();

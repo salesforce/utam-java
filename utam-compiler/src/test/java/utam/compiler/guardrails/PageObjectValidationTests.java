@@ -36,8 +36,7 @@ public class PageObjectValidationTests {
   private static final String ELEMENT_NAME = "fakeElementName";
   private static final String SELECTOR_VALUE = ".fakeSelector";
   private static final String PAGE_OBJECT = "test";
-  private static final TypeProvider DUMMY_TYPE =
-      new TypeUtilities.FromString("FakeElementType", "test.FakeElementType");
+  private static final TypeProvider DUMMY_TYPE = new TypeUtilities.FromString("test.FakeElementType");
 
   private static void validatePageObject(ElementContext... elements) {
     PageObjectValidation validation = new PageObjectValidation(GuardrailsMode.ERROR, PAGE_OBJECT,

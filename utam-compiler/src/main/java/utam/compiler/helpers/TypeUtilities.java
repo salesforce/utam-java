@@ -7,20 +7,14 @@
  */
 package utam.compiler.helpers;
 
-import static utam.compiler.translator.TranslationTypesConfigJava.isCustomType;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.BasicElement;
-import utam.core.framework.base.ElementLocation;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.BaseRootPageObject;
+import utam.core.framework.base.ElementLocation;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.consumer.ContainerElement;
@@ -37,19 +31,20 @@ import utam.core.selenium.element.LocatorBy;
 public final class TypeUtilities {
 
   /**
-   * A type provider for the java.util.stream.Collectors class
+   * Used to import the java.util.stream.Collectors class for compose statements
    */
   public static final TypeProvider COLLECTOR_IMPORT = new TypeUtilities.FromClass(Collectors.class);
 
   /**
-   * A type provider for the java.util.List class
-   */
-  public static final TypeProvider LIST_IMPORT = new TypeUtilities.FromClass(List.class);
-
-  /**
    * A type provider for the PageObject class
    */
-  public static final TypeProvider PAGE_OBJECT = new TypeUtilities.FromClass(PageObject.class);
+  public static final TypeProvider PAGE_OBJECT = new TypeUtilities.FromClass(PageObject.class) {
+    @Override
+    public boolean isSameType(TypeProvider anotherType) {
+      // for literal page object it's still same type
+      return isCustomType(anotherType) || super.isSameType(anotherType);
+    }
+  };
 
   /**
    * A type provider for the BasePageObject class
@@ -91,16 +86,6 @@ public final class TypeUtilities {
   public static final TypeProvider SELECTOR = new FromClass(LocatorBy.class);
 
   /**
-   * A type provider for the java.util.function.Supplier class
-   */
-  public static final TypeProvider FUNCTION = new FromClass(Supplier.class) {
-    @Override
-    public String getSimpleName() {
-      return "Supplier<T>";
-    }
-  };
-
-  /**
    * A type provider for the ElementLocation class
    */
   public static final TypeProvider ELEMENT_FIELD = new FromClass(ElementLocation.class);
@@ -121,54 +106,80 @@ public final class TypeUtilities {
   public static final String CONTAINER_ELEMENT_TYPE_NAME = "container";
 
   /**
-   * A type provider for a Page Object parameter
+   * A type name for a page object - can be parameter type or return type
    */
-  public static final TypeProvider PAGE_OBJECT_PARAMETER = new PageObjectClass(null);
+  public static final String PAGE_OBJECT_TYPE_NAME = "pageObject";
 
   /**
-   * A type provider for the bounded Page Object parameter
+   * A type name for a root page object - can be parameter type or return type
    */
-  public static final TypeProvider BOUNDED_PAGE_OBJECT_PARAMETER = new PageObjectClass("T");
+  public static final String ROOT_PAGE_OBJECT_TYPE_NAME = "rootPageObject";
 
   /**
-   * A type provider for the RootPageObject class
+   * PageObject type for parameter. Used for non-literal arg with "type" : "pageObject"
    */
-  public static final TypeProvider ROOT_PAGE_OBJECT_PARAMETER = new RootPageObjectClass();
+  public static final TypeProvider T_PAGE_OBJECT_TYPE_PARAMETER = new TBoundedPageObjectType(
+      PAGE_OBJECT);
 
+  /**
+   * PageObject type for parameter. Used for non-literal arg with "type" : "pageObject" if it's not
+   * returned from method
+   */
+  public static final TypeProvider W_PAGE_OBJECT_TYPE_PARAMETER = new WBoundedPageObjectType(
+      PAGE_OBJECT);
+
+  /**
+   * RootPageObject type for parameter. Used for non-literal arg with "type" : "rootPageObject" if
+   * it's not returned from method
+   */
+  public static final TypeProvider W_ROOT_PAGE_OBJECT_TYPE_PARAMETER = new WBoundedPageObjectType(
+      ROOT_PAGE_OBJECT);
+
+  /**
+   * Bounded Page Object. Used as return type in container method or returned from compose.
+   */
+  public static final TypeProvider PAGE_OBJECT_RETURN = new TBoundedPageObject(PAGE_OBJECT) {
+    @Override
+    public boolean isSameType(TypeProvider anotherType) {
+      // for literal page object it's still same type
+      return isCustomType(anotherType) || super.isSameType(anotherType);
+    }
+  };
+
+  /**
+   * List of bounded Root Page Objects. Used as return type in container method.
+   */
+  public static final TypeProvider PAGE_OBJECT_RETURN_LIST = new TBoundedList(PAGE_OBJECT);
   /**
    * A type provider for the BasicPageElement class
    */
-  public static final TypeProvider BASIC_ELEMENT_IMPL_CLASS = new FromClass(
-      BasePageElement.class);
-  static final TypeProvider JAVA_OBJECT_TYPE = new UnimportableType("Object");
-  private static final String ERR_PARAMETERS_TYPES_MISMATCH =
-      "expected %d parameters with type {%s}, provided were {%s}";
+  public static final TypeProvider BASIC_ELEMENT_IMPL_CLASS = new FromClass(BasePageElement.class);
+  /**
+   * Bounded Root Page Object. Used as return type in container method or returned from compose.
+   */
+  static final TypeProvider ROOT_PAGE_OBJECT_RETURN = new TBoundedPageObject(ROOT_PAGE_OBJECT);
+  /**
+   * List of bounded Root Page Objects. Used as return type in container method.
+   */
+  static final TypeProvider ROOT_PAGE_OBJECT_RETURN_LIST = new TBoundedList(ROOT_PAGE_OBJECT);
+  /**
+   * Expected type for notNull matcher
+   */
+  public static final TypeProvider JAVA_OBJECT_TYPE = new UnimportableType("Object");
 
-  static String getUnmatchedParametersErr(List<TypeProvider> expectedTypes,
-      List<MethodParameter> providedParameters) {
-    return String.format(
-        ERR_PARAMETERS_TYPES_MISMATCH,
-        expectedTypes.size(),
-        expectedTypes.stream().map(TypeProvider::getSimpleName).collect(Collectors.joining(",")),
-        providedParameters.stream()
-            .map(parameter -> parameter.getType().getSimpleName())
-            .collect(Collectors.joining(",")));
-  }
+  /**
+   * RootPageObject type for parameter. Used for non-literal arg with "type" : "rootPageObject"
+   */
+  private static final TypeProvider T_ROOT_PAGE_OBJECT_TYPE_PARAMETER = new TBoundedPageObjectType(
+      ROOT_PAGE_OBJECT);
 
-  static boolean isParametersTypesMatch(List<TypeProvider> expectedTypes,
-      List<MethodParameter> actualTypes) {
-    if (expectedTypes == null) {
-      return true;
+  static Class getClassFromFullName(TypeProvider type) {
+    String fullName = type.getFullName();
+    try {
+      return Class.forName(fullName);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
     }
-    if (expectedTypes.size() != actualTypes.size()) {
-      return false;
-    }
-    for (int i = 0; i < expectedTypes.size(); i++) {
-      if (!expectedTypes.get(i).isSameType(actualTypes.get(i).getType())) {
-        return false;
-      }
-    }
-    return true;
   }
 
   /**
@@ -178,7 +189,68 @@ public final class TypeUtilities {
    * @return a type provider describing a list of the original type
    */
   public static TypeProvider wrapAsList(TypeProvider originalType) {
-    return originalType instanceof ListOf ? originalType : new ListOf(originalType);
+    if (isListType(originalType)) {
+      return originalType;
+    }
+    return new BoundedList(originalType);
+  }
+
+  /**
+   * check if type is a list
+   *
+   * @param type type to check
+   * @return boolean, true if list
+   */
+  public static boolean isListType(TypeProvider type) {
+    return type instanceof BoundedList;
+  }
+
+  /**
+   * check if type is a page object or list of page objects
+   *
+   * @param type type to check
+   * @return true if type is a custom (page object) type
+   */
+  public static boolean isCustomType(TypeProvider type) {
+    if (type == null) {
+      return false;
+    }
+    if (type instanceof PageObjectType) {
+      return true;
+    }
+    TypeProvider boundType = type.getBoundType();
+    if (boundType != null) {
+      return isCustomType(boundType);
+    }
+    return false;
+  }
+
+  /**
+   * Parameter type depends on method return type: if return type is not page object itself, use
+   * Class with wildcards, otherwise Class with T
+   *
+   * @param returnType method or statement return type
+   * @return type to use
+   */
+  public static TypeProvider getPageObjectTypeParameter(ReturnType returnType) {
+    if (returnType.isPageObject()) {
+      return T_PAGE_OBJECT_TYPE_PARAMETER; // with T
+    }
+    return W_PAGE_OBJECT_TYPE_PARAMETER; // with wildcard
+  }
+
+  /**
+   * Parameter type depends on method return type: if return type is not page object itself, use
+   * Class with wildcards, otherwise Class with T
+   *
+   * @param returnType method or statement return type
+   * @return type to use
+   */
+  public static TypeProvider getRootPageObjectTypeParameter(ReturnType returnType) {
+    if (returnType.isPageObject()) {
+      return T_ROOT_PAGE_OBJECT_TYPE_PARAMETER; // with T
+    }
+    return W_ROOT_PAGE_OBJECT_TYPE_PARAMETER; // with wildcard
   }
 
   /**
@@ -218,16 +290,6 @@ public final class TypeUtilities {
     public String getSimpleName() {
       return clazz.getSimpleName();
     }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(getSimpleName(), getFullName());
-    }
-
-    @Override
-    public Class getClassType() {
-      return clazz;
-    }
   }
 
   /**
@@ -242,40 +304,14 @@ public final class TypeUtilities {
     /**
      * Initializes a new instance of the FromString class
      *
-     * @param name     the name of the type
-     * @param fullName the full name of the type
-     */
-    public FromString(String name, String fullName) {
-      this.name = name;
-      this.fullName = fullName;
-      this.packageName = setPackageName(fullName);
-    }
-
-    /**
-     * Initializes a new instance of the FromString class
-     *
      * @param fullName the full name of the type
      */
     public FromString(String fullName) {
-      this.name = getShortName(fullName);
       this.fullName = fullName;
-      this.packageName = setPackageName(fullName);
-    }
-
-    private static String getShortName(String fullName) {
-      if (!fullName.contains(".")) {
-        return fullName;
-      }
-      int index = fullName.lastIndexOf(".") + 1;
-      return fullName.substring(index);
-    }
-
-    private static String setPackageName(String fullName) {
-      if (!fullName.contains(".")) {
-        return "";
-      }
-      int index = fullName.lastIndexOf(".") + 1;
-      return fullName.substring(0, index - 1);
+      this.name =
+          fullName.contains(".") ? fullName.substring(fullName.lastIndexOf(".") + 1) : fullName;
+      this.packageName =
+          fullName.contains(".") ? fullName.substring(0, fullName.lastIndexOf(".")) : "";
     }
 
     @Override
@@ -292,64 +328,6 @@ public final class TypeUtilities {
     public String getPackageName() {
       return packageName;
     }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(getSimpleName(), getFullName());
-    }
-
-    @Override
-    public Class getClassType() {
-      return null;
-    }
-  }
-
-  /**
-   * Creates a type provider describing a list of types
-   */
-  public static final class ListOf extends FromClass {
-
-    private final TypeProvider elementType;
-
-    /**
-     * Intializes a new instance of the ListOf class
-     *
-     * @param elementType the type provider to create a list of
-     */
-    private ListOf(TypeProvider elementType) {
-      super(List.class);
-      this.elementType = elementType;
-    }
-
-    @Override
-    public String getSimpleName() {
-      return String.format("List<%s>", elementType.getSimpleName());
-    }
-
-    @Override
-    public boolean isSameType(TypeProvider anotherType) {
-      if (!(anotherType instanceof ListOf)) {
-        return false;
-      }
-      return this.getSimpleName().equals(anotherType.getSimpleName());
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(elementType);
-    }
-
-    @Override
-    public List<TypeProvider> getBoundTypes() {
-      return Collections.singletonList(elementType);
-    }
-
-    @Override
-    public List<TypeProvider> getImportableTypes() {
-      List<TypeProvider> typesToImport = new ArrayList<>(getBoundTypes());
-      typesToImport.add(LIST_IMPORT);
-      return typesToImport;
-    }
   }
 
   /**
@@ -363,72 +341,204 @@ public final class TypeUtilities {
      * @param name the name of the type
      */
     public UnimportableType(String name) {
-      super(name, "");
+      super(name);
+    }
+
+    @Override
+    public String getFullName() {
+      return ""; // returning empty string means nothing will be imported
     }
   }
 
   /**
-   * types like Class&lt;T&gt; or Class&lt;? extends Page Object&gt;
+   * Type for a list of objects, accepts object type as a parameter
    */
-  static class BoundedClass extends FromClass {
+  private static class BoundedList extends BoundedType {
 
-    private final TypeProvider boundType;
-    private final String typeNameStr;
+    private static final TypeProvider LIST_IMPORT = new TypeUtilities.FromClass(List.class);
 
-    BoundedClass(TypeProvider boundType, String boundStr) {
-      super(Class.class);
-      this.boundType = boundType;
-      this.typeNameStr = boundStr != null ? String.format("Class<%s>", boundStr)
-          : String.format("Class<? extends %s>", boundType.getSimpleName());
-    }
-
-    @Override
-    public String getSimpleName() {
-      return typeNameStr;
-    }
-
-    @Override
-    public List<TypeProvider> getBoundTypes() {
-      return Collections.singletonList(boundType);
+    BoundedList(TypeProvider boundType) {
+      super(List.class, boundType);
     }
 
     @Override
     public List<TypeProvider> getImportableTypes() {
-      return new ArrayList<>(getBoundTypes());
+      List<TypeProvider> typesToImport = new ArrayList<>(boundType.getImportableTypes());
+      typesToImport.add(LIST_IMPORT);
+      return typesToImport;
+    }
+  }
+
+  /**
+   * Type for List of page objects whose types were passed as parameters
+   */
+  static final class TBoundedList extends BoundedList {
+
+    TBoundedList(TypeProvider boundType) {
+      super(boundType);
+    }
+
+    @Override
+    public String getReturnString() {
+      return String.format("<T extends %s> List<T>", boundType.getSimpleName());
+    }
+
+    @Override
+    public String getSimpleName() {
+      return "List<T>";
+    }
+  }
+
+  /**
+   * type to support "List of entities" or "Class of entities"
+   */
+  private static abstract class BoundedType extends FromString {
+
+    final TypeProvider boundType;
+    private final Class wrapperClass;
+
+    /**
+     * create instance of bounded type
+     *
+     * @param wrapperClass can be Class.class or List.class
+     * @param boundType    bounded type, can be page object type, custom type or primitive
+     */
+    BoundedType(Class wrapperClass, TypeProvider boundType) {
+      super(wrapperClass.getName());
+      this.wrapperClass = wrapperClass;
+      this.boundType = boundType;
+    }
+
+    @Override
+    public String getSimpleName() {
+      return String.format("%s<%s>", wrapperClass.getSimpleName(), boundType.getSimpleName());
     }
 
     @Override
     public boolean isSameType(TypeProvider anotherType) {
-      if (anotherType instanceof BoundedClass) {
-        return this.boundType.isSameType(((BoundedClass) anotherType).boundType);
+      if (anotherType instanceof BoundedType) {
+        boolean isBoundSame = this.boundType.isSameType(((BoundedType) anotherType).boundType);
+        boolean isWrapperSame = this.wrapperClass.equals(((BoundedType) anotherType).wrapperClass);
+        return isBoundSame && isWrapperSame;
       }
       return false;
     }
-  }
 
-  static class PageObjectClass extends BoundedClass {
-
-    PageObjectClass(String boundStr) {
-      super(PAGE_OBJECT, boundStr);
+    @Override
+    public TypeProvider getBoundType() {
+      return boundType;
     }
 
-    PageObjectClass(TypeProvider boundType, String boundStr) {
-      super(boundType, boundStr);
+    @Override
+    public List<TypeProvider> getImportableTypes() {
+      return boundType.getImportableTypes();
+    }
+  }
+
+  /**
+   * Wildcard bounded type like Class&lt;T&gt; or Class&lt;? extends Page Object&gt;. Bound type can
+   * be PageObject or RootPageObject
+   */
+  static class WBoundedPageObjectType extends BoundedType {
+
+    WBoundedPageObjectType(TypeProvider boundType) {
+      super(Class.class, boundType);
+    }
+
+    @Override
+    public String getSimpleName() {
+      return String.format("Class<? extends %s>", boundType.getSimpleName());
+    }
+  }
+
+  /**
+   * Parameter T bounded type like Class&lt;T&gt;. At the moment bound type can be either PageObject
+   * or RootPageObject
+   */
+  static class TBoundedPageObjectType extends BoundedType {
+
+    TBoundedPageObjectType(TypeProvider boundType) {
+      super(Class.class, boundType);
+    }
+
+    @Override
+    public String getSimpleName() {
+      return "Class<T>";
+    }
+  }
+
+  /**
+   * type used as a return type from container or compose method
+   */
+  static class TBoundedPageObject extends BoundedType {
+
+    TBoundedPageObject(TypeProvider boundType) {
+      super(Class.class, boundType);
+    }
+
+    @Override
+    public String getReturnString() {
+      return String.format("<T extends %s> T", boundType.getSimpleName());
+    }
+
+    @Override
+    public String getSimpleName() {
+      return "T";
+    }
+  }
+
+  /**
+   * This class is separated from FromString so that method "isCustomType" could distinguish page
+   * object from other custom types like utilities
+   */
+  public static class PageObjectType extends FromString {
+
+    public PageObjectType(String fullName) {
+      super(fullName);
+    }
+  }
+
+  /**
+   * Supports custom types name collisions: compiler will use full class name and not import it, for
+   * example: my.page.Object
+   */
+  static class PageObjectWithNamesCollisionType extends PageObjectType {
+
+    private final TypeProvider originalType;
+
+    PageObjectWithNamesCollisionType(TypeProvider originalType) {
+      super(originalType.getFullName());
+      this.originalType = originalType;
+    }
+
+    @Override
+    public String getFullName() {
+      return originalType.getFullName();
+    }
+
+    @Override
+    public String getSimpleName() {
+      return originalType.getFullName();
+    }
+
+    @Override
+    public String getPackageName() {
+      return originalType.getPackageName();
     }
 
     @Override
     public boolean isSameType(TypeProvider anotherType) {
-      if (isCustomType(anotherType)) {
-        return true;
-      }
-      return super.isSameType(anotherType);
+      return anotherType.getFullName().equals(this.getFullName());
     }
-  }
 
-  static class RootPageObjectClass extends PageObjectClass {
+    @Override
+    public String getFalsyValue() {
+      return originalType.getFalsyValue();
+    }
 
-    RootPageObjectClass() {
-      super(ROOT_PAGE_OBJECT, null);
+    @Override
+    public List<TypeProvider> getImportableTypes() {
+      return new ArrayList<>();
     }
   }
 }

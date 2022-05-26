@@ -440,11 +440,10 @@ public class UnitTestSerializerTests {
     assertThat(serializer.getTestMethods(), hasSize(1));
     String unitTestCode = serializer.toString();
     assertThat(
-        unitTestCode, containsString("assertThat(testObject.getTestElementText(), hasSize(-1));"));
-    assertThat(
         unitTestCode,
-        containsString(
-            "assertThat(testObject.getTestElementText(), containsInAnyOrder(\"replaceWithValidExpectedValueList\"));"));
+        containsString("assertThat(testObject.getTestElementText(), hasSize(-1));"));
+    assertThat(unitTestCode,containsString("assertThat(testObject.getTestElementText(),"));
+    assertThat(unitTestCode, containsString("\"replaceWithValidExpectedValueList\"));"));
     assertThat(unitTestCode, containsString(".withChild"));
     assertThat(unitTestCode, containsString("of the root element"));
   }
@@ -477,7 +476,8 @@ public class UnitTestSerializerTests {
     assertThat(
         unitTestCode,
         containsString(
-            "assertThat(testObject.getTestElement(\"replaceWithValidExpectedValue\").isPresent(), is(equalTo(true)));"));
+            "assertThat(testObject.getTestElement(\"replaceWithValidExpectedValue\").isPresent(),"));
+    assertThat(unitTestCode, containsString("is(equalTo(true)));"));
     assertThat(unitTestCode, containsString(".withChild"));
     assertThat(unitTestCode, containsString("of the root element"));
   }
