@@ -12,12 +12,10 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.UtamRootSelector.ERR_SELECTOR_MISSING;
-import static utam.compiler.grammar.UtamRootSelector.ERR_SELECTOR_REDUNDANT;
 
 import org.testng.annotations.Test;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.LocatorCodeGeneration.SelectorType;
-import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -38,13 +36,19 @@ public class UtamRootSelectorTests {
 
   @Test
   public void testMissingSelectorThrows() {
-    UtamError e = expectThrows(UtamError.class,  () -> new UtamRootSelector(null, null, null, null));
-    assertThat(e.getMessage(), containsString(ERR_SELECTOR_MISSING));
+    String json = "{ \"root\" : true, \"selector\" : {}}";
+    RuntimeException e = expectThrows(
+        UtamCompilationError.class,  () -> new DeserializerUtilities().getResultFromString(json));
+    assertThat(e.getMessage(), containsString("error 1002: root selector: "
+        + "one of { accessid, css, uiautomator, classchain } should be set for selector"));
   }
 
   @Test
   public void testRedundantSelectorThrows() {
-    UtamError e = expectThrows(UtamError.class, () -> new UtamRootSelector("one", "two", null, null));
-    assertThat(e.getMessage(), is(equalTo(ERR_SELECTOR_REDUNDANT)));
+    String json = "{ \"root\" : true, \"selector\" : { \"css\": \"css\", \"accessid\": \"accessid\"}}";
+    RuntimeException e = expectThrows(
+        UtamCompilationError.class,  () -> new DeserializerUtilities().getResultFromString(json));
+    assertThat(e.getMessage(), containsString("error 1003: root selector: "
+        + "only one of selector types { accessid, css, uiautomator, classchain } can be set"));
   }
 }

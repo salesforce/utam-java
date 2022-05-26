@@ -92,6 +92,10 @@
     "message": "element \"%s\": %s element can't have nested elements"
   },
   {
+    "code": 206,
+    "message": "element \"%s\": frame selector cannot have \"returnAll\" set to true"
+  },
+  {
     "code": 300,
     "message": "element \"%s\" filter: incorrect format of element filter: \n%s",
     "docs": "https://utam.dev/grammar/spec#element-filter"
@@ -295,6 +299,14 @@
   {
     "code": 1001,
     "message": "element \"%s\" selector: unknown selector parameter type \"%s\", only string and number are supported"
+  },
+  {
+    "code": 1002,
+    "message": "root selector: one of { %s } should be set for selector"
+  },
+  {
+    "code": 1003,
+    "message": "root selector: only one of selector types { %s } can be set"
   },
   {
     "message": "%s: incorrect format of elements inside shadow: \n%s",

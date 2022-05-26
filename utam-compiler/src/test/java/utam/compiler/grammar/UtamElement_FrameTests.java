@@ -10,7 +10,6 @@ package utam.compiler.grammar;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static utam.compiler.grammar.DeserializerUtilities.expectCompilerError;
-import static utam.compiler.grammar.UtamElement.ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED;
 
 import org.testng.annotations.Test;
 import utam.compiler.grammar.UtamElement.Type;
@@ -32,8 +31,7 @@ public class UtamElement_FrameTests {
         + "    }\n"
         + "  ]}";
     Exception e = expectCompilerError(json);
-    assertThat(e.getMessage(),
-        containsString(String.format(ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED, "test")));
+    assertThat(e.getMessage(), containsString("error 206: element \"test\": frame selector cannot have \"returnAll\" set to true"));
   }
 
   @Test

@@ -36,7 +36,7 @@ public class LocatorCodeGeneration {
    * The supported selector types as a comma-delimited string
    */
   public static final String SUPPORTED_SELECTOR_TYPES_STRING =
-      String.join(",", SUPPORTED_SELECTOR_TYPES);
+      String.join(", ", SUPPORTED_SELECTOR_TYPES);
 
   private final String builderValue;
   private final Locator locator;

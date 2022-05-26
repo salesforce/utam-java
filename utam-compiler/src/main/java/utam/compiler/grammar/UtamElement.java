@@ -56,8 +56,6 @@ public final class UtamElement {
    * The default CSS selector for a container
    */
   public static final String DEFAULT_CONTAINER_SELECTOR_CSS = ":scope > *:first-child";
-  static final String ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED =
-      "element '%s': frame selector cannot return all";
 
   private final String name;
   private final List<UtamElementProvider> shadow;
@@ -476,7 +474,7 @@ public final class UtamElement {
         throw new UtamCompilerIntermediateError(204, name, "selector");
       }
       if (selector.isReturnAll()) {
-        throw new UtamCompilationError(String.format(ERR_FRAME_LIST_SELECTOR_NOT_ALLOWED, name));
+        throw new UtamCompilerIntermediateError(206, name);
       }
     }
 
