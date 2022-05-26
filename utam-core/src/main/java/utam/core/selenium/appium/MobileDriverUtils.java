@@ -146,7 +146,7 @@ public abstract class MobileDriverUtils {
     } else {
       Dimension docDimension = getWebViewDocumentSize(driver);
       Dimension scrollOffset = getScrollOffset(driver);
-      Dimension webViewElementSize = webViewElement.getSize();
+      Dimension webViewElementSize = webViewElement.getRect().getDimension();
       x = webViewToNative(webViewLocation.getX(), scrollOffset.getWidth(),
           webViewElementSize.getWidth(), docDimension.getWidth());
       y = webViewToNative(webViewLocation.getY(), scrollOffset.getHeight(),
@@ -179,7 +179,7 @@ public abstract class MobileDriverUtils {
   private static Point getAbsoluteCoordinates(WebElement webView, int xWebView,
       int yWebView) {
     // The dimensions are all relative to the WebView, so calculate absolute coordinates
-    Point location = webView.getLocation();
+    Point location = webView.getRect().getPoint();
     int webViewX = location.getX();
     int webViewY = location.getY();
     int absoluteX = xWebView + webViewX;
