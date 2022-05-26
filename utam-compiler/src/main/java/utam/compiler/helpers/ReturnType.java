@@ -63,6 +63,7 @@ public abstract class ReturnType {
    * build object for VOID return type
    *
    * @param methodName the method name
+   * @return the return type for a method returning VOID
    */
   public static ReturnType getVoidReturn(String methodName) {
     return new AbstractMethodReturnType(null, null, methodName);

@@ -255,7 +255,8 @@ public class ParameterUtils {
     /**
      * Initializes a new instance of the LiteralPageObjectClass class
      *
-     * @param type the type of the Page object
+     * @param type     the type of the Page Object
+     * @param baseType the base type of the Page Object
      */
     public LiteralPageObjectTypeParameter(TypeProvider type, TypeProvider baseType) {
       super(String.format("%s.class", type.getSimpleName()), type);
