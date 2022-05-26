@@ -14,7 +14,6 @@ import static utam.core.selenium.element.DriverAdapter.getSeleniumDriver;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.openqa.selenium.By;
-import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
@@ -24,6 +23,7 @@ import utam.core.driver.Driver;
 import utam.core.element.DragAndDropOptions;
 import utam.core.element.Element;
 import utam.core.element.Locator;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * implementation for selenium element
@@ -108,6 +108,7 @@ public class ElementAdapter implements Element {
   }
 
   @Override
+  @SuppressWarnings("rawtypes")
   public Element findElement(Locator locator) {
     By by = ((LocatorBy) locator).getValue();
     WebElement res = getWebElement().findElement(by);
@@ -118,13 +119,14 @@ public class ElementAdapter implements Element {
   }
 
   @Override
+  @SuppressWarnings("rawtypes")
   public List<Element> findElements(Locator locator) {
     By by = ((LocatorBy) locator).getValue();
     List<WebElement> found = getWebElement().findElements(by);
     if (found == null || found.isEmpty()) {
       throw new NoSuchElementException(getNotFoundErr(locator));
     }
-    return found.stream().map(el -> wrapElement(el)).collect(Collectors.toList());
+    return found.stream().map(this::wrapElement).collect(Collectors.toList());
   }
 
   @Override
@@ -163,7 +165,7 @@ public class ElementAdapter implements Element {
         driverAdapter.executeScript(SCROLL_TOP_VIA_JAVASCRIPT, getWebElement());
       }
       if (!isDisplayed()) {
-        throw new ElementNotVisibleException(SCROLL_INTO_VIEW_ERR);
+        throw new UtamError(SCROLL_INTO_VIEW_ERR);
       }
     } else {
       driverAdapter.executeScript(SCROLL_CENTER_VIA_JAVASCRIPT, getWebElement());
@@ -205,6 +207,7 @@ public class ElementAdapter implements Element {
   }
 
   @Override
+  @SuppressWarnings("rawtypes")
   public int containsElements(Locator locator) {
     By by = ((LocatorBy) locator).getValue();
     return getWebElement().findElements(by).size();

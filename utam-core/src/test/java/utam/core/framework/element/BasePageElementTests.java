@@ -24,7 +24,6 @@ import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_INTO_VIEW_JS;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_TOP_VIA_JAVASCRIPT;
 
-import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -35,6 +34,7 @@ import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.element.Locator;
+import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -178,7 +178,7 @@ public class BasePageElementTests {
   @Test
   public void testScrollIntoViewIfElementNotVisibleThrows() {
     MockUtilities mock = new MockUtilities();
-    assertThrows(ElementNotVisibleException.class, () -> mock.getUtamElement().scrollToTop());
+    assertThrows(UtamError.class, () -> mock.getUtamElement().scrollToTop());
   }
 
   @Test
