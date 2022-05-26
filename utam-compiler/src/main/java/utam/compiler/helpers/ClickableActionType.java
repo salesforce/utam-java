@@ -29,13 +29,7 @@ public enum ClickableActionType implements ActionType {
    * click on the element using WebElement.click <br>
    * throws exception if fails
    */
-  click(),
-  /**
-   * executes javascript "arguments[0].click();" to trick Selenium into clicking on the element that
-   * is not considered clickable by the Web Driver. It's a workaround for inconsistent behavior of
-   * some browsers. Otherwise same as "click"
-   */
-  javascriptClick();
+  click();
 
   // used in unit tests
   Class[] getParameterClasses() {
