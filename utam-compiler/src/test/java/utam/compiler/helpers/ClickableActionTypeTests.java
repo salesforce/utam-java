@@ -77,13 +77,6 @@ public class ClickableActionTypeTests {
     validateAction(ClickableActionType.click, new ArrayList<>());
   }
 
-  /**
-   * The javascriptClick member should return the proper value
-   */
-  @Test
-  public void testJavascriptClick() {
-    validateAction(ClickableActionType.javascriptClick, new ArrayList<>());
-  }
 
   @Test
   @SuppressWarnings({"rawtypes"})
