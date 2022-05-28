@@ -28,10 +28,9 @@ import utam.core.declarative.representation.TypeProvider;
  */
 public abstract class ReturnType {
 
-  public static final ReturnType RETURN_VOID = new ReturnType() {
-  };
+  public static final ReturnType RETURN_VOID = new ReturnType() {};
   final boolean isReturnList;
-  final JsonNode returnTypeJsonNode;
+  private final JsonNode returnTypeJsonNode;
   private final String returnTypeString;
   private final String methodName;
   private final Integer errorCode;

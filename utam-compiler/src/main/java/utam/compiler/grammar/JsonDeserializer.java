@@ -206,8 +206,13 @@ public final class JsonDeserializer extends
     return node == null || node.isNull();
   }
 
+  /**
+   * print node as a string. "toPrettyString()" can add extra quotes, so remove them
+   * @param node json node
+   * @return string representation
+   */
   static String nodeToString(JsonNode node) {
-    if(isEmptyNode(node)) {
+    if (isEmptyNode(node)) {
       return "null";
     }
     return node.toPrettyString().replaceAll("^\"|\"$", "");
