@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.JsonDeserializer.nodeToString;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.compiler.types.BasicElementInterface.isBasicType;
 import static utam.compiler.types.BasicElementInterface.processBasicTypeNode;
@@ -16,6 +17,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParametersContext;
@@ -68,8 +72,7 @@ class UtamInterfaceMethod extends UtamMethod {
     if (returnTypeNode.isArray()) {
       for (JsonNode valueNode : returnTypeNode) {
         if (!valueNode.isTextual() || !isBasicType(valueNode.textValue())) {
-          throw new UtamCompilerIntermediateError(returnTypeNode, 401, name,
-              returnTypeNode.toPrettyString());
+          throw new UtamCompilerIntermediateError(returnTypeNode, 401, name, nodeToString(returnTypeNode));
         }
       }
       return true;
@@ -81,15 +84,14 @@ class UtamInterfaceMethod extends UtamMethod {
   PageObjectMethod getMethod(TranslationContext context) {
     boolean isReturnsBasicType = isReturnBasicType(returnTypeNode);
     final ReturnType returnTypeObject;
-    String typeNodeValue = returnTypeNode == null ? "null" : returnTypeNode.toPrettyString();
     if (isReturnsBasicType) {
-      String[] basicUnionType = processBasicTypeNode(returnTypeNode,
-          node -> new UtamCompilerIntermediateError(node, 401,
-              name, typeNodeValue));
+      String errMessage = context.getErrorMessage(401, name, nodeToString(returnTypeNode));
+      Supplier<RuntimeException> errorProducer = () -> new UtamCompilationError(returnTypeNode, errMessage);
+      String[] basicUnionType = processBasicTypeNode(returnTypeNode, errorProducer);
       TypeProvider unionReturnType = asBasicOrUnionType(name, basicUnionType, false);
       returnTypeObject = new AbstractMethodBasicReturnType(unionReturnType, isReturnList);
     } else {
-      returnTypeObject = new AbstractMethodReturnType(returnTypeNode, isReturnList, name);
+      returnTypeObject = new AbstractMethodReturnType(returnTypeNode, isReturnList, context, name);
     }
     TypeProvider methodReturnType = returnTypeObject.getReturnTypeOrDefault(context, VOID);
     MethodContext methodContext = new MethodContext(name, returnTypeObject, context, argsNode, true);

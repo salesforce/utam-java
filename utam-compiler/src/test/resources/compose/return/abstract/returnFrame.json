@@ -1,0 +1,9 @@
+{
+  "interface": true,
+  "methods": [
+    {
+      "returnType": "frame",
+      "name": "test"
+    }
+  ]
+}

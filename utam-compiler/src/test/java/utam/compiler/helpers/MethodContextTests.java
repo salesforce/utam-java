@@ -13,7 +13,6 @@ import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.helpers.PrimitiveType.BOOLEAN;
 import static utam.compiler.helpers.PrimitiveType.STRING;
-import static utam.compiler.helpers.ReturnType.getVoidReturn;
 import static utam.compiler.helpers.TypeUtilities.PARAMETER_REFERENCE;
 
 import org.hamcrest.core.StringContains;
@@ -34,7 +33,7 @@ import utam.core.framework.consumer.UtamError;
 public class MethodContextTests {
 
   private static MethodContext getMethodContext() {
-    return new MethodContext("test", getVoidReturn("test"),
+    return new MethodContext("test", ReturnType.RETURN_VOID,
         getTestTranslationContext(),
         null, false);
   }

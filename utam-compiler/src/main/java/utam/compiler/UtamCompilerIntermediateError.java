@@ -7,6 +7,8 @@
  */
 package utam.compiler;
 
+import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
+
 import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -74,7 +76,7 @@ public class UtamCompilerIntermediateError extends RuntimeException {
    * @return string with json source
    */
   private static String getJsonSource(JsonNode currentNode) {
-    if (currentNode == null || currentNode.isNull()) {
+    if (isEmptyNode(currentNode)) {
       return "";
     }
     return String.format("\n[Source: %s]", currentNode.toPrettyString());

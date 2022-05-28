@@ -24,7 +24,6 @@ import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.element.FrameElement;
 
 /**
  * generate code of getter method for frame element
@@ -34,10 +33,6 @@ import utam.core.element.FrameElement;
  */
 public class FrameMethod implements PageObjectMethod {
 
-  /**
-   * A type provider representing a frame element
-   */
-  public static final TypeProvider FRAME_ELEMENT = new TypeUtilities.FromClass(FrameElement.class);
   private final String methodName;
   private final List<String> methodCode = new ArrayList<>();
   private final List<MethodParameter> parameters;
@@ -66,8 +61,8 @@ public class FrameMethod implements PageObjectMethod {
 
   @Override
   public MethodDeclaration getDeclaration() {
-    List<TypeProvider> imports = Stream.of(FRAME_ELEMENT).collect(Collectors.toList());
-    return new MethodDeclarationImpl(methodName, parameters, FRAME_ELEMENT, imports, description);
+    List<TypeProvider> imports = Stream.of(TypeUtilities.FRAME_ELEMENT).collect(Collectors.toList());
+    return new MethodDeclarationImpl(methodName, parameters, TypeUtilities.FRAME_ELEMENT, imports, description);
   }
 
   @Override

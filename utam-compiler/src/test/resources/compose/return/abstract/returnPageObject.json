@@ -1,0 +1,15 @@
+{
+  "interface": true,
+  "methods": [
+    {
+      "returnType": "pageObject",
+      "name": "test",
+      "args": [
+        {
+          "name": "nonLiteral",
+          "type": "pageObject"
+        }
+      ]
+    }
+  ]
+}

@@ -70,7 +70,7 @@ class UtamMethodActionUtility extends UtamMethodAction {
     TypeProvider utilityType = context.getUtilityType(applyExternal.getExternalClassPath());
     Operand operand = new UtilityOperand(utilityType);
     List<MethodParameter> parameters = applyExternal.getParameters(context, methodContext);
-    ReturnType returnTypeObject = getDeclaredReturnType(methodContext.getName());
+    ReturnType returnTypeObject = getDeclaredReturnType(context, methodContext.getName());
     TypeProvider defaultReturnType = statementContext.isLastStatement() ?
         methodContext.getDeclaredReturnType().getReturnTypeOrDefault(context, VOID) : VOID;
     TypeProvider statementReturnType = returnTypeObject

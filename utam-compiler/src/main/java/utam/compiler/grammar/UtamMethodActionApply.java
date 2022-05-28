@@ -260,7 +260,7 @@ class UtamMethodActionApply extends UtamMethodAction {
       String methodName = methodContext.getName();
       ActionType action = getActionType(apply, elementContext.getType(),
           context.getErrorMessage(612, methodName, apply));
-      ReturnType declaredReturnType = getDeclaredReturnType(methodName);
+      ReturnType declaredReturnType = getDeclaredReturnType(context, methodName);
       if (declaredReturnType.isReturnTypeSet()) {
         // if "returnType" is set - check if it's correct
         TypeProvider declaredReturn = declaredReturnType.getReturnType(context);

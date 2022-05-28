@@ -78,8 +78,8 @@ public abstract class UtamMethodAction {
     this.returnTypeJsonNode = returnTypeJsonNode;
   }
 
-  final ReturnType getDeclaredReturnType(String methodName) {
-    return new StatementReturnType(returnTypeJsonNode, isReturnList, methodName);
+  final ReturnType getDeclaredReturnType(TranslationContext context, String methodName) {
+    return new StatementReturnType(returnTypeJsonNode, isReturnList, context, methodName);
   }
 
   final void chainValidations(TranslationContext context,

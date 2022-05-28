@@ -1,0 +1,10 @@
+{
+  "interface": true,
+  "methods": [
+    {
+      "returnType": "pageObject",
+      "returnAll": true,
+      "name": "test"
+    }
+  ]
+}

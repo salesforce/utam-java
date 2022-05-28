@@ -9,6 +9,7 @@ package utam.compiler.grammar;
 
 import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.JsonDeserializer.isNotArrayOrEmptyArray;
+import static utam.compiler.grammar.JsonDeserializer.nodeToString;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
@@ -60,7 +61,7 @@ final class UtamProfile {
       for (JsonNode valueNode : valuesNode) {
         if (!valueNode.isTextual() || valueNode.textValue().isEmpty()) {
           throw new UtamCompilationError(valueNode,
-              context.getErrorMessage(11, propertyName, valuesNode.toPrettyString()));
+              context.getErrorMessage(11, propertyName, nodeToString(valuesNode)));
         }
         String profileValue = valueNode.textValue();
         if (values.contains(profileValue)) {

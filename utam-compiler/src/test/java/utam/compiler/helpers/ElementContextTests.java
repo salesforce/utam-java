@@ -22,7 +22,7 @@ import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.SELF_ELEMENT_NAME;
 import static utam.compiler.types.BasicElementInterface.actionable;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
-import static utam.compiler.representation.FrameMethod.FRAME_ELEMENT;
+import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
 
 import java.util.Collections;
 import org.testng.annotations.Test;

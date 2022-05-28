@@ -172,7 +172,7 @@ public final class JsonDeserializer extends
     } catch (UtamCompilationError e) {
       throw e;
     } catch (UtamCompilerIntermediateError e) {
-      throw e.getCompilationError(context, parser, e.getCause()).get();
+      throw e.getCompilationError(context, parser, e).get();
     } catch (Exception e) {
       throw processErrorMessage(context, parser, e).get();
     }
@@ -204,6 +204,13 @@ public final class JsonDeserializer extends
    */
   public static boolean isEmptyNode(JsonNode node) {
     return node == null || node.isNull();
+  }
+
+  static String nodeToString(JsonNode node) {
+    if(isEmptyNode(node)) {
+      return "null";
+    }
+    return node.toPrettyString().replaceAll("^\"|\"$", "");
   }
 
   /**

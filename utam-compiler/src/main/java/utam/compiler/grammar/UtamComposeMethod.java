@@ -139,7 +139,7 @@ class UtamComposeMethod extends UtamMethod {
           i,
           isUsedAsChain(compose, i),
           i == compose.size() - 1 ? StatementType.LAST_STATEMENT : StatementType.REGULAR_STATEMENT,
-          statementDeclaration.getDeclaredReturnType(name));
+          statementDeclaration.getDeclaredReturnType(context, name));
       statementDeclaration.checkBeforeLoadElements(context, methodContext);
       ComposeMethodStatement statement = statementDeclaration
           .getComposeAction(context, methodContext, statementContext);
@@ -166,7 +166,7 @@ class UtamComposeMethod extends UtamMethod {
   @Override
   final PageObjectMethod getMethod(TranslationContext context) {
     // return type at method level is not supported, so infer from last statement
-    ReturnType lastStatementReturn = composeList.get(composeList.size()-1).getDeclaredReturnType(name);
+    ReturnType lastStatementReturn = composeList.get(composeList.size()-1).getDeclaredReturnType(context, name);
     MethodContext methodContext = new MethodContext(name, lastStatementReturn, context, argsNode,
         false);
     ParametersContext parametersContext = methodContext.getParametersContext();
