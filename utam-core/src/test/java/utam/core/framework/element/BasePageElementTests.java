@@ -244,15 +244,6 @@ public class BasePageElementTests {
   }
 
   @Test
-  public void testJavascriptClick() {
-    MockUtilities mock = new MockUtilities();
-    when(mock.getExecutorMock().executeScript(any(), any())).thenReturn(true);
-    mock.getUtamElement().javascriptClick();
-    verify(mock.getExecutorMock(), times(1))
-        .executeScript(any(), any());
-  }
-
-  @Test
   public void testClickWithException() {
     MockUtilities mock = new MockUtilities();
     doThrow(new JavascriptException(
