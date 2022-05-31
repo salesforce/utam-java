@@ -267,4 +267,18 @@ public class UtamArgumentTests {
     expected.addCodeLine("return statement0");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
+
+  @Test
+  public void testAbstractLiteralArgThrows() {
+    RuntimeException e = expectThrows(UtamCompilationError.class,
+        () -> new DeserializerUtilities().getContext("validate/args/abstractLiteralArg"));
+    assertThat(e.getMessage(), containsString("error 105: method \"test\": literal arguments are not allowed"));
+  }
+
+  @Test
+  public void testComposeMethodLiteralArgThrows() {
+    RuntimeException e = expectThrows(UtamCompilationError.class,
+        () -> new DeserializerUtilities().getContext("validate/args/methodLiteralArg"));
+    assertThat(e.getMessage(), containsString("error 105: method \"test\": literal arguments are not allowed"));
+  }
 }

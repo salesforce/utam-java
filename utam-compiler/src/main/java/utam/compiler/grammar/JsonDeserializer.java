@@ -172,7 +172,7 @@ public final class JsonDeserializer extends
     } catch (UtamCompilationError e) {
       throw e;
     } catch (UtamCompilerIntermediateError e) {
-      throw e.getCompilationError(context, parser, e.getCause()).get();
+      throw e.getCompilationError(context, parser, e).get();
     } catch (Exception e) {
       throw processErrorMessage(context, parser, e).get();
     }
@@ -204,6 +204,20 @@ public final class JsonDeserializer extends
    */
   public static boolean isEmptyNode(JsonNode node) {
     return node == null || node.isNull();
+  }
+
+  /**
+   * Return node value as a string for error messages. "toPrettyString()" can add extra quotes, so remove them
+   *
+   * @param node json node
+   * @return string representation
+   */
+  static String nodeToString(JsonNode node) {
+    if (isEmptyNode(node)) {
+      return "null";
+    }
+    // remove extra quotes, otherwise error message can have ""weird double quoted string""
+    return node.toPrettyString().replaceAll("^\"|\"$", "");
   }
 
   /**

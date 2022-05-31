@@ -14,7 +14,7 @@ import static utam.compiler.grammar.DeserializerUtilities.expectCompilerErrorFro
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.COLLECTOR_IMPORT;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
-import static utam.compiler.representation.FrameMethod.FRAME_ELEMENT;
+import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
 
 import java.util.List;
 import org.testng.annotations.Test;

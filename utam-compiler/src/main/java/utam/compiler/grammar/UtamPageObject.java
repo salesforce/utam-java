@@ -7,8 +7,9 @@
  */
 package utam.compiler.grammar;
 
-import static utam.compiler.grammar.JsonDeserializer.isNotArrayOrEmptyArray;
 import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
+import static utam.compiler.grammar.JsonDeserializer.isNotArrayOrEmptyArray;
+import static utam.compiler.grammar.JsonDeserializer.nodeToString;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.compiler.grammar.UtamComposeMethod.getComposeStatements;
 import static utam.compiler.grammar.UtamComposeMethod.processComposeNodes;
@@ -19,7 +20,7 @@ import static utam.compiler.helpers.AnnotationUtils.DEPRECATED_ANNOTATION;
 import static utam.compiler.helpers.AnnotationUtils.getPageObjectAnnotation;
 import static utam.compiler.helpers.AnnotationUtils.getPagePlatformAnnotation;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
-import static utam.compiler.helpers.ReturnType.getVoidReturn;
+import static utam.compiler.helpers.ReturnType.RETURN_VOID;
 import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.BASE_ROOT_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT_IMPL_CLASS;
@@ -35,6 +36,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.grammar.UtamElement.UtamElementProvider;
@@ -260,7 +262,7 @@ final class UtamPageObject {
 
   private PageObjectMethod setBeforeLoadMethod(TranslationContext context) {
     String methodName = BEFORE_LOAD_METHOD_NAME;
-    MethodContext methodContext = new MethodContext(methodName, getVoidReturn(methodName),
+    MethodContext methodContext = new MethodContext(methodName, RETURN_VOID,
         context, null, false);
     List<ComposeMethodStatement> statements = getComposeStatements(context, methodContext,
         beforeLoad);
@@ -311,10 +313,9 @@ final class UtamPageObject {
     private final JsonNode typeNode;
 
     RootElementHelper(JsonNode typeNode, boolean isExposeRootElement) {
-      String typeNodeValue = typeNode == null ? "null" : typeNode.toPrettyString();
-      this.rootElementType = processBasicTypeNode(typeNode,
-          node -> new UtamCompilerIntermediateError(node, 101,
-              ROOT_ELEMENT_NAME, typeNodeValue));
+      Supplier<RuntimeException> errorProvider = () -> new UtamCompilerIntermediateError(typeNode,
+          101, ROOT_ELEMENT_NAME, nodeToString(typeNode));
+      this.rootElementType = processBasicTypeNode(typeNode, errorProvider);
       this.isPublic = isExposeRootElement;
       this.typeNode = typeNode;
     }

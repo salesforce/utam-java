@@ -128,7 +128,7 @@
   },
   {
     "code": 403,
-    "message": "abstract method \"%s\": return type %s is not supported"
+    "message": "abstract method \"%s\": return type \"%s\" is not supported"
   },
   {
     "code": 500,
@@ -163,7 +163,7 @@
   },
   {
     "code": 602,
-    "message": "method \"%s\" statement: return type %s is not supported in a compose statement",
+    "message": "method \"%s\" statement: return type \"%s\" is not supported in a compose statement",
     "docs": "https://utam.dev/grammar/spec#return-type-for-a-compose-statement"
   },
   {

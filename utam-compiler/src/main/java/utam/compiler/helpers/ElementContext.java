@@ -8,7 +8,7 @@
 package utam.compiler.helpers;
 
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
-import static utam.compiler.representation.FrameMethod.FRAME_ELEMENT;
+import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.wrapAsList;
 
 import java.util.ArrayList;

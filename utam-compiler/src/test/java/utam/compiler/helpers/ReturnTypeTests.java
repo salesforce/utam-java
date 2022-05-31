@@ -15,6 +15,9 @@ import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
 import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.element.FrameElement;
+import utam.core.framework.base.PageObject;
+import utam.core.framework.base.RootPageObject;
 import utam.core.framework.consumer.UtamError;
 
 /**
@@ -171,6 +174,70 @@ public class ReturnTypeTests {
         "List<my2.pack.Foo> statement1 = statement0.stream().flatMap(element -> element.myPrivateMethod()"
             + ".stream()).collect(Collectors.toList())");
     expected.addCodeLine("return statement1");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
+
+  @Test
+  public void testAbstractMethodReturnsPageObject() {
+    PageObjectMethod method = test("compose/return/abstract/returnPageObject");
+    MethodInfo expected = new MethodInfo(METHOD_NAME, "T");
+    assertThat(method.getDeclaration().getCodeLine(), is("<T extends PageObject> T test(Class<T> nonLiteral)"));
+    expected.addParameter(new MethodParameterInfo("nonLiteral", "Class<T>"));
+    expected.addImportedTypes(PageObject.class.getName());
+    PageObjectValidationTestHelper.validateDeclaration(method.getDeclaration(), expected);
+  }
+
+  @Test
+  public void testAbstractMethodReturnsPageObjectList() {
+    PageObjectMethod method = test("compose/return/abstract/returnPageObjectList");
+    MethodInfo expected = new MethodInfo(METHOD_NAME, "List<T>");
+    assertThat(method.getDeclaration().getCodeLine(), is("<T extends PageObject> List<T> test()"));
+    expected.addImportedTypes(PageObject.class.getName(), List.class.getName());
+    PageObjectValidationTestHelper.validateDeclaration(method.getDeclaration(), expected);
+  }
+
+  @Test
+  public void testAbstractMethodReturnsRootPageObject() {
+    PageObjectMethod method = test("compose/return/abstract/returnRootPageObject");
+    MethodInfo expected = new MethodInfo(METHOD_NAME, "T");
+    assertThat(method.getDeclaration().getCodeLine(), is("<T extends RootPageObject> T test()"));
+    expected.addImportedTypes(RootPageObject.class.getName());
+    PageObjectValidationTestHelper.validateDeclaration(method.getDeclaration(), expected);
+  }
+
+  @Test
+  public void testAbstractNamesCollisions() {
+    TranslationContext context = new DeserializerUtilities().getContext("compose/return/abstract/namesCollision");
+    PageObjectMethod method1 = context.getMethod("test1");
+    MethodInfo expected1 = new MethodInfo("test1", "Name");
+    assertThat(method1.getDeclaration().getCodeLine(), is("Name test1()"));
+    expected1.addImportedTypes("my.type1.Name");
+    PageObjectValidationTestHelper.validateDeclaration(method1.getDeclaration(), expected1);
+
+    PageObjectMethod method2 = context.getMethod("test2");
+    MethodInfo expected2 = new MethodInfo("test2", "my.type2.Name");
+    assertThat(method2.getDeclaration().getCodeLine(), is("my.type2.Name test2()"));
+    PageObjectValidationTestHelper.validateDeclaration(method2.getDeclaration(), expected2);
+  }
+
+  @Test
+  public void testAbstractMethodReturnsFrame() {
+    PageObjectMethod method = test("compose/return/abstract/returnFrame");
+    MethodInfo expected = new MethodInfo(METHOD_NAME, "FrameElement");
+    assertThat(method.getDeclaration().getCodeLine(), is("FrameElement test()"));
+    expected.addImportedTypes(FrameElement.class.getName());
+    PageObjectValidationTestHelper.validateDeclaration(method.getDeclaration(), expected);
+  }
+
+  @Test
+  public void testMethodReturnsFrame() {
+    PageObjectMethod method = test("compose/return/returnFrame");
+    MethodInfo expected = new MethodInfo(METHOD_NAME, "FrameElement");
+    assertThat(method.getDeclaration().getCodeLine(), is("FrameElement test()"));
+    expected.addImpliedImportedTypes(FrameElement.class.getName());
+    expected.addImportedTypes(FrameElement.class.getName());
+    expected.addCodeLine("FrameElement statement0 = this.getFrameElement()");
+    expected.addCodeLine("return statement0");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 }

@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.JsonDeserializer.nodeToString;
 import static utam.compiler.grammar.UtamElementFilter.processFilterNode;
 import static utam.compiler.grammar.UtamMethodDescription.processMethodDescriptionNode;
 import static utam.compiler.grammar.UtamPageObject.processElementsNode;
@@ -25,6 +26,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.function.Supplier;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.helpers.ElementContext;
@@ -106,9 +108,9 @@ public final class UtamElement {
         return new SimpleEntry<>(new Custom(), new String[]{value});
       }
     }
-    String typeNodeContent = typeNode == null ? "null" : typeNode.toPrettyString();
-    String[] type = processBasicTypeNode(typeNode,
-        node -> new UtamCompilerIntermediateError(node, 201, name, typeNodeContent));
+    Supplier<RuntimeException> errorProvider = () -> new UtamCompilerIntermediateError(typeNode,
+        201, name, nodeToString(typeNode));
+    String[] type = processBasicTypeNode(typeNode, errorProvider);
     return new SimpleEntry<>(new Basic(), type);
   }
 

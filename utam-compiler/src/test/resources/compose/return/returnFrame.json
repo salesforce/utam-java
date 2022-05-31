@@ -1,0 +1,22 @@
+{
+  "elements": [
+    {
+      "name": "frame",
+      "type": "frame",
+      "selector": {
+        "css": "iframe"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "returnType": "frame",
+          "element": "frame"
+        }
+      ]
+    }
+  ]
+}
