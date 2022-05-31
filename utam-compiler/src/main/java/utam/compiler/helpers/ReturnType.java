@@ -17,7 +17,6 @@ import static utam.compiler.translator.TranslationTypesConfigJava.isPageObjectTy
 
 import com.fasterxml.jackson.databind.JsonNode;
 import utam.compiler.UtamCompilationError;
-import utam.compiler.UtamCompilerIntermediateError;
 import utam.core.declarative.representation.TypeProvider;
 
 /**
@@ -28,27 +27,27 @@ import utam.core.declarative.representation.TypeProvider;
  */
 public abstract class ReturnType {
 
+  /**
+   * Instance of the void return type. Used for beforeLoad MethodContext and in tests
+   */
   public static final ReturnType RETURN_VOID = new ReturnType() {};
   final boolean isReturnList;
   private final JsonNode returnTypeJsonNode;
-  private final String returnTypeString;
-  private final String methodName;
-  private final Integer errorCode;
+  final String returnTypeString;
+  final String methodName;
 
   /**
-   * create a new instance of the ReturnType class
+   * Create a new instance of the ReturnType class
    *
    * @param typeNode     the JSON node of the type
    * @param isReturnList a value indicating whether the return type is a list
    * @param context      translation context for error message
    * @param methodName   method name with return type
    */
-  ReturnType(JsonNode typeNode, Boolean isReturnList, TranslationContext context, String methodName,
-      Integer errorCode) {
+  ReturnType(JsonNode typeNode, Boolean isReturnList, TranslationContext context, String methodName) {
     this.returnTypeJsonNode = typeNode;
     this.isReturnList = Boolean.TRUE.equals(isReturnList);
     this.methodName = methodName;
-    this.errorCode = errorCode;
     if (!isEmptyNode(typeNode)) {
       if (returnTypeJsonNode.isTextual()) {
         this.returnTypeString = returnTypeJsonNode.textValue();
@@ -63,19 +62,26 @@ public abstract class ReturnType {
     }
   }
 
+  /**
+   * Instance of ReturnType for abstract method that returns basic type
+   *
+   * @param basicReturnType basic type
+   * @param isReturnList    boolean to return list
+   */
   ReturnType(TypeProvider basicReturnType, Boolean isReturnList) {
     this.returnTypeJsonNode = null;
     this.returnTypeString = basicReturnType.getSimpleName();
     this.isReturnList = Boolean.TRUE.equals(isReturnList);
-    this.errorCode = -1;
     this.methodName = null;
   }
 
-  ReturnType() {
+  /**
+   * Instance of void return type
+   */
+  private ReturnType() {
     this.returnTypeJsonNode = null;
     this.returnTypeString = null;
     this.isReturnList = false;
-    this.errorCode = -1;
     this.methodName = null;
   }
 
@@ -135,9 +141,13 @@ public abstract class ReturnType {
     if (VOID.getSimpleName().equals(returnTypeString)) {
       return VOID;
     }
-    String errMessage = context
-        .getErrorMessage(errorCode, methodName, returnTypeString);
+    String errMessage = getUnsupportedReturnTypeErr(context);
     throw new UtamCompilationError(returnTypeJsonNode, errMessage);
+  }
+
+  String getUnsupportedReturnTypeErr(TranslationContext context) {
+    //for VOID or Basic return types this error never happens, otherwise overridden
+    return "";
   }
 
   /**
@@ -179,11 +189,16 @@ public abstract class ReturnType {
      */
     public AbstractMethodReturnType(JsonNode typeNode, Boolean isReturnList,
         TranslationContext context, String methodName) {
-      super(typeNode, isReturnList, context, methodName, 403);
+      super(typeNode, isReturnList, context, methodName);
       if (isReturnAllRedundant()) {
-        String errMessage = context.getErrorMessage(402, methodName);
-        throw new UtamCompilationError(typeNode, errMessage);
+        String returnAllRedundantErr = context.getErrorMessage(402, methodName);
+        throw new UtamCompilationError(typeNode, returnAllRedundantErr);
       }
+    }
+
+    @Override
+    String getUnsupportedReturnTypeErr(TranslationContext context) {
+      return context.getErrorMessage(403, methodName, returnTypeString);
     }
   }
 
@@ -231,10 +246,16 @@ public abstract class ReturnType {
      */
     public StatementReturnType(JsonNode typeNode, Boolean isReturnList, TranslationContext context,
         String methodName) {
-      super(typeNode, isReturnList, context, methodName, 602);
+      super(typeNode, isReturnList, context, methodName);
       if (isReturnAllRedundant()) {
-        throw new UtamCompilerIntermediateError(603, methodName);
+        String returnAllRedundantErr = context.getErrorMessage(603, methodName);
+        throw new UtamCompilationError(typeNode, returnAllRedundantErr);
       }
+    }
+
+    @Override
+    String getUnsupportedReturnTypeErr(TranslationContext context) {
+      return context.getErrorMessage(602, methodName, returnTypeString);
     }
   }
 }
