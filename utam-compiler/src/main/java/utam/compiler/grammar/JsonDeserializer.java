@@ -207,7 +207,8 @@ public final class JsonDeserializer extends
   }
 
   /**
-   * print node as a string. "toPrettyString()" can add extra quotes, so remove them
+   * Return node value as a string for error messages. "toPrettyString()" can add extra quotes, so remove them
+   *
    * @param node json node
    * @return string representation
    */
@@ -215,6 +216,7 @@ public final class JsonDeserializer extends
     if (isEmptyNode(node)) {
       return "null";
     }
+    // remove extra quotes, otherwise error message can have ""weird double quoted string""
     return node.toPrettyString().replaceAll("^\"|\"$", "");
   }
 

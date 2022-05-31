@@ -85,11 +85,14 @@ public abstract class ReturnType {
     this.methodName = null;
   }
 
+  /**
+   * Check if returnAll is set for null or void return type to later throw an error
+   *
+   * @return boolean
+   */
   final boolean isReturnAllRedundant() {
-    if (!Boolean.TRUE.equals(isReturnList)) {
-      return false;
-    }
-    return returnTypeString == null || "void".equals(returnTypeString);
+    return Boolean.TRUE.equals(isReturnList) && (returnTypeString == null || "void"
+        .equals(returnTypeString));
   }
 
   /**

@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.JsonDeserializer.nodeToString;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.compiler.types.BasicElementInterface.isBasicType;
@@ -17,10 +18,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import utam.compiler.UtamCompilationError;
-import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParametersContext;
 import utam.compiler.helpers.ReturnType;
@@ -57,13 +56,14 @@ class UtamInterfaceMethod extends UtamMethod {
   }
 
   /**
-   * check if "returnType" in an interface method returns basic type
+   * Check if "returnType" of an interface method returns basic type
    *
-   * @param returnTypeNode the node containing the return type
+   * @param returnTypeNode JSON node with return type
+   * @param context        context to build error message
    * @return true if it is
    */
-  private boolean isReturnBasicType(JsonNode returnTypeNode) {
-    if (returnTypeNode == null || returnTypeNode.isNull()) {
+  private boolean isReturnBasicType(JsonNode returnTypeNode, TranslationContext context) {
+    if (isEmptyNode(returnTypeNode)) {
       return false;
     }
     if (returnTypeNode.isTextual() && isBasicType(returnTypeNode.textValue())) {
@@ -72,7 +72,8 @@ class UtamInterfaceMethod extends UtamMethod {
     if (returnTypeNode.isArray()) {
       for (JsonNode valueNode : returnTypeNode) {
         if (!valueNode.isTextual() || !isBasicType(valueNode.textValue())) {
-          throw new UtamCompilerIntermediateError(returnTypeNode, 401, name, nodeToString(returnTypeNode));
+          String unsupportedArrayValueErr = context.getErrorMessage(401, name, nodeToString(returnTypeNode));
+          throw new UtamCompilationError(returnTypeNode, unsupportedArrayValueErr);
         }
       }
       return true;
@@ -82,7 +83,7 @@ class UtamInterfaceMethod extends UtamMethod {
 
   @Override
   PageObjectMethod getMethod(TranslationContext context) {
-    boolean isReturnsBasicType = isReturnBasicType(returnTypeNode);
+    boolean isReturnsBasicType = isReturnBasicType(returnTypeNode, context);
     final ReturnType returnTypeObject;
     if (isReturnsBasicType) {
       String errMessage = context.getErrorMessage(401, name, nodeToString(returnTypeNode));
