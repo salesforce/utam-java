@@ -20,13 +20,4 @@ public interface Clickable extends BasicElement {
    * Throws exception if nothing found within timeout. <br>
    */
   void click();
-
-  /**
-   * executes javascript "arguments[0].click();" to trick Selenium into clicking on the element that
-   * is not considered clickable by the Web Driver due to bug in driver or in LWC.
-   * @deprecated starting from chromedriver 87 and utam version 232.0.10, use click(): <br>
-   * because driver now throws exception, we are falling back in click() into same
-   */
-  @Deprecated
-  void javascriptClick();
 }
