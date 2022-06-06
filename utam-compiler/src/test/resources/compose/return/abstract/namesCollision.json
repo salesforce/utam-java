@@ -1,0 +1,13 @@
+{
+  "interface": true,
+  "methods": [
+    {
+      "returnType": "my/type1/Name",
+      "name": "test1"
+    },
+    {
+      "returnType": "my/type2/Name",
+      "name": "test2"
+    }
+  ]
+}

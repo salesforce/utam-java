@@ -1,0 +1,17 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "args": [
+        {
+          "value": "string literal"
+        }
+      ],
+      "compose": [
+        {
+          "element" : "root"
+        }
+      ]
+    }
+  ]
+}

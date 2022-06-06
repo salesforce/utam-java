@@ -175,7 +175,7 @@ public class PageObjectValidationTestHelper {
     assertThat(actualAnnotationTextList, is(equalTo(expectedAnnotationTextList)));
   }
 
-  private static void validateDeclaration(MethodDeclaration actual, MethodInfo expected) {
+  public static void validateDeclaration(MethodDeclaration actual, MethodInfo expected) {
     List<MethodParameter> actualParameters = actual.getParameters();
     assertThat(actual.getName(), is(equalTo(expected.name)));
     assertThat(

@@ -10,7 +10,7 @@ package utam.compiler.representation;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
-import static utam.compiler.representation.FrameMethod.FRAME_ELEMENT;
+import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
 import org.hamcrest.Matchers;

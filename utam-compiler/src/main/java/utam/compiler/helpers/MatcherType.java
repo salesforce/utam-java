@@ -101,6 +101,7 @@ public enum MatcherType {
    * Checks the operand is of the valid type
    *
    * @param operandType the operand type
+   * @return true if the operand type is the correct type; otherwise, false
    */
   public boolean isCorrectOperandType(TypeProvider operandType) {
     if (this == notNull) { // not null allows any type

@@ -184,12 +184,6 @@ public class BasePageElement extends UtamBaseImpl implements Actionable, Clickab
   }
 
   @Override
-  public void javascriptClick() {
-    log("deprecated javascript click");
-    getElement().deprecatedClick();
-  }
-
-  @Override
   public void flick(int xOffset, int yOffset) {
     log(String.format("flick element at X '%d' Y '%d'", xOffset, yOffset));
     String originalContext = getDriver().getPageContext();

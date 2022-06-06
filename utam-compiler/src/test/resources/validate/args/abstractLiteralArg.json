@@ -1,0 +1,14 @@
+{
+  "interface": true,
+  "methods": [
+    {
+      "name": "test",
+      "args": [
+        {
+          "value": "my/type/Name",
+          "type": "pageObject"
+        }
+      ]
+    }
+  ]
+}

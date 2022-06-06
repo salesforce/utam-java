@@ -8,6 +8,7 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.UtamCompilerIntermediateError.getJsonNodeType;
+import static utam.compiler.grammar.JsonDeserializer.nodeToString;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.compiler.grammar.UtamComposeMethod.isUsedAsChain;
 import static utam.compiler.grammar.UtamComposeMethod.processComposeNodes;
@@ -26,7 +27,7 @@ import static utam.compiler.helpers.TypeUtilities.W_PAGE_OBJECT_TYPE_PARAMETER;
 import static utam.compiler.helpers.TypeUtilities.W_ROOT_PAGE_OBJECT_TYPE_PARAMETER;
 import static utam.compiler.helpers.TypeUtilities.getPageObjectTypeParameter;
 import static utam.compiler.helpers.TypeUtilities.getRootPageObjectTypeParameter;
-import static utam.compiler.representation.FrameMethod.FRAME_ELEMENT;
+import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -188,7 +189,7 @@ abstract class UtamArgument {
               e.getMessage()));
     }
     throw new UtamCompilerIntermediateError(argNode, 102, parserContext,
-        valueNode.toPrettyString(), SUPPORTED_LITERALS);
+        nodeToString(valueNode), SUPPORTED_LITERALS);
   }
 
   /**
@@ -387,7 +388,7 @@ abstract class UtamArgument {
             i,
             isUsedAsChain(conditions, i),
             i == conditions.size() - 1 ? PREDICATE_LAST_STATEMENT : PREDICATE_STATEMENT,
-            condition.getDeclaredReturnType(methodContext.getName()));
+            condition.getDeclaredReturnType(context, methodContext.getName()));
         condition.checkBeforeLoadElements(context, methodContext);
         ComposeMethodStatement statement = condition
             .getComposeAction(context, methodContext, statementContext);

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.BasicElement;
+import utam.core.element.FrameElement;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.BaseRootPageObject;
 import utam.core.framework.base.ElementLocation;
@@ -154,6 +155,10 @@ public final class TypeUtilities {
    * A type provider for the BasicPageElement class
    */
   public static final TypeProvider BASIC_ELEMENT_IMPL_CLASS = new FromClass(BasePageElement.class);
+  /**
+   * A type provider representing a frame element
+   */
+  public static final TypeProvider FRAME_ELEMENT = new FromClass(FrameElement.class);
   /**
    * Bounded Root Page Object. Used as return type in container method or returned from compose.
    */
