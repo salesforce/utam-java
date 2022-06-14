@@ -18,12 +18,12 @@ import static org.testng.Assert.expectThrows;
 import static utam.core.driver.DriverConfig.DEFAULT_EXPLICIT_TIMEOUT;
 import static utam.core.driver.DriverConfig.DEFAULT_IMPLICIT_TIMEOUT;
 import static utam.core.driver.DriverConfig.DEFAULT_POLLING_INTERVAL;
-import static utam.core.framework.consumer.JsonLoaderConfig.ERR_CANT_FIND_LOADER_CONFIG;
-import static utam.core.framework.consumer.JsonLoaderConfig.ERR_READING_LOADER_CONFIG;
+import static utam.core.framework.consumer.JsonLoaderConfig.DeserializerFromUrl.ERR_CANT_FIND_LOADER_CONFIG;
 import static utam.core.framework.consumer.JsonLoaderConfig.loadConfig;
 
 import java.time.Duration;
 import org.testng.annotations.Test;
+import utam.core.framework.consumer.JsonLoaderConfig.DeserializerFromUrl;
 
 /**
  * @author elizaveta.ivanova
@@ -31,9 +31,13 @@ import org.testng.annotations.Test;
  */
 public class JsonLoaderConfigTests {
 
+  private static JsonLoaderConfig getConfig(String resource) {
+    return loadConfig(new DeserializerFromUrl(resource));
+  }
+
   @Test
   public void testValidLoaderConfig() {
-    JsonLoaderConfig config = loadConfig("loaderconfig/test_loader_config.json");
+    JsonLoaderConfig config = getConfig("loaderconfig/test_loader_config.json");
     assertThat(config.modules, hasSize(2));
     assertThat(config.modules, containsInAnyOrder("module1", "module2"));
     assertThat(config.bridgeAppTitle, is(equalTo("salesforce")));
@@ -44,7 +48,7 @@ public class JsonLoaderConfigTests {
 
   @Test
   public void testEmptyLoaderConfig() {
-    JsonLoaderConfig config = loadConfig("loaderconfig/test_empty_config.json");
+    JsonLoaderConfig config = getConfig("loaderconfig/test_empty_config.json");
     assertThat(config.modules, hasSize(0));
     assertThat(config.bridgeAppTitle, is(emptyString()));
     assertThat(config.explicitTimeout, is(equalTo(DEFAULT_EXPLICIT_TIMEOUT)));
@@ -63,16 +67,14 @@ public class JsonLoaderConfigTests {
   }
 
   @Test
-  public void testIncorrectJsonThrows() {
-    UtamError e = expectThrows(UtamError.class,
-        () -> JsonLoaderConfig.loadConfig("loaderconfig/test_incorrect_config.json"));
-    assertThat(e.getMessage(), containsString(ERR_READING_LOADER_CONFIG));
+  public void testJsonUnknownPropertiesDoNotThrow() {
+    getConfig("loaderconfig/test_incorrect_config.json");
   }
 
   @Test
   public void testNonExistingLoaderConfigThrows() {
     final String config = "i.do.not.exist";
-    UtamError e = expectThrows(UtamError.class, () -> loadConfig(config));
+    UtamError e = expectThrows(UtamError.class, () -> getConfig(config));
     assertThat(e.getMessage(), containsString(ERR_CANT_FIND_LOADER_CONFIG));
   }
 }

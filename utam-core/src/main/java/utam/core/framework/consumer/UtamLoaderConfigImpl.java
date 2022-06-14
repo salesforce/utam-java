@@ -21,6 +21,8 @@ import java.util.stream.Stream;
 import utam.core.driver.DriverConfig;
 import utam.core.framework.UtamLogger;
 import utam.core.framework.base.PageObject;
+import utam.core.framework.consumer.JsonLoaderConfig.DeserializerFromFile;
+import utam.core.framework.consumer.JsonLoaderConfig.DeserializerFromUrl;
 import utam.core.framework.context.Profile;
 import utam.core.framework.context.ProfileContext;
 import utam.core.framework.context.StringValueProfile;
@@ -43,11 +45,11 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
   private final Map<String, String> activeProfiles = new HashMap<>();
   // module names to read dependency injections
   private final Set<String> dependenciesModules;
-  // driver timeouts
+  // driver timeouts, assigned by default values until set
   private Duration implicitTimeout;
   private Duration explicitTimeout;
   private Duration pollingInterval;
-  // mobile bridge app title
+  // mobile bridge app title, by default empty string
   private String bridgeAppTitle;
 
   /**
@@ -57,7 +59,7 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
    *                           the loader
    */
   public UtamLoaderConfigImpl(String resourceWithConfig) {
-    this(loadConfig(resourceWithConfig));
+    this(loadConfig(new DeserializerFromUrl(resourceWithConfig)));
   }
 
   /**
@@ -66,7 +68,7 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
    * @param fileWithConfig a file containing configuration information to configure the loader
    */
   public UtamLoaderConfigImpl(File fileWithConfig) {
-    this(loadConfig(fileWithConfig));
+    this(loadConfig(new DeserializerFromFile(fileWithConfig)));
   }
 
   /**
@@ -127,10 +129,10 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
 
   @Override
   public PageObjectContext getPageContext() {
-    UtamLogger.info("Reload injection dependencies configurations");
+    UtamLogger.info("Reload dependency injections configurations");
     ProfileContext defaultProfileContext = getEmptyProfileContext();
     // different modules can have config for same profile
-    // key - profile key, value - reduced context
+    // map: key - profile key, value - profile context merged from multiple modules
     Map<String, ProfileContext> mergedContext = new HashMap<>();
     for (String moduleName : dependenciesModules) {
       Map<String, ProfileContext> moduleConfig = new JsonInjectionsConfig()
