@@ -1,6 +1,14 @@
 {
-  "name1": {
-    "value1": [
+  "custom": {
+    "two": [
+      {
+        "interface": "utam.core.framework.consumer.TestLoaderConfigPageObject",
+        "implementation": "utam.core.framework.consumer.impl.TestLoaderConfigPageObjectImpl"
+      }
+    ]
+  },
+  "default": {
+    "impl": [
       {
         "interface": "utam.core.framework.consumer.TestLoaderConfigDefault",
         "implementation": "utam.core.framework.consumer.TestLoaderConfigPageObjectProfile"

@@ -75,7 +75,7 @@ public class JsonInjectionsConfig {
    * @return list of found URLs
    * @throws IOException if file error happened
    */
-  List<URL> getDependenciesConfigResources(String filename) throws IOException {
+  private List<URL> getDependenciesConfigResources(String filename) throws IOException {
     return Collections.list(getClass().getClassLoader().getResources(filename));
   }
 

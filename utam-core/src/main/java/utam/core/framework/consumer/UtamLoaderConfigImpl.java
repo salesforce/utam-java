@@ -11,7 +11,6 @@ import static utam.core.framework.consumer.JsonLoaderConfig.loadConfig;
 import static utam.core.framework.context.DefaultProfileContext.getEmptyProfileContext;
 import static utam.core.framework.context.DefaultProfileContext.mergeBeans;
 import static utam.core.framework.context.DefaultProfileContext.mergeDependencies;
-import static utam.core.framework.context.DefaultProfileContext.mergeWithProperties;
 
 import java.io.File;
 import java.time.Duration;
@@ -35,19 +34,19 @@ import utam.core.framework.context.StringValueProfile;
 public class UtamLoaderConfigImpl implements UtamLoaderConfig {
 
   /**
-   * always an active profile in the loader, but has lower precedence than any other profiles
-   * that would implement the interface
+   * always an active profile in the loader, but has lower precedence than any other profiles that
+   * would implement the interface
    */
   public static final Profile DEFAULT_PROFILE = new StringValueProfile("default", "impl");
 
   // profiles that were set as active. it's a map because same profile should override old value
   private final Map<String, String> activeProfiles = new HashMap<>();
-  // profiles assigned to a module: key is module name, value is pairs of profileKey/profile
-  private final Map<String, Map<String, Profile>> pageObjectModules;
+  // module names to read dependency injections
+  private final Set<String> dependenciesModules;
   // driver timeouts
-  private Duration implicitTimeout = Duration.ZERO;
-  private Duration explicitTimeout = Duration.ofSeconds(20);
-  private Duration pollingInterval = Duration.ofMillis(200);
+  private Duration implicitTimeout;
+  private Duration explicitTimeout;
+  private Duration pollingInterval;
   // mobile bridge app title
   private String bridgeAppTitle;
 
@@ -83,11 +82,11 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
    * @param config loader config from json file
    */
   public UtamLoaderConfigImpl(JsonLoaderConfig config) {
-    this.pageObjectModules = config.getModuleToProfilesMapping();
-    DriverConfig driverConfig = config.driverConfig;
-    setImplicitTimeout(driverConfig.getImplicitTimeout());
-    setExplicitTimeout(driverConfig.getExplicitTimeout());
-    setPollingInterval(driverConfig.getPollingInterval());
+    this.dependenciesModules = config.modules;
+    this.implicitTimeout = config.implicitTimeout;
+    this.explicitTimeout = config.explicitTimeout;
+    this.pollingInterval = config.pollingInterval;
+    this.bridgeAppTitle = config.bridgeAppTitle;
   }
 
   /**
@@ -100,58 +99,16 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
     Stream.of(modules).forEach(this::setLoaderConfig);
   }
 
-  private void setModuleProfile(String moduleName, Profile profile) {
-    if (pageObjectModules.containsKey(moduleName)) {
-      pageObjectModules.get(moduleName).put(profile.getKey(), profile);
-    } else {
-      Map<String, Profile> map = new HashMap<>();
-      map.put(profile.getKey(), profile);
-      pageObjectModules.put(moduleName, map);
-    }
-  }
-
   @Override
   public void setProfile(Profile profile) {
-    UtamLogger.info(String.format("Set profile '%s' value to '%s'", profile.getName(), profile.getValue()));
+    UtamLogger.info(
+        String.format("Set profile '%s' value to '%s'", profile.getName(), profile.getValue()));
     activeProfiles.put(profile.getName(), profile.getValue());
-    Set<String> modules = getModules();
-    if (modules.isEmpty()) { //modules might not be set
-      setModuleProfile("", profile);
-    }
-    else {
-      for (String moduleName : getModules()) {
-        setModuleProfile(moduleName, profile);
-      }
-    }
   }
 
   @Override
   public void setLoaderConfig(String moduleName) {
-    pageObjectModules.put(moduleName, new HashMap<>());
-  }
-
-  /**
-   * different modules can have config for same profile. This method reduces it to one map
-   *
-   * @param defaultContext default context has to be collected separately
-   * @return map: key - profile key, value - reduced context
-   */
-  private Map<String, ProfileContext> reduceConfig(ProfileContext defaultContext) {
-    Map<String, ProfileContext> mergedConfigs = new HashMap<>();
-    for (String moduleName : getModules()) {
-      // from json
-      if (!moduleName.isEmpty()) {
-        Map<String, ProfileContext> moduleConfig = new JsonInjectionsConfig()
-            .readDependenciesConfig(moduleName);
-        mergeDependencies(mergedConfigs, defaultContext, moduleConfig);
-      }
-      // from properties
-      for (String profileKey : pageObjectModules.get(moduleName).keySet()) {
-        Profile profile = pageObjectModules.get(moduleName).get(profileKey);
-        mergeWithProperties(mergedConfigs, moduleName, profile);
-      }
-    }
-    return mergedConfigs;
+    dependenciesModules.add(moduleName);
   }
 
   /**
@@ -165,20 +122,28 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
       Map<String, ProfileContext> mergedContext) {
     String profileValue = activeProfiles.get(profileName);
     String profileKey = new StringValueProfile(profileName, profileValue).getKey();
-    return mergedContext.get(profileKey);
+    return mergedContext.containsKey(profileKey)? mergedContext.get(profileKey) : getEmptyProfileContext();
   }
 
   @Override
   public PageObjectContext getPageContext() {
     UtamLogger.info("Reload injection dependencies configurations");
     ProfileContext defaultProfileContext = getEmptyProfileContext();
-    Map<String, ProfileContext> mergedContext = reduceConfig(defaultProfileContext);
+    // different modules can have config for same profile
+    // key - profile key, value - reduced context
+    Map<String, ProfileContext> mergedContext = new HashMap<>();
+    for (String moduleName : dependenciesModules) {
+      Map<String, ProfileContext> moduleConfig = new JsonInjectionsConfig()
+            .readDependenciesConfig(moduleName);
+      mergeDependencies(mergedContext, defaultProfileContext, moduleConfig);
+    }
     Map<Class<? extends PageObject>, Class> beans = new HashMap<>();
     for (String profileName : activeProfiles.keySet()) {
       ProfileContext profileContext = getProfileContext(profileName, mergedContext);
       mergeBeans(beans, profileContext);
     }
-    Map<Class<? extends PageObject>, Class> defaultBeans = mergeBeans(new HashMap<>(), defaultProfileContext);
+    Map<Class<? extends PageObject>, Class> defaultBeans = mergeBeans(new HashMap<>(),
+        defaultProfileContext);
     return new PageObjectContextImpl(beans, defaultBeans);
   }
 
@@ -205,9 +170,5 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
   @Override
   public DriverConfig getDriverConfig() {
     return new DriverConfig(implicitTimeout, explicitTimeout, pollingInterval, bridgeAppTitle);
-  }
-
-  private Set<String> getModules() {
-    return pageObjectModules.keySet();
   }
 }

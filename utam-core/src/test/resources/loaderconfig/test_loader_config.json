@@ -1,0 +1,7 @@
+{
+  "dependencies" : [ "module1", "module2"],
+  "implicitTimeout": 0,
+  "explicitTimeout": 60000,
+  "pollingInterval": 200,
+  "bridgeAppTitle" : "salesforce"
+}

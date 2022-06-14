@@ -78,22 +78,6 @@ public class JsonInjectionsConfigTests {
   }
 
   @Test
-  public void testReloadingProfileCombineWithProperties() {
-    UtamLoaderConfig loaderConfig = new UtamLoaderConfigImpl("config/module1", "config/module3");
-    // read from module1.config.json
-    loaderConfig.setProfile(new StringValueProfile("name", "value1"));
-    PageObjectContext pageObjectContext = loaderConfig.getPageContext();
-    PageObject instance = pageObjectContext.getBean(TestLoaderConfigPageObject.class);
-    assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
-
-    // read from module3_name_value2_config.properties
-    loaderConfig.setProfile(new StringValueProfile("name", "value2"));
-    pageObjectContext = loaderConfig.getPageContext();
-    instance = pageObjectContext.getBean(TestLoaderConfigPageObject.class);
-    assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
-  }
-
-  @Test
   public void testMergingTwoJsonConfigs() {
     UtamLoaderConfig loaderConfig = new UtamLoaderConfigImpl("config/module1", "config/module2");
     loaderConfig.setProfile(new StringValueProfile("name2", "value2"));
@@ -115,9 +99,9 @@ public class JsonInjectionsConfigTests {
     PageObject instance = pageObjectContext.getBean(TestLoaderConfigDefault.class);
     assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
 
-    // read from module2_test_one.config.json
+    // read from module2.config.json
     instance = pageObjectContext.getBean(TestLoaderConfigPageObject.class);
-    assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
+    assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
   }
 
   @Test
