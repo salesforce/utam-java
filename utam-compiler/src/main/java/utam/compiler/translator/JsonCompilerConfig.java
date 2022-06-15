@@ -80,7 +80,8 @@ public class JsonCompilerConfig {
   }
 
   private static String getConfigLoggerMessage(String optionName, Object optionValue) {
-    return String.format("Compiler config: %s is set to %s", optionName, optionValue.toString());
+    String value = optionValue == null ? "null" : optionValue.toString();
+    return String.format("Compiler config: %s is set to %s", optionName, value);
   }
 
   /**
