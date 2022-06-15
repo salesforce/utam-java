@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.translator.DefaultSourceConfiguration.FilesScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
@@ -36,6 +37,7 @@ import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorSourceConfig;
 import utam.core.declarative.translator.TranslatorTargetConfig;
 import utam.core.declarative.translator.UnitTestRunner;
+import utam.core.framework.UtamLogger;
 
 /**
  * JSON based config for UTAM compiler
@@ -46,18 +48,11 @@ import utam.core.declarative.translator.UnitTestRunner;
 public class JsonCompilerConfig {
 
   static final String ERR_READING_COMPILER_CONFIG = "Error reading compiler config '%s'";
+  private static final String CONFIG_LOGGER_MESSAGE = "Compiler config: %s is set to %s";
 
   private final Module moduleConfig;
   private final String filePathsRoot;
   private final List<File> inputFiles;
-
-  private static ObjectMapper getJsonCompilerMapper() {
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.enable(ALLOW_COMMENTS);
-    // for compatibility with possible JS options - ignore unknown properties
-    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    return mapper;
-  }
 
   /**
    * Initializes a new instance of the JsonCompilerConfig class
@@ -68,8 +63,14 @@ public class JsonCompilerConfig {
    */
   public JsonCompilerConfig(File configFile, File compilerRoot, List<File> fileList) throws IOException {
     try {
-      moduleConfig = getJsonCompilerMapper().readValue(configFile, Module.class);
+      ObjectMapper mapper = new ObjectMapper();
+      mapper.enable(ALLOW_COMMENTS);
+      // config can contain custom properties, for example shared by JS and Java
+      mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+      UtamLogger.info("Read compiler config " + configFile.toString());
+      moduleConfig = mapper.readValue(configFile, Module.class);
       filePathsRoot = compilerRoot.toString();
+      UtamLogger.info(String.format(CONFIG_LOGGER_MESSAGE, "compiler root", filePathsRoot));
       inputFiles = new ArrayList<>();
       if (fileList != null) {
         inputFiles.addAll(fileList);
@@ -222,13 +223,34 @@ public class JsonCompilerConfig {
         @JsonProperty(value = "copyright") List<String> copyright
     ) {
       this.pageObjectsRootDirectory = pageObjectsRootDirectory;
-      this.namespaces.addAll(Objects.requireNonNullElse(namespaces, new ArrayList<>()));
-      setUniqueProfiles(profiles);
+      UtamLogger.info(String.format(CONFIG_LOGGER_MESSAGE, "pageObjectsRootDir", pageObjectsRootDirectory));
       this.pageObjectFileMaskRegex = Objects.requireNonNullElse(filesMaskRegex, DEFAULT_JSON_FILE_MASK_REGEX);
+      UtamLogger.info(String.format(CONFIG_LOGGER_MESSAGE, "pageObjectsFilesMask", pageObjectFileMaskRegex));
       this.pageObjectsOutputDir = pageObjectsOutputDir;
+      UtamLogger
+          .info(String.format(CONFIG_LOGGER_MESSAGE, "pageObjectsOutputDir", pageObjectsOutputDir));
       this.resourcesOutputDir = resourcesOutputDir;
+      UtamLogger
+          .info(String.format(CONFIG_LOGGER_MESSAGE, "resourcesOutputDir", resourcesOutputDir));
       this.unitTestsOutputDir = validateUnitTestDirectory(unitTestRunner, unitTestDirectory);
+      if (unitTestDirectory != null) {
+        UtamLogger.info(
+            String.format(CONFIG_LOGGER_MESSAGE, "unitTestsOutputDir", this.unitTestsOutputDir));
+      }
       this.unitTestRunnerType = Objects.requireNonNullElse(unitTestRunner, NONE);
+      if (unitTestRunner != null) {
+        UtamLogger.info(String.format(CONFIG_LOGGER_MESSAGE, "unitTestRunner", unitTestRunner));
+      }
+      this.namespaces.addAll(Objects.requireNonNullElse(namespaces, new ArrayList<>()));
+      String namespacesString = this.namespaces.stream().map(n -> n.typePrefix)
+          .collect(Collectors.joining(", "));
+      UtamLogger
+          .info(String.format(CONFIG_LOGGER_MESSAGE, "namespaces", "[ " + namespacesString + " ]"));
+      setUniqueProfiles(profiles);
+      String profilesString = this.profiles.stream().map(p -> p.name)
+          .collect(Collectors.joining(", "));
+      UtamLogger
+          .info(String.format(CONFIG_LOGGER_MESSAGE, "profiles", "[ " + profilesString + " ]"));
       this.outputOptions = new CompilerOutputOptions(
           Objects.requireNonNullElse(moduleName, ""),
           Objects.requireNonNullElse(pageObjectsVersion, ""),

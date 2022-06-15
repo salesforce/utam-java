@@ -66,7 +66,6 @@ public class JsonCompilerConfigTests {
     JsonCompilerConfig config = getTestConfig();
     assertThat(config.getModuleName(), is(equalTo("myModule")));
     assertThat(config.getVersion(), is(equalTo("myVersion")));
-
     Module module = config.getModule();
     assertThat(module.getPageObjectsRootDirectory(), is(equalTo("/src/test/resources/spec")));
     assertThat(module.getPageObjectsOutputDir(), is(equalTo("/src/test/java/pageObjects")));
