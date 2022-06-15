@@ -10,6 +10,7 @@ package utam.compiler.translator;
 import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_COMMENTS;
 import static utam.core.declarative.translator.UnitTestRunner.NONE;
 import static utam.core.declarative.translator.UnitTestRunner.validateUnitTestDirectory;
+import static utam.core.framework.UtamLogger.info;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -37,7 +38,6 @@ import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorSourceConfig;
 import utam.core.declarative.translator.TranslatorTargetConfig;
 import utam.core.declarative.translator.UnitTestRunner;
-import utam.core.framework.UtamLogger;
 
 /**
  * JSON based config for UTAM compiler
@@ -48,7 +48,6 @@ import utam.core.framework.UtamLogger;
 public class JsonCompilerConfig {
 
   static final String ERR_READING_COMPILER_CONFIG = "Error reading compiler config '%s'";
-  private static final String CONFIG_LOGGER_MESSAGE = "Compiler config: %s is set to %s";
 
   private final Module moduleConfig;
   private final String filePathsRoot;
@@ -67,10 +66,10 @@ public class JsonCompilerConfig {
       mapper.enable(ALLOW_COMMENTS);
       // config can contain custom properties, for example shared by JS and Java
       mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-      UtamLogger.info("Read compiler config " + configFile.toString());
+      info("Read compiler config " + configFile.toString());
       moduleConfig = mapper.readValue(configFile, Module.class);
       filePathsRoot = compilerRoot.toString();
-      UtamLogger.info(String.format(CONFIG_LOGGER_MESSAGE, "compiler root", filePathsRoot));
+      info(getConfigLoggerMessage("compiler root", filePathsRoot));
       inputFiles = new ArrayList<>();
       if (fileList != null) {
         inputFiles.addAll(fileList);
@@ -78,6 +77,10 @@ public class JsonCompilerConfig {
     } catch (IOException e) {
       throw new IOException(String.format(ERR_READING_COMPILER_CONFIG, configFile.toString()), e);
     }
+  }
+
+  private static String getConfigLoggerMessage(String optionName, Object optionValue) {
+    return String.format("Compiler config: %s is set to %s", optionName, optionValue.toString());
   }
 
   /**
@@ -223,34 +226,33 @@ public class JsonCompilerConfig {
         @JsonProperty(value = "copyright") List<String> copyright
     ) {
       this.pageObjectsRootDirectory = pageObjectsRootDirectory;
-      UtamLogger.info(String.format(CONFIG_LOGGER_MESSAGE, "pageObjectsRootDir", pageObjectsRootDirectory));
+      info(getConfigLoggerMessage("pageObjectsRootDir", pageObjectsRootDirectory));
+
       this.pageObjectFileMaskRegex = Objects.requireNonNullElse(filesMaskRegex, DEFAULT_JSON_FILE_MASK_REGEX);
-      UtamLogger.info(String.format(CONFIG_LOGGER_MESSAGE, "pageObjectsFilesMask", pageObjectFileMaskRegex));
+      info(getConfigLoggerMessage("pageObjectsFilesMask", pageObjectFileMaskRegex));
+
       this.pageObjectsOutputDir = pageObjectsOutputDir;
-      UtamLogger
-          .info(String.format(CONFIG_LOGGER_MESSAGE, "pageObjectsOutputDir", pageObjectsOutputDir));
+      info(getConfigLoggerMessage("pageObjectsOutputDir", pageObjectsOutputDir));
+
       this.resourcesOutputDir = resourcesOutputDir;
-      UtamLogger
-          .info(String.format(CONFIG_LOGGER_MESSAGE, "resourcesOutputDir", resourcesOutputDir));
+      info(getConfigLoggerMessage("resourcesOutputDir", resourcesOutputDir));
+
       this.unitTestsOutputDir = validateUnitTestDirectory(unitTestRunner, unitTestDirectory);
-      if (unitTestDirectory != null) {
-        UtamLogger.info(
-            String.format(CONFIG_LOGGER_MESSAGE, "unitTestsOutputDir", this.unitTestsOutputDir));
-      }
+      info(getConfigLoggerMessage("unitTestsOutputDir", this.unitTestsOutputDir));
+
       this.unitTestRunnerType = Objects.requireNonNullElse(unitTestRunner, NONE);
-      if (unitTestRunner != null) {
-        UtamLogger.info(String.format(CONFIG_LOGGER_MESSAGE, "unitTestRunner", unitTestRunner));
-      }
+      info(getConfigLoggerMessage("unitTestRunner", unitTestRunner));
+
       this.namespaces.addAll(Objects.requireNonNullElse(namespaces, new ArrayList<>()));
       String namespacesString = this.namespaces.stream().map(n -> n.typePrefix)
           .collect(Collectors.joining(", "));
-      UtamLogger
-          .info(String.format(CONFIG_LOGGER_MESSAGE, "namespaces", "[ " + namespacesString + " ]"));
+      info(getConfigLoggerMessage("namespaces", "[ " + namespacesString + " ]"));
+
       setUniqueProfiles(profiles);
       String profilesString = this.profiles.stream().map(p -> p.name)
           .collect(Collectors.joining(", "));
-      UtamLogger
-          .info(String.format(CONFIG_LOGGER_MESSAGE, "profiles", "[ " + profilesString + " ]"));
+      info(getConfigLoggerMessage("profiles", "[ " + profilesString + " ]"));
+
       this.outputOptions = new CompilerOutputOptions(
           Objects.requireNonNullElse(moduleName, ""),
           Objects.requireNonNullElse(pageObjectsVersion, ""),
