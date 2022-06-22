@@ -1,9 +1,6 @@
 package utam.core.framework.consumer;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
-import static utam.core.driver.DriverConfig.DEFAULT_EXPLICIT_TIMEOUT;
-import static utam.core.driver.DriverConfig.DEFAULT_IMPLICIT_TIMEOUT;
-import static utam.core.driver.DriverConfig.DEFAULT_POLLING_INTERVAL;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,8 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.time.Duration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import utam.core.framework.UtamCoreError;
 
@@ -24,44 +21,27 @@ import utam.core.framework.UtamCoreError;
  */
 class JsonLoaderConfig {
 
-  final Set<String> modules;
-  // driver timeouts
-  final Duration implicitTimeout;
-  final Duration explicitTimeout;
-  final Duration pollingInterval;
-  // mobile bridge app title
-  final String bridgeAppTitle;
+  final Set<String> injectionConfigs;
 
   /**
-   * @param bridgeAppTitleStr   mobile only: bridge app title
-   * @param implicitTimeoutMsec implicit timeout in msec
-   * @param explicitTimeoutMsec explicit timeout in msec
-   * @param pollingIntervalMsec polling interval in msec
-   * @param modules             list of dependencies modules
+   * Create an instance of loader config
+   *
+   * @param injectionConfigs list of injection configs files names
    */
   @JsonCreator
   JsonLoaderConfig(
-      @JsonProperty(value = "bridgeAppTitle") String bridgeAppTitleStr,
-      @JsonProperty(value = "implicitTimeout") Integer implicitTimeoutMsec,
-      @JsonProperty(value = "explicitTimeout") Integer explicitTimeoutMsec,
-      @JsonProperty(value = "pollingInterval") Integer pollingIntervalMsec,
-      @JsonProperty(value = "dependencies") Set<String> modules) {
-    // default has to be empty string, not null
-    this.bridgeAppTitle = bridgeAppTitleStr == null ? "" : bridgeAppTitleStr;
-    this.implicitTimeout = implicitTimeoutMsec == null ? DEFAULT_IMPLICIT_TIMEOUT
-        : Duration.ofMillis(implicitTimeoutMsec);
-    this.explicitTimeout = explicitTimeoutMsec == null ? DEFAULT_EXPLICIT_TIMEOUT
-        : Duration.ofMillis(explicitTimeoutMsec);
-    this.pollingInterval = pollingIntervalMsec == null ? DEFAULT_POLLING_INTERVAL
-        : Duration.ofMillis(pollingIntervalMsec);
-    this.modules = modules == null ? new HashSet<>() : modules;
+      @JsonProperty(value = "injectionConfigs") Set<String> injectionConfigs) {
+    this.injectionConfigs = new HashSet<>();
+    if(injectionConfigs != null) {
+      this.injectionConfigs.addAll(injectionConfigs);
+    }
   }
 
   /**
    * create empty loader config without JSON file
    */
   JsonLoaderConfig() {
-    this("", null, null, null, null);
+    this(null);
   }
 
   /**
@@ -74,7 +54,7 @@ class JsonLoaderConfig {
     try {
       return deserializer.deserialize();
     } catch (IOException e) {
-      throw new UtamCoreError(deserializer.getErrorMessage(), e);
+      throw new RuntimeException(deserializer.getErrorMessage(), e);
     }
   }
 
@@ -84,7 +64,7 @@ class JsonLoaderConfig {
    * @author elizaveta.ivanova
    * @since 240
    */
-  private static abstract class Deserializer {
+  static abstract class Deserializer {
 
     static final String ERR_READING_LOADER_CONFIG = "error while reading loader config ";
 
@@ -94,7 +74,7 @@ class JsonLoaderConfig {
 
     final ObjectMapper getJsonMapper() {
       ObjectMapper mapper = new ObjectMapper();
-      mapper.disable(FAIL_ON_UNKNOWN_PROPERTIES);
+      mapper.enable(FAIL_ON_UNKNOWN_PROPERTIES);
       return mapper;
     }
 

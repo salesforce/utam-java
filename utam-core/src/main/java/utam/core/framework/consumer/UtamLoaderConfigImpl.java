@@ -7,6 +7,9 @@
  */
 package utam.core.framework.consumer;
 
+import static utam.core.driver.DriverConfig.DEFAULT_EXPLICIT_TIMEOUT;
+import static utam.core.driver.DriverConfig.DEFAULT_IMPLICIT_TIMEOUT;
+import static utam.core.driver.DriverConfig.DEFAULT_POLLING_INTERVAL;
 import static utam.core.framework.consumer.JsonLoaderConfig.loadConfig;
 import static utam.core.framework.context.DefaultProfileContext.getEmptyProfileContext;
 import static utam.core.framework.context.DefaultProfileContext.mergeBeans;
@@ -14,10 +17,10 @@ import static utam.core.framework.context.DefaultProfileContext.mergeDependencie
 
 import java.io.File;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 import utam.core.driver.DriverConfig;
 import utam.core.framework.UtamLogger;
 import utam.core.framework.base.PageObject;
@@ -84,11 +87,11 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
    * @param config loader config from json file
    */
   public UtamLoaderConfigImpl(JsonLoaderConfig config) {
-    this.dependenciesModules = config.modules;
-    this.implicitTimeout = config.implicitTimeout;
-    this.explicitTimeout = config.explicitTimeout;
-    this.pollingInterval = config.pollingInterval;
-    this.bridgeAppTitle = config.bridgeAppTitle;
+    this.dependenciesModules = config.injectionConfigs;
+    this.implicitTimeout = DEFAULT_IMPLICIT_TIMEOUT;
+    this.explicitTimeout = DEFAULT_EXPLICIT_TIMEOUT;
+    this.pollingInterval = DEFAULT_POLLING_INTERVAL;
+    this.bridgeAppTitle = "";
   }
 
   /**
@@ -98,7 +101,7 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
    */
   UtamLoaderConfigImpl(String... modules) {
     this();
-    Stream.of(modules).forEach(this::setLoaderConfig);
+    dependenciesModules.addAll(Arrays.asList(modules));
   }
 
   @Override
@@ -106,11 +109,6 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
     UtamLogger.info(
         String.format("Set profile '%s' value to '%s'", profile.getName(), profile.getValue()));
     activeProfiles.put(profile.getName(), profile.getValue());
-  }
-
-  @Override
-  public void setLoaderConfig(String moduleName) {
-    dependenciesModules.add(moduleName);
   }
 
   /**

@@ -88,8 +88,7 @@ public class UtamLoaderConfigTests {
 
   @Test
   public void testDefaultConfigMissingThrows() {
-    UtamLoaderConfig config = new UtamLoaderConfigImpl();
-    config.setLoaderConfig("module1");
+    UtamLoaderConfig config = new UtamLoaderConfigImpl("loaderconfig/test_one_module_loader_config.json");
     PageObjectContext context = config.getPageContext();
     UtamError e = expectThrows(UtamError.class,
         () -> context.getBean(TestLoaderConfigDefault.class));
