@@ -21,6 +21,7 @@ import static org.mockito.Mockito.refEq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.element.ElementAdapter.BLUR_VIA_JAVASCRIPT;
@@ -35,7 +36,9 @@ import static utam.core.selenium.element.LocatorBy.byCss;
 import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR_ALL;
 
 import java.util.Collections;
+import java.util.List;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -53,32 +56,84 @@ import utam.core.element.Element.ScrollOptions;
  */
 public class ElementAdapterTests {
 
-  @Test
-  public void testFind() {
-    MockUtilities mock = new MockUtilities();
-    WebElement foundMock = mock(WebElement.class);
-    Element test = mock.getElementAdapter();
-    when(mock.getWebElementMock().findElement(By.cssSelector("css")))
-        .thenReturn(foundMock);
-    ElementAdapter found = (ElementAdapter) test.findElement(byCss("css"));
-    assertThat(found.getWebElement(), is(sameInstance(foundMock)));
-    assertThrows(() -> test.findElement(byCss("css1")));
-    when(mock.getWebElementMock().findElements(By.cssSelector("css")))
-        .thenReturn(Collections.singletonList(mock(WebElement.class)));
-    assertThat(test.findElements(byCss("css")),
-        is(not(empty())));
-    assertThrows(() -> test.findElements(byCss("css1")));
+  final static String NOT_FOUND_SELECTOR = "not_found";
+  final static String ELEMENT_NOT_FOUND_ERROR = "can't find element with locator 'By.cssSelector: not_found'";
+
+  static ElementAdapter findNotNullable(LocatorBy locator, Element scope) {
+    return  (ElementAdapter) scope.findElement(locator, false);
+  }
+
+  static ElementAdapter findNullable(LocatorBy locator, Element scope) {
+    Element res = scope.findElement(locator, true);
+    return res == null? null : (ElementAdapter) res;
+  }
+
+  static List<Element> findNotNullables(LocatorBy locator, Element scope) {
+    return  scope.findElements(locator, false);
+  }
+
+  static List<Element> findNullables(LocatorBy locator, Element scope) {
+    return scope.findElements(locator, true);
   }
 
   @Test
-  public void testFindInShadow() {
+  public void testFindElement() {
     MockUtilities mock = new MockUtilities();
-    mock.setShadowMock(mock.getWebElementMock(), "css");
-    Element test = new ShadowRootElementAdapter(mock.getElementAdapter());
-    assertThat(test.findElement(byCss("css")), is(notNullValue()));
-    assertThrows(() -> test.findElement(byCss("css1")));
-    assertThat(test.findElements(byCss("css")), is(not(empty())));
-    assertThrows(() -> test.findElements(byCss("css1")));
+    WebElement foundMock = mock(WebElement.class);
+    Element scope = mock.getElementAdapter();
+    final String FOUND_SELECTOR = "found";
+    when(mock.getWebElementMock().findElement(By.cssSelector(FOUND_SELECTOR)))
+        .thenReturn(foundMock);
+    ElementAdapter found = findNotNullable(byCss(FOUND_SELECTOR), scope);
+    assertThat(found.getWebElement(), is(sameInstance(foundMock)));
+  }
+
+  @Test
+  public void testFindElementNotFound() {
+    Element scope = new MockUtilities().getElementAdapter();
+    Exception e = expectThrows(NoSuchElementException.class, () -> findNotNullable(byCss(NOT_FOUND_SELECTOR), scope));
+    assertThat(e.getMessage(), containsString(ELEMENT_NOT_FOUND_ERROR));
+  }
+
+  @Test
+  public void testFindElementNullable() {
+    MockUtilities mock = new MockUtilities();
+    WebElement foundMock = mock(WebElement.class);
+    Element scope = mock.getElementAdapter();
+    final String FOUND_SELECTOR = "found";
+    when(mock.getWebElementMock().findElement(By.cssSelector(FOUND_SELECTOR)))
+        .thenReturn(foundMock);
+    ElementAdapter found = findNullable(byCss(FOUND_SELECTOR), scope);
+    assertThat(found.getWebElement(), is(sameInstance(foundMock)));
+  }
+
+  @Test
+  public void testFindElementNullableNotFound() {
+    Element scope = new MockUtilities().getElementAdapter();
+    assertNull(findNullable(byCss(NOT_FOUND_SELECTOR), scope));
+  }
+
+  @Test
+  public void testFindElements() {
+    MockUtilities mock = new MockUtilities();
+    Element test = mock.getElementAdapter();
+    final String FOUND_SELECTOR = "found";
+    when(mock.getWebElementMock().findElements(By.cssSelector(FOUND_SELECTOR)))
+        .thenReturn(Collections.singletonList(mock(WebElement.class)));
+    assertThat(findNotNullables(byCss(FOUND_SELECTOR), test), is(not(empty())));
+  }
+
+  @Test
+  public void testFindElementsNotFound() {
+    Element scope = new MockUtilities().getElementAdapter();
+    Exception e = expectThrows(NoSuchElementException.class, () -> findNotNullables(byCss(NOT_FOUND_SELECTOR), scope));
+    assertThat(e.getMessage(), containsString(ELEMENT_NOT_FOUND_ERROR));
+  }
+
+  @Test
+  public void testFindElementsNullableNotFound() {
+    Element scope = new MockUtilities().getElementAdapter();
+    assertNull(findNullables(byCss(NOT_FOUND_SELECTOR), scope));
   }
 
   @Test

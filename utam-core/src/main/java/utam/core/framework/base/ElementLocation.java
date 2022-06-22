@@ -37,16 +37,6 @@ public final class ElementLocation {
     return new ShadowRootElementAdapter(scope);
   }
 
-  private boolean isNullableAndNull(Element scope) {
-    if (!findContext.isNullable()) {
-      return false;
-    }
-    if (scope == null) {
-      return true;
-    }
-    return scope.containsElements(locator) <= 0;
-  }
-
   /**
    * apply parameters to locator and find element or return null
    *
@@ -55,11 +45,12 @@ public final class ElementLocation {
    */
   ElementFound find(Element scopeElement) {
     Element transformedScope = transformScope(scopeElement);
-    if (isNullableAndNull(transformedScope)) {
+    if (scopeElement == null && findContext.isNullable()) {
       return null;
     }
-    Element foundElement = transformedScope.findElement(locator);
-    return new ElementFound(locator, foundElement);
+    Element foundElement = transformedScope.findElement(locator, findContext.isNullable());
+    // null only returned for nullable
+    return foundElement == null? null : new ElementFound(locator, foundElement);
   }
 
   /**
@@ -70,10 +61,14 @@ public final class ElementLocation {
    */
   List<ElementFound> findList(Element scopeElement) {
     Element transformedScope = transformScope(scopeElement);
-    if (isNullableAndNull(transformedScope)) {
+    if (scopeElement == null && findContext.isNullable()) {
       return null;
     }
-    List<Element> foundList = transformedScope.findElements(locator);
+    List<Element> foundList = transformedScope.findElements(locator, findContext.isNullable());
+    // null only returned for nullable
+    if(foundList == null) {
+      return null;
+    }
     return foundList
         .stream()
         .map(e -> new ElementFound(locator, e))

@@ -109,10 +109,13 @@ public class ElementAdapter implements Element {
 
   @Override
   @SuppressWarnings("rawtypes")
-  public Element findElement(Locator locator) {
+  public Element findElement(Locator locator, boolean isNullable) {
     By by = ((LocatorBy) locator).getValue();
     WebElement res = getWebElement().findElement(by);
     if (res == null) { //this can happen for mock in unit tests
+      if(isNullable) {
+        return null;
+      }
       throw new NoSuchElementException(getNotFoundErr(locator));
     }
     return wrapElement(res);
@@ -120,10 +123,13 @@ public class ElementAdapter implements Element {
 
   @Override
   @SuppressWarnings("rawtypes")
-  public List<Element> findElements(Locator locator) {
+  public List<Element> findElements(Locator locator, boolean isNullable) {
     By by = ((LocatorBy) locator).getValue();
     List<WebElement> found = getWebElement().findElements(by);
     if (found == null || found.isEmpty()) {
+      if(isNullable) {
+        return null;
+      }
       throw new NoSuchElementException(getNotFoundErr(locator));
     }
     return found.stream().map(this::wrapElement).collect(Collectors.toList());

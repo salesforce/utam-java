@@ -20,19 +20,20 @@ public interface Element {
   /**
    * find and element with a given locator inside current element
    *
-   * @param by                 locator
-   * @return instance of the found element or "null" element (with isNull returning true) for
-   * nullable context
+   * @param by         locator
+   * @param isNullable boolean, true if element can be absent
+   * @return instance of the found element or null for nullable
    */
-  Element findElement(Locator by);
+  Element findElement(Locator by, boolean isNullable);
 
   /**
    * find all elements with a given locator inside current element
    *
-   * @param by            locator
-   * @return list of found elements or empty list for nullable context
+   * @param by         locator
+   * @param isNullable boolean, true if element can be absent
+   * @return list of found elements or empty list for nullable
    */
-  List<Element> findElements(Locator by);
+  List<Element> findElements(Locator by, boolean isNullable);
 
   /**
    * get number of elements with a given locator inside current element

@@ -14,11 +14,22 @@ import org.testng.annotations.Test;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import utam.core.MockUtilities;
+import utam.core.element.Element;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.expectThrows;
+import static utam.core.selenium.element.ElementAdapterTests.ELEMENT_NOT_FOUND_ERROR;
+import static utam.core.selenium.element.ElementAdapterTests.NOT_FOUND_SELECTOR;
+import static utam.core.selenium.element.ElementAdapterTests.findNotNullable;
+import static utam.core.selenium.element.ElementAdapterTests.findNotNullables;
+import static utam.core.selenium.element.ElementAdapterTests.findNullable;
+import static utam.core.selenium.element.ElementAdapterTests.findNullables;
+import static utam.core.selenium.element.LocatorBy.byCss;
 import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR;
 import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR_ALL;
 
@@ -311,5 +322,68 @@ public class ShadowRootWebElementTests {
     assertThat(
         ShadowRootWebElement.getElementsWithFirefoxWorkaround(map),
         is(equalTo(Collections.singletonList(shadowRootWebElement))));
+  }
+
+  @Test
+  public void testFindElementInShadow() {
+    MockUtilities mock = new MockUtilities();
+    final String FOUND_SELECTOR = "found";
+    mock.setShadowMock(mock.getWebElementMock(), FOUND_SELECTOR);
+    Element scope = new ShadowRootElementAdapter(mock.getElementAdapter());
+    assertThat(findNotNullable(byCss(FOUND_SELECTOR), scope), is(notNullValue()));
+  }
+
+  @Test
+  public void testFindNullableElementInShadow() {
+    MockUtilities mock = new MockUtilities();
+    final String FOUND_SELECTOR = "found";
+    mock.setShadowMock(mock.getWebElementMock(), FOUND_SELECTOR);
+    Element scope = new ShadowRootElementAdapter(mock.getElementAdapter());
+    assertThat(findNullable(byCss(FOUND_SELECTOR), scope), is(notNullValue()));
+  }
+
+  @Test
+  public void testFindElementInShadowNotFound() {
+    Element scope = new ShadowRootElementAdapter(new MockUtilities().getElementAdapter());
+    Exception e = expectThrows(NoSuchElementException.class, () -> findNotNullable(byCss(NOT_FOUND_SELECTOR), scope));
+    assertThat(e.getMessage(), containsString(ELEMENT_NOT_FOUND_ERROR));
+  }
+
+  @Test
+  public void testFindNullableElementInShadowNotFound() {
+    Element scope = new ShadowRootElementAdapter(new MockUtilities().getElementAdapter());
+    assertNull(findNullable(byCss(NOT_FOUND_SELECTOR), scope));
+  }
+
+  @Test
+  public void testFindElementsInShadow() {
+    MockUtilities mock = new MockUtilities();
+    final String FOUND_SELECTOR = "found";
+    mock.setShadowMock(mock.getWebElementMock(), FOUND_SELECTOR);
+    Element scope = new ShadowRootElementAdapter(mock.getElementAdapter());
+    assertThat(findNotNullables(byCss(FOUND_SELECTOR), scope), is(not(empty())));
+  }
+
+  @Test
+  public void testFindNullableElementsInShadow() {
+    MockUtilities mock = new MockUtilities();
+    final String FOUND_SELECTOR = "found";
+    mock.setShadowMock(mock.getWebElementMock(), FOUND_SELECTOR);
+    Element scope = new ShadowRootElementAdapter(mock.getElementAdapter());
+    assertThat(findNotNullables(byCss(FOUND_SELECTOR), scope), is(not(empty())));
+  }
+
+  @Test
+  public void testFindElementsInShadowNotFound() {
+    Element scope = new ShadowRootElementAdapter(new MockUtilities().getElementAdapter());
+    Exception e = expectThrows(NoSuchElementException.class, () -> findNotNullables(byCss(NOT_FOUND_SELECTOR), scope));
+    assertThat(e.getMessage(), containsString(ELEMENT_NOT_FOUND_ERROR));
+  }
+
+  @Test
+  public void testFindNullableElementsInShadowNotFound() {
+    MockUtilities mock = new MockUtilities();
+    Element scope = new ShadowRootElementAdapter(mock.getElementAdapter());
+    assertNull(findNullables(byCss(NOT_FOUND_SELECTOR), scope));
   }
 }
