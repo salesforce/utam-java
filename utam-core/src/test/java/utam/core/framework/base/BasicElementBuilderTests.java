@@ -52,7 +52,7 @@ public class BasicElementBuilderTests {
   private static final String NULLABLE_CSS = "nullable";
   private static final String NOT_NULLABLE_CSS = "existing";
 
-  static BasicElementBuilder getBasicBuilder(MockUtilities mock, ElementLocation location) {
+  private static BasicElementBuilder getBasicBuilder(MockUtilities mock, ElementLocation location) {
     Driver driver = mock.getFactory().getDriver();
     BasePageElement element = createInstance(mock.getElementAdapter(), driver);
     return new BasicElementBuilder(mock.getFactory(), element, location);

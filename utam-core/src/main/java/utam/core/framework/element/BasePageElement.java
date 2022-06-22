@@ -32,10 +32,16 @@ import utam.core.framework.consumer.UtamError;
 public class BasePageElement extends UtamBaseImpl implements Actionable, Clickable, Editable,
     Touchable, Draggable {
 
-  // note: class needs constructor without parameters!
+  /**
+   * Do not delete! Class needs constructor without parameters because we use Java Reflection to create
+   * an instance
+   * @see BasePageElement createInstance static method
+   */
+  public BasePageElement() {
+  }
 
   /**
-   * Build instance of the BasePageElement
+   * Build instance of the BasePageElement using Java Reflection
    *
    * @param element element to inject
    * @param driver  driver instance
@@ -46,7 +52,7 @@ public class BasePageElement extends UtamBaseImpl implements Actionable, Clickab
   }
 
   /**
-   * Build instance of the basic type
+   * Build instance of the basic type using Java Reflection
    *
    * @param implType type to build
    * @param element  element to inject
