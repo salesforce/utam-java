@@ -84,8 +84,8 @@ public class ContainerElementPageObjectTests {
     MockUtilities mock = new MockUtilities();
     TestContainersPage page = new TestContainersPage(mock);
     WebElement expectedContent = mock(WebElement.class);
-    when(mock.getWebElementMock().findElement(By.cssSelector(TestContainersPage.CONTAINER_CSS)))
-        .thenReturn(expectedContent);
+    when(mock.getWebElementMock().findElements(By.cssSelector(TestContainersPage.CONTAINER_CSS)))
+        .thenReturn(Collections.singletonList(expectedContent));
     ContainerElementPageObject testMe = page
         .getContainerContent(ContainerElementPageObject.class, false);
     WebElement actualContent = ((ElementAdapter) (testMe.getContainerElement()).containerScope)
@@ -94,7 +94,7 @@ public class ContainerElementPageObjectTests {
     assertThat(actualContent, is(equalTo(expectedContent)));
 
     WebElement expectedContentInjected = mock(WebElement.class);
-    when(expectedContent.findElement(By.cssSelector("inject"))).thenReturn(expectedContentInjected);
+    when(expectedContent.findElements(By.cssSelector("inject"))).thenReturn(Collections.singletonList(expectedContentInjected));
     LoadMe test = testMe.load(LoadMe.class, LocatorBy.byCss("inject"));
     WebElement actualContentInjected = ((ElementAdapter) test.getElement()).getWebElement();
     // "driver > By.cssSelector: root >> By.cssSelector: :scope > *:first-child > By.cssSelector: inject"

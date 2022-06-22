@@ -17,6 +17,7 @@ import static utam.core.element.FindContext.Type.NULLABLE;
 import static utam.core.framework.base.BasicElementBuilder.getUnwrappedElement;
 import static utam.core.framework.element.BasePageElement.createInstance;
 
+import java.util.Collections;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
@@ -54,7 +55,8 @@ public class FrameElementTests {
   public void testBuildFrameForExistingElement() {
     MockUtilities mock = new MockUtilities();
     WebElement foundElementMock = mock.getWebElementMock();
-    when(mock.getWebElementMock().findElement(By.cssSelector("css"))).thenReturn(foundElementMock);
+    when(mock.getWebElementMock().findElements(By.cssSelector("css")))
+        .thenReturn(Collections.singletonList(foundElementMock));
     ElementLocation location = new ElementLocation(LocatorBy.byCss("css"), NULLABLE);
     FrameElement frame = buildFrameElement(mock, location);
     assertThat(getUnwrappedWebElement(frame), is(sameInstance(foundElementMock)));
@@ -72,8 +74,8 @@ public class FrameElementTests {
   public void testBuildFrameWithParametrizedLocator() {
     MockUtilities mock = new MockUtilities();
     WebElement foundElementMock = mock.getWebElementMock();
-    when(mock.getWebElementMock().findElement(By.cssSelector("css[string][1]")))
-        .thenReturn(foundElementMock);
+    when(mock.getWebElementMock().findElements(By.cssSelector("css[string][1]")))
+        .thenReturn(Collections.singletonList(foundElementMock));
     ElementLocation location = new ElementLocation(LocatorBy.byCss("css[%s][%d]"), EXISTING);
     FrameElement frame = buildFrameElement(mock, location.setParameters("string", 1));
     assertThat(getUnwrappedWebElement(frame), is(sameInstance(foundElementMock)));

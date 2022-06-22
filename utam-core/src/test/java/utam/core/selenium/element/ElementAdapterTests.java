@@ -81,8 +81,8 @@ public class ElementAdapterTests {
     WebElement foundMock = mock(WebElement.class);
     Element scope = mock.getElementAdapter();
     final String FOUND_SELECTOR = "found";
-    when(mock.getWebElementMock().findElement(By.cssSelector(FOUND_SELECTOR)))
-        .thenReturn(foundMock);
+    when(mock.getWebElementMock().findElements(By.cssSelector(FOUND_SELECTOR)))
+        .thenReturn(Collections.singletonList(foundMock));
     ElementAdapter found = findNotNullable(byCss(FOUND_SELECTOR), scope);
     assertThat(found.getWebElement(), is(sameInstance(foundMock)));
   }
@@ -100,8 +100,8 @@ public class ElementAdapterTests {
     WebElement foundMock = mock(WebElement.class);
     Element scope = mock.getElementAdapter();
     final String FOUND_SELECTOR = "found";
-    when(mock.getWebElementMock().findElement(By.cssSelector(FOUND_SELECTOR)))
-        .thenReturn(foundMock);
+    when(mock.getWebElementMock().findElements(By.cssSelector(FOUND_SELECTOR)))
+        .thenReturn(Collections.singletonList(foundMock));
     ElementAdapter found = findNullable(byCss(FOUND_SELECTOR), scope);
     assertThat(found.getWebElement(), is(sameInstance(foundMock)));
   }
