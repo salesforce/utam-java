@@ -44,12 +44,15 @@ public final class ElementLocation {
    * @return instance of the found element or null
    */
   ElementFound find(Element scopeElement) {
+    // wrap as shadowRoot if need to
     Element transformedScope = transformScope(scopeElement);
+    // for nullable element its scope can be null
     if (scopeElement == null && findContext.isNullable()) {
       return null;
     }
+    // can return null if element is nullable, otherwise throws
     Element foundElement = transformedScope.findElement(locator, findContext.isNullable());
-    // null only returned for nullable
+    // null can be returned for nullable
     return foundElement == null? null : new ElementFound(locator, foundElement);
   }
 
@@ -60,10 +63,13 @@ public final class ElementLocation {
    * @return list of the found elements or null
    */
   List<ElementFound> findList(Element scopeElement) {
+    // wrap as shadowRoot if need to
     Element transformedScope = transformScope(scopeElement);
+    // for nullable element its scope can be null
     if (scopeElement == null && findContext.isNullable()) {
       return null;
     }
+    // can return null if element is nullable, otherwise throws
     List<Element> foundList = transformedScope.findElements(locator, findContext.isNullable());
     // null only returned for nullable
     if(foundList == null) {
