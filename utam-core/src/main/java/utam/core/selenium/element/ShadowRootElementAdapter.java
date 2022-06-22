@@ -64,7 +64,7 @@ public class ShadowRootElementAdapter extends ElementAdapter {
     if(res.isEmpty()) {
       return null;
     }
-    return res.stream().map(el -> wrapElement(el)).collect(Collectors.toList());
+    return res.stream().map(this::wrapElement).collect(Collectors.toList());
   }
 
 }
