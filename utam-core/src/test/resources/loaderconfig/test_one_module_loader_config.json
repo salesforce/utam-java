@@ -1,0 +1,5 @@
+{
+  "injectionConfigs": [
+    "config/module1.config.json"
+  ]
+}

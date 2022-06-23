@@ -13,26 +13,24 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.mock;
 import static org.testng.Assert.expectThrows;
 import static utam.core.framework.consumer.PageObjectContextImpl.ERR_GET_IMPL_BY_NAME;
 
 import java.io.File;
 import java.time.Duration;
-import org.openqa.selenium.WebDriver;
+import java.util.Objects;
 import org.testng.annotations.Test;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.consumer.impl.TestLoaderConfigPageObjectImpl;
-import utam.core.framework.context.Profile;
 import utam.core.framework.context.StringValueProfile;
-import utam.core.selenium.element.DriverAdapter;
 
 public class UtamLoaderConfigTests {
+
+  private static final String VALID_LOADER_CONFIG_PATH = "loaderconfig/test_loader_config.json";
 
   static UtamLoaderConfigImpl getDefaultConfig() {
     return new UtamLoaderConfigImpl();
   }
-  private static final Profile TEST_PROFILE = new StringValueProfile("test", "profiles");
 
   @Test
   public void testSetBridgeApp() {
@@ -54,48 +52,43 @@ public class UtamLoaderConfigTests {
   }
 
   @Test
-  public void testSettingActiveProfile() {
-    UtamLoaderConfigImpl config = getDefaultConfig();
-    config.setProfile(TEST_PROFILE);
-    PageObject pageObject = config.getPageContext().getBean(
-        TestLoaderConfigPageObject.class);
-    assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
-  }
-
-  @Test
   public void testCustomJSONConfig() {
-    UtamLoaderConfig config = new UtamLoaderConfigImpl("module.loader.json");
+    UtamLoaderConfig config = new UtamLoaderConfigImpl(VALID_LOADER_CONFIG_PATH);
     PageObject pageObject = config.getPageContext().getBean(TestLoaderConfigPageObject.class);
-    assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectImpl.class)));
+    assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
   }
 
   @Test
   public void testCustomJSONConfigFromFile() {
-    File file = new File(this.getClass().getClassLoader().getResource("module.loader.json").getFile());
+    File file = new File(Objects
+        .requireNonNull(this.getClass().getClassLoader().getResource(VALID_LOADER_CONFIG_PATH))
+        .getFile());
     UtamLoaderConfig config = new UtamLoaderConfigImpl(file);
-    PageObject pageObject = config.getPageContext().getBean(TestLoaderConfigPageObject.class);
-    assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectImpl.class)));
-  }
-
-  @Test
-  public void testCustomJSONConfigSetProfile() {
-    UtamLoaderConfig config = new UtamLoaderConfigImpl("module.loader.json");
-    config.setProfile(TEST_PROFILE);
     PageObject pageObject = config.getPageContext().getBean(TestLoaderConfigPageObject.class);
     assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
   }
 
   @Test
   public void testSettingSameActiveProfileDifferentValue() {
-    UtamLoaderConfigImpl config = getDefaultConfig();
-    config.setProfile(TEST_PROFILE);
-    config.setProfile(new StringValueProfile("test", "profile2"));
-    config.getPageContext();
+    UtamLoaderConfigImpl config = new UtamLoaderConfigImpl(VALID_LOADER_CONFIG_PATH);
+
+    config.setProfile(new StringValueProfile("custom", "one"));
+    PageObject pageObject = config.getPageContext().getBean(TestLoaderConfigPageObject.class);
+    assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
+
+    config.setProfile(new StringValueProfile("custom", "two"));
+    pageObject = config.getPageContext().getBean(TestLoaderConfigPageObject.class);
+    assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectImpl.class)));
+
+    config.setProfile(new StringValueProfile("custom", "three"));
+    // default is picked up
+    pageObject = config.getPageContext().getBean(TestLoaderConfigPageObject.class);
+    assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
   }
 
   @Test
   public void testDefaultConfigMissingThrows() {
-    UtamLoaderConfig config = new UtamLoaderConfigImpl("module.loader.json");
+    UtamLoaderConfig config = new UtamLoaderConfigImpl("loaderconfig/test_one_module_loader_config.json");
     PageObjectContext context = config.getPageContext();
     UtamError e = expectThrows(UtamError.class,
         () -> context.getBean(TestLoaderConfigDefault.class));
@@ -104,32 +97,8 @@ public class UtamLoaderConfigTests {
   }
 
   @Test
-  public void testProfileConfigPickedUpAfterReset() {
-    UtamLoaderConfig config = new UtamLoaderConfigImpl();
-    config.setLoaderConfig("module1");
-    UtamLoader utamLoader = new UtamLoaderImpl(config,
-        new DriverAdapter(mock(WebDriver.class), null));
-    PageObject instance = config.getPageContext().getBean(TestLoaderConfigPageObject.class);
-    // first load default class
-    assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectImpl.class)));
-    config.setProfile(TEST_PROFILE);
-    // this line reloads config and overrides previous
-    utamLoader.resetContext();
-    instance = utamLoader.create(TestLoaderConfigPageObject.class);
-    assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
-  }
-
-  @Test
-  public void testDefaultConfigFromOneModule() {
-    UtamLoaderConfigImpl config = new UtamLoaderConfigImpl("testconfig/loader1.config.json");
-    PageObjectContext context = config.getPageContext();
-    PageObject bean1 = context.getBean(TestLoaderConfigPageObject.class);
-    assertThat(bean1, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
-  }
-
-  @Test
   public void testDefaultConfigMergedFromTwoModules() {
-    UtamLoaderConfigImpl config = new UtamLoaderConfigImpl("testconfig/loader2.config.json");
+    UtamLoaderConfigImpl config = new UtamLoaderConfigImpl(VALID_LOADER_CONFIG_PATH);
     PageObjectContext context = config.getPageContext();
     PageObject bean1 = context.getBean(TestLoaderConfigDefault.class);
     assertThat(bean1, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));

@@ -30,15 +30,6 @@ public interface UtamLoaderConfig {
   void setProfile(Profile profile);
 
   /**
-   * for compatibility with utam-js we allow to set module without loader config JSON file. Each new
-   * dependency module will search for dependency config file with the name moduleName.config.json in resources
-   *
-   * @param moduleName name of the module
-   * @since 238
-   */
-  void setLoaderConfig(String moduleName);
-
-  /**
    * create page objects context for dependency injection for each Jar and each profile, search for
    * override config and remember in context
    *

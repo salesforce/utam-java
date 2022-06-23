@@ -8,7 +8,6 @@
 package utam.compiler.translator;
 
 import static utam.core.framework.UtamLogger.info;
-import static utam.core.framework.consumer.JsonInjectionsConfig.CONFIG_FILE_MASK;
 import static utam.core.framework.consumer.UtamLoaderConfigImpl.DEFAULT_PROFILE;
 
 import com.google.common.io.CharStreams;
@@ -43,6 +42,7 @@ import utam.core.framework.context.Profile;
  */
 public class DefaultTranslatorRunner implements TranslatorRunner {
 
+  private static final String CONFIG_FILE_MASK = "%s.config.json";
   private static final String ERR_PROFILE_PATH_DOES_NOT_EXIST =
       "can't write profiles output, profile path '%s' does not exist and cannot be created";
   static final String ERR_PROFILE_PATH_NOT_CONFIGURED = "profile config path is null or empty";

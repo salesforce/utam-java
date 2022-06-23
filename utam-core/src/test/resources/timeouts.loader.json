@@ -1,8 +1,0 @@
-{
-  "timeouts": {
-    "implicitTimeout": "1",
-    "explicitTimeout": "2",
-    "pollingInterval": "3"
-  },
-  "bridgeAppTitle" : "salesforce"
-}

@@ -39,29 +39,28 @@ import utam.core.framework.context.StringValueProfile;
  */
 public class JsonInjectionsConfig {
 
-  public static final String CONFIG_FILE_MASK = "%s.config.json";
   static final String ERR_WHILE_READING_CONFIG = "Error while reading JSON config '%s'";
+  static final String ERR_CANT_FIND_CONFIG = "Injections config file '%s' not found";
 
   /**
    * read JSON config with a given module name
    *
-   * @param moduleName name of the module to use as a file name
+   * @param filename dependencies config file name
    * @return map: key is profile key (ex."platformmobile")
    */
-  Map<String, ProfileContext> readDependenciesConfig(String moduleName) {
+  Map<String, ProfileContext> readDependenciesConfig(String filename) {
     Map<String, ProfileContext> map = new HashMap<>();
-    String filename = String.format(CONFIG_FILE_MASK, moduleName);
     try {
       // with dependencies from different modules, there could be modules with same name
       List<URL> resources = getDependenciesConfigResources(filename);
       if (!resources.isEmpty()) {
         for (URL resource : resources) {
-          UtamLogger.info(String.format("Reading Page Objects config file %s", filename));
+          UtamLogger.info(String.format("Reading injections config file %s", filename));
           Mapping mapping = new ObjectMapper().readValue(resource, Mapping.class);
           mapping.setInjectionsMapping(map);
         }
       } else {
-        UtamLogger.warning(String.format("Page Objects config file '%s' not found", filename));
+        throw new UtamCoreError(String.format(ERR_CANT_FIND_CONFIG, filename));
       }
     } catch (IOException e) {
       throw new UtamCoreError(String.format(ERR_WHILE_READING_CONFIG, filename), e);
@@ -71,11 +70,12 @@ public class JsonInjectionsConfig {
 
   /**
    * overridden in unit test to verify possible resources with same name
+   *
    * @param filename name of the resource
    * @return list of found URLs
    * @throws IOException if file error happened
    */
-  List<URL> getDependenciesConfigResources(String filename) throws IOException {
+  private List<URL> getDependenciesConfigResources(String filename) throws IOException {
     return Collections.list(getClass().getClassLoader().getResources(filename));
   }
 

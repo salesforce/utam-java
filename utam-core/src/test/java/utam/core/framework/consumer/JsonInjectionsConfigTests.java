@@ -13,6 +13,7 @@ import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
+import static utam.core.framework.consumer.JsonInjectionsConfig.ERR_CANT_FIND_CONFIG;
 import static utam.core.framework.consumer.JsonInjectionsConfig.ERR_WHILE_READING_CONFIG;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -34,14 +35,16 @@ import utam.core.framework.context.StringValueProfile;
 public class JsonInjectionsConfigTests {
 
   @Test
-  public void testMissingConfigReturnsEmptyMap() {
-    assertThat(new JsonInjectionsConfig().readDependenciesConfig("notexisting"), is(anEmptyMap()));
+  public void testMissingConfigThrows() {
+    String errMessage = String.format(ERR_CANT_FIND_CONFIG, "notexisting.json");
+    Exception e = expectThrows(UtamCoreError.class, () -> new JsonInjectionsConfig().readDependenciesConfig("notexisting.json"));
+    assertThat(e.getMessage(), containsString(errMessage));
   }
 
   @Test
   public void testWrongFormatThrows() {
     UtamCoreError e = expectThrows(UtamCoreError.class,
-        () -> new JsonInjectionsConfig().readDependenciesConfig("config/wrongFormat"));
+        () -> new JsonInjectionsConfig().readDependenciesConfig("config/wrongFormat.config.json"));
     assertThat(e.getCause(), instanceOf(JsonParseException.class));
     assertThat(e.getMessage(),
         containsString(String.format(ERR_WHILE_READING_CONFIG, "config/wrongFormat.config.json")));
@@ -50,14 +53,13 @@ public class JsonInjectionsConfigTests {
   @Test
   public void testEmptyMapping() {
     Map<String, ProfileContext> map = new JsonInjectionsConfig()
-        .readDependenciesConfig("config/emptyProfiles");
+        .readDependenciesConfig("config/emptyProfiles.config.json");
     assertThat(map, is(anEmptyMap()));
   }
 
   @Test
   public void testReloadingProfile() {
-    UtamLoaderConfig loaderConfig = new UtamLoaderConfigImpl("config/module1", "config/module2",
-        "nonexisting");
+    UtamLoaderConfig loaderConfig = new UtamLoaderConfigImpl("config/module1.config.json", "config/module2.config.json");
     // read from module1.config.json
     loaderConfig.setProfile(new StringValueProfile("name", "value1"));
     PageObjectContext pageObjectContext = loaderConfig.getPageContext();
@@ -78,24 +80,8 @@ public class JsonInjectionsConfigTests {
   }
 
   @Test
-  public void testReloadingProfileCombineWithProperties() {
-    UtamLoaderConfig loaderConfig = new UtamLoaderConfigImpl("config/module1", "config/module3");
-    // read from module1.config.json
-    loaderConfig.setProfile(new StringValueProfile("name", "value1"));
-    PageObjectContext pageObjectContext = loaderConfig.getPageContext();
-    PageObject instance = pageObjectContext.getBean(TestLoaderConfigPageObject.class);
-    assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
-
-    // read from module3_name_value2_config.properties
-    loaderConfig.setProfile(new StringValueProfile("name", "value2"));
-    pageObjectContext = loaderConfig.getPageContext();
-    instance = pageObjectContext.getBean(TestLoaderConfigPageObject.class);
-    assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
-  }
-
-  @Test
   public void testMergingTwoJsonConfigs() {
-    UtamLoaderConfig loaderConfig = new UtamLoaderConfigImpl("config/module1", "config/module2");
+    UtamLoaderConfig loaderConfig = new UtamLoaderConfigImpl("config/module1.config.json", "config/module2.config.json");
     loaderConfig.setProfile(new StringValueProfile("name2", "value2"));
     PageObjectContext pageObjectContext = loaderConfig.getPageContext();
     // read from module1.config.json
@@ -108,22 +94,21 @@ public class JsonInjectionsConfigTests {
 
   @Test
   public void testMergingJsonAndPropertyConfigs() {
-    UtamLoaderConfig loaderConfig = new UtamLoaderConfigImpl("config/module1", "config/module2");
+    UtamLoaderConfig loaderConfig = new UtamLoaderConfigImpl("config/module1.config.json", "config/module2.config.json");
     loaderConfig.setProfile(TestNonStringProfile.ONE);
     PageObjectContext pageObjectContext = loaderConfig.getPageContext();
     // read from module1.config.json
     PageObject instance = pageObjectContext.getBean(TestLoaderConfigDefault.class);
     assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
 
-    // read from module2_test_one.config.json
+    // read from module2.config.json
     instance = pageObjectContext.getBean(TestLoaderConfigPageObject.class);
-    assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
+    assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
   }
 
   @Test
   public void testSwitchProfile() {
-    UtamLoaderConfig loaderConfig = new UtamLoaderConfigImpl();
-    loaderConfig.setLoaderConfig("config/module1");
+    UtamLoaderConfig loaderConfig = new UtamLoaderConfigImpl("loaderconfig/test_one_module_loader_config.json");
     loaderConfig.setProfile(TestNonStringProfile.ONE);
     PageObject instance = loaderConfig.getPageContext().getBean(TestLoaderConfigDefault.class);
     assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));

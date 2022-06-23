@@ -1,0 +1,6 @@
+{
+  "injectionConfigs": [
+    "module1.config.json",
+    "module2.config.json"
+  ]
+}

@@ -13,18 +13,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.expectThrows;
 import static utam.core.framework.context.DefaultProfileContext.ERR_GET_CLASS_BY_NAME;
+import static utam.core.framework.context.DefaultProfileContext.getClassFromName;
 
 import org.testng.annotations.Test;
 import utam.core.framework.consumer.TestLoaderConfigPageObject;
-import utam.core.framework.consumer.TestLoaderConfigPageObjectOverride;
-import utam.core.framework.consumer.TestLoaderConfigPageObjectProfile;
 import utam.core.framework.consumer.UtamError;
 
 public class ProfileContextTests {
 
   @Test
-  public void testEmptyProfileContextSetupOverride() {
-    DefaultProfileContext profile = new DefaultProfileContext(null, new StringValueProfile("name", "value"));
+  public void testProfileContext() {
+    DefaultProfileContext profile = new DefaultProfileContext();
     assertThat(profile.getBeanName(null), is(nullValue()));
     profile.setBean(TestLoaderConfigPageObject.class, "class");
     assertThat(profile.getBeanName(TestLoaderConfigPageObject.class),
@@ -32,44 +31,9 @@ public class ProfileContextTests {
   }
 
   @Test
-  public void testNotExistingConfig() {
-    DefaultProfileContext profile = new DefaultProfileContext(null, new StringValueProfile("foo", "bar"));
-    assertThat(profile.getBeanName(null), is(nullValue()));
-    assertThat(profile.getBeanName(TestLoaderConfigPageObject.class), is(nullValue()));
-    assertThat(profile.beans.isEmpty(), is(true));
-  }
-
-  @Test
-  public void testNotExistingConfigWithModule() {
-    DefaultProfileContext profile = new DefaultProfileContext("module", new StringValueProfile("foo", "bar"));
-    assertThat(profile.getBeanName(null), is(nullValue()));
-    assertThat(profile.getBeanName(TestLoaderConfigPageObject.class), is(nullValue()));
-    assertThat(profile.beans.isEmpty(), is(true));
-  }
-
-  @Test
-  public void testExistingConfig() {
-    // read beans from config test_profiles_config
-    ProfileContext profileContext =
-        new DefaultProfileContext(null, new StringValueProfile("test", "profiles"));
-    assertThat(profileContext.getBeanName(TestLoaderConfigPageObject.class),
-        is(equalTo(TestLoaderConfigPageObjectOverride.class.getName())));
-  }
-
-  @Test
-  public void testExistingConfigWithModule() {
-    // read beans from config module1_test_profiles_config
-    ProfileContext profileContext =
-        new DefaultProfileContext("module1", new StringValueProfile("test", "profiles"));
-    assertThat(profileContext.getBeanName(TestLoaderConfigPageObject.class),
-        is(equalTo(TestLoaderConfigPageObjectProfile.class.getName())));
-  }
-
-  @Test
   public void testNonExistingClassThrows() {
-    // properties have utam.test.Error=utam.test.ErrorImpl
-    UtamError error = expectThrows(UtamError.class,
-        () -> new DefaultProfileContext(null, new StringValueProfile("test", "error")));
-    assertThat(error.getMessage(), is(equalTo(String.format(ERR_GET_CLASS_BY_NAME, "utam.test.Error"))));
+    UtamError error = expectThrows(UtamError.class, () -> getClassFromName("utam.test.Error"));
+    assertThat(error.getMessage(),
+        is(equalTo(String.format(ERR_GET_CLASS_BY_NAME, "utam.test.Error"))));
   }
 }
