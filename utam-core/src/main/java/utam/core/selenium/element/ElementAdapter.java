@@ -81,14 +81,20 @@ public class ElementAdapter implements Element {
     this.driverAdapter = driverAdapter;
   }
 
-  // used by ShadowRootElementAdapter
+  /**
+   * Create new instance of element adapter from an existing element. Used by
+   * ShadowRootElementAdapter.
+   *
+   * @param element original element to wrap as ShadowRoot
+   */
   ElementAdapter(Element element) {
-    if(!(element instanceof ElementAdapter)) {
-      throw new UnsupportedOperationException("Can't wrap element as shadow root");
+    if (!(element instanceof ElementAdapter)) {
+      throw new UnsupportedOperationException("Internal bug in the utam-core: can't wrap element as shadow root");
     }
-    this.webElement = new ShadowRootWebElement(((ElementAdapter) element).getWebElement());
-    this.driver = ((ElementAdapter) element).driver;
-    this.driverAdapter = ((ElementAdapter) element).driverAdapter;
+    ElementAdapter elementAdapter = (ElementAdapter) element;
+    this.webElement = new ShadowRootWebElement(elementAdapter.getWebElement());
+    this.driver = elementAdapter.driver;
+    this.driverAdapter = elementAdapter.driverAdapter;
   }
 
   /**
@@ -109,22 +115,27 @@ public class ElementAdapter implements Element {
 
   @Override
   @SuppressWarnings("rawtypes")
-  public Element findElement(Locator locator) {
-    By by = ((LocatorBy) locator).getValue();
-    WebElement res = getWebElement().findElement(by);
-    if (res == null) { //this can happen for mock in unit tests
-      throw new NoSuchElementException(getNotFoundErr(locator));
+  public Element findElement(Locator locator, boolean isNullable) {
+    // return null for not found element, otherwise throws or returns non empty list
+    List<Element> res = findElements(locator, isNullable);
+    if(res == null) {
+      return null;
     }
-    return wrapElement(res);
+    return res.get(0);
   }
 
   @Override
   @SuppressWarnings("rawtypes")
-  public List<Element> findElements(Locator locator) {
+  public List<Element> findElements(Locator locator, boolean isNullable) {
     By by = ((LocatorBy) locator).getValue();
+    // per Selenium spec, this returns empty list if element not found
     List<WebElement> found = getWebElement().findElements(by);
     if (found == null || found.isEmpty()) {
-      throw new NoSuchElementException(getNotFoundErr(locator));
+      if(isNullable) {
+        return null;
+      } else {
+        throw new NoSuchElementException(getNotFoundErr(locator));
+      }
     }
     return found.stream().map(this::wrapElement).collect(Collectors.toList());
   }

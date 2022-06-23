@@ -18,6 +18,10 @@ import utam.core.framework.element.BasePageElement;
  */
 public class FrameElementImpl extends BasePageElement implements FrameElement {
 
-  // note: class needs constructor without parameters!
-
+  /**
+   * Do not delete! Class needs constructor without parameters because we use Java Reflection to create
+   * an instance
+   */
+  public FrameElementImpl() {
+  }
 }

@@ -21,6 +21,7 @@ import static utam.core.framework.consumer.UtamLoaderConfigTests.getDefaultConfi
 import static utam.core.framework.consumer.UtamLoaderImpl.getSimulatorLoader;
 
 import io.appium.java_client.AppiumDriver;
+import java.util.Collections;
 import java.util.function.Supplier;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
@@ -71,7 +72,7 @@ public class UtamLoaderTests {
   public void testCreateUtamFromContainer() {
     UtamLoader loader = getDefaultLoader();
     WebElement mockElement = mock(WebElement.class);
-    when(mockElement.findElement(By.cssSelector("root"))).thenReturn(mockElement);
+    when(mockElement.findElements(By.cssSelector("root"))).thenReturn(Collections.singletonList(mockElement));
     ContainerMock containerMock = new ContainerMock(() -> mockElement);
     TestLoaderConfigPageObject pageObjectMock =
         loader.create(containerMock, TestLoaderConfigPageObject.class, LocatorBy.byCss("root"));

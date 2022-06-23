@@ -134,10 +134,11 @@ public class DriverAdapter implements Driver {
   public List<Element> findElements(Locator locator) {
     By by = ((LocatorBy) locator).getValue();
     List<WebElement> found = getSeleniumDriver().findElements(by);
+    // root element can't be nullable, so we always throw
     if (found == null || found.isEmpty()) {
       throw new NoSuchElementException(getNotFoundErr(locator));
     }
-    return found.stream().map(el -> wrapElement(el)).collect(Collectors.toList());
+    return found.stream().map(this::wrapElement).collect(Collectors.toList());
   }
 
   @Override

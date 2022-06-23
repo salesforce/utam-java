@@ -52,7 +52,7 @@ public class BasicElementBuilderTests {
   private static final String NULLABLE_CSS = "nullable";
   private static final String NOT_NULLABLE_CSS = "existing";
 
-  static BasicElementBuilder getBasicBuilder(MockUtilities mock, ElementLocation location) {
+  private static BasicElementBuilder getBasicBuilder(MockUtilities mock, ElementLocation location) {
     Driver driver = mock.getFactory().getDriver();
     BasePageElement element = createInstance(mock.getElementAdapter(), driver);
     return new BasicElementBuilder(mock.getFactory(), element, location);
@@ -75,8 +75,8 @@ public class BasicElementBuilderTests {
             .build(Actionable.class, BasePageElement.class));
     assertThat(e.getMessage(), startsWith(ERR_ELEMENT_NOT_FOUND_PREFIX));
 
-    when(mock.getWebElementMock().findElement(By.cssSelector(NOT_NULLABLE_CSS)))
-        .thenReturn(mock.getWebElementMock());
+    when(mock.getWebElementMock().findElements(By.cssSelector(NOT_NULLABLE_CSS)))
+        .thenReturn(Collections.singletonList(mock.getWebElementMock()));
     BasicElement test = getBasicBuilder(mock, getNotNullableLocation())
         .build(Actionable.class, BasePageElement.class);
     assertThat(test, is(notNullValue()));
@@ -85,8 +85,8 @@ public class BasicElementBuilderTests {
   @Test
   public void testBuilderWithParametrizedLocator() {
     MockUtilities mock = new MockUtilities();
-    when(mock.getWebElementMock().findElement(By.cssSelector("css[string]")))
-        .thenReturn(mock.getWebElementMock());
+    when(mock.getWebElementMock().findElements(By.cssSelector("css[string]")))
+        .thenReturn(Collections.singletonList(mock.getWebElementMock()));
     ElementLocation location = new ElementLocation(LocatorBy.byCss("css[%s]"), EXISTING);
     BasicElement test = getBasicBuilder(mock, location.setParameters("string"))
         .build(Actionable.class, BasePageElement.class);
@@ -255,8 +255,8 @@ public class BasicElementBuilderTests {
   @Test
   public void testBuildFrameElement() {
     MockUtilities mock = new MockUtilities();
-    when(mock.getWebElementMock().findElement(By.cssSelector(NOT_NULLABLE_CSS)))
-        .thenReturn(mock.getWebElementMock());
+    when(mock.getWebElementMock().findElements(By.cssSelector(NOT_NULLABLE_CSS)))
+        .thenReturn(Collections.singletonList(mock.getWebElementMock()));
     FrameElement test = getBasicBuilder(mock, getNotNullableLocation()).build(FrameElement.class, FrameElementImpl.class);
     assertThat(test, is(notNullValue()));
   }

@@ -9,6 +9,7 @@ package utam.core.selenium.element;
 
 import static utam.core.selenium.element.DriverAdapter.getNotFoundErr;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.openqa.selenium.By;
@@ -35,26 +36,35 @@ public class ShadowRootElementAdapter extends ElementAdapter {
   }
 
   @Override
-  public Element findElement(Locator locator) {
-    By by = ((LocatorBy) locator).getValue();
-    WebElement res = driverAdapter
-        .waitFor(() -> getWebElement().findElement(by), getNotFoundErr(locator),
-            driverAdapter.getDriverConfig().getImplicitTimeout());
-    return wrapElement(res);
+  public Element findElement(Locator locator, boolean isNullable) {
+    List<Element> res = findElements(locator, isNullable);
+    // null only returned for nullable, otherwise throws
+    if(res == null) {
+      return null;
+    }
+    return res.get(0);
   }
 
   @Override
-  public List<Element> findElements(Locator locator) {
+  public List<Element> findElements(Locator locator, boolean isNullable) {
     By by = ((LocatorBy) locator).getValue();
     List<WebElement> res = driverAdapter
         .waitFor(() -> {
               List<WebElement> found = getWebElement().findElements(by);
               if (found == null || found.isEmpty()) {
+                if(isNullable) {
+                  return new ArrayList<>();
+                }
                 throw new NoSuchElementException(getNotFoundErr(locator));
               }
               return found;
             }, getNotFoundErr(locator),
             driverAdapter.getDriverConfig().getImplicitTimeout());
-    return res.stream().map(el -> wrapElement(el)).collect(Collectors.toList());
+    // empty only returned for nullable, otherwise throws
+    if(res.isEmpty()) {
+      return null;
+    }
+    return res.stream().map(this::wrapElement).collect(Collectors.toList());
   }
+
 }
