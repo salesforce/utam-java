@@ -7,21 +7,17 @@
  */
 package utam.core.selenium.element;
 
-import org.openqa.selenium.*;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import utam.core.MockUtilities;
-import utam.core.element.Element;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertNull;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.element.ElementAdapterTests.ELEMENT_NOT_FOUND_ERROR;
 import static utam.core.selenium.element.ElementAdapterTests.NOT_FOUND_SELECTOR;
@@ -32,6 +28,23 @@ import static utam.core.selenium.element.ElementAdapterTests.findNullables;
 import static utam.core.selenium.element.LocatorBy.byCss;
 import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR;
 import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR_ALL;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import org.openqa.selenium.By;
+import org.openqa.selenium.InvalidArgumentException;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.UnsupportedCommandException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.WrapsDriver;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import utam.core.MockUtilities;
+import utam.core.element.Element;
 
 public class ShadowRootWebElementTests {
 
@@ -352,7 +365,7 @@ public class ShadowRootWebElementTests {
   @Test
   public void testFindNullableElementInShadowNotFound() {
     Element scope = new ShadowRootElementAdapter(new MockUtilities().getElementAdapter());
-    assertNull(findNullable(byCss(NOT_FOUND_SELECTOR), scope));
+    assertThat(findNullable(byCss(NOT_FOUND_SELECTOR), scope), is(nullValue()));
   }
 
   @Test
@@ -384,6 +397,6 @@ public class ShadowRootWebElementTests {
   public void testFindNullableElementsInShadowNotFound() {
     MockUtilities mock = new MockUtilities();
     Element scope = new ShadowRootElementAdapter(mock.getElementAdapter());
-    assertNull(findNullables(byCss(NOT_FOUND_SELECTOR), scope));
+    assertThat(findNullables(byCss(NOT_FOUND_SELECTOR), scope), is(nullValue()));
   }
 }

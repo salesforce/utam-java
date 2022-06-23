@@ -8,6 +8,7 @@
 package utam.core.selenium.element;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -20,7 +21,6 @@ import static org.mockito.Mockito.refEq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.element.ElementAdapter.BLUR_VIA_JAVASCRIPT;
@@ -109,7 +109,7 @@ public class ElementAdapterTests {
   @Test
   public void testFindElementNullableNotFound() {
     Element scope = new MockUtilities().getElementAdapter();
-    assertNull(findNullable(byCss(NOT_FOUND_SELECTOR), scope));
+    assertThat(findNullable(byCss(NOT_FOUND_SELECTOR), scope), is(nullValue()));
   }
 
   @Test
@@ -132,7 +132,7 @@ public class ElementAdapterTests {
   @Test
   public void testFindElementsNullableNotFound() {
     Element scope = new MockUtilities().getElementAdapter();
-    assertNull(findNullables(byCss(NOT_FOUND_SELECTOR), scope));
+    assertThat(findNullables(byCss(NOT_FOUND_SELECTOR), scope), is(nullValue()));
   }
 
   @Test
