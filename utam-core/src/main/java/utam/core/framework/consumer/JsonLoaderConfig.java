@@ -9,17 +9,17 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import utam.core.framework.UtamCoreError;
 
 /**
- * JSON mapping for config of a UTAM Loader
+ * This class has to be public as it's used in RepositoryTransformer in distribution plugin! JSON
+ * mapping for config of a UTAM Loader
  *
  * @author elizaveta.ivanova
  * @since 234
  */
-class JsonLoaderConfig {
+public class JsonLoaderConfig {
 
   final Set<String> injectionConfigs;
 
