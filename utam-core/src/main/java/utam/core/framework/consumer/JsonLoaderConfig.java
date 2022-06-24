@@ -13,14 +13,16 @@ import java.util.Set;
 import utam.core.framework.UtamCoreError;
 
 /**
- * This class has to be public as it's used in RepositoryTransformer in distribution plugin! JSON
- * mapping for config of a UTAM Loader
+ * JSON mapping for config of a UTAM Loader.
+ * This class has to be public as it's used in RepositoryTransformer in distribution plugin.
  *
  * @author elizaveta.ivanova
  * @since 234
  */
 public class JsonLoaderConfig {
 
+  // todo - injection filename should be configurable
+  public static final String INJECTION_CONFIG_FILE_MASK = "%s.config.json";
   final Set<String> injectionConfigs;
 
   /**
@@ -38,10 +40,19 @@ public class JsonLoaderConfig {
   }
 
   /**
-   * create empty loader config without JSON file
+   * Create empty loader config without JSON file. This constructor is used by RepositoryTransformer in distribution plugin.
    */
-  JsonLoaderConfig() {
+  protected JsonLoaderConfig() {
     this(null);
+  }
+
+  /**
+   * Set injection config, protected because used by RepositoryTransformer in distribution plugin
+   *
+   * @param moduleName name of the module which is partial file name
+   */
+  protected final void setInjectionConfigFile(String moduleName) {
+    injectionConfigs.add(String.format(INJECTION_CONFIG_FILE_MASK, moduleName));
   }
 
   /**

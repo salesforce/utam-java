@@ -11,12 +11,13 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
-import static utam.core.framework.consumer.JsonInjectionsConfig.ERR_CANT_FIND_CONFIG;
 import static utam.core.framework.consumer.JsonInjectionsConfig.ERR_WHILE_READING_CONFIG;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import java.util.Collection;
 import java.util.Map;
 import org.testng.annotations.Test;
 import utam.core.framework.UtamCoreError;
@@ -36,9 +37,8 @@ public class JsonInjectionsConfigTests {
 
   @Test
   public void testMissingConfigThrows() {
-    String errMessage = String.format(ERR_CANT_FIND_CONFIG, "notexisting.json");
-    Exception e = expectThrows(UtamCoreError.class, () -> new JsonInjectionsConfig().readDependenciesConfig("notexisting.json"));
-    assertThat(e.getMessage(), containsString(errMessage));
+    Collection<ProfileContext> emptyConfig = new JsonInjectionsConfig().readDependenciesConfig("notexisting.json").values();
+    assertThat(emptyConfig, is(emptyIterable()));
   }
 
   @Test
