@@ -23,7 +23,7 @@ public class JsonLoaderConfig {
 
   // todo - injection filename should be configurable
   public static final String INJECTION_CONFIG_FILE_MASK = "%s.config.json";
-  final Set<String> injectionConfigs;
+  private final Set<String> injectionConfigs;
 
   /**
    * Create an instance of loader config
@@ -56,6 +56,16 @@ public class JsonLoaderConfig {
     if(moduleName != null) {
       injectionConfigs.add(String.format(INJECTION_CONFIG_FILE_MASK, moduleName));
     }
+  }
+
+  /**
+   * Get all injection configurations file names, used by RepositoryTransformer in distribution
+   * plugin
+   *
+   * @return set of strings
+   */
+  protected final Set<String> getInjectionConfigs() {
+    return injectionConfigs;
   }
 
   /**

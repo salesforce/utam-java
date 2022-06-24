@@ -32,29 +32,29 @@ public class JsonLoaderConfigTests {
   @Test
   public void testValidLoaderConfig() {
     JsonLoaderConfig config = getConfig("loaderconfig/test_loader_config.json");
-    assertThat(config.injectionConfigs, hasSize(2));
-    assertThat(config.injectionConfigs, containsInAnyOrder("module1.config.json", "module2.config.json"));
+    assertThat(config.getInjectionConfigs(), hasSize(2));
+    assertThat(config.getInjectionConfigs(), containsInAnyOrder("module1.config.json", "module2.config.json"));
   }
 
   @Test
   public void testValidLoaderConfigWithDuplicates() {
     JsonLoaderConfig config = getConfig("loaderconfig/test_duplicate_config.json");
-    assertThat(config.injectionConfigs, hasSize(2));
-    assertThat(config.injectionConfigs, containsInAnyOrder("module1.config.json", "module2.config.json"));
+    assertThat(config.getInjectionConfigs(), hasSize(2));
+    assertThat(config.getInjectionConfigs(), containsInAnyOrder("module1.config.json", "module2.config.json"));
   }
 
   @Test
   public void testEmptyLoaderConfig() {
     JsonLoaderConfig config = getConfig("loaderconfig/test_empty_config.json");
-    assertThat(config.injectionConfigs, hasSize(0));
+    assertThat(config.getInjectionConfigs(), hasSize(0));
   }
 
   @Test
   public void testEmptyLoaderConfigConstructor() {
     JsonLoaderConfig config = new JsonLoaderConfig();
-    assertThat(config.injectionConfigs, hasSize(0));
+    assertThat(config.getInjectionConfigs(), hasSize(0));
     config.setInjectionConfigFile("module");
-    assertThat(config.injectionConfigs, containsInAnyOrder("module.config.json"));
+    assertThat(config.getInjectionConfigs(), containsInAnyOrder("module.config.json"));
   }
 
   @Test
