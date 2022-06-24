@@ -53,6 +53,8 @@ public class JsonLoaderConfigTests {
   public void testEmptyLoaderConfigConstructor() {
     JsonLoaderConfig config = new JsonLoaderConfig();
     assertThat(config.injectionConfigs, hasSize(0));
+    config.setInjectionConfigFile("module");
+    assertThat(config.injectionConfigs, containsInAnyOrder("module.config.json"));
   }
 
   @Test

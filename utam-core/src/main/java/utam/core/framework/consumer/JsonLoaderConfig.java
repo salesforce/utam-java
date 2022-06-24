@@ -40,19 +40,22 @@ public class JsonLoaderConfig {
   }
 
   /**
-   * Create empty loader config without JSON file. This constructor is used by RepositoryTransformer in distribution plugin.
+   * Create empty loader config without JSON file. This constructor is used by RepositoryTransformer
+   * in distribution plugin.
    */
   protected JsonLoaderConfig() {
     this(null);
   }
 
   /**
-   * Set injection config, protected because used by RepositoryTransformer in distribution plugin
+   * Set injection config, used by RepositoryTransformer in distribution plugin
    *
-   * @param moduleName name of the module which is partial file name
+   * @param moduleName name of the module, full file name will be set using INJECTION_CONFIG_FILE_MASK
    */
   protected final void setInjectionConfigFile(String moduleName) {
-    injectionConfigs.add(String.format(INJECTION_CONFIG_FILE_MASK, moduleName));
+    if(moduleName != null) {
+      injectionConfigs.add(String.format(INJECTION_CONFIG_FILE_MASK, moduleName));
+    }
   }
 
   /**

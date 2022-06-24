@@ -36,7 +36,7 @@ import utam.core.framework.context.StringValueProfile;
 public class JsonInjectionsConfigTests {
 
   @Test
-  public void testMissingConfigThrows() {
+  public void testMissingInjectionsJsonReturnsEmptyConfig() {
     Collection<ProfileContext> emptyConfig = new JsonInjectionsConfig().readDependenciesConfig("notexisting.json").values();
     assertThat(emptyConfig, is(emptyIterable()));
   }
