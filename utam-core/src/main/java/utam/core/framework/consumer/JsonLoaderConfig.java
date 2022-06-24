@@ -9,19 +9,21 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import utam.core.framework.UtamCoreError;
 
 /**
- * JSON mapping for config of a UTAM Loader
+ * JSON mapping for config of a UTAM Loader.
+ * This class has to be public as it's used in RepositoryTransformer in distribution plugin.
  *
  * @author elizaveta.ivanova
  * @since 234
  */
-class JsonLoaderConfig {
+public class JsonLoaderConfig {
 
-  final Set<String> injectionConfigs;
+  // todo - injection filename should be configurable
+  public static final String INJECTION_CONFIG_FILE_MASK = "%s.config.json";
+  private final Set<String> injectionConfigs;
 
   /**
    * Create an instance of loader config
@@ -38,10 +40,32 @@ class JsonLoaderConfig {
   }
 
   /**
-   * create empty loader config without JSON file
+   * Create empty loader config without JSON file. This constructor is used by RepositoryTransformer
+   * in distribution plugin.
    */
-  JsonLoaderConfig() {
+  protected JsonLoaderConfig() {
     this(null);
+  }
+
+  /**
+   * Set injection config, used by RepositoryTransformer in distribution plugin
+   *
+   * @param moduleName name of the module, full file name will be set using INJECTION_CONFIG_FILE_MASK
+   */
+  protected final void setInjectionConfigFile(String moduleName) {
+    if(moduleName != null) {
+      injectionConfigs.add(String.format(INJECTION_CONFIG_FILE_MASK, moduleName));
+    }
+  }
+
+  /**
+   * Get all injection configurations file names, used by RepositoryTransformer in distribution
+   * plugin
+   *
+   * @return set of strings
+   */
+  protected final Set<String> getInjectionConfigs() {
+    return injectionConfigs;
   }
 
   /**

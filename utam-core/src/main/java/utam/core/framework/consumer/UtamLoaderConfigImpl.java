@@ -87,7 +87,7 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
    * @param config loader config from json file
    */
   public UtamLoaderConfigImpl(JsonLoaderConfig config) {
-    this.dependenciesModules = config.injectionConfigs;
+    this.dependenciesModules = config.getInjectionConfigs();
     this.implicitTimeout = DEFAULT_IMPLICIT_TIMEOUT;
     this.explicitTimeout = DEFAULT_EXPLICIT_TIMEOUT;
     this.pollingInterval = DEFAULT_POLLING_INTERVAL;

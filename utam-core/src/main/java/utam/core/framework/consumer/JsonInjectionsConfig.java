@@ -40,7 +40,7 @@ import utam.core.framework.context.StringValueProfile;
 public class JsonInjectionsConfig {
 
   static final String ERR_WHILE_READING_CONFIG = "Error while reading JSON config '%s'";
-  static final String ERR_CANT_FIND_CONFIG = "Injections config file '%s' not found";
+  private static final String ERR_CANT_FIND_CONFIG = "Injections config file '%s' not found";
 
   /**
    * read JSON config with a given module name
@@ -60,7 +60,9 @@ public class JsonInjectionsConfig {
           mapping.setInjectionsMapping(map);
         }
       } else {
-        throw new UtamCoreError(String.format(ERR_CANT_FIND_CONFIG, filename));
+        // we can't throw here because of distribution plugin:
+        // transformer of distribution plugin combines modules and generates loader config assuming that injection config exists
+        UtamLogger.warning(String.format(ERR_CANT_FIND_CONFIG, filename));
       }
     } catch (IOException e) {
       throw new UtamCoreError(String.format(ERR_WHILE_READING_CONFIG, filename), e);
