@@ -11,6 +11,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.helpers.ElementContext.Self.SELF_ELEMENT;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 import org.testng.annotations.Test;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.TypeUtilities;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.element.Locator;
@@ -60,7 +62,8 @@ public class PageObjectValidationTests {
     expectThrows(UtamError.class, () -> validatePageObject(basicElement));
 
     ElementContext rootElement = new ElementContext.Root(
-        DUMMY_TYPE, getCssSelector(SELECTOR_VALUE + "[title='fakeTitle']"), actionable);
+        DUMMY_TYPE, getCssSelector(SELECTOR_VALUE + "[title='fakeTitle']"), actionable, mock(
+        PageObjectMethod.class));
 
     expectThrows(UtamError.class, () -> validatePageObject(rootElement));
   }

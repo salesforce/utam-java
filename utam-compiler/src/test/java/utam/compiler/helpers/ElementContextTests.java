@@ -157,7 +157,7 @@ public class ElementContextTests {
 
   @Test
   public void testRootElement() {
-    ElementContext.Root context = new Root(TEST_PAGE_OBJECT, getCssSelector("css"), actionable);
+    ElementContext.Root context = new Root(TEST_PAGE_OBJECT, getCssSelector("css"), actionable, mock(PageObjectMethod.class));
     assertThat(context.getName(), is(equalTo(ROOT_ELEMENT_NAME)));
     assertThat(context.getElementNodeType(), is(ElementType.ROOT));
     assertThat(context.isNullable(), is(false));

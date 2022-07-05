@@ -348,9 +348,8 @@ final class UtamPageObject {
           context.setMethod(rootElementMethod);
         }
       }
-      ElementContext rootElement = new ElementContext.Root(interfaceType, rootLocator, elementType);
+      ElementContext rootElement = new ElementContext.Root(interfaceType, rootLocator, elementType, rootElementMethod);
       context.setElement(typeNode, rootElement);
-      rootElement.setElementMethod(rootElementMethod, context);
       return rootElement;
     }
   }

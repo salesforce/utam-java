@@ -178,26 +178,43 @@ public abstract class ElementContext {
   }
 
   /**
-   * Sets the element getter method
+   * Register element getter method, throw NPE if method already exists
    *
-   * @param method the method to set as the element getter
-   * @param context context is used to set scope element method usage
+   * @param method  the method to set as the element getter
    */
-  public void setElementMethod(PageObjectMethod method, TranslationContext context) {
+  void registerElementMethod(PageObjectMethod method) {
     if (this.elementGetter != null) {
       throw new NullPointerException(
           String.format("element getter already exists for an element '%s'", getName()));
     }
     this.elementGetter = method;
-    if(context != null) { // context can be null for document constructor
-      ElementContext scopeElement = this.getScopeElement();
-      while (scopeElement != null) {
-        // for each scope element in hierarchy set that it's used
-        // private methods that are not public and not marked as "used" will not be added to generation
-        context.setMethodUsage(scopeElement.getElementGetterName());
-        scopeElement = scopeElement.getScopeElement();
-      }
+  }
+
+  /**
+   * Traverse scope elements and for each scope element in hierarchy set that it's used by it's
+   * child getter. Private methods that are not public and not marked as "used" will not be added to
+   * generation
+   *
+   * @param context translation context
+   */
+  private void setUsageOfScopeElement(TranslationContext context) {
+    ElementContext scopeElement = this.getScopeElement();
+    while (scopeElement != null) {
+      context.setMethodUsage(scopeElement.getElementGetterName());
+      scopeElement = scopeElement.getScopeElement();
     }
+  }
+
+  /**
+   * Register element getter method, throw NPE if method already exists. Then traverse scope
+   * elements and set their usage.
+   *
+   * @param method  the method to set as the element getter
+   * @param context context is used to set scope element method usage
+   */
+  public void setElementMethod(PageObjectMethod method, TranslationContext context) {
+    registerElementMethod(method);
+    setUsageOfScopeElement(context);
   }
 
   /**
@@ -210,7 +227,7 @@ public abstract class ElementContext {
   }
 
   /**
-   * represents a basic element
+   * Represents a basic element (on of actionable group)
    */
   public static class Basic extends ElementContext {
 
@@ -241,7 +258,6 @@ public abstract class ElementContext {
      * @param elementType  the type of the element
      * @param selector     the selector for the element
      */
-    // used in tests
     public Basic(String name, TypeProvider elementType, Locator selector) {
       this(null, name, elementType, selector, new ArrayList<>(), false);
     }
@@ -252,14 +268,13 @@ public abstract class ElementContext {
      * @param elementType  the type of the element
      * @param selector     the selector for the element
      */
-    // used in tests
     public Basic(TypeProvider elementType, Locator selector) {
       this(null, "test", elementType, selector, new ArrayList<>(), false);
     }
   }
 
   /**
-   * represents a list of basic elements
+   * Represents a list of basic elements (on of actionable group)
    */
   public static class BasicReturnsAll extends Basic {
 
@@ -285,7 +300,6 @@ public abstract class ElementContext {
      * @param elementType  the type of the element
      * @param selector     the selector for the element
      */
-    // used in tests
     public BasicReturnsAll(TypeProvider elementType, Locator selector) {
       this(null, "test", elementType, selector, new ArrayList<>(), false);
     }
@@ -297,7 +311,7 @@ public abstract class ElementContext {
   }
 
   /**
-   * represents a container element
+   * Represents a container element ("type" : "container")
    */
   public static class Container extends ElementContext {
 
@@ -320,7 +334,7 @@ public abstract class ElementContext {
   }
 
   /**
-   * represents a frame element
+   * Represents a frame element ("type" : "frame")
    */
   public static class Frame extends ElementContext {
 
@@ -348,14 +362,13 @@ public abstract class ElementContext {
      * @param name        the name of the element
      * @param cssSelector the selector for the frame
      */
-    // used in tests
     public Frame(String name, String cssSelector) {
       this(null, name, new LocatorCodeGeneration(cssSelector));
     }
   }
 
   /**
-   * represents a root element
+   * Represents a root element
    */
   public static final class Root extends ElementContext {
 
@@ -368,8 +381,9 @@ public abstract class ElementContext {
      * @param selector                the selector for the element
      * @param rootType                the type of the root element
      */
-    public Root(TypeProvider enclosingPageObjectType, Locator selector, TypeProvider rootType) {
+    public Root(TypeProvider enclosingPageObjectType, Locator selector, TypeProvider rootType, PageObjectMethod rootElementMethod) {
       super(ElementType.ROOT, null, ROOT_ELEMENT_NAME, rootType, selector, new ArrayList<>(), false);
+      registerElementMethod(rootElementMethod);
       this.enclosingPageObjectType = enclosingPageObjectType;
     }
 
@@ -384,7 +398,7 @@ public abstract class ElementContext {
   }
 
   /**
-   * represents a list of elements wrapped by other Page Objects
+   * Represents a list of "custom" elements: other Page Objects
    */
   public static class CustomReturnsAll extends Custom {
 
@@ -411,7 +425,7 @@ public abstract class ElementContext {
   }
 
   /**
-   * represents an element wrapped by another Page Object
+   * Represents a "custom" element: another Page Object
    */
   public static class Custom extends ElementContext {
 
@@ -442,14 +456,13 @@ public abstract class ElementContext {
      * @param type         the type of the element
      * @param selector      the selector for the element
      */
-    // used in tests
     public Custom(String elementName, TypeProvider type, Locator selector) {
       this(null, elementName, type, selector, new ArrayList<>(), false);
     }
   }
 
   /**
-   * represents the document
+   * Represents the Document
    */
   public static class Document extends ElementContext {
 
@@ -469,12 +482,12 @@ public abstract class ElementContext {
           EMPTY_SELECTOR,
           Collections.emptyList(),
           false);
-      setElementMethod(ElementMethod.DOCUMENT_GETTER, null);
+      registerElementMethod(ElementMethod.DOCUMENT_GETTER);
     }
   }
 
   /**
-   * represents the returning the element itself
+   * Represents self element (or "this")
    */
   public static class Self extends ElementContext {
 
