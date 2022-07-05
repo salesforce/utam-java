@@ -85,7 +85,10 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
     bootstrapElements(pageObject);
     PlatformType mobileContextType = PlatformType.from(pageObject.getClass());
     // only mobile driver implementation actually changes context
-    getDriver().setPageContext(mobileContextType);
+    if (instance instanceof RootPageObject) {
+    	// do context switching for only root POs as child POs are within the required context already
+    	getDriver().setPageContext(mobileContextType);
+    }
   }
 
   @Override
