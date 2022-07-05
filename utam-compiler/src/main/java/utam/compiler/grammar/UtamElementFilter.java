@@ -14,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
-import utam.compiler.UtamCompilationError;
 import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.grammar.UtamMatcher.ElementFilterMatcherProvider;
 import utam.compiler.grammar.UtamMethodAction.ArgumentsProvider;

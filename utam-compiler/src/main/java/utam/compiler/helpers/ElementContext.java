@@ -181,13 +181,23 @@ public abstract class ElementContext {
    * Sets the element getter method
    *
    * @param method the method to set as the element getter
+   * @param context context is used to set scope element method usage
    */
-  public void setElementMethod(PageObjectMethod method) {
+  public void setElementMethod(PageObjectMethod method, TranslationContext context) {
     if (this.elementGetter != null) {
       throw new NullPointerException(
           String.format("element getter already exists for an element '%s'", getName()));
     }
     this.elementGetter = method;
+    if(context != null) { // context can be null for document constructor
+      ElementContext scopeElement = this.getScopeElement();
+      while (scopeElement != null) {
+        // for each scope element in hierarchy set that it's used
+        // private methods that are not public and not marked as "used" will not be added to generation
+        context.setMethodUsage(scopeElement.getElementGetterName());
+        scopeElement = scopeElement.getScopeElement();
+      }
+    }
   }
 
   /**
@@ -197,15 +207,6 @@ public abstract class ElementContext {
    */
   public String getElementGetterName() {
     return getElementMethod().getDeclaration().getName();
-  }
-
-  /**
-   * Sets the element method usage
-   *
-   * @param translationContext the translation context defining the element usage
-   */
-  public void setElementMethodUsage(TranslationContext translationContext) {
-    translationContext.setMethodUsage(getElementGetterName());
   }
 
   /**
@@ -468,7 +469,7 @@ public abstract class ElementContext {
           EMPTY_SELECTOR,
           Collections.emptyList(),
           false);
-      setElementMethod(ElementMethod.DOCUMENT_GETTER);
+      setElementMethod(ElementMethod.DOCUMENT_GETTER, null);
     }
   }
 

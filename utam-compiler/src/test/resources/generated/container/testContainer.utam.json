@@ -1,4 +1,9 @@
 {
+  "description": {
+    "text": [
+      "test container element getter compiles"
+    ]
+  },
   "elements": [
     {
       "name": "scopePrivate",
@@ -9,14 +14,14 @@
         {
           "description": {
             "text": [
-              "bugfix test: scoped element inside private element would not compile"
+              "bugfix test: scoped frame inside private element would not compile"
             ]
           },
           "public": true,
-          "type": "generated-basic/pageObjects/testBasicTypes",
-          "name": "scopedCustom",
+          "type": "container",
+          "name": "scopedContainer",
           "selector": {
-            "css": "scopedCustom"
+            "css": "scopedContainer"
           }
         },
         {
@@ -38,39 +43,24 @@
                 ]
               },
               "public": true,
-              "type": "generated-basic/pageObjects/testBasicTypes",
-              "name": "scopedInScopeCustom",
-              "selector": {
-                "css": "scopedInScopeCustom"
-              }
+              "name": "scopedInScopeContainer",
+              "type": "container"
             }
           ]
         }
       ]
     },
     {
-      "name": "test",
-      "nullable": true,
-      "public": true,
-      "type": "generated-basic/pageObjects/testBasicTypes",
-      "selector": {
-        "css": "css"
-      }
-    },
-    {
-      "name": "testWithFilter",
-      "nullable": true,
-      "public": true,
-      "type": "generated-basic/pageObjects/testBasicTypes",
-      "selector": {
-        "css": "css",
-        "returnAll": true
+      "description": {
+        "text": [
+          "test simple getter for container element"
+        ]
       },
-      "filter": {
-        "apply": "isVisible",
-        "matcher": {
-          "type": "isTrue"
-        }
+      "public": true,
+      "type": "container",
+      "name": "container",
+      "selector": {
+        "css": "container"
       }
     }
   ]

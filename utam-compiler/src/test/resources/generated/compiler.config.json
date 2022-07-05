@@ -41,6 +41,14 @@
     {
       "typeMatch": "generated-duplicate",
       "pathMatch": ".*/duplicate"
+    },
+    {
+      "typeMatch": "generated-frame",
+      "pathMatch": ".*/frame"
+    },
+    {
+      "typeMatch": "generated-container",
+      "pathMatch": ".*/container"
     }
   ],
   "copyright" : [

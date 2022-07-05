@@ -454,6 +454,7 @@ abstract class UtamArgument {
       }
       String argsString = getParametersValuesString(parameters);
       String elementGetterName = elementGetter.getName();
+      // mark that element getter is invoked, otherwise private element getter will not be generated
       context.setMethodUsage(elementGetterName);
       String literalValue = String.format("this.%s(%s)", elementGetterName, argsString);
       return new Literal(literalValue, elementContext.getType(), parameters);

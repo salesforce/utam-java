@@ -315,7 +315,7 @@ public final class UtamElement {
       }
       context.setElement(elementNode, component);
       context.setMethod(method);
-      component.setElementMethod(method);
+      component.setElementMethod(method, context);
       context.setTestableElement(
           name,
           new ElementUnitTestHelper(
@@ -328,8 +328,6 @@ public final class UtamElement {
               name, getFindAnnotation(selectorContext.getLocator(),
               isExpandScopeShadowRoot, isNullable()));
       context.setClassField(field);
-      // scope element method is invoked
-      component.getScopeElement().setElementMethodUsage(context);
       return new ElementContext[]{null, component};
     }
   }
@@ -406,9 +404,7 @@ public final class UtamElement {
       context.setClassField(field);
       context.setElement(elementNode, elementContext);
       context.setMethod(method);
-      elementContext.setElementMethod(method);
-      // scope element method is invoked
-      elementContext.getScopeElement().setElementMethodUsage(context);
+      elementContext.setElementMethod(method, context);
       context.setTestableElement(name, new ElementUnitTestHelper(
           locatorHelper.getLocator().getStringValue(),
           scopeElement == null ? null : scopeElement.getName(),
@@ -454,11 +450,9 @@ public final class UtamElement {
         method = new ContainerMethod.WithSelector(
             scopeElement, isExpandScopeShadowRoot, name, selectorContext, isPublic(), description);
       }
-      elementContext.setElementMethod(method);
+      elementContext.setElementMethod(method, context);
       context.setElement(elementNode, elementContext);
       context.setMethod(method);
-      // scope element method is invoked
-      elementContext.getScopeElement().setElementMethodUsage(context);
       return new ElementContext[]{null, elementContext};
     }
   }
@@ -493,7 +487,7 @@ public final class UtamElement {
       ElementContext elementContext = new ElementContext.Frame(scopeElement, name, selectorContext);
       PageObjectMethod method = new FrameMethod(elementContext, isPublic(),
           selectorContext.getParameters(), description);
-      elementContext.setElementMethod(method);
+      elementContext.setElementMethod(method, context);
       context.setClassField(field);
       context.setElement(elementNode, elementContext);
       context.setMethod(method);
