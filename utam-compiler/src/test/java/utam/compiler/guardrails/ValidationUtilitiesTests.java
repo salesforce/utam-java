@@ -11,6 +11,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.mock;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.guardrails.ValidationError.COMPONENTS_WITH_SAME_SELECTOR_BUT_DIFFERENT_TYPES;
 import static utam.compiler.guardrails.ValidationError.COMPONENT_AND_ELEMENT_DUPLICATE_SELECTOR;
@@ -28,6 +29,7 @@ import utam.compiler.helpers.ElementContext.Document;
 import utam.compiler.helpers.ElementContext.Root;
 import utam.compiler.helpers.ElementContext.Self;
 import utam.compiler.helpers.TypeUtilities;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Locator;
 import utam.core.selenium.element.LocatorBy;
@@ -43,11 +45,11 @@ public class ValidationUtilitiesTests {
   private static final String ELEMENT_NAME = "fakeElementName";
 
   private static ElementContext.Root getRoot(String type, Locator selector) {
-    return new Root(new TypeUtilities.FromString(type), selector, actionable);
+    return new Root(new TypeUtilities.FromString(type), selector, actionable, mock(PageObjectMethod.class));
   }
 
   private static ElementContext.Root getEmptyRoot(String type) {
-    return new Root(new TypeUtilities.FromString(type), LocatorBy.byCss(""), actionable);
+    return new Root(new TypeUtilities.FromString(type), LocatorBy.byCss(""), actionable, mock(PageObjectMethod.class));
   }
 
   @Test

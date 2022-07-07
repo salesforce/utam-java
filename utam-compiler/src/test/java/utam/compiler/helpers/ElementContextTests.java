@@ -16,6 +16,7 @@ import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertThrows;
 import static utam.compiler.grammar.TestUtilities.TEST_PAGE_OBJECT;
 import static utam.compiler.grammar.TestUtilities.getCssSelector;
+import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.EMPTY_SELECTOR;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
@@ -116,8 +117,9 @@ public class ElementContextTests {
   public void testBasicElementSetDuplicateGetterThrows() {
     PageObjectMethod method = mock(PageObjectMethod.class);
     ElementContext elementContext = getSingleElementContext();
-    elementContext.setElementMethod(method);
-    assertThrows(NullPointerException.class, () -> elementContext.setElementMethod(method));
+    TranslationContext context = getTestTranslationContext();
+    elementContext.setElementMethod(method, context);
+    assertThrows(NullPointerException.class, () -> elementContext.setElementMethod(method, context));
   }
 
   @Test
@@ -155,7 +157,7 @@ public class ElementContextTests {
 
   @Test
   public void testRootElement() {
-    ElementContext.Root context = new Root(TEST_PAGE_OBJECT, getCssSelector("css"), actionable);
+    ElementContext.Root context = new Root(TEST_PAGE_OBJECT, getCssSelector("css"), actionable, mock(PageObjectMethod.class));
     assertThat(context.getName(), is(equalTo(ROOT_ELEMENT_NAME)));
     assertThat(context.getElementNodeType(), is(ElementType.ROOT));
     assertThat(context.isNullable(), is(false));

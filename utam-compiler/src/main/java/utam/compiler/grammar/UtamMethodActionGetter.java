@@ -170,7 +170,8 @@ class UtamMethodActionGetter extends UtamMethodAction {
 
     @Override
     ApplyOperation getApplyOperation() {
-      elementContext.setElementMethodUsage(context);
+      // mark that element getter is invoked, otherwise private element getter will not be generated
+      context.setMethodUsage(elementContext.getElementGetterName());
       String methodName = methodContext.getName();
       MethodDeclaration elementGetter = elementContext.getElementMethod().getDeclaration();
       boolean isContainer = elementContext.getElementNodeType() == ElementType.CONTAINER;

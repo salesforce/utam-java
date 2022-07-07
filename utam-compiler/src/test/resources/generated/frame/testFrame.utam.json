@@ -1,7 +1,7 @@
 {
   "description": {
     "text": [
-      "test basic element getter compiles"
+      "test frame element getter compiles"
     ]
   },
   "elements": [
@@ -11,6 +11,19 @@
         "css": "scope"
       },
       "elements": [
+        {
+          "description": {
+            "text": [
+              "bugfix test: scoped frame inside private element would not compile"
+            ]
+          },
+          "public": true,
+          "type": "frame",
+          "name": "scopedFrame",
+          "selector": {
+            "css": "scopedFrame"
+          }
+        },
         {
           "name": "scopeInScope",
           "selector": {
@@ -30,38 +43,15 @@
                 ]
               },
               "public": true,
-              "name": "scopedInScopeBasic",
+              "name": "scopedInScopeFrame",
+              "type": "frame",
               "selector": {
-                "css": "scopedInScopeBasic"
+                "css": "scopedInScopeFrame"
               }
             }
           ]
-        },
-        {
-          "description": {
-            "text": [
-              "bugfix test: scoped element inside private element would not compile"
-            ]
-          },
-          "public": true,
-          "name": "scopedBasic",
-          "selector": {
-            "css": "scopedBasic"
-          }
         }
       ]
-    },
-    {
-      "description": {
-        "text": [
-          "test simple getter for basic element"
-        ]
-      },
-      "public": true,
-      "name": "test",
-      "selector": {
-        "css": ".css"
-      }
     }
   ]
 }

@@ -12,7 +12,6 @@ import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.representation.UnionType;

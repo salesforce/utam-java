@@ -307,8 +307,8 @@ class UtamMethodActionApply extends UtamMethodAction {
     }
 
     ElementOperand getReferencedElementOperand() {
-      // register usage of getter from compose statement
-      elementContext.setElementMethodUsage(context);
+      // mark that element getter is invoked, otherwise private element getter will not be generated
+      context.setMethodUsage(elementContext.getElementGetterName());
       ElementsUsageTracker usageTracker = methodContext.getElementUsageTracker();
       String elementName = elementContext.getName();
       if (usageTracker.isReusedElement(elementName)) {
