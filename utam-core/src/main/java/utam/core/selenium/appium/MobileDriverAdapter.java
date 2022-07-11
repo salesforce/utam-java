@@ -90,10 +90,12 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
         mobilePlatform == MobilePlatformType.ANDROID_TABLET) {
       Set<String> windowHandles = appiumDriver.getWindowHandles();
       for (String windowHandle : windowHandles) {
-        AppiumDriver newDriver = (AppiumDriver) appiumDriver.switchTo().window(windowHandle);
-        String currentTitle = newDriver.getTitle();
-        if (!currentTitle.isEmpty() && currentTitle.equalsIgnoreCase(title)) {
-          return newDriver;
+        if(!windowHandle.equals(NATIVE_CONTEXT_HANDLE)) {
+          AppiumDriver newDriver = (AppiumDriver) appiumDriver.switchTo().window(windowHandle);
+          String currentTitle = newDriver.getTitle();
+          if (!currentTitle.isEmpty() && currentTitle.equalsIgnoreCase(title)) {
+            return newDriver;
+          }
         }
       }
     }
