@@ -1,0 +1,55 @@
+{
+  "elements": [
+    {
+      "name": "settingsPanel",
+      "type": "clickable",
+      "selector": {
+        "css": "mat-expansion-panel-header",
+        "returnAll": true
+      },
+      "filter": {
+        "apply": "getText",
+        "findFirst": true,
+        "matcher": {
+          "type": "stringContains",
+          "args": [
+            {
+              "value": "Settings"
+            }
+          ]
+        }
+      },
+      "public": true
+    }
+  ],
+  "methods": [
+    {
+      "name": "expandSettings",
+      "compose": [
+        {
+          "apply": "waitFor",
+          "args": [
+            {
+              "type": "function",
+              "predicate": [
+                {
+                  "element": "settingsPanel",
+                  "apply": "click"
+                },
+                {
+                  "element": "settingsPanel",
+                  "apply": "getAttribute",
+                  "args": [
+                    {
+                      "value": "ariaExpanded"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
