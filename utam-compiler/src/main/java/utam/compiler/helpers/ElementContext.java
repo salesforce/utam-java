@@ -44,9 +44,7 @@ public abstract class ElementContext {
   static final Locator EMPTY_SELECTOR = LocatorBy.byCss("");
   private final Locator selector;
   // parameters from scope + from element itself
-  private final List<MethodParameter> allParameters = new ArrayList<>();
-  // subset of non literal parameters
-  private final List<MethodParameter> nonLiteralParameters;
+  private final List<MethodParameter> parameters = new ArrayList<>();
   private final String name;
   private final TypeProvider type;
   private final boolean isNullable;
@@ -78,17 +76,11 @@ public abstract class ElementContext {
     this.type = type;
     this.selector = selector;
     if (scopeContext != null) {
-      this.allParameters.addAll(scopeContext.allParameters);
+      this.parameters.addAll(scopeContext.parameters);
     }
-    this.allParameters.addAll(parameters);
+    this.parameters.addAll(parameters);
     this.isNullable = isNullable;
     this.scopeElement = scopeContext;
-    this.nonLiteralParameters = allParameters
-        .stream()
-        // getter can have literal parameter that is HARDCODED in the element
-        // then when we invoke getter it should not be used
-        .filter(parameter -> !parameter.isLiteral())
-        .collect(Collectors.toList());
   }
 
   /**
@@ -142,7 +134,7 @@ public abstract class ElementContext {
    * @return the list of parameters for the element getter
    */
   public final List<MethodParameter> getParameters() {
-    return allParameters;
+    return parameters;
   }
 
   /**
