@@ -160,8 +160,8 @@ class UtamMethodActionApply extends UtamMethodAction {
     }
 
     private String getElementGetterString() {
-      List<MethodParameter> allParameters = elementContext.getParameters();
-      String parameters = getParametersValuesString(allParameters);
+      List<MethodParameter> getterParameters = elementContext.getGetterNonLiteralParameters();
+      String parameters = getParametersValuesString(getterParameters);
       return String.format("this.%s(%s)", elementContext.getElementGetterName(), parameters);
     }
 

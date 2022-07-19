@@ -142,7 +142,7 @@ class UtamMethodActionGetter extends UtamMethodAction {
       String parserContext = String.format("method \"%s\"", methodContext.getName());
       ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
       List<UtamArgument> arguments = provider.getArguments(true);
-      MethodDeclaration elementGetter = elementContext.getElementMethod().getDeclaration();
+      List<MethodParameter> getterNonLiteralParameters = elementContext.getGetterNonLiteralParameters();
       ParametersContext parametersContext = new StatementParametersContext(parserContext,
           context,
           argsNode,
@@ -153,16 +153,15 @@ class UtamMethodActionGetter extends UtamMethodAction {
             .stream()
             .map(arg -> arg.asParameter(context, methodContext, parametersContext))
             .forEach(parametersContext::setParameter);
-        List<TypeProvider> expectedElementArgsTypes = elementGetter
-            .getParameters()
+        List<TypeProvider> expectedElementArgsTypes = getterNonLiteralParameters
             .stream()
             .map(MethodParameter::getType)
             .collect(Collectors.toList());
         parameters = parametersContext.getParameters(expectedElementArgsTypes);
       } else if (methodContext.getElementUsageTracker().isReusedElement(elementName)) {
-        parameters = elementGetter.getParameters();
+        parameters = getterNonLiteralParameters;
       } else {
-        elementGetter.getParameters().forEach(parametersContext::setParameter);
+        getterNonLiteralParameters.forEach(parametersContext::setParameter);
         parameters = parametersContext.getParameters();
       }
       return parameters;

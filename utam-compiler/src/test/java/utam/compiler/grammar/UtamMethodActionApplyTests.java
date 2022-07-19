@@ -13,8 +13,8 @@ import static org.hamcrest.core.StringContains.containsString;
 import static utam.compiler.grammar.DeserializerUtilities.expectCompilerErrorFromFile;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.COLLECTOR_IMPORT;
-import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
+import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 
 import java.util.List;
 import org.testng.annotations.Test;
@@ -408,5 +408,16 @@ public class UtamMethodActionApplyTests {
     assertThat(e.getMessage(), containsString(
         "error 601: method \"test\" statement: "
             + "unknown element with name \"error\" is referenced in a compose statement"));
+  }
+
+  @Test
+  public void testLiteralGetterArgument() {
+    PageObjectMethod method = new DeserializerUtilities()
+        .getContext("generated/args/literalGetterArg.utam")
+        .getMethod("testApply");
+    MethodInfo expected = new MethodInfo("testApply", "void");
+    expected.addCodeLine("SettingsPanelElement settingsPanel0 = this.getSettingsPanel()");
+    expected.addCodeLine("settingsPanel0.click()");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 }

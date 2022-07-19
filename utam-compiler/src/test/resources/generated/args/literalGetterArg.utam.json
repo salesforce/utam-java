@@ -24,30 +24,19 @@
   ],
   "methods": [
     {
-      "name": "expandSettings",
+      "name": "testApply",
       "compose": [
         {
-          "apply": "waitFor",
-          "args": [
-            {
-              "type": "function",
-              "predicate": [
-                {
-                  "element": "settingsPanel",
-                  "apply": "click"
-                },
-                {
-                  "element": "settingsPanel",
-                  "apply": "getAttribute",
-                  "args": [
-                    {
-                      "value": "ariaExpanded"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
+          "element": "settingsPanel",
+          "apply": "click"
+        }
+      ]
+    },
+    {
+      "name": "testGetter",
+      "compose": [
+        {
+          "element": "settingsPanel"
         }
       ]
     }
