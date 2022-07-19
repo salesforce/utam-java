@@ -1,0 +1,44 @@
+{
+  "elements": [
+    {
+      "name": "settingsPanel",
+      "type": "clickable",
+      "selector": {
+        "css": "mat-expansion-panel-header",
+        "returnAll": true
+      },
+      "filter": {
+        "apply": "getText",
+        "findFirst": true,
+        "matcher": {
+          "type": "stringContains",
+          "args": [
+            {
+              "value": "Settings"
+            }
+          ]
+        }
+      },
+      "public": true
+    }
+  ],
+  "methods": [
+    {
+      "name": "testApply",
+      "compose": [
+        {
+          "element": "settingsPanel",
+          "apply": "click"
+        }
+      ]
+    },
+    {
+      "name": "testGetter",
+      "compose": [
+        {
+          "element": "settingsPanel"
+        }
+      ]
+    }
+  ]
+}

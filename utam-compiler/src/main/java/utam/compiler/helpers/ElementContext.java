@@ -14,6 +14,7 @@ import static utam.compiler.helpers.TypeUtilities.wrapAsList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import utam.compiler.representation.ElementMethod;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -43,7 +44,7 @@ public abstract class ElementContext {
   static final Locator EMPTY_SELECTOR = LocatorBy.byCss("");
   private final Locator selector;
   // parameters from scope + from element itself
-  private final List<MethodParameter> parameters;
+  private final List<MethodParameter> parameters = new ArrayList<>();
   private final String name;
   private final TypeProvider type;
   private final boolean isNullable;
@@ -74,7 +75,6 @@ public abstract class ElementContext {
     this.name = name;
     this.type = type;
     this.selector = selector;
-    this.parameters = new ArrayList<>();
     if (scopeContext != null) {
       this.parameters.addAll(scopeContext.parameters);
     }
@@ -135,6 +135,20 @@ public abstract class ElementContext {
    */
   public final List<MethodParameter> getParameters() {
     return parameters;
+  }
+
+  /**
+   * Getter can have literal parameter that is HARDCODED in the element. When we invoke getter it
+   * should not be used
+   *
+   * @return list of non-literal parameters
+   */
+  public final List<MethodParameter> getGetterNonLiteralParameters() {
+    return getElementMethod().getDeclaration()
+        .getParameters()
+        .stream()
+        .filter(parameter -> !parameter.isLiteral())
+        .collect(Collectors.toList());
   }
 
   /**

@@ -323,4 +323,15 @@ public class UtamMethodActionGetterTests {
     expected.addCodeLine("statement1.something(anotherArg)");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
+
+  @Test
+  public void testLiteralGetterArgument() {
+    PageObjectMethod method = new DeserializerUtilities()
+        .getContext("generated/args/literalGetterArg.utam")
+        .getMethod("testGetter");
+    MethodInfo expected = new MethodInfo("testGetter", "SettingsPanelElement");
+    expected.addCodeLine("SettingsPanelElement statement0 = this.getSettingsPanel()");
+    expected.addCodeLine("return statement0");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
 }

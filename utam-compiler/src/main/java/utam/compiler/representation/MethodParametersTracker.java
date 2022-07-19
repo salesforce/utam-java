@@ -50,6 +50,7 @@ public class MethodParametersTracker {
     if (parameter.getNestedParameters() != null) {
       parameter.getNestedParameters().forEach(this::setMethodParameter);
     }
+    // set parameter if it's literal as well, so that we could import its type (for Locator)
     methodParameters.add(parameter);
   }
 

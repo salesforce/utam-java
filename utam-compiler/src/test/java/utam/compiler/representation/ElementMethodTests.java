@@ -273,6 +273,7 @@ public class ElementMethodTests {
     TranslationContext context = new DeserializerUtilities()
         .getContext("filter/customWithFilterContainsElement");
     PageObjectMethod method = context.getMethod(ELEMENT_METHOD_NAME);
+    assertThat(method.getDeclaration().getCodeLine(), is(equalTo("BasicElement getTest(String value)")));
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "BasicElement");
     expected.addParameter(new MethodParameterInfo("value", "String"));
     expected.addParameter(new MethodParameterInfo("LocatorBy.byCss(String.format(\"input[value='%s']\", value))", "LocatorBy"));
