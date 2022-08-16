@@ -176,6 +176,7 @@ class UtamComposeMethod extends UtamMethod {
     List<MethodParameter> parameters = parametersContext.getParameters();
     ComposeMethodStatement lastStatement = statements.get(statements.size() - 1);
     TypeProvider lastStatementReturnType = lastStatement.getReturnType();
+    UtamMethodDescription description = getDescription(context);
     return new ComposeMethod(
         name,
         lastStatementReturnType,

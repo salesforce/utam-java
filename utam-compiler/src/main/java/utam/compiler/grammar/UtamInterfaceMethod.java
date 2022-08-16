@@ -99,6 +99,7 @@ class UtamInterfaceMethod extends UtamMethod {
     ParametersContext parametersContext = methodContext.getParametersContext();
     setMethodLevelParameters(context, methodContext);
     List<MethodParameter> parameters = parametersContext.getParameters();
+    UtamMethodDescription description = getDescription(context);
     return isReturnsBasicType ? new AbstractBasicElementGetter(name, parameters, methodReturnType,
         description)
         : new InterfaceMethod(name, methodReturnType, parameters, description);

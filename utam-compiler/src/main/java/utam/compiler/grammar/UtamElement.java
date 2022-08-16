@@ -64,7 +64,7 @@ public final class UtamElement {
   private final List<UtamElementProvider> elements;
   private final Boolean isNullable;
   private final Traversal traversal;
-  private final UtamMethodDescription description;
+  private final JsonNode description;
   private UtamSelector selector;
   private final String[] type;
   private final Boolean isPublic; // should be nullable as it's redundant for root
@@ -92,7 +92,7 @@ public final class UtamElement {
     Entry<Traversal, String[]> elementType = processTypeNode(type);
     this.type = elementType.getValue();
     this.traversal = elementType.getKey();
-    this.description = processMethodDescriptionNode(descriptionNode, validationContext);
+    this.description = descriptionNode;
   }
 
   private Entry<Traversal, String[]> processTypeNode(JsonNode typeNode) {
@@ -177,7 +177,7 @@ public final class UtamElement {
     }
   }
 
-  abstract static class Traversal {
+  abstract class Traversal {
 
     // traverse and return next scope
     // if next scope is null, second element is self
@@ -187,6 +187,10 @@ public final class UtamElement {
         ElementContext scopeElement,
         JsonNode elementNode,
         boolean isExpandScopeShadowRoot);
+
+    final UtamMethodDescription getDescription(TranslationContext context) {
+      return processMethodDescriptionNode(description, context, String.format("element \"%s\" description", name));
+    }
   }
 
   /**
@@ -252,6 +256,7 @@ public final class UtamElement {
         ElementContext scopeElement,
         JsonNode elementNode,
         boolean isExpandScopeShadowRoot) {
+      UtamMethodDescription description = getDescription(context);
       boolean isReturnList = selector.isReturnAll() && (filter == null || !filter.getFindFirst());
       LocatorCodeGeneration selectorContext = selector.getElementCodeGenerationHelper(name, context);
       MethodParametersTracker parameters = new MethodParametersTracker(
@@ -351,6 +356,7 @@ public final class UtamElement {
         ElementContext scopeElement,
         JsonNode elementNode,
         boolean isExpandScopeShadowRoot) {
+      UtamMethodDescription description = getDescription(context);
       String parserContext = String.format("element \"%s\"", name);
       boolean isPublicImplementationOnlyElement =
           isPublic() && context.isImplementationPageObject();
@@ -440,6 +446,7 @@ public final class UtamElement {
         ElementContext scopeElement,
         JsonNode elementNode,
         boolean isExpandScopeShadowRoot) {
+      UtamMethodDescription description = getDescription(context);
       LocatorCodeGeneration selectorContext = selector.getElementCodeGenerationHelper(name, context);
       ElementContext elementContext = new ElementContext.Container(scopeElement, name);
       PageObjectMethod method;
@@ -479,6 +486,7 @@ public final class UtamElement {
         ElementContext scopeElement,
         JsonNode elementNode,
         boolean isExpandScopeShadowRoot) {
+      UtamMethodDescription description = getDescription(context);
       LocatorCodeGeneration selectorContext = selector.getElementCodeGenerationHelper(name, context);
       ElementField field =
           new ElementField(

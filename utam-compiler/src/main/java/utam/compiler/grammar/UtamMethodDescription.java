@@ -18,7 +18,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import utam.compiler.UtamCompilerIntermediateError;
+import utam.compiler.UtamCompilationError;
+import utam.compiler.helpers.TranslationContext;
+import utam.compiler.helpers.ValidationUtilities;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
@@ -62,22 +64,27 @@ public class UtamMethodDescription {
   /**
    * Process/deserialize description node at the method or element level
    *
-   * @param descriptionNode Json node
+   * @param node Json node
    * @param parserContext   element or method name with prefix
    * @return object with description
    */
-  static UtamMethodDescription processMethodDescriptionNode(JsonNode descriptionNode, String parserContext) {
-    if (descriptionNode == null || descriptionNode.isNull()) {
+  static UtamMethodDescription processMethodDescriptionNode(JsonNode node, TranslationContext context, String parserContext) {
+    if (node == null || node.isNull()) {
       return null;
     }
-    if (descriptionNode.isTextual()) {
-      String value = descriptionNode.textValue();
+    ValidationUtilities utils = new ValidationUtilities(context);
+    if (node.isTextual()) {
+      String value = node.textValue();
+      utils.validateNotNullOrEmptyString(node, value, parserContext, "text");
       return new UtamMethodDescription(Collections.singletonList(value), null, null, null);
     }
-    Function<Exception, RuntimeException> parserErrorWrapper = causeErr -> new UtamCompilerIntermediateError(
-        causeErr, descriptionNode, 700, parserContext, causeErr.getMessage());
-    return readNode(descriptionNode, UtamMethodDescription.class,
-        parserErrorWrapper);
+    Function<Exception, RuntimeException> parserErrorWrapper = cause -> new UtamCompilationError(context.getErrorMessage(700, parserContext));
+    UtamMethodDescription object = readNode(node, UtamMethodDescription.class, parserErrorWrapper);
+    object.text.forEach(textValue -> utils.validateNotNullOrEmptyString(node, textValue, parserContext, "text"));
+    utils.validateNullOrNotEmptyString(node, object.deprecatedStr, parserContext, "deprecated");
+    utils.validateNullOrNotEmptyString(node, object.returnStr, parserContext, "return");
+    utils.validateNullOrNotEmptyString(node, object.throwsStr, parserContext, "throws");
+    return object;
   }
 
   /**

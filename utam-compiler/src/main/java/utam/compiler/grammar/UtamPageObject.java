@@ -87,7 +87,7 @@ final class UtamPageObject {
   private final UtamProfileProvider profileProvider;
   private final List<UtamElementProvider> elements;
   private final List<UtamElementProvider> shadowElements;
-  private final UtamRootDescription description;
+  private UtamRootDescription description;
   private final List<String> descriptionText = new ArrayList<>();
 
   @JsonCreator

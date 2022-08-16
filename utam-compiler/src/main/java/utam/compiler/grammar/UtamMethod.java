@@ -31,13 +31,12 @@ import utam.core.declarative.representation.PageObjectMethod;
 abstract class UtamMethod {
 
   final String name;
-  final UtamMethodDescription description;
+  final JsonNode descriptionNode;
   final JsonNode argsNode;
 
   UtamMethod(String name, JsonNode descriptionNode, JsonNode argsNode) {
     this.name = name;
-    String validationContext = String.format("method \"%s\"", name);
-    this.description = processMethodDescriptionNode(descriptionNode, validationContext);
+    this.descriptionNode = descriptionNode;
     this.argsNode = argsNode;
   }
 
@@ -75,6 +74,11 @@ abstract class UtamMethod {
    * @return method instance
    */
   abstract PageObjectMethod getMethod(TranslationContext context);
+
+  final UtamMethodDescription getDescription(TranslationContext context) {
+    String validationContext = String.format("method \"%s\"", name);
+    return processMethodDescriptionNode(descriptionNode, context, validationContext);
+  }
 
   final void setMethodLevelParameters(TranslationContext context, MethodContext methodContext) {
     ParametersContext parametersContext = methodContext.getParametersContext();
