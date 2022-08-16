@@ -7,6 +7,7 @@
  */
 package utam.compiler.helpers;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.Document.DOCUMENT_ELEMENT;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
@@ -180,7 +181,7 @@ public final class TranslationContext {
    */
   public void setElement(JsonNode currentNode, ElementContext element) {
     if (elementContextMap.containsKey(element.getName())) {
-      throw new UtamCompilationError(currentNode, getErrorMessage(202, element.getName()));
+      throw new UtamCompilationError(currentNode, VALIDATION.getErrorMessage(202, element.getName()));
     }
     elementContextMap.put(element.getName(), element);
   }
@@ -415,25 +416,11 @@ public final class TranslationContext {
   }
 
   /**
-   * read error message by code and replace %s by args if any
+   * get name of the page object for error messages
    *
-   * @param code string error code
-   * @param args replacement for part of the messages that are context dependent
-   * @return string with message or throws an error
+   * @return string with a name
    */
-  public String getErrorMessage(Integer code, String... args) {
-    String message = translatorConfiguration.getErrorMessage(code, args);
-    return getRawErrorMessage(message);
-  }
-
-  /**
-   * utility function to add prefix with page object name to the error
-   *
-   * @param message original message
-   * @return message concatenated with prefix
-   */
-  public String getRawErrorMessage(String message) {
-    String prefix = String.format("error in page object '%s'", pageObjectURI);
-    return String.format("%s: \n%s", prefix, message);
+  public String getPageObjectName() {
+    return pageObjectURI;
   }
 }

@@ -5,7 +5,7 @@
  * For full license text, see the LICENSE file in the repo root
  * or https://opensource.org/licenses/MIT
  */
-package utam.compiler.translator;
+package utam.compiler.diagnostics;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,7 +25,7 @@ import java.util.MissingFormatArgumentException;
  * @author elizaveta.ivanova
  * @since 238
  */
-class JsonErrorsConfig {
+public class JsonErrorsConfig {
 
   static final String ERR_FINDING_ERROR_CONFIG = "can't find error codes config '%s'";
   static final String ERR_READING_ERROR_CONFIG = "error while reading error codes config '%s': ";
@@ -38,7 +38,7 @@ class JsonErrorsConfig {
    *
    * @return de-serialized object
    */
-  static JsonErrorsConfig getErrorsConfigWithDefaultName() {
+  public static JsonErrorsConfig getErrorsConfig() {
     return getErrorsConfig("errors.config.json");
   }
 
@@ -74,7 +74,7 @@ class JsonErrorsConfig {
    * @param args replacement for part of the messages that are context dependent
    * @return string with message or throws an error
    */
-  String getErrorMessage(Integer code, String... args) {
+  public String getErrorMessage(Integer code, String... args) {
     if (!errorDetailsMap.containsKey(code)) {
       throw new IllegalArgumentException(String.format(ERR_CODE_NOT_CONFIGURED, code));
     }

@@ -7,10 +7,11 @@
  */
 package utam.compiler.representation;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
+
 import java.util.List;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.MatcherType;
-import utam.compiler.helpers.TranslationContext;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
@@ -71,9 +72,9 @@ public class MatcherObject {
     return matcherType.getOperandType();
   }
 
-  public void checkMatcherOperand(TranslationContext context, TypeProvider operandType) {
+  public void checkMatcherOperand(TypeProvider operandType) {
     if (!matcherType.isCorrectOperandType(operandType)) {
-      String errorMsg = context.getErrorMessage(wrongTypeErrorCode,
+      String errorMsg = VALIDATION.getErrorMessage(wrongTypeErrorCode,
           errorContextString, matcherType.getOperandType().getSimpleName(),
           operandType.getSimpleName());
       throw new UtamCompilationError(errorMsg);

@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -56,12 +57,12 @@ class UtamMethodActionGetter extends UtamMethodAction {
   Statement getStatement(TranslationContext context, MethodContext methodContext,
       StatementContext statementContext) {
     if (isChain) {
-      chainValidations(context, statementContext, methodContext.getName());
+      chainValidations(statementContext, methodContext.getName());
       return new ForeignElementStatement(context, methodContext, statementContext);
     } else {
       ElementContext elementContext = context.getElement(elementName);
       if (elementContext == null) {
-        String message = context.getErrorMessage(601, methodContext.getName(), elementName);
+        String message = VALIDATION.getErrorMessage(601, methodContext.getName(), elementName);
         throw new UtamCompilationError(message);
       }
       return new SelfElementStatement(context, methodContext, statementContext, elementContext);
@@ -85,7 +86,6 @@ class UtamMethodActionGetter extends UtamMethodAction {
       String parserContext = String.format("method \"%s\"", methodContext.getName());
       ParametersContext parametersContext = new StatementParametersContext(parserContext,
           context,
-          argsNode,
           methodContext);
       ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
       List<UtamArgument> arguments = provider.getArguments(true);
@@ -104,7 +104,7 @@ class UtamMethodActionGetter extends UtamMethodAction {
           .getDeclaredReturnOrDefault(context, methodContext.getDeclaredReturnType(), null);
       if (returnType == null) {
         throw new UtamCompilationError(
-            context.getErrorMessage(605, methodContext.getName(), elementName));
+            VALIDATION.getErrorMessage(605, methodContext.getName(), elementName));
       }
       // matcher parameters should be set after action parameters
       MatcherObject matcher = matcherProvider.apply(context, methodContext);
@@ -145,7 +145,6 @@ class UtamMethodActionGetter extends UtamMethodAction {
       List<MethodParameter> getterNonLiteralParameters = elementContext.getGetterNonLiteralParameters();
       ParametersContext parametersContext = new StatementParametersContext(parserContext,
           context,
-          argsNode,
           methodContext);
       List<MethodParameter> parameters;
       if (!arguments.isEmpty()) {
@@ -176,7 +175,7 @@ class UtamMethodActionGetter extends UtamMethodAction {
       boolean isContainer = elementContext.getElementNodeType() == ElementType.CONTAINER;
       if (isContainer && !statementContext.hasDeclaredReturn()) {
         // for container return type is PageObject
-        throw new UtamCompilationError(context.getErrorMessage(604, methodName));
+        throw new UtamCompilationError(VALIDATION.getErrorMessage(604, methodName));
       }
       TypeProvider returnType = statementContext.hasDeclaredReturn() ? statementContext
           .getDeclaredStatementReturnOrNull(context) : elementGetter.getReturnType();
@@ -185,7 +184,7 @@ class UtamMethodActionGetter extends UtamMethodAction {
         TypeProvider expectedType =
             hasMatcher ? PrimitiveType.BOOLEAN : elementGetter.getReturnType();
         if (!expectedType.isSameType(returnType)) {
-          String errorMsg = context.getErrorMessage(613, methodName,
+          String errorMsg = VALIDATION.getErrorMessage(613, methodName,
               expectedType.getSimpleName(),
               returnType.getSimpleName());
           throw new UtamCompilationError(errorMsg);
@@ -195,7 +194,7 @@ class UtamMethodActionGetter extends UtamMethodAction {
       // matcher parameters should be set after action parameters
       MatcherObject matcher = matcherProvider.apply(context, methodContext);
       if (matcher != null && !statementContext.hasDeclaredReturn()) {
-        matcher.checkMatcherOperand(context, returnType);
+        matcher.checkMatcherOperand(returnType);
       }
       ActionType action = new CustomActionType(elementGetter.getName(), returnType);
       // should be after all other lines!

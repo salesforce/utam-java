@@ -7,9 +7,8 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
-import static utam.compiler.grammar.JsonDeserializer.isNotArrayOrEmptyArray;
-import static utam.compiler.grammar.JsonDeserializer.nodeToString;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
@@ -44,29 +43,40 @@ final class UtamProfile {
     this.values = values;
   }
 
+  static List<UtamProfile> processProfileNodes(JsonNode profilesNode) {
+    List<UtamProfile> profiles = VALIDATION.validateOptionalNotEmptyArray(profilesNode, "page object root", "profile");
+    if(isEmptyNode(profilesNode)) {
+      return profiles;
+    }
+    Set<String> profilesNames = new HashSet<>();
+    for (JsonNode node : profilesNode) {
+      String profileName = node.fieldNames().next();
+      if (profilesNames.contains(profileName)) {
+        throw new UtamCompilationError(profilesNode, VALIDATION.getErrorMessage(801, profileName));
+      }
+      profilesNames.add(profileName);
+      profiles.add(processProfileNode(node, profileName));
+    }
+    return profiles;
+  }
+
   /**
    * instance of the profile
    *
    * @param node        profiles node
    * @param profileName name of the profile
-   * @param context     compilation context
    * @return instance of UtamProfile
    */
-  private static UtamProfile processProfileNode(JsonNode node, String profileName,
-      TranslationContext context) {
+  private static UtamProfile processProfileNode(JsonNode node, String profileName) {
     Set<String> values = new HashSet<>();
     JsonNode valuesNode = node.get(profileName);
-    String propertyName = String.format("profile \"%s\"", profileName);
     if (valuesNode.isArray()) {
+      VALIDATION.validateArrayOfStrings(valuesNode, String.format("profile \"%s\"", profileName));
       for (JsonNode valueNode : valuesNode) {
-        if (!valueNode.isTextual() || valueNode.textValue().isEmpty()) {
-          throw new UtamCompilationError(valueNode,
-              context.getErrorMessage(11, propertyName, nodeToString(valuesNode)));
-        }
         String profileValue = valueNode.textValue();
         if (values.contains(profileValue)) {
           throw new UtamCompilationError(valueNode,
-              context.getErrorMessage(802, profileName, profileValue));
+              VALIDATION.getErrorMessage(802, profileName, profileValue));
         }
         values.add(profileValue);
       }
@@ -75,7 +85,7 @@ final class UtamProfile {
       values.add(profileValue);
     } else {
       throw new UtamCompilationError(valuesNode,
-          context.getErrorMessage(806, profileName));
+          VALIDATION.getErrorMessage(806, profileName));
     }
     return new UtamProfile(profileName, values);
   }
@@ -86,78 +96,27 @@ final class UtamProfile {
    * @param context compiler context
    * @return list of profiles
    */
-  private List<Profile> getProfiles(TranslationContext context, JsonNode jsonNode) {
+  private List<Profile> getProfiles(TranslationContext context) {
     List<Profile> profiles = new ArrayList<>();
     ProfileConfiguration configuration = context.getConfiguredProfile(profileName);
     if (configuration == null) {
-      throw new UtamCompilationError(jsonNode, context.getErrorMessage(804, profileName));
+      throw new UtamCompilationError(VALIDATION.getErrorMessage(804, profileName));
     }
     values.forEach(profileValue -> {
       Profile profile = configuration.getFromString(profileValue);
       if (profile == null) {
-        throw new UtamCompilationError(jsonNode,
-            context.getErrorMessage(803, profileName, profileValue));
+        throw new UtamCompilationError(VALIDATION.getErrorMessage(803, profileName, profileValue));
       }
       profiles.add(profile);
     });
     return profiles;
   }
 
-  /**
-   * Helper class that provides list of compiled profiles
-   *
-   * @author elizaveta.ivanova
-   * @since 238
-   */
-  static class UtamProfileProvider {
-
-    final JsonNode node;
-
-    /**
-     * deserialize profiles node
-     *
-     * @param node Json source
-     */
-    UtamProfileProvider(JsonNode node) {
-      this.node = node;
+  static List<Profile> getConfiguredProfiles(List<UtamProfile> profiles, TranslationContext context) {
+    List<Profile> res = new ArrayList<>();
+    for (UtamProfile profile : profiles) {
+      res.addAll(profile.getProfiles(context));
     }
-
-    /**
-     * check if profiles are set
-     *
-     * @return true if set, used in PO validations
-     */
-    boolean isNotEmpty() {
-      return !isEmptyNode(node);
-    }
-
-    /**
-     * deserialize profiles node
-     *
-     * @param context translation context
-     * @return list of Json objects
-     */
-    List<Profile> getProfiles(TranslationContext context) {
-      // profiles can be empty for default implementation
-      if (isEmptyNode(node)) {
-        return new ArrayList<>();
-      }
-      if (isNotArrayOrEmptyArray(node)) {
-        String message = context.getErrorMessage(12, "page object root", "profile");
-        throw new UtamCompilationError(node, message);
-      }
-      Set<String> profilesNames = new HashSet<>();
-      List<Profile> profiles = new ArrayList<>();
-      for (JsonNode node : node) {
-        String profileName = node.fieldNames().next();
-        if (profilesNames.contains(profileName)) {
-          throw new UtamCompilationError(this.node, context.getErrorMessage(801, profileName));
-        }
-        profilesNames.add(profileName);
-        UtamProfile utamProfile = processProfileNode(node, profileName, context);
-        profiles.addAll(utamProfile.getProfiles(context, node));
-      }
-      return profiles;
-    }
+    return res;
   }
 }

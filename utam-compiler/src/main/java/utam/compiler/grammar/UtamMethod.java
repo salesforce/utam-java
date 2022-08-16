@@ -7,15 +7,14 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
+import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.compiler.grammar.UtamArgument.processArgsNode;
 import static utam.compiler.grammar.UtamMethodDescription.processMethodDescriptionNode;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
-import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParametersContext;
 import utam.compiler.helpers.TranslationContext;
@@ -31,13 +30,18 @@ import utam.core.declarative.representation.PageObjectMethod;
 abstract class UtamMethod {
 
   final String name;
-  final JsonNode descriptionNode;
-  final JsonNode argsNode;
+  final UtamMethodDescription description;
+  private final List<UtamArgument> arguments;
 
   UtamMethod(String name, JsonNode descriptionNode, JsonNode argsNode) {
     this.name = name;
-    this.descriptionNode = descriptionNode;
-    this.argsNode = argsNode;
+    String parserContext = String.format("method \"%s\"", name);
+    this.description = processMethodDescriptionNode(descriptionNode, parserContext + " description");
+    this.arguments = processArgsNode(argsNode, parserContext, false);
+  }
+
+  final boolean hasMethodLevelArgs() {
+    return arguments.size() > 0;
   }
 
   /**
@@ -48,20 +52,17 @@ abstract class UtamMethod {
    * @return list of declared methods
    */
   static List<UtamMethod> processMethodsNode(JsonNode methodsNode, boolean isAbstract) {
-    List<UtamMethod> methods = new ArrayList<>();
-    if (methodsNode == null || methodsNode.isNull()) {
+    List<UtamMethod> methods = VALIDATION
+        .validateOptionalNotEmptyArray(methodsNode, "page object root", "methods");
+    if (isEmptyNode(methodsNode)) {
       return methods;
-    }
-    if (!methodsNode.isArray()) {
-      throw new UtamCompilerIntermediateError(methodsNode, 12, "page object root", "methods");
     }
     Class<? extends UtamMethod> methodType =
         isAbstract ? UtamInterfaceMethod.class : UtamComposeMethod.class;
-    Integer errCode = isAbstract? 400 : 500;
-    Function<Exception, RuntimeException> parserErrorWrapper = causeErr -> new UtamCompilerIntermediateError(
-        causeErr, methodsNode, errCode, causeErr.getMessage());
+    Integer errCode = isAbstract ? 400 : 500;
     for (JsonNode methodNode : methodsNode) {
-      UtamMethod method = readNode(methodNode, methodType, parserErrorWrapper);
+      String name = VALIDATION.validateNotNullOrEmptyString(methodNode.get("name"), "method", "name");
+      UtamMethod method = readNode(methodNode, methodType, VALIDATION.getErrorMessage(errCode, name));
       methods.add(method);
     }
     return methods;
@@ -75,15 +76,8 @@ abstract class UtamMethod {
    */
   abstract PageObjectMethod getMethod(TranslationContext context);
 
-  final UtamMethodDescription getDescription(TranslationContext context) {
-    String validationContext = String.format("method \"%s\"", name);
-    return processMethodDescriptionNode(descriptionNode, context, validationContext);
-  }
-
   final void setMethodLevelParameters(TranslationContext context, MethodContext methodContext) {
     ParametersContext parametersContext = methodContext.getParametersContext();
-    String parserContext = String.format("method \"%s\"", name);
-    List<UtamArgument> arguments = processArgsNode(argsNode, parserContext, false);
     arguments.forEach(arg -> {
       MethodParameter parameter = arg.asParameter(context, methodContext, parametersContext);
       parametersContext.setParameter(parameter);

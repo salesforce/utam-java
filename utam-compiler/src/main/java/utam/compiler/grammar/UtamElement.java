@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.grammar.JsonDeserializer.nodeToString;
 import static utam.compiler.grammar.UtamElementFilter.processFilterNode;
 import static utam.compiler.grammar.UtamMethodDescription.processMethodDescriptionNode;
@@ -26,9 +27,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.function.Supplier;
 import utam.compiler.UtamCompilationError;
-import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementUnitTestHelper;
 import utam.compiler.helpers.LocatorCodeGeneration;
@@ -64,7 +63,7 @@ public final class UtamElement {
   private final List<UtamElementProvider> elements;
   private final Boolean isNullable;
   private final Traversal traversal;
-  private final JsonNode description;
+  private final UtamMethodDescription description;
   private UtamSelector selector;
   private final String[] type;
   private final Boolean isPublic; // should be nullable as it's redundant for root
@@ -92,7 +91,7 @@ public final class UtamElement {
     Entry<Traversal, String[]> elementType = processTypeNode(type);
     this.type = elementType.getValue();
     this.traversal = elementType.getKey();
-    this.description = descriptionNode;
+    this.description = processMethodDescriptionNode(descriptionNode, validationContext + " description");
   }
 
   private Entry<Traversal, String[]> processTypeNode(JsonNode typeNode) {
@@ -108,9 +107,8 @@ public final class UtamElement {
         return new SimpleEntry<>(new Custom(), new String[]{value});
       }
     }
-    Supplier<RuntimeException> errorProvider = () -> new UtamCompilerIntermediateError(typeNode,
-        201, name, nodeToString(typeNode));
-    String[] type = processBasicTypeNode(typeNode, errorProvider);
+    String error = VALIDATION.getErrorMessage(201, name, nodeToString(typeNode));
+    String[] type = processBasicTypeNode(typeNode, error);
     return new SimpleEntry<>(new Basic(), type);
   }
 
@@ -177,7 +175,7 @@ public final class UtamElement {
     }
   }
 
-  abstract class Traversal {
+  abstract static class Traversal {
 
     // traverse and return next scope
     // if next scope is null, second element is self
@@ -187,10 +185,6 @@ public final class UtamElement {
         ElementContext scopeElement,
         JsonNode elementNode,
         boolean isExpandScopeShadowRoot);
-
-    final UtamMethodDescription getDescription(TranslationContext context) {
-      return processMethodDescriptionNode(description, context, String.format("element \"%s\" description", name));
-    }
   }
 
   /**
@@ -240,10 +234,10 @@ public final class UtamElement {
 
     private Custom() {
       if (selector == null) {
-        throw new UtamCompilerIntermediateError(204, name, "selector");
+        throw new UtamCompilationError(VALIDATION.getErrorMessage(204, name, "selector"));
       }
       if (filter != null && !selector.isReturnAll()) {
-        throw new UtamCompilerIntermediateError(302, name);
+        throw new UtamCompilationError(VALIDATION.getErrorMessage(302, name));
       }
       if (elements.size() > 0 || shadow.size() > 0) {
         throw new UtamCompilationError(Type.CUSTOM.getSupportedPropertiesErr(name));
@@ -256,7 +250,6 @@ public final class UtamElement {
         ElementContext scopeElement,
         JsonNode elementNode,
         boolean isExpandScopeShadowRoot) {
-      UtamMethodDescription description = getDescription(context);
       boolean isReturnList = selector.isReturnAll() && (filter == null || !filter.getFindFirst());
       LocatorCodeGeneration selectorContext = selector.getElementCodeGenerationHelper(name, context);
       MethodParametersTracker parameters = new MethodParametersTracker(
@@ -341,13 +334,13 @@ public final class UtamElement {
 
     private Basic() {
       if (selector == null) {
-        throw new UtamCompilerIntermediateError(204, name, "selector");
+        throw new UtamCompilationError(VALIDATION.getErrorMessage(204, name, "selector"));
       }
       if (filter != null && !selector.isReturnAll()) {
-        throw new UtamCompilerIntermediateError(302, name);
+        throw new UtamCompilationError(VALIDATION.getErrorMessage(302, name));
       }
       if (selector.isReturnAll() && (elements.size() > 0 || shadow.size() > 0)) {
-        throw new UtamCompilerIntermediateError(205, name, "basic");
+        throw new UtamCompilationError(VALIDATION.getErrorMessage(205, name, "basic"));
       }
     }
 
@@ -356,7 +349,6 @@ public final class UtamElement {
         ElementContext scopeElement,
         JsonNode elementNode,
         boolean isExpandScopeShadowRoot) {
-      UtamMethodDescription description = getDescription(context);
       String parserContext = String.format("element \"%s\"", name);
       boolean isPublicImplementationOnlyElement =
           isPublic() && context.isImplementationPageObject();
@@ -446,7 +438,6 @@ public final class UtamElement {
         ElementContext scopeElement,
         JsonNode elementNode,
         boolean isExpandScopeShadowRoot) {
-      UtamMethodDescription description = getDescription(context);
       LocatorCodeGeneration selectorContext = selector.getElementCodeGenerationHelper(name, context);
       ElementContext elementContext = new ElementContext.Container(scopeElement, name);
       PageObjectMethod method;
@@ -474,10 +465,10 @@ public final class UtamElement {
         throw new UtamCompilationError(Type.FRAME.getSupportedPropertiesErr(name));
       }
       if (selector == null) {
-        throw new UtamCompilerIntermediateError(204, name, "selector");
+        throw new UtamCompilationError(VALIDATION.getErrorMessage(204, name, "selector"));
       }
       if (selector.isReturnAll()) {
-        throw new UtamCompilerIntermediateError(206, name);
+        throw new UtamCompilationError(VALIDATION.getErrorMessage(206, name));
       }
     }
 
@@ -486,7 +477,6 @@ public final class UtamElement {
         ElementContext scopeElement,
         JsonNode elementNode,
         boolean isExpandScopeShadowRoot) {
-      UtamMethodDescription description = getDescription(context);
       LocatorCodeGeneration selectorContext = selector.getElementCodeGenerationHelper(name, context);
       ElementField field =
           new ElementField(

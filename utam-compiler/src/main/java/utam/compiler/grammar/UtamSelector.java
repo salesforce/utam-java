@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.core.element.Locator.SELECTOR_INTEGER_PARAMETER;
 import static utam.core.element.Locator.SELECTOR_STRING_PARAMETER;
 
@@ -15,10 +16,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
-import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.grammar.UtamMethodAction.ArgumentsProvider;
 import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.MethodContext;
@@ -84,10 +83,7 @@ class UtamSelector extends UtamRootSelector {
    */
   static UtamSelector processSelectorNode(JsonNode node, String elementName) {
     String parserContext = String.format("element \"%s\"", elementName);
-    return JsonDeserializer.readNode(node,
-        UtamSelector.class,
-        cause -> new UtamCompilerIntermediateError(cause, node, 1000, parserContext,
-            cause.getMessage()));
+    return JsonDeserializer.readNode(node, UtamSelector.class, VALIDATION.getErrorMessage(1000, parserContext));
   }
 
 
@@ -95,11 +91,10 @@ class UtamSelector extends UtamRootSelector {
    * parse selector string to find parameters %s or %d
    *
    * @param selectorStr  selector string
-   * @param errorMessage error message provider
+   * @param parserContext can be element or method
    * @return list of types of selector args
    */
-  private static List<TypeProvider> getParametersTypes(String selectorStr,
-      Function<String, String> errorMessage) {
+  private static List<TypeProvider> getParametersTypes(String selectorStr, String parserContext) {
     List<TypeProvider> res = new ArrayList<>();
     while (selectorStr.contains("%")) {
       int index = selectorStr.indexOf("%");
@@ -111,8 +106,7 @@ class UtamSelector extends UtamRootSelector {
         selectorStr = selectorStr.replaceFirst(SELECTOR_STRING_PARAMETER, "");
       } else {
         String selectorParameter = selectorStr.substring(index, index + 2);
-        String error = errorMessage.apply(selectorParameter);
-        throw new UtamCompilationError(error);
+        throw new UtamCompilationError(VALIDATION.getErrorMessage(111, parserContext, selectorParameter));
       }
     }
     return res;
@@ -128,8 +122,7 @@ class UtamSelector extends UtamRootSelector {
    */
   LocatorCodeGeneration getArgCodeGenerationHelper(String parserContext,
       MethodContext methodContext, TranslationContext context) {
-    Function<String, String> errorMessage = str -> context.getErrorMessage(111, parserContext, str);
-    return setCodeGenerationHelper(parserContext, context, methodContext, errorMessage);
+    return setCodeGenerationHelper(parserContext, context, methodContext);
   }
 
   /**
@@ -141,20 +134,16 @@ class UtamSelector extends UtamRootSelector {
    */
   LocatorCodeGeneration getElementCodeGenerationHelper(String elementName,
       TranslationContext context) {
-    String parserContext = String.format("element \"%s\"", elementName);
-    Function<String, String> errorMessage = str -> context.getErrorMessage(1001, elementName, str);
-    return setCodeGenerationHelper(parserContext, context, null, errorMessage);
+    return setCodeGenerationHelper(String.format("element \"%s\"", elementName), context, null);
   }
 
-  private LocatorCodeGeneration setCodeGenerationHelper(String selectorHolder, TranslationContext context,
-      MethodContext methodContext, Function<String, String> errorMessage) {
+  private LocatorCodeGeneration setCodeGenerationHelper(String selectorHolder, TranslationContext context, MethodContext methodContext) {
     if (this.locatorContext == null) {
       String parserContext = String
           .format("%s selector \"%s\"", selectorHolder, getLocator().getStringValue());
-      List<TypeProvider> expectedArgsTypes = getParametersTypes(getLocator().getStringValue(), errorMessage);
+      List<TypeProvider> expectedArgsTypes = getParametersTypes(getLocator().getStringValue(), selectorHolder);
       ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
-      ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
-          argsNode, methodContext);
+      ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
       List<UtamArgument> arguments = provider.getArguments(true);
       List<MethodParameter> parameters = arguments
           .stream()

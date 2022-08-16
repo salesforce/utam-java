@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -15,9 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import utam.compiler.UtamCompilerIntermediateError;
+import utam.compiler.helpers.TranslationContext;
 
 /**
  * Description at the level of the page object root, added as JavaDoc for generated page object
@@ -28,25 +27,23 @@ import utam.compiler.UtamCompilerIntermediateError;
 class UtamRootDescription {
 
   final static String VERSION_TAG = "@version";
-  private final List<String> text = new ArrayList<>();
+  private final List<String> text;
   private final String author;
   private final String deprecated;
 
   /**
    * Initialize object
    *
-   * @param text   text of the page object description
-   * @param author name of the team or person who owns a page object, by default UTAM
+   * @param text       text of the page object description
+   * @param author     name of the team or person who owns a page object, by default UTAM
    * @param deprecated if page object is deprecated, text explains why
    */
   @JsonCreator
-  UtamRootDescription(
+  private UtamRootDescription(
       @JsonProperty(value = "text", required = true) List<String> text,
       @JsonProperty("author") String author,
       @JsonProperty("deprecated") String deprecated) {
-    if (text != null) {
-      this.text.addAll(text);
-    }
+    this.text = text;
     this.author = author;
     this.deprecated = deprecated;
   }
@@ -54,68 +51,73 @@ class UtamRootDescription {
   /**
    * Process/deserialize description node at the root of the page object
    *
-   * @param descriptionNode Json node
+   * @param node Json node
    * @return object with description
    */
-  static UtamRootDescription processRootDescriptionNode(JsonNode descriptionNode) {
-    if (descriptionNode == null || descriptionNode.isNull()) {
-      return new UtamRootDescription(null, null, null);
+  static UtamRootDescription processRootDescriptionNode(JsonNode node) {
+    String parserContext = "page object description";
+    UtamRootDescription object;
+    if (node == null || node.isNull()) {
+      object = new UtamRootDescription(new ArrayList<>(), null, null);
+    } else if (node.isTextual()) {
+      String value = node.textValue();
+      VALIDATION.validateNotNullOrEmptyString(node, parserContext, "text");
+      object = new UtamRootDescription(Collections.singletonList(value), null, null);
+    } else {
+      object = readNode(node, UtamRootDescription.class, VALIDATION.getErrorMessage(906));
+      VALIDATION.validateNotEmptyArray(node.get("text"), parserContext, "text");
+      for(JsonNode textNode : node.get("text")) {
+        VALIDATION.validateNotNullOrEmptyString(textNode, parserContext, "text");
+      }
+      VALIDATION.validateNotEmptyString(node.get("author"), parserContext, "author");
+      VALIDATION.validateNotEmptyString(node.get("deprecated"), parserContext, "deprecated");
     }
-    // "description" : "text"
-    if (descriptionNode.isTextual()) {
-      String value = descriptionNode.textValue();
-      return new UtamRootDescription(Collections.singletonList(value), null, null);
-    }
-    Function<Exception, RuntimeException> parserErrorWrapper = causeErr -> new UtamCompilerIntermediateError(
-        causeErr, descriptionNode, 906, causeErr.getMessage());
-    return readNode(descriptionNode, UtamRootDescription.class, parserErrorWrapper);
+    return object;
+  }
+
+  RootDescription getDescription(TranslationContext context) {
+    return new RootDescription(context, text, author, deprecated);
   }
 
   /**
-   * Get description as list of strings to wrap into javadoc format
+   * Helper class to process description in context and return javadoc
    *
-   * @param version                page objects with version number
-   * @param sourceFileRelativePath relative path with Json
-   * @return list of strings
+   * @author elizaveta.ivanova
+   * @since 242
    */
-  List<String> getDescription(String version, String sourceFileRelativePath) {
-    List<String> descriptionLines = new ArrayList<>(text);
-    if(sourceFileRelativePath != null) {
+  static class RootDescription {
+
+    private final List<String> javadoc;
+    private final boolean isDeprecated;
+
+    private RootDescription(TranslationContext context, List<String> text, String author,
+        String deprecated) {
+      this.isDeprecated = deprecated != null;
+      String version = context.getConfiguredVersion();
       // On Windows, sourceFileRelativePath may contain backslashes ("\"), which will
       // be misinterpreted in Javadoc comments by the Java source code formatter.
       // Replacing them with forward slashes ("/") ensures consistent generation of
       // Java files cross-platform.
-      String addComma = text.isEmpty()? "" : ", ";
-      descriptionLines.add(
-          String.format("%screated from JSON %s", addComma,
-              sourceFileRelativePath.replace("\\", "/")));
+      String sourceFileRelativePath = context.getJsonPath().replace("\\", "/");
+      javadoc = new ArrayList<>(text);
+      javadoc.add(String
+          .format("%screated from JSON %s", text.isEmpty() ? "" : ", ", sourceFileRelativePath));
+      // add line @author team_name
+      javadoc.add(String.format("@author %s", (author == null ? "UTAM" : author)));
+      // add line @version with timestamp
+      javadoc.add(String.format("%s %s", VERSION_TAG, version));
+      // add line @deprecated
+      if (this.isDeprecated) {
+        javadoc.add(String.format("@deprecated %s", deprecated));
+      }
     }
-    // add line @author team_name
-    descriptionLines.add(String.format("@author %s", (author == null ? "UTAM" : author)));
-    // add line @version with timestamp
-    descriptionLines.add(String.format("%s %s", VERSION_TAG, version));
-    // add line @deprecated
-    if(isDeprecated()) {
-      descriptionLines.add(String.format("@deprecated %s", this.deprecated));
-    }
-    // replace any invalid HTML characters with their appropriate encoded entities.
-    // special note: iOS class chains contain "*/" in their paths, so this must be
-    // escaped for Javadoc generation.
-    return descriptionLines.stream()
-        .map((s) -> s
-            .replace("&", "&amp;")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;")
-            .replace("*/", "*&#47;"))
-        .collect(Collectors.toList());
-  }
 
-  /**
-   * check if page object was marked as deprecated
-   *
-   * @return boolean
-   */
-  boolean isDeprecated() {
-    return this.deprecated != null;
+    List<String> getJavadoc() {
+      return javadoc;
+    }
+
+    boolean isDeprecated() {
+      return isDeprecated;
+    }
   }
 }

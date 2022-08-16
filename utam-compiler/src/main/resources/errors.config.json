@@ -16,7 +16,7 @@
     "code": 13
   },
   {
-    "message": "%s: incorrect argument format: \n%s",
+    "message": "%s: incorrect argument format",
     "docs": "https://utam.dev/grammar/spec#supported-argument-types",
     "code": 100
   },
@@ -34,7 +34,7 @@
   },
   {
     "code": 104,
-    "message": "%s: incorrect predicate format: \n%s",
+    "message": "%s: incorrect predicate format",
     "docs": "https://utam.dev/grammar/spec#explicit-waits"
   },
   {
@@ -44,7 +44,7 @@
   },
   {
     "code": 106,
-    "message": "%s: incorrect format of elementReference argument: \n%s",
+    "message": "%s: incorrect format of elementReference argument",
     "docs": "https://utam.dev/grammar/spec#element-reference"
   },
   {
@@ -69,7 +69,7 @@
   },
   {
     "code": 200,
-    "message": "%s: incorrect format of elements: \n%s"
+    "message": "%s: incorrect format of elements"
   },
   {
     "code": 201,
@@ -97,7 +97,7 @@
   },
   {
     "code": 300,
-    "message": "element \"%s\" filter: incorrect format of element filter: \n%s",
+    "message": "element \"%s\" filter: incorrect format of element filter",
     "docs": "https://utam.dev/grammar/spec#element-filter"
   },
   {
@@ -110,12 +110,12 @@
   },
   {
     "code": 303,
-    "message": "method \"%s\": incorrect format of statement filter: \n%s",
+    "message": "method \"%s\": incorrect format of statement filter",
     "docs": "https://utam.dev/grammar/spec#element-filter"
   },
   {
     "code": 400,
-    "message": "incorrect format of abstract method: \n%s",
+    "message": "method \"%s\": incorrect format of abstract method",
     "docs": "https://utam.dev/grammar/spec#interfaces"
   },
   {
@@ -132,7 +132,7 @@
   },
   {
     "code": 500,
-    "message": "incorrect format of compose method: \n%s",
+    "message": "method \"%s\": incorrect format of compose method",
     "docs": "https://utam.dev/grammar/spec#compose-method"
   },
   {
@@ -148,13 +148,8 @@
     "message": "%s: parameter \"%s\" at method level can't have type \"argumentReference\""
   },
   {
-    "code": 505,
-    "message": "method \"%s\": compose statements should be a non empty array",
-    "docs": "https://utam.dev/grammar/spec#compose-method"
-  },
-  {
     "code": 600,
-    "message": "method \"%s\" statement: incorrect compose statement format: \n%s",
+    "message": "method \"%s\" statement: incorrect compose statement format",
     "docs": "https://utam.dev/grammar/spec#compose-method"
   },
   {
@@ -185,10 +180,6 @@
   {
     "code": 607,
     "message": "method \"beforeLoad\" statement: only \"document\" or \"root\" elements are allowed"
-  },
-  {
-    "code": 608,
-    "message": "method \"%s\" statement: compose statement should be a non empty object"
   },
   {
     "code": 609,
@@ -232,7 +223,7 @@
   },
   {
     "code": 700,
-    "message": "%s: format of the description is incorrect: \n%s",
+    "message": "%s: format of the description is incorrect",
     "docs": "https://utam.dev/grammar/spec#method-description"
   },
   {
@@ -261,7 +252,7 @@
   },
   {
     "code": 900,
-    "message": "incorrect format of the page object: \n%s"
+    "message": "incorrect format of the page object"
   },
   {
     "code": 901,
@@ -297,13 +288,9 @@
     "code": 907
   },
   {
-    "message": "%s: format of selector is incorrect: \n%s",
+    "message": "%s: format of selector is incorrect",
     "docs": "https://utam.dev/grammar/spec#element-selector",
     "code": 1000
-  },
-  {
-    "code": 1001,
-    "message": "element \"%s\" selector: unknown selector parameter type \"%s\", only string and number are supported"
   },
   {
     "code": 1002,
@@ -314,7 +301,7 @@
     "message": "root selector: only one of selector types { %s } can be set"
   },
   {
-    "message": "%s: incorrect format of elements inside shadow: \n%s",
+    "message": "%s: incorrect format of elements inside shadow",
     "code": 1100
   }
 ]

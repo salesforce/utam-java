@@ -36,18 +36,17 @@ public class UtamMethodTests {
   public void testGetAbstractMethodWithComposeThrows() {
     Exception e = expectCompilerErrorFromFile("interface/nonEmptyMethod");
     assertThat(e.getMessage(),
-        containsString("error 400: incorrect format of abstract method: \n"
-            + "Unrecognized field \"compose\""));
+        containsString("error 400: method \"test\": incorrect format of abstract method"));
   }
 
   @Test
   public void testComposeEmptyStatementsThrows() {
-    test("emptyCompose", "error 505: method \"test\": compose statements should be a non empty array;");
+    test("emptyCompose", "error 12: method \"test\": property \"compose\" should be a not empty array");
   }
 
   @Test
   public void testComposeNullStatementsThrows() {
-    test("nullCompose", "error 505: method \"test\": compose statements should be a non empty array");
+    test("nullCompose", "error 12: method \"test\": property \"compose\" should be a not empty array");
   }
 
   @Test

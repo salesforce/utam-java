@@ -7,6 +7,7 @@
  */
 package utam.compiler.helpers;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
@@ -15,7 +16,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import utam.compiler.UtamCompilationError;
-import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.types.BasicElementInterface;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.representation.UnionType;
@@ -207,8 +207,8 @@ public enum BasicElementActionType implements ActionType {
     } else {
       int expected = actionParameters.length;
       if (actionParameters.length != parameterCount) {
-        throw new UtamCompilerIntermediateError(ERROR_CODE_FOR_PARAMETERS, parserContext, this.name(),
-            String.valueOf(expected), String.valueOf(parameterCount));
+        throw new UtamCompilationError(VALIDATION.getErrorMessage(ERROR_CODE_FOR_PARAMETERS, parserContext, this.name(),
+            String.valueOf(expected), String.valueOf(parameterCount)));
       }
       return Stream.of(actionParameters).collect(Collectors.toList());
     }

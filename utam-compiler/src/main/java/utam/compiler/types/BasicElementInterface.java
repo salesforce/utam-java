@@ -12,7 +12,7 @@ import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
+import utam.compiler.UtamCompilationError;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.representation.UnionType;
 import utam.core.element.Actionable;
@@ -92,7 +92,7 @@ public enum BasicElementInterface implements TypeProvider {
    * @param error    error message supplier
    * @return string array with basic types or empty array
    */
-  public static String[] processBasicTypeNode(JsonNode typeNode, Supplier<RuntimeException> error) {
+  public static String[] processBasicTypeNode(JsonNode typeNode, String error) {
     if (typeNode == null || typeNode.isNull()) {
       return new String[]{};
     }
@@ -103,17 +103,17 @@ public enum BasicElementInterface implements TypeProvider {
       List<String> values = new ArrayList<>();
       for (JsonNode valueNode : typeNode) {
         if (!valueNode.isTextual()) {
-          throw error.get();
+          throw new UtamCompilationError(typeNode, error);
         }
         String valueStr = valueNode.textValue();
         if (!isBasicType(valueStr)) {
-          throw error.get();
+          throw new UtamCompilationError(typeNode, error);
         }
         values.add(valueStr);
       }
       return values.toArray(String[]::new);
     }
-    throw error.get();
+    throw new UtamCompilationError(typeNode, error);
   }
 
   @Override

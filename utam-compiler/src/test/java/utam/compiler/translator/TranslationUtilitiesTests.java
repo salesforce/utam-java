@@ -22,8 +22,8 @@ import static utam.compiler.translator.TranslationUtilities.applyJavaFormatter;
 import static utam.compiler.translator.TranslationUtilities.getPackageDeclaration;
 import static utam.compiler.translator.TranslationUtilities.getStatement;
 import static utam.compiler.translator.TranslationUtilities.getWrappedJavadoc;
-import static utam.compiler.translator.TranslationUtilities.handleSpecialChars;
 import static utam.compiler.translator.TranslationUtilities.isImportableType;
+import static utam.compiler.translator.TranslationUtilities.formatJavadoc;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -162,15 +162,6 @@ public class TranslationUtilitiesTests {
   }
 
   @Test
-  public void testHandleSpecialChars() {
-    String splCharStr = "**/XCUIElementTypeButton[1]";
-    String expSplCharStr = "\\*\\*\\/XCUIElementTypeButton[1]";
-    String noSplCharStr = "//XCUIElementTypeButton[1]";
-    assertThat(handleSpecialChars(splCharStr), is(equalTo(expSplCharStr)));
-    assertThat(handleSpecialChars(noSplCharStr), is(equalTo(noSplCharStr)));
-  }
-
-  @Test
   public void testGetWrappedJavadoc() {
     List<String> comments = Stream.of("one", "two").collect(Collectors.toList());
     List<String> wrapped = getWrappedJavadoc(comments);
@@ -184,5 +175,11 @@ public class TranslationUtilitiesTests {
   @Test
   public void testGetWrappedJavadocEmptyList() {
     assertThat(getWrappedJavadoc(Collections.emptyList()), is(emptyIterable()));
+  }
+
+  @Test
+  public void testFormatJavadoc() {
+    final String input = "<text> & */";
+    assertThat(formatJavadoc(input), is(equalTo("&lt;text&gt; &amp; *&#47")));
   }
 }

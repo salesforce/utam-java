@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.UtamArgument.processArgsNode;
 import static utam.compiler.grammar.UtamPageObject.BEFORE_LOAD_METHOD_NAME;
@@ -78,26 +79,23 @@ public abstract class UtamMethodAction {
     this.returnTypeJsonNode = returnTypeJsonNode;
   }
 
-  final ReturnType getDeclaredReturnType(TranslationContext context, String methodName) {
-    return new StatementReturnType(returnTypeJsonNode, isReturnList, context, methodName);
+  final ReturnType getDeclaredReturnType(String methodName) {
+    return new StatementReturnType(returnTypeJsonNode, isReturnList, methodName);
   }
 
-  final void chainValidations(TranslationContext context,
-      StatementContext statementContext,
-      String methodName) {
+  final void chainValidations(StatementContext statementContext, String methodName) {
     if (isChain) {
       // first statement can't be chain
       if (statementContext.isFirstStatement()) {
-        String message = context.getErrorMessage(616, methodName);
+        String message = VALIDATION.getErrorMessage(616, methodName);
         throw new UtamCompilationError(message);
       }
-
       // chain should only be allowed if previous statement returned custom type
       TypeProvider previousStatementReturn = statementContext.getPreviousStatementReturnType();
       if (!isCustomType(previousStatementReturn)) {
         String returnType =
             previousStatementReturn == null ? "void" : previousStatementReturn.getSimpleName();
-        String message = context.getErrorMessage(617, methodName, returnType);
+        String message = VALIDATION.getErrorMessage(617, methodName, returnType);
         throw new UtamCompilationError(message);
       }
     }
@@ -107,12 +105,11 @@ public abstract class UtamMethodAction {
    * check that beforeLoad method statement does not use elements other than "root" or "document"
    *
    * @param methodContext method context has method name
-   * @param context       translation context
    */
-  final void checkBeforeLoadElements(TranslationContext context, MethodContext methodContext) {
+  final void checkBeforeLoadElements(MethodContext methodContext) {
     if (BEFORE_LOAD_METHOD_NAME.equals(methodContext.getName()) && elementName != null
         && !BEFORE_LOAD_ELEMENTS.contains(elementName)) {
-      String message = context.getErrorMessage(607);
+      String message = VALIDATION.getErrorMessage(607);
       throw new UtamCompilationError(message);
     }
   }
@@ -311,7 +308,7 @@ public abstract class UtamMethodAction {
     ElementContext getElementArgument(TranslationContext context, String elementName) {
       ElementContext element = context.getElement(elementName);
       if (element == null) {
-        String message = context.getErrorMessage(101, argsParserContext, elementName);
+        String message = VALIDATION.getErrorMessage(101, argsParserContext, elementName);
         throw new UtamCompilationError(argsNode, message);
       }
       return element;

@@ -9,7 +9,6 @@ package utam.compiler.helpers;
 
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,17 +42,16 @@ public final class MethodContext {
    * @param methodName         the name of the method
    * @param declaredReturnType the declared return type of the method
    * @param context            translation context
-   * @param argsNode           can be null
    * @param isAbstract         true for interface methods
    */
   public MethodContext(String methodName, ReturnType declaredReturnType,
-      TranslationContext context, JsonNode argsNode, boolean isAbstract) {
+      TranslationContext context, boolean isAbstract, boolean hasMethodLevelArgs) {
     this.methodName = methodName;
     this.methodReturnType = declaredReturnType;
     this.elementsUsageTrackers.add(new ElementsUsageTracker());
     String parserContext = String.format("method \"%s\"", methodName);
-    this.parametersContext = isAbstract? new AbstractParametersContext(parserContext, context, argsNode)
-        : new MethodParametersContext(parserContext, context, argsNode);
+    this.parametersContext = isAbstract? new AbstractParametersContext(parserContext, context, hasMethodLevelArgs)
+        : new MethodParametersContext(parserContext, context, hasMethodLevelArgs);
   }
 
   /**

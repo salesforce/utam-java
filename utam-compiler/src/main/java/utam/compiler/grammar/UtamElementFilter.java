@@ -7,14 +7,15 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
+import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.compiler.helpers.BasicElementActionType.getActionType;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
-import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.grammar.UtamMatcher.ElementFilterMatcherProvider;
 import utam.compiler.grammar.UtamMethodAction.ArgumentsProvider;
 import utam.compiler.helpers.ActionType;
@@ -58,18 +59,14 @@ final class UtamElementFilter {
    * @return object of selector
    */
   static UtamElementFilter processFilterNode(JsonNode node, String elementName) {
-    return JsonDeserializer.readNode(node,
-        UtamElementFilter.class,
-        cause -> new UtamCompilerIntermediateError(cause, node, 300, elementName,
-            cause.getMessage()));
+    return readNode(node, UtamElementFilter.class, VALIDATION.getErrorMessage(300, elementName));
   }
 
   MatcherObject setElementFilter(TranslationContext context, UtamElement.Type elementNodeType,
       TypeProvider elementType, String elementName) {
     String parserContext = String.format("element '%s' filter", elementName);
     ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
-    ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
-        argsNode, null);
+    ParametersContext parametersContext = new StatementParametersContext(parserContext, context, null);
     List<UtamArgument> arguments = provider.getArguments(true);
     arguments
         .stream()
@@ -78,8 +75,8 @@ final class UtamElementFilter {
     MatcherObject matcher = isEmptyNode(matcherNode) ? null
         : new ElementFilterMatcherProvider(matcherNode, elementName).getMatcherObject(context);
     if (elementNodeType == UtamElement.Type.BASIC) {
-      ActionType actionType = getActionType(this.applyMethod, elementType, context.getErrorMessage(301, elementName, this.applyMethod));
-      matcher.checkMatcherOperand(context, actionType.getReturnType());
+      ActionType actionType = getActionType(this.applyMethod, elementType, VALIDATION.getErrorMessage(301, elementName, this.applyMethod));
+      matcher.checkMatcherOperand(actionType.getReturnType());
       List<TypeProvider> expectedArgsTypes = actionType
           .getParametersTypes(parserContext, arguments.size());
       this.applyMethodParameters = parametersContext.getParameters(expectedArgsTypes);
