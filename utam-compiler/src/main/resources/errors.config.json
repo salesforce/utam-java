@@ -292,6 +292,11 @@
     "code": 906
   },
   {
+    "message": "metadata property value must be an object",
+    "docs": "https://utam.dev/grammar/spec#page-object-metadata",
+    "code": 907
+  },
+  {
     "message": "%s: format of selector is incorrect: \n%s",
     "docs": "https://utam.dev/grammar/spec#element-selector",
     "code": 1000
