@@ -195,7 +195,7 @@ public class UtamPageObject_Tests {
       UtamError e = expectThrows(UtamError.class,
           () -> new DeserializerUtilities().getResultFromString(json));
       assertThat(e.getMessage(), containsString(
-          "error 907: metadata property value must be an object"));
+          "error 13: page object root: property \"metadata\" should be a non empty object"));
     });
   }
 }

@@ -122,7 +122,7 @@ final class UtamPageObject {
     this.rootLocator = selector == null ? null : selector.getLocator();
     this.description = processRootDescriptionNode(descriptionNode);
     if (metadata != null && !metadata.isObject()) {
-      throw new UtamCompilerIntermediateError(907);
+      VALIDATION.validateNotNullObject(metadata, "page object root", "property \"metadata\"");
     }
   }
 
