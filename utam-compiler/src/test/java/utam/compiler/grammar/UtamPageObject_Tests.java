@@ -8,10 +8,12 @@
 package utam.compiler.grammar;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.not;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.DeserializerUtilities.expectCompilerError;
 import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT_CLASS;
@@ -19,6 +21,8 @@ import static utam.compiler.helpers.TypeUtilities.BASE_ROOT_PAGE_OBJECT_CLASS;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.testng.annotations.Test;
@@ -174,5 +178,30 @@ public class UtamPageObject_Tests {
     assertThat(e.getMessage(),
         containsString("error 200: root elements: incorrect format of elements: \n"
             + "Unrecognized field \"wrong\""));
+  }
+
+  @Test
+  public void testMetadataProperty() {
+    String json = "{ \"metadata\": {}}";
+    assertThat(
+            new DeserializerUtilities().getResultFromString(json).getPageObject(),
+            is(not(nullValue())));
+  }
+
+  @Test
+  public void testMetadataPropertyValueNotObjectThrows() {
+    List<String> jsonValues = Arrays.asList(
+        "{ \"metadata\": \"value\" }",
+        "{ \"metadata\": [\"value\", \"anotherValue\"] }",
+        "{ \"metadata\": 0 }",
+        "{ \"metadata\": true }",
+        "{ \"metadata\": null }"
+    );
+    jsonValues.forEach((json) -> {
+      UtamError e = expectThrows(UtamError.class,
+          () -> new DeserializerUtilities().getResultFromString(json));
+      assertThat(e.getMessage(), containsString(
+          "metadata property value must be an object"));
+    });
   }
 }

@@ -107,7 +107,8 @@ final class UtamPageObject {
       @JsonProperty("elements") JsonNode elementsNode,
       @JsonProperty("methods") JsonNode methodsNode,
       @JsonProperty("beforeLoad") JsonNode beforeLoadNode,
-      @JsonProperty("description") JsonNode descriptionNode) {
+      @JsonProperty("description") JsonNode descriptionNode,
+      @JsonProperty("metadata") JsonNode metadata) {
     this.profileProvider = new UtamProfileProvider(profilesNode);
     this.isAbstract = isAbstract;
     this.methods = processMethodsNode(methodsNode, isAbstract);
@@ -131,6 +132,9 @@ final class UtamPageObject {
     this.beforeLoad = processBeforeLoadNodes(isAbstract, beforeLoadNode);
     this.rootLocator = selector == null ? null : selector.getLocator();
     this.description = processRootDescriptionNode(descriptionNode);
+    if (metadata != null && !metadata.isObject()) {
+      throw new UtamCompilerIntermediateError(907);
+    }
   }
 
   /**
