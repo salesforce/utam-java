@@ -7,10 +7,10 @@
  */
 package utam.compiler.helpers;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.helpers.ParameterUtils.isExpectedType;
 import static utam.compiler.helpers.TypeUtilities.PARAMETER_REFERENCE;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,7 +32,6 @@ public abstract class ParametersContext {
 
   final String contextString;
   final TranslationContext context;
-  final JsonNode argsNode;
   private final Set<String> parameterNames = new HashSet<>();
 
   /**
@@ -40,12 +39,10 @@ public abstract class ParametersContext {
    *
    * @param contextString parser context
    * @param context       translation context
-   * @param argsNode      json node with args
    */
-  ParametersContext(String contextString, TranslationContext context, JsonNode argsNode) {
+  ParametersContext(String contextString, TranslationContext context) {
     this.contextString = contextString;
     this.context = context;
-    this.argsNode = argsNode;
   }
 
   private static boolean isArgReference(MethodParameter parameter) {
@@ -79,9 +76,9 @@ public abstract class ParametersContext {
         .map(this::getUnwrappedParameter)
         .collect(Collectors.toList());
     if (expectedTypes != null) {
-      checkParametersCount(argsNode, parameters, expectedTypes);
+      checkParametersCount(parameters, expectedTypes);
       for (int i = 0; i < parameters.size(); i++) {
-        checkParameterType(argsNode, parameters.get(i), expectedTypes.get(i));
+        checkParameterType(parameters.get(i), expectedTypes.get(i));
       }
     }
     return parameters;
@@ -95,37 +92,33 @@ public abstract class ParametersContext {
    */
   public void setNestedParameters(List<MethodParameter> parameters,
       List<TypeProvider> expectedTypes) {
-    ParametersContext validationOfTypes = new StatementParametersContext(contextString, context,
-        argsNode, null);
+    ParametersContext validationOfTypes = new StatementParametersContext(contextString, context, null);
     parameters.forEach(validationOfTypes::setParameter);
     validationOfTypes.getParameters(expectedTypes);
   }
 
-  abstract MethodParameter getReferencedParameter(MethodParameter p, JsonNode argsNode);
+  abstract MethodParameter getReferencedParameter(MethodParameter p);
 
   abstract MethodParameter getUnwrappedParameter(MethodParameter parameter);
 
-  abstract void registerParameter(MethodParameter parameter, JsonNode argsNode);
+  abstract void registerParameter(MethodParameter parameter);
 
   /**
    * check that parameters number match expected
    *
-   * @param argsNode      context node
    * @param parameters    values to check
    * @param expectedTypes expected types
    */
   private void checkParametersCount(
-      JsonNode argsNode,
       List<MethodParameter> parameters,
       List<TypeProvider> expectedTypes) {
     if (expectedTypes != null) {
       int expectedCount = expectedTypes.size();
       int actualCount = parameters.size();
       if (expectedCount != actualCount) {
-        String message = context
-            .getErrorMessage(108, contextString, String.valueOf(expectedCount),
+        String message = VALIDATION.getErrorMessage(108, contextString, String.valueOf(expectedCount),
                 String.valueOf(actualCount));
-        throw new UtamCompilationError(argsNode, message);
+        throw new UtamCompilationError(message);
       }
     }
   }
@@ -134,15 +127,13 @@ public abstract class ParametersContext {
    * check that parameter name is unique
    *
    * @param parameter value to check
-   * @param argsNode  context node
    */
-  void setParameterUniqueName(MethodParameter parameter, JsonNode argsNode) {
+  void setParameterUniqueName(MethodParameter parameter) {
     if (parameter != null && !parameter.isLiteral()) {
       String name = parameter.getValue();
       if (parameterNames.contains(name)) {
-        // unclear how to test - by this time already validated from method action
-        String message = context.getErrorMessage(107, contextString, name);
-        throw new UtamCompilationError(argsNode, message);
+        String message = VALIDATION.getErrorMessage(107, contextString, name);
+        throw new UtamCompilationError(message);
       }
       parameterNames.add(name);
     }
@@ -151,21 +142,17 @@ public abstract class ParametersContext {
   /**
    * check that parameter type match
    *
-   * @param argsNode  context node
    * @param parameter value to check
    * @param expected  expected type
    */
-  final void checkParameterType(
-      JsonNode argsNode,
-      MethodParameter parameter,
-      TypeProvider expected) {
+  final void checkParameterType(MethodParameter parameter, TypeProvider expected) {
     if (!isExpectedType(parameter, expected)) {
       String expectedType = expected.getSimpleName();
       String actualType = parameter.getType().getSimpleName();
       String parameterValue = parameter.getValue();
-      String message = context
+      String message = VALIDATION
           .getErrorMessage(109, contextString, parameterValue, expectedType, actualType);
-      throw new UtamCompilationError(argsNode, message);
+      throw new UtamCompilationError(message);
     }
   }
 
@@ -180,13 +167,11 @@ public abstract class ParametersContext {
     /**
      * construct an instance of parameters context
      *
-     * @param argsNode      json node with method args
      * @param contextString parser context
      * @param context       translation context
      */
-    AbstractParametersContext(String contextString,
-        TranslationContext context, JsonNode argsNode) {
-      super(contextString, context, argsNode);
+    AbstractParametersContext(String contextString, TranslationContext context, boolean hasMethodLevelArgs) {
+      super(contextString, context, hasMethodLevelArgs);
     }
 
     @Override
@@ -207,10 +192,10 @@ public abstract class ParametersContext {
     final List<Entry<Boolean, MethodParameter>> declaredMethodParams = new ArrayList<>();
     private final boolean hasMethodLevelArgs;
 
-    MethodParametersContext(String contextString,
-        TranslationContext context, JsonNode argsNode) {
-      super(contextString, context, argsNode);
-      hasMethodLevelArgs = argsNode != null && !argsNode.isNull();
+
+    MethodParametersContext(String contextString, TranslationContext context, boolean hasMethodLevelArgs) {
+      super(contextString, context);
+      this.hasMethodLevelArgs = hasMethodLevelArgs;
     }
 
     @Override
@@ -219,7 +204,7 @@ public abstract class ParametersContext {
     }
 
     @Override
-    MethodParameter getReferencedParameter(MethodParameter argReference, JsonNode argsNode) {
+    MethodParameter getReferencedParameter(MethodParameter argReference) {
       String parameterName = argReference.getValue();
       for (int i = 0; i < declaredMethodParams.size(); i++) {
         Entry<Boolean, MethodParameter> alreadyDeclared = declaredMethodParams.get(i);
@@ -229,8 +214,8 @@ public abstract class ParametersContext {
           return parameter;
         }
       }
-      String message = context.getErrorMessage(502, contextString, parameterName);
-      throw new UtamCompilationError(argsNode, message);
+      String message = VALIDATION.getErrorMessage(502, contextString, parameterName);
+      throw new UtamCompilationError(message);
     }
 
     /**
@@ -243,20 +228,20 @@ public abstract class ParametersContext {
       String parameterName = parameter.getValue();
       if (isArgReference(parameter)) {
         // can't set at method level type of reference
-        String message = context.getErrorMessage(504, contextString, parameterName);
-        throw new UtamCompilationError(argsNode, message);
+        String message = VALIDATION.getErrorMessage(504, contextString, parameterName);
+        throw new UtamCompilationError(message);
       }
       if (parameter.isLiteral()) {
         // can't set at method level literal
-        String message = context.getErrorMessage(105, contextString);
-        throw new UtamCompilationError(argsNode, message);
+        String message = VALIDATION.getErrorMessage(105, contextString);
+        throw new UtamCompilationError(message);
       }
-      setParameterUniqueName(parameter, argsNode);
+      setParameterUniqueName(parameter);
       declaredMethodParams.add(new SimpleEntry<>(false, parameter));
     }
 
     @Override
-    void registerParameter(MethodParameter p, JsonNode argsNode) {
+    void registerParameter(MethodParameter p) {
       // parameter is never null or literal!
       String parameterName = p.getValue();
       if (hasMethodLevelArgs) {
@@ -267,15 +252,15 @@ public abstract class ParametersContext {
             MethodParameter parameter = alreadyDeclared.getValue();
             declaredMethodParams.set(i, new SimpleEntry<>(true, parameter));
             // if same parameter declared at method level - check same type
-            checkParameterType(argsNode, p, parameter.getType());
+            checkParameterType(p, parameter.getType());
             return;
           }
         }
         // cant find declared parameter
-        String message = context.getErrorMessage(502, contextString, parameterName);
-        throw new UtamCompilationError(argsNode, message);
+        String message = VALIDATION.getErrorMessage(502, contextString, parameterName);
+        throw new UtamCompilationError(message);
       }
-      setParameterUniqueName(p, argsNode);
+      setParameterUniqueName(p);
       declaredMethodParams.add(new SimpleEntry<>(true, p));
     }
 
@@ -288,7 +273,7 @@ public abstract class ParametersContext {
       return declaredMethodParams.stream().map(p -> {
         // check that each parameter was used in statements
         if (!p.getKey()) {
-          String message = context.getErrorMessage(503, contextString, p.getValue().getValue());
+          String message = VALIDATION.getErrorMessage(503, contextString, p.getValue().getValue());
           throw new UtamCompilationError(message);
         }
         return p.getValue();
@@ -310,7 +295,6 @@ public abstract class ParametersContext {
     /**
      * construct an instance of parameters context
      *
-     * @param argsNode      json node with method args
      * @param methodContext method context
      * @param contextString parser context
      * @param context       translation context
@@ -318,14 +302,13 @@ public abstract class ParametersContext {
     public StatementParametersContext(
         String contextString,
         TranslationContext context,
-        JsonNode argsNode,
         MethodContext methodContext) {
-      super(contextString, context, argsNode);
+      super(contextString, context);
       this.methodParameters = methodContext == null ? null : methodContext.getParametersContext();
     }
 
     private StatementParametersContext(StatementParametersContext parent) {
-      super(parent.contextString, parent.context, parent.argsNode);
+      super(parent.contextString, parent.context);
       this.methodParameters = parent.methodParameters;
     }
 
@@ -335,12 +318,12 @@ public abstract class ParametersContext {
     }
 
     @Override
-    MethodParameter getReferencedParameter(MethodParameter p, JsonNode node) {
+    MethodParameter getReferencedParameter(MethodParameter p) {
       throw new IllegalStateException("Unsupported for statement level");
     }
 
     @Override
-    void registerParameter(MethodParameter parameter, JsonNode argsNode) {
+    void registerParameter(MethodParameter parameter) {
       throw new IllegalStateException("Unsupported for statement level");
     }
 
@@ -348,10 +331,10 @@ public abstract class ParametersContext {
     MethodParameter getUnwrappedParameter(MethodParameter parameter) {
       if (isArgReference(parameter)) {
         if (methodParameters == null) {
-          String message = context.getErrorMessage(502, contextString, parameter.getValue());
-          throw new UtamCompilationError(argsNode, message);
+          String message = VALIDATION.getErrorMessage(502, contextString, parameter.getValue());
+          throw new UtamCompilationError(message);
         }
-        return methodParameters.getReferencedParameter(parameter, argsNode);
+        return methodParameters.getReferencedParameter(parameter);
       }
       return parameter;
     }
@@ -368,10 +351,10 @@ public abstract class ParametersContext {
       }
       if (isArgReference(parameter)) {
         if (methodParameters == null) {
-          String message = context.getErrorMessage(502, contextString, parameter.getValue());
-          throw new UtamCompilationError(argsNode, message);
+          String message = VALIDATION.getErrorMessage(502, contextString, parameter.getValue());
+          throw new UtamCompilationError(message);
         }
-        MethodParameter referenced = methodParameters.getReferencedParameter(parameter, argsNode);
+        MethodParameter referenced = methodParameters.getReferencedParameter(parameter);
         statementsParameters.add(referenced);
         return;
       }
@@ -383,9 +366,9 @@ public abstract class ParametersContext {
       }
       if (!parameter.isLiteral()) { //check unique name and set to method level
         if (methodParameters != null) {
-          methodParameters.registerParameter(parameter, argsNode);
+          methodParameters.registerParameter(parameter);
         }
-        setParameterUniqueName(parameter, argsNode);
+        setParameterUniqueName(parameter);
       }
       statementsParameters.add(parameter);
     }

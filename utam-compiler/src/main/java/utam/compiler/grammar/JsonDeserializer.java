@@ -10,20 +10,29 @@ package utam.compiler.grammar;
 import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_COMMENTS;
 import static com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION;
 import static com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY;
+import static utam.compiler.UtamCompilationError.processParserError;
+import static utam.compiler.UtamCompilationError.processMapperError;
+import static utam.compiler.grammar.UtamProfile.getConfiguredProfiles;
+import static utam.compiler.helpers.AnnotationUtils.DEPRECATED_ANNOTATION;
+import static utam.compiler.helpers.AnnotationUtils.getPageObjectAnnotation;
+import static utam.compiler.helpers.AnnotationUtils.getPagePlatformAnnotation;
+import static utam.compiler.helpers.TypeUtilities.BASE_PAGE_OBJECT_CLASS;
+import static utam.compiler.helpers.TypeUtilities.BASE_ROOT_PAGE_OBJECT_CLASS;
+import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
+import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
-import utam.compiler.UtamCompilerIntermediateError;
+import utam.compiler.UtamCompilationError.ErrorSupplier;
+import utam.compiler.grammar.UtamRootDescription.RootDescription;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.translator.ClassSerializer;
 import utam.compiler.translator.InterfaceSerializer;
@@ -82,83 +91,28 @@ public final class JsonDeserializer extends
   }
 
   /**
-   * traverse exception stack to find compiler error thrown by internal parsers
-   *
-   * @param error thrown error
-   * @return exception cause or null
-   */
-  private static RuntimeException unwrapError(Throwable error) {
-    Throwable e = error.getCause();
-    while (e != null) {
-      if (e instanceof UtamCompilerIntermediateError) {
-        return (UtamCompilerIntermediateError) e;
-      }
-      if (e instanceof UtamCompilationError) {
-        return (UtamCompilationError) e;
-      }
-      e = e.getCause();
-    }
-    return null;
-  }
-
-  /**
-   * simple parser to deserialize json node
+   * Simple parser to deserialize json node.
+   * Called from constructor so does not have access to context.
    *
    * @param node node to deserialize
    * @param type type to deserialize
    * @param <T>  generic type parameter
    * @return de-serialized object
    */
-  static <T> T readNode(JsonNode node, Class<T> type, Function<Exception, RuntimeException> err) {
-    ObjectMapper mapper = getObjectMapperWithSettings();
-    if (node == null || node.isNull()) {
+  static <T> T readNode(JsonNode node, Class<T> type, String errorMessage) {
+    if(isEmptyNode(node)) {
       return null;
     }
+    ObjectMapper mapper = getObjectMapperWithSettings();
     try {
       return mapper.readValue(node.toString(), type);
-    } catch (UtamCompilationError e) {
-      throw e;
-    } catch (UtamCompilerIntermediateError e) {
-      throw e.addJsonSource(node).get();
     } catch (Exception e) {
-      RuntimeException runtimeException = unwrapError(e);
-      if (runtimeException != null) { //from parser of inner elements
-        throw runtimeException;
+      ErrorSupplier error = processMapperError(node, e, errorMessage);
+      if(error.getCause() == null) {
+        throw new UtamCompilationError(error.getMessage());
       }
-      throw err.apply(e);
+      throw new UtamCompilationError(error.getMessage(), error.getCause());
     }
-  }
-
-  /**
-   * if error is thrown by compiler after parser, process it and use error codes
-   *
-   * @param context translation context
-   * @param parser  json parser
-   * @param error   error thrown from parser
-   * @return object with error message
-   */
-  private static Supplier<UtamCompilationError> processErrorMessage(TranslationContext context,
-      JsonParser parser, Throwable error) {
-    RuntimeException compilerErrorOrNull = unwrapError(error);
-    if (compilerErrorOrNull != null) {
-      if (compilerErrorOrNull instanceof UtamCompilationError) {
-        return () -> (UtamCompilationError) compilerErrorOrNull;
-      }
-      if (compilerErrorOrNull instanceof UtamCompilerIntermediateError) {
-        return () -> ((UtamCompilerIntermediateError) compilerErrorOrNull)
-            .getCompilationError(context, parser, error).get();
-      }
-    }
-    if (error instanceof JsonProcessingException) {
-      String errSplitMarker = "problem:";
-      String message = error.getMessage();
-      int index = message.contains(errSplitMarker) ? message.indexOf(errSplitMarker)
-          + errSplitMarker.length() : 0;
-      String errorStr = context.getErrorMessage(900, message.substring(index));
-      return () -> new UtamCompilationError(parser, errorStr, error);
-    }
-    return () -> new UtamCompilationError(parser, context.getRawErrorMessage(error.getMessage()),
-        error);
   }
 
   @Override
@@ -166,15 +120,15 @@ public final class JsonDeserializer extends
     try {
       ObjectMapper mapper = getObjectMapperWithSettings();
       UtamPageObject utamPageObject = mapper.readValue(parser, UtamPageObject.class);
-      utamPageObject.compile(this.context, parser);
+      utamPageObject.compile(this.context);
       this.context.guardrailsValidation();
       return utamPageObject;
-    } catch (UtamCompilationError e) {
-      throw e;
-    } catch (UtamCompilerIntermediateError e) {
-      throw e.getCompilationError(context, parser, e).get();
     } catch (Exception e) {
-      throw processErrorMessage(context, parser, e).get();
+      ErrorSupplier error = processParserError(parser, e, context.getPageObjectName());
+      if(error.getCause() == null) {
+        throw new UtamCompilationError(error.getMessage());
+      }
+      throw new UtamCompilationError(error.getMessage(), error.getCause());
     }
   }
 
@@ -220,16 +174,6 @@ public final class JsonDeserializer extends
     return node.toPrettyString().replaceAll("^\"|\"$", "");
   }
 
-  /**
-   * check if node is a non empty array
-   *
-   * @param node JSON node
-   * @return true if non empty array
-   */
-  static boolean isNotArrayOrEmptyArray(JsonNode node) {
-    return !node.isArray() || node.size() == 0;
-  }
-
   static class Object implements PageObjectDeclaration {
 
     private final UtamPageObject utamPageObject;
@@ -268,11 +212,13 @@ public final class JsonDeserializer extends
     private final TranslationContext context;
     private final UtamPageObject utamPageObject;
     private final TypeProvider implementedType;
+    private final RootDescription description;
 
     Interface(TranslationContext context, UtamPageObject utamPageObject) {
       this.context = context;
       this.utamPageObject = utamPageObject;
       this.implementedType = context.getSelfType();
+      this.description = utamPageObject.description.getDescription(context);
     }
 
     @Override
@@ -290,7 +236,7 @@ public final class JsonDeserializer extends
 
     @Override
     public TypeProvider getBaseInterfaceType() {
-      return utamPageObject.getBaseType();
+      return utamPageObject.isRootPageObject ? ROOT_PAGE_OBJECT : PAGE_OBJECT;
     }
 
     @Override
@@ -300,7 +246,7 @@ public final class JsonDeserializer extends
 
     @Override
     public List<String> getDescription() {
-      return utamPageObject.getDescription(context);
+      return description.getJavadoc();
     }
 
     @Override
@@ -310,7 +256,7 @@ public final class JsonDeserializer extends
 
     @Override
     public boolean isDeprecated() {
-      return utamPageObject.isDeprecated();
+      return description.isDeprecated();
     }
 
     @Override
@@ -325,6 +271,8 @@ public final class JsonDeserializer extends
     private final UtamPageObject utamPageObject;
     private final PageObjectInterface pageObjectInterface;
     private final List<Profile> profiles;
+    private final List<AnnotationProvider> annotations = new ArrayList<>();
+    private final RootDescription description;
 
     Implementation(
         TranslationContext context,
@@ -333,7 +281,17 @@ public final class JsonDeserializer extends
       this.context = context;
       this.utamPageObject = utamPageObject;
       this.pageObjectInterface = pageObjectInterface;
-      this.profiles = utamPageObject.getProfiles(context);
+      this.profiles = getConfiguredProfiles(utamPageObject.profile, context);
+      this.description = utamPageObject.description.getDescription(context);
+      if (utamPageObject.rootLocator != null) {
+        annotations.add(getPageObjectAnnotation(utamPageObject.rootLocator));
+      }
+      if (utamPageObject.platform != null) {
+        annotations.add(getPagePlatformAnnotation(utamPageObject.platform));
+      }
+      if (description.isDeprecated()) {
+        annotations.add(DEPRECATED_ANNOTATION);
+      }
     }
 
     @Override
@@ -348,7 +306,7 @@ public final class JsonDeserializer extends
 
     @Override
     public List<AnnotationProvider> getClassAnnotations() {
-      return utamPageObject.getAnnotations();
+      return annotations;
     }
 
     @Override
@@ -358,7 +316,7 @@ public final class JsonDeserializer extends
 
     @Override
     public TypeProvider getBaseClassType() {
-      return utamPageObject.getBaseClass();
+      return utamPageObject.isRootPageObject ? BASE_ROOT_PAGE_OBJECT_CLASS : BASE_PAGE_OBJECT_CLASS;
     }
 
     @Override
@@ -383,7 +341,7 @@ public final class JsonDeserializer extends
 
     @Override
     public List<String> getDescription() {
-      return utamPageObject.getDescription(context);
+      return description.getJavadoc();
     }
 
     @Override

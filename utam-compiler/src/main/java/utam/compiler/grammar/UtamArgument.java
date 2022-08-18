@@ -7,7 +7,8 @@
  */
 package utam.compiler.grammar;
 
-import static utam.compiler.UtamCompilerIntermediateError.getJsonNodeType;
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
+import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.JsonDeserializer.nodeToString;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.compiler.grammar.UtamComposeMethod.isUsedAsChain;
@@ -19,6 +20,7 @@ import static utam.compiler.helpers.PrimitiveType.STRING;
 import static utam.compiler.helpers.PrimitiveType.isPrimitiveType;
 import static utam.compiler.helpers.StatementContext.StatementType.PREDICATE_LAST_STATEMENT;
 import static utam.compiler.helpers.StatementContext.StatementType.PREDICATE_STATEMENT;
+import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT_TYPE_NAME;
 import static utam.compiler.helpers.TypeUtilities.PARAMETER_REFERENCE;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT_TYPE_NAME;
@@ -27,7 +29,6 @@ import static utam.compiler.helpers.TypeUtilities.W_PAGE_OBJECT_TYPE_PARAMETER;
 import static utam.compiler.helpers.TypeUtilities.W_ROOT_PAGE_OBJECT_TYPE_PARAMETER;
 import static utam.compiler.helpers.TypeUtilities.getPageObjectTypeParameter;
 import static utam.compiler.helpers.TypeUtilities.getRootPageObjectTypeParameter;
-import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -37,7 +38,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import utam.compiler.UtamCompilerIntermediateError;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.UtamMethodAction.ArgumentsProvider;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.LocatorCodeGeneration;
@@ -104,17 +105,13 @@ abstract class UtamArgument {
    */
   static List<UtamArgument> processArgsNode(JsonNode argsNode, String parserContext,
       boolean isLiteralsAllowed) {
-    List<UtamArgument> args = new ArrayList<>();
-    if (argsNode == null || argsNode.isNull()) {
+    List<UtamArgument> args = VALIDATION
+        .validateOptionalNotEmptyArray(argsNode, parserContext, "args");
+    if(isEmptyNode(argsNode)) {
       return args;
     }
-    if (!argsNode.isArray() || argsNode.size() == 0) {
-      throw new UtamCompilerIntermediateError(argsNode, 12, parserContext, "args");
-    }
     for (JsonNode argNode : argsNode) {
-      if (argNode == null || argNode.isNull() || !argNode.isObject()) {
-        throw new UtamCompilerIntermediateError(13, parserContext, "argument");
-      }
+      VALIDATION.validateNotNullObject(argNode, parserContext, "argument");
       UtamArgument arg = processArgNode(argNode, parserContext, isLiteralsAllowed);
       args.add(arg);
     }
@@ -123,30 +120,24 @@ abstract class UtamArgument {
 
   private static UtamArgument processArgNode(JsonNode argNode, String parserContext,
       boolean isLiteralsAllowed) {
-    boolean hasType = argNode.has("type");
     boolean isLiteral = argNode.has("value");
     if (isLiteral && !isLiteralsAllowed) {
-      throw new UtamCompilerIntermediateError(argNode, 105, parserContext);
+      throw new UtamCompilationError(argNode, VALIDATION.getErrorMessage(105, parserContext));
     }
     String type;
-    if (hasType) {
+    if (argNode.has("type")) {
       JsonNode typeNode = argNode.get("type");
-      if (!typeNode.isTextual() || typeNode.textValue().isEmpty()) {
-        throw new UtamCompilerIntermediateError(argNode, 10, parserContext, "type",
-            getJsonNodeType(typeNode));
-      }
-      type = argNode.get("type").textValue();
+      type = VALIDATION.validateNotNullOrEmptyString(typeNode, parserContext, "type");
       if (FUNCTION_TYPE_PROPERTY.equals(type)) {
-        return readNode(argNode, UtamArgumentPredicate.class, e ->
-            new UtamCompilerIntermediateError(e, argNode, 104, parserContext, e.getMessage()));
+        return readNode(argNode, UtamArgumentPredicate.class, VALIDATION.getErrorMessage(104, parserContext));
       }
       if (isLiteral && !getSupportedLiteralTypes().contains(type)) {
-        throw new UtamCompilerIntermediateError(argNode, 102, parserContext, type,
-            SUPPORTED_LITERALS);
+        throw new UtamCompilationError(argNode, VALIDATION.getErrorMessage(102, parserContext, type,
+            SUPPORTED_LITERALS));
       }
       if (!isLiteral && !getSupportedNonLiteralTypes().contains(type)) {
-        throw new UtamCompilerIntermediateError(argNode, 103, parserContext, type,
-            SUPPORTED_NON_LITERALS);
+        throw new UtamCompilationError(argNode, VALIDATION.getErrorMessage(103, parserContext, type,
+            SUPPORTED_NON_LITERALS));
       }
     } else {
       // acceptable for predicate
@@ -155,8 +146,7 @@ abstract class UtamArgument {
     if (isLiteral) {
       return processLiteralNode(argNode, type, parserContext);
     }
-    return readNode(argNode, UtamArgumentNonLiteral.class, e ->
-        new UtamCompilerIntermediateError(e, argNode, 100, parserContext, e.getMessage()));
+    return readNode(argNode, UtamArgumentNonLiteral.class, VALIDATION.getErrorMessage(100, parserContext));
   }
 
   private static UtamArgument processLiteralNode(JsonNode argNode, String typeStr,
@@ -172,24 +162,19 @@ abstract class UtamArgument {
           return new UtamArgumentLiteralPageObject(valueStr, W_ROOT_PAGE_OBJECT_TYPE_PARAMETER);
         }
         if (ELEMENT_REFERENCE_TYPE_PROPERTY.equals(typeStr)) {
-          return readNode(argNode, UtamArgumentElementReference.class,
-              e -> new UtamCompilerIntermediateError(e, argNode, 106, parserContext,
-                  e.getMessage()));
+          return readNode(argNode, UtamArgumentElementReference.class, VALIDATION.getErrorMessage(106, parserContext));
         }
       }
     }
     if (SELECTOR_TYPE_PROPERTY.equals(typeStr)) {
-      UtamSelector selector = readNode(valueNode, UtamSelector.class,
-          e -> new UtamCompilerIntermediateError(e, valueNode, 1000, parserContext));
+      UtamSelector selector = readNode(valueNode, UtamSelector.class, VALIDATION.getErrorMessage(1000, parserContext));
       return new UtamArgumentLiteralSelector(selector, parserContext);
     }
     if (valueNode.isBoolean() || valueNode.isInt() || valueNode.isTextual()) {
-      return readNode(argNode, UtamArgumentLiteralPrimitive.class,
-          e -> new UtamCompilerIntermediateError(e, argNode, 100, parserContext,
-              e.getMessage()));
+      return readNode(argNode, UtamArgumentLiteralPrimitive.class, VALIDATION.getErrorMessage(100, parserContext));
     }
-    throw new UtamCompilerIntermediateError(argNode, 102, parserContext,
-        nodeToString(valueNode), SUPPORTED_LITERALS);
+    throw new UtamCompilationError(argNode, VALIDATION.getErrorMessage(102, parserContext,
+        nodeToString(valueNode), SUPPORTED_LITERALS));
   }
 
   /**
@@ -388,8 +373,8 @@ abstract class UtamArgument {
             i,
             isUsedAsChain(conditions, i),
             i == conditions.size() - 1 ? PREDICATE_LAST_STATEMENT : PREDICATE_STATEMENT,
-            condition.getDeclaredReturnType(context, methodContext.getName()));
-        condition.checkBeforeLoadElements(context, methodContext);
+            condition.getDeclaredReturnType(methodContext.getName()));
+        condition.checkBeforeLoadElements(methodContext);
         ComposeMethodStatement statement = condition
             .getComposeAction(context, methodContext, statementContext);
         previousStatementReturn = statement.getReturnType();

@@ -7,6 +7,8 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -43,7 +45,7 @@ class UtamMethodActionReturnSelf extends UtamMethodAction {
   ComposeMethodStatement getComposeAction(TranslationContext context,
       MethodContext methodContext, StatementContext statementContext) {
     if (!statementContext.isLastStatement() && !statementContext.isLastPredicateStatement()) {
-      String message = context.getErrorMessage(618, methodContext.getName());
+      String message = VALIDATION.getErrorMessage(618, methodContext.getName());
       throw new UtamCompilationError(message);
     }
     return new ReturnSelf(context.getSelfType());

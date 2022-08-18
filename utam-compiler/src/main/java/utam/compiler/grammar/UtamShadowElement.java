@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.compiler.grammar.UtamPageObject.processElementsNode;
@@ -17,8 +18,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
-import utam.compiler.UtamCompilerIntermediateError;
 import utam.compiler.grammar.UtamElement.UtamElementProvider;
 
 /**
@@ -48,9 +47,7 @@ class UtamShadowElement {
     if (isEmptyNode(shadowNode)) {
       return elements;
     }
-    Function<Exception, RuntimeException> parserErrorWrapper = causeErr -> new UtamCompilerIntermediateError(
-        causeErr, shadowNode, 1100, parserContext, causeErr.getMessage());
-    UtamShadowElement shadowElement = readNode(shadowNode, UtamShadowElement.class, parserErrorWrapper);
+    UtamShadowElement shadowElement = readNode(shadowNode, UtamShadowElement.class, VALIDATION.getErrorMessage(1100, parserContext));
     return processElementsNode(Objects.requireNonNull(shadowElement).elementsNode, parserContext);
   }
 }

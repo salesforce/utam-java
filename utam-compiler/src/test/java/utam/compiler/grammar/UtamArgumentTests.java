@@ -110,8 +110,7 @@ public class UtamArgumentTests {
     String json = "{ \"type\" : \"string\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error 100: method \"test\": incorrect argument format: \n"
-            + "Missing required creator property 'name'"));
+        containsString("error 100: method \"test\": incorrect argument format"));
   }
 
   @Test
@@ -119,8 +118,7 @@ public class UtamArgumentTests {
     String json = "{ \"name\" : \"name\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error 100: method \"test\": incorrect argument format: \n"
-            + "Missing required creator property 'type'"));
+        containsString("error 100: method \"test\": incorrect argument format"));
   }
 
   @Test
@@ -137,8 +135,7 @@ public class UtamArgumentTests {
     String json = "{ \"value\" : true, \"type\" : \"string\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error 100: method \"test\": incorrect argument format: \n"
-            + "Unrecognized field \"type\""));
+        containsString("error 100: method \"test\": incorrect argument format"));
   }
 
   @Test
@@ -146,8 +143,7 @@ public class UtamArgumentTests {
     String json = "{ \"value\" : true, \"name\" : \"name\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error 100: method \"test\": incorrect argument format: \n"
-            + "Unrecognized field \"name\""));
+        containsString("error 100: method \"test\": incorrect argument format"));
   }
 
   @Test
@@ -155,8 +151,7 @@ public class UtamArgumentTests {
     String json = "{  \"name\" :  \"name\",  \"type\" : \"function\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error 104: method \"test\": incorrect predicate format: \n"
-            + "Missing required creator property 'predicate'"));
+        containsString("error 104: method \"test\": incorrect predicate format"));
   }
 
   @Test
@@ -172,8 +167,7 @@ public class UtamArgumentTests {
     String json = "{  \"value\" :  \"element\",  \"type\" : \"elementReference\", \"predicate\" : [] }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(), containsString(
-        "error 106: method \"test\": incorrect format of elementReference argument: \n"
-            + "Unrecognized field \"predicate\""));
+        "error 106: method \"test\": incorrect format of elementReference argument"));
   }
 
   @Test
@@ -190,8 +184,7 @@ public class UtamArgumentTests {
     String json = "{  \"error\" : \"text\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error 100: method \"test\": incorrect argument format: \n"
-            + "Missing required creator property 'name'"));
+        containsString("error 100: method \"test\": incorrect argument format"));
   }
 
   @Test

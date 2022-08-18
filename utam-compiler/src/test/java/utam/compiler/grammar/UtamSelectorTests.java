@@ -73,7 +73,7 @@ public class UtamSelectorTests {
     UtamSelector selector = new UtamSelector("selector[%f]");
     RuntimeException e = expectThrows(UtamCompilationError.class, () ->
         selector.getElementCodeGenerationHelper("test", getTestTranslationContext()));
-    assertThat(e.getMessage(), containsString("error 1001: element \"test\" selector: "
+    assertThat(e.getMessage(), containsString("error 111: element \"test\": "
         + "unknown selector parameter type \"%f\", only string and number are supported"));
   }
 

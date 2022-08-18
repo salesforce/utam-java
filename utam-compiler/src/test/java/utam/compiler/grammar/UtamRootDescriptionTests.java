@@ -86,7 +86,7 @@ public class UtamRootDescriptionTests {
     List<String> description = getInterfaceDescription("generated/comments/verboseObject.utam");
     assertThat(description, hasSize(6));
     assertThat(description.get(0), containsString("one"));
-    assertThat(description.get(1), containsString("&lt;two&gt; &amp; *&#47;"));
+    assertThat(description.get(1), containsString("<two> & */"));
     assertThat(description.get(2), containsString("created from JSON"));
     assertThat(description.get(3), containsString("@author records_team"));
     assertThat(description.get(4), containsString(VERSION_TAG));
@@ -96,7 +96,7 @@ public class UtamRootDescriptionTests {
     description = getImplementationDescription("generated/comments/verboseObject.utam");
     assertThat(description, hasSize(6));
     assertThat(description.get(0), containsString("one"));
-    assertThat(description.get(1), containsString("&lt;two&gt; &amp; *&#47;"));
+    assertThat(description.get(1), containsString("<two> & */"));
     assertThat(description.get(2), containsString("created from JSON"));
     assertThat(description.get(3), containsString("@author records_team"));
     assertThat(description.get(4), containsString(VERSION_TAG));
@@ -143,5 +143,49 @@ public class UtamRootDescriptionTests {
     assertThat(description.get(2), containsString("@author UTAM"));
     assertThat(description.get(3), containsString(VERSION_TAG));
     assertThat(description.get(4), containsString("@deprecated this class is outdated"));
+  }
+
+  @Test
+  public void testEmptyTextArrayThrows() {
+    UtamError e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities()
+            .getResultFromString("{ \"description\" : { \"text\" : [] } }"));
+    assertThat(e.getMessage(), containsString(
+        "error 12: page object description: property \"text\" should be a not empty array"));
+  }
+
+  @Test
+  public void testEmptyTextThrows() {
+    UtamError e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities().getResultFromString("{ \"description\" : \"\" }"));
+    assertThat(e.getMessage(), containsString(
+        "error 10: page object description: property \"text\" should be a non empty string, instead found empty"));
+  }
+
+  @Test
+  public void testEmptyArrayStringThrows() {
+    UtamError e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities()
+            .getResultFromString("{ \"description\" : { \"text\" : [\"\"] } }"));
+    assertThat(e.getMessage(), containsString(
+        "error 10: page object description: property \"text\" should be a non empty string, instead found empty"));
+  }
+
+  @Test
+  public void testEmptyAuthorStringThrows() {
+    UtamError e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities()
+            .getResultFromString("{ \"description\" : { \"text\" : [\"`\"], \"author\":\"\" } }"));
+    assertThat(e.getMessage(), containsString(
+        "error 10: page object description: property \"author\" should be a non empty string, instead found empty"));
+  }
+
+  @Test
+  public void testEmptyDeprecatedStringThrows() {
+    UtamError e = expectThrows(UtamError.class,
+        () -> new DeserializerUtilities()
+            .getResultFromString("{ \"description\" : { \"text\" : [\"`\"], \"deprecated\":\"\" } }"));
+    assertThat(e.getMessage(), containsString(
+        "error 10: page object description: property \"deprecated\" should be a non empty string, instead found empty"));
   }
 }

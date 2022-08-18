@@ -57,7 +57,7 @@ public class UtamProfile_Tests {
     jsonTest.addString("implements", "my/pageobjects/type");
     Exception e = jsonTest.expectCompilerError();
     assertThat(e.getMessage(),
-        containsString("error 11: profile \"name\": array value should be a non empty string, instead found [ 1 ]"));
+        containsString("error 11: profile \"name\": array value should be a non empty string, instead found number"));
   }
 
   @Test

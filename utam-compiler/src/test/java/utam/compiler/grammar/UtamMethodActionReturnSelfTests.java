@@ -72,7 +72,7 @@ public class UtamMethodActionReturnSelfTests {
   @Test
   public void returnSelfRedundantAttributes() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("returnSelfError"));
-    assertThat(e.getMessage(), containsString("Unrecognized field \"element\""));
+    assertThat(e.getMessage(), containsString("error 600: method \"test\" statement: incorrect compose statement format"));
   }
 
   @Test

@@ -60,9 +60,14 @@ public class UtamPageObjectInterfaceTests {
 
   @Test
   public void testAbstractWithProfileThrows() {
-    String partialJson = "\"profile\" : \"web\", ";
+    String partialJson = "\"profile\": [\n"
+        + "    {\n"
+        + "      \"name\": \"value\"\n"
+        + "    }\n"
+        + "  ],";
     Exception e = expectThrows(UtamCompilationError.class, () -> expectError(partialJson));
-    assertThat(e.getMessage(), containsString(getErrUnsupportedProperties("profile")));
+    assertThat(e.getMessage(), containsString(
+        "error 805: \"profile\" can only be set for a page object that implements an interface, please add \"implements\" property"));
   }
 
   @Test

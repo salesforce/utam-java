@@ -13,14 +13,12 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import java.lang.reflect.Method;
 import java.util.List;
 import org.testng.annotations.Test;
-import utam.compiler.UtamCompilerIntermediateError;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Draggable;
 
@@ -54,9 +52,9 @@ public class DraggableActionTypeTests {
     assertThat(parameters.get(0).isSameType(BASIC_ELEMENT), is(true));
     assertThat(parameters.get(1).isSameType(PrimitiveType.NUMBER), is(true));
 
-    UtamCompilerIntermediateError e = expectThrows(UtamCompilerIntermediateError.class,
+    RuntimeException e = expectThrows(RuntimeException.class,
         () -> action.getParametersTypes("test", 0));
-    assertThat(e.getCompilationError(getTestTranslationContext(), null, null).get().getMessage(),
+    assertThat(e.getMessage(),
         containsString(
             "error 110: \"test\": incorrect number of parameters for action \"dragAndDrop\": "
                 + "expected (check documentation), provided 0"));

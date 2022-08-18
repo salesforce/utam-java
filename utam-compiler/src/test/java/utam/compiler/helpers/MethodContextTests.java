@@ -20,7 +20,6 @@ import org.testng.annotations.Test;
 import utam.compiler.grammar.DeserializerUtilities;
 import utam.compiler.helpers.ParameterUtils.Literal;
 import utam.compiler.helpers.ParameterUtils.Regular;
-import utam.compiler.helpers.ParametersContext.StatementParametersContext;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.framework.consumer.UtamError;
 
@@ -35,13 +34,7 @@ public class MethodContextTests {
   private static MethodContext getMethodContext() {
     return new MethodContext("test", ReturnType.RETURN_VOID,
         getTestTranslationContext(),
-        null, false);
-  }
-
-  private static ParametersContext getParametersContext(MethodContext methodContext) {
-    return new StatementParametersContext("test", getTestTranslationContext(), null,
-        methodContext);
-
+        false, false);
   }
 
   private static void test(String jsonFile, String expectedError) {
@@ -68,7 +61,7 @@ public class MethodContextTests {
   @Test
   public void testDuplicateArgNameInStmntThrows() {
     MethodContext methodContext = getMethodContext();
-    ParametersContext context = getParametersContext(methodContext);
+    ParametersContext context = methodContext.getParametersContext();
     setStatementParameter(context, new Regular("name", STRING));
     UtamError e = expectThrows(UtamError.class,
         () -> setStatementParameter(context, new Regular("name", STRING)));
@@ -98,12 +91,8 @@ public class MethodContextTests {
 
   @Test
   public void testComposeWithInvalidArgReferenceThrows() {
-    MethodContext methodContext = getMethodContext();
-    ParametersContext context = getParametersContext(methodContext);
-    UtamError e = expectThrows(UtamError.class,
-        () -> setStatementParameter(context, new Regular("arg", PARAMETER_REFERENCE)));
-    assertThat(e.getMessage(), containsString(
-        "error 502: method \"test\": statement parameter \"arg\" is not found in declared method args"));
+    test("referencedArgNotFound",
+        "error 502: method \"test\": statement parameter \"arg1\" is not found in declared method args");
   }
 
   @Test

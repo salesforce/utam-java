@@ -7,11 +7,13 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects;
 import java.util.stream.Stream;
-import utam.compiler.UtamCompilerIntermediateError;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.LocatorCodeGeneration.SelectorType;
 import utam.core.element.Locator;
@@ -50,11 +52,11 @@ class UtamRootSelector {
       locator = LocatorBy.byUiAutomator(uiautomator);
       selectorType = SelectorType.uiautomator;
     } else {
-      throw new UtamCompilerIntermediateError(1002,  LocatorCodeGeneration.SUPPORTED_SELECTOR_TYPES_STRING);
+      throw new UtamCompilationError(VALIDATION.getErrorMessage(1002,  LocatorCodeGeneration.SUPPORTED_SELECTOR_TYPES_STRING));
     }
     if (Stream.of(css, classchain, uiautomator, accessid)
         .filter(Objects::nonNull).toArray().length > 1) {
-      throw new UtamCompilerIntermediateError(1003, LocatorCodeGeneration.SUPPORTED_SELECTOR_TYPES_STRING);
+      throw new UtamCompilationError(VALIDATION.getErrorMessage(1003, LocatorCodeGeneration.SUPPORTED_SELECTOR_TYPES_STRING));
     }
   }
 

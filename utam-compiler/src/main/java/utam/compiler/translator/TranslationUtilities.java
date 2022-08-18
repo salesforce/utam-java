@@ -29,11 +29,16 @@ public class TranslationUtilities {
   static final String JAVADOC_LINE_PATTERN = "   * %s";
   static final String JAVADOC_OPEN_LINE = "  /**";
   static final String JAVADOC_CLOSE_LINE = "   */";
-  private static final List<String> EMPTY_JAVADOC_LIST = new ArrayList<>();
 
+  /**
+   * Wrap comments into Javadoc
+   *
+   * @param comments comments text
+   * @return javadoc as list of strings
+   */
   static List<String> getWrappedJavadoc(List<String> comments) {
     if (comments.isEmpty()) {
-      return EMPTY_JAVADOC_LIST;
+      return comments;
     }
     List<String> res = new ArrayList<>();
     res.add(JAVADOC_OPEN_LINE);
@@ -42,14 +47,24 @@ public class TranslationUtilities {
       res.add(String.format(JAVADOC_LINE_PATTERN, ""));
     }
     for (String line : comments) {
-      res.add(String.format(JAVADOC_LINE_PATTERN, line));
+      res.add(String.format(JAVADOC_LINE_PATTERN, formatJavadoc(line)));
     }
     res.add(JAVADOC_CLOSE_LINE);
     return res;
   }
 
-  static String handleSpecialChars(String selector) {
-    return selector.replaceAll("\\*\\*", "\\\\*\\\\*\\\\");
+  /**
+   * Replace any invalid HTML characters with their appropriate encoded entities
+   *
+   * @param str input string
+   * @return string for javadoc content
+   */
+  static String formatJavadoc(String str) {
+    return str.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        // iOS class chains contain "*/" in their paths, must be escaped for Javadoc generation
+        .replace("*/", "*&#47");
   }
 
   static Set<String> getImportStrings(TypeProvider typeToImport, String currentPackage) {
@@ -114,8 +129,8 @@ public class TranslationUtilities {
    */
   public static String getElementGetterMethodName(String elementName, boolean isPublic) {
     return "get"
-            + elementName.substring(0, 1).toUpperCase()
-            + elementName.substring(1)
-            + (isPublic? "" : "Element");
+        + elementName.substring(0, 1).toUpperCase()
+        + elementName.substring(1)
+        + (isPublic ? "" : "Element");
   }
 }

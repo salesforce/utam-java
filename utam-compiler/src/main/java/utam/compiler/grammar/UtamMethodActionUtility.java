@@ -66,11 +66,11 @@ class UtamMethodActionUtility extends UtamMethodAction {
   @Override
   ComposeMethodStatement getComposeAction(TranslationContext context, MethodContext methodContext,
       StatementContext statementContext) {
-    chainValidations(context, statementContext, methodContext.getName());
+    chainValidations(statementContext, methodContext.getName());
     TypeProvider utilityType = context.getUtilityType(applyExternal.getExternalClassPath());
     Operand operand = new UtilityOperand(utilityType);
     List<MethodParameter> parameters = applyExternal.getParameters(context, methodContext);
-    ReturnType returnTypeObject = getDeclaredReturnType(context, methodContext.getName());
+    ReturnType returnTypeObject = getDeclaredReturnType(methodContext.getName());
     TypeProvider defaultReturnType = statementContext.isLastStatement() ?
         methodContext.getDeclaredReturnType().getReturnTypeOrDefault(context, VOID) : VOID;
     TypeProvider statementReturnType = returnTypeObject

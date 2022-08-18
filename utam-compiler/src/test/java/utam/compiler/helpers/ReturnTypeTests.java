@@ -65,7 +65,7 @@ public class ReturnTypeTests {
   @Test
   public void testReturnTypeNotAllowedThrows() {
     test("returnTypeMethodNotAllowed",
-        "error 500: incorrect format of compose method: \nUnrecognized field \"returnType\"");
+        "error 500: method \"test\": incorrect format of compose method");
   }
 
   @Test

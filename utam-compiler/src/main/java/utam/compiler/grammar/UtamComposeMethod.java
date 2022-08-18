@@ -7,8 +7,7 @@
  */
 package utam.compiler.grammar;
 
-import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
-import static utam.compiler.grammar.JsonDeserializer.isNotArrayOrEmptyArray;
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.compiler.grammar.UtamMethodActionReturnSelf.RETURN_SELF;
 import static utam.compiler.grammar.UtamMethodActionWaitFor.WAIT_FOR;
@@ -18,8 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
-import utam.compiler.UtamCompilerIntermediateError;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParametersContext;
 import utam.compiler.helpers.ReturnType;
@@ -60,13 +58,7 @@ class UtamComposeMethod extends UtamMethod {
    * @return list of statements
    */
   static List<UtamMethodAction> processComposeNodes(String methodName, JsonNode composeNodes) {
-    if (isEmptyNode(composeNodes)) {
-      throw new UtamCompilerIntermediateError(composeNodes, 505, methodName);
-    }
-    if (isNotArrayOrEmptyArray(composeNodes)) {
-      throw new UtamCompilerIntermediateError(composeNodes, 505, methodName);
-    }
-    List<UtamMethodAction> res = new ArrayList<>();
+    List<UtamMethodAction> res = VALIDATION.validateNotEmptyArray(composeNodes, String.format("method \"%s\"", methodName), "compose");
     for (JsonNode composeNode : composeNodes) {
       UtamMethodAction action = processComposeStatementNode(methodName, composeNode);
       res.add(action);
@@ -76,35 +68,26 @@ class UtamComposeMethod extends UtamMethod {
 
   private static UtamMethodAction processComposeStatementNode(String methodName,
       JsonNode composeNode) {
-    if (composeNode == null || composeNode.isNull() || !composeNode.isObject()) {
-      throw new UtamCompilerIntermediateError(composeNode, 608, methodName);
-    }
-
+    VALIDATION.validateNotNullObject(composeNode, String.format("method \"%s\"", methodName), "compose statement");
     JsonNode applyNode = composeNode.get("apply");
     JsonNode applyExternalNode = composeNode.get("applyExternal");
     JsonNode elementNode = composeNode.get("element");
-
     String apply = applyNode != null ? applyNode.asText() : null;
     String applyExternal = applyExternalNode != null ? applyExternalNode.asText() : null;
     String elementName = elementNode != null ? elementNode.asText() : null;
-
     if (apply == null && applyExternal == null) {
       if (elementName == null) {
-        throw new UtamCompilerIntermediateError(composeNode, 609, methodName);
+        throw new UtamCompilationError(composeNode, VALIDATION.getErrorMessage(609, methodName));
       }
-      return readNode(composeNode, UtamMethodActionGetter.class,
-          e -> new UtamCompilerIntermediateError(composeNode, 600, methodName, e.getMessage()));
+      return readNode(composeNode, UtamMethodActionGetter.class, VALIDATION.getErrorMessage(600, methodName));
     }
-
     if (apply != null && applyExternal != null) {
-      throw new UtamCompilerIntermediateError(composeNode, 610, methodName);
+      throw new UtamCompilationError(composeNode, VALIDATION.getErrorMessage(610, methodName));
     }
-
-    Function<Exception, RuntimeException> error = e -> new UtamCompilerIntermediateError(e,
-        composeNode, 600, methodName, e.getMessage());
+    String error = VALIDATION.getErrorMessage(600, methodName);
     if (applyExternal != null) {
       if (elementName != null) {
-        throw new UtamCompilerIntermediateError(composeNode, 611, methodName);
+        throw new UtamCompilationError(composeNode, VALIDATION.getErrorMessage(611, methodName));
       }
       return readNode(composeNode, UtamMethodActionUtility.class, error);
     }
@@ -139,8 +122,8 @@ class UtamComposeMethod extends UtamMethod {
           i,
           isUsedAsChain(compose, i),
           i == compose.size() - 1 ? StatementType.LAST_STATEMENT : StatementType.REGULAR_STATEMENT,
-          statementDeclaration.getDeclaredReturnType(context, name));
-      statementDeclaration.checkBeforeLoadElements(context, methodContext);
+          statementDeclaration.getDeclaredReturnType(name));
+      statementDeclaration.checkBeforeLoadElements(methodContext);
       ComposeMethodStatement statement = statementDeclaration
           .getComposeAction(context, methodContext, statementContext);
       previousStatementReturn = statement.getReturnType();
@@ -166,9 +149,8 @@ class UtamComposeMethod extends UtamMethod {
   @Override
   final PageObjectMethod getMethod(TranslationContext context) {
     // return type at method level is not supported, so infer from last statement
-    ReturnType lastStatementReturn = composeList.get(composeList.size()-1).getDeclaredReturnType(context, name);
-    MethodContext methodContext = new MethodContext(name, lastStatementReturn, context, argsNode,
-        false);
+    ReturnType lastStatementReturn = composeList.get(composeList.size()-1).getDeclaredReturnType(name);
+    MethodContext methodContext = new MethodContext(name, lastStatementReturn, context,false, hasMethodLevelArgs());
     ParametersContext parametersContext = methodContext.getParametersContext();
     setMethodLevelParameters(context, methodContext);
     List<ComposeMethodStatement> statements = getComposeStatements(context, methodContext,

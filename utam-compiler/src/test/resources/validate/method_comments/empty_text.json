@@ -1,0 +1,19 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "description": {
+        "text": [
+          "",
+          "not empty"
+        ]
+      },
+      "compose": [
+        {
+          "element": "root",
+          "apply": "isPresent"
+        }
+      ]
+    }
+  ]
+}
