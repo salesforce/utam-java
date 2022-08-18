@@ -12,8 +12,6 @@ import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.TBoundedPageObjectType;
 import static utam.compiler.helpers.TypeUtilities.VOID;
@@ -23,7 +21,6 @@ import static utam.compiler.types.BasicElementInterface.clickable;
 
 import org.testng.annotations.Test;
 import utam.compiler.types.BasicElementInterface;
-import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Actionable;
 import utam.core.element.Clickable;
@@ -36,17 +33,9 @@ import utam.core.selenium.element.LocatorBy;
  *
  * @author james.evans
  */
-@SuppressWarnings("EqualsBetweenInconvertibleTypes")
 public class TypeUtilitiesTests {
 
   private static final TypeProvider FAKE_TYPE_FROM_STRING = new TypeUtilities.FromString("test.FakeType");
-
-  private static MethodParameter getMockParameter(String name, TypeProvider type) {
-    MethodParameter mockParam = mock(MethodParameter.class);
-    when(mockParam.getValue()).thenReturn(name);
-    when(mockParam.getType()).thenReturn(type);
-    return mockParam;
-  }
 
   @Test
   public void testActionableGetTypeMethod() {

@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -54,9 +55,9 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
   @Override
   Statement getStatement(TranslationContext context, MethodContext methodContext,
       StatementContext statementContext) {
-    chainValidations(context, statementContext, methodContext.getName());
+    chainValidations(statementContext, methodContext.getName());
     if (statementContext.isInsidePredicate()) {
-      String message = context.getErrorMessage(615, methodContext.getName());
+      String message = VALIDATION.getErrorMessage(615, methodContext.getName());
       throw new UtamCompilationError(message);
     }
     return new PredicateStatement(context, methodContext, statementContext);
@@ -109,10 +110,9 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
       super(context, methodContext, statementContext);
     }
 
-    private void checkFunctionParameter(TranslationContext context, String contextString,
-        List<MethodParameter> parameters) {
+    private void checkFunctionParameter(String contextString, List<MethodParameter> parameters) {
       if (parameters.size() != 1) {
-        String message = context
+        String message = VALIDATION
             .getErrorMessage(108, contextString, "1", String.valueOf(parameters.size()));
         throw new UtamCompilationError(argsNode, message);
       }
@@ -120,7 +120,7 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
       if (parameter != null) {
         String actualType = parameter.getType().getSimpleName();
         String parameterValue = parameter.getValue();
-        String message = context
+        String message = VALIDATION
             .getErrorMessage(109, contextString, parameterValue, "function", actualType);
         throw new UtamCompilationError(argsNode, message);
       }
@@ -138,14 +138,13 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
       ActionType action = new CustomActionType(WAIT_FOR, declaredStatementReturnType);
       methodContext.enterPredicateContext();
       ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
-      ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
-          argsNode, methodContext);
+      ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
       List<UtamArgument> arguments = argumentsProvider.getArguments(false);
       List<MethodParameter> parameters = arguments
           .stream()
           .map(arg -> arg.asParameter(context, methodContext, parametersContext))
           .collect(Collectors.toList());
-      checkFunctionParameter(context, parserContext, parameters);
+      checkFunctionParameter(parserContext, parameters);
       List<ComposeMethodStatement> predicate = arguments.get(0)
           .getPredicate(context, methodContext);
       methodContext.exitPredicateContext();

@@ -1,0 +1,14 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "description": {
+        "text" : [ "text"],
+        "throws" : 75
+      },
+      "selector" : {
+        "css" : "css"
+      }
+    }
+  ]
+}

@@ -7,6 +7,7 @@
  */
 package utam.compiler.translator;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.core.framework.UtamLogger.info;
 import static utam.core.framework.consumer.JsonLoaderConfig.INJECTION_CONFIG_FILE_MASK;
 import static utam.core.framework.consumer.UtamLoaderConfigImpl.DEFAULT_PROFILE;
@@ -271,7 +272,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
 
   final void setImplementation(Profile profile, String typeName, String classTypeName) {
     if (!profileDependenciesMapping.containsKey(profile)) {
-      throw new UtamRunnerError(translatorConfig.getErrorMessage(803, profile.getName(), profile.getValue()));
+      throw new UtamRunnerError(VALIDATION.getErrorMessage(803, profile.getName(), profile.getValue()));
     }
     if (profileDependenciesMapping.get(profile).containsKey(typeName)) {
       String profileValue = String.format("{ %s : %s }", profile.getName(), profile.getValue());

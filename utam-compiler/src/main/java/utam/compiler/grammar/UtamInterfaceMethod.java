@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.JsonDeserializer.nodeToString;
 import static utam.compiler.helpers.TypeUtilities.VOID;
@@ -18,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
-import java.util.function.Supplier;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParametersContext;
@@ -59,10 +59,9 @@ class UtamInterfaceMethod extends UtamMethod {
    * Check if "returnType" of an interface method returns basic type
    *
    * @param returnTypeNode JSON node with return type
-   * @param context        context to build error message
    * @return true if it is
    */
-  private boolean isReturnBasicType(JsonNode returnTypeNode, TranslationContext context) {
+  private boolean isReturnBasicType(JsonNode returnTypeNode) {
     if (isEmptyNode(returnTypeNode)) {
       return false;
     }
@@ -72,7 +71,7 @@ class UtamInterfaceMethod extends UtamMethod {
     if (returnTypeNode.isArray()) {
       for (JsonNode valueNode : returnTypeNode) {
         if (!valueNode.isTextual() || !isBasicType(valueNode.textValue())) {
-          String unsupportedArrayValueErr = context.getErrorMessage(401, name, nodeToString(returnTypeNode));
+          String unsupportedArrayValueErr = VALIDATION.getErrorMessage(401, name, nodeToString(returnTypeNode));
           throw new UtamCompilationError(returnTypeNode, unsupportedArrayValueErr);
         }
       }
@@ -83,19 +82,18 @@ class UtamInterfaceMethod extends UtamMethod {
 
   @Override
   PageObjectMethod getMethod(TranslationContext context) {
-    boolean isReturnsBasicType = isReturnBasicType(returnTypeNode, context);
+    boolean isReturnsBasicType = isReturnBasicType(returnTypeNode);
     final ReturnType returnTypeObject;
     if (isReturnsBasicType) {
-      String errMessage = context.getErrorMessage(401, name, nodeToString(returnTypeNode));
-      Supplier<RuntimeException> errorProducer = () -> new UtamCompilationError(returnTypeNode, errMessage);
-      String[] basicUnionType = processBasicTypeNode(returnTypeNode, errorProducer);
+      String errMessage = VALIDATION.getErrorMessage(401, name, nodeToString(returnTypeNode));
+      String[] basicUnionType = processBasicTypeNode(returnTypeNode, errMessage);
       TypeProvider unionReturnType = asBasicOrUnionType(name, basicUnionType, false);
       returnTypeObject = new AbstractMethodBasicReturnType(unionReturnType, isReturnList);
     } else {
-      returnTypeObject = new AbstractMethodReturnType(returnTypeNode, isReturnList, context, name);
+      returnTypeObject = new AbstractMethodReturnType(returnTypeNode, isReturnList, name);
     }
     TypeProvider methodReturnType = returnTypeObject.getReturnTypeOrDefault(context, VOID);
-    MethodContext methodContext = new MethodContext(name, returnTypeObject, context, argsNode, true);
+    MethodContext methodContext = new MethodContext(name, returnTypeObject, context, true, hasMethodLevelArgs());
     ParametersContext parametersContext = methodContext.getParametersContext();
     setMethodLevelParameters(context, methodContext);
     List<MethodParameter> parameters = parametersContext.getParameters();

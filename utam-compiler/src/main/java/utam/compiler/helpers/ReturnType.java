@@ -1,6 +1,6 @@
 package utam.compiler.helpers;
 
-import static utam.compiler.UtamCompilerIntermediateError.getJsonNodeType;
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.helpers.PrimitiveType.isPrimitiveType;
 import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
@@ -41,22 +41,15 @@ public abstract class ReturnType {
    *
    * @param typeNode     the JSON node of the type
    * @param isReturnList a value indicating whether the return type is a list
-   * @param context      translation context for error message
    * @param methodName   method name with return type
    */
-  ReturnType(JsonNode typeNode, Boolean isReturnList, TranslationContext context, String methodName) {
+  ReturnType(JsonNode typeNode, Boolean isReturnList, String methodName) {
     this.returnTypeJsonNode = typeNode;
     this.isReturnList = Boolean.TRUE.equals(isReturnList);
     this.methodName = methodName;
-    if (!isEmptyNode(typeNode)) {
-      if (returnTypeJsonNode.isTextual()) {
-        this.returnTypeString = returnTypeJsonNode.textValue();
-      } else {
-        String validationContext = String.format("method \"%s\"", methodName);
-        String errMessage = context.getErrorMessage(10, validationContext, "returnType",
-            getJsonNodeType(returnTypeJsonNode));
-        throw new UtamCompilationError(returnTypeJsonNode, errMessage);
-      }
+    if (!isEmptyNode(returnTypeJsonNode)) {
+      String validationContext = String.format("method \"%s\"", methodName);
+      this.returnTypeString = VALIDATION.validateNotNullOrEmptyString(returnTypeJsonNode, validationContext, "returnType");
     } else {
       this.returnTypeString = null;
     }
@@ -144,11 +137,11 @@ public abstract class ReturnType {
     if (VOID.getSimpleName().equals(returnTypeString)) {
       return VOID;
     }
-    String errMessage = getUnsupportedReturnTypeErr(context);
+    String errMessage = getUnsupportedReturnTypeErr();
     throw new UtamCompilationError(returnTypeJsonNode, errMessage);
   }
 
-  String getUnsupportedReturnTypeErr(TranslationContext context) {
+  String getUnsupportedReturnTypeErr() {
     //for VOID or Basic return types this error never happens, otherwise overridden
     return "";
   }
@@ -190,18 +183,17 @@ public abstract class ReturnType {
      * @param isReturnList a value indicating whether the return type is a list
      * @param methodName   the method name
      */
-    public AbstractMethodReturnType(JsonNode typeNode, Boolean isReturnList,
-        TranslationContext context, String methodName) {
-      super(typeNode, isReturnList, context, methodName);
+    public AbstractMethodReturnType(JsonNode typeNode, Boolean isReturnList, String methodName) {
+      super(typeNode, isReturnList, methodName);
       if (isReturnAllRedundant()) {
-        String returnAllRedundantErr = context.getErrorMessage(402, methodName);
+        String returnAllRedundantErr = VALIDATION.getErrorMessage(402, methodName);
         throw new UtamCompilationError(typeNode, returnAllRedundantErr);
       }
     }
 
     @Override
-    String getUnsupportedReturnTypeErr(TranslationContext context) {
-      return context.getErrorMessage(403, methodName, returnTypeString);
+    String getUnsupportedReturnTypeErr() {
+      return VALIDATION.getErrorMessage(403, methodName, returnTypeString);
     }
   }
 
@@ -247,18 +239,17 @@ public abstract class ReturnType {
      * @param isReturnList a value indicating whether the return type is a list
      * @param methodName   the method name
      */
-    public StatementReturnType(JsonNode typeNode, Boolean isReturnList, TranslationContext context,
-        String methodName) {
-      super(typeNode, isReturnList, context, methodName);
+    public StatementReturnType(JsonNode typeNode, Boolean isReturnList, String methodName) {
+      super(typeNode, isReturnList, methodName);
       if (isReturnAllRedundant()) {
-        String returnAllRedundantErr = context.getErrorMessage(603, methodName);
+        String returnAllRedundantErr = VALIDATION.getErrorMessage(603, methodName);
         throw new UtamCompilationError(typeNode, returnAllRedundantErr);
       }
     }
 
     @Override
-    String getUnsupportedReturnTypeErr(TranslationContext context) {
-      return context.getErrorMessage(602, methodName, returnTypeString);
+    String getUnsupportedReturnTypeErr() {
+      return VALIDATION.getErrorMessage(602, methodName, returnTypeString);
     }
   }
 }

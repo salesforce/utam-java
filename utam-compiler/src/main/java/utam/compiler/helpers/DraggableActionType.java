@@ -7,6 +7,7 @@
  */
 package utam.compiler.helpers;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.helpers.BasicElementActionType.ERROR_CODE_FOR_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.VOID;
@@ -15,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import utam.compiler.UtamCompilerIntermediateError;
+import utam.compiler.UtamCompilationError;
 import utam.core.declarative.representation.TypeProvider;
 
 /**
@@ -66,8 +67,8 @@ public enum DraggableActionType implements ActionType {
         return ELEMENT_PARAMETERS;
       }
     }
-    throw new UtamCompilerIntermediateError(ERROR_CODE_FOR_PARAMETERS, parserContext, this.name(),
-          "(check documentation)", String.valueOf(parametersCount));
+    throw new UtamCompilationError(VALIDATION.getErrorMessage(ERROR_CODE_FOR_PARAMETERS, parserContext, this.name(),
+          "(check documentation)", String.valueOf(parametersCount)));
   }
 
   @Override

@@ -38,7 +38,7 @@ import utam.core.framework.consumer.UtamError;
  */
 public class UtamPageObject_Tests {
 
-  private final String PARSER_ERROR_PREFIX = "error 900: incorrect format of the page object: \n";
+  private final String PARSER_ERROR_PREFIX = "error 900: incorrect format of the page object";
 
   @Test
   public void testRootPageObjectHasCorrectBaseClasses() {
@@ -122,10 +122,7 @@ public class UtamPageObject_Tests {
     String json = "{\"root\": \"invalid\"}";
     UtamError e = expectThrows(UtamError.class,
         () -> new DeserializerUtilities().getResultFromString(json));
-    assertThat(
-        e.getMessage(),
-        containsString(
-            PARSER_ERROR_PREFIX + "Cannot deserialize value of type `boolean` from String"));
+    assertThat(e.getMessage(), containsString(PARSER_ERROR_PREFIX));
   }
 
   @Test
@@ -133,8 +130,7 @@ public class UtamPageObject_Tests {
     String json = "{\"public\": true}";
     UtamError e = expectThrows(UtamError.class,
         () -> new DeserializerUtilities().getResultFromString(json));
-    assertThat(e.getMessage(),
-        containsString(PARSER_ERROR_PREFIX + "Unrecognized field \"public\""));
+    assertThat(e.getMessage(), containsString(PARSER_ERROR_PREFIX));
   }
 
   @Test
@@ -142,7 +138,7 @@ public class UtamPageObject_Tests {
     String json = "{ \"elements\" : [], \"elements\" : [] }";
     UtamError e = expectThrows(UtamError.class,
         () -> new DeserializerUtilities().getResultFromString(json));
-    assertThat(e.getMessage(), containsString(PARSER_ERROR_PREFIX + "Duplicate field 'elements'"));
+    assertThat(e.getMessage(), containsString(PARSER_ERROR_PREFIX));
   }
 
   @Test
@@ -150,8 +146,7 @@ public class UtamPageObject_Tests {
     String json = "{ \"platform\": [] }";
     Exception e = expectThrows(UtamError.class,
         () -> new DeserializerUtilities().getResultFromString(json));
-    assertThat(e.getMessage(),
-        containsString(PARSER_ERROR_PREFIX + "Cannot deserialize value of type `java.lang.String`"));
+    assertThat(e.getMessage(), containsString(PARSER_ERROR_PREFIX));
   }
 
   @Test
@@ -176,8 +171,7 @@ public class UtamPageObject_Tests {
         + "  ]}";
     Exception e = expectCompilerError(json);
     assertThat(e.getMessage(),
-        containsString("error 200: root elements: incorrect format of elements: \n"
-            + "Unrecognized field \"wrong\""));
+        containsString("error 200: root elements: incorrect format of elements"));
   }
 
   @Test
@@ -201,7 +195,7 @@ public class UtamPageObject_Tests {
       UtamError e = expectThrows(UtamError.class,
           () -> new DeserializerUtilities().getResultFromString(json));
       assertThat(e.getMessage(), containsString(
-          "error 907: metadata property value must be an object"));
+          "error 13: page object root: property \"metadata\" should be a non empty object"));
     });
   }
 }

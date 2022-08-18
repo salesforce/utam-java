@@ -42,7 +42,6 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   private final TranslatorTargetConfig translatorTargetConfig;
   private final GuardrailsMode guardrailsMode;
   private final CompilerOutputOptions outputOptions;
-  private final JsonErrorsConfig jsonErrorsConfig;
 
   /**
    * Initializes a new instance of the translator configuration class
@@ -71,7 +70,6 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
     }
     // if passed as null - set to warning by default
     this.guardrailsMode = Objects.requireNonNullElse(guardrailsMode, GuardrailsMode.WARNING);
-    this.jsonErrorsConfig = JsonErrorsConfig.getErrorsConfigWithDefaultName();
   }
 
   /**
@@ -232,11 +230,6 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   @Override
   public List<String> getCopyright() {
     return outputOptions.configuredCopyright;
-  }
-
-  @Override
-  public String getErrorMessage(Object code, String... args) {
-    return jsonErrorsConfig.getErrorMessage((Integer) code, args);
   }
 
   /**

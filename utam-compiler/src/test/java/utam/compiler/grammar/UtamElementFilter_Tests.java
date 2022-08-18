@@ -43,8 +43,7 @@ public class UtamElementFilter_Tests {
   public void testBasicElementFilterWithoutMatcherThrows() {
     Exception e = expectCompilerErrorFromFile("validate/filter/basicFilterNoMatcher");
     assertThat(e.getMessage(), containsString(
-        "error 300: element \"test\" filter: incorrect format of element filter: \n"
-            + "Missing required creator property 'matcher'"));
+        "error 300: element \"test\" filter: incorrect format of element filter"));
   }
 
   @Test

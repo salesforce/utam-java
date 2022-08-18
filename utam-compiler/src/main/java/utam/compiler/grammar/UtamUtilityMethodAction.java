@@ -61,8 +61,7 @@ class UtamUtilityMethodAction {
    */
   List<MethodParameter> getParameters(TranslationContext context, MethodContext methodContext) {
     String parserContext = String.format("method \"%s\"", methodContext.getName());
-    ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
-        argsNode, methodContext);
+    ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
     ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
     List<UtamArgument> arguments = argumentsProvider.getArguments(true);
     arguments

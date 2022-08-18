@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.helpers.BasicElementActionType.getActionType;
 import static utam.compiler.helpers.BasicElementActionType.size;
 import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
@@ -72,17 +73,17 @@ class UtamMethodActionApply extends UtamMethodAction {
   Statement getStatement(TranslationContext context, MethodContext methodContext,
       StatementContext statementContext) {
     if (isChain) {
-      chainValidations(context, statementContext, methodContext.getName());
+      chainValidations(statementContext, methodContext.getName());
       // if statement is marked as a chain, it should be applied to previous result, so "element" is redundant
       if (elementName != null) {
-        String message = context.getErrorMessage(606, methodContext.getName());
+        String message = VALIDATION.getErrorMessage(606, methodContext.getName());
         throw new UtamCompilationError(message);
       }
       return new ChainApplyStatement(context, methodContext, statementContext);
     }
     ElementContext elementContext = context.getElement(elementName);
     if (elementContext == null) {
-      String message = context.getErrorMessage(601, methodContext.getName(), elementName);
+      String message = VALIDATION.getErrorMessage(601, methodContext.getName(), elementName);
       throw new UtamCompilationError(message);
     }
     ElementContext.ElementType type = elementContext.getElementNodeType();
@@ -244,8 +245,7 @@ class UtamMethodActionApply extends UtamMethodAction {
     private List<MethodParameter> getBasicActionParameters(ActionType action) {
       String parserContext = String.format("method \"%s\"", methodContext.getName());
       ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
-      ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
-          argsNode, methodContext);
+      ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
       List<UtamArgument> arguments = argumentsProvider.getArguments(true);
       arguments
           .stream()
@@ -259,8 +259,8 @@ class UtamMethodActionApply extends UtamMethodAction {
     ApplyOperation getApplyOperation() {
       String methodName = methodContext.getName();
       ActionType action = getActionType(apply, elementContext.getType(),
-          context.getErrorMessage(612, methodName, apply));
-      ReturnType declaredReturnType = getDeclaredReturnType(context, methodName);
+          VALIDATION.getErrorMessage(612, methodName, apply));
+      ReturnType declaredReturnType = getDeclaredReturnType(methodName);
       if (declaredReturnType.isReturnTypeSet()) {
         // if "returnType" is set - check if it's correct
         TypeProvider declaredReturn = declaredReturnType.getReturnType(context);
@@ -268,7 +268,7 @@ class UtamMethodActionApply extends UtamMethodAction {
             (elementContext.isReturnAll() ? wrapAsList(action.getReturnType())
                 : action.getReturnType());
         if (!expectedReturn.isSameType(declaredReturn)) {
-          String errorMsg = context.getErrorMessage(613, methodName,
+          String errorMsg = VALIDATION.getErrorMessage(613, methodName,
               expectedReturn.getSimpleName(),
               declaredReturn.getSimpleName());
           throw new UtamCompilationError(errorMsg);
@@ -278,7 +278,7 @@ class UtamMethodActionApply extends UtamMethodAction {
       // matcher parameters should be set after action parameters
       MatcherObject matcher = matcherProvider.apply(context, methodContext);
       if (matcher != null) {
-        matcher.checkMatcherOperand(context, action.getReturnType());
+        matcher.checkMatcherOperand(action.getReturnType());
       }
       return new ApplyOperation(action, action.getReturnType(), parameters, matcher);
     }
@@ -322,8 +322,7 @@ class UtamMethodActionApply extends UtamMethodAction {
       usageTracker.setElementUsage(elementVariableName, elementContext);
       String parserContext = String
           .format("method \"%s\", element \"%s\"", methodContext.getName(), elementName);
-      ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
-          null, methodContext);
+      ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
       elementContext.getParameters().forEach(parametersContext::setParameter);
       List<MethodParameter> parameters = parametersContext.getParameters();
       return new ElementOperand(elementContext, elementVariableName, parameters);
@@ -331,8 +330,7 @@ class UtamMethodActionApply extends UtamMethodAction {
 
     List<MethodParameter> getActionParameters() {
       String parserContext = String.format("method \"%s\"", methodContext.getName());
-      ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
-          argsNode, methodContext);
+      ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
       ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
       List<UtamArgument> arguments = argumentsProvider.getArguments(true);
       arguments

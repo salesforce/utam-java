@@ -7,13 +7,13 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
-import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.UtamMethodAction.ArgumentsProvider;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.MethodContext;
@@ -82,15 +82,11 @@ class UtamMatcher {
 
     @Override
     MatcherObject getMatcherObject(TranslationContext context) {
-      Function<Exception, RuntimeException> errorProducer = cause ->
-          new UtamCompilationError(matcherNode,
-              context.getErrorMessage(300, elementName, cause.getMessage()));
       UtamMatcher matcher = Objects.requireNonNull(JsonDeserializer
-          .readNode(matcherNode, UtamMatcher.class, errorProducer));
+          .readNode(matcherNode, UtamMatcher.class, VALIDATION.getErrorMessage(300, elementName)));
       String parserContext = String.format("element \"%s\" matcher", elementName);
       ArgumentsProvider provider = new ArgumentsProvider(matcher.argsNode, parserContext);
-      ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
-          matcher.argsNode, null);
+      ParametersContext parametersContext = new StatementParametersContext(parserContext, context, null);
       List<UtamArgument> arguments = provider.getArguments(true);
       arguments
           .stream()
@@ -119,16 +115,12 @@ class UtamMatcher {
 
     @Override
     MatcherObject getMatcherObject(TranslationContext context) {
-      Function<Exception, RuntimeException> errorProducer = cause ->
-          new UtamCompilationError(matcherNode,
-              context.getErrorMessage(303, methodContext.getName(), cause.getMessage()));
       UtamMatcher matcher = JsonDeserializer
-          .readNode(matcherNode, UtamMatcher.class, errorProducer);
+          .readNode(matcherNode, UtamMatcher.class, VALIDATION.getErrorMessage(303, methodContext.getName()));
       String parserContext = String
           .format("method \"%s\" statement matcher", methodContext.getName());
       ArgumentsProvider provider = new ArgumentsProvider(matcher.argsNode, parserContext);
-      ParametersContext parametersContext = new StatementParametersContext(parserContext, context,
-          matcher.argsNode, methodContext);
+      ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
       List<UtamArgument> arguments = provider.getArguments(true);
       arguments
           .stream()

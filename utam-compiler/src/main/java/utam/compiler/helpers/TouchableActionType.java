@@ -7,9 +7,10 @@
  */
 package utam.compiler.helpers;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.helpers.BasicElementActionType.ERROR_CODE_FOR_PARAMETERS;
 
-import utam.compiler.UtamCompilerIntermediateError;
+import utam.compiler.UtamCompilationError;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Touchable;
 
@@ -72,8 +73,8 @@ public enum TouchableActionType implements ActionType {
   public List<TypeProvider> getParametersTypes(String parserContext, int parameterCount) {
     int expected = actionParameters.length;
     if (actionParameters.length != parameterCount) {
-      throw new UtamCompilerIntermediateError(ERROR_CODE_FOR_PARAMETERS, parserContext, this.name(),
-          String.valueOf(expected), String.valueOf(parameterCount));
+      throw new UtamCompilationError(VALIDATION.getErrorMessage(ERROR_CODE_FOR_PARAMETERS, parserContext, this.name(),
+          String.valueOf(expected), String.valueOf(parameterCount)));
     }
     return Stream.of(actionParameters).collect(Collectors.toList());
   }

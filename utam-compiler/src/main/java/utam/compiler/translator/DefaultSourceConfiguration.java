@@ -162,7 +162,7 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
           }
         });
       } catch (IOException | NullPointerException e) {
-        throw new UtamCompilationError(String.format(ERR_IO_DURING_SCAN, rootFolder), e);
+        throw new UtamRunnerError(String.format(ERR_IO_DURING_SCAN, rootFolder), e);
       }
     }
   }
@@ -276,7 +276,7 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
           }
         });
       } catch (IOException | NullPointerException e) {
-        throw new UtamCompilationError(String.format(ERR_IO_DURING_SCAN, rootFolder), e);
+        throw new UtamRunnerError(String.format(ERR_IO_DURING_SCAN, rootFolder), e);
       }
     }
 

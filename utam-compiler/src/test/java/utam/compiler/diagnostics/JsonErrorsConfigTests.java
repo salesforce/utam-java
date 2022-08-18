@@ -5,19 +5,20 @@
  * For full license text, see the LICENSE file in the repo root
  * or https://opensource.org/licenses/MIT
  */
-package utam.compiler.translator;
+package utam.compiler.diagnostics;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.translator.JsonErrorsConfig.ERR_CODE_NOT_CONFIGURED;
-import static utam.compiler.translator.JsonErrorsConfig.ERR_FINDING_ERROR_CONFIG;
-import static utam.compiler.translator.JsonErrorsConfig.ERR_READING_ERROR_CONFIG;
-import static utam.compiler.translator.JsonErrorsConfig.getErrorsConfig;
+import static utam.compiler.diagnostics.JsonErrorsConfig.ERR_CODE_NOT_CONFIGURED;
+import static utam.compiler.diagnostics.JsonErrorsConfig.ERR_FINDING_ERROR_CONFIG;
+import static utam.compiler.diagnostics.JsonErrorsConfig.ERR_READING_ERROR_CONFIG;
+import static utam.compiler.diagnostics.JsonErrorsConfig.getErrorsConfig;
 
 import org.testng.annotations.Test;
+import utam.compiler.diagnostics.JsonErrorsConfig;
 
 /**
  * test configuration of error codes
@@ -29,14 +30,14 @@ public class JsonErrorsConfigTests {
 
   @Test
   public void testCorrectConfig() {
-    JsonErrorsConfig config = JsonErrorsConfig.getErrorsConfig("config/test_error_config.json");
+    JsonErrorsConfig config = getErrorsConfig("config/test_error_config.json");
     String errorMsg = config.getErrorMessage(1);
     assertThat(errorMsg, equalTo("warning 1: message; \nsee documentation docs; \ntip: tip"));
   }
 
   @Test
   public void testNotExistingCode() {
-    JsonErrorsConfig config = JsonErrorsConfig.getErrorsConfigWithDefaultName();
+    JsonErrorsConfig config = getErrorsConfig();
     Exception e = expectThrows(IllegalArgumentException.class,
         () -> config.getErrorMessage(-100));
     assertThat(e.getMessage(), is(equalTo(String.format(ERR_CODE_NOT_CONFIGURED, -100))));
