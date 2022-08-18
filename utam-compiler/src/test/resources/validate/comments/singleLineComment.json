@@ -1,0 +1,22 @@
+{
+  "description": {
+    "text": [
+      "test basic element getter compiles"
+    ]
+  },
+  "elements": [
+    {
+      // This is a not allowed comment
+      "description": {
+        "text": [
+          "test simple getter for basic element"
+        ]
+      },
+      "public": true,
+      "name": "test",
+      "selector": {
+        "css": ".css"
+      }
+    }
+  ]
+}
