@@ -84,7 +84,7 @@ public final class JsonDeserializer extends
   private static ObjectMapper getObjectMapperWithSettings() {
     ObjectMapper mapper = new ObjectMapper();
     // parser options
-    mapper.enable(ALLOW_COMMENTS);
+    mapper.disable(ALLOW_COMMENTS);
     mapper.enable(ACCEPT_SINGLE_VALUE_AS_ARRAY);
     mapper.enable(STRICT_DUPLICATE_DETECTION);
     return mapper;

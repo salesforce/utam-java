@@ -184,18 +184,32 @@ public class UtamPageObject_Tests {
 
   @Test
   public void testMetadataPropertyValueNotObjectThrows() {
-    List<String> jsonValues = Arrays.asList(
-        "{ \"metadata\": \"value\" }",
-        "{ \"metadata\": [\"value\", \"anotherValue\"] }",
-        "{ \"metadata\": 0 }",
-        "{ \"metadata\": true }",
-        "{ \"metadata\": null }"
-    );
+    List<String> jsonValues = Arrays.asList("{ \"metadata\": \"value\" }",
+        "{ \"metadata\": [\"value\", \"anotherValue\"] }", "{ \"metadata\": 0 }",
+        "{ \"metadata\": true }", "{ \"metadata\": null }");
     jsonValues.forEach((json) -> {
       UtamError e = expectThrows(UtamError.class,
           () -> new DeserializerUtilities().getResultFromString(json));
       assertThat(e.getMessage(), containsString(
           "error 13: page object root: property \"metadata\" should be a non empty object"));
     });
+  }
+
+  @Test
+  public void testSingleLineCommentDisallowed() {
+    UtamCompilationError e = expectThrows(
+        UtamCompilationError.class,
+        () -> new DeserializerUtilities().getResultFromFile("validate/comments/singleLineComment"));
+    assertThat(e.getMessage(), containsString("error 900: incorrect format of the page object"));
+    assertThat(e.getMessage(), containsString("ALLOW_COMMENTS"));
+  }
+
+  @Test
+  public void testBlockCommentDisallowed() {
+    UtamCompilationError e = expectThrows(
+        UtamCompilationError.class,
+        () -> new DeserializerUtilities().getResultFromFile("validate/comments/blockComment"));
+    assertThat(e.getMessage(), containsString("error 900: incorrect format of the page object"));
+    assertThat(e.getMessage(), containsString("ALLOW_COMMENTS"));
   }
 }
