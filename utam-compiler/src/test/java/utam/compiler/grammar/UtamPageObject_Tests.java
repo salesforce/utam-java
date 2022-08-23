@@ -186,7 +186,7 @@ public class UtamPageObject_Tests {
   public void testMetadataPropertyValueNotObjectThrows() {
     List<String> jsonValues = Arrays.asList("{ \"metadata\": \"value\" }",
         "{ \"metadata\": [\"value\", \"anotherValue\"] }", "{ \"metadata\": 0 }",
-        "{ \"metadata\": true }", "{ \"metadata\": null }");
+        "{ \"metadata\": true }");
     jsonValues.forEach((json) -> {
       UtamError e = expectThrows(UtamError.class,
           () -> new DeserializerUtilities().getResultFromString(json));
