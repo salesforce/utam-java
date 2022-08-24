@@ -10,9 +10,9 @@ package utam.compiler.grammar;
 import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.JsonDeserializer.nodeToString;
-import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.compiler.grammar.UtamComposeMethod.getComposeStatements;
 import static utam.compiler.grammar.UtamComposeMethod.processComposeNodes;
+import static utam.compiler.grammar.UtamElement.processElementsNode;
 import static utam.compiler.grammar.UtamMethod.processMethodsNode;
 import static utam.compiler.grammar.UtamProfile.processProfileNodes;
 import static utam.compiler.grammar.UtamRootDescription.processRootDescriptionNode;
@@ -31,7 +31,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import utam.compiler.UtamCompilationError;
-import utam.compiler.grammar.UtamElement.UtamElementProvider;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.TranslationContext;
@@ -59,6 +58,8 @@ import utam.core.framework.context.PlatformType;
 final class UtamPageObject {
 
   static final String BEFORE_LOAD_METHOD_NAME = "load";
+  private static final TypeProvider PUBLIC_DEFAULT_ROOT_ELEMENT_TYPE = new FromClass(
+      BasicElement.class);
   private static final String INTERFACE_PROPERTIES = String.join(", ", "root",
       "interface",
       "methods",
@@ -69,13 +70,14 @@ final class UtamPageObject {
   final Locator rootLocator;
   private final JsonNode beforeLoadNode;
   private final List<UtamMethodAction> beforeLoad;
-  private final RootElementHelper rootElementHelper;
+  private final String[] type;
+  private final boolean exposeRootElement;
   final boolean isRootPageObject;
   private final List<UtamMethod> methods;
   final PlatformType platform;
   final List<UtamProfile> profile;
-  private final List<UtamElementProvider> elements;
-  private final List<UtamElementProvider> shadowElements;
+  private final List<UtamElement> elements;
+  private final UtamShadowElement shadow;
   final UtamRootDescription description;
 
   @JsonCreator
@@ -110,76 +112,26 @@ final class UtamPageObject {
       throw new UtamCompilationError(VALIDATION.getErrorMessage(903, platformString), e);
     }
     this.isRootPageObject = isRootPageObject;
-    if(isAbstract && !isEmptyNode(shadowNode)) {
-      throw new UtamCompilationError(VALIDATION.getErrorMessage(904, "shadow", INTERFACE_PROPERTIES));
-    }
-    this.shadowElements = processShadowNode(shadowNode, "root shadow");
-    if(isAbstract && !isEmptyNode(elementsNode)) {
-      throw new UtamCompilationError(VALIDATION.getErrorMessage(904, "elements", INTERFACE_PROPERTIES));
-    }
+    this.shadow = processShadowNode(shadowNode, "root shadow");
     this.elements = processElementsNode(elementsNode, "root elements");
-    this.rootElementHelper = new RootElementHelper(typeNode, isExposeRootElement);
+    this.exposeRootElement = isExposeRootElement;
+    this.type = processBasicTypeNode(typeNode, VALIDATION.getErrorMessage(101, ROOT_ELEMENT_NAME, nodeToString(typeNode)));
     this.beforeLoadNode = beforeLoadNode;
-    this.beforeLoad = processBeforeLoadNodes(isAbstract, beforeLoadNode);
+    this.beforeLoad = isEmptyNode(beforeLoadNode)? new ArrayList<>() : processComposeNodes(BEFORE_LOAD_METHOD_NAME, beforeLoadNode);
     this.rootLocator = selector == null ? null : selector.getLocator();
     this.description = processRootDescriptionNode(descriptionNode);
-    if (metadata != null && !metadata.isNull()) {
-      VALIDATION.validateNotNullObject(metadata, "page object root", "property \"metadata\"");
-    }
-  }
-
-  /**
-   * process beforeLoad method nodes
-   *
-   * @param isAbstract boolean to indicate if page object is an interface
-   * @param beforeLoadNodes json nodes
-   * @return list of statements
-   */
-  private static List<UtamMethodAction> processBeforeLoadNodes(boolean isAbstract,
-      JsonNode beforeLoadNodes) {
-    if (isAbstract && !isEmptyNode(beforeLoadNodes)) {
-      throw new UtamCompilationError(beforeLoadNodes, VALIDATION.getErrorMessage(904, "beforeLoad", INTERFACE_PROPERTIES));
-    }
-    if(isEmptyNode(beforeLoadNodes)) {
-      return new ArrayList<>();
-    }
-    return processComposeNodes(BEFORE_LOAD_METHOD_NAME, beforeLoadNodes);
-  }
-
-  /**
-   * parse platform node, separated into stand alone method because of error codes
-   *
-   * @param elementsNode  node with elements
-   * @param parserContext context of the parser
-   * @return list of parsed elements
-   */
-  static List<UtamElementProvider> processElementsNode(JsonNode elementsNode,
-      String parserContext) {
-    List<UtamElementProvider> elements = VALIDATION.validateOptionalNotEmptyArray(elementsNode, parserContext, "elements");
-    if(isEmptyNode(elementsNode)) {
-      return elements;
-    }
-    for (JsonNode elementNode : elementsNode) {
-      VALIDATION.validateNotNullObject(elementNode, parserContext, "element");
-      UtamElement element = readNode(elementNode, UtamElement.class, VALIDATION.getErrorMessage(200, parserContext));
-      elements.add(new UtamElementProvider(element, elementNode));
-    }
-    return elements;
+    VALIDATION.validateIsObject(metadata, "page object root", "property \"metadata\"");
   }
 
   private void validateAbstract() {
-    if (rootLocator != null) {
-      throw new UtamCompilationError(VALIDATION.getErrorMessage(904, "selector", INTERFACE_PROPERTIES));
-    }
-    if (platform != null) {
-      throw new UtamCompilationError(VALIDATION.getErrorMessage(904, "platform", INTERFACE_PROPERTIES));
-    }
-    if(profile.size() > 0) {
-      throw new UtamCompilationError(VALIDATION.getErrorMessage(904, "profile", INTERFACE_PROPERTIES));
-    }
-    if(implementsType != null) {
-      throw new UtamCompilationError(VALIDATION.getErrorMessage(904, "implements", INTERFACE_PROPERTIES));
-    }
+    String validationContext = "interface";
+    VALIDATION.validateUnsupportedProperty(rootLocator, validationContext, "selector", INTERFACE_PROPERTIES);
+    VALIDATION.validateUnsupportedProperty(platform, validationContext, "platform", INTERFACE_PROPERTIES);
+    VALIDATION.validateUnsupportedProperty(profile, validationContext, "profile", INTERFACE_PROPERTIES);
+    VALIDATION.validateUnsupportedProperty(implementsType, validationContext, "implements", INTERFACE_PROPERTIES);
+    VALIDATION.validateUnsupportedProperty(beforeLoad, validationContext, "beforeLoad", INTERFACE_PROPERTIES);
+    VALIDATION.validateUnsupportedProperty(shadow, validationContext, "shadow", INTERFACE_PROPERTIES);
+    VALIDATION.validateUnsupportedProperty(elements, validationContext, "elements", INTERFACE_PROPERTIES);
   }
 
   private void validateRegular(TranslationContext context) {
@@ -190,6 +142,7 @@ final class UtamPageObject {
       throw new UtamCompilationError(VALIDATION.getErrorMessage(901));
     }
     if (implementsType != null) {
+      VALIDATION.validateNotEmptyString(this.implementsType, "page object root", "implements");
       context.setImplementedType(implementsType);
     }
   }
@@ -201,14 +154,15 @@ final class UtamPageObject {
       validateRegular(context);
     }
     // register element to prevent names collisions
-    ElementContext rootElement = rootElementHelper.setRootElementMethod(context, rootLocator);
+    ElementContext rootElement = setRootElementMethod(context, rootLocator);
 
-    for (UtamElementProvider element : elements) {
-      element.traverse(context, rootElement);
+    for (UtamElement element : elements) {
+      element.traverse(context, rootElement, false);
     }
-
-    for (UtamElementProvider element : shadowElements) {
-      element.traverseShadow(context, rootElement);
+    if(shadow != null) {
+      for (UtamElement element : shadow.elements) {
+        element.traverse(context, rootElement, true);
+      }
     }
     // should be before processing methods to ensure unique name
     if (!beforeLoad.isEmpty()) {
@@ -217,70 +171,46 @@ final class UtamPageObject {
     methods.forEach(method -> context.setMethod(method.getMethod(context)));
   }
 
+  /**
+   * depending on root element settings, add root getter and union type
+   *
+   * @param context     translation context
+   * @param rootLocator locator of the root element
+   * @return root element context
+   */
+  private ElementContext setRootElementMethod(TranslationContext context, Locator rootLocator) {
+    TypeProvider interfaceType = context.getSelfType();
+    final TypeProvider elementType;
+    final PageObjectMethod rootElementMethod;
+    // if type is not set and element should be public - add public getter that returns basic type
+    // if type is set - add new type and public or private getter
+    // if type is not set and root element is not exposed - use protected method BasePageObject.getRootElement
+    if (type.length > 0) {
+      elementType = asBasicOrUnionType(ROOT_ELEMENT_NAME, type, false);
+      UnionType unionType = (UnionType) elementType;
+      rootElementMethod = exposeRootElement ? new PublicCustomType(unionType) : new PrivateCustomType(unionType);
+      context.setMethod(rootElementMethod);
+    } else {
+      elementType = exposeRootElement ? PUBLIC_DEFAULT_ROOT_ELEMENT_TYPE : BASIC_ELEMENT_IMPL_CLASS;
+      rootElementMethod =
+          exposeRootElement ? new PublicDefaultType(elementType) : new ProtectedDefaultType(elementType);
+      if (exposeRootElement) { // for default not exposed root - no need to add method
+        context.setMethod(rootElementMethod);
+      }
+    }
+    ElementContext rootElement = new ElementContext.Root(interfaceType, rootLocator, elementType, rootElementMethod);
+    context.setElement(rootElement);
+    return rootElement;
+  }
+
   private PageObjectMethod setBeforeLoadMethod(TranslationContext context) {
     MethodContext methodContext = new MethodContext(BEFORE_LOAD_METHOD_NAME, RETURN_VOID, context, false, false);
     List<ComposeMethodStatement> statements = getComposeStatements(context, methodContext,
         beforeLoad);
     List<MethodParameter> methodParameters = methodContext.getParametersContext().getParameters();
     if (!methodParameters.isEmpty()) {
-      throw new UtamCompilationError(beforeLoadNode, VALIDATION.getErrorMessage(905));
+      throw new UtamCompilationError(beforeLoadNode, VALIDATION.getErrorMessage(904));
     }
     return new BeforeLoadMethod(methodContext, statements);
-  }
-
-  /**
-   * helper class for root element declaration
-   *
-   * @author elizaveta.ivanova
-   * @since 236
-   */
-  static final class RootElementHelper {
-
-    private static final TypeProvider PUBLIC_DEFAULT_ROOT_ELEMENT_TYPE = new FromClass(
-        BasicElement.class);
-
-    private final String[] rootElementType;
-    private final boolean isPublic;
-    private final JsonNode typeNode;
-
-    RootElementHelper(JsonNode typeNode, boolean isExposeRootElement) {
-      String error = VALIDATION.getErrorMessage(101, ROOT_ELEMENT_NAME, nodeToString(typeNode));
-      this.rootElementType = processBasicTypeNode(typeNode, error);
-      this.isPublic = isExposeRootElement;
-      this.typeNode = typeNode;
-    }
-
-    /**
-     * depending on root element settings, add root getter and union type
-     *
-     * @param context     translation context
-     * @param rootLocator locator of the root element
-     * @return root element context
-     */
-    ElementContext setRootElementMethod(TranslationContext context, Locator rootLocator) {
-      TypeProvider interfaceType = context.getSelfType();
-      final TypeProvider elementType;
-      final PageObjectMethod rootElementMethod;
-      // if type is not set and element should be public - add public getter that returns basic type
-      // if type is set - add new type and public or private getter
-      // if type is not set and root element is not exposed - use protected method BasePageObject.getRootElement
-      if (rootElementType.length > 0) {
-        elementType = asBasicOrUnionType(ROOT_ELEMENT_NAME, rootElementType, false);
-        UnionType unionType = (UnionType) elementType;
-        rootElementMethod =
-            isPublic ? new PublicCustomType(unionType) : new PrivateCustomType(unionType);
-        context.setMethod(rootElementMethod);
-      } else {
-        elementType = isPublic ? PUBLIC_DEFAULT_ROOT_ELEMENT_TYPE : BASIC_ELEMENT_IMPL_CLASS;
-        rootElementMethod =
-            isPublic ? new PublicDefaultType(elementType) : new ProtectedDefaultType(elementType);
-        if (isPublic) { // for default not exposed root - no need to add method
-          context.setMethod(rootElementMethod);
-        }
-      }
-      ElementContext rootElement = new ElementContext.Root(interfaceType, rootLocator, elementType, rootElementMethod);
-      context.setElement(typeNode, rootElement);
-      return rootElement;
-    }
   }
 }

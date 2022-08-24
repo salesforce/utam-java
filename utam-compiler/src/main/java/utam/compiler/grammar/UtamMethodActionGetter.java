@@ -56,6 +56,8 @@ class UtamMethodActionGetter extends UtamMethodAction {
   @Override
   Statement getStatement(TranslationContext context, MethodContext methodContext,
       StatementContext statementContext) {
+    String parserContext = String.format("method \"%s\"", methodContext.getName());
+    VALIDATION.validateNotEmptyString(elementName, parserContext, "element");
     if (isChain) {
       chainValidations(statementContext, methodContext.getName());
       return new ForeignElementStatement(context, methodContext, statementContext);

@@ -101,7 +101,7 @@ public class MethodContextTests {
     UtamError e = expectThrows(UtamError.class,
         () -> context.setParameter(new Regular("arg", PARAMETER_REFERENCE)));
     assertThat(e.getMessage(), containsString(
-        "error 504: method \"test\": parameter \"arg\" at method level can't have type \"argumentReference\""));
+        "error 501: method \"test\": parameter \"arg\" at method level can't have type \"argumentReference\""));
   }
 
   @Test

@@ -57,7 +57,7 @@ public class UtamProfile_Tests {
     jsonTest.addString("implements", "my/pageobjects/type");
     Exception e = jsonTest.expectCompilerError();
     assertThat(e.getMessage(),
-        containsString("error 11: profile \"name\": array value should be a non empty string, instead found number"));
+        containsString("error 11: profile \"name\": array member should be a non empty string, instead found number"));
   }
 
   @Test
@@ -116,5 +116,21 @@ public class UtamProfile_Tests {
         .getImplementation().getProfiles());
     assertThat(e.getMessage(), containsString("error 803: "
         + "profile { \"name\": \"error\" } is not configured, make sure it's in compiler config"));
+  }
+
+  @Test
+  public void testMoreThanOneProfileThrows() {
+    String json = "{ \"profile\" : [ { \"name1\" : \"value1\", \"name2\" : \"value2\" } ] , \"implements\": \"my/pageobjects/type\"}";
+    Exception e = expectCompilerError(json);
+    assertThat(e.getMessage(), containsString(
+        "error 800: profile format is incorrect"));
+  }
+
+  @Test
+  public void testEmptyProfileThrows() {
+    String json = "{ \"profile\" : [ { } ] , \"implements\": \"my/pageobjects/type\"}";
+    Exception e = expectCompilerError(json);
+    assertThat(e.getMessage(), containsString(
+        "error 800: profile format is incorrect"));
   }
 }

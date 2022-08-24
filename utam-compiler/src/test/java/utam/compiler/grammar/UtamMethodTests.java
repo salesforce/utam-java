@@ -58,4 +58,9 @@ public class UtamMethodTests {
     assertThat(e.getMessage(),
         containsString("error 401: abstract method \"test\": return basic type \"[ \"wrong\" ]\" is incorrect"));
   }
+
+  @Test
+  public void testComposeArgReferenceParameter() {
+    test("argReferenceParam", "error 501: method \"test\": parameter \"arg1\" at method level can't have type \"argumentReference\"");
+  }
 }

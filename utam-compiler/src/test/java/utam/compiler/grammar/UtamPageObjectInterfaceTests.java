@@ -32,7 +32,7 @@ public class UtamPageObjectInterfaceTests {
 
   private static String getErrUnsupportedProperties(String property) {
     return String.format(
-        "error 904: property \"%s\" is not supported, interface declaration can only have properties",
+        "error 8: interface: property \"%s\" is not supported, supported are: root, interface, methods, type, exposeRootElement",
         property);
   }
 
@@ -46,7 +46,7 @@ public class UtamPageObjectInterfaceTests {
 
   @Test
   public void testAbstractWithNonNullElementsThrows() {
-    String partialJson = "\"elements\" : [], ";
+    String partialJson = "\"elements\" : [{ \"name\" : \"name\", \"selector\" : {\"css\": \"css\"}}], ";
     Exception e = expectThrows(UtamCompilationError.class, () -> expectError(partialJson));
     assertThat(e.getMessage(), containsString(getErrUnsupportedProperties("elements")));
   }
@@ -79,14 +79,14 @@ public class UtamPageObjectInterfaceTests {
 
   @Test
   public void testAbstractWithShadowThrows() {
-    String partialJson = "\"shadow\" : { }, ";
+    String partialJson = "\"shadow\" : { \"elements\" : [{ \"name\" : \"name\", \"selector\" : {\"css\": \"css\"}}] }, ";
     Exception e = expectThrows(UtamCompilationError.class, () -> expectError(partialJson));
     assertThat(e.getMessage(), containsString(getErrUnsupportedProperties("shadow")));
   }
 
   @Test
   public void testAbstractWithBeforeLoadThrows() {
-    String partialJson = "\"beforeLoad\" : [], ";
+    String partialJson = "\"beforeLoad\" : [{ \"element\": \"root\" }], ";
     Exception e = expectThrows(UtamCompilationError.class, () -> expectError(partialJson));
     assertThat(e.getMessage(), containsString(getErrUnsupportedProperties("beforeLoad")));
   }

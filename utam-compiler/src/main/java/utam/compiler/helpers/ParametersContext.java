@@ -228,7 +228,7 @@ public abstract class ParametersContext {
       String parameterName = parameter.getValue();
       if (isArgReference(parameter)) {
         // can't set at method level type of reference
-        String message = VALIDATION.getErrorMessage(504, contextString, parameterName);
+        String message = VALIDATION.getErrorMessage(501, contextString, parameterName);
         throw new UtamCompilationError(message);
       }
       if (parameter.isLiteral()) {

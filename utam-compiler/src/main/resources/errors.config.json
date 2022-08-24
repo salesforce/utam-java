@@ -1,10 +1,18 @@
 [
   {
+    "message": "%s: property \"%s\" is not supported, supported are: %s",
+    "code": 8
+  },
+  {
+    "message": "%s: property \"%s\" is required",
+    "code": 9
+  },
+  {
     "message": "%s: property \"%s\" should be a non empty string, instead found %s",
     "code": 10
   },
   {
-    "message": "%s: array value should be a non empty string, instead found %s",
+    "message": "%s: array member should be a non empty string, instead found %s",
     "code": 11
   },
   {
@@ -81,18 +89,10 @@
   },
   {
     "code": 203,
-    "message": "element \"%s\" matcher: expected type for matcher is \"%s\", found \"%s\""
+    "message": "element \"%s\": list element can't have nested elements"
   },
   {
     "code": 204,
-    "message": "element \"%s\": property \"%s\" is mandatory"
-  },
-  {
-    "code": 205,
-    "message": "element \"%s\": %s element can't have nested elements"
-  },
-  {
-    "code": 206,
     "message": "element \"%s\": frame selector cannot have \"returnAll\" set to true"
   },
   {
@@ -107,11 +107,6 @@
   {
     "code": 302,
     "message": "element \"%s\" filter: filter can only be set for list"
-  },
-  {
-    "code": 303,
-    "message": "method \"%s\": incorrect format of statement filter",
-    "docs": "https://utam.dev/grammar/spec#element-filter"
   },
   {
     "code": 400,
@@ -136,16 +131,16 @@
     "docs": "https://utam.dev/grammar/spec#compose-method"
   },
   {
+    "code": 501,
+    "message": "%s: parameter \"%s\" at method level can't have type \"argumentReference\""
+  },
+  {
     "code": 502,
     "message": "%s: statement parameter \"%s\" is not found in declared method args"
   },
   {
     "code": 503,
     "message": "%s: declared parameter \"%s\" is never used"
-  },
-  {
-    "code": 504,
-    "message": "%s: parameter \"%s\" at method level can't have type \"argumentReference\""
   },
   {
     "code": 600,
@@ -182,6 +177,10 @@
     "message": "method \"beforeLoad\" statement: only \"document\" or \"root\" elements are allowed"
   },
   {
+    "code" : 608,
+    "message": "method \"%s\" statement: \"returnSelf\" can only be invoked from a last statement"
+  },
+  {
     "code": 609,
     "message": "method \"%s\" statement: either \"element\" or \"apply\" or \"applyExternal\" should be defined"
   },
@@ -202,8 +201,8 @@
     "message": "method \"%s\" statement: incorrect return type; expected \"%s\", provided is \"%s\""
   },
   {
-    "code": 614,
-    "message": "method \"%s\" statement: expected type for matcher is \"%s\", found \"%s\""
+    "code" : 614,
+    "message": "method \"%s\" statement: to use chain previous statement should return custom type, but it returns \"%s\""
   },
   {
     "code": 615,
@@ -214,17 +213,14 @@
     "message": "method \"%s\" statement: first statement can't be marked as chain"
   },
   {
-    "code" : 617,
-    "message": "method \"%s\" statement: to use chain previous statement should return custom type, but it returns \"%s\""
-  },
-  {
-    "code" : 618,
-    "message": "method \"%s\" statement: \"returnSelf\" can only be invoked from a last statement"
-  },
-  {
     "code": 700,
     "message": "%s: format of the description is incorrect",
     "docs": "https://utam.dev/grammar/spec#method-description"
+  },
+  {
+    "code": 800,
+    "message": "profile format is incorrect",
+    "docs": "https://utam.dev/grammar/interfaces"
   },
   {
     "code": 801,
@@ -271,16 +267,12 @@
   },
   {
     "code": 904,
-    "message": "property \"%s\" is not supported, interface declaration can only have properties: [ %s ]"
-  },
-  {
-    "code": 905,
     "message": "method \"beforeLoad\" cannot have parameters"
   },
   {
     "message": "format of the root description is incorrect",
     "docs": "https://utam.dev/grammar/spec#page-object-description",
-    "code": 906
+    "code": 905
   },
   {
     "message": "%s: format of selector is incorrect",
@@ -298,5 +290,17 @@
   {
     "message": "%s: incorrect format of elements inside shadow",
     "code": 1100
+  },
+  {
+    "code": 1200,
+    "message": "%s: incorrect format of matcher"
+  },
+  {
+    "code": 1201,
+    "message": "%s: unsupported matcher type \"%s\", supported are %s"
+  },
+  {
+    "code": 1202,
+    "message": "%s: expected type for matcher is \"%s\", found \"%s\""
   }
 ]

@@ -79,14 +79,13 @@ public class UtamCompilationError extends UtamError {
     Throwable cause;
     // there could be error from child objects
     UtamCompilationError compilationError = unwrapCompilerError(error);
-    if (compilationError != null && compilationError.hasJsonSource) {
-      message = compilationError.getMessage();
+    if (compilationError != null) {
+      message = compilationError.hasJsonSource? compilationError.getMessage() : getErrorMessageWithJsonCode(node, compilationError.getMessage());
       cause = compilationError.getCause();
     } else {
-      Throwable original = compilationError == null ? error : compilationError;
       // merge original message with processor message
-      message = String.format("%s \n%s", original.getMessage(), errorMessage);
-      cause = original.getCause();
+      message = String.format("%s \n%s", errorMessage, error.getMessage());
+      cause = error.getCause();
       // add JSON source
       message = getErrorMessageWithJsonCode(node, message);
     }

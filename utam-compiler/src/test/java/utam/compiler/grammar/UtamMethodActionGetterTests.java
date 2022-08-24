@@ -54,7 +54,7 @@ public class UtamMethodActionGetterTests {
 
   @Test
   public void incorrectMatcherThrows() {
-    testThrows("incorrectMatcherType", "error 614: method \"test\" statement: "
+    testThrows("incorrectMatcherType", "error 1202: method \"test\" statement matcher: "
         + "expected type for matcher is \"Boolean\", found \"BasicElement\"");
   }
 
@@ -78,7 +78,7 @@ public class UtamMethodActionGetterTests {
 
   @Test
   public void testChainCantBeApplied() {
-    String expectedError = "error 617: method \"test\" statement: to use chain previous statement should return custom type, but it returns \"BasicElement\"";
+    String expectedError = "error 614: method \"test\" statement: to use chain previous statement should return custom type, but it returns \"BasicElement\"";
     testThrows("chainNotAllowed", expectedError);
   }
 

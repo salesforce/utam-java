@@ -64,7 +64,7 @@ class UtamRootDescription {
       VALIDATION.validateNotNullOrEmptyString(node, parserContext, "text");
       object = new UtamRootDescription(Collections.singletonList(value), null, null);
     } else {
-      object = readNode(node, UtamRootDescription.class, VALIDATION.getErrorMessage(906));
+      object = readNode(node, UtamRootDescription.class, VALIDATION.getErrorMessage(905));
       VALIDATION.validateNotEmptyArray(node.get("text"), parserContext, "text");
       for(JsonNode textNode : node.get("text")) {
         VALIDATION.validateNotNullOrEmptyString(textNode, parserContext, "text");

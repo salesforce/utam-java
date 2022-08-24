@@ -95,7 +95,7 @@ public abstract class UtamMethodAction {
       if (!isCustomType(previousStatementReturn)) {
         String returnType =
             previousStatementReturn == null ? "void" : previousStatementReturn.getSimpleName();
-        String message = VALIDATION.getErrorMessage(617, methodName, returnType);
+        String message = VALIDATION.getErrorMessage(614, methodName, returnType);
         throw new UtamCompilationError(message);
       }
     }
@@ -286,6 +286,7 @@ public abstract class UtamMethodAction {
     ArgumentsProvider(JsonNode argsNode, String argsParserContext) {
       this.argsNode = argsNode;
       this.argsParserContext = argsParserContext;
+      VALIDATION.validateOptionalNotEmptyArray(argsNode, argsParserContext, "args");
     }
 
     /**

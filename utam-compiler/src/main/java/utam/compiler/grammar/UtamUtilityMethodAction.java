@@ -7,6 +7,8 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -61,6 +63,8 @@ class UtamUtilityMethodAction {
    */
   List<MethodParameter> getParameters(TranslationContext context, MethodContext methodContext) {
     String parserContext = String.format("method \"%s\"", methodContext.getName());
+    VALIDATION.validateNotEmptyString(methodName, parserContext, "name");
+    VALIDATION.validateNotEmptyString(externalClassPath, parserContext, "type");
     ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
     ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
     List<UtamArgument> arguments = argumentsProvider.getArguments(true);

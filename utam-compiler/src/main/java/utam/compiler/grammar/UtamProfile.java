@@ -13,6 +13,7 @@ import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import utam.compiler.UtamCompilationError;
@@ -50,9 +51,16 @@ final class UtamProfile {
     }
     Set<String> profilesNames = new HashSet<>();
     for (JsonNode node : profilesNode) {
-      String profileName = node.fieldNames().next();
+      Iterator<String> iterator = node.fieldNames();
+      if(!iterator.hasNext()) {
+        throw new UtamCompilationError(profilesNode, VALIDATION.getErrorMessage(800));
+      }
+      String profileName = iterator.next();
       if (profilesNames.contains(profileName)) {
         throw new UtamCompilationError(profilesNode, VALIDATION.getErrorMessage(801, profileName));
+      }
+      if(iterator.hasNext()) { // more fields?
+        throw new UtamCompilationError(profilesNode, VALIDATION.getErrorMessage(800));
       }
       profilesNames.add(profileName);
       profiles.add(processProfileNode(node, profileName));
@@ -71,6 +79,7 @@ final class UtamProfile {
     Set<String> values = new HashSet<>();
     JsonNode valuesNode = node.get(profileName);
     if (valuesNode.isArray()) {
+      VALIDATION.validateNotEmptyArray(valuesNode, String.format("profile \"%s\"", profileName), "values");
       VALIDATION.validateArrayOfStrings(valuesNode, String.format("profile \"%s\"", profileName));
       for (JsonNode valueNode : valuesNode) {
         String profileValue = valueNode.textValue();

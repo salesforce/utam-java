@@ -68,6 +68,20 @@ public class ValidationUtilities {
   }
 
   /**
+   * Validate that string is not null or empty
+   *
+   * @param value        string value
+   * @param prefix       validation context
+   * @param propertyName name of the JSON property
+   */
+  public void validateNotNullOrEmptyString(String value, String prefix, String propertyName) {
+    if (value == null) {
+      throw new UtamCompilationError(getEmptyStringError(prefix, propertyName, "null"));
+    }
+    validateNotEmptyString(value, prefix, propertyName);
+  }
+
+  /**
    * Validate that string is not empty. It can be null
    *
    * @param node         JSON node for error
@@ -87,6 +101,22 @@ public class ValidationUtilities {
           getEmptyStringError(prefix, propertyName, "empty"));
     }
     return node.textValue();
+  }
+
+  /**
+   * Validate that string is not empty. It can be null
+   *
+   * @param value        string value
+   * @param prefix       validation context
+   * @param propertyName name of the JSON property
+   */
+  public void validateNotEmptyString(String value, String prefix, String propertyName) {
+    if (value == null) {
+      return;
+    }
+    if (value.isEmpty()) {
+      throw new UtamCompilationError(getEmptyStringError(prefix, propertyName, "empty"));
+    }
   }
 
   private String getEmptyArrayError(String prefix, String propertyName) {
@@ -143,10 +173,26 @@ public class ValidationUtilities {
   }
 
   /**
+   * Validate that node is an object. can be null.
+   *
+   * @param node         JSON node
+   * @param prefix       validation context
+   * @param propertyName name of the JSON property
+   */
+  public void validateIsObject(JsonNode node, String prefix, String propertyName) {
+    if (node == null || node.isNull()) {
+      return;
+    }
+    if (!node.isObject()) {
+      throw new UtamCompilationError(node, getErrorMessage(13, prefix, propertyName));
+    }
+  }
+
+  /**
    * Validate that array contains not empty strings
    *
-   * @param arrayNode    JSON node
-   * @param prefix       validation context
+   * @param arrayNode JSON node
+   * @param prefix    validation context
    */
   public void validateArrayOfStrings(JsonNode arrayNode, String prefix) {
     for (JsonNode valueNode : arrayNode) {
@@ -154,6 +200,49 @@ public class ValidationUtilities {
         throw new UtamCompilationError(valueNode,
             VALIDATION.getErrorMessage(11, prefix, getJsonNodeType(valueNode)));
       }
+    }
+  }
+
+  /**
+   * Validate that property is not null
+   *
+   * @param object       property value
+   * @param prefix       validation context
+   * @param propertyName name of the JSON property
+   */
+  public void validateRequiredProperty(Object object, String prefix, String propertyName) {
+    if (object == null) {
+      throw new UtamCompilationError(getErrorMessage(9, prefix, propertyName));
+    }
+  }
+
+  /**
+   * Validate that property is null
+   *
+   * @param object       property value
+   * @param prefix       validation context
+   * @param propertyName name of the JSON property
+   * @param supported    supported values
+   */
+  public void validateUnsupportedProperty(Object object, String prefix, String propertyName,
+      String supported) {
+    if (object != null) {
+      throw new UtamCompilationError(getErrorMessage(8, prefix, propertyName, supported));
+    }
+  }
+
+  /**
+   * Validate that property is null
+   *
+   * @param list         property value
+   * @param prefix       validation context
+   * @param propertyName name of the JSON property
+   * @param supported    supported values
+   */
+  public <T> void validateUnsupportedProperty(List<T> list, String prefix, String propertyName,
+      String supported) {
+    if (list != null && list.size() > 0) {
+      throw new UtamCompilationError(getErrorMessage(8, prefix, propertyName, supported));
     }
   }
 }

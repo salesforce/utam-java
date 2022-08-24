@@ -30,7 +30,7 @@ public class UtamElement_CustomTests {
     test.addRawString("elements",
         "[ {\"name\": \"test\", \"type\" : \"my/page/type\" }]");
     UtamError e = expectThrows(UtamCompilationError.class, test::getDeserializedJson);
-    assertThat(e.getMessage(), containsString("error 204: element \"test\": property \"selector\" is mandatory"));
+    assertThat(e.getMessage(), containsString("error 9: element \"test\": property \"selector\" is required"));
   }
 
   @Test
