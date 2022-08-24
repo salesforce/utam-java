@@ -29,7 +29,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.node.JsonNodeType;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MethodContext;
