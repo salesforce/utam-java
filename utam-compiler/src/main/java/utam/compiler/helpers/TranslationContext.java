@@ -23,12 +23,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
-import utam.compiler.guardrails.GlobalValidation;
-import utam.compiler.guardrails.PageObjectValidation;
 import utam.compiler.helpers.ElementContext.Document;
 import utam.compiler.helpers.ElementContext.Self;
 import utam.compiler.helpers.TypeUtilities.PageObjectWithNamesCollisionType;
+import utam.compiler.lint.PageObjectLintingImpl;
 import utam.compiler.representation.BasicElementGetterMethod;
+import utam.core.declarative.lint.PageObjectLinting;
 import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
@@ -67,6 +67,7 @@ public final class TranslationContext {
    * track possible names collisions for custom elements types
    */
   private final Map<String,TypeProvider> customTypesMap = new HashMap<>();
+  private final PageObjectLinting contextForLinting;
 
   /**
    * Initializes a new instance of the TranslationContext class
@@ -84,24 +85,7 @@ public final class TranslationContext {
     // has impl prefixes
     this.pageObjectClassType = translationTypesConfig.getClassType(pageObjectURI);
     this.pageObjectInterfaceType = translationTypesConfig.getInterfaceType(pageObjectURI);
-  }
-
-  /**
-   * Performs guardrails validation
-   */
-  public void guardrailsValidation() {
-    PageObjectValidation pageObjectValidation = new PageObjectValidation(
-        translatorConfiguration.getValidationMode(), pageObjectURI, elementContextMap.values());
-    pageObjectValidation.validate();
-  }
-
-  /**
-   * Sets the global guardrails validation context
-   *
-   * @param validation the global validation context
-   */
-  public void setGlobalGuardrailsContext(GlobalValidation validation) {
-    validation.setPageObjectElements(pageObjectURI, elementContextMap.values());
+    this.contextForLinting = new PageObjectLintingImpl(pageObjectURI, this.pageObjectInterfaceType);
   }
 
   /**
@@ -414,11 +398,11 @@ public final class TranslationContext {
   }
 
   /**
-   * get name of the page object for error messages
+   * Get subset of the page object data that is needed for linting
    *
-   * @return string with a name
+   * @return object
    */
-  public String getPageObjectName() {
-    return pageObjectURI;
+  public PageObjectLinting getLintingObject() {
+    return contextForLinting;
   }
 }

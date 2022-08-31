@@ -41,10 +41,6 @@ abstract class UtamMethod {
     this.arguments = processArgsNode(argsNode, parserContext, false);
   }
 
-  final boolean hasMethodLevelArgs() {
-    return arguments.size() > 0;
-  }
-
   /**
    * process json node "methods"
    *
@@ -62,11 +58,26 @@ abstract class UtamMethod {
         isAbstract ? UtamInterfaceMethod.class : UtamComposeMethod.class;
     Integer errCode = isAbstract ? 400 : 500;
     for (JsonNode methodNode : methodsNode) {
-      String name = VALIDATION.validateNotNullOrEmptyString(methodNode.get("name"), "method", "name");
-      UtamMethod method = readNode(methodNode, methodType, VALIDATION.getErrorMessage(errCode, name));
+      String name = VALIDATION
+          .validateNotNullOrEmptyString(methodNode.get("name"), "method", "name");
+      UtamMethod method = readNode(methodNode, methodType,
+          VALIDATION.getErrorMessage(errCode, name));
       methods.add(method);
     }
     return methods;
+  }
+
+  final boolean hasMethodLevelArgs() {
+    return arguments.size() > 0;
+  }
+
+  /**
+   * Information for linting to check if description is set
+   *
+   * @return boolean
+   */
+  final boolean hasDescription() {
+    return !description.isEmpty();
   }
 
   /**

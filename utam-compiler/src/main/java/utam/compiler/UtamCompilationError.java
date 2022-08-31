@@ -120,8 +120,7 @@ public class UtamCompilationError extends UtamError {
       errorMessage = String.format("%s: %s", VALIDATION.getErrorMessage(900), message.substring(index));
       errorCause = error.getCause();
       hasJsonSource = true;
-    } else {
-      errorMessage = String.format("%s: %s", VALIDATION.getErrorMessage(900), error.getMessage());
+    } else { errorMessage = String.format("%s: %s", VALIDATION.getErrorMessage(900), error.getMessage());
       errorCause = error.getCause();
       hasJsonSource = false;
     }

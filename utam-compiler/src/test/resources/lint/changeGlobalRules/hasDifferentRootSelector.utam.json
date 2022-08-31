@@ -1,0 +1,17 @@
+{
+  "root": true,
+  "description": "i have description",
+  "selector": {
+    "css": "root1"
+  },
+  "shadow": {
+    "elements": [
+      {
+        "name": "sameAsRootBasic",
+        "selector": {
+          "css": "root"
+        }
+      }
+    ]
+  }
+}

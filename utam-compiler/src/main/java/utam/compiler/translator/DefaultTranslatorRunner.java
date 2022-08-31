@@ -22,8 +22,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import utam.compiler.grammar.JsonDeserializer;
-import utam.compiler.guardrails.GlobalValidation;
 import utam.compiler.helpers.TranslationContext;
+import utam.core.declarative.lint.LintingContext;
+import utam.core.declarative.lint.LintingConfig;
+import utam.core.declarative.lint.LintingError;
 import utam.core.declarative.representation.PageObjectClass;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.PageObjectInterface;
@@ -44,26 +46,18 @@ import utam.core.framework.context.Profile;
  */
 public class DefaultTranslatorRunner implements TranslatorRunner {
 
-  private static final String ERR_PROFILE_PATH_DOES_NOT_EXIST =
-      "can't write profiles output, profile path '%s' does not exist and cannot be created";
   static final String ERR_PROFILE_PATH_NOT_CONFIGURED = "profile config path is null or empty";
   static final String DUPLICATE_PAGE_OBJECT_NAME = "declaration '%s' already generated";
   static final String DUPLICATE_IMPL_WITH_PROFILE_ERR =
       "can't set dependency as '%s' for type '%s', it was already set as '%s' for profile %s";
   static final String ERR_MODULE_NAME_NOT_CONFIGURED = "module name is not configured, can't write dependencies config file";
+  private static final String ERR_PROFILE_PATH_DOES_NOT_EXIST =
+      "can't write profiles output, profile path '%s' does not exist and cannot be created";
   private final TranslatorConfig translatorConfig;
   private final Map<String, PageObjectDeclaration> generated = new HashMap<>();
   private final Map<Profile, Map<String, String>> profileDependenciesMapping = new HashMap<>();
   // max number of POs to generate for generator performance measurements
   private int maxPageObjectsCounter = Integer.MAX_VALUE;
-
-  private static String getStringFromReader(TranslatorSourceConfig translatorSourceConfig, String pageObjectURI) {
-    try {
-      return CharStreams.toString(translatorSourceConfig.getDeclarationReader(pageObjectURI));
-    } catch (IOException e) {
-      throw new UtamRunnerError(String.format("Error in the page object '%s'", pageObjectURI), e);
-    }
-  }
 
   /**
    * Initializes a new instance of the DefaultTranslatorRunner class
@@ -79,6 +73,15 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       }
     }
     profileDependenciesMapping.put(DEFAULT_PROFILE, new HashMap<>());
+  }
+
+  private static String getStringFromReader(TranslatorSourceConfig translatorSourceConfig,
+      String pageObjectURI) {
+    try {
+      return CharStreams.toString(translatorSourceConfig.getDeclarationReader(pageObjectURI));
+    } catch (IOException e) {
+      throw new UtamRunnerError(String.format("Error in the page object '%s'", pageObjectURI), e);
+    }
   }
 
   final PageObjectDeclaration getGeneratedObject(String name) {
@@ -113,7 +116,8 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
                 pageObjectInterface.getInterfaceType().getFullName()));
       }
       if (!object.isInterfaceOnly()) {
-        write(object.getImplementation().getClassType(), object.getImplementation().getGeneratedCode());
+        write(object.getImplementation().getClassType(),
+            object.getImplementation().getGeneratedCode());
         filesCounter++;
         if (writeUnitTest(object.getImplementation())) {
           filesCounter++;
@@ -121,8 +125,9 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       }
       counter++;
     }
-    info(String.format("generated %d files for %d page objects, took %d msec", filesCounter, counter,
-        System.currentTimeMillis() - timer));
+    info(
+        String.format("generated %d files for %d page objects, took %d msec", filesCounter, counter,
+            System.currentTimeMillis() - timer));
   }
 
   /**
@@ -173,28 +178,31 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
   }
 
   @Override
-  public void run() {
+  public RunnerOutput run() {
     int counter = 0;
     long timer = System.currentTimeMillis();
     TranslatorSourceConfig sourceConfig = translatorConfig.getConfiguredSource();
-    GlobalValidation globalGuardrails = new GlobalValidation(translatorConfig.getValidationMode());
+    LintingConfig linting = translatorConfig.getLintingConfig();
     sourceConfig.recursiveScan();
+    LintingContext lintingContext = linting.start();
     for (String pageObjectURI : sourceConfig.getPageObjects()) {
       if (counter >= maxPageObjectsCounter) {
         break;
       }
       info(String.format("de-serialize Page Object %s", pageObjectURI));
-      TranslationContext translationContext = new TranslationContext(pageObjectURI, translatorConfig);
+      TranslationContext translationContext = new TranslationContext(pageObjectURI,
+          translatorConfig);
       String jsonSource = getStringFromReader(sourceConfig, pageObjectURI);
       JsonDeserializer deserializer = new JsonDeserializer(translationContext, jsonSource);
       PageObjectDeclaration object = deserializer.getObject();
       setPageObject(pageObjectURI, object);
-      deserializer.getPageObjectContext().setGlobalGuardrailsContext(globalGuardrails);
+      linting.lint(lintingContext, translationContext.getLintingObject());
       counter++;
     }
-    globalGuardrails.validate();
+    List<LintingError> lintingErrors = linting.finish(lintingContext);
     info(String.format("generated %d page objects, took %d msec", counter,
         System.currentTimeMillis() - timer));
+    return () -> lintingErrors;
   }
 
   /**
@@ -204,7 +212,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
    * @return full path
    */
   final String buildDependenciesConfigPath(String moduleName) {
-    if(moduleName == null || moduleName.isEmpty()) {
+    if (moduleName == null || moduleName.isEmpty()) {
       throw new UtamRunnerError(ERR_MODULE_NAME_NOT_CONFIGURED);
     }
     String profilesRoot = getTargetConfig().getInjectionConfigRootFilePath();
@@ -220,7 +228,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
 
   @Override
   public void writeDependenciesConfigs() {
-    if(profileDependenciesMapping.isEmpty()) {
+    if (profileDependenciesMapping.isEmpty()) {
       return;
     }
     String moduleName = translatorConfig.getModuleName();
@@ -260,7 +268,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     String classTypeName = object.getImplementation().getClassType().getFullName();
     if (!object.isClassWithInterface()) {
       List<Profile> profiles = object.getImplementation().getProfiles();
-      if(profiles.isEmpty()) {
+      if (profiles.isEmpty()) {
         setImplementation(DEFAULT_PROFILE, typeName, classTypeName);
       } else {
         for (Profile profile : profiles) {
@@ -272,7 +280,8 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
 
   final void setImplementation(Profile profile, String typeName, String classTypeName) {
     if (!profileDependenciesMapping.containsKey(profile)) {
-      throw new UtamRunnerError(VALIDATION.getErrorMessage(803, profile.getName(), profile.getValue()));
+      throw new UtamRunnerError(
+          VALIDATION.getErrorMessage(803, profile.getName(), profile.getValue()));
     }
     if (profileDependenciesMapping.get(profile).containsKey(typeName)) {
       String profileValue = String.format("{ %s : %s }", profile.getName(), profile.getValue());

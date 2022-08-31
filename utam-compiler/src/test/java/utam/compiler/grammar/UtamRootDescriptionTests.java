@@ -13,7 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.UtamRootDescription.VERSION_TAG;
+import static utam.compiler.representation.JavadocObject.VERSION_TAG;
 
 import java.util.List;
 import org.testng.annotations.Test;

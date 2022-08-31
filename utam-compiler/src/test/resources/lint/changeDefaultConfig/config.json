@@ -1,0 +1,18 @@
+{
+  "pageObjectsRootDir": "",
+  "pageObjectsOutputDir": "",
+  "resourcesOutputDir": "",
+  "lint": {
+    "requiredRootDescription": {
+      "violation": "warning"
+    },
+    "duplicateSelectors": {
+      "violation": "disabled"
+    },
+    "requiredMethodDescription": {
+      "exclude": [
+        "utam/pageObjects/test"
+      ]
+    }
+  }
+}

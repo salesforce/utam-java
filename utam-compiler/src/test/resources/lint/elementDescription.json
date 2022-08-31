@@ -1,0 +1,13 @@
+{
+  "description": "i have description",
+  "shadow": {
+    "elements": [
+      {
+        "name": "nodescription",
+        "selector": {
+          "css": "css"
+        }
+      }
+    ]
+  }
+}

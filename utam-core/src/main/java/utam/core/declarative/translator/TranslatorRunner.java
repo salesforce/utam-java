@@ -8,6 +8,8 @@
 package utam.core.declarative.translator;
 
 import java.io.IOException;
+import java.util.List;
+import utam.core.declarative.lint.LintingError;
 
 /**
  * translation runner
@@ -18,22 +20,41 @@ import java.io.IOException;
 public interface TranslatorRunner {
 
   /**
-   * first scan all contexts and create generation order based on dependencies <br>
-   * generation order is list of Page Object names<br>
-   * then for each PO from list de-serialize and create representation of interface and class <br>
+   * first scan all contexts and create generation order based on dependencies <br> generation order
+   * is list of Page Object names<br> then for each PO from list de-serialize and create
+   * representation of interface and class <br>
+   *
+   * @return RunnerOutput information for analysing results
    */
-  void run();
+  RunnerOutput run();
 
   /**
-   * can only be executed after run method to write objects to files <br>
-   * for each representation created after "run" write files with interface and class <br>
+   * Executed after run method to write objects to files for each representation for and interface
+   * and class
+   *
    * @throws IOException if an error is encountered in writing files to disk
    */
   void write() throws IOException;
 
   /**
-   * after translator generated code, dependencies that do not follow default injection rule
-   * will be written into configuration files later used by Page Objects Provider
+   * After translator generated code, dependencies that do not follow default injection rule will be
+   * written into configuration files later used by Page Objects Provider
    */
   void writeDependenciesConfigs();
+
+  /**
+   * Container for runner output information
+   *
+   * @author elizaveta.ivanova
+   * @since 242
+   */
+  interface RunnerOutput {
+
+    /**
+     * Get list of linting errors
+     *
+     * @return list of linting errors (except excluded)
+     */
+    List<LintingError> getLintingErrors();
+  }
 }

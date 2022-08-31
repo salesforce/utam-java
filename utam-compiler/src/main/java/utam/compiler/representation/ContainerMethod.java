@@ -22,6 +22,7 @@ import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.ParameterUtils;
 import utam.compiler.helpers.ParameterUtils.Regular;
+import utam.compiler.representation.JavadocObject.MethodJavadoc;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -38,12 +39,12 @@ public abstract class ContainerMethod implements PageObjectMethod {
   private static final String PAGE_OBJECT_TYPE_PARAMETER_NAME = "pageObjectType";
   static final MethodParameter PAGE_OBJECT_PARAMETER =
       new Regular(PAGE_OBJECT_TYPE_PARAMETER_NAME, T_PAGE_OBJECT_TYPE_PARAMETER);
-  private final List<String> codeLines = new ArrayList<>();
   final String methodName;
-  private final boolean isPublic;
   final MethodParametersTracker parametersTracker;
   final String locatorVariableName;
-  final UtamMethodDescription methodDescription;
+  final UtamMethodDescription description;
+  private final List<String> codeLines = new ArrayList<>();
+  private final boolean isPublic;
 
   ContainerMethod(
       ElementContext scopeElement,
@@ -61,12 +62,13 @@ public abstract class ContainerMethod implements PageObjectMethod {
       String scopeElementLine = getScopeElementCode(scopeElement);
       codeLines.add(scopeElementLine);
     }
-    codeLines.add(String.format("%s %s = %s", SELECTOR.getSimpleName(), this.locatorVariableName, selectorBuilderString));
+    codeLines.add(String.format("%s %s = %s", SELECTOR.getSimpleName(), this.locatorVariableName,
+        selectorBuilderString));
     String scopeVariableName = scopeElement.getName();
     codeLines.add(String.format("return this.container(%s, %s).%s",
         scopeVariableName, isExpandScope, getContainerMethodInvocationString()));
     this.isPublic = isPublic;
-    this.methodDescription = methodDescription;
+    this.description = methodDescription;
   }
 
   abstract String getContainerMethodInvocationString();
@@ -100,8 +102,10 @@ public abstract class ContainerMethod implements PageObjectMethod {
      * @param methodDescription the method description
      */
     public WithSelectorReturnsList(ElementContext scopeElement, boolean isExpandScope,
-        String elementName, LocatorCodeGeneration selectorContext, boolean isPublic, UtamMethodDescription methodDescription) {
-      super(scopeElement, isExpandScope, elementName, isPublic, selectorContext.getBuilderString(), methodDescription);
+        String elementName, LocatorCodeGeneration selectorContext, boolean isPublic,
+        UtamMethodDescription methodDescription) {
+      super(scopeElement, isExpandScope, elementName, isPublic, selectorContext.getBuilderString(),
+          methodDescription);
       parametersTracker.setMethodParameters(selectorContext.getParameters());
       parametersTracker.setMethodParameter(PAGE_OBJECT_PARAMETER);
       ParameterUtils.setImport(classImports, BASIC_ELEMENT);
@@ -117,8 +121,12 @@ public abstract class ContainerMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(),
-          PAGE_OBJECT_RETURN_LIST, methodDescription);
+      List<MethodParameter> parameters = parametersTracker.getMethodParameters();
+      JavadocObject javadoc = new MethodJavadoc(methodName,
+          PAGE_OBJECT_RETURN_LIST,
+          parameters,
+          description);
+      return new MethodDeclarationImpl(methodName, parameters, PAGE_OBJECT_RETURN_LIST, javadoc);
     }
 
     @Override
@@ -151,7 +159,8 @@ public abstract class ContainerMethod implements PageObjectMethod {
         LocatorCodeGeneration selectorContext,
         boolean isPublic,
         UtamMethodDescription methodDescription) {
-      super(scopeElement, isExpandScope, elementName, isPublic, selectorContext.getBuilderString(), methodDescription);
+      super(scopeElement, isExpandScope, elementName, isPublic, selectorContext.getBuilderString(),
+          methodDescription);
       parametersTracker.setMethodParameters(selectorContext.getParameters());
       parametersTracker.setMethodParameter(PAGE_OBJECT_PARAMETER);
       ParameterUtils.setImport(classImports, BASIC_ELEMENT);
@@ -167,8 +176,13 @@ public abstract class ContainerMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(),
-          PAGE_OBJECT_RETURN, methodDescription);
+      List<MethodParameter> parameters = parametersTracker.getMethodParameters();
+      JavadocObject javadoc = new MethodJavadoc(methodName,
+          PAGE_OBJECT_RETURN,
+          parameters,
+          description);
+      return new MethodDeclarationImpl(methodName, parameters,
+          PAGE_OBJECT_RETURN, javadoc);
     }
 
     @Override

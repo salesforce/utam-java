@@ -1,0 +1,18 @@
+{
+  "root": true,
+  "description": "i have description",
+  "selector": {
+    "css": "root"
+  },
+  "shadow": {
+    "elements": [
+      {
+        "name": "custom",
+        "type": "my/custom/type",
+        "selector": {
+          "css": "custom-duplicate"
+        }
+      }
+    ]
+  }
+}

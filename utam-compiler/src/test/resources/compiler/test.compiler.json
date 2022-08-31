@@ -22,5 +22,8 @@
         "android_tablet"
       ]
     }
-  ]
+  ],
+  "lint" : {
+    "throwError" : false
+  }
 }

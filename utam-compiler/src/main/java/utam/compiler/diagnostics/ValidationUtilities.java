@@ -49,6 +49,17 @@ public class ValidationUtilities {
     return errorsConfig.getErrorMessage(code, args);
   }
 
+  /**
+   * Get linting message with the given code
+   *
+   * @param code error code
+   * @param args optional args
+   * @return error message
+   */
+  public String getLintingMessage(Integer code, String... args) {
+    return errorsConfig.getLintingMessage(code, args);
+  }
+
   private String getEmptyStringError(String prefix, String propertyName, String actualValue) {
     return getErrorMessage(10, prefix, propertyName, actualValue);
   }

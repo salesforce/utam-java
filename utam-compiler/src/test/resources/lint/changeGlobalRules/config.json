@@ -1,0 +1,25 @@
+{
+  "pageObjectsRootDir": "",
+  "pageObjectsOutputDir": "",
+  "resourcesOutputDir": "",
+  "lint": {
+    "duplicateRootSelectors": {
+      "violation" : "warning",
+      "exclude": [
+        "utam/pageObjects/hasRootSelector",
+        "utam/pageObjects/hasAnotherSameRootSelector"
+      ]
+    },
+    "elementCantHaveRootSelector" : {
+      "exclude" : [
+        "utam/pageObjects/hasDifferentRootSelector"
+      ]
+    },
+    "duplicateCustomSelectors": {
+      "violation" : "warning",
+      "exclude" : [
+        "utam/pageObjects/hasRootSelector"
+      ]
+    }
+  }
+}

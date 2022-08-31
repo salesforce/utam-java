@@ -16,7 +16,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import utam.compiler.helpers.ParameterUtils;
+import utam.compiler.representation.JavadocObject.EmptyJavadoc;
 import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.representation.UnionType;
 
@@ -50,12 +52,14 @@ public class RootElementMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
+      List<MethodParameter> parameters = new ArrayList<>();
+      JavadocObject javadoc = new EmptyJavadoc();
       return new MethodDeclarationImpl(
           methodName,
-          new ArrayList<>(),
+          parameters,
           returnType,
           Stream.of(returnType).collect(Collectors.toList()),
-          description);
+          javadoc);
     }
 
     @Override
@@ -90,12 +94,14 @@ public class RootElementMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
+      List<MethodParameter> parameters = new ArrayList<>();
+      JavadocObject javadoc = new EmptyJavadoc();
       return new MethodDeclarationImpl(
           methodName,
-          new ArrayList<>(),
+          parameters,
           returnType,
           imports,
-          description);
+          javadoc);
     }
 
     @Override
@@ -133,12 +139,14 @@ public class RootElementMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
+      List<MethodParameter> parameters = new ArrayList<>();
+      JavadocObject javadoc = new EmptyJavadoc();
       return new MethodDeclarationImpl(
           methodName,
-          new ArrayList<>(),
+          parameters,
           returnType,
           imports,
-          description);
+          javadoc);
     }
 
     @Override
@@ -176,12 +184,13 @@ public class RootElementMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
+      List<MethodParameter> parameters = new ArrayList<>();
+      JavadocObject javadoc = new EmptyJavadoc();
       return new MethodDeclarationImpl(
           methodName,
-          new ArrayList<>(),
+          parameters,
           this.returnType,
-          new ArrayList<>(),
-          description);
+          javadoc);
     }
 
     @Override

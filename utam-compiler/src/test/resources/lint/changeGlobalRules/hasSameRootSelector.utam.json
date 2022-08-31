@@ -1,0 +1,18 @@
+{
+  "root": true,
+  "description": "i have description",
+  "selector": {
+    "css": "root"
+  },
+  "shadow": {
+    "elements": [
+      {
+        "name": "basic",
+        "type": "frame",
+        "selector": {
+          "css": "custom-duplicate"
+        }
+      }
+    ]
+  }
+}

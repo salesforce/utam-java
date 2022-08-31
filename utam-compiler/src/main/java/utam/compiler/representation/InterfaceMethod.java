@@ -12,6 +12,7 @@ import static utam.compiler.types.BasicElementUnionType.asUnionTypeOrNull;
 import java.util.ArrayList;
 import java.util.List;
 import utam.compiler.grammar.UtamMethodDescription;
+import utam.compiler.representation.JavadocObject.MethodJavadoc;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -30,20 +31,24 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
 
   /**
    * Initializes a new instance of the InterfaceMethod class
-   * @param methodName        the name of the method
-   * @param returnType        the return type of the method
-   * @param methodParameters  the list of parameters for the method
-   * @param methodDescription the method description
+   *
+   * @param methodName  the name of the method
+   * @param returnType  the return type of the method
+   * @param parameters  the list of parameters for the method
+   * @param description the method description
    */
   public InterfaceMethod(
       String methodName,
       TypeProvider returnType,
-      List<MethodParameter> methodParameters,
-      UtamMethodDescription methodDescription) {
+      List<MethodParameter> parameters,
+      UtamMethodDescription description) {
     super(
         methodName,
-        methodParameters,
-        returnType, methodDescription);
+        parameters,
+        returnType, new MethodJavadoc(methodName,
+            returnType,
+            parameters,
+            description));
   }
 
   @Override
@@ -79,6 +84,7 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
 
     /**
      * Initializes a new instance of the AbstractBasicElementGetter class
+     *
      * @param methodName  the name of the method
      * @param parameters  the list of parameters of the method
      * @param returnType  the return type of the method
@@ -90,7 +96,11 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
         TypeProvider returnType,
         UtamMethodDescription description) {
       super(methodName, true, returnType, description);
-      this.declaration = new MethodDeclarationImpl(methodName, parameters, returnType, description);
+      JavadocObject javadoc = new MethodJavadoc(methodName,
+          returnType,
+          parameters,
+          description);
+      this.declaration = new MethodDeclarationImpl(methodName, parameters, returnType, javadoc);
       this.unionType = asUnionTypeOrNull(returnType);
     }
 

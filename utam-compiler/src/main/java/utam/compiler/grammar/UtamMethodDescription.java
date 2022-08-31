@@ -10,7 +10,6 @@ package utam.compiler.grammar;
 import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
-import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -18,9 +17,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import utam.core.declarative.representation.MethodDeclaration;
-import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.TypeProvider;
 
 /**
  * Description at the level of the page object method (compose or getter), added as JavaDoc.
@@ -34,6 +30,7 @@ public class UtamMethodDescription {
   private final String returnStr;
   private final String throwsStr;
   private final String deprecatedStr;
+
   /**
    * Initialize object
    *
@@ -55,10 +52,6 @@ public class UtamMethodDescription {
     this.deprecatedStr = deprecatedStr;
   }
 
-  public UtamMethodDescription() {
-    this(new ArrayList<>(), null, null, null);
-  }
-
   /**
    * Process/deserialize description node at the method or element level
    *
@@ -69,7 +62,7 @@ public class UtamMethodDescription {
   static UtamMethodDescription processMethodDescriptionNode(JsonNode node,
       String validationContext) {
     if (isEmptyNode(node)) {
-      return new UtamMethodDescription();
+      return new UtamEmptyMethodDescription();
     }
     String parserContext = validationContext + " description";
     if (node.isTextual()) {
@@ -77,9 +70,10 @@ public class UtamMethodDescription {
       VALIDATION.validateNotNullOrEmptyString(node, parserContext, "text");
       return new UtamMethodDescription(Collections.singletonList(value), null, null, null);
     }
-    UtamMethodDescription object = readNode(node, UtamMethodDescription.class, VALIDATION.getErrorMessage(700, parserContext));
+    UtamMethodDescription object = readNode(node, UtamMethodDescription.class,
+        VALIDATION.getErrorMessage(700, parserContext));
     VALIDATION.validateNotEmptyArray(node.get("text"), parserContext, "text");
-    for(JsonNode textNode : node.get("text")) {
+    for (JsonNode textNode : node.get("text")) {
       VALIDATION.validateNotNullOrEmptyString(textNode, parserContext, "text");
     }
     VALIDATION.validateNotEmptyString(node.get("deprecated"), parserContext, "deprecated");
@@ -88,72 +82,66 @@ public class UtamMethodDescription {
     return object;
   }
 
-  public MethodDescription getDescription(MethodDeclaration method) {
-    return new MethodDescription(method, text, returnStr, throwsStr, deprecatedStr);
+  /**
+   * Used in linting to check if method has description
+   *
+   * @return boolean
+   */
+  boolean isEmpty() {
+    return false;
   }
 
   /**
-   * Helper class to process description in context and return javadoc
+   * Get description text. Public method to access from compiled method
+   *
+   * @return list of strings
+   */
+  public List<String> getText() {
+    return text;
+  }
+
+  /**
+   * Get return description. Public method to access from compiled method
+   *
+   * @return string
+   */
+  public String getReturnStr() {
+    return returnStr;
+  }
+
+  /**
+   * Get throw message. Public method to access from compiled method
+   *
+   * @return string
+   */
+  public String getThrowsStr() {
+    return throwsStr;
+  }
+
+  /**
+   * Get deprecated message. Public method to access from compiled method
+   *
+   * @return string
+   */
+  public String getDeprecatedStr() {
+    return deprecatedStr;
+  }
+
+  /**
+   * Helper class for an empty method description
    *
    * @author elizaveta.ivanova
    * @since 242
    */
-  public static class MethodDescription {
+  public static class UtamEmptyMethodDescription extends UtamMethodDescription {
 
-    private final List<String> javadoc;
-    private final boolean isDeprecated;
-
-    private MethodDescription(MethodDeclaration method, List<String> text,
-        String returnStr,
-        String throwsStr,
-        String deprecatedStr) {
-      this(method.getName(), method.getReturnType(), method.getParameters(), text, returnStr, throwsStr, deprecatedStr);
+    public UtamEmptyMethodDescription() {
+      super(new ArrayList<>(), null, null, null);
     }
 
-    private MethodDescription(
-        String methodName,
-        TypeProvider returnType,
-        List<MethodParameter> parameters,
-        List<String> text,
-        String returnStr,
-        String throwsStr,
-        String deprecatedStr) {
-      javadoc = new ArrayList<>();
-      if (text.isEmpty()) {
-        javadoc.add("method " + methodName);
-      } else {
-        javadoc.addAll(text);
-      }
-      if (returnStr != null) {
-        javadoc.add(String.format("@return %s", returnStr));
-      } else if (!returnType.isSameType(VOID)) {
-        javadoc
-            .add(String.format("@return %s", returnType.getSimpleName()));
-      }
-      parameters.stream()
-          .filter(p -> !p.isLiteral())
-          .forEach(parameter -> {
-            final String parameterDescription =
-                parameter.getDescription() == null ? parameter.getType().getSimpleName()
-                    : parameter.getDescription();
-            javadoc
-                .add(String.format("@param %s %s", parameter.getValue(), parameterDescription));
-          });
-      if (throwsStr != null) {
-        javadoc.add(String.format("@throws %s", throwsStr));
-      }
-      this.isDeprecated = deprecatedStr != null;
-      if (isDeprecated) {
-        javadoc.add(String.format("@deprecated %s", deprecatedStr));
-      }
-    }
-
-    public List<String> getJavadoc() {
-      return javadoc;
-    }
-
-    public boolean isDeprecated() {
-      return isDeprecated;
+    @Override
+    boolean isEmpty() {
+      return true;
     }
   }
 }

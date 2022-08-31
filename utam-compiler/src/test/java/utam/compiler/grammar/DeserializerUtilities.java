@@ -35,12 +35,16 @@ public class DeserializerUtilities {
   private final TranslatorConfig translatorConfig;
   private final String type;
 
-  public DeserializerUtilities() {
-    this.type = TEST_URI;
+  public DeserializerUtilities(String pageObjectName) {
+    this.type = pageObjectName;
     this.translatorConfig = getDefaultConfig();
     // profile is required for implementations POs
     this.translatorConfig.getConfiguredProfiles()
         .add(new StringValueProfileConfig("profile", "test"));
+  }
+
+  public DeserializerUtilities() {
+    this(TEST_URI);
   }
 
   static UtamCompilationError expectCompilerError(String json) {

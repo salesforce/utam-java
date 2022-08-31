@@ -84,6 +84,21 @@ public class JsonErrorsConfig {
   }
 
   /**
+   * read error message by code and replace %s by args if any
+   *
+   * @param code string code
+   * @param args replacement for part of the messages that are context dependent
+   * @return string with message or throws an error
+   */
+  public String getLintingMessage(Integer code, String... args) {
+    if (!errorDetailsMap.containsKey(code)) {
+      throw new IllegalArgumentException(String.format(ERR_CODE_NOT_CONFIGURED, code));
+    }
+    ErrorDetails errorDetails = errorDetailsMap.get(code);
+    return errorDetails.getStringMessage(args);
+  }
+
+  /**
    * error code can be one of 2 types
    */
   enum ErrorCategory {
