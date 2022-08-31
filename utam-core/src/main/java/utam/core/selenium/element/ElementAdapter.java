@@ -208,6 +208,11 @@ public class ElementAdapter implements Element {
   }
 
   @Override
+  public String getCssPropertyValue(String propertyName) {
+    return getWebElement().getCssValue(propertyName);
+  }
+
+  @Override
   public String getText() {
     return getWebElement().getText();
   }

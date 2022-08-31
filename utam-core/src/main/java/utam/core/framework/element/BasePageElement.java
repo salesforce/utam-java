@@ -90,6 +90,12 @@ public class BasePageElement extends UtamBaseImpl implements Actionable, Clickab
   }
 
   @Override
+  public String getCssPropertyValue(String propertyName) {
+    log(String.format("get CSS property value '%s'", propertyName));
+    return getElement().getCssPropertyValue(propertyName);
+  }
+
+  @Override
   public String getClassAttribute() {
     return getAttribute("class");
   }

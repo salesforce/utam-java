@@ -199,6 +199,15 @@ public class ElementAdapterTests {
   }
 
   @Test
+  public void testGetCssPropertyValue() {
+    String attr = "nameAndValue";
+    MockUtilities mock = new MockUtilities();
+    when(mock.getWebElementMock().getCssValue(attr)).thenReturn(attr);
+    assertThat(mock.getElementAdapter().getCssPropertyValue(attr), is(equalTo(attr)));
+    verify(mock.getWebElementMock(), times(1)).getCssValue(attr);
+  }
+
+  @Test
   public void testGetText() {
     String text = "text";
     MockUtilities mock = new MockUtilities();

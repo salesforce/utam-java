@@ -61,6 +61,14 @@ public interface BasicElement extends UtamBase {
   String getValue();
 
   /**
+   * Returns the string value of the CSS property with the given name
+   *
+   * @param propertyName the name of the CSS property whose value to return
+   * @return the value of the CSS property
+   */
+  String getCssPropertyValue(String propertyName);
+
+  /**
    * Check if element has focus (is active) inside document or its parent shadow root
    *
    * @return true if current element is active

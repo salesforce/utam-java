@@ -116,6 +116,21 @@ public class BasicElementActionTypeTests {
     assertThat(action.getReturnType().getSimpleName(), is(equalTo(STRING_TYPE_NAME)));
   }
 
+  /** The getCssPropertyValue member should return the proper value */
+  @Test
+  public void testGetCssPropertyValue() {
+    ActionType action = BasicElementActionType.getCssPropertyValue;
+    Set<String> parameterTypeStrings =
+            action.getParametersTypes("test", 1).stream()
+                    .filter((type) -> !type.getSimpleName().isEmpty())
+                    .map(TypeProvider::getSimpleName)
+                    .collect(Collectors.toSet());
+
+    assertThat(parameterTypeStrings, hasSize(1));
+    assertThat(parameterTypeStrings.iterator().next(), is(equalTo(STRING_TYPE_NAME)));
+    assertThat(action.getReturnType().getSimpleName(), is(equalTo(STRING_TYPE_NAME)));
+  }
+
   /** The getText member should return the proper value */
   @Test
   public void testGetText() {

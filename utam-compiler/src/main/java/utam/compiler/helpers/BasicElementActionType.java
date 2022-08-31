@@ -41,6 +41,11 @@ public enum BasicElementActionType implements ActionType {
    */
   getAttribute(PrimitiveType.STRING, PrimitiveType.STRING),
   /**
+   * get value of the given CSS property <br>
+   * returns value of the CSS property with the given name
+   */
+  getCssPropertyValue(PrimitiveType.STRING, PrimitiveType.STRING),
+  /**
    * get value of the "class" attribute <br>
    */
   getClassAttribute(PrimitiveType.STRING),
