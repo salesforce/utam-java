@@ -35,8 +35,9 @@ abstract class UtamMethod {
 
   UtamMethod(String name, JsonNode descriptionNode, JsonNode argsNode) {
     this.name = name;
+    VALIDATION.validateNotEmptyString(name, "method", "name");
     String parserContext = String.format("method \"%s\"", name);
-    this.description = processMethodDescriptionNode(descriptionNode, parserContext + " description");
+    this.description = processMethodDescriptionNode(descriptionNode, parserContext);
     this.arguments = processArgsNode(argsNode, parserContext, false);
   }
 

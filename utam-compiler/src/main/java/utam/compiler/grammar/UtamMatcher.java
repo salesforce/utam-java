@@ -14,6 +14,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.UtamMethodAction.ArgumentsProvider;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.MethodContext;
@@ -31,15 +34,25 @@ import utam.core.declarative.representation.MethodParameter;
  */
 class UtamMatcher {
 
+  private static final String SUPPORTED_MATCHER_VALUES = Stream.of(MatcherType.values()).map(Enum::name).collect(
+      Collectors.joining(", "));
   private final JsonNode argsNode;
-  private final MatcherType matcherType;
+  private final String matcherType;
 
   @JsonCreator
   UtamMatcher(
-      @JsonProperty(value = "type", required = true) MatcherType matcherType,
+      @JsonProperty(value = "type") String matcherType,
       @JsonProperty(value = "args") JsonNode args) {
     this.argsNode = args;
     this.matcherType = matcherType;
+  }
+
+  private MatcherType getMatcherType(JsonNode node, String parserContext) {
+    try {
+      return MatcherType.valueOf(matcherType);
+    } catch (Exception e) {
+      throw new UtamCompilationError(node, VALIDATION.getErrorMessage(1201, parserContext, matcherType, SUPPORTED_MATCHER_VALUES));
+    }
   }
 
   /**
@@ -82,9 +95,9 @@ class UtamMatcher {
 
     @Override
     MatcherObject getMatcherObject(TranslationContext context) {
+      String parserContext = String.format("element \"%s\" filter", elementName);
       UtamMatcher matcher = Objects.requireNonNull(JsonDeserializer
-          .readNode(matcherNode, UtamMatcher.class, VALIDATION.getErrorMessage(300, elementName)));
-      String parserContext = String.format("element \"%s\" matcher", elementName);
+          .readNode(matcherNode, UtamMatcher.class, VALIDATION.getErrorMessage(1200, parserContext)));
       ArgumentsProvider provider = new ArgumentsProvider(matcher.argsNode, parserContext);
       ParametersContext parametersContext = new StatementParametersContext(parserContext, context, null);
       List<UtamArgument> arguments = provider.getArguments(true);
@@ -92,9 +105,10 @@ class UtamMatcher {
           .stream()
           .map(arg -> arg.asParameter(context, null, parametersContext))
           .forEach(parametersContext::setParameter);
+      MatcherType matcherType = matcher.getMatcherType(matcherNode, parserContext);
       List<MethodParameter> parameters = parametersContext
-          .getParameters(matcher.matcherType.getExpectedParametersTypes());
-      return new MatcherObject(matcher.matcherType, parameters, 203, elementName);
+          .getParameters(matcherType.getExpectedParametersTypes());
+      return new MatcherObject(matcherType, parameters, parserContext);
     }
   }
 
@@ -115,10 +129,10 @@ class UtamMatcher {
 
     @Override
     MatcherObject getMatcherObject(TranslationContext context) {
-      UtamMatcher matcher = JsonDeserializer
-          .readNode(matcherNode, UtamMatcher.class, VALIDATION.getErrorMessage(303, methodContext.getName()));
       String parserContext = String
           .format("method \"%s\" statement matcher", methodContext.getName());
+      UtamMatcher matcher = JsonDeserializer
+          .readNode(matcherNode, UtamMatcher.class, VALIDATION.getErrorMessage(1200, parserContext));
       ArgumentsProvider provider = new ArgumentsProvider(matcher.argsNode, parserContext);
       ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
       List<UtamArgument> arguments = provider.getArguments(true);
@@ -126,9 +140,10 @@ class UtamMatcher {
           .stream()
           .map(arg -> arg.asParameter(context, methodContext, parametersContext))
           .forEach(parametersContext::setParameter);
+      MatcherType matcherType = matcher.getMatcherType(matcherNode, parserContext);
       List<MethodParameter> parameters = parametersContext
-          .getParameters(matcher.matcherType.getExpectedParametersTypes());
-      return new MatcherObject(matcher.matcherType, parameters, 614, methodContext.getName());
+          .getParameters(matcherType.getExpectedParametersTypes());
+      return new MatcherObject(matcherType, parameters, parserContext);
     }
   }
 }

@@ -110,7 +110,7 @@ public class TranslationContextTests {
   public void testGetRootElement() {
     TranslationContext context = getTestTranslationContext();
     ElementContext defaultRoot = new ElementContext.Root(editable, null, editable, mock(PageObjectMethod.class));
-    context.setElement(null, defaultRoot);
+    context.setElement(defaultRoot);
     assertThat(context.getRootElement().getName(), is(equalTo(ElementContext.ROOT_ELEMENT_NAME)));
   }
 

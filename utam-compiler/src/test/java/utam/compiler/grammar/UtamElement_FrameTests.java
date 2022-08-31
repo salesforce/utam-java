@@ -12,7 +12,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static utam.compiler.grammar.DeserializerUtilities.expectCompilerError;
 
 import org.testng.annotations.Test;
-import utam.compiler.grammar.UtamElement.Type;
 
 /**
  * test reads JSON file with declared frames
@@ -31,7 +30,7 @@ public class UtamElement_FrameTests {
         + "    }\n"
         + "  ]}";
     Exception e = expectCompilerError(json);
-    assertThat(e.getMessage(), containsString("error 206: element \"test\": frame selector cannot have \"returnAll\" set to true"));
+    assertThat(e.getMessage(), containsString("error 204: element \"test\": frame selector cannot have \"returnAll\" set to true"));
   }
 
   @Test
@@ -44,7 +43,7 @@ public class UtamElement_FrameTests {
         + "  ]}";
     Exception e = expectCompilerError(json);
     assertThat(e.getMessage(),
-        containsString("error 204: element \"test\": property \"selector\" is mandatory"));
+        containsString("error 9: element \"test\": property \"selector\" is required"));
   }
 
   @Test
@@ -58,7 +57,9 @@ public class UtamElement_FrameTests {
         + "    }\n"
         + "  ]}";
     Exception e = expectCompilerError(json);
-    assertThat(e.getMessage(), containsString(Type.FRAME.getSupportedPropertiesErr("test")));
+    assertThat(e.getMessage(),
+        containsString("error 8: element \"test\": property \"nullable\" is not supported, "
+            + "supported are: name, public, selector, type"));
   }
 
   @Test
@@ -73,7 +74,8 @@ public class UtamElement_FrameTests {
         + "  ]}";
     Exception e = expectCompilerError(json);
     assertThat(e.getMessage(),
-        containsString(Type.FRAME.getSupportedPropertiesErr("test")));
+        containsString("error 8: element \"test\": property \"elements\" is not supported, "
+            + "supported are: name, public, selector, type"));
   }
 
   @Test

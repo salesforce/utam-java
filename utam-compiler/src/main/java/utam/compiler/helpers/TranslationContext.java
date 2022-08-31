@@ -14,7 +14,6 @@ import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.SELF_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.Self.SELF_ELEMENT;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -80,8 +79,8 @@ public final class TranslationContext {
     this.translationTypesConfig = translatorConfiguration.getTranslationTypesConfig();
     this.translatorConfiguration = translatorConfiguration;
     // register elements to prevent names collisions
-    setElement(null, Document.DOCUMENT_ELEMENT);
-    setElement(null, Self.SELF_ELEMENT);
+    setElement(Document.DOCUMENT_ELEMENT);
+    setElement(Self.SELF_ELEMENT);
     // has impl prefixes
     this.pageObjectClassType = translationTypesConfig.getClassType(pageObjectURI);
     this.pageObjectInterfaceType = translationTypesConfig.getInterfaceType(pageObjectURI);
@@ -176,12 +175,11 @@ public final class TranslationContext {
   /**
    * Sets the element context for this Page Object
    *
-   * @param currentNode the current JSON node
    * @param element the element context to set
    */
-  public void setElement(JsonNode currentNode, ElementContext element) {
+  public void setElement(ElementContext element) {
     if (elementContextMap.containsKey(element.getName())) {
-      throw new UtamCompilationError(currentNode, VALIDATION.getErrorMessage(202, element.getName()));
+      throw new UtamCompilationError(VALIDATION.getErrorMessage(202, element.getName()));
     }
     elementContextMap.put(element.getName(), element);
   }

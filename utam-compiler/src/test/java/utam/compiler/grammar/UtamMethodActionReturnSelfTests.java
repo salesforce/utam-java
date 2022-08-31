@@ -78,21 +78,21 @@ public class UtamMethodActionReturnSelfTests {
   @Test
   public void returnSelfNotLastStatementThrows() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("notLastStatement"));
-    assertThat(e.getMessage(), containsString("error 618: method \"test\" statement: "
+    assertThat(e.getMessage(), containsString("error 608: method \"test\" statement: "
         + "\"returnSelf\" can only be invoked from a last statement"));
   }
 
   @Test
   public void returnSelfNotLastStatementPredicateThrows() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("notLastStatementPredicate"));
-    assertThat(e.getMessage(), containsString("error 618: method \"test\" statement: "
+    assertThat(e.getMessage(), containsString("error 608: method \"test\" statement: "
         + "\"returnSelf\" can only be invoked from a last statement"));
   }
 
   @Test
   public void returnSelfNotLastStatementBeforeLoadThrows() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("notLastStatementBeforeLoad"));
-    assertThat(e.getMessage(), containsString("error 618: method \"load\" statement: "
+    assertThat(e.getMessage(), containsString("error 608: method \"load\" statement: "
         + "\"returnSelf\" can only be invoked from a last statement"));
   }
 }

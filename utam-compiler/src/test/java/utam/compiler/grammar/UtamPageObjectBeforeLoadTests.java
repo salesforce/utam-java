@@ -103,7 +103,7 @@ public class UtamPageObjectBeforeLoadTests {
   public void testCantHaveArgs() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("withArgs"));
     assertThat(e.getMessage(),
-        containsString("error 905: method \"beforeLoad\" cannot have parameters"));
+        containsString("error 904: method \"beforeLoad\" cannot have parameters"));
   }
 
   @Test

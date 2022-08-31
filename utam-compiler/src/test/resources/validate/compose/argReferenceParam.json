@@ -1,0 +1,18 @@
+{
+  "methods": [
+    {
+      "args": [
+        {
+          "name": "arg1",
+          "type": "argumentReference"
+        }
+      ],
+      "name": "test",
+      "compose": [
+        {
+          "apply": "something"
+        }
+      ]
+    }
+  ]
+}

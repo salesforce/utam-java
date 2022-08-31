@@ -8,7 +8,6 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
-import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.compiler.helpers.BasicElementActionType.getActionType;
 
@@ -65,6 +64,7 @@ final class UtamElementFilter {
   MatcherObject setElementFilter(TranslationContext context, UtamElement.Type elementNodeType,
       TypeProvider elementType, String elementName) {
     String parserContext = String.format("element '%s' filter", elementName);
+    VALIDATION.validateNotEmptyString(this.applyMethod, parserContext, "apply");
     ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
     ParametersContext parametersContext = new StatementParametersContext(parserContext, context, null);
     List<UtamArgument> arguments = provider.getArguments(true);
@@ -72,8 +72,8 @@ final class UtamElementFilter {
         .stream()
         .map(arg -> arg.asParameter(context, null, parametersContext))
         .forEach(parametersContext::setParameter);
-    MatcherObject matcher = isEmptyNode(matcherNode) ? null
-        : new ElementFilterMatcherProvider(matcherNode, elementName).getMatcherObject(context);
+    VALIDATION.validateNotNullObject(matcherNode, parserContext, "matcher");
+    MatcherObject matcher = new ElementFilterMatcherProvider(matcherNode, elementName).getMatcherObject(context);
     if (elementNodeType == UtamElement.Type.BASIC) {
       ActionType actionType = getActionType(this.applyMethod, elementType, VALIDATION.getErrorMessage(301, elementName, this.applyMethod));
       matcher.checkMatcherOperand(actionType.getReturnType());
@@ -95,7 +95,7 @@ final class UtamElementFilter {
     return this.matcherParameters;
   }
 
-  boolean getFindFirst() {
+  boolean isFindFirst() {
     return this.isFindFirst;
   }
 }

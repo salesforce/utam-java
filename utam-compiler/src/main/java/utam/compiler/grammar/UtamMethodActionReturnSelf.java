@@ -45,7 +45,7 @@ class UtamMethodActionReturnSelf extends UtamMethodAction {
   ComposeMethodStatement getComposeAction(TranslationContext context,
       MethodContext methodContext, StatementContext statementContext) {
     if (!statementContext.isLastStatement() && !statementContext.isLastPredicateStatement()) {
-      String message = VALIDATION.getErrorMessage(618, methodContext.getName());
+      String message = VALIDATION.getErrorMessage(608, methodContext.getName());
       throw new UtamCompilationError(message);
     }
     return new ReturnSelf(context.getSelfType());

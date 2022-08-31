@@ -72,6 +72,8 @@ class UtamMethodActionApply extends UtamMethodAction {
   @Override
   Statement getStatement(TranslationContext context, MethodContext methodContext,
       StatementContext statementContext) {
+    String parserContext = String.format("method \"%s\"", methodContext.getName());
+    VALIDATION.validateNotNullOrEmptyString(apply, parserContext, "apply");
     if (isChain) {
       chainValidations(statementContext, methodContext.getName());
       // if statement is marked as a chain, it should be applied to previous result, so "element" is redundant

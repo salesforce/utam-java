@@ -146,7 +146,9 @@ abstract class UtamArgument {
     if (isLiteral) {
       return processLiteralNode(argNode, type, parserContext);
     }
-    return readNode(argNode, UtamArgumentNonLiteral.class, VALIDATION.getErrorMessage(100, parserContext));
+    UtamArgumentNonLiteral arg = readNode(argNode, UtamArgumentNonLiteral.class, VALIDATION.getErrorMessage(100, parserContext));
+    VALIDATION.validateNotEmptyString(arg.name, parserContext, "name");
+    return arg;
   }
 
   private static UtamArgument processLiteralNode(JsonNode argNode, String typeStr,

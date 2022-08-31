@@ -22,19 +22,26 @@ import utam.compiler.JsonBuilderTestUtility;
 public class UtamShadowElement_Tests {
 
   @Test
-  public void testShadowElementsMissingInRoot() {
+  public void testShadowElementsMissingThrows() {
     JsonBuilderTestUtility test = new JsonBuilderTestUtility();
     test.addRawString("shadow", "{} ");
     Exception e = test.expectCompilerError();
     assertThat(e.getMessage(), containsString(
-        "error 1100: root shadow: incorrect format of elements inside shadow"));
+        "error 12: root shadow: property \"elements\" should be a not empty array"));
   }
 
   @Test
   public void testNestedShadowMissingElements() {
     Exception e = expectCompilerErrorFromFile("validate/shadow/nestedElementsMissing");
     assertThat(e.getMessage(), containsString(
-        "error 1100: element \"parent\" shadow: incorrect format of elements inside shadow"));
+        "error 12: element \"parent\" shadow: property \"elements\" should be a not empty array"));
+  }
+
+  @Test
+  public void testIncorrectElementInsideShadowThrows() {
+    Exception e = expectCompilerErrorFromFile("validate/shadow/incorrectElement");
+    assertThat(e.getMessage(), containsString(
+        "error 1100: root shadow: incorrect format of elements inside shadow"));
   }
 
   @Test

@@ -32,7 +32,7 @@ public class UtamElement_BasicTests {
     JsonBuilderTestUtility test = new JsonBuilderTestUtility();
     test.addRawString("elements", "[ {\"name\": \"test\" }]");
     UtamError e = expectThrows(UtamCompilationError.class, test::getDeserializedJson);
-    assertThat(e.getMessage(), containsString("error 204: element \"test\": property \"selector\" is mandatory"));
+    assertThat(e.getMessage(), containsString("error 9: element \"test\": property \"selector\" is required"));
   }
 
   /**
@@ -56,7 +56,7 @@ public class UtamElement_BasicTests {
   @Test
   public void testElementWithListCantHaveNestedElements() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("listWithNestedElements"));
-    assertThat(e.getMessage(), containsString("error 205: element \"test\": basic element can't have nested elements"));
+    assertThat(e.getMessage(), containsString("error 203: element \"test\": list element can't have nested elements"));
   }
 
   @Test

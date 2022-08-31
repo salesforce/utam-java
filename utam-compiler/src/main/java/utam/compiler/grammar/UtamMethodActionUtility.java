@@ -7,6 +7,7 @@
  */
 package utam.compiler.grammar;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
@@ -44,7 +45,7 @@ class UtamMethodActionUtility extends UtamMethodAction {
 
   @JsonCreator
   UtamMethodActionUtility(
-      @JsonProperty(value = "applyExternal", required = true) UtamUtilityMethodAction applyExternal,
+      @JsonProperty(value = "applyExternal") UtamUtilityMethodAction applyExternal,
       @JsonProperty(value = "returnType") JsonNode returnType,
       @JsonProperty(value = "returnAll") Boolean isReturnList) {
     // utility can't be marked as chain
@@ -67,6 +68,8 @@ class UtamMethodActionUtility extends UtamMethodAction {
   ComposeMethodStatement getComposeAction(TranslationContext context, MethodContext methodContext,
       StatementContext statementContext) {
     chainValidations(statementContext, methodContext.getName());
+    String parserContext = String.format("method \"%s\"", methodContext.getName());
+    VALIDATION.validateRequiredProperty(applyExternal, parserContext, "applyExternal");
     TypeProvider utilityType = context.getUtilityType(applyExternal.getExternalClassPath());
     Operand operand = new UtilityOperand(utilityType);
     List<MethodParameter> parameters = applyExternal.getParameters(context, methodContext);

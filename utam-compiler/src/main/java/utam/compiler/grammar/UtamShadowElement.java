@@ -10,15 +10,11 @@ package utam.compiler.grammar;
 import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
-import static utam.compiler.grammar.UtamPageObject.processElementsNode;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import utam.compiler.grammar.UtamElement.UtamElementProvider;
 
 /**
  * shadow boundary
@@ -28,11 +24,11 @@ import utam.compiler.grammar.UtamElement.UtamElementProvider;
  */
 class UtamShadowElement {
 
-  private final JsonNode elementsNode;
+  final List<UtamElement> elements;
 
   @JsonCreator
-  UtamShadowElement(@JsonProperty(value = "elements", required = true) JsonNode elementsNode) {
-    this.elementsNode = elementsNode;
+  UtamShadowElement(@JsonProperty(value = "elements") List<UtamElement> elements) {
+    this.elements = elements;
   }
 
   /**
@@ -42,12 +38,12 @@ class UtamShadowElement {
    * @param parserContext parser context
    * @return list of elements inside shadow
    */
-  static List<UtamElementProvider> processShadowNode(JsonNode shadowNode, String parserContext) {
-    List<UtamElementProvider> elements = new ArrayList<>();
+  static UtamShadowElement processShadowNode(JsonNode shadowNode, String parserContext) {
     if (isEmptyNode(shadowNode)) {
-      return elements;
+      return null;
     }
-    UtamShadowElement shadowElement = readNode(shadowNode, UtamShadowElement.class, VALIDATION.getErrorMessage(1100, parserContext));
-    return processElementsNode(Objects.requireNonNull(shadowElement).elementsNode, parserContext);
+    VALIDATION.validateNotEmptyArray(shadowNode.get("elements"), parserContext, "elements");
+    return readNode(shadowNode, UtamShadowElement.class,
+        VALIDATION.getErrorMessage(1100, parserContext));
   }
 }

@@ -62,14 +62,16 @@ public class UtamMethodDescription {
   /**
    * Process/deserialize description node at the method or element level
    *
-   * @param node          Json node
-   * @param parserContext element or method name with prefix
+   * @param node              Json node
+   * @param validationContext element or method name with prefix
    * @return object with description
    */
-  static UtamMethodDescription processMethodDescriptionNode(JsonNode node, String parserContext) {
+  static UtamMethodDescription processMethodDescriptionNode(JsonNode node,
+      String validationContext) {
     if (isEmptyNode(node)) {
       return new UtamMethodDescription();
     }
+    String parserContext = validationContext + " description";
     if (node.isTextual()) {
       String value = node.textValue();
       VALIDATION.validateNotNullOrEmptyString(node, parserContext, "text");

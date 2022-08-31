@@ -124,14 +124,14 @@ public class UtamRootDescriptionTests {
   public void testFormatIsNotStringOrObject() {
     UtamError e = expectThrows(UtamError.class,
         () -> new DeserializerUtilities().getResultFromString("{ \"description\" : true }"));
-    assertThat(e.getMessage(), containsString("error 906: format of the root description is incorrect"));
+    assertThat(e.getMessage(), containsString("error 905: format of the root description is incorrect"));
   }
 
   @Test
   public void testIncorrectTextInsideDescriptionThrows() {
     UtamError e = expectThrows(UtamError.class,
         () -> new DeserializerUtilities().getResultFromString("{ \"description\" : { \"text\" : {} } }"));
-    assertThat(e.getMessage(), containsString("error 906: format of the root description is incorrect"));
+    assertThat(e.getMessage(), containsString("error 905: format of the root description is incorrect"));
   }
 
   @Test

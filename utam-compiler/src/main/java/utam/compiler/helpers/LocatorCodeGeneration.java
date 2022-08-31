@@ -12,10 +12,7 @@ import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import utam.compiler.helpers.ParameterUtils.Literal;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.element.Locator;
@@ -28,15 +25,6 @@ import utam.core.selenium.element.LocatorBy;
  * @since 234
  */
 public class LocatorCodeGeneration {
-
-  private static final Set<String> SUPPORTED_SELECTOR_TYPES = Stream.of(SelectorType.values())
-      .map(Enum::name).collect(Collectors.toSet());
-
-  /**
-   * The supported selector types as a comma-delimited string
-   */
-  public static final String SUPPORTED_SELECTOR_TYPES_STRING =
-      String.join(", ", SUPPORTED_SELECTOR_TYPES);
 
   private final String builderValue;
   private final Locator locator;
