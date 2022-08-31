@@ -92,6 +92,7 @@ public interface Element {
 
   /**
    * get the value of the CSS property with the given name
+   * 
    * @param propertyName the name of the CSS property whose value to return
    * @return the value of the CSS property
    */

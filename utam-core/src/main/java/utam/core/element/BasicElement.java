@@ -62,6 +62,7 @@ public interface BasicElement extends UtamBase {
 
   /**
    * Returns the string value of the CSS property with the given name
+   *
    * @param propertyName the name of the CSS property whose value to return
    * @return the value of the CSS property
    */
