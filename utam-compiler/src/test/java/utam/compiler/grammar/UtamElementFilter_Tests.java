@@ -146,6 +146,24 @@ public class UtamElementFilter_Tests {
   }
 
   @Test
+  public void testFilterByGetCssPropertyValue() {
+    TranslationContext context = new DeserializerUtilities()
+            .getContext("filter/basicFilterGetCssPropertyValue");
+    PageObjectMethod method = context.getMethod(ELEMENT_METHOD_NAME);
+    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "List<BasicElement>");
+    expected.addParameter(new MethodParameterInfo("scopeArg"));
+    expected.addParameter(new MethodParameterInfo("selectorArg"));
+    expected.addParameter(new MethodParameterInfo("applyArg"));
+    expected.addParameter(new MethodParameterInfo("matcherArg"));
+    expected.addCodeLine("BasicElement scope = this.getScopeElement(scopeArg)");
+    expected.addCodeLines(
+            "return basic(scope, this.test.setParameters(selectorArg))"
+                    + ".buildList(BasicElement.class, BasePageElement.class, "
+                    + "elm -> (elm.getCssPropertyValue(applyArg)!= null && elm.getCssPropertyValue(applyArg).contains(matcherArg)))");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
+
+  @Test
   public void testFilterByIsVisibleFalseFindFirst() {
     TranslationContext context = new DeserializerUtilities()
         .getContext("filter/basicFilterIsVisible");

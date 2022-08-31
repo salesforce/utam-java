@@ -91,6 +91,13 @@ public interface Element {
   String getAttribute(String attrName);
 
   /**
+   * get the value of the CSS property with the given name
+   * @param propertyName the name of the CSS property whose value to return
+   * @return the value of the CSS property
+   */
+  String getCssPropertyValue(String propertyName);
+
+  /**
    * get text inside an element
    *
    * @return string

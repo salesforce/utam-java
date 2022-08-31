@@ -1,0 +1,50 @@
+{
+  "elements" : [
+    {
+      "name" : "scope",
+      "selector" : {
+        "css" : "%s",
+        "args" : [
+          {
+            "name" : "scopeArg",
+            "type" : "string"
+          }
+        ]
+      },
+      "elements" : [
+        {
+          "name" : "test",
+          "public": true,
+          "selector" : {
+            "css" : "selector %s",
+            "returnAll" : true,
+            "args" : [
+              {
+                "name" : "selectorArg",
+                "type" : "string"
+              }
+            ]
+          },
+          "filter" : {
+            "apply" : "getCssPropertyValue",
+            "args" : [
+              {
+                "name" : "applyArg",
+                "type" : "string"
+              }
+            ],
+            "matcher" : {
+              "type" : "stringContains",
+              "args" : [
+                {
+                  "name" : "matcherArg",
+                  "type" : "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

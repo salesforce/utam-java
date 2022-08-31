@@ -96,6 +96,16 @@ public class BasePageElementTests {
   }
 
   @Test
+  public void testGetCssPropertyValue() {
+    String attrName = "name";
+    String attrValue = "value";
+    MockUtilities mock = new MockUtilities();
+    when(mock.getElementAdapter().getCssPropertyValue(attrName)).thenReturn(attrValue);
+    assertThat(mock.getUtamElement().getCssPropertyValue(attrName), is(equalTo(attrValue)));
+    verify(mock.getWebElementMock(), times(1)).getCssValue(attrName);
+  }
+
+  @Test
   public void testGetClassAttribute() {
     String attr = "class";
     MockUtilities mock = new MockUtilities();
