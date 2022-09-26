@@ -113,6 +113,13 @@ public interface PageObjectLinting {
     boolean hasDescription();
 
     /**
+     * Check if JSON file has root description with author property
+     *
+     * @return boolean
+     */
+    boolean hasAuthor();
+
+    /**
      * Get String with root locator, for example "By.css('.css')"
      *
      * @return string

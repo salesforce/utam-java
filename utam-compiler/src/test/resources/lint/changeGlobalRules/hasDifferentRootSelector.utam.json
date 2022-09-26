@@ -1,6 +1,11 @@
 {
   "root": true,
-  "description": "i have description",
+  "description": {
+    "text": [
+      "i have description"
+    ],
+    "author": "test"
+  },
   "selector": {
     "css": "root1"
   },

@@ -22,17 +22,14 @@ import utam.core.declarative.lint.PageObjectLinting.MethodLinting;
  */
 abstract class LintingRule {
 
-  private static final ViolationType DEFAULT_RULE_TYPE = ViolationType.error;
-  private static final Set<String> RULE_NO_EXCEPTION = new HashSet<>();
-
   private final ViolationType violationType;
   private final Integer errorCode;
   private final Set<String> exceptions;
 
   private LintingRule(ViolationType ruleType, Integer errorCode, Set<String> exceptions) {
-    this.violationType = Objects.requireNonNullElse(ruleType, DEFAULT_RULE_TYPE);
+    this.violationType = Objects.requireNonNullElse(ruleType, ViolationType.error);
     this.errorCode = errorCode;
-    this.exceptions = Objects.requireNonNullElse(exceptions, RULE_NO_EXCEPTION);
+    this.exceptions = Objects.requireNonNullElse(exceptions, new HashSet<>());
   }
 
   // is Rule enabled?
@@ -80,7 +77,7 @@ abstract class LintingRule {
   static class UniqueSelectorInsidePageObject extends LintingRule {
 
     static final UniqueSelectorInsidePageObject DEFAULT = new UniqueSelectorInsidePageObject(
-        DEFAULT_RULE_TYPE, new HashSet<>());
+        ViolationType.error, new HashSet<>());
 
     @JsonCreator
     UniqueSelectorInsidePageObject(
@@ -118,7 +115,8 @@ abstract class LintingRule {
    */
   static class RequiredRootDescription extends LintingRule {
 
-    static final RequiredRootDescription DEFAULT = new RequiredRootDescription(DEFAULT_RULE_TYPE,
+    static final RequiredRootDescription DEFAULT = new RequiredRootDescription(
+        ViolationType.warning,
         new HashSet<>());
 
     @JsonCreator
@@ -137,6 +135,33 @@ abstract class LintingRule {
   }
 
   /**
+   * Check description at the root level has an author
+   *
+   * @author elizaveta.ivanova
+   * @since 242
+   */
+  static class RequiredAuthor extends LintingRule {
+
+    static final RequiredAuthor DEFAULT = new RequiredAuthor(
+        ViolationType.warning,
+        new HashSet<>());
+
+    @JsonCreator
+    RequiredAuthor(
+        @JsonProperty(value = "violation") ViolationType ruleType,
+        @JsonProperty(value = "exclude") Set<String> exceptions) {
+      super(ruleType, 2005, exceptions);
+    }
+
+    @Override
+    void validate(List<LintingError> errors, PageObjectLinting pageObjectContext) {
+      if (pageObjectContext.getRootContext().hasDescription() && !pageObjectContext.getRootContext().hasAuthor()) {
+        errors.add(getError(pageObjectContext, pageObjectContext.getName()));
+      }
+    }
+  }
+
+  /**
    * Check every method has description
    *
    * @author elizaveta.ivanova
@@ -145,7 +170,7 @@ abstract class LintingRule {
   static class RequiredMethodDescription extends LintingRule {
 
     static final RequiredMethodDescription DEFAULT = new RequiredMethodDescription(
-        DEFAULT_RULE_TYPE,
+        ViolationType.warning,
         new HashSet<>());
 
     @JsonCreator
@@ -174,7 +199,7 @@ abstract class LintingRule {
   static class SingleShadowBoundaryAllowed extends LintingRule {
 
     static final SingleShadowBoundaryAllowed DEFAULT = new SingleShadowBoundaryAllowed(
-        DEFAULT_RULE_TYPE,
+        ViolationType.error,
         new HashSet<>());
 
     @JsonCreator
@@ -200,7 +225,7 @@ abstract class LintingRule {
    */
   static class UniqueRootSelector extends LintingRule {
 
-    static final UniqueRootSelector DEFAULT = new UniqueRootSelector(DEFAULT_RULE_TYPE,
+    static final UniqueRootSelector DEFAULT = new UniqueRootSelector(ViolationType.error,
         new HashSet<>());
 
     @JsonCreator
@@ -240,7 +265,7 @@ abstract class LintingRule {
   static class RootSelectorExistsForElement extends LintingRule {
 
     static final RootSelectorExistsForElement DEFAULT = new RootSelectorExistsForElement(
-        DEFAULT_RULE_TYPE,
+        ViolationType.error,
         new HashSet<>());
 
     @JsonCreator
@@ -305,7 +330,7 @@ abstract class LintingRule {
   static class ElementsWithDifferentTypes extends LintingRule {
 
     static final ElementsWithDifferentTypes DEFAULT = new ElementsWithDifferentTypes(
-        DEFAULT_RULE_TYPE, new HashSet<>());
+        ViolationType.error, new HashSet<>());
 
     @JsonCreator
     ElementsWithDifferentTypes(

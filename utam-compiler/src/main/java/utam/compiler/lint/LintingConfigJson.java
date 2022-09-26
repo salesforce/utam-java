@@ -7,23 +7,25 @@
  */
 package utam.compiler.lint;
 
+import static java.util.Objects.requireNonNullElse;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import utam.compiler.lint.LintingRule.ElementsWithDifferentTypes;
+import utam.compiler.lint.LintingRule.RequiredAuthor;
 import utam.compiler.lint.LintingRule.RequiredMethodDescription;
 import utam.compiler.lint.LintingRule.RequiredRootDescription;
 import utam.compiler.lint.LintingRule.RootSelectorExistsForElement;
 import utam.compiler.lint.LintingRule.SingleShadowBoundaryAllowed;
 import utam.compiler.lint.LintingRule.UniqueRootSelector;
 import utam.compiler.lint.LintingRule.UniqueSelectorInsidePageObject;
-import utam.core.declarative.lint.LintingContext;
 import utam.core.declarative.lint.LintingConfig;
-import utam.core.declarative.lint.PageObjectLinting;
+import utam.core.declarative.lint.LintingContext;
 import utam.core.declarative.lint.LintingError;
+import utam.core.declarative.lint.PageObjectLinting;
 import utam.core.framework.UtamLogger;
 
 /**
@@ -35,12 +37,14 @@ import utam.core.framework.UtamLogger;
 public class LintingConfigJson implements LintingConfig {
 
   static final String LINTING_EXCEPTION_PREFIX = "UTAM linting failures:\n";
+  static final boolean DEFAULT_THROWS_ERROR = false;
 
   /**
    * default configuration when config is empty
    */
   static final LintingConfig DEFAULT_LINTING_CONFIG = new LintingConfigJson(
-      true,
+      DEFAULT_THROWS_ERROR,
+      null,
       null,
       null,
       null,
@@ -59,25 +63,23 @@ public class LintingConfigJson implements LintingConfig {
       @JsonProperty(value = "throwError") Boolean interruptCompilation,
       @JsonProperty(value = "duplicateSelectors") UniqueSelectorInsidePageObject uniqueSelectors,
       @JsonProperty(value = "requiredRootDescription") RequiredRootDescription requiredRootDescription,
+      @JsonProperty(value = "requiredAuthor") RequiredAuthor requiredAuthor,
       @JsonProperty(value = "requiredMethodDescription") RequiredMethodDescription requiredMethodDescription,
       @JsonProperty(value = "requiredSingleShadowRoot") SingleShadowBoundaryAllowed singleShadowBoundaryAllowed,
       @JsonProperty(value = "duplicateRootSelectors") UniqueRootSelector uniqueRootSelectors,
       @JsonProperty(value = "elementCantHaveRootSelector") RootSelectorExistsForElement rootSelectorExists,
       @JsonProperty(value = "duplicateCustomSelectors") ElementsWithDifferentTypes customWrongType) {
-    isInterruptCompilation = Objects.requireNonNullElse(interruptCompilation, true);
+    isInterruptCompilation = requireNonNullElse(interruptCompilation, DEFAULT_THROWS_ERROR);
+    localRules.add(requireNonNullElse(uniqueSelectors, UniqueSelectorInsidePageObject.DEFAULT));
+    localRules.add(requireNonNullElse(requiredRootDescription, RequiredRootDescription.DEFAULT));
+    localRules.add(requireNonNullElse(requiredAuthor, RequiredAuthor.DEFAULT));
     localRules
-        .add(Objects.requireNonNullElse(uniqueSelectors, UniqueSelectorInsidePageObject.DEFAULT));
+        .add(requireNonNullElse(requiredMethodDescription, RequiredMethodDescription.DEFAULT));
     localRules
-        .add(Objects.requireNonNullElse(requiredRootDescription, RequiredRootDescription.DEFAULT));
-    localRules.add(
-        Objects.requireNonNullElse(requiredMethodDescription, RequiredMethodDescription.DEFAULT));
-    localRules.add(Objects
-        .requireNonNullElse(singleShadowBoundaryAllowed, SingleShadowBoundaryAllowed.DEFAULT));
-    globalRules.add(Objects.requireNonNullElse(uniqueRootSelectors, UniqueRootSelector.DEFAULT));
-    globalRules
-        .add(Objects.requireNonNullElse(rootSelectorExists, RootSelectorExistsForElement.DEFAULT));
-    globalRules
-        .add(Objects.requireNonNullElse(customWrongType, ElementsWithDifferentTypes.DEFAULT));
+        .add(requireNonNullElse(singleShadowBoundaryAllowed, SingleShadowBoundaryAllowed.DEFAULT));
+    globalRules.add(requireNonNullElse(uniqueRootSelectors, UniqueRootSelector.DEFAULT));
+    globalRules.add(requireNonNullElse(rootSelectorExists, RootSelectorExistsForElement.DEFAULT));
+    globalRules.add(requireNonNullElse(customWrongType, ElementsWithDifferentTypes.DEFAULT));
   }
 
   /**

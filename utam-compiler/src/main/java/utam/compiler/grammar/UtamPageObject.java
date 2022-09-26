@@ -218,7 +218,7 @@ final class UtamPageObject {
     ElementContext rootElement = new ElementContext.Root(interfaceType, rootLocator, elementType,
         rootElementMethod);
     context.setElement(rootElement);
-    RootLinting rootLintingContext = new Root(!description.isEmpty(), rootLocator);
+    RootLinting rootLintingContext = new Root(!description.isEmpty(), description.hasAuthor(), rootLocator);
     context.getLintingObject().setRootContext(rootLintingContext);
     return rootElement;
   }

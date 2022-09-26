@@ -90,6 +90,15 @@ class UtamRootDescription {
   }
 
   /**
+   * Used for linting to check if author is set
+   *
+   * @return boolean
+   */
+  boolean hasAuthor() {
+    return author != null;
+  }
+
+  /**
    * Helper class for an empty root description
    *
    * @author elizaveta.ivanova

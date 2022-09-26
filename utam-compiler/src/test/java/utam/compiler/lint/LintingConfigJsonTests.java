@@ -10,7 +10,6 @@ package utam.compiler.lint;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
 
 import java.io.File;
@@ -54,7 +53,8 @@ public class LintingConfigJsonTests {
     List<LintingError> errors = runner.run().getLintingErrors();
     assertThat(errors, hasSize(1));
     assertThat(errors.get(0).getMessage(),
-        containsString("linting warning 2002: page object utam/pageObjects/test: root description is missing"));
+        containsString(
+            "linting warning 2002: page object utam/pageObjects/test: root description is missing"));
   }
 
   @Test
@@ -65,9 +65,11 @@ public class LintingConfigJsonTests {
   }
 
   @Test
-  public void testLintingDoesThrowIfConfigured() {
-    TranslatorRunner runner = getRunner("defaultConfig");
-    List<LintingError> errors = runner.run().getLintingErrors();
-    assertThat(errors, hasSize(3));
+  public void testLintingThrowsIfConfigured() {
+    TranslatorRunner runner = getRunner("throwConfig");
+    Exception e = expectThrows(UtamLintingError.class, runner::run);
+    assertThat(e.getMessage(),
+        containsString("linting error 2001: page object utam/pageObjects/test: "
+            + "duplicate selector \"By.cssSelector: .one\" for the elements \"two\" and \"one\""));
   }
 }

@@ -191,16 +191,23 @@ public class PageObjectLintingImpl implements PageObjectLinting {
   public static class Root implements RootLinting {
 
     private final boolean hasRootDescription;
+    private final boolean hasAuthor;
     private final String locator;
 
-    public Root(boolean hasRootDescription, Locator locator) {
+    public Root(boolean hasRootDescription, boolean hasAuthor, Locator locator) {
       this.hasRootDescription = hasRootDescription;
+      this.hasAuthor = hasAuthor;
       this.locator = locator == null ? null : locator.getValue().toString();
     }
 
     @Override
     public boolean hasDescription() {
       return hasRootDescription;
+    }
+
+    @Override
+    public boolean hasAuthor() {
+      return hasAuthor;
     }
 
     @Override
