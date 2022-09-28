@@ -36,9 +36,14 @@ public abstract class ElementContext {
   public static final String ROOT_ELEMENT_NAME = "root";
 
   /**
-   * The name of the document element
+   * The name of the document object
    */
   public static final String DOCUMENT_ELEMENT_NAME = "document";
+
+  /**
+   * The name of the navigation object
+   */
+  static final String NAVIGATION_OBJECT_NAME = "navigation";
 
   static final String SELF_ELEMENT_NAME = "self";
   static final Locator EMPTY_SELECTOR = LocatorBy.byCss("");
@@ -48,9 +53,9 @@ public abstract class ElementContext {
   private final String name;
   private final TypeProvider type;
   private final boolean isNullable;
-  private PageObjectMethod elementGetter;
   private final ElementType elementType;
   private final ElementContext scopeElement;
+  private PageObjectMethod elementGetter;
 
   /**
    * Initializes a new instance of the ElementContext class
@@ -194,7 +199,7 @@ public abstract class ElementContext {
   /**
    * Register element getter method, throw NPE if method already exists
    *
-   * @param method  the method to set as the element getter
+   * @param method the method to set as the element getter
    */
   void registerElementMethod(PageObjectMethod method) {
     if (this.elementGetter != null) {
@@ -241,6 +246,51 @@ public abstract class ElementContext {
   }
 
   /**
+   * The node types of elements
+   */
+  public enum ElementType {
+    /**
+     * A basic element
+     */
+    BASIC,
+
+    /**
+     * An element that represents another Page Object
+     */
+    CUSTOM,
+
+    /**
+     * A container element
+     */
+    CONTAINER,
+
+    /**
+     * An element representing a frame or iframe
+     */
+    FRAME,
+
+    /**
+     * An element representing the root element
+     */
+    ROOT,
+
+    /**
+     * An element representing itself
+     */
+    SELF,
+
+    /**
+     * An element representing the enclosing document
+     */
+    DOCUMENT,
+
+    /**
+     * An object for access to driver navigation
+     */
+    NAVIGATION
+  }
+
+  /**
    * Represents a basic element (on of actionable group)
    */
   public static class Basic extends ElementContext {
@@ -268,9 +318,9 @@ public abstract class ElementContext {
     /**
      * Initializes a new instance of the Basic class, used only in unit tests
      *
-     * @param name         the name of the element
-     * @param elementType  the type of the element
-     * @param selector     the selector for the element
+     * @param name        the name of the element
+     * @param elementType the type of the element
+     * @param selector    the selector for the element
      */
     public Basic(String name, TypeProvider elementType, Locator selector) {
       this(null, name, elementType, selector, new ArrayList<>(), false);
@@ -279,8 +329,8 @@ public abstract class ElementContext {
     /**
      * Initializes a new instance of the Basic class, used only in unit tests
      *
-     * @param elementType  the type of the element
-     * @param selector     the selector for the element
+     * @param elementType the type of the element
+     * @param selector    the selector for the element
      */
     public Basic(TypeProvider elementType, Locator selector) {
       this(null, "test", elementType, selector, new ArrayList<>(), false);
@@ -311,8 +361,8 @@ public abstract class ElementContext {
     /**
      * Initializes a new instance of the BasicReturnsAll class, used only in unit tests
      *
-     * @param elementType  the type of the element
-     * @param selector     the selector for the element
+     * @param elementType the type of the element
+     * @param selector    the selector for the element
      */
     public BasicReturnsAll(TypeProvider elementType, Locator selector) {
       this(null, "test", elementType, selector, new ArrayList<>(), false);
@@ -395,8 +445,10 @@ public abstract class ElementContext {
      * @param selector                the selector for the element
      * @param rootType                the type of the root element
      */
-    public Root(TypeProvider enclosingPageObjectType, Locator selector, TypeProvider rootType, PageObjectMethod rootElementMethod) {
-      super(ElementType.ROOT, null, ROOT_ELEMENT_NAME, rootType, selector, new ArrayList<>(), false);
+    public Root(TypeProvider enclosingPageObjectType, Locator selector, TypeProvider rootType,
+        PageObjectMethod rootElementMethod) {
+      super(ElementType.ROOT, null, ROOT_ELEMENT_NAME, rootType, selector, new ArrayList<>(),
+          false);
       registerElementMethod(rootElementMethod);
       this.enclosingPageObjectType = enclosingPageObjectType;
     }
@@ -466,11 +518,11 @@ public abstract class ElementContext {
     /**
      * Initializes a new instance of the Custom class, used only in unit tests
      *
-     * @param elementName  the name of the element
-     * @param type         the type of the element
-     * @param selector      the selector for the element
+     * @param elementName the name of the element
+     * @param type        the type of the element
+     * @param selector    the selector for the element
      */
-    public Custom(String elementName, TypeProvider type, Locator selector) {
+    Custom(String elementName, TypeProvider type, Locator selector) {
       this(null, elementName, type, selector, new ArrayList<>(), false);
     }
   }
@@ -503,12 +555,12 @@ public abstract class ElementContext {
   /**
    * Represents self element (or "this")
    */
-  public static class Self extends ElementContext {
+  static class Self extends ElementContext {
 
     /**
      * The self element context
      */
-    public static final ElementContext SELF_ELEMENT = new Self();
+    static final ElementContext SELF_ELEMENT = new Self();
 
     /**
      * Initializes a new instance of the Self class
@@ -526,42 +578,30 @@ public abstract class ElementContext {
   }
 
   /**
-   * The node types of elements
+   * Represents the navigation object
+   *
+   * @author elizaveta.ivanova
+   * @since 242
    */
-  public enum ElementType {
-    /**
-     * A basic element
-     */
-    BASIC,
+  public static class Navigation extends ElementContext {
 
     /**
-     * An element that represents another Page Object
+     * The document element context
      */
-    CUSTOM,
+    public static final ElementContext NAVIGATION_OBJECT = new Navigation();
 
     /**
-     * A container element
+     * Initializes a new instance of the Document class
      */
-    CONTAINER,
-
-    /**
-     * An element representing a frame or iframe
-     */
-    FRAME,
-
-    /**
-     * An element representing the root element
-     */
-    ROOT,
-
-    /**
-     * An element representing itself
-     */
-    SELF,
-
-    /**
-     * An element representing the enclosing document
-     */
-    DOCUMENT
+    private Navigation() {
+      super(ElementType.NAVIGATION,
+          null,
+          NAVIGATION_OBJECT_NAME,
+          null,
+          EMPTY_SELECTOR,
+          Collections.emptyList(),
+          false);
+      registerElementMethod(ElementMethod.NAVIGATION_GETTER);
+    }
   }
 }

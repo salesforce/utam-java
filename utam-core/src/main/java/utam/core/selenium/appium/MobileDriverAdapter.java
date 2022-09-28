@@ -122,7 +122,7 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
     return MobileDriverUtils.isNative(getAppiumDriver());
   }
 
-  AppiumDriver getAppiumDriver() {
+  final AppiumDriver getAppiumDriver() {
     return (AppiumDriver) getSeleniumDriver();
   }
 
@@ -155,5 +155,15 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
   @Override
   protected Element wrapElement(WebElement element) {
     return new MobileElementAdapter(element, this);
+  }
+
+  @Override
+  public void back() {
+    getAppiumDriver().navigate().back();
+  }
+
+  @Override
+  public void forward() {
+    getAppiumDriver().navigate().forward();
   }
 }

@@ -28,6 +28,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsDriver;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
+import utam.core.driver.Navigation;
 import utam.core.element.Element;
 import utam.core.element.FrameElement;
 import utam.core.framework.base.FrameElementImpl;
@@ -37,6 +38,7 @@ import utam.core.framework.consumer.PageObjectContext;
 import utam.core.framework.consumer.PageObjectContextImpl;
 import utam.core.framework.element.BasePageElement;
 import utam.core.framework.element.DocumentObject;
+import utam.core.framework.element.NavigationImpl;
 import utam.core.selenium.appium.MobileDriverAdapter;
 import utam.core.selenium.appium.MobileElementAdapter;
 import utam.core.selenium.element.DriverAdapter;
@@ -160,6 +162,10 @@ public class MockUtilities {
 
   public Document getDocument() {
     return new DocumentObject(getFactory());
+  }
+
+  public Navigation getNavigation() {
+    return new NavigationImpl(getDriverAdapter());
   }
 
   public BasePageElement getUtamElement() {

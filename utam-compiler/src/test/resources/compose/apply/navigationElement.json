@@ -1,0 +1,17 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "navigation",
+          "apply": "back"
+        },
+        {
+          "element": "navigation",
+          "apply": "forward"
+        }
+      ]
+    }
+  ]
+}

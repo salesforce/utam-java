@@ -141,4 +141,14 @@ public interface Driver {
    * @return boolean true if current context is native
    */
   boolean isNativeContext();
+
+  /**
+   * Navigates backward in the current browsing context (mobile or web)
+   */
+  void back();
+
+  /**
+   * Navigates forward in the current browsing context (mobile or web)
+   */
+  void forward();
 }

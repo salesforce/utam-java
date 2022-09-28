@@ -15,13 +15,13 @@ import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.COLLECTOR_IMPORT;
 import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
+import static utam.compiler.representation.PageObjectValidationTestHelper.validateMethod;
 
 import java.util.List;
 import org.testng.annotations.Test;
 import utam.compiler.JsonBuilderTestUtility;
 import utam.compiler.helpers.PrimitiveType;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -55,7 +55,7 @@ public class UtamMethodActionApplyTests {
     expected.addCodeLine("Custom custom0 = this.getCustomElement()");
     expected.addCodeLine("List<String> statement0 = custom0.someMethod(strArg, true)");
     expected.addCodeLine("return statement0");
-    PageObjectValidationTestHelper.validateMethod(method, expected);
+    validateMethod(method, expected);
   }
 
   @Test
@@ -66,7 +66,17 @@ public class UtamMethodActionApplyTests {
     methodInfo.addCodeLine("String statement0 = this.getDocument().getUrl()");
     methodInfo.addCodeLine("Boolean matcher0 = \"url\".equals(statement0)");
     methodInfo.addCodeLine("return matcher0");
-    PageObjectValidationTestHelper.validateMethod(actualMethod, methodInfo);
+    validateMethod(actualMethod, methodInfo);
+  }
+
+  @Test
+  public void testComposeWithNavigation() {
+    TranslationContext context = getContext("navigationElement");
+    PageObjectMethod actualMethod = context.getMethod(methodName);
+    MethodInfo methodInfo = new MethodInfo(methodName);
+    methodInfo.addCodeLine("this.getNavigation().back()");
+    methodInfo.addCodeLine("this.getNavigation().forward()");
+    validateMethod(actualMethod, methodInfo);
   }
 
   @Test
@@ -76,7 +86,7 @@ public class UtamMethodActionApplyTests {
     MethodInfo methodInfo = new MethodInfo(methodName);
     methodInfo.addCodeLine("TestElement test0 = this.getTestElement()");
     methodInfo.addCodeLine("test0.click()");
-    PageObjectValidationTestHelper.validateMethod(actualMethod, methodInfo);
+    validateMethod(actualMethod, methodInfo);
   }
 
   @Test
@@ -89,7 +99,7 @@ public class UtamMethodActionApplyTests {
     expected.addCodeLine("BasicElement nestedTarget0 = this.getNestedTargetElement(row, column)");
     expected.addCodeLine("String statement0 = nestedTarget0.getText()");
     expected.addCodeLine("return statement0");
-    PageObjectValidationTestHelper.validateMethod(method, expected);
+    validateMethod(method, expected);
   }
 
   @Test
@@ -101,7 +111,7 @@ public class UtamMethodActionApplyTests {
     methodInfo.addCodeLine("TestElement test0 = this.getTest(buttonText)");
     methodInfo.addCodeLine("test0.click()");
     methodInfo.addCodeLine("return this");
-    PageObjectValidationTestHelper.validateMethod(actualMethod, methodInfo);
+    validateMethod(actualMethod, methodInfo);
   }
 
   @Test
@@ -111,7 +121,7 @@ public class UtamMethodActionApplyTests {
     MethodInfo expected = new MethodInfo(methodName, "Boolean");
     expected.addCodeLine("Boolean statement0 = this.isPresent()");
     expected.addCodeLine("return statement0");
-    PageObjectValidationTestHelper.validateMethod(actualMethod, expected);
+    validateMethod(actualMethod, expected);
   }
 
   @Test
@@ -123,7 +133,7 @@ public class UtamMethodActionApplyTests {
     expected.addImportedTypes(LIST_IMPORT);
     expected.addCodeLine("List<Boolean> statement0 = this.isPresent()");
     expected.addCodeLine("return statement0");
-    PageObjectValidationTestHelper.validateMethod(actualMethod, expected);
+    validateMethod(actualMethod, expected);
   }
 
   @Test
@@ -135,7 +145,7 @@ public class UtamMethodActionApplyTests {
     expected.addCodeLine("List<TestElement> test0 = this.getTestElement()");
     expected.addCodeLine("if (test0 == null) { return; }");
     expected.addCodeLine("test0.forEach(element -> element.focus())");
-    PageObjectValidationTestHelper.validateMethod(actualMethod, expected);
+    validateMethod(actualMethod, expected);
   }
 
   @Test
@@ -150,7 +160,7 @@ public class UtamMethodActionApplyTests {
     expected.addCodeLine(
         "List<Boolean> statement0 = test0.stream().map(element -> element.isVisible()).collect(Collectors.toList())");
     expected.addCodeLine("return statement0");
-    PageObjectValidationTestHelper.validateMethod(actualMethod, expected);
+    validateMethod(actualMethod, expected);
   }
 
   @Test
@@ -164,7 +174,7 @@ public class UtamMethodActionApplyTests {
         "basic0.stream().map(element -> element.getText()).collect(Collectors.toList())");
     expected.addCodeLine("Integer statement1 = basic0.size()");
     expected.addCodeLine("return statement1");
-    PageObjectValidationTestHelper.validateMethod(actualMethod, expected);
+    validateMethod(actualMethod, expected);
   }
 
   @Test
@@ -178,7 +188,7 @@ public class UtamMethodActionApplyTests {
     expected.addCodeLine("Custom custom0 = this.getCustomElement()");
     expected.addCodeLine("Custom statement0 = custom0.someMethod(strArg)");
     expected.addCodeLine("return statement0");
-    PageObjectValidationTestHelper.validateMethod(actualMethod, expected);
+    validateMethod(actualMethod, expected);
   }
 
   @Test
@@ -194,7 +204,7 @@ public class UtamMethodActionApplyTests {
         "Object statement1 = statement0.stream().map(element -> element.method2()).collect(Collectors.toList())");
     expected.addCodeLine("Boolean matcher1 = statement1 != null");
     expected.addCodeLine("return matcher1");
-    PageObjectValidationTestHelper.validateMethod(method, expected);
+    validateMethod(method, expected);
   }
 
   @Test
@@ -211,7 +221,7 @@ public class UtamMethodActionApplyTests {
     expected.addCodeLine("List<Item> statement2 = statement1.getItems()");
     expected.addCodeLine("return statement2");
     assertThat(method.getDeclaration().getCodeLine(), is("List<Item> test(Integer rowIndex)"));
-    PageObjectValidationTestHelper.validateMethod(method, expected);
+    validateMethod(method, expected);
   }
 
   @Test
@@ -239,7 +249,7 @@ public class UtamMethodActionApplyTests {
     methodInfo.addCodeLine("FirstElement first0 = this.getFirstElement(selectorArg1)");
     methodInfo.addCodeLine("first0.dragAndDrop(this.getSecond(selectorArg2), 2)");
     PageObjectMethod method = context.getMethod(methodName);
-    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+    validateMethod(method, methodInfo);
   }
 
   @Test
@@ -251,7 +261,7 @@ public class UtamMethodActionApplyTests {
     methodInfo.addParameter(new MethodParameterInfo("y", PrimitiveType.NUMBER));
     methodInfo.addCodeLine("SimplePublicElement simplePublic0 = this.getSimplePublic()");
     methodInfo.addCodeLine("simplePublic0.dragAndDropByOffset(x, y)");
-    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+    validateMethod(method, methodInfo);
   }
 
   @Test
@@ -262,7 +272,7 @@ public class UtamMethodActionApplyTests {
     methodInfo.addParameter(new MethodParameterInfo("duration", PrimitiveType.NUMBER));
     methodInfo.addCodeLine("SimplePublicElement simplePublic0 = this.getSimplePublic()");
     methodInfo.addCodeLine("simplePublic0.dragAndDropByOffset(1, 2, duration)");
-    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+    validateMethod(method, methodInfo);
   }
 
   @Test
@@ -275,7 +285,7 @@ public class UtamMethodActionApplyTests {
     methodInfo.addCodeLine("this.getDocument().enterFrame(this.getMyPublicFrame(frameStr))");
     methodInfo.addCodeLine("this.getDocument().exitFrame()");
     methodInfo.addCodeLine("this.getDocument().exitToParentFrame()");
-    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+    validateMethod(method, methodInfo);
   }
 
   @Test
@@ -288,7 +298,7 @@ public class UtamMethodActionApplyTests {
     methodInfo.addImpliedImportedTypes(importPageObjectType);
     methodInfo.addCodeLine(
         "this.getDocument().enterFrameAndLoad(this.getMyFrameElement(), Button.class)");
-    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+    validateMethod(method, methodInfo);
   }
 
   @Test
@@ -299,9 +309,10 @@ public class UtamMethodActionApplyTests {
     MethodInfo methodInfo = new MethodInfo(methodName, "Button");
     String importPageObjectType = "my.lightning.Button";
     methodInfo.addImpliedImportedTypes(importPageObjectType);
-    methodInfo.addCodeLine("Button statement0 = this.getDocument().enterFrameAndLoad(this.getMyFrameElement(), Button.class)");
+    methodInfo.addCodeLine(
+        "Button statement0 = this.getDocument().enterFrameAndLoad(this.getMyFrameElement(), Button.class)");
     methodInfo.addCodeLine("return statement0");
-    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+    validateMethod(method, methodInfo);
   }
 
   @Test
@@ -316,9 +327,10 @@ public class UtamMethodActionApplyTests {
         .addParameter(new MethodParameterInfo("pageObject", "Class<T>"));
     methodInfo.addImportedTypes(ROOT_PAGE_OBJECT.getFullName(), FRAME_ELEMENT.getFullName());
     methodInfo.addImpliedImportedTypes(ROOT_PAGE_OBJECT.getFullName(), FRAME_ELEMENT.getFullName());
-    methodInfo.addCodeLine("T statement0 = this.getDocument().enterFrameAndLoad(myFrame, pageObject)");
+    methodInfo
+        .addCodeLine("T statement0 = this.getDocument().enterFrameAndLoad(myFrame, pageObject)");
     methodInfo.addCodeLine("return statement0");
-    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+    validateMethod(method, methodInfo);
   }
 
   @Test
@@ -334,7 +346,7 @@ public class UtamMethodActionApplyTests {
     methodInfo.addImportedTypes(ROOT_PAGE_OBJECT.getFullName(), FRAME_ELEMENT.getFullName());
     methodInfo.addImpliedImportedTypes(ROOT_PAGE_OBJECT.getFullName(), FRAME_ELEMENT.getFullName());
     methodInfo.addCodeLine("this.getDocument().enterFrameAndLoad(myFrame, pageObject)");
-    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+    validateMethod(method, methodInfo);
   }
 
   @Test
@@ -346,7 +358,7 @@ public class UtamMethodActionApplyTests {
     methodInfo.addCodeLine("FrameElement myFrame0 = this.getMyFrameElement()");
     methodInfo.addCodeLine("String statement0 = myFrame0.getText()");
     methodInfo.addCodeLine("return statement0");
-    PageObjectValidationTestHelper.validateMethod(method, methodInfo);
+    validateMethod(method, methodInfo);
   }
 
   @Test
@@ -354,7 +366,8 @@ public class UtamMethodActionApplyTests {
     String importStr = "my.pageobject.Foo";
     TranslationContext context = getContext("customWithFilterFindFirst");
     PageObjectMethod method = context.getMethod(methodName);
-    assertThat(method.getDeclaration().getCodeLine(), is("Foo test(String filterArg, String applyArg)"));
+    assertThat(method.getDeclaration().getCodeLine(),
+        is("Foo test(String filterArg, String applyArg)"));
     MethodInfo expected = new MethodInfo(methodName, "Foo");
     expected.addParameter(new MethodParameterInfo("filterArg"));
     expected.addParameter(new MethodParameterInfo("applyArg"));
@@ -363,7 +376,7 @@ public class UtamMethodActionApplyTests {
     expected.addCodeLine("Foo findFirst0 = this.getFindFirstElement(filterArg)");
     expected.addCodeLine("Foo statement0 = findFirst0.publicMethod(applyArg)");
     expected.addCodeLine("return statement0");
-    PageObjectValidationTestHelper.validateMethod(method, expected);
+    validateMethod(method, expected);
   }
 
   /**
@@ -379,7 +392,7 @@ public class UtamMethodActionApplyTests {
     expected.addParameter(new MethodParameterInfo("applyArg"));
     expected.addCodeLine("Element element0 = this.getElementElement(row, column)");
     expected.addCodeLine("element0.apply(applyArg)");
-    PageObjectValidationTestHelper.validateMethod(method, expected);
+    validateMethod(method, expected);
   }
 
   /**
@@ -396,7 +409,7 @@ public class UtamMethodActionApplyTests {
     expected.addCodeLine(
         "List<String> statement0 = element0.stream().map(element -> element.getText()).collect(Collectors.toList())");
     expected.addCodeLine("return statement0");
-    PageObjectValidationTestHelper.validateMethod(method, expected);
+    validateMethod(method, expected);
   }
 
   @Test
@@ -418,6 +431,6 @@ public class UtamMethodActionApplyTests {
     MethodInfo expected = new MethodInfo("testApply", "void");
     expected.addCodeLine("SettingsPanelElement settingsPanel0 = this.getSettingsPanel()");
     expected.addCodeLine("settingsPanel0.click()");
-    PageObjectValidationTestHelper.validateMethod(method, expected);
+    validateMethod(method, expected);
   }
 }

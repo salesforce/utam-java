@@ -27,6 +27,7 @@ import utam.compiler.helpers.ElementContext.BasicReturnsAll;
 import utam.compiler.helpers.ElementContext.CustomReturnsAll;
 import utam.compiler.helpers.ElementContext.Document;
 import utam.compiler.helpers.ElementContext.ElementType;
+import utam.compiler.helpers.ElementContext.Navigation;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.MethodContext.ElementsUsageTracker;
 import utam.compiler.helpers.ParameterUtils;
@@ -53,6 +54,8 @@ class UtamMethodActionApply extends UtamMethodAction {
 
   private static final Operand DOCUMENT_OPERAND = new ConstOperand(String.format("this.%s()",
       Document.DOCUMENT_ELEMENT.getElementGetterName()));
+  private static final Operand NAVIGATION_OPERAND = new ConstOperand(String.format("this.%s()",
+      Navigation.NAVIGATION_OBJECT.getElementGetterName()));
 
   private final String apply;
 
@@ -364,6 +367,8 @@ class UtamMethodActionApply extends UtamMethodAction {
         return SELF_OPERAND;
       } else if (elementContext.getElementNodeType() == ElementType.DOCUMENT) {
         return DOCUMENT_OPERAND;
+      } else if (elementContext.getElementNodeType() == ElementType.NAVIGATION) {
+        return NAVIGATION_OPERAND;
       } else {
         return getReferencedElementOperand();
       }

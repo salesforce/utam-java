@@ -20,6 +20,8 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.contains;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
@@ -33,6 +35,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriver.Navigation;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
@@ -120,15 +123,16 @@ public class DriverAdapterTests {
   public void testWaitForThrowsTimeout() {
     Driver driver = new MockUtilities().getDriverAdapter();
     Instant start = Instant.now();
-    TimeoutException e = expectThrows(TimeoutException.class, () -> driver.waitFor(() -> null, "test", null));
+    TimeoutException e = expectThrows(TimeoutException.class,
+        () -> driver.waitFor(() -> null, "test", null));
     Instant stop = Instant.now();
-    assertThat(Duration.between(start, stop).toSecondsPart() , is(lessThanOrEqualTo(1)));
+    assertThat(Duration.between(start, stop).toSecondsPart(), is(lessThanOrEqualTo(1)));
     assertThat(e.getMessage(), containsString("Expected condition failed: test"));
     start = Instant.now();
     e = expectThrows(TimeoutException.class, () -> driver.waitFor(() -> false, null, null));
     stop = Instant.now();
     assertThat(e.getMessage(), containsString("Expected condition failed: wait for condition"));
-    assertThat(Duration.between(start, stop).toSecondsPart() , is(lessThanOrEqualTo(1)));
+    assertThat(Duration.between(start, stop).toSecondsPart(), is(lessThanOrEqualTo(1)));
   }
 
   @Test
@@ -140,7 +144,7 @@ public class DriverAdapterTests {
     }, "test", Duration.ofSeconds(3)));
     Instant stop = Instant.now();
     assertThat(e.getMessage(), containsString("my error"));
-    assertThat(Duration.between(start, stop).toSecondsPart() , is(greaterThanOrEqualTo(3)));
+    assertThat(Duration.between(start, stop).toSecondsPart(), is(greaterThanOrEqualTo(3)));
   }
 
   @Test
@@ -196,5 +200,25 @@ public class DriverAdapterTests {
     DriverAdapter adapter = (DriverAdapter) mock.getDriverAdapter();
     // nothing happens
     adapter.setPageContext(PlatformType.WEB);
+  }
+
+  @Test
+  public void testBackNavigation() {
+    MockUtilities mock = new MockUtilities();
+    Navigation navigationMock = mock(Navigation.class);
+    WebDriver driver = mock.getWebDriverMock();
+    when(driver.navigate()).thenReturn(navigationMock);
+    mock.getDriverAdapter().back();
+    verify(navigationMock, times(1)).back();
+  }
+
+  @Test
+  public void testForwardNavigation() {
+    MockUtilities mock = new MockUtilities();
+    Navigation navigationMock = mock(Navigation.class);
+    WebDriver driver = mock.getWebDriverMock();
+    when(driver.navigate()).thenReturn(navigationMock);
+    mock.getDriverAdapter().forward();
+    verify(navigationMock, times(1)).forward();
   }
 }

@@ -19,11 +19,12 @@ import static utam.compiler.grammar.TestUtilities.getCssSelector;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.EMPTY_SELECTOR;
+import static utam.compiler.helpers.ElementContext.NAVIGATION_OBJECT_NAME;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.SELF_ELEMENT_NAME;
-import static utam.compiler.types.BasicElementInterface.actionable;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
+import static utam.compiler.types.BasicElementInterface.actionable;
 
 import java.util.Collections;
 import org.testng.annotations.Test;
@@ -33,6 +34,7 @@ import utam.compiler.helpers.ElementContext.Custom;
 import utam.compiler.helpers.ElementContext.CustomReturnsAll;
 import utam.compiler.helpers.ElementContext.Document;
 import utam.compiler.helpers.ElementContext.ElementType;
+import utam.compiler.helpers.ElementContext.Navigation;
 import utam.compiler.helpers.ElementContext.Root;
 import utam.compiler.helpers.ElementContext.Self;
 import utam.compiler.helpers.LocatorCodeGeneration.SelectorType;
@@ -52,7 +54,8 @@ public class ElementContextTests {
 
   private static final String ELEMENT_NAME = "fakeElementName";
   private static final Locator SELECTOR_VALUE = getCssSelector(".fakeSelector");
-  private static final TypeProvider DUMMY_TYPE = new TypeUtilities.FromString("test.FakeElementType");
+  private static final TypeProvider DUMMY_TYPE = new TypeUtilities.FromString(
+      "test.FakeElementType");
   private static final TypeProvider BASIC_ELEMENT_TYPE = actionable;
 
   private static ElementContext.Basic getSingleElementContext() {
@@ -119,7 +122,8 @@ public class ElementContextTests {
     ElementContext elementContext = getSingleElementContext();
     TranslationContext context = getTestTranslationContext();
     elementContext.setElementMethod(method, context);
-    assertThrows(NullPointerException.class, () -> elementContext.setElementMethod(method, context));
+    assertThrows(NullPointerException.class,
+        () -> elementContext.setElementMethod(method, context));
   }
 
   @Test
@@ -145,6 +149,17 @@ public class ElementContextTests {
   }
 
   @Test
+  public void testNavigationElement() {
+    ElementContext context = Navigation.NAVIGATION_OBJECT;
+    assertThat(context.getElementNodeType(), is(ElementType.NAVIGATION));
+    assertThat(context.isNullable(), is(false));
+    assertThat(context.getName(), is(equalTo(NAVIGATION_OBJECT_NAME)));
+    assertThat(context.getType(), is(nullValue()));
+    assertThat(context.getParameters(), is(hasSize(0)));
+    assertThat(context.getSelector(), is(equalTo(EMPTY_SELECTOR)));
+  }
+
+  @Test
   public void testSelfElement() {
     ElementContext context = Self.SELF_ELEMENT;
     assertThat(context.getElementNodeType(), is(ElementType.SELF));
@@ -157,11 +172,13 @@ public class ElementContextTests {
 
   @Test
   public void testRootElement() {
-    ElementContext.Root context = new Root(TEST_PAGE_OBJECT, getCssSelector("css"), actionable, mock(PageObjectMethod.class));
+    ElementContext.Root context = new Root(TEST_PAGE_OBJECT, getCssSelector("css"), actionable,
+        mock(PageObjectMethod.class));
     assertThat(context.getName(), is(equalTo(ROOT_ELEMENT_NAME)));
     assertThat(context.getElementNodeType(), is(ElementType.ROOT));
     assertThat(context.isNullable(), is(false));
-    assertThat(context.getEnclosingPageObjectType().getFullName(), is(equalTo(TEST_PAGE_OBJECT.getFullName())));
+    assertThat(context.getEnclosingPageObjectType().getFullName(),
+        is(equalTo(TEST_PAGE_OBJECT.getFullName())));
     assertThat(context.getType().getFullName(), is(equalTo(actionable.getFullName())));
     assertThat(context.getParameters(), is(hasSize(0)));
     assertThat(context.getSelector(), is(equalTo(getCssSelector("css"))));

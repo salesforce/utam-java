@@ -18,8 +18,9 @@ import static utam.core.element.FindContext.Type.EXISTING;
 import java.util.function.Supplier;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
+import utam.core.driver.Document;
+import utam.core.driver.Navigation;
 import utam.core.framework.element.BasePageElement;
-import utam.core.framework.element.DocumentObject;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -32,7 +33,7 @@ public class PageObjectTests {
   @Test
   public void testWaitFor() {
     TestPageImpl testPage = new TestPageImpl();
-    MockUtilities mockUtilities = testPage.mockUtilities;
+    MockUtilities mockUtilities = testPage.mock;
     Supplier<Object> apply =
         () -> {
           mockUtilities.getElementAdapter().setText("text");
@@ -54,7 +55,13 @@ public class PageObjectTests {
   @Test
   public void testGetDocument() {
     TestPageImpl testPage = new TestPageImpl();
-    assertThat(testPage.getDocument(), is(instanceOf(DocumentObject.class)));
+    assertThat(testPage.getDocument(), is(instanceOf(Document.class)));
+  }
+
+  @Test
+  public void testGetNavigation() {
+    TestPageImpl testPage = new TestPageImpl();
+    assertThat(testPage.getNavigation(), is(instanceOf(Navigation.class)));
   }
 
   @Test
@@ -79,12 +86,13 @@ public class PageObjectTests {
 
   static class TestPageImpl extends BasePageObject {
 
-    final MockUtilities mockUtilities = new MockUtilities();
+    final MockUtilities mock = new MockUtilities();
 
     final ElementLocation element = new ElementLocation(LocatorBy.byCss("css"), EXISTING);
 
     TestPageImpl() {
-      initialize(mockUtilities.getFactory(), mockUtilities.getElementAdapter(), LocatorBy.byCss("root"));
+      initialize(mock.getFactory(), mock.getElementAdapter(),
+          LocatorBy.byCss("root"), mock.getDocument(), mock.getNavigation());
     }
   }
 }

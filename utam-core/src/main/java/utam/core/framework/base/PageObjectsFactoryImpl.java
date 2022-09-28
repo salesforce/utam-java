@@ -14,13 +14,17 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import utam.core.driver.Document;
 import utam.core.driver.Driver;
+import utam.core.driver.Navigation;
 import utam.core.element.Element;
 import utam.core.element.Locator;
 import utam.core.framework.consumer.PageObjectContext;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.consumer.UtamLoaderConfig;
 import utam.core.framework.context.PlatformType;
+import utam.core.framework.element.DocumentObject;
+import utam.core.framework.element.NavigationImpl;
 
 /**
  * selenium page objects factory
@@ -32,6 +36,8 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
 
   private final PageObjectContext pageObjectContext;
   private final Driver driver;
+  private final Navigation navigation;
+  private final Document document;
 
   /**
    * Initializes a new instance of the PageObjectsFactoryImpl class
@@ -44,6 +50,8 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
       Driver driver) {
     this.pageObjectContext = pageObjectContext;
     this.driver = driver;
+    this.navigation = new NavigationImpl(driver);
+    this.document = new DocumentObject(this);
   }
 
   /**
@@ -81,7 +89,7 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
               instance.getClass(), BasePageObject.class.getName()));
     }
     BasePageObject pageObject = (BasePageObject) instance;
-    pageObject.initialize(this, element, locator);
+    pageObject.initialize(this, element, locator, document, navigation);
     bootstrapElements(pageObject);
     PlatformType mobileContextType = PlatformType.from(pageObject.getClass());
     // only mobile driver implementation actually changes context
