@@ -61,8 +61,7 @@ final class UtamElementFilter {
     return readNode(node, UtamElementFilter.class, VALIDATION.getErrorMessage(300, elementName));
   }
 
-  MatcherObject setElementFilter(TranslationContext context, UtamElement.Type elementNodeType,
-      TypeProvider elementType, String elementName) {
+  MatcherObject setElementFilter(TranslationContext context, TypeProvider elementType, String elementName, boolean isBasicElement) {
     String parserContext = String.format("element '%s' filter", elementName);
     VALIDATION.validateNotEmptyString(this.applyMethod, parserContext, "apply");
     ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
@@ -74,7 +73,7 @@ final class UtamElementFilter {
         .forEach(parametersContext::setParameter);
     VALIDATION.validateNotNullObject(matcherNode, parserContext, "matcher");
     MatcherObject matcher = new ElementFilterMatcherProvider(matcherNode, elementName).getMatcherObject(context);
-    if (elementNodeType == UtamElement.Type.BASIC) {
+    if (isBasicElement) {
       ActionType actionType = getActionType(this.applyMethod, elementType, VALIDATION.getErrorMessage(301, elementName, this.applyMethod));
       matcher.checkMatcherOperand(actionType.getReturnType());
       List<TypeProvider> expectedArgsTypes = actionType

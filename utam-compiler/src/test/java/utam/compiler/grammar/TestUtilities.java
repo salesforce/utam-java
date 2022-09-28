@@ -17,7 +17,6 @@ import utam.compiler.translator.DefaultTranslatorConfiguration;
 import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorSourceConfig;
@@ -64,7 +63,7 @@ public class TestUtilities {
   public static DefaultTranslatorConfiguration getDefaultConfig() {
     TranslatorTargetConfig targetConfig = new DefaultTargetConfigurationTests.Mock();
     TranslatorSourceConfig sourceConfig = new DefaultSourceConfigurationTests.Mock();
-    return new DefaultTranslatorConfiguration(DEFAULT_COMPILER_OUTPUT_OPTIONS, GuardrailsMode.ERROR, sourceConfig,
+    return new DefaultTranslatorConfiguration(DEFAULT_COMPILER_OUTPUT_OPTIONS, null, sourceConfig,
         targetConfig, new ArrayList<>());
   }
 }

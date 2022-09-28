@@ -1,0 +1,8 @@
+{
+  "pageObjectsRootDir": "",
+  "pageObjectsOutputDir": "",
+  "resourcesOutputDir": "",
+  "lint": {
+    "throwError": true
+  }
+}

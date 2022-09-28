@@ -12,6 +12,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.lint.LintingRuleTests.TEST_DEFAULT_LINTING_CONFIG;
 import static utam.compiler.translator.DefaultSourceConfiguration.ERR_DUPLICATE_PAGE_OBJECT;
 import static utam.compiler.translator.DefaultSourceConfiguration.ERR_IO_DURING_SCAN;
 import static utam.compiler.translator.DefaultSourceConfiguration.ERR_MISSING_SOURCE_PATH;
@@ -34,6 +35,7 @@ import org.hamcrest.CoreMatchers;
 import org.testng.annotations.Test;
 import utam.compiler.translator.DefaultSourceConfiguration.FilesScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
+import utam.core.declarative.lint.LintingConfig;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorSourceConfig;
@@ -165,6 +167,11 @@ public class DefaultSourceConfigurationTests {
         TranslatorTargetConfig targetConfig) {
       super(sourceConfig, targetConfig);
       setConfiguredProfile(TEST_PROFILE_CONFIG);
+    }
+
+    @Override
+    public LintingConfig getLintingConfig() {
+      return TEST_DEFAULT_LINTING_CONFIG;
     }
   }
 

@@ -27,12 +27,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
+import utam.compiler.lint.LintingConfigJson;
 import utam.compiler.translator.DefaultSourceConfiguration.FilesScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.ScannerConfig;
 import utam.compiler.translator.DefaultSourceConfiguration.SourceWithoutPackages;
 import utam.compiler.translator.DefaultTranslatorConfiguration.CompilerOutputOptions;
-import utam.core.declarative.translator.GuardrailsMode;
+import utam.core.declarative.lint.LintingConfig;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorSourceConfig;
@@ -159,14 +160,13 @@ public class JsonCompilerConfig {
   /**
    * Gets the translator configuration
    *
-   * @param guardrailsMode the guardrails mode
    * @return the translator configurtion
    */
-  public TranslatorConfig getTranslatorConfig(GuardrailsMode guardrailsMode) {
+  public TranslatorConfig getTranslatorConfig() {
     TranslatorSourceConfig sourceConfig = getSourceConfig();
     TranslatorTargetConfig targetConfig = getTargetConfig();
     List<ProfileConfiguration> profiles = getConfiguredProfiles();
-    return new DefaultTranslatorConfiguration(moduleConfig.outputOptions, guardrailsMode, sourceConfig, targetConfig, profiles);
+    return new DefaultTranslatorConfiguration(moduleConfig.outputOptions, moduleConfig.lintingConfiguration, sourceConfig, targetConfig, profiles);
   }
 
   /**
@@ -190,6 +190,7 @@ public class JsonCompilerConfig {
     private final String unitTestsOutputDir;
     private final UnitTestRunner unitTestRunnerType;
     private final CompilerOutputOptions outputOptions;
+    private final LintingConfig lintingConfiguration;
 
     /**
      * Initializes a new instance of the Module class. Instantiated via JSON deserialization.
@@ -211,12 +212,13 @@ public class JsonCompilerConfig {
      * @param profiles                 an array of Profile objects representing the profiles used in
      *                                 JSON files of the module
      * @param copyright                lines for copyright header
+     * @param lintingConfiguration     configured linting
      */
     @JsonCreator
     public Module(
         @JsonProperty(value = "module") String moduleName,
         @JsonProperty(value = "version") String pageObjectsVersion,
-        @JsonProperty(value = "pageObjectsFilesMask", defaultValue = DEFAULT_JSON_FILE_MASK_REGEX) String filesMaskRegex,
+        @JsonProperty(value = "pageObjectsFilesMask") String filesMaskRegex,
         @JsonProperty(value = "pageObjectsRootDir") String pageObjectsRootDirectory,
         @JsonProperty(value = "pageObjectsOutputDir", required = true) String pageObjectsOutputDir,
         @JsonProperty(value = "resourcesOutputDir", required = true) String resourcesOutputDir,
@@ -224,7 +226,8 @@ public class JsonCompilerConfig {
         @JsonProperty(value = "unitTestsRunner", defaultValue = "NONE") UnitTestRunner unitTestRunner,
         @JsonProperty(value = "namespaces") List<Namespace> namespaces,
         @JsonProperty(value = "profiles") List<Profile> profiles,
-        @JsonProperty(value = "copyright") List<String> copyright
+        @JsonProperty(value = "copyright") List<String> copyright,
+        @JsonProperty(value = "lint") LintingConfigJson lintingConfiguration
     ) {
       this.pageObjectsRootDirectory = pageObjectsRootDirectory;
       info(getConfigLoggerMessage("pageObjectsRootDir", pageObjectsRootDirectory));
@@ -258,6 +261,7 @@ public class JsonCompilerConfig {
           Objects.requireNonNullElse(moduleName, ""),
           Objects.requireNonNullElse(pageObjectsVersion, ""),
           Objects.requireNonNullElse(copyright, new ArrayList<>()));
+      this.lintingConfiguration = LintingConfigJson.getLintingConfig(lintingConfiguration);
     }
 
     void setUniqueProfiles(List<Profile> profiles) {
@@ -287,7 +291,8 @@ public class JsonCompilerConfig {
           null,
           new ArrayList<>(),
           new ArrayList<>(),
-          new ArrayList<>());
+          new ArrayList<>(),
+          null);
     }
 
     // used in tests
@@ -302,7 +307,8 @@ public class JsonCompilerConfig {
           null,
           new ArrayList<>(),
           new ArrayList<>(),
-          new ArrayList<>());
+          new ArrayList<>(),
+          null);
     }
 
     /**

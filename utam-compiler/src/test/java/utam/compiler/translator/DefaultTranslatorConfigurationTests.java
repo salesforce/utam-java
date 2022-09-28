@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.List;
 import org.testng.annotations.Test;
 import utam.compiler.translator.DefaultTranslatorConfiguration.CompilerOutputOptions;
-import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.core.declarative.translator.TranslatorConfig;
@@ -41,7 +40,7 @@ public class DefaultTranslatorConfigurationTests {
         "version", Collections.singletonList("copyright"));
     TranslatorConfig config = new DefaultTranslatorConfiguration(
         options,
-        GuardrailsMode.ERROR,
+        null,
         typesConfig,
         sourceConfig,
         targetConfig,

@@ -1,0 +1,23 @@
+{
+  "root": true,
+  "description": {
+    "text": [
+      "i have description"
+    ],
+    "author": "test"
+  },
+  "selector": {
+    "css": "root"
+  },
+  "shadow": {
+    "elements": [
+      {
+        "name": "basic",
+        "type": "frame",
+        "selector": {
+          "css": "custom-duplicate"
+        }
+      }
+    ]
+  }
+}

@@ -9,6 +9,7 @@ package utam.compiler.representation;
 
 import utam.compiler.grammar.UtamMethodDescription;
 import utam.compiler.helpers.ParameterUtils;
+import utam.compiler.representation.JavadocObject.MethodJavadoc;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -98,7 +99,12 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), returnType, interfaceImports, description);
+      List<MethodParameter> parameters = parametersTracker.getMethodParameters();
+      JavadocObject javadoc = new MethodJavadoc(methodName,
+          returnType,
+          parameters,
+          description);
+      return new MethodDeclarationImpl(methodName, parameters, returnType, interfaceImports, javadoc);
     }
 
     @Override
@@ -187,7 +193,12 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), returnType, interfaceImports, description);
+      List<MethodParameter> parameters = parametersTracker.getMethodParameters();
+      JavadocObject javadoc = new MethodJavadoc(methodName,
+          returnType,
+          parameters,
+          description);
+      return new MethodDeclarationImpl(methodName, parameters, returnType, interfaceImports, javadoc);
     }
 
     @Override
@@ -250,7 +261,12 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
     @Override
     public MethodDeclarationImpl getDeclaration() {
-      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), returnType, interfaceImports, description);
+      List<MethodParameter> parameters = parametersTracker.getMethodParameters();
+      JavadocObject javadoc = new MethodJavadoc(methodName,
+          returnType,
+          parameters,
+          description);
+      return new MethodDeclarationImpl(methodName, parameters, returnType, interfaceImports, javadoc);
     }
 
     @Override

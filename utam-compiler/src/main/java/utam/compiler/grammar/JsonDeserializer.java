@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.UtamCompilationError.ErrorSupplier;
-import utam.compiler.grammar.UtamRootDescription.RootDescription;
+import utam.compiler.representation.JavadocObject;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.translator.ClassSerializer;
 import utam.compiler.translator.InterfaceSerializer;
@@ -121,10 +121,9 @@ public final class JsonDeserializer extends
       ObjectMapper mapper = getObjectMapperWithSettings();
       UtamPageObject utamPageObject = mapper.readValue(parser, UtamPageObject.class);
       utamPageObject.compile(this.context);
-      this.context.guardrailsValidation();
       return utamPageObject;
     } catch (Exception e) {
-      ErrorSupplier error = processParserError(parser, e, context.getPageObjectName());
+      ErrorSupplier error = processParserError(parser, e, context.getLintingObject().getName());
       if(error.getCause() == null) {
         throw new UtamCompilationError(error.getMessage());
       }
@@ -212,7 +211,7 @@ public final class JsonDeserializer extends
     private final TranslationContext context;
     private final UtamPageObject utamPageObject;
     private final TypeProvider implementedType;
-    private final RootDescription description;
+    private final JavadocObject description;
 
     Interface(TranslationContext context, UtamPageObject utamPageObject) {
       this.context = context;
@@ -272,7 +271,7 @@ public final class JsonDeserializer extends
     private final PageObjectInterface pageObjectInterface;
     private final List<Profile> profiles;
     private final List<AnnotationProvider> annotations = new ArrayList<>();
-    private final RootDescription description;
+    private final JavadocObject description;
 
     Implementation(
         TranslationContext context,

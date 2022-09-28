@@ -17,7 +17,6 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import org.testng.annotations.Test;
-import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorRunner;
 import utam.core.framework.context.Profile;
@@ -40,7 +39,7 @@ public class JsonCompilerOutputTests {
         new File(USER_ROOT),
         null
     );
-    return jsonConfig.getTranslatorConfig(GuardrailsMode.WARNING);
+    return jsonConfig.getTranslatorConfig();
   }
 
   private static void runCompiler() throws IOException {

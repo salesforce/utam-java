@@ -1,0 +1,22 @@
+{
+  "root": true,
+  "description": {
+    "text": [
+      "i have description"
+    ],
+    "author": "test"
+  },
+  "selector": {
+    "css": "root1"
+  },
+  "shadow": {
+    "elements": [
+      {
+        "name": "sameAsRootBasic",
+        "selector": {
+          "css": "root"
+        }
+      }
+    ]
+  }
+}

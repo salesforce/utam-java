@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.TEST_URI;
 import static utam.compiler.grammar.TestUtilities.getJsonStringDeserializer;
+import static utam.compiler.lint.LintingRuleTests.TEST_DEFAULT_LINTING_CONFIG;
 import static utam.compiler.translator.DefaultSourceConfigurationTests.TranslatorConfigWithProfile.TEST_PROFILE;
 import static utam.compiler.translator.DefaultTargetConfigurationTests.PAGE_OBJECT_IMPL_CLASS_NAME;
 import static utam.compiler.translator.DefaultTargetConfigurationTests.PAGE_OBJECT_INTERFACE_CLASS_NAME;
@@ -42,6 +43,7 @@ import org.testng.annotations.Test;
 import utam.compiler.grammar.TestUtilities;
 import utam.compiler.helpers.TypeUtilities.FromString;
 import utam.compiler.translator.DefaultSourceConfigurationTests.TranslatorConfigWithProfile;
+import utam.core.declarative.lint.LintingConfig;
 import utam.core.declarative.representation.PageObjectClass;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.PageObjectInterface;
@@ -246,7 +248,12 @@ public class DefaultTranslatorRunnerTests {
     DefaultTargetConfigurationTests.Mock targetConfig =
         new DefaultTargetConfigurationTests.Mock();
     DefaultTranslatorConfiguration translatorConfig = new DefaultTranslatorConfiguration(
-        sourceConfig, targetConfig);
+        sourceConfig, targetConfig) {
+      @Override
+      public LintingConfig getLintingConfig() {
+        return TEST_DEFAULT_LINTING_CONFIG;
+      }
+    };
     translatorConfig.setConfiguredProfile(new StringValueProfileConfig("driver", "chrome"));
     DefaultTranslatorRunner translator = new DefaultTranslatorRunner(translatorConfig);
     translator.run();

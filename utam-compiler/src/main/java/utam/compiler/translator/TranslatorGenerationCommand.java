@@ -10,7 +10,6 @@ package utam.compiler.translator;
 import static utam.compiler.translator.DefaultTranslatorConfiguration.getConfiguredProfiles;
 import static utam.compiler.translator.DefaultTranslatorConfiguration.getScanner;
 import static utam.compiler.translator.DefaultTranslatorConfiguration.getScannerConfig;
-import static utam.core.declarative.translator.GuardrailsMode.WARNING;
 import static utam.core.declarative.translator.UnitTestRunner.NONE;
 import static utam.core.declarative.translator.UnitTestRunner.validateUnitTestDirectory;
 
@@ -25,7 +24,6 @@ import picocli.CommandLine.ExitCode;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import utam.compiler.translator.DefaultTranslatorConfiguration.CompilerOutputOptions;
-import utam.core.declarative.translator.GuardrailsMode;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorRunner;
 import utam.core.declarative.translator.TranslatorSourceConfig;
@@ -102,11 +100,8 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
       description = "Name of the current POs version, usually matches application version.")
   private String versionName;
 
-  @Option(names = {"-g", "-guardrails", "--guardrails"},
-      description = "Defines how strict should be guardrails violations, possible values: 'error' or 'warning'")
-  private String validationStrict;
-
-  private Exception thrownError;
+  // assigned default value for local run not to throw NPE
+  private Exception thrownError = new RuntimeException("UTAM error");
   Integer returnCode = CommandLine.ExitCode.OK;
 
   /**
@@ -144,7 +139,7 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
         thrownError = new UnsupportedOperationException(INVALID_FILE_LIST);
         return null;
       }
-      return jsonConfig.getTranslatorConfig(WARNING);
+      return jsonConfig.getTranslatorConfig();
     } catch (IOException e) {
       thrownError = e;
       returnCode = RUNTIME_ERR;
@@ -207,16 +202,13 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
           getScannerConfig(packageMappingFile),
           getScanner(inputDirectory, inputFiles));
 
-      GuardrailsMode guardrailsMode =
-          validationStrict == null ? WARNING : GuardrailsMode.valueOf(validationStrict.toUpperCase());
-
       // NOTE: Copyright cannot be set from the command line; you must
       // use a compiler config JSON settings file.
       CompilerOutputOptions outputOptions = new CompilerOutputOptions(moduleName, versionName,
           new ArrayList<>());
       return new DefaultTranslatorConfiguration(
           outputOptions,
-          guardrailsMode,
+          null,
           sourceConfig,
           targetConfig,
           getConfiguredProfiles(profileDefinitionsFile));

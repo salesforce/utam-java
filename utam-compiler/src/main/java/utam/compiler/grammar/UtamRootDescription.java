@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.representation.JavadocObject;
+import utam.compiler.representation.JavadocObject.PageObjectJavadoc;
 
 /**
  * Description at the level of the page object root, added as JavaDoc for generated page object
@@ -26,7 +28,6 @@ import utam.compiler.helpers.TranslationContext;
  */
 class UtamRootDescription {
 
-  final static String VERSION_TAG = "@version";
   private final List<String> text;
   private final String author;
   private final String deprecated;
@@ -58,7 +59,7 @@ class UtamRootDescription {
     String parserContext = "page object description";
     UtamRootDescription object;
     if (node == null || node.isNull()) {
-      object = new UtamRootDescription(new ArrayList<>(), null, null);
+      object = new UtamEmptyRootDescription();
     } else if (node.isTextual()) {
       String value = node.textValue();
       VALIDATION.validateNotNullOrEmptyString(node, parserContext, "text");
@@ -66,7 +67,7 @@ class UtamRootDescription {
     } else {
       object = readNode(node, UtamRootDescription.class, VALIDATION.getErrorMessage(905));
       VALIDATION.validateNotEmptyArray(node.get("text"), parserContext, "text");
-      for(JsonNode textNode : node.get("text")) {
+      for (JsonNode textNode : node.get("text")) {
         VALIDATION.validateNotNullOrEmptyString(textNode, parserContext, "text");
       }
       VALIDATION.validateNotEmptyString(node.get("author"), parserContext, "author");
@@ -75,49 +76,44 @@ class UtamRootDescription {
     return object;
   }
 
-  RootDescription getDescription(TranslationContext context) {
-    return new RootDescription(context, text, author, deprecated);
+  JavadocObject getDescription(TranslationContext context) {
+    return new PageObjectJavadoc(context, text, author, deprecated);
   }
 
   /**
-   * Helper class to process description in context and return javadoc
+   * Used for linting to check if description is set
+   *
+   * @return boolean
+   */
+  boolean isEmpty() {
+    return false;
+  }
+
+  /**
+   * Used for linting to check if author is set
+   *
+   * @return boolean
+   */
+  boolean hasAuthor() {
+    return author != null;
+  }
+
+  /**
+   * Helper class for an empty root description
    *
    * @author elizaveta.ivanova
    * @since 242
    */
-  static class RootDescription {
+  private static class UtamEmptyRootDescription extends UtamRootDescription {
 
-    private final List<String> javadoc;
-    private final boolean isDeprecated;
-
-    private RootDescription(TranslationContext context, List<String> text, String author,
-        String deprecated) {
-      this.isDeprecated = deprecated != null;
-      String version = context.getConfiguredVersion();
-      // On Windows, sourceFileRelativePath may contain backslashes ("\"), which will
-      // be misinterpreted in Javadoc comments by the Java source code formatter.
-      // Replacing them with forward slashes ("/") ensures consistent generation of
-      // Java files cross-platform.
-      String sourceFileRelativePath = context.getJsonPath().replace("\\", "/");
-      javadoc = new ArrayList<>(text);
-      javadoc.add(String
-          .format("%screated from JSON %s", text.isEmpty() ? "" : ", ", sourceFileRelativePath));
-      // add line @author team_name
-      javadoc.add(String.format("@author %s", (author == null ? "UTAM" : author)));
-      // add line @version with timestamp
-      javadoc.add(String.format("%s %s", VERSION_TAG, version));
-      // add line @deprecated
-      if (this.isDeprecated) {
-        javadoc.add(String.format("@deprecated %s", deprecated));
-      }
+    private UtamEmptyRootDescription() {
+      super(new ArrayList<>(), null, null);
     }
 
-    List<String> getJavadoc() {
-      return javadoc;
-    }
-
-    boolean isDeprecated() {
-      return isDeprecated;
+    @Override
+    boolean isEmpty() {
+      return true;
     }
   }
+
 }

@@ -1,0 +1,18 @@
+{
+  "description": {
+    "text": [
+      "i have description"
+    ],
+    "author": "test"
+  },
+  "shadow": {
+    "elements": [
+      {
+        "name": "nodescription",
+        "selector": {
+          "css": "css"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "root": true,
+  "selector": {
+    "css": ".one"
+  },
+  "elements": [
+    {
+      "name": "one",
+      "selector": {
+        "css": ".one"
+      }
+    },
+    {
+      "name": "two",
+      "selector": {
+        "css": ".one"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "nodescription",
+      "compose": [
+        {
+          "element": "root",
+          "apply": "isPresent"
+        }
+      ]
+    }
+  ]
+}

@@ -13,7 +13,8 @@ import static utam.compiler.helpers.ParameterUtils.setImport;
 
 import java.util.ArrayList;
 import java.util.List;
-import utam.compiler.grammar.UtamMethodDescription;
+import utam.compiler.grammar.UtamMethodDescription.UtamEmptyMethodDescription;
+import utam.compiler.representation.JavadocObject.MethodJavadoc;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
@@ -29,34 +30,35 @@ class MethodDeclarationImpl implements MethodDeclaration {
   private final List<TypeProvider> imports;
   private final List<MethodParameter> parameters;
   private final TypeProvider returnType;
-  private final UtamMethodDescription.MethodDescription description;
+  private final JavadocObject javadoc;
 
   MethodDeclarationImpl(
       String methodName,
       List<MethodParameter> parameters,
       TypeProvider returnType,
       List<TypeProvider> imports,
-      UtamMethodDescription description) {
+      JavadocObject javadoc) {
     this.methodName = methodName;
     this.imports = imports;
     this.returnType = returnType;
     this.parameters = parameters;
-    this.description = description == null? new UtamMethodDescription().getDescription(this) : description.getDescription(this);
+    this.javadoc = javadoc;
   }
 
   MethodDeclarationImpl(
       String methodName,
       List<MethodParameter> parameters,
       TypeProvider returnType,
-      UtamMethodDescription description) {
-    this(methodName, parameters, returnType, buildImports(returnType, parameters), description);
+      JavadocObject javadoc) {
+    this(methodName, parameters, returnType, buildImports(returnType, parameters), javadoc);
   }
 
   // used in tests
   MethodDeclarationImpl(
       List<MethodParameter> parameters,
       TypeProvider returnType) {
-    this("test", parameters, returnType, null);
+    this("test", parameters, returnType,
+        new MethodJavadoc("test", returnType, parameters, new UtamEmptyMethodDescription()));
   }
 
   private static List<TypeProvider> buildImports(
@@ -100,11 +102,11 @@ class MethodDeclarationImpl implements MethodDeclaration {
 
   @Override
   public List<String> getDescription() {
-    return description.getJavadoc();
+    return javadoc.getJavadoc();
   }
 
   @Override
   public boolean isDeprecated() {
-    return description.isDeprecated();
+    return javadoc.isDeprecated();
   }
 }

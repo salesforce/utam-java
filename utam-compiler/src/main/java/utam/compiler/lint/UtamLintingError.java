@@ -5,17 +5,17 @@
  * For full license text, see the LICENSE file in the repo root
  * or https://opensource.org/licenses/MIT
  */
-package utam.compiler.guardrails;
+package utam.compiler.lint;
 
 import utam.core.framework.consumer.UtamError;
 
 /**
- * Error thrown in runtime from UTAM guardrails
+ * Error thrown by linting
  *
  * @author elizaveta.ivanova
- * @since 234
+ * @since 242
  */
-public class UtamValidationError extends UtamError {
+public class UtamLintingError extends UtamError {
 
   /**
    * Default serial version ID for serializable object
@@ -27,7 +27,7 @@ public class UtamValidationError extends UtamError {
    *
    * @param message the validation error message
    */
-  public UtamValidationError(String message) {
+  public UtamLintingError(String message) {
     super(message);
   }
 }

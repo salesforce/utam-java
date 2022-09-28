@@ -15,13 +15,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import utam.compiler.lint.LintingConfigJson;
 import utam.compiler.translator.DefaultSourceConfiguration.FilesScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.ScannerConfig;
-import utam.core.declarative.translator.GuardrailsMode;
+import utam.core.declarative.lint.LintingConfig;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.core.declarative.translator.TranslatorConfig;
@@ -40,23 +40,23 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   private final TranslatorSourceConfig translatorSourceConfig;
   private final TranslationTypesConfig translatorTypesConfig;
   private final TranslatorTargetConfig translatorTargetConfig;
-  private final GuardrailsMode guardrailsMode;
+  private final LintingConfig lintingConfiguration;
   private final CompilerOutputOptions outputOptions;
 
   /**
    * Initializes a new instance of the translator configuration class
    *
-   * @param outputOptions      compiler output options
-   * @param guardrailsMode     type of guardrails to apply - with warning or error
-   * @param typesConfig        types provider config
-   * @param sourceConfig       configuration to scan for page object sources
-   * @param targetConfig       information about output folders for page objects, configs and unit
-   *                           tests
-   * @param profileDefinitions list of known profiles and their values
+   * @param outputOptions        compiler output options
+   * @param lintingConfiguration configured lint rules
+   * @param typesConfig          types provider config
+   * @param sourceConfig         configuration to scan for page object sources
+   * @param targetConfig         information about output folders for page objects, configs and unit
+   *                             tests
+   * @param profileDefinitions   list of known profiles and their values
    */
   DefaultTranslatorConfiguration(
       CompilerOutputOptions outputOptions,
-      GuardrailsMode guardrailsMode,
+      LintingConfig lintingConfiguration,
       TranslationTypesConfig typesConfig,
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig,
@@ -68,15 +68,36 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
     for (ProfileConfiguration profileDefinition : profileDefinitions) {
       setConfiguredProfile(profileDefinition);
     }
-    // if passed as null - set to warning by default
-    this.guardrailsMode = Objects.requireNonNullElse(guardrailsMode, GuardrailsMode.WARNING);
+    this.lintingConfiguration =
+        lintingConfiguration == null ? LintingConfigJson.getLintingConfig(null)
+            : lintingConfiguration;
   }
 
   /**
    * Initializes a new instance of the translator configuration class
    *
+   * @param outputOptions        compiler output options
+   * @param lintingConfiguration configured lint rules
+   * @param sourceConfig         configuration to scan for page object sources
+   * @param targetConfig         information about output folders for page objects, configs and unit
+   *                             tests
+   * @param profileDefinitions   list of known profiles and their values
+   */
+  public DefaultTranslatorConfiguration(
+      CompilerOutputOptions outputOptions,
+      LintingConfig lintingConfiguration,
+      TranslatorSourceConfig sourceConfig,
+      TranslatorTargetConfig targetConfig,
+      List<ProfileConfiguration> profileDefinitions) {
+    this(outputOptions, lintingConfiguration, new TranslationTypesConfigJava(), sourceConfig,
+        targetConfig, profileDefinitions);
+  }
+
+
+  /**
+   * Initializes a new instance of the translator configuration class
+   *
    * @param outputOptions      compiler output options
-   * @param guardrailsMode     type of guardrails to apply - with warning or error
    * @param sourceConfig       configuration to scan for page object sources
    * @param targetConfig       information about output folders for page objects, configs and unit
    *                           tests
@@ -84,49 +105,30 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
    */
   public DefaultTranslatorConfiguration(
       CompilerOutputOptions outputOptions,
-      GuardrailsMode guardrailsMode,
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig,
       List<ProfileConfiguration> profileDefinitions) {
-    this(outputOptions, guardrailsMode, new TranslationTypesConfigJava(), sourceConfig, targetConfig, profileDefinitions);
-  }
-
-
-  /**
-   * Initializes a new instance of the translator configuration class
-   *
-   * @param outputOptions      compiler output options
-   * @param sourceConfig       configuration to scan for page object sources
-   * @param targetConfig       information about output folders for page objects, configs and unit
-   *                           tests
-   * @param profileDefinitions list of known profiles and their values
-   */
-  public DefaultTranslatorConfiguration(
-      CompilerOutputOptions outputOptions,
-      TranslatorSourceConfig sourceConfig,
-      TranslatorTargetConfig targetConfig,
-      List<ProfileConfiguration> profileDefinitions) {
-    this(outputOptions, GuardrailsMode.WARNING, new TranslationTypesConfigJava(), sourceConfig, targetConfig, profileDefinitions);
+    this(outputOptions, null, new TranslationTypesConfigJava(), sourceConfig, targetConfig,
+        profileDefinitions);
   }
 
 
   /**
    * Initializes a new instance of the translator configuration class, only used in unit tests
    *
-   * @param sourceConfig       configuration to scan for page object sources
-   * @param targetConfig       information about output folders for page objects, configs and unit
-   *                           tests
+   * @param sourceConfig configuration to scan for page object sources
+   * @param targetConfig information about output folders for page objects, configs and unit tests
    */
   // used in tests
   DefaultTranslatorConfiguration(
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig) {
-    this(CompilerOutputOptions.DEFAULT_COMPILER_OUTPUT_OPTIONS , sourceConfig, targetConfig, new ArrayList<>());
+    this(CompilerOutputOptions.DEFAULT_COMPILER_OUTPUT_OPTIONS, sourceConfig, targetConfig,
+        new ArrayList<>());
   }
 
   /**
-   * get scanner based on input directory or files
-   * public because used in downstream projects
+   * get scanner based on input directory or files public because used in downstream projects
    *
    * @param inputDirectory the root input directory to be recursively searched for the *.utam.json
    *                       Page Object description files
@@ -161,8 +163,8 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   }
 
   /**
-   * read profiles config and translate into list of ProfileConfigurations
-   * public because used in downstream projects
+   * read profiles config and translate into list of ProfileConfigurations public because used in
+   * downstream projects
    *
    * @param profileDefinitionsFile profiles configuration file
    * @return list of configured profiles
@@ -218,11 +220,6 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   }
 
   @Override
-  public GuardrailsMode getValidationMode() {
-    return guardrailsMode;
-  }
-
-  @Override
   public String getPageObjectsVersion() {
     return outputOptions.pageObjectsVersion;
   }
@@ -230,6 +227,11 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   @Override
   public List<String> getCopyright() {
     return outputOptions.configuredCopyright;
+  }
+
+  @Override
+  public LintingConfig getLintingConfig() {
+    return lintingConfiguration;
   }
 
   /**
@@ -243,7 +245,8 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
     /**
      * used in utam-core-util in consumer, so should be public
      */
-    public static final CompilerOutputOptions DEFAULT_COMPILER_OUTPUT_OPTIONS = new CompilerOutputOptions("", "",
+    public static final CompilerOutputOptions DEFAULT_COMPILER_OUTPUT_OPTIONS = new CompilerOutputOptions(
+        "", "",
         new ArrayList<>());
 
     final String moduleName;
@@ -258,8 +261,9 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
     public CompilerOutputOptions(String moduleName, String pageObjectsVersion,
         List<String> configuredCopyright) {
       this.moduleName = moduleName;
-      this.pageObjectsVersion = (pageObjectsVersion == null || pageObjectsVersion.isEmpty())?
-          LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : pageObjectsVersion;
+      this.pageObjectsVersion = (pageObjectsVersion == null || pageObjectsVersion.isEmpty()) ?
+          LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+          : pageObjectsVersion;
       this.configuredCopyright = configuredCopyright;
     }
   }

@@ -57,7 +57,8 @@ public interface TypeProvider {
    * false
    */
   default boolean isSameType(TypeProvider anotherType) {
-    return this.getFullName().equals(anotherType.getFullName())
+    return anotherType != null
+        && this.getFullName().equals(anotherType.getFullName())
         && (this.getSimpleName().equals(anotherType.getSimpleName()));
   }
 

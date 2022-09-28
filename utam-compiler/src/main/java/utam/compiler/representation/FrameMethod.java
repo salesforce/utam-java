@@ -8,6 +8,7 @@
 package utam.compiler.representation;
 
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
+import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
 import static utam.compiler.representation.ElementMethod.getElementLocationCode;
 import static utam.compiler.representation.ElementMethod.getScopeElementCode;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
@@ -19,7 +20,7 @@ import java.util.stream.Stream;
 import utam.compiler.grammar.UtamMethodDescription;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ParameterUtils;
-import utam.compiler.helpers.TypeUtilities;
+import utam.compiler.representation.JavadocObject.MethodJavadoc;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -41,12 +42,14 @@ public class FrameMethod implements PageObjectMethod {
 
   /**
    * Initializes a new instance of the FrameMethod class
+   *
    * @param element           the element
    * @param isPublic          a value indicating whether the element is public
    * @param locatorParameters the list of parameters to use in locating the element
    * @param description       the description of the method
    */
-  public FrameMethod(ElementContext element, boolean isPublic, List<MethodParameter> locatorParameters, UtamMethodDescription description) {
+  public FrameMethod(ElementContext element, boolean isPublic,
+      List<MethodParameter> locatorParameters, UtamMethodDescription description) {
     methodCode.add(getScopeElementCode(element.getScopeElement()));
     String scopeVariableName = element.getScopeElement().getName();
     String locationWithParameters = getElementLocationCode(element.getName(), locatorParameters);
@@ -61,8 +64,14 @@ public class FrameMethod implements PageObjectMethod {
 
   @Override
   public MethodDeclaration getDeclaration() {
-    List<TypeProvider> imports = Stream.of(TypeUtilities.FRAME_ELEMENT).collect(Collectors.toList());
-    return new MethodDeclarationImpl(methodName, parameters, TypeUtilities.FRAME_ELEMENT, imports, description);
+    List<TypeProvider> imports = Stream.of(FRAME_ELEMENT)
+        .collect(Collectors.toList());
+    JavadocObject javadoc = new MethodJavadoc(methodName,
+        FRAME_ELEMENT,
+        parameters,
+        description);
+    return new MethodDeclarationImpl(methodName, parameters, FRAME_ELEMENT, imports,
+        javadoc);
   }
 
   @Override

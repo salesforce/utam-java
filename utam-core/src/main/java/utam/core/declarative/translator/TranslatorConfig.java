@@ -9,6 +9,7 @@ package utam.core.declarative.translator;
 
 import java.util.Collection;
 import java.util.List;
+import utam.core.declarative.lint.LintingConfig;
 
 /**
  * configuration for translator
@@ -54,13 +55,6 @@ public interface TranslatorConfig {
   String getModuleName();
 
   /**
-   * translator is configured to set guardrails mode
-   *
-   * @return type of validations
-   */
-  GuardrailsMode getValidationMode();
-
-  /**
    * version of the page objects to add to the JavaDoc
    *
    * @return not nullable string
@@ -73,4 +67,11 @@ public interface TranslatorConfig {
    * @return list of strings
    */
   List<String> getCopyright();
+
+  /**
+   * Get linting configuration
+   *
+   * @return object
+   */
+  LintingConfig getLintingConfig();
 }

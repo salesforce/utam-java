@@ -16,9 +16,13 @@ import static utam.compiler.grammar.UtamMethodDescription.processMethodDescripti
 import static utam.compiler.grammar.UtamSelector.processSelectorNode;
 import static utam.compiler.grammar.UtamShadowElement.processShadowNode;
 import static utam.compiler.helpers.AnnotationUtils.getFindAnnotation;
+import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT_IMPL_CLASS;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT_TYPE_NAME;
 import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT_TYPE_NAME;
+import static utam.compiler.lint.PageObjectLintingImpl.Element.LINTING_BASIC_TYPE;
+import static utam.compiler.lint.PageObjectLintingImpl.Element.LINTING_CONTAINER_TYPE;
+import static utam.compiler.lint.PageObjectLintingImpl.Element.LINTING_FRAME_TYPE;
 import static utam.compiler.types.BasicElementInterface.processBasicTypeNode;
 import static utam.compiler.types.BasicElementUnionType.asBasicOrUnionType;
 
@@ -31,6 +35,8 @@ import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementUnitTestHelper;
 import utam.compiler.helpers.LocatorCodeGeneration;
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.lint.PageObjectLintingImpl.Element;
+import utam.compiler.lint.PageObjectLintingImpl.Method;
 import utam.compiler.representation.ContainerMethod;
 import utam.compiler.representation.CustomElementMethod;
 import utam.compiler.representation.ElementField;
@@ -40,9 +46,11 @@ import utam.compiler.representation.MatcherObject;
 import utam.compiler.representation.MethodParametersTracker;
 import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.compiler.types.BasicElementUnionTypeImpl;
+import utam.core.declarative.lint.PageObjectLinting.ElementLinting;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.representation.UnionType;
+import utam.core.element.Locator;
 
 /**
  * Page Object Element
@@ -56,6 +64,12 @@ public final class UtamElement {
    * The default CSS selector for a container
    */
   public static final String DEFAULT_CONTAINER_SELECTOR_CSS = ":scope > *:first-child";
+  private static final String CONTAINER_SUPPORTED_PROPERTIES = String
+      .join(", ", "name", "public", "selector", "type");
+  private static final String CUSTOM_SUPPORTED_PROPERTIES = String.join(", ",
+      "name", "public", "selector", "type", "filter", "nullable");
+  private static final String FRAME_SUPPORTED_PROPERTIES = String.join(", ",
+      "name", "public", "selector", "type");
 
   private final String name;
   private final UtamShadowElement shadow;
@@ -63,9 +77,9 @@ public final class UtamElement {
   private final Boolean isNullable;
   private final Traversal traversal;
   private final UtamMethodDescription description;
-  private UtamSelector selector;
   private final Boolean isPublic; // should be nullable as it's redundant for root
   private final UtamElementFilter filter;
+  private UtamSelector selector;
 
   @JsonCreator
   UtamElement(
@@ -100,13 +114,15 @@ public final class UtamElement {
    */
   static List<UtamElement> processElementsNode(JsonNode elementsNode,
       String parserContext) {
-    List<UtamElement> elements = VALIDATION.validateOptionalNotEmptyArray(elementsNode, parserContext, "elements");
-    if(isEmptyNode(elementsNode)) {
+    List<UtamElement> elements = VALIDATION
+        .validateOptionalNotEmptyArray(elementsNode, parserContext, "elements");
+    if (isEmptyNode(elementsNode)) {
       return elements;
     }
     for (JsonNode elementNode : elementsNode) {
       VALIDATION.validateNotNullObject(elementNode, parserContext, "element");
-      UtamElement element = readNode(elementNode, UtamElement.class, VALIDATION.getErrorMessage(200, parserContext));
+      UtamElement element = readNode(elementNode, UtamElement.class,
+          VALIDATION.getErrorMessage(200, parserContext));
       elements.add(element);
     }
     return elements;
@@ -147,44 +163,13 @@ public final class UtamElement {
     for (UtamElement element : elements) {
       element.traverse(context, nextScope, false);
     }
-    if(shadow != null) {
+    if (shadow != null) {
+      if (!name.equals(ROOT_ELEMENT_NAME)) {
+        context.getLintingObject().setShadowBoundary(name);
+      }
       for (UtamElement element : shadow.elements) {
         element.traverse(context, nextScope, true);
       }
-    }
-  }
-
-  /**
-   * The type of element
-   */
-  public enum Type {
-    /**
-     * A basic element
-     */
-    BASIC(String.join(", ",
-        "name", "public", "selector", "type", "filter", "nullable", "shadow", "elements")),
-
-    /**
-     * A custom element
-     */
-    CUSTOM(String.join(", ",
-        "name", "public", "selector", "type", "filter", "nullable")),
-
-    /**
-     * A container element
-     */
-    CONTAINER(String.join(", ", "name", "public", "selector", "type")),
-
-    /**
-     * A frame element
-     */
-    FRAME(String.join(", ",
-        "name", "public", "selector", "type"));
-
-    private final String supportedProperties;
-
-    Type(String supportedProperties) {
-      this.supportedProperties = supportedProperties;
     }
   }
 
@@ -197,7 +182,7 @@ public final class UtamElement {
     }
 
     Traversal(String type) {
-      this.type = new String[] {type};
+      this.type = new String[]{type};
     }
 
     // traverse and return next scope
@@ -219,8 +204,10 @@ public final class UtamElement {
       if (filter != null && !selector.isReturnAll()) {
         throw new UtamCompilationError(VALIDATION.getErrorMessage(302, name));
       }
-      VALIDATION.validateUnsupportedProperty(elements, validationContext, "elements", Type.CUSTOM.supportedProperties);
-      VALIDATION.validateUnsupportedProperty(shadow, validationContext, "shadow", Type.CUSTOM.supportedProperties);
+      VALIDATION.validateUnsupportedProperty(elements, validationContext, "elements",
+          CUSTOM_SUPPORTED_PROPERTIES);
+      VALIDATION.validateUnsupportedProperty(shadow, validationContext, "shadow",
+          CUSTOM_SUPPORTED_PROPERTIES);
     }
 
     @Override
@@ -229,30 +216,32 @@ public final class UtamElement {
         ElementContext scopeElement,
         boolean isExpandScopeShadowRoot) {
       boolean isReturnList = selector.isReturnAll() && (filter == null || !filter.isFindFirst());
-      LocatorCodeGeneration selectorContext = selector.getElementCodeGenerationHelper(name, context);
+      LocatorCodeGeneration selectorContext = selector
+          .getElementCodeGenerationHelper(name, context);
       MethodParametersTracker parameters = new MethodParametersTracker(
           String.format("element '%s' getter", name));
       parameters.setMethodParameters(selectorContext.getParameters());
       TypeProvider elementType = context.getType(type[0]);
       MatcherObject filterMatcher = null;
       if (filter != null) {
-        filterMatcher = filter.setElementFilter(context, Type.CUSTOM, elementType, name);
+        filterMatcher = filter.setElementFilter(context, elementType, name, false);
         parameters.setMethodParameters(filter.getApplyMethodParameters());
         parameters.setMethodParameters(filter.getMatcherParameters());
       }
+      Locator locator = selectorContext.getLocator();
       // set element
       ElementContext component = isReturnList ? new ElementContext.CustomReturnsAll(
           scopeElement,
           name,
           elementType,
-          selectorContext.getLocator(),
+          locator,
           parameters.getMethodParameters(),
           isNullable()) :
           new ElementContext.Custom(
               scopeElement,
               name,
               elementType,
-              selectorContext.getLocator(),
+              locator,
               parameters.getMethodParameters(),
               isNullable());
       PageObjectMethod method;
@@ -295,15 +284,18 @@ public final class UtamElement {
       context.setTestableElement(
           name,
           new ElementUnitTestHelper(
-              selectorContext.getLocator().getStringValue(),
+              locator.getStringValue(),
               scopeElement.getName(),
               isExpandScopeShadowRoot,
               isReturnList));
       ElementField field =
           new ElementField(
-              name, getFindAnnotation(selectorContext.getLocator(),
-              isExpandScopeShadowRoot, isNullable()));
+              name, getFindAnnotation(locator, isExpandScopeShadowRoot, isNullable()));
       context.setClassField(field);
+      ElementLinting lintingContext = new Element(name, elementType.getFullName(),
+          locator.getValue(), scopeElement.getName(), selector.isReturnAll());
+      context.getLintingObject().setElement(lintingContext);
+      context.getLintingObject().setMethod(new Method(method.getDeclaration().getName(), true));
       return new ElementContext[]{null, component};
     }
   }
@@ -318,7 +310,7 @@ public final class UtamElement {
         throw new UtamCompilationError(VALIDATION.getErrorMessage(302, name));
       }
       boolean isReturnsList = selector.isReturnAll() && (filter == null || !filter.isFindFirst());
-      if (isReturnsList && (elements.size() > 0 || shadow!= null)) {
+      if (isReturnsList && (elements.size() > 0 || shadow != null)) {
         throw new UtamCompilationError(VALIDATION.getErrorMessage(203, name));
       }
     }
@@ -331,26 +323,28 @@ public final class UtamElement {
       boolean isPublicImplementationOnlyElement =
           isPublic() && context.isImplementationPageObject();
       TypeProvider elementType = asBasicOrUnionType(name, type, isPublicImplementationOnlyElement);
-      LocatorCodeGeneration locatorHelper = selector.getElementCodeGenerationHelper(name, context);
+      LocatorCodeGeneration selectorContext = selector
+          .getElementCodeGenerationHelper(name, context);
+      Locator locator = selectorContext.getLocator();
       MethodParametersTracker addedParameters = new MethodParametersTracker(parserContext);
-      addedParameters.setMethodParameters(locatorHelper.getParameters());
+      addedParameters.setMethodParameters(selectorContext.getParameters());
       ElementField field =
           new ElementField(
-              name, getFindAnnotation(locatorHelper.getLocator(),
+              name, getFindAnnotation(selectorContext.getLocator(),
               isExpandScopeShadowRoot, isNullable()));
       MatcherObject filterMatcher = null;
       if (filter != null) {
-        filterMatcher = filter.setElementFilter(context, Type.BASIC, elementType, name);
+        filterMatcher = filter.setElementFilter(context, elementType, name, true);
         addedParameters.setMethodParameters(filter.getApplyMethodParameters());
         addedParameters.setMethodParameters(filter.getMatcherParameters());
       }
       boolean isList = selector.isReturnAll() && (filter == null || !filter.isFindFirst());
       ElementContext elementContext = isList ?
           new ElementContext.BasicReturnsAll(
-              scopeElement, name, elementType, locatorHelper.getLocator(),
+              scopeElement, name, elementType, locator,
               addedParameters.getMethodParameters(), isNullable()) :
           new ElementContext.Basic(
-              scopeElement, name, elementType, locatorHelper.getLocator(),
+              scopeElement, name, elementType, locator,
               addedParameters.getMethodParameters(), isNullable());
       final PageObjectMethod method;
       final TypeProvider implType = elementType instanceof UnionType ?
@@ -362,7 +356,7 @@ public final class UtamElement {
                 name,
                 elementType,
                 implType,
-                locatorHelper.getParameters(),
+                selectorContext.getParameters(),
                 isPublic(),
                 filter.applyMethod,
                 filter.getApplyMethodParameters(),
@@ -371,10 +365,11 @@ public final class UtamElement {
                 filter.isFindFirst(),
                 description);
       } else if (isList) {
-        method = new ElementMethod.Multiple(elementContext, locatorHelper.getParameters(),
+        method = new ElementMethod.Multiple(elementContext, selectorContext.getParameters(),
             isPublic(), implType, description);
       } else {
-        method = new ElementMethod.Single(elementContext, locatorHelper.getParameters(), isPublic(),
+        method = new ElementMethod.Single(elementContext, selectorContext.getParameters(),
+            isPublic(),
             implType, description);
       }
       context.setClassField(field);
@@ -382,11 +377,15 @@ public final class UtamElement {
       context.setMethod(method);
       elementContext.setElementMethod(method, context);
       context.setTestableElement(name, new ElementUnitTestHelper(
-          locatorHelper.getLocator().getStringValue(),
+          locator.getStringValue(),
           scopeElement == null ? null : scopeElement.getName(),
           isExpandScopeShadowRoot,
           isList
       ));
+      ElementLinting lintingContext = new Element(name, LINTING_BASIC_TYPE,
+          locator.getValue(), scopeElement.getName(), selector.isReturnAll());
+      context.getLintingObject().setElement(lintingContext);
+      context.getLintingObject().setMethod(new Method(method.getDeclaration().getName(), true));
       return new ElementContext[]{elementContext};
     }
   }
@@ -406,32 +405,37 @@ public final class UtamElement {
             null);
       }
       VALIDATION.validateUnsupportedProperty(elements, validationContext, "elements",
-          Type.CONTAINER.supportedProperties);
+          CONTAINER_SUPPORTED_PROPERTIES);
       VALIDATION.validateUnsupportedProperty(shadow, validationContext, "shadow",
-          Type.CONTAINER.supportedProperties);
+          CONTAINER_SUPPORTED_PROPERTIES);
       VALIDATION.validateUnsupportedProperty(filter, validationContext, "filter",
-          Type.CONTAINER.supportedProperties);
+          CONTAINER_SUPPORTED_PROPERTIES);
       VALIDATION.validateUnsupportedProperty(isNullable, validationContext, "nullable",
-          Type.CONTAINER.supportedProperties);
+          CONTAINER_SUPPORTED_PROPERTIES);
     }
 
     @Override
     ElementContext[] traverse(TranslationContext context,
         ElementContext scopeElement,
         boolean isExpandScopeShadowRoot) {
-      LocatorCodeGeneration selectorContext = selector.getElementCodeGenerationHelper(name, context);
+      LocatorCodeGeneration locator = selector
+          .getElementCodeGenerationHelper(name, context);
       ElementContext elementContext = new ElementContext.Container(scopeElement, name);
       PageObjectMethod method;
       if (selector.isReturnAll()) {
         method = new ContainerMethod.WithSelectorReturnsList(
-            scopeElement, isExpandScopeShadowRoot, name, selectorContext, isPublic(), description);
+            scopeElement, isExpandScopeShadowRoot, name, locator, isPublic(), description);
       } else {
         method = new ContainerMethod.WithSelector(
-            scopeElement, isExpandScopeShadowRoot, name, selectorContext, isPublic(), description);
+            scopeElement, isExpandScopeShadowRoot, name, locator, isPublic(), description);
       }
       elementContext.setElementMethod(method, context);
       context.setElement(elementContext);
       context.setMethod(method);
+      ElementLinting lintingContext = new Element(name, LINTING_CONTAINER_TYPE,
+          locator.getLocator().getValue(), scopeElement.getName(), selector.isReturnAll());
+      context.getLintingObject().setElement(lintingContext);
+      context.getLintingObject().setMethod(new Method(method.getDeclaration().getName(), true));
       return new ElementContext[]{null, elementContext};
     }
   }
@@ -443,13 +447,13 @@ public final class UtamElement {
       String validationContext = String.format("element \"%s\"", name);
       VALIDATION.validateRequiredProperty(selector, validationContext, "selector");
       VALIDATION.validateUnsupportedProperty(elements, validationContext, "elements",
-          Type.FRAME.supportedProperties);
+          FRAME_SUPPORTED_PROPERTIES);
       VALIDATION.validateUnsupportedProperty(shadow, validationContext, "shadow",
-          Type.FRAME.supportedProperties);
+          FRAME_SUPPORTED_PROPERTIES);
       VALIDATION.validateUnsupportedProperty(filter, validationContext, "filter",
-          Type.FRAME.supportedProperties);
+          FRAME_SUPPORTED_PROPERTIES);
       VALIDATION.validateUnsupportedProperty(isNullable, validationContext, "nullable",
-          Type.FRAME.supportedProperties);
+          FRAME_SUPPORTED_PROPERTIES);
       if (selector.isReturnAll()) {
         throw new UtamCompilationError(VALIDATION.getErrorMessage(204, name));
       }
@@ -459,18 +463,23 @@ public final class UtamElement {
     ElementContext[] traverse(TranslationContext context,
         ElementContext scopeElement,
         boolean isExpandScopeShadowRoot) {
-      LocatorCodeGeneration selectorContext = selector.getElementCodeGenerationHelper(name, context);
+      LocatorCodeGeneration locator = selector
+          .getElementCodeGenerationHelper(name, context);
       ElementField field =
           new ElementField(
-              name, getFindAnnotation(selectorContext.getLocator(),
+              name, getFindAnnotation(locator.getLocator(),
               isExpandScopeShadowRoot, isNullable()));
-      ElementContext elementContext = new ElementContext.Frame(scopeElement, name, selectorContext);
+      ElementContext elementContext = new ElementContext.Frame(scopeElement, name, locator);
       PageObjectMethod method = new FrameMethod(elementContext, isPublic(),
-          selectorContext.getParameters(), description);
+          locator.getParameters(), description);
       elementContext.setElementMethod(method, context);
       context.setClassField(field);
       context.setElement(elementContext);
       context.setMethod(method);
+      ElementLinting lintingContext = new Element(name, LINTING_FRAME_TYPE,
+          locator.getLocator().getValue(), scopeElement.getName(), selector.isReturnAll());
+      context.getLintingObject().setElement(lintingContext);
+      context.getLintingObject().setMethod(new Method(method.getDeclaration().getName(), true));
       return new ElementContext[]{elementContext};
     }
   }

@@ -16,12 +16,12 @@ import static utam.compiler.types.BasicElementUnionType.asUnionTypeOrNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import utam.compiler.grammar.UtamMethodDescription;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.ParameterUtils;
 import utam.compiler.helpers.TypeUtilities.FromClass;
+import utam.compiler.representation.JavadocObject.MethodJavadoc;
 import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -75,14 +75,17 @@ public abstract class ElementMethod {
     String methodName = scopeElement.getElementMethod().getDeclaration().getName();
     String scopeVariableName = scopeElement.getName();
     String parameters = ParameterUtils.getParametersValuesString(scopeElement.getParameters());
-    return String.format("BasicElement %s = this.%s(%s)", scopeVariableName, methodName, parameters);
+    return String
+        .format("BasicElement %s = this.%s(%s)", scopeVariableName, methodName, parameters);
   }
 
-  static String getElementLocationCode(String locationFieldName, List<MethodParameter> locatorParameters) {
-    if(locatorParameters.isEmpty()) {
+  static String getElementLocationCode(String locationFieldName,
+      List<MethodParameter> locatorParameters) {
+    if (locatorParameters.isEmpty()) {
       return String.format("this.%s", locationFieldName);
     }
-    return String.format("this.%s.setParameters(%s)", locationFieldName, getParametersValuesString(locatorParameters));
+    return String.format("this.%s.setParameters(%s)", locationFieldName,
+        getParametersValuesString(locatorParameters));
   }
 
   private static List<String> getElementMethodCode(ElementContext element,
@@ -93,7 +96,7 @@ public abstract class ElementMethod {
     code.add(String.format("return basic(%s, %s).%s(%s.class, %s.class)",
         scopeVariableName,
         getElementLocationCode(element.getName(), locatorParameters),
-        isList? "buildList" : "build",
+        isList ? "buildList" : "build",
         element.getType().getSimpleName(),
         implClass.getSimpleName()));
     return code;
@@ -140,8 +143,10 @@ public abstract class ElementMethod {
      * @param implType          the type provider for the implementation type
      * @param description       method description in Json
      */
-    public Single(ElementContext element, List<MethodParameter> locatorParameters, boolean isPublic, TypeProvider implType, UtamMethodDescription description) {
-      super(getElementGetterMethodName(element.getName(), isPublic), isPublic, element.getGetterReturnType(), description);
+    public Single(ElementContext element, List<MethodParameter> locatorParameters, boolean isPublic,
+        TypeProvider implType, UtamMethodDescription description) {
+      super(getElementGetterMethodName(element.getName(), isPublic), isPublic,
+          element.getGetterReturnType(), description);
       this.methodCode = getElementMethodCode(element, locatorParameters, implType, false);
       this.parametersTracker.setMethodParameters(element.getParameters());
       setInterfaceImports(imports, returnType);
@@ -151,7 +156,12 @@ public abstract class ElementMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), returnType, imports, description);
+      List<MethodParameter> parameters = parametersTracker.getMethodParameters();
+      JavadocObject javadoc = new MethodJavadoc(methodName,
+          returnType,
+          parameters,
+          description);
+      return new MethodDeclarationImpl(methodName, parameters, returnType, imports, javadoc);
     }
 
     @Override
@@ -195,7 +205,8 @@ public abstract class ElementMethod {
      * @param implType          the type provider for the implementation type
      * @param description       method description in Json
      */
-    public Multiple(ElementContext element, List<MethodParameter> locatorParameters, boolean isPublic, TypeProvider implType, UtamMethodDescription description) {
+    public Multiple(ElementContext element, List<MethodParameter> locatorParameters,
+        boolean isPublic, TypeProvider implType, UtamMethodDescription description) {
       super(getElementGetterMethodName(element.getName(), isPublic), isPublic, null, description);
       this.methodCode = getElementMethodCode(element, locatorParameters, implType, true);
       this.parametersTracker.setMethodParameters(element.getParameters());
@@ -207,11 +218,16 @@ public abstract class ElementMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
+      List<MethodParameter> parameters = parametersTracker.getMethodParameters();
+      JavadocObject javadoc = new MethodJavadoc(methodName,
+          listReturnType,
+          parameters,
+          description);
       return new MethodDeclarationImpl(
           methodName,
-          parametersTracker.getMethodParameters(),
+          parameters,
           listReturnType,
-          imports, description);
+          imports, javadoc);
     }
 
     @Override
@@ -258,7 +274,8 @@ public abstract class ElementMethod {
      * @param applyParameters   the list of parameters to use in the filter
      * @param matcherType       the type of matcher for the filter
      * @param matcherParameters the list of parameters for the matcher
-     * @param isFindFirstMatch  a value indicting whether to only return the first match of the filter
+     * @param isFindFirstMatch  a value indicting whether to only return the first match of the
+     *                          filter
      * @param description       method description in Json
      */
     public Filtered(
@@ -283,7 +300,8 @@ public abstract class ElementMethod {
       setInterfaceImports(imports, returnType);
       setClassImports(classImports, returnType, implType);
       setFilterParameterClassImports();
-      String predicateCode = getPredicateCode(applyMethod, applyParameters, matcherType, matcherParameters);
+      String predicateCode = getPredicateCode(applyMethod, applyParameters, matcherType,
+          matcherParameters);
       code.add(getScopeElementCode(scopeElement));
       String scopeVariableName = scopeElement.getName();
       String locationCode = getElementLocationCode(elementName, locatorParameters);
@@ -307,7 +325,12 @@ public abstract class ElementMethod {
 
     @Override
     public MethodDeclaration getDeclaration() {
-      return new MethodDeclarationImpl(methodName, parametersTracker.getMethodParameters(), returnType, imports, description);
+      List<MethodParameter> parameters = parametersTracker.getMethodParameters();
+      JavadocObject javadoc = new MethodJavadoc(methodName,
+          returnType,
+          parameters,
+          description);
+      return new MethodDeclarationImpl(methodName, parameters, returnType, imports, javadoc);
     }
 
     @Override
