@@ -15,7 +15,7 @@ import utam.core.framework.consumer.UtamError;
  * @author elizaveta.ivanova
  * @since 242
  */
-public class UtamLintingError extends UtamError {
+class UtamLintingError extends UtamError {
 
   /**
    * Default serial version ID for serializable object
@@ -27,7 +27,11 @@ public class UtamLintingError extends UtamError {
    *
    * @param message the validation error message
    */
-  public UtamLintingError(String message) {
+  UtamLintingError(String message) {
     super(message);
+  }
+
+  UtamLintingError(String message, Throwable t) {
+    super(message, t);
   }
 }

@@ -13,8 +13,8 @@ import utam.core.framework.consumer.UtamError;
 import org.testng.annotations.Test;
 
 import static utam.compiler.grammar.TestUtilities.TEST_URI;
+import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 import static utam.compiler.translator.TranslationTypesConfigJava.getWrongTypeError;
-import static utam.compiler.grammar.TestUtilities.getDefaultConfig;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.expectThrows;
@@ -75,7 +75,7 @@ public class TranslationTypesConfigJavaTests {
 
   @Test
   public void testTypeValidationFromContext() {
-    TranslationContext context = new TranslationContext(TEST_URI, getDefaultConfig());
+    TranslationContext context = getTestTranslationContext();
     final String INVALID_PAGE_OBJECT_TYPE = "InvalidType";
     UtamError e = expectThrows(UtamError.class, () -> context.getType(INVALID_PAGE_OBJECT_TYPE));
     assertThat(

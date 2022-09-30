@@ -27,6 +27,13 @@ public interface PageObjectLinting {
   String getName();
 
   /**
+   * Get path to UTAM JSON file relative to project path. Used by SARIF.
+   *
+   * @return string with path
+   */
+  String getJsonFilePath();
+
+  /**
    * Get type (full class name) of the page object. Ex: my.page.Object
    *
    * @return page object class

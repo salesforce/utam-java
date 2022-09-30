@@ -37,7 +37,7 @@ public class TestUtilities {
   public static final TypeProvider TEST_PAGE_OBJECT = TYPES_CONFIG.getInterfaceType(TEST_URI);
 
   public static TranslationContext getTestTranslationContext() {
-    return new TranslationContext(TEST_URI, getDefaultConfig());
+    return new TestTranslationContext(getDefaultConfig());
   }
 
   public static Locator getCssSelector(String value) {
@@ -50,7 +50,7 @@ public class TestUtilities {
 
   public static JsonDeserializer getJsonStringDeserializer(String json,
       TranslatorConfig translatorConfig) {
-    TranslationContext translationContext = new TranslationContext(TEST_URI, translatorConfig);
+    TranslationContext translationContext = new TestTranslationContext(translatorConfig);
     return new JsonDeserializer(translationContext, json);
   }
 
@@ -65,5 +65,16 @@ public class TestUtilities {
     TranslatorSourceConfig sourceConfig = new DefaultSourceConfigurationTests.Mock();
     return new DefaultTranslatorConfiguration(DEFAULT_COMPILER_OUTPUT_OPTIONS, null, sourceConfig,
         targetConfig, new ArrayList<>());
+  }
+
+  static class TestTranslationContext extends TranslationContext {
+
+    TestTranslationContext(TranslatorConfig translatorConfiguration) {
+      super(TEST_URI, TEST_URI, translatorConfiguration);
+    }
+
+    TestTranslationContext(String name, TranslatorConfig translatorConfiguration) {
+      super(name, name, translatorConfiguration);
+    }
   }
 }

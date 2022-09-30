@@ -3,6 +3,7 @@
   "pageObjectsOutputDir": "",
   "resourcesOutputDir": "",
   "lint": {
+    "outputFile" : "test.sarif.json",
     "requiredRootDescription": {
       "violation": "warning"
     },

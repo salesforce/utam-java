@@ -305,34 +305,34 @@
   },
   {
     "code": 2001,
-    "message": "page object %s: duplicate selector \"%s\" for the elements \"%s\" and \"%s\""
+    "message": "duplicate selector \"%s\" for the elements \"%s\" and \"%s\""
   },
   {
     "code": 2002,
-    "message": "page object %s: root description is missing"
+    "message": "root description is missing"
   },
   {
     "code": 2003,
-    "message": "page object %s: method \"%s\" does not have description"
+    "message": "method \"%s\" does not have description"
   },
   {
     "code": 2004,
-    "message": "page object %s: only root shadow boundary is allowed, please create another page object for the element \"%s\""
+    "message": "only root shadow boundary is allowed, please create another page object for the element \"%s\""
   },
   {
     "code": 2005,
-    "message": "page object %s: property \"author\" is missing in the root description"
+    "message": "property \"author\" is missing in the root description"
   },
   {
     "code": 3001,
-    "message": "page object %s: same root selector \"%s\" is used as a root selector in the page object %s"
+    "message": "same root selector \"%s\" is used as a root selector in the page object %s"
   },
   {
     "code": 3002,
-    "message": "page object %s: element \"%s\" should have type \"%s\" because it uses its root selector"
+    "message": "element \"%s\" should have type \"%s\" because it uses its root selector"
   },
   {
     "code": 3003,
-    "message": "page object %s: custom selector \"%s\" of the element \"%s\" is used for an element \"%s\" in the page object %s, but has a different type"
+    "message": "custom selector \"%s\" of the element \"%s\" is used for an element \"%s\" in the page object %s, but has a different type"
   }
 ]

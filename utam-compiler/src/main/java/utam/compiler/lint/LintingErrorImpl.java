@@ -9,8 +9,8 @@ package utam.compiler.lint;
 
 import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 
-import utam.compiler.lint.LintingRule.ViolationType;
 import utam.core.declarative.lint.LintingError;
+import utam.core.declarative.lint.PageObjectLinting;
 
 /**
  * Linting error implementation
@@ -21,15 +21,37 @@ import utam.core.declarative.lint.LintingError;
 class LintingErrorImpl implements LintingError {
 
   private final String errorMessage;
-  private final ViolationType ruleType;
-  private final boolean isReport;
+  private final String fullErrorMessage;
+  private final String id;
+  private final String ruleId;
+  private final ViolationLevel level;
+  private final String pageObjectPath;
 
-  LintingErrorImpl(ViolationType ruleType, boolean isReport, Integer errorCode, String... args) {
-    this.ruleType = ruleType;
-    String prefix = isReport? ruleType.name() : "disabled";
-    this.errorMessage = String.format("linting %s %d: %s", prefix, errorCode,
-        VALIDATION.getLintingMessage(errorCode, args));
-    this.isReport = isReport;
+  LintingErrorImpl(String ruleId, ViolationLevel level, PageObjectLinting pageObject,
+      Integer errorCode,
+      String... args) {
+    this.ruleId = ruleId;
+    this.level = level;
+    this.id = String.valueOf(errorCode);
+    this.errorMessage = VALIDATION.getLintingMessage(errorCode, args);
+    this.pageObjectPath = pageObject.getJsonFilePath();
+    this.fullErrorMessage = buildFullErrorMessage(pageObject.getName(), this, this.errorMessage);
+  }
+
+  /**
+   * Build full error message that includes ruleId and page object name to print in UTAM logs. Not
+   * private because used in the unit tests.
+   *
+   * @param pageObjectName URI of the page page object
+   * @param error          linting error object
+   * @param shortMessage   short message used by SARIF
+   * @return string
+   */
+  static String buildFullErrorMessage(String pageObjectName, LintingError error,
+      String shortMessage) {
+    LintingErrorImpl err = (LintingErrorImpl) error;
+    return String.format("lint %s %s in page object %s: %s", err.ruleId,
+        err.level.name(), pageObjectName, shortMessage);
   }
 
   @Override
@@ -38,12 +60,27 @@ class LintingErrorImpl implements LintingError {
   }
 
   @Override
-  public boolean isThrowError() {
-    return isReport() && ruleType == ViolationType.error;
+  public String getFullMessage() {
+    return fullErrorMessage;
   }
 
   @Override
-  public boolean isReport() {
-    return isReport;
+  public ViolationLevel getLevel() {
+    return level;
+  }
+
+  @Override
+  public String getId() {
+    return id;
+  }
+
+  @Override
+  public String getRuleId() {
+    return ruleId;
+  }
+
+  @Override
+  public String getSourceFilePath() {
+    return pageObjectPath;
   }
 }

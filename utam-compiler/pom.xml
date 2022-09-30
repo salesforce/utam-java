@@ -60,6 +60,10 @@
             <artifactId>hamcrest</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.contrastsecurity</groupId>
+            <artifactId>java-sarif</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
+import utam.compiler.grammar.TestUtilities.TestTranslationContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.translator.ClassSerializer;
 import utam.compiler.translator.InterfaceSerializer;
@@ -81,7 +82,7 @@ public class DeserializerUtilities {
   }
 
   public Result getResultFromString(String content) {
-    TranslationContext context = new TranslationContext(type, translatorConfig);
+    TranslationContext context = new TestTranslationContext(type, translatorConfig);
     // to test implementations
     translatorConfig.getConfiguredProfiles().add(new StringValueProfileConfig("name", "value"));
     JsonDeserializer deserializer = new JsonDeserializer(context, content);

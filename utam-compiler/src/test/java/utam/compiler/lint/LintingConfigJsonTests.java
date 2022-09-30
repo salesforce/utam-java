@@ -8,9 +8,15 @@
 package utam.compiler.lint;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.lint.LintingConfigJson.DEFAULT_SARIF_OUTPUT_FILE;
+import static utam.compiler.lint.LintingConfigJson.LINTING_EXCEPTION_PREFIX;
+import static utam.compiler.lint.LintingConfigJson.SARIF_OUTPUT_FOLDER;
+import static utam.compiler.lint.LintingErrorImpl.buildFullErrorMessage;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +39,7 @@ public class LintingConfigJsonTests {
   private static final String ROOT_DIR = String
       .join(File.separator, System.getProperty("user.dir"), "src", "test", "resources", "lint");
 
-  private static TranslatorRunner getRunner(String folder) {
+  static TranslatorRunner getRunner(String folder) {
     String relativeRoot = String.join(File.separator, ROOT_DIR, folder);
     String configFile = String.join(File.separator, "lint", folder, "config.json");
     File config = new File(
@@ -52,9 +58,10 @@ public class LintingConfigJsonTests {
     TranslatorRunner runner = getRunner("changeDefaultConfig");
     List<LintingError> errors = runner.run().getLintingErrors();
     assertThat(errors, hasSize(1));
-    assertThat(errors.get(0).getMessage(),
-        containsString(
-            "linting warning 2002: page object utam/pageObjects/test: root description is missing"));
+    LintingError error = errors.get(0);
+    String errMsg = buildFullErrorMessage("utam/pageObjects/test", error,
+        "root description is missing");
+    assertThat(errors.get(0).getFullMessage(), equalTo(errMsg));
   }
 
   @Test
@@ -62,6 +69,8 @@ public class LintingConfigJsonTests {
     TranslatorRunner runner = getRunner("changeGlobalRules");
     List<LintingError> errors = runner.run().getLintingErrors();
     assertThat(errors, hasSize(0));
+    String outputFile = SARIF_OUTPUT_FOLDER + DEFAULT_SARIF_OUTPUT_FILE;
+    assertThat(new File(outputFile).exists(), is(true));
   }
 
   @Test
@@ -69,7 +78,8 @@ public class LintingConfigJsonTests {
     TranslatorRunner runner = getRunner("throwConfig");
     Exception e = expectThrows(UtamLintingError.class, runner::run);
     assertThat(e.getMessage(),
-        containsString("linting error 2001: page object utam/pageObjects/test: "
+        containsString("lint ULR01 error in page object utam/pageObjects/test: "
             + "duplicate selector \"By.cssSelector: .one\" for the elements \"two\" and \"one\""));
+    assertThat(e.getMessage(), containsString(LINTING_EXCEPTION_PREFIX));
   }
 }

@@ -45,7 +45,7 @@ import utam.core.framework.consumer.UtamError;
  * @author elizaveta.ivanova
  * @since 228
  */
-public final class TranslationContext {
+public class TranslationContext {
 
   static final String ERR_CONTEXT_DUPLICATE_METHOD = "duplicate method '%s'";
   static final String ERR_CONTEXT_DUPLICATE_FIELD = "duplicate field '%s'";
@@ -73,9 +73,10 @@ public final class TranslationContext {
    * Initializes a new instance of the TranslationContext class
    *
    * @param pageObjectURI           the Page Object URI
+   * @param filePath                path to the JSON source file, used by SARIF to link with source file
    * @param translatorConfiguration the translator configuration
    */
-  public TranslationContext(String pageObjectURI, TranslatorConfig translatorConfiguration) {
+  public TranslationContext(String pageObjectURI, String filePath, TranslatorConfig translatorConfiguration) {
     this.pageObjectURI = pageObjectURI;
     this.translationTypesConfig = translatorConfiguration.getTranslationTypesConfig();
     this.translatorConfiguration = translatorConfiguration;
@@ -85,7 +86,7 @@ public final class TranslationContext {
     // has impl prefixes
     this.pageObjectClassType = translationTypesConfig.getClassType(pageObjectURI);
     this.pageObjectInterfaceType = translationTypesConfig.getInterfaceType(pageObjectURI);
-    this.contextForLinting = new PageObjectLintingImpl(pageObjectURI, this.pageObjectInterfaceType);
+    this.contextForLinting = new PageObjectLintingImpl(pageObjectURI, filePath, this.pageObjectInterfaceType);
   }
 
   /**

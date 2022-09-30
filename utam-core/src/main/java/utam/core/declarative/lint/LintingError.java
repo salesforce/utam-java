@@ -16,23 +16,58 @@ package utam.core.declarative.lint;
 public interface LintingError {
 
   /**
-   * Get an error message
+   * Get unique error ID for SARIF JSON
    *
-   * @return string
+   * @return error id
+   */
+  String getId();
+
+  /**
+   * Get rule Id that was violated
+   *
+   * @return string with rule Id
+   */
+  String getRuleId();
+
+  /**
+   * Get an error message for SARIF JSON
+   *
+   * @return preconfigured via errors config short message
    */
   String getMessage();
 
   /**
-   * If set to true, error should throw an exception and interrupt compilation
+   * Full message includes information about error code and page object name to print to console
+   * log
    *
-   * @return boolean
+   * @return string
    */
-  boolean isThrowError();
+  String getFullMessage();
 
   /**
-   * Exclusions should not be reported
+   * Get violation level, error or warning
    *
-   * @return boolean
+   * @return violation type
    */
-  boolean isReport();
+  ViolationLevel getLevel();
+
+  /**
+   * Full JSON source file path for SARIF JSON
+   *
+   * @return string
+   */
+  String getSourceFilePath();
+
+  /**
+   * Type of the linting violation
+   *
+   * @author elizaveta.ivanova
+   * @since 242
+   */
+  enum ViolationLevel {
+    // lower case for deserialization
+    error,
+    warning,
+    disabled
+  }
 }
