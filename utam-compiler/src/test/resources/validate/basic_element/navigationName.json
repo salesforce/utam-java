@@ -1,0 +1,10 @@
+{
+  "elements": [
+    {
+      "name": "navigation",
+      "selector": {
+        "css": "css"
+      }
+    }
+  ]
+}

@@ -14,6 +14,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
+import utam.core.driver.Navigation;
 import utam.core.element.Element;
 import utam.core.element.FrameElement;
 import utam.core.element.Locator;
@@ -22,6 +23,7 @@ import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.PageObjectsFactoryImpl;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.element.DocumentObject;
+import utam.core.framework.element.NavigationImpl;
 import utam.core.selenium.appium.MobileDriverAdapter;
 import utam.core.selenium.appium.MobileElementAdapter;
 import utam.core.selenium.element.ElementAdapter;
@@ -39,6 +41,7 @@ public class UtamLoaderImpl implements UtamLoader {
   private final UtamLoaderConfig loaderConfig;
   private PageObjectsFactory factory;
   private Document document;
+  private final Navigation navigation;
 
   /**
    * Initializes a new instance of the UtamLoaderImpl class
@@ -50,6 +53,7 @@ public class UtamLoaderImpl implements UtamLoader {
     this.driver = driver;
     this.factory = new PageObjectsFactoryImpl(loaderConfig, driver);
     this.document = new DocumentObject(factory);
+    this.navigation = new NavigationImpl(driver);
   }
 
   /**
@@ -62,6 +66,7 @@ public class UtamLoaderImpl implements UtamLoader {
     this.driver = WebDriverFactory.getAdapter(webDriver, loaderConfig.getDriverConfig());
     this.factory = new PageObjectsFactoryImpl(loaderConfig, driver);
     this.document = new DocumentObject(factory);
+    this.navigation = new NavigationImpl(driver);
   }
 
   /**
@@ -141,6 +146,11 @@ public class UtamLoaderImpl implements UtamLoader {
   @Override
   public Document getDocument() {
     return document;
+  }
+
+  @Override
+  public Navigation getNavigation() {
+    return navigation;
   }
 
   @Override

@@ -76,4 +76,11 @@ public class UtamElement_BasicTests {
     UtamError e = expectThrows(UtamError.class, () -> getContext("wrongBasicTypeArrayElement"));
     assertThat(e.getMessage(), containsString("error 201: element \"test\": basic type \"[ \"wrong\" ]\" is not supported"));
   }
+
+  @Test
+  public void testNavigationElementNameNotAllowed() {
+    UtamError e = expectThrows(UtamCompilationError.class, () -> getContext("navigationName"));
+    assertThat(e.getMessage(),
+        containsString("error 202: element \"navigation\": element with same name was already declared"));
+  }
 }

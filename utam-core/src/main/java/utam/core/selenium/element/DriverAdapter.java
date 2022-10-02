@@ -49,6 +49,7 @@ public class DriverAdapter implements Driver {
 
   /**
    * Initializes a new instance of the DriverAdapter class
+   *
    * @param driver       the driver instance
    * @param driverConfig the driver configuration object
    */
@@ -57,7 +58,7 @@ public class DriverAdapter implements Driver {
     this.driverConfig = driverConfig;
     // set implicit timeout as configured
     Options options = this.driver.manage();
-    if(options != null && options.timeouts() != null) { // for mock both can be null
+    if (options != null && options.timeouts() != null) { // for mock both can be null
       options
           .timeouts()
           .implicitlyWait(this.driverConfig.getImplicitTimeout().toSeconds(), TimeUnit.SECONDS);
@@ -80,7 +81,8 @@ public class DriverAdapter implements Driver {
   }
 
   static String getNotFoundErr(Locator by) {
-    return String.format("%s with locator '%s'", ERR_ELEMENT_NOT_FOUND_PREFIX, by.getValue().toString());
+    return String
+        .format("%s with locator '%s'", ERR_ELEMENT_NOT_FOUND_PREFIX, by.getValue().toString());
   }
 
   static WebDriver getSeleniumDriver(Driver driver) {
@@ -149,18 +151,19 @@ public class DriverAdapter implements Driver {
 
   @Override
   public <T> T waitFor(Supplier<T> isTrue, String message, Duration timeout) {
-    Duration waitDuration = timeout == null? driverConfig.getExplicitTimeout() : timeout;
-    String errorMessage = message == null? "wait for condition" : message;
-    DriverWait driverWait = new DriverWait(this, waitDuration, driverConfig.getPollingInterval(), errorMessage);
+    Duration waitDuration = timeout == null ? driverConfig.getExplicitTimeout() : timeout;
+    String errorMessage = message == null ? "wait for condition" : message;
+    DriverWait driverWait = new DriverWait(this, waitDuration, driverConfig.getPollingInterval(),
+        errorMessage);
     return driverWait.until((driver) -> isTrue.get());
   }
 
   @Override
   public void enterFrame(Element element) {
-    if(element == null) {
+    if (element == null) {
       throw new UtamCoreError(ERR_CANT_ENTER_NULL_FRAME);
     }
-    WebElement webElement = ((ElementAdapter)element).getWebElement();
+    WebElement webElement = ((ElementAdapter) element).getWebElement();
     driver.switchTo().frame(webElement);
   }
 
@@ -194,6 +197,11 @@ public class DriverAdapter implements Driver {
   }
 
   @Override
+  public void setPageContext(PlatformType mobileContextType) {
+    // do nothing
+  }
+
+  @Override
   public DriverConfig getDriverConfig() {
     return driverConfig;
   }
@@ -204,8 +212,13 @@ public class DriverAdapter implements Driver {
   }
 
   @Override
-  public void setPageContext(PlatformType mobileContextType) {
-    // do nothing
+  public void back() {
+    this.driver.navigate().back();
+  }
+
+  @Override
+  public void forward() {
+    this.driver.navigate().forward();
   }
 
   static class DriverWait extends FluentWait<Driver> {

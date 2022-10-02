@@ -118,6 +118,11 @@ public class UtamLoaderTests {
   }
 
   @Test
+  public void testGetNavigation() {
+    assertThat(getDefaultLoader().getNavigation(), is(notNullValue()));
+  }
+
+  @Test
   public void testEnterFrame() {
     UtamLoader loader = getDefaultLoader();
     FrameElement frameElement = new MockUtilities().getFrameElement();

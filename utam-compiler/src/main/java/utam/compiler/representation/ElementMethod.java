@@ -28,6 +28,7 @@ import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.representation.UnionType;
 import utam.core.driver.Document;
+import utam.core.driver.Navigation;
 
 /**
  * generate code of getter method for basic element
@@ -37,14 +38,19 @@ import utam.core.driver.Document;
  */
 public abstract class ElementMethod {
 
-  private static final TypeProvider DOCUMENT_TYPE = new FromClass(Document.class);
   private static final MethodDeclaration DOCUMENT_GETTER_DECLARATION = new MethodDeclarationImpl(
       "getDocument",
       new ArrayList<>(),
-      DOCUMENT_TYPE,
+      new FromClass(Document.class),
       Collections.emptyList(),
       null);
 
+  private static final MethodDeclaration NAVIGATION_GETTER_DECLARATION = new MethodDeclarationImpl(
+      "getNavigation",
+      new ArrayList<>(),
+      new FromClass(Navigation.class),
+      Collections.emptyList(),
+      null);
   /**
    * The Page Object method for a document getter
    */
@@ -58,6 +64,32 @@ public abstract class ElementMethod {
     public List<String> getCodeLines() {
       return Collections
           .singletonList("this.getDocument()");
+    }
+
+    @Override
+    public List<TypeProvider> getClassImports() {
+      return Collections.emptyList();
+    }
+
+    @Override
+    public boolean isPublic() {
+      return false;
+    }
+  };
+
+  /**
+   * The Page Object method for a document getter
+   */
+  public static final PageObjectMethod NAVIGATION_GETTER = new PageObjectMethod() {
+    @Override
+    public MethodDeclaration getDeclaration() {
+      return NAVIGATION_GETTER_DECLARATION;
+    }
+
+    @Override
+    public List<String> getCodeLines() {
+      return Collections
+          .singletonList("this.getNavigation()");
     }
 
     @Override

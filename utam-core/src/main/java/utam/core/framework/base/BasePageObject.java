@@ -11,13 +11,13 @@ import static utam.core.framework.element.BasePageElement.createInstance;
 
 import java.lang.reflect.Proxy;
 import utam.core.driver.Document;
+import utam.core.driver.Navigation;
 import utam.core.element.BasicElement;
 import utam.core.element.Element;
 import utam.core.element.Locator;
 import utam.core.framework.UtamCoreError;
 import utam.core.framework.consumer.ContainerElement;
 import utam.core.framework.element.BasePageElement;
-import utam.core.framework.element.DocumentObject;
 
 /**
  * base class for any UTAM page object, analogue of the UtamBasePageObject in JS library
@@ -31,6 +31,7 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   PageObjectsFactory factory;
   BasePageElement rootElement;
   private Document document;
+  private Navigation navigation;
   private Locator locatorInsideScope;
 
   /**
@@ -66,27 +67,38 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   }
 
   /**
-   * Gets the document object associated with this Page object.
+   * Gets the document object.
    *
-   * @return the document object for this Page Object.
+   * @return the document object.
    */
   protected final Document getDocument() {
-    if (document == null) {
-      document = new DocumentObject(getFactory());
-    }
     return document;
+  }
+
+  /**
+   * Gets the navigation object.
+   *
+   * @return the navigation object.
+   */
+  protected final Navigation getNavigation() {
+    return navigation;
   }
 
   /**
    * During bootstrap assign values injected by page objects factory
    *
-   * @param factory instance of the factory
-   * @param element root element (not null!)
-   * @param locator root locator (not null!)
+   * @param factory    instance of the factory
+   * @param element    root element (not null!)
+   * @param locator    root locator (not null!)
+   * @param document   singleton instance of the document object
+   * @param navigation singleton instance of the navigation object
    */
-  final void initialize(PageObjectsFactory factory, Element element, Locator locator) {
+  final void initialize(PageObjectsFactory factory, Element element, Locator locator,
+      Document document, Navigation navigation) {
     this.factory = factory;
     this.locatorInsideScope = locator;
+    this.document = document;
+    this.navigation = navigation;
     setDriver(factory.getDriver());
     setElement(element);
   }
@@ -115,8 +127,8 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   /**
    * scopes custom element in certain location
    *
-   * @param scopeElement    scope element (can be root)
-   * @param location locator and expand/nullable flags
+   * @param scopeElement scope element (can be root)
+   * @param location     locator and expand/nullable flags
    * @return builder
    */
   protected final CustomElementBuilder custom(BasicElement scopeElement, ElementLocation location) {
@@ -126,8 +138,8 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   /**
    * scopes basic element in certain location
    *
-   * @param scopeElement    scope element (can be root)
-   * @param location locator and expand/nullable flags
+   * @param scopeElement scope element (can be root)
+   * @param location     locator and expand/nullable flags
    * @return builder
    */
   protected final BasicElementBuilder basic(BasicElement scopeElement, ElementLocation location) {
@@ -148,6 +160,7 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
 
   /**
    * Gets the instance of the imperative extensions for this Page Object
+   *
    * @param type Class of the class containing the imperative extensions for this Page Object
    * @param <T>  type name of the imperative extension class
    * @return the instance of the class containing the imperative extensions for thie Page Object
@@ -192,7 +205,8 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
 
   /**
    * dummy interface whose sole purpose is to have getElement method so that it'd be called for a
-   * proxy instance. interface should be public otherwise proxy throws IllegalArgumentException: non-public interfaces from different packages
+   * proxy instance. interface should be public otherwise proxy throws IllegalArgumentException:
+   * non-public interfaces from different packages
    */
   @SuppressWarnings("unused")
   public interface HasElementGetter {

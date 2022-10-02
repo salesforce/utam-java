@@ -10,6 +10,8 @@ package utam.compiler.helpers;
 import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.Document.DOCUMENT_ELEMENT;
+import static utam.compiler.helpers.ElementContext.NAVIGATION_OBJECT_NAME;
+import static utam.compiler.helpers.ElementContext.Navigation.NAVIGATION_OBJECT;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.SELF_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.Self.SELF_ELEMENT;
@@ -60,14 +62,14 @@ public final class TranslationContext {
   private final TranslatorConfig translatorConfiguration;
   private final Set<String> usedPrivateMethods = new HashSet<>();
   private final Map<String, ElementUnitTestHelper> testableElements = new HashMap<>();
-  private boolean isImplementationPageObject = false;
   private final TypeProvider pageObjectClassType;
-  private TypeProvider pageObjectInterfaceType;
   /**
    * track possible names collisions for custom elements types
    */
-  private final Map<String,TypeProvider> customTypesMap = new HashMap<>();
+  private final Map<String, TypeProvider> customTypesMap = new HashMap<>();
   private final PageObjectLinting contextForLinting;
+  private boolean isImplementationPageObject = false;
+  private TypeProvider pageObjectInterfaceType;
 
   /**
    * Initializes a new instance of the TranslationContext class
@@ -82,6 +84,7 @@ public final class TranslationContext {
     // register elements to prevent names collisions
     setElement(Document.DOCUMENT_ELEMENT);
     setElement(Self.SELF_ELEMENT);
+    setElement(NAVIGATION_OBJECT);
     // has impl prefixes
     this.pageObjectClassType = translationTypesConfig.getClassType(pageObjectURI);
     this.pageObjectInterfaceType = translationTypesConfig.getInterfaceType(pageObjectURI);
@@ -133,11 +136,11 @@ public final class TranslationContext {
    */
   public TypeProvider getType(String typeStr) {
     TypeProvider type = translationTypesConfig.getInterfaceType(typeStr);
-    if(customTypesMap.containsKey(type.getSimpleName())) {
+    if (customTypesMap.containsKey(type.getSimpleName())) {
       TypeProvider alreadyDeclared = customTypesMap.get(type.getSimpleName());
       // if simple name is same, but full is not - resolve collision by using full name instead short name
       // this allows to avoid importing class with simple names twice
-      if(!alreadyDeclared.getFullName().equals(type.getFullName())) {
+      if (!alreadyDeclared.getFullName().equals(type.getFullName())) {
         type = new PageObjectWithNamesCollisionType(type);
       }
     } else {
@@ -193,7 +196,7 @@ public final class TranslationContext {
     }
     // no duplicates - add method
     methodNames.add(method.getDeclaration().getName());
-    if(method instanceof BasicElementGetterMethod) {
+    if (method instanceof BasicElementGetterMethod) {
       elementGetters.add((BasicElementGetterMethod) method);
     } else {
       pageObjectMethods.add(method);
@@ -221,6 +224,9 @@ public final class TranslationContext {
     }
     if (DOCUMENT_ELEMENT_NAME.equals(name)) {
       return DOCUMENT_ELEMENT;
+    }
+    if (NAVIGATION_OBJECT_NAME.equals(name)) {
+      return NAVIGATION_OBJECT;
     }
     if (!elementContextMap.containsKey(name)) {
       return null;
@@ -286,13 +292,13 @@ public final class TranslationContext {
         .filter(method -> method.getDeclaration().getName().equals(name))
         .findFirst()
         .orElse(null);
-    if(result == null) {
+    if (result == null) {
       result = elementGetters.stream()
           .filter(method -> method.getDeclaration().getName().equals(name))
           .findFirst()
           .orElse(null);
     }
-    if(result == null) {
+    if (result == null) {
       throw new AssertionError(String.format("method '%s' not found in JSON", name));
     }
     return result;
@@ -321,7 +327,8 @@ public final class TranslationContext {
   private List<BasicElementGetterMethod> getBasicElementsGetters() {
     // only used element getter should be returned
     return elementGetters.stream()
-        .filter(getter -> getter.isPublic() || usedPrivateMethods.contains(getter.getDeclaration().getName()))
+        .filter(getter -> getter.isPublic() || usedPrivateMethods
+            .contains(getter.getDeclaration().getName()))
         .collect(Collectors.toList());
   }
 
@@ -333,16 +340,16 @@ public final class TranslationContext {
   public List<UnionType> getClassUnionTypes() {
     List<BasicElementGetterMethod> getters = getBasicElementsGetters();
     List<UnionType> unionTypes = new ArrayList<>();
-    if(isImplementationPageObject()) {
+    if (isImplementationPageObject()) {
       // if impl only PO has private basic elements - declare interface as well
       getters.forEach(getter -> {
-        if(!getter.isPublic() && getter.getInterfaceUnionType() != null) {
+        if (!getter.isPublic() && getter.getInterfaceUnionType() != null) {
           unionTypes.add(getter.getInterfaceUnionType());
         }
       });
     }
     getters.forEach(getter -> {
-      if(getter.getClassUnionType() != null) {
+      if (getter.getClassUnionType() != null) {
         unionTypes.add(getter.getClassUnionType());
       }
     });
@@ -358,7 +365,7 @@ public final class TranslationContext {
     List<BasicElementGetterMethod> getters = getBasicElementsGetters();
     List<UnionType> unionTypes = new ArrayList<>();
     getters.forEach(getter -> {
-      if(getter.getInterfaceUnionType() != null) {
+      if (getter.getInterfaceUnionType() != null) {
         unionTypes.add(getter.getInterfaceUnionType());
       }
     });

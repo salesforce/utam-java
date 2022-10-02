@@ -32,9 +32,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.hamcrest.Matchers;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver.Navigation;
 import org.openqa.selenium.WebDriver.TargetLocator;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
@@ -54,7 +54,8 @@ public class MobileDriverAdapterTests {
 
   @Test
   public void testCreation() {
-    MobileDriverAdapter driverAdapter = new MockUtilities(AppiumDriver.class).getMobileDriverAdapter();
+    MobileDriverAdapter driverAdapter = new MockUtilities(AppiumDriver.class)
+        .getMobileDriverAdapter();
     assertThat(driverAdapter, is(not(nullValue())));
     assertThat(driverAdapter.getAppiumDriver(), is(instanceOf(AppiumDriver.class)));
     assertThat(driverAdapter.isNativeContext(), is(false));
@@ -194,8 +195,8 @@ public class MobileDriverAdapterTests {
     when(driver.getContextHandles()).thenReturn(contextHandles);
     when(driver.getTitle()).thenReturn(DEFAULT_WEBVIEW_TITLE);
     when(driver.context(anyString())).then((arg) -> {
-        tracker.currentContext = arg.getArgument(0);
-        return driver;
+      tracker.currentContext = arg.getArgument(0);
+      return driver;
     });
     when(driver.getContext()).thenReturn(tracker.currentContext);
 
@@ -281,7 +282,7 @@ public class MobileDriverAdapterTests {
 
     when(driver.getContextHandles()).thenReturn(contextHandles);
     boolean res = provider.waitFor(provider::isWebViewAvailable);
-    assertThat(res, Matchers.is(equalTo(true)));
+    assertThat(res, is(equalTo(true)));
   }
 
   /**
@@ -308,9 +309,10 @@ public class MobileDriverAdapterTests {
       return driver;
     });
     when(driver.getContext()).thenReturn(tracker.currentContext);
-    AppiumDriver sdriver = driverAdapter.waitFor(() -> driverAdapter.switchToWebView(testWebViewTitle));
-    assertThat(driver, Matchers.is(sameInstance(sdriver)));
-    assertThat(tracker.currentContext, Matchers.is(equalTo(testWebViewHandle)));
+    AppiumDriver sdriver = driverAdapter
+        .waitFor(() -> driverAdapter.switchToWebView(testWebViewTitle));
+    assertThat(driver, is(sameInstance(sdriver)));
+    assertThat(tracker.currentContext, is(equalTo(testWebViewHandle)));
   }
 
   /**
@@ -376,10 +378,10 @@ public class MobileDriverAdapterTests {
         .thenReturn(tracker.currentContext);
     MobileDriverAdapter adapter = mock.getMobileDriverAdapter();
     assertThat(adapter.waitFor(() -> adapter.switchToWebView(testWebViewTitle)),
-        Matchers.is(sameInstance(driver)));
+        is(sameInstance(driver)));
     assertThat(
         tracker.currentContext,
-        Matchers.is(equalTo(testWebViewHandle)));
+        is(equalTo(testWebViewHandle)));
   }
 
   /**
@@ -433,10 +435,10 @@ public class MobileDriverAdapterTests {
     mock.setMobilePlatform(Platform.LINUX);
     MobileDriverAdapter adapter = mock.getMobileDriverAdapter();
     assertThat(adapter.waitFor(() -> adapter.switchToWebView(testWebViewTitle)),
-        Matchers.is(sameInstance(driver)));
+        is(sameInstance(driver)));
     assertThat(
         windowHandleTracker.currentHandle,
-        Matchers.is(equalTo(testWindowHandle)));
+        is(equalTo(testWindowHandle)));
   }
 
   @Test
@@ -451,6 +453,26 @@ public class MobileDriverAdapterTests {
     });
     when(driver.getContext()).thenReturn(tracker.currentContext);
     mock.getDriverAdapter().setPageContext(PlatformType.NATIVE);
+  }
+
+  @Test
+  public void testBackNavigation() {
+    MockUtilities mock = new MockUtilities(AppiumDriver.class);
+    Navigation navigationMock = mock(Navigation.class);
+    AppiumDriver driver = mock.getAppiumDriverMock();
+    when(driver.navigate()).thenReturn(navigationMock);
+    mock.getDriverAdapter().back();
+    verify(navigationMock, times(1)).back();
+  }
+
+  @Test
+  public void testForwardNavigation() {
+    MockUtilities mock = new MockUtilities(AppiumDriver.class);
+    Navigation navigationMock = mock(Navigation.class);
+    AppiumDriver driver = mock.getAppiumDriverMock();
+    when(driver.navigate()).thenReturn(navigationMock);
+    mock.getDriverAdapter().forward();
+    verify(navigationMock, times(1)).forward();
   }
 
   private static class ContextTracker {

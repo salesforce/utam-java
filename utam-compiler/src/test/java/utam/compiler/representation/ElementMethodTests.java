@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT_IMPL_CLASS;
 import static utam.compiler.representation.ElementMethod.DOCUMENT_GETTER;
+import static utam.compiler.representation.ElementMethod.NAVIGATION_GETTER;
 
 import java.util.List;
 import java.util.Objects;
@@ -34,7 +35,7 @@ import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.UnionType;
 
 /**
- * basic elements getters
+ * Elements getters
  *
  * @author james.evans
  */
@@ -48,7 +49,8 @@ public class ElementMethodTests {
   private static final String LIST_TYPE = List.class.getName();
 
   private static BasicElementGetterMethod getElementMethod(TranslationContext context) {
-    return (BasicElementGetterMethod) Objects.requireNonNull(context.getElement(ELEMENT_NAME)).getElementMethod();
+    return (BasicElementGetterMethod) Objects.requireNonNull(context.getElement(ELEMENT_NAME))
+        .getElementMethod();
   }
 
   @Test
@@ -60,6 +62,14 @@ public class ElementMethodTests {
   }
 
   @Test
+  public void testNavigationGetter() {
+    PageObjectMethod method = NAVIGATION_GETTER;
+    assertThat(method.isPublic(), is(false));
+    assertThat(method.getClassImports(), is(empty()));
+    assertThat(method.getCodeLines().get(0), is(equalTo("this.getNavigation()")));
+  }
+
+  @Test
   public void testBasicPrivateElementDefaultType() {
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME_PRIVATE, "BasicElement");
     Result result = new DeserializerUtilities().getResultFromFile("element/basicElement");
@@ -68,7 +78,8 @@ public class ElementMethodTests {
     assertThat(method.getClassUnionType(), is(nullValue()));
     assertThat(method.getInterfaceUnionType(), is(nullValue()));
     expected.addCodeLine("BasicElement root = this.getRootElement()");
-    expected.addCodeLine("return basic(root, this.test).build(BasicElement.class, BasePageElement.class)");
+    expected.addCodeLine(
+        "return basic(root, this.test).build(BasicElement.class, BasePageElement.class)");
     expected.addImportedTypes(BASIC_ELEMENT_TYPE);
     expected.addImpliedImportedTypes(BASIC_ELEMENT_TYPE_IMPL, BASIC_ELEMENT_TYPE);
     expected.setNotPublic();
@@ -88,7 +99,8 @@ public class ElementMethodTests {
     ElementContext one = context.getElement("one");
     assertThat(one.getType().getFullName(), is(BASIC_ELEMENT_TYPE));
     ElementContext nested = context.getElement("nestedCustom");
-    assertThat(nested.getType().getSimpleName(), CoreMatchers.is(CoreMatchers.equalTo("ComponentType")));
+    assertThat(nested.getType().getSimpleName(),
+        CoreMatchers.is(CoreMatchers.equalTo("ComponentType")));
     ElementContext nestedInShadow = context.getElement("nestedInsideShadow");
     assertThat(nestedInShadow.getType().getFullName(), is(BASIC_ELEMENT_TYPE));
 
@@ -106,7 +118,8 @@ public class ElementMethodTests {
     BasicElementGetterMethod method = getElementMethod(context);
     expected.addCodeLine("BasicElement root = this.getRootElement()");
     expected
-        .addCodeLine("return basic(root, this.test).build(TestElement.class, TestElementImpl.class)");
+        .addCodeLine(
+            "return basic(root, this.test).build(TestElement.class, TestElementImpl.class)");
     expected.setNotPublic();
     PageObjectValidationTestHelper.validateMethod(method, expected);
     List<UnionType> unionTypes = context.getClassUnionTypes();
@@ -149,7 +162,8 @@ public class ElementMethodTests {
     assertThat(method.getClassUnionType(), is(nullValue()));
     assertThat(method.getInterfaceUnionType(), is(nullValue()));
     expected.addCodeLine("BasicElement root = this.getRootElement()");
-    expected.addCodeLine("return basic(root, this.test).buildList(BasicElement.class, BasePageElement.class)");
+    expected.addCodeLine(
+        "return basic(root, this.test).buildList(BasicElement.class, BasePageElement.class)");
     expected.addImportedTypes(LIST_TYPE, BASIC_ELEMENT_TYPE);
     expected.addImpliedImportedTypes(LIST_TYPE, BASIC_ELEMENT_TYPE_IMPL, BASIC_ELEMENT_TYPE);
     expected.setNotPublic();
@@ -180,7 +194,8 @@ public class ElementMethodTests {
     TranslationContext context = result.getContext();
     BasicElementGetterMethod method = getElementMethod(context);
     expected.addCodeLine("BasicElement root = this.getRootElement()");
-    expected.addCodeLine("return basic(root, this.test).buildList(TestElement.class, TestElementImpl.class)");
+    expected.addCodeLine(
+        "return basic(root, this.test).buildList(TestElement.class, TestElementImpl.class)");
     expected.addImportedTypes(LIST_TYPE);
     expected.addImpliedImportedTypes(LIST_TYPE, BASIC_ELEMENT_TYPE);
     expected.setNotPublic();
@@ -201,7 +216,8 @@ public class ElementMethodTests {
     expected.addImportedTypes(LIST_TYPE);
     expected.addImpliedImportedTypes(LIST_TYPE, BASIC_ELEMENT_TYPE);
     expected.addCodeLine("BasicElement root = this.getRootElement()");
-    expected.addCodeLine("return basic(root, this.test).buildList(TestElement.class, TestElementImpl.class)");
+    expected.addCodeLine(
+        "return basic(root, this.test).buildList(TestElement.class, TestElementImpl.class)");
     PageObjectValidationTestHelper.validateMethod(method, expected);
     String unionClass = method.getClassUnionType().getDeclarationCode().get(0);
     assertThat(unionClass, is(equalTo(
@@ -214,8 +230,10 @@ public class ElementMethodTests {
   public void testNullableList() {
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "List<BasicElement>");
     expected.addCodeLine("BasicElement parent = this.getParentElement()");
-    expected.addCodeLine("return basic(parent, this.test).buildList(BasicElement.class, BasePageElement.class)");
-    Result result = new DeserializerUtilities().getResultFromFile("element/basicElementNullableList");
+    expected.addCodeLine(
+        "return basic(parent, this.test).buildList(BasicElement.class, BasePageElement.class)");
+    Result result = new DeserializerUtilities()
+        .getResultFromFile("element/basicElementNullableList");
     TranslationContext context = result.getContext();
     assertThat(context.getFields(), hasSize(2));
     PageObjectValidationTestHelper.FieldInfo fieldInfo =
@@ -230,8 +248,10 @@ public class ElementMethodTests {
   public void testNullableSingle() {
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "BasicElement");
     expected.addCodeLine("BasicElement root = this.getRootElement()");
-    expected.addCodeLine("return basic(root, this.test).build(BasicElement.class, BasePageElement.class)");
-    Result result = new DeserializerUtilities().getResultFromFile("element/basicElementNullableSingle");
+    expected.addCodeLine(
+        "return basic(root, this.test).build(BasicElement.class, BasePageElement.class)");
+    Result result = new DeserializerUtilities()
+        .getResultFromFile("element/basicElementNullableSingle");
     TranslationContext context = result.getContext();
     BasicElementGetterMethod method = getElementMethod(context);
     PageObjectValidationTestHelper.validateMethod(method, expected);
@@ -258,7 +278,7 @@ public class ElementMethodTests {
   @Test
   public void testFilterByGetCssPropertyValue() {
     TranslationContext context = new DeserializerUtilities()
-            .getContext("filter/basicFilterGetCssPropertyValue");
+        .getContext("filter/basicFilterGetCssPropertyValue");
     PageObjectMethod method = context.getMethod(ELEMENT_METHOD_NAME);
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "List<BasicElement>");
     expected.addParameter(new MethodParameterInfo("scopeArg"));
@@ -267,15 +287,16 @@ public class ElementMethodTests {
     expected.addParameter(new MethodParameterInfo("matcherArg"));
     expected.addCodeLine("BasicElement scope = this.getScopeElement(scopeArg)");
     expected.addCodeLines(
-            "return basic(scope, this.test.setParameters(selectorArg))"
-                    + ".buildList(BasicElement.class, BasePageElement.class, "
-                    + "elm -> (elm.getCssPropertyValue(applyArg)!= null && elm.getCssPropertyValue(applyArg).contains(matcherArg)))");
+        "return basic(scope, this.test.setParameters(selectorArg))"
+            + ".buildList(BasicElement.class, BasePageElement.class, "
+            + "elm -> (elm.getCssPropertyValue(applyArg)!= null && elm.getCssPropertyValue(applyArg).contains(matcherArg)))");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 
   @Test
   public void testFilterByIsVisibleFalseFindFirst() {
-    TranslationContext context = new DeserializerUtilities().getContext("filter/basicFilterIsVisible");
+    TranslationContext context = new DeserializerUtilities()
+        .getContext("filter/basicFilterIsVisible");
     PageObjectMethod method = context.getMethod(ELEMENT_METHOD_NAME);
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "TestElement");
     expected.addParameter(new MethodParameterInfo("scopeArg"));
@@ -291,10 +312,13 @@ public class ElementMethodTests {
     TranslationContext context = new DeserializerUtilities()
         .getContext("filter/customWithFilterContainsElement");
     PageObjectMethod method = context.getMethod(ELEMENT_METHOD_NAME);
-    assertThat(method.getDeclaration().getCodeLine(), is(equalTo("BasicElement getTest(String value)")));
+    assertThat(method.getDeclaration().getCodeLine(),
+        is(equalTo("BasicElement getTest(String value)")));
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "BasicElement");
     expected.addParameter(new MethodParameterInfo("value", "String"));
-    expected.addParameter(new MethodParameterInfo("LocatorBy.byCss(String.format(\"input[value='%s']\", value))", "LocatorBy"));
+    expected.addParameter(
+        new MethodParameterInfo("LocatorBy.byCss(String.format(\"input[value='%s']\", value))",
+            "LocatorBy"));
     expected.addCodeLine("BasicElement root = this.getRootElement()");
     expected.addCodeLine("return basic(root, this.test)."
         + "build(BasicElement.class, BasePageElement.class, "
