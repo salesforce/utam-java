@@ -82,6 +82,35 @@
       ],
       "results" : [
         {
+          "ruleId" : "ULR01",
+          "level" : "error",
+          "message" : {
+            "text" : "duplicate selector \"By.cssSelector: .one\" for the elements \"two\" and \"one\"",
+            "id" : "2001"
+          },
+          "locations" : [
+            {
+              "physicalLocation" : {
+                "artifactLocation" : {
+                  "uri" : "src/test/resources/lint/sarif/test.utam.json",
+                  "uriBaseId" : "%srcroot%",
+                  "index" : 0
+                },
+                "region" : {
+                  "startLine" : 15
+                }
+              }
+            }
+          ],
+          "fixes" : [
+            {
+              "description" : {
+                "text" : "remove duplicate elements: \"one\" or \"two\""
+              }
+            }
+          ]
+        },
+        {
           "ruleId" : "ULR03",
           "message" : {
             "text" : "property \"author\" is missing in the root description",
@@ -96,7 +125,7 @@
                   "index" : 0
                 },
                 "region" : {
-                  "startLine" : 2
+                  "startLine" : 6
                 }
               }
             }

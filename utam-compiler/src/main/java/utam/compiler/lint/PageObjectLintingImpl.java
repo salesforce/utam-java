@@ -8,14 +8,12 @@
 package utam.compiler.lint;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Stream;
 import utam.core.declarative.lint.PageObjectLinting;
@@ -29,8 +27,6 @@ import utam.core.element.Locator;
  * @since 242
  */
 public class PageObjectLintingImpl implements PageObjectLinting {
-
-  static final String ROOT_CONTEXT = "root";
 
   private final String name;
   private final String filePath;
@@ -59,35 +55,6 @@ public class PageObjectLintingImpl implements PageObjectLinting {
   }
 
   @Override
-  public int findLine(LineSearchContext context) {
-    if (fileScanner == null || context == null) {
-      return -1;
-    }
-    String string = context.getLine();
-    String contextString = context.getContext();
-    if(ROOT_CONTEXT.equals(contextString)) {
-      return 1;
-    }
-    int lineNum = 0;
-    boolean foundContext = contextString == null;
-    try {
-      Scanner scanner = new Scanner(fileScanner);
-      while (scanner.hasNextLine()) {
-        String line = scanner.nextLine();
-        lineNum++;
-        if (!foundContext && line.contains(contextString)) {
-          foundContext = true;
-        }
-        if (foundContext && line.contains(string)) {
-          return lineNum;
-        }
-      }
-    } catch (IOException ignored) {
-    }
-    return -1;
-  }
-
-  @Override
   public String getName() {
     return name;
   }
@@ -95,6 +62,14 @@ public class PageObjectLintingImpl implements PageObjectLinting {
   @Override
   public String getJsonFilePath() {
     return filePath;
+  }
+
+  @Override
+  public int findCodeLine(FileSearchContext context, String line) {
+    if (fileScanner == null) {
+      return 1;
+    }
+    return context.find(fileScanner, line);
   }
 
   @Override

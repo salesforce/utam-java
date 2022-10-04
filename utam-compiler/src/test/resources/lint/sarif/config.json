@@ -3,17 +3,6 @@
   "pageObjectsOutputDir": "",
   "resourcesOutputDir": "",
   "lint": {
-    "outputFile" : "sarif.json",
-    "requiredRootDescription": {
-      "violation": "warning"
-    },
-    "duplicateSelectors": {
-      "violation": "disabled"
-    },
-    "requiredMethodDescription": {
-      "exclude": [
-        "utam/pageObjects/test"
-      ]
-    }
+    "outputFile" : "sarif.json"
   }
 }

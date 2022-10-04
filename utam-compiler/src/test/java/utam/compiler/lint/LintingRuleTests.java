@@ -96,7 +96,7 @@ public class LintingRuleTests {
     assertThat(error.getRuleId(), equalTo(SingleShadowBoundaryAllowed.RULE_ID));
     assertThat(error.getFixSuggestion(), equalTo(
         "remove \"shadow\" under element \"three\" and create separate page object for its content"));
-    assertThat(error.getSourceLine(), equalTo(21));
+    assertThat(error.getSourceLine(), equalTo(25));
   }
 
   @Test

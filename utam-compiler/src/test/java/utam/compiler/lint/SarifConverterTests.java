@@ -27,6 +27,7 @@ import com.contrastsecurity.sarif.PhysicalLocation;
 import com.contrastsecurity.sarif.ReportingDescriptor;
 import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.Result.Kind;
+import com.contrastsecurity.sarif.Result.Level;
 import com.contrastsecurity.sarif.Run;
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.contrastsecurity.sarif.ToolComponent;
@@ -38,7 +39,6 @@ import java.io.Reader;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import utam.compiler.lint.LintingRuleImpl.RequiredAuthor;
-import utam.core.declarative.lint.LintingError;
 
 /**
  * Test that SARIF file output has correct values
@@ -105,11 +105,16 @@ public class SarifConverterTests {
     assertThat(rule.getShortDescription().getText(), equalTo(RequiredAuthor.DESCRIPTION));
 
     // results
-    assertThat(run.getResults(), hasSize(1));
+    assertThat(run.getResults(), hasSize(2));
     Result result = run.getResults().get(0);
     assertThat(result, notNullValue());
+    assertThat(result.getLevel(), equalTo(Level.ERROR));
+    assertThat(result.getKind(), equalTo(Kind.FAIL));
+
+    result = run.getResults().get(1);
+    assertThat(result, notNullValue());
     assertThat(result.getRuleId(), equalTo(ruleId));
-    assertThat(result.getLevel().value(), equalTo(LintingError.ViolationLevel.warning.name()));
+    assertThat(result.getLevel(), equalTo(Level.WARNING));
     assertThat(result.getKind(), equalTo(Kind.FAIL));
     assertThat(result.getMessage().getId(), equalTo("2005"));
     assertThat(result.getMessage().getText(), equalTo("property \"author\" is missing in the root description"));
@@ -123,7 +128,7 @@ public class SarifConverterTests {
     assertThat(physicalLocation, notNullValue());
     assertLocation(physicalLocation.getArtifactLocation());
     assertThat(physicalLocation.getRegion(), notNullValue());
-    assertThat(physicalLocation.getRegion().getStartLine(), equalTo(2));
+    assertThat(physicalLocation.getRegion().getStartLine(), equalTo(6));
   }
 
 }

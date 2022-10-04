@@ -1,9 +1,9 @@
 {
-  "description" : "text",
   "root": true,
   "selector": {
-    "css": ".one"
+    "css": "css"
   },
+  "description": "text",
   "elements": [
     {
       "name": "one",
@@ -16,17 +16,6 @@
       "selector": {
         "css": ".one"
       }
-    }
-  ],
-  "methods": [
-    {
-      "name": "nodescription",
-      "compose": [
-        {
-          "element": "root",
-          "apply": "isPresent"
-        }
-      ]
     }
   ]
 }
