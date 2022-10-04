@@ -47,7 +47,7 @@ public class LintingRuleTests {
     LintingContext context = linting.start();
     for (String jsonFile : jsonFiles) {
       TranslationContext translationContext = new DeserializerUtilities("test/" + jsonFile)
-          .getContext(jsonFile);
+          .getContextWithPath(jsonFile);
       linting.lint(context, translationContext.getLintingObject());
     }
     return linting.finish(context);
@@ -70,14 +70,17 @@ public class LintingRuleTests {
     assertThat(error.getRuleId(), equalTo(UniqueSelectorInsidePageObject.RULE_ID));
     assertThat(error.getFixSuggestion(),
         equalTo("remove duplicate elements: \"container1\" or \"container2\""));
+    assertThat(error.getSourceLine(), equalTo(41));
     error = errors.get(1);
     assertThat(error.getMessage(), containsString(
         "duplicate selector \"By.cssSelector: .two\" for the elements \"three\" and \"two\""));
+    assertThat(error.getSourceLine(), equalTo(21));
     error = errors.get(2);
     assertThat(error.getFullMessage(), containsString(
         buildFullErrorMessage(fileName, error, "root description is missing")));
     assertThat(error.getRuleId(), equalTo(RequiredRootDescription.RULE_ID));
     assertThat(error.getFixSuggestion(), equalTo("add \"description\" property at the root"));
+    assertThat(error.getSourceLine(), equalTo(1));
     error = errors.get(3);
     assertThat(error.getFullMessage(), containsString(
         buildFullErrorMessage(fileName, error,
@@ -85,6 +88,7 @@ public class LintingRuleTests {
     assertThat(error.getRuleId(), equalTo(RequiredMethodDescription.RULE_ID));
     assertThat(error.getFixSuggestion(),
         equalTo("add \"description\" property to the method \"nodescription\""));
+    assertThat(error.getSourceLine(), equalTo(47));
     error = errors.get(4);
     assertThat(error.getFullMessage(), containsString(
         buildFullErrorMessage(fileName, error,
@@ -92,6 +96,7 @@ public class LintingRuleTests {
     assertThat(error.getRuleId(), equalTo(SingleShadowBoundaryAllowed.RULE_ID));
     assertThat(error.getFixSuggestion(), equalTo(
         "remove \"shadow\" under element \"three\" and create separate page object for its content"));
+    assertThat(error.getSourceLine(), equalTo(21));
   }
 
   @Test
@@ -109,6 +114,7 @@ public class LintingRuleTests {
         buildFullErrorMessage("test/lint/rootNoAuthor", errors.get(0),
             "property \"author\" is missing in the root description")));
     assertThat(error.getRuleId(), equalTo(RequiredAuthor.RULE_ID));
+    assertThat(error.getSourceLine(), equalTo(2));
   }
 
   @Test
@@ -154,9 +160,10 @@ public class LintingRuleTests {
         buildFullErrorMessage("test/lint/hasRootSelector", error,
             "same root selector \"By.cssSelector: root\" is used as a root selector in the page object test/lint/hasSameRootSelector")));
     assertThat(error.getRuleId(), equalTo(UniqueRootSelector.RULE_ID));
-    assertThat(errors.get(1).getMessage(), containsString("same root selector"));
+    assertThat(error.getSourceLine(), equalTo(9));
     assertThat(error.getFixSuggestion(), equalTo(
-        "remove one of the duplicate page objects: \"test/lint/hasRootSelector\" or \"test/lint/hasSameRootSelector\""));
+        "remove one of the page objects with same root selector: \"test/lint/hasRootSelector\" or \"test/lint/hasSameRootSelector\""));
+    assertThat(errors.get(1).getMessage(), containsString("same root selector"));
 
     error = errors.get(2);
     assertThat(error.getFullMessage(), containsString(
@@ -165,6 +172,7 @@ public class LintingRuleTests {
     assertThat(error.getRuleId(), equalTo(RootSelectorExistsForElement.RULE_ID));
     assertThat(error.getFixSuggestion(), equalTo(
         "change the element \"sameAsRootBasic\" type to the type of the page object \"test.lint.HasRootSelector\""));
+    assertThat(error.getSourceLine(), equalTo(15));
 
     assertThat(errors.get(3).getMessage(), containsString(
         "custom selector \"By.cssSelector: custom-duplicate\" of the element \"custom\" is used for an element \"basic\" in the page object test/lint/hasSameRootSelector, but has a different type"));
@@ -176,5 +184,6 @@ public class LintingRuleTests {
     assertThat(error.getRuleId(), equalTo(ElementsWithDifferentTypes.RULE_ID));
     assertThat(error.getFixSuggestion(), equalTo(
         "change the element \"custom\" type to the same type as the element \"customDuplicate\" in page object \"test/lint/hasAnotherSameRootSelector\""));
+    assertThat(error.getSourceLine(), equalTo(15));
   }
 }

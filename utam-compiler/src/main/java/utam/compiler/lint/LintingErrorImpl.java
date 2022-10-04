@@ -27,11 +27,13 @@ class LintingErrorImpl implements LintingError {
   private final ViolationLevel level;
   private final String pageObjectPath;
   private final String fixSuggesion;
+  private final int sourceLine;
 
   LintingErrorImpl(String ruleId,
       ViolationLevel level,
       String fixSuggestion,
       PageObjectLinting pageObject,
+      int sourceLine,
       Integer errorCode,
       String... args) {
     this.ruleId = ruleId;
@@ -41,6 +43,7 @@ class LintingErrorImpl implements LintingError {
     this.pageObjectPath = pageObject.getJsonFilePath();
     this.fullErrorMessage = buildFullErrorMessage(pageObject.getName(), this, this.errorMessage);
     this.fixSuggesion = fixSuggestion;
+    this.sourceLine = sourceLine;
   }
 
   /**
@@ -92,5 +95,10 @@ class LintingErrorImpl implements LintingError {
   @Override
   public String getFixSuggestion() {
     return fixSuggesion;
+  }
+
+  @Override
+  public int getSourceLine() {
+    return sourceLine;
   }
 }

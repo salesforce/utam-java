@@ -30,6 +30,8 @@ import utam.core.element.Locator;
  */
 public class PageObjectLintingImpl implements PageObjectLinting {
 
+  static final String ROOT_CONTEXT = "root";
+
   private final String name;
   private final String filePath;
   private final String type;
@@ -57,24 +59,32 @@ public class PageObjectLintingImpl implements PageObjectLinting {
   }
 
   @Override
-  public int findLine(String lineToFind) {
-    if (fileScanner == null) {
-      return 0;
+  public int findLine(LineSearchContext context) {
+    if (fileScanner == null || context == null) {
+      return -1;
     }
+    String string = context.getLine();
+    String contextString = context.getContext();
+    if(ROOT_CONTEXT.equals(contextString)) {
+      return 1;
+    }
+    int lineNum = 0;
+    boolean foundContext = contextString == null;
     try {
       Scanner scanner = new Scanner(fileScanner);
-      //now read the file line by line...
-      int lineNum = 0;
       while (scanner.hasNextLine()) {
         String line = scanner.nextLine();
         lineNum++;
-        if (line.contains(lineToFind)) {
+        if (!foundContext && line.contains(contextString)) {
+          foundContext = true;
+        }
+        if (foundContext && line.contains(string)) {
           return lineNum;
         }
       }
     } catch (IOException ignored) {
     }
-    return 0;
+    return -1;
   }
 
   @Override

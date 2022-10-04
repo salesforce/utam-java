@@ -65,6 +65,8 @@ public interface LintingError {
    */
   String getFixSuggestion();
 
+  int getSourceLine();
+
   /**
    * Type of the linting violation
    *

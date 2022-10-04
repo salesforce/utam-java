@@ -33,7 +33,13 @@ public interface PageObjectLinting {
    */
   String getJsonFilePath();
 
-  int findLine(String lineToFind);
+  /**
+   * For SARIF: scan file and fine line number by string and context
+   *
+   * @param context      context to find - search string and parent can be method or element or selector
+   * @return found line number or -1
+   */
+  int findLine(LineSearchContext context);
 
   /**
    * Get type (full class name) of the page object. Ex: my.page.Object
@@ -105,6 +111,19 @@ public interface PageObjectLinting {
    * @return set
    */
   Set<String> getAllLocators();
+
+  /**
+   * Context to search for the line
+   *
+   * @author elizaveta.ivanova
+   * @since 242
+   */
+  interface LineSearchContext {
+
+    String getLine();
+
+    String getContext();
+  }
 
   /**
    * Linting information about the page object root

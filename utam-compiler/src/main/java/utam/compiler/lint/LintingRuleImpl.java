@@ -1,5 +1,6 @@
 package utam.compiler.lint;
 
+import static utam.compiler.lint.PageObjectLintingImpl.ROOT_CONTEXT;
 import static utam.compiler.lint.PageObjectLintingImpl.isCustomElement;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -14,6 +15,7 @@ import utam.core.declarative.lint.LintingError.ViolationLevel;
 import utam.core.declarative.lint.LintingRule;
 import utam.core.declarative.lint.PageObjectLinting;
 import utam.core.declarative.lint.PageObjectLinting.ElementLinting;
+import utam.core.declarative.lint.PageObjectLinting.LineSearchContext;
 import utam.core.declarative.lint.PageObjectLinting.MethodLinting;
 
 /**
@@ -50,12 +52,16 @@ abstract class LintingRuleImpl implements LintingRule {
   /**
    * Create linting error for a rule violation
    *
-   * @param context       page object under linting
-   * @param fixSuggestion string with suggestion how to fix an error
-   * @param args          parameters for error message
+   * @param context           page object under linting
+   * @param lineSearchContext context to search the line with violation
+   * @param fixSuggestion     string with suggestion how to fix an error
+   * @param args              parameters for error message
    */
-  final LintingError getError(PageObjectLinting context, String fixSuggestion, String... args) {
-    return new LintingErrorImpl(ruleId, violationLevel, fixSuggestion, context, errorCode, args);
+  final LintingError getError(PageObjectLinting context, LineSearchContext lineSearchContext,
+      String fixSuggestion, String... args) {
+    int codeLine = context.findLine(lineSearchContext);
+    return new LintingErrorImpl(ruleId, violationLevel, fixSuggestion, context, codeLine, errorCode,
+        args);
   }
 
   @Override
@@ -79,6 +85,27 @@ abstract class LintingRuleImpl implements LintingRule {
   @Override
   public String getDescription() {
     return description;
+  }
+
+  private static class FailureSourceLine implements LineSearchContext {
+
+    private final String line;
+    private final String context;
+
+    FailureSourceLine(String line, String context) {
+      this.line = line;
+      this.context = context;
+    }
+
+    @Override
+    public String getLine() {
+      return line;
+    }
+
+    @Override
+    public String getContext() {
+      return context;
+    }
   }
 
   /**
@@ -117,6 +144,7 @@ abstract class LintingRuleImpl implements LintingRule {
                 // lists can have duplicates
                 && !first.isList() && !second.isList()) {
               errors.add(getError(pageObject,
+                  new FailureSourceLine(second.getName(), "elements"),
                   String.format(FIX, first.getName(), second.getName()),
                   locator,
                   second.getName(),
@@ -141,8 +169,8 @@ abstract class LintingRuleImpl implements LintingRule {
         LintingError.ViolationLevel.warning,
         new HashSet<>());
     static final String RULE_ID = "ULR02";
-    static final String NAME = "Required root description";
-    static final String DESCRIPTION = "Check description at the root level";
+    private static final String NAME = "Required root description";
+    private static final String DESCRIPTION = "Check description at the root level";
     private static final String FIX = "add \"description\" property at the root";
 
 
@@ -156,7 +184,7 @@ abstract class LintingRuleImpl implements LintingRule {
     @Override
     public void validate(List<LintingError> errors, PageObjectLinting pageObject) {
       if (isEnabled(pageObject) && !pageObject.getRootContext().hasDescription()) {
-        errors.add(getError(pageObject, FIX));
+        errors.add(getError(pageObject, new FailureSourceLine(null, ROOT_CONTEXT), FIX));
       }
     }
   }
@@ -174,9 +202,9 @@ abstract class LintingRuleImpl implements LintingRule {
         LintingError.ViolationLevel.warning,
         new HashSet<>());
     static final String RULE_ID = "ULR03";
-    private static final String NAME = "Required author";
-    private static final String DESCRIPTION = "Check description at the root level has an author";
-    private static final String FIX = "add \"author\" property to the root description";
+    static final String NAME = "Required author";
+    static final String DESCRIPTION = "Check description at the root level has an author";
+    static final String FIX = "add \"author\" property to the root description";
 
     @JsonCreator
     RequiredAuthor(
@@ -190,7 +218,7 @@ abstract class LintingRuleImpl implements LintingRule {
       if (isEnabled(pageObject) && pageObject.getRootContext().hasDescription()
           && !pageObject.getRootContext()
           .hasAuthor()) {
-        errors.add(getError(pageObject, FIX));
+        errors.add(getError(pageObject, new FailureSourceLine("description", null), FIX));
       }
     }
   }
@@ -224,7 +252,9 @@ abstract class LintingRuleImpl implements LintingRule {
       if (isEnabled(pageObject)) {
         for (MethodLinting method : pageObject.getMethods()) {
           if (!method.hasDescription()) {
-            errors.add(getError(pageObject, String.format(FIX, method.getName()), method.getName()));
+            LineSearchContext context = new FailureSourceLine(method.getName(), "methods");
+            errors.add(getError(pageObject, context, String.format(FIX, method.getName(), method.getName()),
+                method.getName()));
           }
         }
       }
@@ -259,7 +289,8 @@ abstract class LintingRuleImpl implements LintingRule {
     public void validate(List<LintingError> errors, PageObjectLinting pageObject) {
       if (isEnabled(pageObject)) {
         for (String elementName : pageObject.getShadowBoundaries()) {
-          errors.add(getError(pageObject, String.format(FIX, elementName), elementName));
+          LineSearchContext context = new FailureSourceLine(elementName, "elements");
+          errors.add(getError(pageObject, context, String.format(FIX, elementName), elementName));
         }
       }
     }
@@ -279,7 +310,7 @@ abstract class LintingRuleImpl implements LintingRule {
     static final String RULE_ID = "ULR06";
     private static final String NAME = "Unique root selector";
     private static final String DESCRIPTION = "Check root selector is unique across all page objects";
-    private static final String FIX = "remove one of the duplicate page objects: \"%s\" or \"%s\"";
+    private static final String FIX = "remove one of the page objects with same root selector: \"%s\" or \"%s\"";
 
     @JsonCreator
     UniqueRootSelector(
@@ -301,7 +332,8 @@ abstract class LintingRuleImpl implements LintingRule {
                 PageObjectLinting first = pageObjects.get(i);
                 if (isEnabled(first)) {
                   PageObjectLinting second = pageObjects.get(i + 1);
-                  errors.add(getError(first,
+                  LineSearchContext searchContext = new FailureSourceLine("selector", null);
+                  errors.add(getError(first, searchContext,
                       String.format(FIX, first.getName(), second.getName()),
                       locatorKey, second.getName()));
                 }
@@ -355,7 +387,9 @@ abstract class LintingRuleImpl implements LintingRule {
                 for (ElementLinting element : pageObjectContext
                     .getElementsByLocator(elementSelector)) {
                   if (!element.getFullTypeName().equals(existingPageObjectType)) {
+                    LineSearchContext searchContext = new FailureSourceLine(element.getName(), "elements");
                     errors.add(getError(pageObjectContext,
+                        searchContext,
                         String.format(FIX, element.getName(), existingPageObjectType),
                         element.getName(),
                         existingPageObjectType));
@@ -428,8 +462,11 @@ abstract class LintingRuleImpl implements LintingRule {
                 for (ElementLinting existingElement : existingElements) {
                   for (ElementLinting element : elementsUnderTest) {
                     if (isCustomElement(existingElement) || isCustomElement(element)) {
+                      LineSearchContext searchContext = new FailureSourceLine(element.getName(), "elements");
                       errors.add(getError(pageObjectContext,
-                          String.format(FIX, element.getName(), existingElement.getName(), existing.getName()),
+                          searchContext,
+                          String.format(FIX, element.getName(), existingElement.getName(),
+                              existing.getName()),
                           locator,
                           element.getName(),
                           existingElement.getName(),

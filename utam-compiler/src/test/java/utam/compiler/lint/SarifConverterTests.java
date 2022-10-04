@@ -37,7 +37,7 @@ import java.io.IOException;
 import java.io.Reader;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import utam.compiler.lint.LintingRuleImpl.RequiredRootDescription;
+import utam.compiler.lint.LintingRuleImpl.RequiredAuthor;
 import utam.core.declarative.lint.LintingError;
 
 /**
@@ -55,13 +55,13 @@ public class SarifConverterTests {
     assertThat(location.getUriBaseId(), equalTo(SARIF_BASE_URI));
     assertThat(location.getIndex(), equalTo(0));
     assertThat(location.getUri(),
-        equalTo("src/test/resources/lint/changeDefaultConfig/test.utam.json"));
+        equalTo("src/test/resources/lint/sarif/test.utam.json"));
   }
 
   @BeforeClass
   void setUp() throws IOException {
-    getRunner("changeDefaultConfig").run();
-    String outputFile = SARIF_OUTPUT_FOLDER + "test.sarif.json";
+    getRunner("sarif").run();
+    String outputFile = SARIF_OUTPUT_FOLDER + "sarif.json";
     File file = new File(outputFile);
     assertThat(String.format("linting SARIF output %s is missing", outputFile), file.exists(),
         is(true));
@@ -97,12 +97,12 @@ public class SarifConverterTests {
     assertThat(toolComponent.getRules(), hasSize(8));
 
     // rule properties
-    String ruleId = RequiredRootDescription.RULE_ID;
+    String ruleId = RequiredAuthor.RULE_ID;
     ReportingDescriptor rule = toolComponent.getRules().stream()
         .filter(r -> r.getId().equals(ruleId)).findAny().orElse(null);
     assertThat(rule, notNullValue());
-    assertThat(rule.getName(), equalTo(RequiredRootDescription.NAME));
-    assertThat(rule.getShortDescription().getText(), equalTo(RequiredRootDescription.DESCRIPTION));
+    assertThat(rule.getName(), equalTo(RequiredAuthor.NAME));
+    assertThat(rule.getShortDescription().getText(), equalTo(RequiredAuthor.DESCRIPTION));
 
     // results
     assertThat(run.getResults(), hasSize(1));
@@ -111,17 +111,19 @@ public class SarifConverterTests {
     assertThat(result.getRuleId(), equalTo(ruleId));
     assertThat(result.getLevel().value(), equalTo(LintingError.ViolationLevel.warning.name()));
     assertThat(result.getKind(), equalTo(Kind.FAIL));
-    assertThat(result.getMessage().getId(), equalTo("2002"));
-    assertThat(result.getMessage().getText(), equalTo("root description is missing"));
+    assertThat(result.getMessage().getId(), equalTo("2005"));
+    assertThat(result.getMessage().getText(), equalTo("property \"author\" is missing in the root description"));
     assertThat(result.getFixes(), hasSize(1));
     Fix fix = result.getFixes().iterator().next();
-    assertThat(fix.getDescription().getText(), equalTo("add \"description\" property at the root"));
+    assertThat(fix.getDescription().getText(), equalTo(RequiredAuthor.FIX));
 
     // source location
     assertThat(result.getLocations(), hasSize(1));
     PhysicalLocation physicalLocation = result.getLocations().get(0).getPhysicalLocation();
     assertThat(physicalLocation, notNullValue());
     assertLocation(physicalLocation.getArtifactLocation());
+    assertThat(physicalLocation.getRegion(), notNullValue());
+    assertThat(physicalLocation.getRegion().getStartLine(), equalTo(2));
   }
 
 }

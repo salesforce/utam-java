@@ -14,6 +14,7 @@ import com.contrastsecurity.sarif.Location;
 import com.contrastsecurity.sarif.Message;
 import com.contrastsecurity.sarif.MultiformatMessageString;
 import com.contrastsecurity.sarif.PhysicalLocation;
+import com.contrastsecurity.sarif.Region;
 import com.contrastsecurity.sarif.ReportingDescriptor;
 import com.contrastsecurity.sarif.Result;
 import com.contrastsecurity.sarif.Result.Kind;
@@ -77,8 +78,12 @@ class SarifConverter {
         .withUriBaseId(SARIF_BASE_URI)
         .withIndex(0)
         .withUri(error.getSourceFilePath());
+    int sourceCodeLine = error.getSourceLine();
     PhysicalLocation physicalLocation = new PhysicalLocation()
         .withArtifactLocation(artifactLocation);
+    if(sourceCodeLine > 0) {
+      physicalLocation.withRegion(new Region().withStartLine(sourceCodeLine));
+    }
     Location location = new Location().withPhysicalLocation(physicalLocation);
     Message message = new Message()
         .withText(error.getMessage())
