@@ -191,6 +191,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       }
       info(String.format("de-serialize Page Object %s", pageObjectURI));
       TranslationContext translationContext = new TranslationContext(pageObjectURI,
+          sourceConfig.getSourcePath(pageObjectURI),
           translatorConfig);
       String jsonSource = getStringFromReader(sourceConfig, pageObjectURI);
       JsonDeserializer deserializer = new JsonDeserializer(translationContext, jsonSource);

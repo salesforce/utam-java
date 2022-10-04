@@ -7,6 +7,7 @@
  */
 package utam.compiler.lint;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,15 +29,23 @@ import utam.core.element.Locator;
 public class PageObjectLintingImpl implements PageObjectLinting {
 
   private final String name;
+  private final String filePath;
   private final String type;
   private final Map<String, List<ElementLinting>> locatorsMap = new HashMap<>();
   private final Map<String, MethodLinting> methodsMap = new HashMap<>();
   private final Set<String> shadowRoots = new HashSet<>();
+  private final File fileScanner;
   private RootLinting rootContext;
 
-  public PageObjectLintingImpl(String name, TypeProvider type) {
+
+  public PageObjectLintingImpl(String name, String filePath, TypeProvider type) {
     this.name = name;
+    String dir = System.getProperty("user.dir");
+    // file path should be relative to project root for SARIF
+    // for unit tests path is dummy hence condition
+    this.filePath = filePath.contains(dir) ? filePath.substring(dir.length() + 1) : filePath;
     this.type = type.getFullName();
+    this.fileScanner = filePath.contains(dir) ? new File(filePath) : null;
   }
 
   static boolean isCustomElement(ElementLinting element) {
@@ -48,6 +57,19 @@ public class PageObjectLintingImpl implements PageObjectLinting {
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public String getJsonFilePath() {
+    return filePath;
+  }
+
+  @Override
+  public int findCodeLine(FileSearchContext context, String line) {
+    if (fileScanner == null) {
+      return 1;
+    }
+    return context.find(fileScanner, line);
   }
 
   @Override

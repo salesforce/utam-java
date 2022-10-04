@@ -131,6 +131,7 @@
         <junit.version>4.13.2</junit.version>
         <mockito.version>2.21.0</mockito.version>
         <hamcrest.version>2.2</hamcrest.version>
+        <sarif.version>2.0</sarif.version>
     </properties>
 
     <scm>
@@ -219,6 +220,11 @@
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest</artifactId>
                 <version>${hamcrest.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.contrastsecurity</groupId>
+                <artifactId>java-sarif</artifactId>
+                <version>${sarif.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

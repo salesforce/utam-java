@@ -1,0 +1,21 @@
+{
+  "root": true,
+  "selector": {
+    "css": "css"
+  },
+  "description": "text",
+  "elements": [
+    {
+      "name": "one",
+      "selector": {
+        "css": ".one"
+      }
+    },
+    {
+      "name": "two",
+      "selector": {
+        "css": ".one"
+      }
+    }
+  ]
+}

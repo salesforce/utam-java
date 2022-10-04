@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
+import utam.compiler.grammar.TestUtilities.TestTranslationContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.translator.ClassSerializer;
 import utam.compiler.translator.InterfaceSerializer;
@@ -61,17 +62,33 @@ public class DeserializerUtilities {
     return translatorConfig;
   }
 
-  public Result getResultFromFile(String fileName) {
+  private static String getJsonString(String fileName) {
     String testFileName = fileName + ".json";
     InputStream stream =
         DeserializerUtilities.class.getClassLoader().getResourceAsStream(testFileName);
     if (stream == null) {
       throw new AssertionError(String.format("JSON file '%s' not found", testFileName));
     }
-    String content = new BufferedReader(new InputStreamReader(stream))
+    return new BufferedReader(new InputStreamReader(stream))
         .lines()
         .parallel()
         .collect(Collectors.joining("\n"));
+  }
+
+  public TranslationContext getContextWithPath(String fileName) {
+    String testFileName = fileName + ".json";
+    String path = DeserializerUtilities.class.getClassLoader().getResource(testFileName).getFile();
+    String content = getJsonString(fileName);
+    try {
+      return getResultFromString(content, path).translationContext;
+    } catch (Exception e) {
+      UtamLogger.error(String.format("ERROR IN FILE %s", fileName));
+      throw e;
+    }
+  }
+
+  public Result getResultFromFile(String fileName) {
+    String content = getJsonString(fileName);
     try {
       return getResultFromString(content);
     } catch (Exception e) {
@@ -80,8 +97,22 @@ public class DeserializerUtilities {
     }
   }
 
+  Result getResultFromString(String content, String path) {
+    TranslationContext context = new TranslationContext(type, path, translatorConfig);
+    // to test implementations
+    translatorConfig.getConfiguredProfiles().add(new StringValueProfileConfig("name", "value"));
+    JsonDeserializer deserializer = new JsonDeserializer(context, content);
+    PageObjectDeclaration declaration = deserializer.getObject();
+    // to ensure that code can be generated
+    new InterfaceSerializer(declaration.getInterface()).toString();
+    if (!declaration.isInterfaceOnly()) {
+      new ClassSerializer(declaration.getImplementation()).toString();
+    }
+    return new Result(deserializer.getObject(), deserializer.getPageObjectContext());
+  }
+
   public Result getResultFromString(String content) {
-    TranslationContext context = new TranslationContext(type, translatorConfig);
+    TranslationContext context = new TestTranslationContext(type, translatorConfig);
     // to test implementations
     translatorConfig.getConfiguredProfiles().add(new StringValueProfileConfig("name", "value"));
     JsonDeserializer deserializer = new JsonDeserializer(context, content);

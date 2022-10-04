@@ -7,6 +7,7 @@
  */
 package utam.core.declarative.lint;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -25,6 +26,22 @@ public interface PageObjectLinting {
    * @return string with name
    */
   String getName();
+
+  /**
+   * Get path to UTAM JSON file relative to project path. Used by SARIF.
+   *
+   * @return string with path
+   */
+  String getJsonFilePath();
+
+  /**
+   * Find code line number for SARIF report
+   *
+   * @param context search context (can be element, method etc.)
+   * @param line    string to fund
+   * @return number of the line or 1 if no match
+   */
+  int findCodeLine(FileSearchContext context, String line);
 
   /**
    * Get type (full class name) of the page object. Ex: my.page.Object
@@ -96,6 +113,24 @@ public interface PageObjectLinting {
    * @return set
    */
   Set<String> getAllLocators();
+
+  /**
+   * Context to search for the line inside the file
+   *
+   * @author elizaveta.ivanova
+   * @since 242
+   */
+  interface FileSearchContext {
+
+    /**
+     * Search for the code line inside the file
+     *
+     * @param file   page object JSON file
+     * @param string string to find with partial match
+     * @return line number or 1 if no match found
+     */
+    int find(File file, String string);
+  }
 
   /**
    * Linting information about the page object root

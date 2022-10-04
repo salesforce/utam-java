@@ -33,7 +33,7 @@ public interface LintingConfig {
 
   /**
    * Run linting to collect errors across all page objects. Executed after applying linting for
-   * every page object.
+   * every page object and then reports results to SARIF and UTAM logs
    *
    * @return list of errors
    */
