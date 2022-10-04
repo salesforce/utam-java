@@ -22,6 +22,7 @@ import static utam.compiler.lint.SarifConverter.SARIF_SEMANTIC_VERSION;
 
 import com.contrastsecurity.sarif.Artifact;
 import com.contrastsecurity.sarif.ArtifactLocation;
+import com.contrastsecurity.sarif.Fix;
 import com.contrastsecurity.sarif.PhysicalLocation;
 import com.contrastsecurity.sarif.ReportingDescriptor;
 import com.contrastsecurity.sarif.Result;
@@ -112,6 +113,9 @@ public class SarifConverterTests {
     assertThat(result.getKind(), equalTo(Kind.FAIL));
     assertThat(result.getMessage().getId(), equalTo("2002"));
     assertThat(result.getMessage().getText(), equalTo("root description is missing"));
+    assertThat(result.getFixes(), hasSize(1));
+    Fix fix = result.getFixes().iterator().next();
+    assertThat(fix.getDescription().getText(), equalTo("add \"description\" property at the root"));
 
     // source location
     assertThat(result.getLocations(), hasSize(1));

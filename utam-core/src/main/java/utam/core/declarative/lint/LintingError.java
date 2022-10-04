@@ -59,6 +59,13 @@ public interface LintingError {
   String getSourceFilePath();
 
   /**
+   * Suggestion how to fix the error
+   *
+   * @return string
+   */
+  String getFixSuggestion();
+
+  /**
    * Type of the linting violation
    *
    * @author elizaveta.ivanova

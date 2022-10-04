@@ -33,7 +33,8 @@ abstract class LintingRuleImpl implements LintingRule {
 
   private LintingRuleImpl(String ruleId, String name, String description,
       ViolationLevel violationLevel, Integer errorCode, Set<String> exceptions) {
-    this.violationLevel = Objects.requireNonNullElse(violationLevel, LintingError.ViolationLevel.error);
+    this.violationLevel = Objects
+        .requireNonNullElse(violationLevel, LintingError.ViolationLevel.error);
     this.errorCode = errorCode;
     this.exceptions = Objects.requireNonNullElse(exceptions, new HashSet<>());
     this.name = name;
@@ -49,11 +50,12 @@ abstract class LintingRuleImpl implements LintingRule {
   /**
    * Create linting error for a rule violation
    *
-   * @param context page object under linting
-   * @param args    parameters for error message
+   * @param context       page object under linting
+   * @param fixSuggestion string with suggestion how to fix an error
+   * @param args          parameters for error message
    */
-  final LintingError getError(PageObjectLinting context, String... args) {
-    return new LintingErrorImpl(ruleId, violationLevel, context, errorCode, args);
+  final LintingError getError(PageObjectLinting context, String fixSuggestion, String... args) {
+    return new LintingErrorImpl(ruleId, violationLevel, fixSuggestion, context, errorCode, args);
   }
 
   @Override
@@ -92,7 +94,9 @@ abstract class LintingRuleImpl implements LintingRule {
         LintingError.ViolationLevel.error, new HashSet<>());
     static final String RULE_ID = "ULR01";
     private static final String NAME = "Unique local selectors";
-    private static final String DESCRIPTION = "Check for unique selectors inside same file. By default warning because list element can have same selector";
+    private static final String DESCRIPTION = "Check for unique selectors inside same file. "
+        + "By default warning because list element can have same selector";
+    private static final String FIX = "remove duplicate elements: \"%s\" or \"%s\"";
 
     @JsonCreator
     UniqueSelectorInsidePageObject(
@@ -113,6 +117,7 @@ abstract class LintingRuleImpl implements LintingRule {
                 // lists can have duplicates
                 && !first.isList() && !second.isList()) {
               errors.add(getError(pageObject,
+                  String.format(FIX, first.getName(), second.getName()),
                   locator,
                   second.getName(),
                   first.getName()));
@@ -138,6 +143,7 @@ abstract class LintingRuleImpl implements LintingRule {
     static final String RULE_ID = "ULR02";
     static final String NAME = "Required root description";
     static final String DESCRIPTION = "Check description at the root level";
+    private static final String FIX = "add \"description\" property at the root";
 
 
     @JsonCreator
@@ -150,7 +156,7 @@ abstract class LintingRuleImpl implements LintingRule {
     @Override
     public void validate(List<LintingError> errors, PageObjectLinting pageObject) {
       if (isEnabled(pageObject) && !pageObject.getRootContext().hasDescription()) {
-        errors.add(getError(pageObject));
+        errors.add(getError(pageObject, FIX));
       }
     }
   }
@@ -170,6 +176,7 @@ abstract class LintingRuleImpl implements LintingRule {
     static final String RULE_ID = "ULR03";
     private static final String NAME = "Required author";
     private static final String DESCRIPTION = "Check description at the root level has an author";
+    private static final String FIX = "add \"author\" property to the root description";
 
     @JsonCreator
     RequiredAuthor(
@@ -183,7 +190,7 @@ abstract class LintingRuleImpl implements LintingRule {
       if (isEnabled(pageObject) && pageObject.getRootContext().hasDescription()
           && !pageObject.getRootContext()
           .hasAuthor()) {
-        errors.add(getError(pageObject));
+        errors.add(getError(pageObject, FIX));
       }
     }
   }
@@ -203,6 +210,7 @@ abstract class LintingRuleImpl implements LintingRule {
     static final String RULE_ID = "ULR04";
     private static final String NAME = "Required method description";
     private static final String DESCRIPTION = "Check every compose method has description";
+    private static final String FIX = "add \"description\" property to the method \"%s\"";
 
     @JsonCreator
     RequiredMethodDescription(
@@ -216,7 +224,7 @@ abstract class LintingRuleImpl implements LintingRule {
       if (isEnabled(pageObject)) {
         for (MethodLinting method : pageObject.getMethods()) {
           if (!method.hasDescription()) {
-            errors.add(getError(pageObject, method.getName()));
+            errors.add(getError(pageObject, String.format(FIX, method.getName()), method.getName()));
           }
         }
       }
@@ -238,6 +246,7 @@ abstract class LintingRuleImpl implements LintingRule {
     static final String RULE_ID = "ULR05";
     private static final String NAME = "Single shadowRoot";
     private static final String DESCRIPTION = "Check only one shadowRoot present at the component root";
+    private static final String FIX = "remove \"shadow\" under element \"%s\" and create separate page object for its content";
 
     @JsonCreator
     SingleShadowBoundaryAllowed(
@@ -250,7 +259,7 @@ abstract class LintingRuleImpl implements LintingRule {
     public void validate(List<LintingError> errors, PageObjectLinting pageObject) {
       if (isEnabled(pageObject)) {
         for (String elementName : pageObject.getShadowBoundaries()) {
-          errors.add(getError(pageObject, elementName));
+          errors.add(getError(pageObject, String.format(FIX, elementName), elementName));
         }
       }
     }
@@ -264,11 +273,13 @@ abstract class LintingRuleImpl implements LintingRule {
    */
   static class UniqueRootSelector extends LintingRuleImpl {
 
-    static final UniqueRootSelector DEFAULT = new UniqueRootSelector(LintingError.ViolationLevel.error,
+    static final UniqueRootSelector DEFAULT = new UniqueRootSelector(
+        LintingError.ViolationLevel.error,
         new HashSet<>());
     static final String RULE_ID = "ULR06";
     private static final String NAME = "Unique root selector";
     private static final String DESCRIPTION = "Check root selector is unique across all page objects";
+    private static final String FIX = "remove one of the duplicate page objects: \"%s\" or \"%s\"";
 
     @JsonCreator
     UniqueRootSelector(
@@ -290,7 +301,9 @@ abstract class LintingRuleImpl implements LintingRule {
                 PageObjectLinting first = pageObjects.get(i);
                 if (isEnabled(first)) {
                   PageObjectLinting second = pageObjects.get(i + 1);
-                  errors.add(getError(first, locatorKey, second.getName()));
+                  errors.add(getError(first,
+                      String.format(FIX, first.getName(), second.getName()),
+                      locatorKey, second.getName()));
                 }
               }
             }
@@ -315,6 +328,7 @@ abstract class LintingRuleImpl implements LintingRule {
     static final String RULE_ID = "ULR07";
     private static final String NAME = "Root selector usage";
     private static final String DESCRIPTION = "Root selector should match only custom elements of the same type";
+    private static final String FIX = "change the element \"%s\" type to the type of the page object \"%s\"";
 
     @JsonCreator
     RootSelectorExistsForElement(
@@ -342,6 +356,7 @@ abstract class LintingRuleImpl implements LintingRule {
                     .getElementsByLocator(elementSelector)) {
                   if (!element.getFullTypeName().equals(existingPageObjectType)) {
                     errors.add(getError(pageObjectContext,
+                        String.format(FIX, element.getName(), existingPageObjectType),
                         element.getName(),
                         existingPageObjectType));
                   }
@@ -384,6 +399,7 @@ abstract class LintingRuleImpl implements LintingRule {
     static final String RULE_ID = "ULR08";
     private static final String NAME = "Custom selector";
     private static final String DESCRIPTION = "Element with custom tag should have same type across all page objects";
+    private static final String FIX = "change the element \"%s\" type to the same type as the element \"%s\" in page object \"%s\"";
 
     @JsonCreator
     ElementsWithDifferentTypes(
@@ -413,6 +429,7 @@ abstract class LintingRuleImpl implements LintingRule {
                   for (ElementLinting element : elementsUnderTest) {
                     if (isCustomElement(existingElement) || isCustomElement(element)) {
                       errors.add(getError(pageObjectContext,
+                          String.format(FIX, element.getName(), existingElement.getName(), existing.getName()),
                           locator,
                           element.getName(),
                           existingElement.getName(),

@@ -33,6 +33,8 @@ public interface PageObjectLinting {
    */
   String getJsonFilePath();
 
+  int findLine(String lineToFind);
+
   /**
    * Get type (full class name) of the page object. Ex: my.page.Object
    *

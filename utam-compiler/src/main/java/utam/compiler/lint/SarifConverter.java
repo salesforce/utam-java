@@ -9,6 +9,7 @@ package utam.compiler.lint;
 
 import com.contrastsecurity.sarif.Artifact;
 import com.contrastsecurity.sarif.ArtifactLocation;
+import com.contrastsecurity.sarif.Fix;
 import com.contrastsecurity.sarif.Location;
 import com.contrastsecurity.sarif.Message;
 import com.contrastsecurity.sarif.MultiformatMessageString;
@@ -82,9 +83,11 @@ class SarifConverter {
     Message message = new Message()
         .withText(error.getMessage())
         .withId(error.getId());
+    Fix fix = new Fix().withDescription(new Message().withText(error.getFixSuggestion()));
     return new Result()
         .withLevel(convertViolationLevel(error.getLevel()))
         .withKind(Kind.FAIL)
+        .withFixes(Collections.singleton(fix))
         .withLocations(Collections.singletonList(location))
         .withRuleId(error.getRuleId())
         .withMessage(message);
@@ -110,7 +113,8 @@ class SarifConverter {
    * @return SARIF object that will be serialized to JSON
    */
   SarifSchema210 convert(LintingContext lintingContext, List<LintingError> errors) {
-    List<Result> results = errors.stream().map(SarifConverter::buildResult)
+    List<Result> results = errors.stream()
+        .map(SarifConverter::buildResult)
         .collect(Collectors.toList());
     Set<Artifact> artifacts = buildArtifactsLocations(lintingContext);
     Run run = new Run()

@@ -7,12 +7,15 @@
  */
 package utam.compiler.lint;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Stream;
 import utam.core.declarative.lint.PageObjectLinting;
@@ -33,6 +36,7 @@ public class PageObjectLintingImpl implements PageObjectLinting {
   private final Map<String, List<ElementLinting>> locatorsMap = new HashMap<>();
   private final Map<String, MethodLinting> methodsMap = new HashMap<>();
   private final Set<String> shadowRoots = new HashSet<>();
+  private final File fileScanner;
   private RootLinting rootContext;
 
 
@@ -41,14 +45,36 @@ public class PageObjectLintingImpl implements PageObjectLinting {
     String dir = System.getProperty("user.dir");
     // file path should be relative to project root for SARIF
     // for unit tests path is dummy hence condition
-    this.filePath = filePath.contains(dir)? filePath.substring(dir.length() + 1) : filePath;
+    this.filePath = filePath.contains(dir) ? filePath.substring(dir.length() + 1) : filePath;
     this.type = type.getFullName();
+    this.fileScanner = filePath.contains(dir) ? new File(filePath) : null;
   }
 
   static boolean isCustomElement(ElementLinting element) {
     return Stream
         .of(Element.LINTING_BASIC_TYPE, Element.LINTING_CONTAINER_TYPE, Element.LINTING_FRAME_TYPE)
         .noneMatch(type -> type.equals(element.getFullTypeName()));
+  }
+
+  @Override
+  public int findLine(String lineToFind) {
+    if (fileScanner == null) {
+      return 0;
+    }
+    try {
+      Scanner scanner = new Scanner(fileScanner);
+      //now read the file line by line...
+      int lineNum = 0;
+      while (scanner.hasNextLine()) {
+        String line = scanner.nextLine();
+        lineNum++;
+        if (line.contains(lineToFind)) {
+          return lineNum;
+        }
+      }
+    } catch (IOException ignored) {
+    }
+    return 0;
   }
 
   @Override
