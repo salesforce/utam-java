@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.stream.Collectors;
 import utam.core.declarative.lint.LintingContext;
 import utam.core.declarative.lint.LintingError;
 import utam.core.declarative.lint.LintingError.ViolationLevel;
@@ -45,6 +46,14 @@ abstract class LintingRuleImpl implements LintingRule {
     this.name = name;
     this.description = description;
     this.ruleId = ruleId;
+  }
+
+  @Override
+  public String toString() {
+    String output = String.format("Rule %s: %s", ruleId, violationLevel.name());
+    String exceptions = this.exceptions.isEmpty()? "" : ", exceptions: " + String
+        .join(", ", this.exceptions);
+    return output + exceptions;
   }
 
   final boolean isEnabled(PageObjectLinting context) {
@@ -425,7 +434,7 @@ abstract class LintingRuleImpl implements LintingRule {
                 String existingPageObjectType = existingPageObject.getTypeFullName();
                 for (ElementLinting element : pageObjectContext
                     .getElementsByLocator(elementSelector)) {
-                  if (!element.getFullTypeName().equals(existingPageObjectType)) {
+                  if (!element.getTypeFullName().equals(existingPageObjectType)) {
                     errors.add(getError(pageObjectContext,
                         pageObjectContext.findCodeLine(SEARCH_CONTEXT, element.getName()),
                         String.format(FIX, element.getName(), existingPageObjectType),
@@ -492,8 +501,7 @@ abstract class LintingRuleImpl implements LintingRule {
               String pageObjectUnderTest = pageObjectContext.getName();
               for (PageObjectLinting existing : context.getAllPageObjects()) {
                 if (!isEnabled(existing) || existing.getName().equals(pageObjectUnderTest)
-                    || !existing.getAllLocators()
-                    .contains(locator)) {
+                    || !existing.getAllLocators().contains(locator)) {
                   continue;
                 }
                 List<ElementLinting> elementsUnderTest = pageObjectContext
@@ -501,7 +509,8 @@ abstract class LintingRuleImpl implements LintingRule {
                 List<ElementLinting> existingElements = existing.getElementsByLocator(locator);
                 for (ElementLinting existingElement : existingElements) {
                   for (ElementLinting element : elementsUnderTest) {
-                    if (isCustomElement(existingElement) || isCustomElement(element)) {
+                    if ((isCustomElement(existingElement) || isCustomElement(element))
+                        && !existingElement.getTypeFullName().equals(element.getTypeFullName())) {
                       errors.add(getError(pageObjectContext,
                           pageObjectContext.findCodeLine(SEARCH_CONTEXT, element.getName()),
                           String.format(FIX, element.getName(), existingElement.getName(),
@@ -509,7 +518,8 @@ abstract class LintingRuleImpl implements LintingRule {
                           locator,
                           element.getName(),
                           existingElement.getName(),
-                          existing.getName()));
+                          existing.getName(),
+                          element.getTypeFullName()));
                     }
                   }
                   // to avoid reporting duplicates

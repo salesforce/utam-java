@@ -9,12 +9,14 @@ package utam.compiler.lint;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static utam.compiler.lint.LintingConfigJson.DEFAULT_LINTING_CONFIG;
 import static utam.compiler.lint.LintingConfigJson.DEFAULT_THROWS_ERROR;
 import static utam.compiler.lint.LintingErrorImpl.buildFullErrorMessage;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -50,7 +52,8 @@ public class LintingRuleTests {
           .getContextWithPath(jsonFile);
       linting.lint(context, translationContext.getLintingObject());
     }
-    return linting.finish(context);
+    String sarifFile = System.getProperty("user.dir") + File.separator + "utam-lint.sarif";
+    return linting.finish(context, sarifFile);
   }
 
   private static List<LintingError> test(String jsonFile, LintingConfig linting) {
@@ -177,10 +180,10 @@ public class LintingRuleTests {
     assertThat(errors.get(3).getMessage(), containsString(
         "custom selector \"By.cssSelector: custom-duplicate\" of the element \"custom\" is used for an element \"basic\" in the page object test/lint/hasSameRootSelector, but has a different type"));
     error = errors.get(4);
-    assertThat(error.getFullMessage(), containsString(
+    assertThat(error.getFullMessage(), endsWith(
         buildFullErrorMessage("test/lint/hasRootSelector", error,
             "custom selector \"By.cssSelector: custom-duplicate\" of the element \"custom\" is used for an element \"customDuplicate\" "
-                + "in the page object test/lint/hasAnotherSameRootSelector, but has a different type")));
+                + "in the page object test/lint/hasAnotherSameRootSelector, but has a different type \"my.custom.Type\"")));
     assertThat(error.getRuleId(), equalTo(ElementsWithDifferentTypes.RULE_ID));
     assertThat(error.getFixSuggestion(), equalTo(
         "change the element \"custom\" type to the same type as the element \"customDuplicate\" in page object \"test/lint/hasAnotherSameRootSelector\""));

@@ -35,7 +35,9 @@ public interface LintingConfig {
    * Run linting to collect errors across all page objects. Executed after applying linting for
    * every page object and then reports results to SARIF and UTAM logs
    *
+   * @param context        linting context
+   * @param reportFilePath absolute path to sarif report
    * @return list of errors
    */
-  List<LintingError> finish(LintingContext context);
+  List<LintingError> finish(LintingContext context, String reportFilePath);
 }

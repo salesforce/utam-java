@@ -40,6 +40,7 @@ import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorSourceConfig;
 import utam.core.declarative.translator.TranslatorTargetConfig;
+import utam.core.declarative.translator.UnitTestRunner;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.Profile;
 import utam.core.framework.context.StringValueProfile;
@@ -77,7 +78,7 @@ public class DefaultSourceConfigurationTests {
   @Test
   public void testRunWithDuplicatePageObjectsThrows() {
     TranslatorConfig configuration = new TranslatorConfigWithProfile(new DuplicatePageObjects(),
-        new DefaultTargetConfiguration());
+        new DefaultTargetConfiguration("", "", "", UnitTestRunner.NONE, null, null));
     DefaultTranslatorRunner translator = new DefaultTranslatorRunner(configuration);
     UtamError e = expectThrows(UtamError.class, translator::run);
     assertThat(

@@ -12,7 +12,6 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static utam.compiler.lint.LintingConfigJson.SARIF_OUTPUT_FOLDER;
 import static utam.compiler.lint.LintingConfigJsonTests.getRunner;
 import static utam.compiler.lint.SarifConverter.SARIF_BASE_URI;
 import static utam.compiler.lint.SarifConverter.SARIF_INFORMATION_URI;
@@ -61,7 +60,7 @@ public class SarifConverterTests {
   @BeforeClass
   void setUp() throws IOException {
     getRunner("sarif").run();
-    String outputFile = SARIF_OUTPUT_FOLDER + "sarif.json";
+    String outputFile = System.getProperty("user.dir") + "/src/test/resources/lint/sarif.json";
     File file = new File(outputFile);
     assertThat(String.format("linting SARIF output %s is missing", outputFile), file.exists(),
         is(true));

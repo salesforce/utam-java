@@ -118,6 +118,7 @@ public class TranslatorGenerationCommandTests {
   @Test
   public void testCLIConfigErrors() {
     TranslatorGenerationCommand command = new TranslatorGenerationCommand();
+    command.compilerRoot = new File(USER_ROOT);
     assertThat(command.getTranslationConfig(), is(nullValue()));
     assertThat(command.returnCode, is(equalTo(CONFIG_ERR)));
     assertThat(command.getThrownError().getMessage(), containsString(MISSING_INPUT));

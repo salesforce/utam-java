@@ -68,9 +68,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
     for (ProfileConfiguration profileDefinition : profileDefinitions) {
       setConfiguredProfile(profileDefinition);
     }
-    this.lintingConfiguration =
-        lintingConfiguration == null ? LintingConfigJson.getLintingConfig(null)
-            : lintingConfiguration;
+    this.lintingConfiguration = LintingConfigJson.getLintingConfig(lintingConfiguration);
   }
 
   /**

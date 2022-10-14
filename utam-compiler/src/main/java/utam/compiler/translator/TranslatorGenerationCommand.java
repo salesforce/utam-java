@@ -42,10 +42,11 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
       "You must specify an input directory with the --inputDirectory argument or a list of files";
   static final String TOO_MANY_INPUTS =
       "You cannot specify both an input directory with the --inputDirectory argument and a list of files";
-  static final String INVALID_FILE_LIST =
+  private static final String INVALID_FILE_LIST =
       "You cannot specify both an input directory in the compiler configuration file and a list of files";
   static final String INVALID_UNIT_TEST_CONFIG =
       "You cannot specify a unit test runner without a destination directory for unit tests";
+  private static final String ROOT_DIRECTORY_MISSING = "Root directory is not configured";
   static final String OUTPUT_DIRECTORY_MISSING = "Output directory is not configured";
   static final String PACKAGE_CONFIG_MISSING = "Packages mapping is not configured";
   static final String REDUNDANT_CLI_ARGS = "If JSON file is set, all other arguments are ignored";
@@ -185,11 +186,19 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
         return null;
       }
 
+      if (compilerRoot == null) {
+        thrownError = new UnsupportedOperationException(ROOT_DIRECTORY_MISSING);
+        returnCode = CONFIG_ERR;
+        return null;
+      }
+
       TranslatorTargetConfig targetConfig = new DefaultTargetConfiguration(
+          compilerRoot.toString(),
           outputDirectory.toString(),
           profileDirectory == null ? "" : profileDirectory.toString(),
           testRunner,
-          unitTestDirectoryPath
+          unitTestDirectoryPath,
+          null
       );
 
       if (packageMappingFile == null) {

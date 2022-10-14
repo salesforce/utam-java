@@ -200,7 +200,8 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       linting.lint(lintingContext, translationContext.getLintingObject());
       counter++;
     }
-    List<LintingError> lintingErrors = linting.finish(lintingContext);
+    String reportPath = translatorConfig.getConfiguredTarget().getLintReportPath();
+    List<LintingError> lintingErrors = linting.finish(lintingContext, reportPath);
     info(String.format("generated %d page objects, took %d msec", counter,
         System.currentTimeMillis() - timer));
     return () -> lintingErrors;

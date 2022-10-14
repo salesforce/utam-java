@@ -29,28 +29,34 @@ import utam.core.declarative.translator.UnitTestRunner;
  */
 public class DefaultTargetConfiguration implements TranslatorTargetConfig {
 
+  private static final String DEFAULT_SARIF_OUTPUT_FILE = "utam-lint.sarif";
   private static final String SRC_DIRECTORY_MARKER = File.separator + "main" + File.separator;
   private static final String TEST_DIRECTORY_MARKER = File.separator + "test" + File.separator;
-
   private final String resourcesHomePath;
   private final String targetPath;
   private final String unitTestDirectory;
   private final UnitTestRunner unitTestRunner;
+  private final String lintReportFile;
 
   /**
    * compiler output configuration
    *
+   * @param compilerRoot      root of the project
    * @param targetPath        the root output directory where the generated Page Object source files
    *                          will be written
-   * @param resourcesHomePath the output directory in which to write profile information
+   * @param resourcesHomePath the output directory in which to write dependencies information
    * @param unitTestRunner    the test runner to use when generating unit tests
    * @param unitTestDirectory the root output directory where generated unit tests for generated
    *                          Page Objects will be written
+   * @param lintReportFile    the output path for linting report file
    */
-  public DefaultTargetConfiguration(String targetPath,
+  public DefaultTargetConfiguration(
+      String compilerRoot,
+      String targetPath,
       String resourcesHomePath,
       UnitTestRunner unitTestRunner,
-      String unitTestDirectory) {
+      String unitTestDirectory,
+      String lintReportFile) {
     this.resourcesHomePath = resourcesHomePath;
     this.targetPath = targetPath;
     if (unitTestDirectory == null || unitTestDirectory.isEmpty()) {
@@ -59,26 +65,32 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
       this.unitTestDirectory = unitTestDirectory;
     }
     this.unitTestRunner = unitTestRunner == null ? UnitTestRunner.NONE : unitTestRunner;
+    this.lintReportFile = getSarifFilePath(compilerRoot, lintReportFile);
   }
 
   /**
    * this constructor can be used for distribution repo where we do not generate unit tests
    *
+   * @param compilerRoot      root of the project
    * @param targetPath        the root output directory where the generated Page Object source files
    *                          will be written
    * @param resourcesHomePath the output directory in which to write profile information
    */
-  public DefaultTargetConfiguration(String targetPath, String resourcesHomePath) {
-    this(targetPath, resourcesHomePath, null, null);
+  public DefaultTargetConfiguration(String compilerRoot, String targetPath,
+      String resourcesHomePath) {
+    this(compilerRoot, targetPath, resourcesHomePath, null, null, null);
   }
 
-  // used in tests
-  DefaultTargetConfiguration() {
-    this("", "", UnitTestRunner.NONE, null);
+  private static String getSarifFilePath(String compilerRoot, String relativeFile) {
+    String targetPath = compilerRoot == null ? System.getProperty("user.dir") : compilerRoot;
+    String fileName = relativeFile == null ? DEFAULT_SARIF_OUTPUT_FILE : relativeFile;
+    return
+        targetPath.endsWith(File.separator) ? targetPath + fileName
+            : targetPath + File.separator + fileName;
   }
 
   @SuppressWarnings("UnstableApiUsage")
-  static FileWriter getWriter(String fullPath) throws IOException {
+  public static FileWriter getWriter(String fullPath) throws IOException {
     try {
       return new FileWriter(fullPath);
     } catch (FileNotFoundException notFound) {
@@ -88,8 +100,8 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
         Files.touch(file);
         return new FileWriter(file);
       } catch (IOException cantCreate) {
-        info(String.format("could not create file '%s' : %s", fullPath, cantCreate.getMessage()));
-        throw notFound;
+        String err = String.format("could not create file %s", fullPath);
+        throw new UtamRunnerError(err, cantCreate);
       }
     }
   }
@@ -137,5 +149,10 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
   @Override
   public UnitTestRunner getUnitTestRunnerType() {
     return unitTestRunner;
+  }
+
+  @Override
+  public String getLintReportPath() {
+    return lintReportFile;
   }
 }

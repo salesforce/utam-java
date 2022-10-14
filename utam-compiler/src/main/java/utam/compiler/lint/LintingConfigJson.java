@@ -8,6 +8,8 @@
 package utam.compiler.lint;
 
 import static java.util.Objects.requireNonNullElse;
+import static utam.compiler.translator.DefaultTargetConfiguration.getWriter;
+import static utam.core.framework.UtamLogger.info;
 
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -15,7 +17,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Files;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -63,13 +67,10 @@ public class LintingConfigJson implements LintingConfig {
       null,
       null
   );
-  static final String SARIF_OUTPUT_FOLDER = System.getProperty("user.dir") + File.separator;
-  static final String DEFAULT_SARIF_OUTPUT_FILE = "utam-lint.sarif";
   private final List<LintingRuleImpl> localRules = new ArrayList<>();
   private final List<LintingRuleImpl> globalRules = new ArrayList<>();
   private final boolean isInterruptCompilation;
   private final boolean isPrintToConsole;
-  private final String outputFileName;
   private final SarifConverter sarifConverter;
 
   @JsonCreator
@@ -86,7 +87,6 @@ public class LintingConfigJson implements LintingConfig {
       @JsonProperty(value = "elementCantHaveRootSelector") RootSelectorExistsForElement rootSelectorExists,
       @JsonProperty(value = "duplicateCustomSelectors") ElementsWithDifferentTypes customWrongType) {
     isInterruptCompilation = requireNonNullElse(interruptCompilation, DEFAULT_THROWS_ERROR);
-    this.outputFileName = requireNonNullElse(outputFileName, DEFAULT_SARIF_OUTPUT_FILE);
     this.isPrintToConsole = requireNonNullElse(isPrintToConsole, true);
     localRules.add(requireNonNullElse(uniqueSelectors, UniqueSelectorInsidePageObject.DEFAULT));
     localRules.add(requireNonNullElse(requiredRootDescription, RequiredRootDescription.DEFAULT));
@@ -109,8 +109,17 @@ public class LintingConfigJson implements LintingConfig {
    * @param config JSON config, can be null
    * @return not null object
    */
-  public static LintingConfig getLintingConfig(LintingConfigJson config) {
+  public static LintingConfig getLintingConfig(LintingConfig config) {
     return config == null ? DEFAULT_LINTING_CONFIG : config;
+  }
+
+  @Override
+  public String toString() {
+    String output = localRules.stream()
+        .map(LintingRuleImpl::toString).collect(Collectors.joining("\n"));
+    String outputGlobal = globalRules.stream()
+        .map(LintingRuleImpl::toString).collect(Collectors.joining("\n"));
+    return String.format("\n%s\n%s", output, outputGlobal);
   }
 
   @Override
@@ -129,12 +138,12 @@ public class LintingConfigJson implements LintingConfig {
   }
 
   @Override
-  public List<LintingError> finish(LintingContext context) {
+  public List<LintingError> finish(LintingContext context, String reportFilePath) {
     List<LintingError> errors = context.getErrors();
     for (LintingRuleImpl rule : globalRules) {
       rule.validate(errors, context);
     }
-    writeSarifResults(context, errors);
+    writeSarifResults(reportFilePath, context, errors);
     reportToConsole(errors);
     return errors;
   }
@@ -163,20 +172,20 @@ public class LintingConfigJson implements LintingConfig {
     }
   }
 
-  private void writeSarifResults(LintingContext context, List<LintingError> errors) {
-    if (outputFileName != null) {
-      String outputFilePath = SARIF_OUTPUT_FOLDER + outputFileName;
+  private void writeSarifResults(String reportFilePath, LintingContext context,
+      List<LintingError> errors) {
+    if (reportFilePath != null) { //can be null in tests
       try {
-        Writer writer = new FileWriter(outputFilePath);
+        Writer writer = getWriter(reportFilePath);
         ObjectMapper mapper = new ObjectMapper();
         DefaultPrettyPrinter formatter = new DefaultPrettyPrinter()
             .withObjectIndenter(new DefaultIndenter("  ", "\n"))
             .withArrayIndenter(new DefaultIndenter("  ", "\n"));
         SarifSchema210 sarifSchema210 = sarifConverter.convert(context, errors);
-        UtamLogger.info(String.format("Write results of linting to %s", outputFilePath));
+        UtamLogger.info(String.format("Write results of linting to %s", reportFilePath));
         mapper.writer(formatter).writeValue(writer, sarifSchema210);
       } catch (IOException e) {
-        String err = String.format("error creating linting log %s", outputFilePath);
+        String err = String.format("error creating linting log %s", reportFilePath);
         throw new UtamLintingError(err, e);
       }
     }

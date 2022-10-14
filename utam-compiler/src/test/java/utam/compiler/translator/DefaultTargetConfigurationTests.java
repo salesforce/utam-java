@@ -127,8 +127,10 @@ public class DefaultTargetConfigurationTests {
     DefaultTargetConfiguration targetConfig = new DefaultTargetConfiguration(
         currentDir,
         currentDir,
+        currentDir,
         UnitTestRunner.JUNIT,
-        currentDir
+        currentDir,
+        null
     );
     assertThat(targetConfig.getUnitTestRunnerType(), is(equalTo(UnitTestRunner.JUNIT)));
     assertThat(targetConfig.getInjectionConfigRootFilePath(), is(equalTo(currentDir)));
@@ -138,12 +140,14 @@ public class DefaultTargetConfigurationTests {
         is(equalTo((currentDir + "/utam/MyPage.java").replace("/", File.separator))));
     assertThat(targetConfig.getPageObjectTestClassPath(type),
         is(equalTo((currentDir + "/utam/MyPageTests.java").replace("/", File.separator))));
+    assertThat(targetConfig.getLintReportPath(), is(equalTo(currentDir + "/utam-lint.sarif")));
   }
 
   @Test
   public void testConstructorForDistribution() {
     String currentDir = System.getProperty("user.dir");
     DefaultTargetConfiguration targetConfig = new DefaultTargetConfiguration(
+        currentDir,
         currentDir,
         currentDir
     );
@@ -202,6 +206,11 @@ public class DefaultTargetConfigurationTests {
 
     @Override
     public String getInjectionConfigRootFilePath() {
+      return configPath;
+    }
+
+    @Override
+    public String getLintReportPath() {
       return configPath;
     }
 
