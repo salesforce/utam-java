@@ -15,11 +15,11 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.translator.DefaultTargetConfiguration.getWriterWithDir;
 import static utam.compiler.translator.DefaultTranslatorRunnerTests.IMPL_ONLY_CLASS_NAME;
 import static utam.compiler.translator.DefaultTranslatorRunnerTests.INTERFACE_ONLY_CLASS_NAME;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
@@ -118,7 +118,7 @@ public class DefaultTargetConfigurationTests {
 
   @Test
   public void testGetWriterError() {
-    assertThrows(FileNotFoundException.class, () -> DefaultTargetConfiguration.getWriter(""));
+    assertThrows(UtamRunnerError.class, () -> getWriterWithDir(""));
   }
 
   @Test

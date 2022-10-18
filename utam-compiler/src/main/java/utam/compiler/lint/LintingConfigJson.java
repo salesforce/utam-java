@@ -8,7 +8,7 @@
 package utam.compiler.lint;
 
 import static java.util.Objects.requireNonNullElse;
-import static utam.compiler.translator.DefaultTargetConfiguration.getWriter;
+import static utam.compiler.translator.DefaultTargetConfiguration.getWriterWithDir;
 import static utam.core.framework.UtamLogger.info;
 
 import com.contrastsecurity.sarif.SarifSchema210;
@@ -17,10 +17,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.Files;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -176,7 +172,7 @@ public class LintingConfigJson implements LintingConfig {
       List<LintingError> errors) {
     if (reportFilePath != null) { //can be null in tests
       try {
-        Writer writer = getWriter(reportFilePath);
+        Writer writer = getWriterWithDir(reportFilePath);
         ObjectMapper mapper = new ObjectMapper();
         DefaultPrettyPrinter formatter = new DefaultPrettyPrinter()
             .withObjectIndenter(new DefaultIndenter("  ", "\n"))

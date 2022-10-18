@@ -90,7 +90,7 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
   }
 
   @SuppressWarnings("UnstableApiUsage")
-  public static FileWriter getWriter(String fullPath) throws IOException {
+  public static FileWriter getWriterWithDir(String fullPath) throws IOException {
     try {
       return new FileWriter(fullPath);
     } catch (FileNotFoundException notFound) {
@@ -125,7 +125,7 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
   @Override
   public Writer getClassWriter(TypeProvider pageObjectType) throws IOException {
     String fullPath = getPageObjectClassPath(pageObjectType);
-    return getWriter(fullPath);
+    return getWriterWithDir(fullPath);
   }
 
   String getPageObjectTestClassPath(TypeProvider pageObjectType) {
@@ -143,7 +143,7 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
       // test files.
       return null;
     }
-    return getWriter(fullPath);
+    return getWriterWithDir(fullPath);
   }
 
   @Override
