@@ -7,10 +7,9 @@
  */
 package utam.core.declarative.translator;
 
-import utam.core.declarative.representation.TypeProvider;
-
 import java.io.IOException;
 import java.io.Writer;
+import utam.core.declarative.representation.TypeProvider;
 
 /**
  * configuration of source with JSON files and target for generated Java files
@@ -46,11 +45,18 @@ public interface TranslatorTargetConfig {
   UnitTestRunner getUnitTestRunnerType();
 
   /**
-   * full path to the injection configuration files directory <br>
-   * translator will write into dependency configs <br>
-   * then Page Objects Provider will read from those to configure dependencies
+   * full path to the injection configuration files directory <br> translator will write into
+   * dependency configs <br> then Page Objects Provider will read from those to configure
+   * dependencies
    *
    * @return string with full path to resources folder with configs
    */
   String getInjectionConfigRootFilePath();
+
+  /**
+   * Absolute path to put linting report
+   *
+   * @return string with path
+   */
+  String getLintReportPath();
 }

@@ -189,7 +189,7 @@ public interface PageObjectLinting {
      *
      * @return string
      */
-    String getFullTypeName();
+    String getTypeFullName();
 
     /**
      * Get parent scope to check duplicate selectors

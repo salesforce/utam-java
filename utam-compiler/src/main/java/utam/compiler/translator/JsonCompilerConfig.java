@@ -71,6 +71,7 @@ public class JsonCompilerConfig {
       moduleConfig = mapper.readValue(configFile, Module.class);
       filePathsRoot = compilerRoot.toString();
       info(getConfigLoggerMessage("compiler root", filePathsRoot));
+      info(getConfigLoggerMessage("compiler config", configFile.toString()));
       inputFiles = new ArrayList<>();
       if (fileList != null) {
         inputFiles.addAll(fileList);
@@ -81,7 +82,7 @@ public class JsonCompilerConfig {
   }
 
   private static String getConfigLoggerMessage(String optionName, Object optionValue) {
-    String value = optionValue == null ? "null" : optionValue.toString();
+    String value = optionValue == null ? "null" : (optionValue.toString().isEmpty()? "empty string" : optionValue.toString());
     return String.format("Compiler config: %s is set to %s", optionName, value);
   }
 
@@ -188,6 +189,7 @@ public class JsonCompilerConfig {
     private final String pageObjectsOutputDir;
     private final String resourcesOutputDir;
     private final String unitTestsOutputDir;
+    private final String lintingReportOutputFile;
     private final UnitTestRunner unitTestRunnerType;
     private final CompilerOutputOptions outputOptions;
     private final LintingConfig lintingConfiguration;
@@ -222,6 +224,7 @@ public class JsonCompilerConfig {
         @JsonProperty(value = "pageObjectsRootDir") String pageObjectsRootDirectory,
         @JsonProperty(value = "pageObjectsOutputDir", required = true) String pageObjectsOutputDir,
         @JsonProperty(value = "resourcesOutputDir", required = true) String resourcesOutputDir,
+        @JsonProperty(value = "lintingOutputFile") String lintingOutputFile,
         @JsonProperty(value = "unitTestsOutputDir") final String unitTestDirectory,
         @JsonProperty(value = "unitTestsRunner", defaultValue = "NONE") UnitTestRunner unitTestRunner,
         @JsonProperty(value = "namespaces") List<Namespace> namespaces,
@@ -262,6 +265,9 @@ public class JsonCompilerConfig {
           Objects.requireNonNullElse(pageObjectsVersion, ""),
           Objects.requireNonNullElse(copyright, new ArrayList<>()));
       this.lintingConfiguration = LintingConfigJson.getLintingConfig(lintingConfiguration);
+      info(getConfigLoggerMessage("lint configuration", this.lintingConfiguration.toString()));
+      this.lintingReportOutputFile = lintingOutputFile;
+      info(getConfigLoggerMessage("lintingOutputFile", lintingOutputFile));
     }
 
     void setUniqueProfiles(List<Profile> profiles) {
@@ -277,38 +283,6 @@ public class JsonCompilerConfig {
         configuredProfiles.add(profile.name);
       });
       this.profiles.addAll(profiles);
-    }
-
-    // used in tests
-    Module(String moduleName, String filesMaskRegex, String pageObjectsRootDirectory) {
-      this(moduleName,
-          null,
-          filesMaskRegex,
-          pageObjectsRootDirectory,
-          null,
-          null,
-          null,
-          null,
-          new ArrayList<>(),
-          new ArrayList<>(),
-          new ArrayList<>(),
-          null);
-    }
-
-    // used in tests
-    Module(String moduleName, String pageObjectsRootDirectory) {
-      this(moduleName,
-          null,
-          null,
-          pageObjectsRootDirectory,
-          null,
-          null,
-          null,
-          null,
-          new ArrayList<>(),
-          new ArrayList<>(),
-          new ArrayList<>(),
-          null);
     }
 
     /**
@@ -341,10 +315,12 @@ public class JsonCompilerConfig {
      */
     public TranslatorTargetConfig getTargetConfig(String compilerRootFolderName) {
       return new DefaultTargetConfiguration(
+          compilerRootFolderName,
           compilerRootFolderName + pageObjectsOutputDir,
           compilerRootFolderName + resourcesOutputDir,
           unitTestRunnerType,
-          compilerRootFolderName + unitTestsOutputDir);
+          compilerRootFolderName + unitTestsOutputDir,
+          lintingReportOutputFile);
     }
 
     /**

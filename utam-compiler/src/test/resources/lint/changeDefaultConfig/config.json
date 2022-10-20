@@ -2,8 +2,8 @@
   "pageObjectsRootDir": "",
   "pageObjectsOutputDir": "",
   "resourcesOutputDir": "",
+  "lintingOutputFile": "test.sarif.json",
   "lint": {
-    "outputFile" : "test.sarif.json",
     "requiredRootDescription": {
       "violation": "warning"
     },

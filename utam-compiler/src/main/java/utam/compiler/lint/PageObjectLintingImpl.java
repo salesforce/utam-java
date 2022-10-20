@@ -38,20 +38,20 @@ public class PageObjectLintingImpl implements PageObjectLinting {
   private RootLinting rootContext;
 
 
-  public PageObjectLintingImpl(String name, String filePath, TypeProvider type) {
+  public PageObjectLintingImpl(String name, String pageObjectFilePath, TypeProvider type) {
     this.name = name;
     String dir = System.getProperty("user.dir");
     // file path should be relative to project root for SARIF
     // for unit tests path is dummy hence condition
-    this.filePath = filePath.contains(dir) ? filePath.substring(dir.length() + 1) : filePath;
+    this.filePath = pageObjectFilePath.contains(dir) ? pageObjectFilePath.substring(dir.length() + 1) : pageObjectFilePath;
     this.type = type.getFullName();
-    this.fileScanner = filePath.contains(dir) ? new File(filePath) : null;
+    this.fileScanner = pageObjectFilePath.contains(dir) ? new File(pageObjectFilePath) : null;
   }
 
   static boolean isCustomElement(ElementLinting element) {
     return Stream
         .of(Element.LINTING_BASIC_TYPE, Element.LINTING_CONTAINER_TYPE, Element.LINTING_FRAME_TYPE)
-        .noneMatch(type -> type.equals(element.getFullTypeName()));
+        .noneMatch(type -> type.equals(element.getTypeFullName()));
   }
 
   @Override
@@ -162,7 +162,7 @@ public class PageObjectLintingImpl implements PageObjectLinting {
     }
 
     @Override
-    public String getFullTypeName() {
+    public String getTypeFullName() {
       return type;
     }
 

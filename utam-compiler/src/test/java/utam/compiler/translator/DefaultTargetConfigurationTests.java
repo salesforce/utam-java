@@ -15,11 +15,11 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.translator.DefaultTargetConfiguration.getWriterWithDir;
 import static utam.compiler.translator.DefaultTranslatorRunnerTests.IMPL_ONLY_CLASS_NAME;
 import static utam.compiler.translator.DefaultTranslatorRunnerTests.INTERFACE_ONLY_CLASS_NAME;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
@@ -118,7 +118,7 @@ public class DefaultTargetConfigurationTests {
 
   @Test
   public void testGetWriterError() {
-    assertThrows(FileNotFoundException.class, () -> DefaultTargetConfiguration.getWriter(""));
+    assertThrows(UtamRunnerError.class, () -> getWriterWithDir(""));
   }
 
   @Test
@@ -127,8 +127,10 @@ public class DefaultTargetConfigurationTests {
     DefaultTargetConfiguration targetConfig = new DefaultTargetConfiguration(
         currentDir,
         currentDir,
+        currentDir,
         UnitTestRunner.JUNIT,
-        currentDir
+        currentDir,
+        null
     );
     assertThat(targetConfig.getUnitTestRunnerType(), is(equalTo(UnitTestRunner.JUNIT)));
     assertThat(targetConfig.getInjectionConfigRootFilePath(), is(equalTo(currentDir)));
@@ -138,12 +140,14 @@ public class DefaultTargetConfigurationTests {
         is(equalTo((currentDir + "/utam/MyPage.java").replace("/", File.separator))));
     assertThat(targetConfig.getPageObjectTestClassPath(type),
         is(equalTo((currentDir + "/utam/MyPageTests.java").replace("/", File.separator))));
+    assertThat(targetConfig.getLintReportPath(), is(equalTo(currentDir + "/utam-lint.sarif")));
   }
 
   @Test
   public void testConstructorForDistribution() {
     String currentDir = System.getProperty("user.dir");
     DefaultTargetConfiguration targetConfig = new DefaultTargetConfiguration(
+        currentDir,
         currentDir,
         currentDir
     );
@@ -202,6 +206,11 @@ public class DefaultTargetConfigurationTests {
 
     @Override
     public String getInjectionConfigRootFilePath() {
+      return configPath;
+    }
+
+    @Override
+    public String getLintReportPath() {
       return configPath;
     }
 

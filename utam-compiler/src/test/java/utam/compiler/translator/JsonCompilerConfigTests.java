@@ -61,6 +61,22 @@ public class JsonCompilerConfigTests {
         null);
   }
 
+  private static Module getTestModule() {
+    return new Module("name",
+          null,
+          null,
+          "pageObjectsDirectory",
+          null,
+          null,
+          null,
+          null,
+          null,
+          new ArrayList<>(),
+          new ArrayList<>(),
+          new ArrayList<>(),
+          null);
+  }
+
   @Test
   public void testValuesFromJsonFile() throws IOException {
     JsonCompilerConfig config = getTestConfig();
@@ -114,7 +130,7 @@ public class JsonCompilerConfigTests {
 
   @Test
   public void testDefaultModuleProperties() {
-    Module module = new Module("name", "pageObjectsDirectory");
+    Module module = getTestModule();
     assertThat(module.getPageObjectFileMaskRegex(), is(equalTo(DEFAULT_JSON_FILE_MASK_REGEX)));
     assertThat(module.getName(), is(equalTo("name")));
     assertThat(module.getPageObjectsRootDirectory(), is(equalTo("pageObjectsDirectory")));
@@ -126,7 +142,7 @@ public class JsonCompilerConfigTests {
 
   @Test
   public void testRootDirectoryWithFileList() {
-    Module module = new Module("name", "pageObjectsDirectory");
+    Module module = getTestModule();
     List<File> inputFiles = new ArrayList<>();
     inputFiles.add(new File("foo.utam.json"));
     UtamError e = expectThrows(UtamError.class, () -> module.getSourceConfig("", inputFiles));
@@ -136,12 +152,10 @@ public class JsonCompilerConfigTests {
 
   @Test
   public void testNonDefaultModuleProperties() {
-    Module module = new Module("name",
-        "fileMask",
-        "pageObjectsDirectory");
+    Module module = getTestModule();
     module.namespaces.add(new Namespace("utam-package", "*/package"));
     module.getRawProfiles().add(new Profile("name", new String[]{"values"}));
-    assertThat(module.getPageObjectFileMaskRegex(), is(equalTo("fileMask")));
+    assertThat(module.getPageObjectFileMaskRegex(), is(equalTo("(.*)\\.utam\\.json$")));
     assertThat(module.getConfiguredProfiles(),
         hasItems(new StringValueProfileConfig("name", "values")));
     assertThat(module.getPackagesMapping().keySet(), hasItems("utam-package"));
@@ -159,7 +173,7 @@ public class JsonCompilerConfigTests {
 
   @Test
   public void testDuplicateNamespace() {
-    Module module = new Module("name", "pageObjectsDirectory");
+    Module module = getTestModule();
     Namespace namespace = new Namespace("utam-package", "*/package1");
     module.namespaces.add(namespace);
     module.namespaces.add(namespace);
@@ -172,7 +186,7 @@ public class JsonCompilerConfigTests {
 
   @Test
   public void testDuplicateProfiles() {
-    Module module = new Module("name", "pageObjectsDirectory");
+    Module module = getTestModule();
     Profile profile = new Profile("name", new String[]{"value"});
     module.getRawProfiles().add(profile);
     module.getRawProfiles().add(profile);
@@ -208,7 +222,7 @@ public class JsonCompilerConfigTests {
   @Test
   public void testProfilesPerModule() {
     Profile profile = new Profile("platform", new String[] {"ios"});
-    Module module = new Module("name", "root");
+    Module module = getTestModule();
     module.setUniqueProfiles(List.of(profile));
     UtamError e = expectThrows(UtamError.class, () -> module.setUniqueProfiles(List.of(profile, profile)));
     assertThat(e.getMessage(),

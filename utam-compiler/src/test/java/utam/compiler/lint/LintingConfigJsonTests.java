@@ -13,9 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.lint.LintingConfigJson.DEFAULT_SARIF_OUTPUT_FILE;
 import static utam.compiler.lint.LintingConfigJson.LINTING_EXCEPTION_PREFIX;
-import static utam.compiler.lint.LintingConfigJson.SARIF_OUTPUT_FOLDER;
 import static utam.compiler.lint.LintingErrorImpl.buildFullErrorMessage;
 
 import java.io.File;
@@ -62,6 +60,8 @@ public class LintingConfigJsonTests {
     String errMsg = buildFullErrorMessage("utam/pageObjects/test", error,
         "root description is missing");
     assertThat(errors.get(0).getFullMessage(), equalTo(errMsg));
+    String outputFile = System.getProperty("user.dir") + "/src/test/resources/lint/changeDefaultConfig/test.sarif.json";
+    assertThat(new File(outputFile).exists(), is(true));
   }
 
   @Test
@@ -69,7 +69,7 @@ public class LintingConfigJsonTests {
     TranslatorRunner runner = getRunner("changeGlobalRules");
     List<LintingError> errors = runner.run().getLintingErrors();
     assertThat(errors, hasSize(0));
-    String outputFile = SARIF_OUTPUT_FOLDER + DEFAULT_SARIF_OUTPUT_FILE;
+    String outputFile = System.getProperty("user.dir") + "/src/test/resources/lint/changeGlobalRules/utam-lint.sarif";
     assertThat(new File(outputFile).exists(), is(true));
   }
 
