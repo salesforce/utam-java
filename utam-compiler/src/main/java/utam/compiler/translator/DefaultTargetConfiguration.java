@@ -82,6 +82,10 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
   }
 
   private static String getSarifFilePath(String compilerRoot, String relativeFile) {
+    if(relativeFile != null && relativeFile.isEmpty()) {
+      // FIXME - add separate config parameter, temporary loop hole to not write report
+      return null;
+    }
     String targetPath = compilerRoot == null ? System.getProperty("user.dir") : compilerRoot;
     String fileName = relativeFile == null ? DEFAULT_SARIF_OUTPUT_FILE : relativeFile;
     return
