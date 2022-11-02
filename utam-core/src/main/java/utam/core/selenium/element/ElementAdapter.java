@@ -356,7 +356,7 @@ public class ElementAdapter implements Element {
       }
 
       @Override
-      public int getHeigth() {
+      public int getHeight() {
         return rectangle.getHeight();
       }
     };

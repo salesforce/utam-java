@@ -158,7 +158,7 @@ public interface Element {
   void dragAndDrop(DragAndDropOptions options);
 
   /**
-   * Get element coordinates and size. Can be used to calculate drop location inside a frame
+   * Get element coordinates and size. Can be used to calculate drop location inside a frame.
    *
    * @return coordinates and size
    */
@@ -179,16 +179,36 @@ public interface Element {
   }
 
   /**
-   * Return type for the method that gets element's size
+   * Return type for the method that gets element size
    */
   interface ElementRectangle {
 
+    /**
+     * get X upper left coordinate
+     *
+     * @return integer
+     */
     int getX();
 
+    /**
+     * get Y upper left coordinate
+     *
+     * @return integer
+     */
     int getY();
 
+    /**
+     * get element width in pixes, can be 0
+     *
+     * @return width in pixels
+     */
     int getWidth();
 
-    int getHeigth();
+    /**
+     * get element height in pixes, can be 0
+     *
+     * @return width in pixels
+     */
+    int getHeight();
   }
 }

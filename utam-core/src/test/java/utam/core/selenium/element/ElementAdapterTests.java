@@ -342,7 +342,7 @@ public class ElementAdapterTests {
     ElementRectangle rectangle = mock.getElementAdapter().getRect();
     assertThat(rectangle.getX(), equalTo(0));
     assertThat(rectangle.getY(), equalTo(1));
-    assertThat(rectangle.getHeigth(), equalTo(2));
+    assertThat(rectangle.getHeight(), equalTo(2));
     assertThat(rectangle.getWidth(), equalTo(3));
   }
 }
