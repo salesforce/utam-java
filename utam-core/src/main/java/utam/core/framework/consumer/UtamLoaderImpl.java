@@ -10,6 +10,8 @@ package utam.core.framework.consumer;
 import static utam.core.driver.DriverConfig.DEFAULT_EXPLICIT_TIMEOUT_MOCK;
 import static utam.core.selenium.factory.WebDriverFactory.getAdapter;
 
+import java.time.Duration;
+import java.util.function.Supplier;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import utam.core.driver.Document;
@@ -171,5 +173,15 @@ public class UtamLoaderImpl implements UtamLoader {
   @Override
   public void exitFrame() {
     document.exitFrame();
+  }
+
+  @Override
+  public <T> T waitFor(Supplier<T> isTrue, String message, Duration timeout) {
+    return getDriver().waitFor(isTrue, message, timeout);
+  }
+
+  @Override
+  public <T> T waitFor(Supplier<T> isTrue, String message) {
+    return waitFor(isTrue, message, loaderConfig.getDriverConfig().getExplicitTimeout());
   }
 }

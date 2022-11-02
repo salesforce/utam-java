@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -333,5 +334,31 @@ public class ElementAdapter implements Element {
 
     // perform the drag and drop action
     builder.build().perform();
+  }
+
+  @Override
+  public ElementRectangle getRect() {
+    Rectangle rectangle = getWebElement().getRect();
+    return new ElementRectangle() {
+      @Override
+      public int getX() {
+        return rectangle.getX();
+      }
+
+      @Override
+      public int getY() {
+        return rectangle.getY();
+      }
+
+      @Override
+      public int getWidth() {
+        return rectangle.getWidth();
+      }
+
+      @Override
+      public int getHeigth() {
+        return rectangle.getHeight();
+      }
+    };
   }
 }
