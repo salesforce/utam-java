@@ -17,14 +17,17 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.expectThrows;
 import static utam.core.framework.consumer.UtamLoaderConfigTests.getDefaultConfig;
 import static utam.core.framework.consumer.UtamLoaderImpl.getSimulatorLoader;
 
 import io.appium.java_client.AppiumDriver;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.function.Supplier;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
@@ -170,6 +173,14 @@ public class UtamLoaderTests {
     assertThat(loader.getDriver().getDriverConfig().getBridgeAppTitle(), is(emptyString()));
     loader.resetContext();
     assertThat(loader.getDriver().getDriverConfig().getBridgeAppTitle(), is(emptyString()));
+  }
+
+  @Test
+  public void testWaitFor() {
+    UtamLoader loader = getDefaultLoader();
+    Object returned = loader.waitFor(() -> true, "message");
+    assertThat(returned, equalTo(true));
+    expectThrows(TimeoutException.class, () -> loader.waitFor(() -> false, "test", Duration.ofSeconds(1)));
   }
 
   private static class ContainerMock implements Container {

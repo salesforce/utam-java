@@ -74,6 +74,14 @@ public class LintingConfigJsonTests {
   }
 
   @Test
+  public void testDoNotProduceSarifReport() {
+    TranslatorRunner runner = getRunner("ignore");
+    runner.run();
+    String outputFile = System.getProperty("user.dir") + "/src/test/resources/lint/ignore/utam-lint.sarif";
+    assertThat(new File(outputFile).exists(), is(false));
+  }
+
+  @Test
   public void testLintingThrowsIfConfigured() {
     TranslatorRunner runner = getRunner("throwConfig");
     Exception e = expectThrows(UtamLintingError.class, runner::run);

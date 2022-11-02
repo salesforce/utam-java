@@ -38,7 +38,7 @@ public interface Element {
   /**
    * get number of elements with a given locator inside current element
    *
-   * @param by                 locator
+   * @param by locator
    * @return number of elements or 0 if none found
    */
   int containsElements(Locator by);
@@ -92,7 +92,7 @@ public interface Element {
 
   /**
    * get the value of the CSS property with the given name
-   * 
+   *
    * @param propertyName the name of the CSS property whose value to return
    * @return the value of the CSS property
    */
@@ -158,6 +158,13 @@ public interface Element {
   void dragAndDrop(DragAndDropOptions options);
 
   /**
+   * Get element coordinates and size. Can be used to calculate drop location inside a frame.
+   *
+   * @return coordinates and size
+   */
+  ElementRectangle getRect();
+
+  /**
    * types of scroll action
    */
   enum ScrollOptions {
@@ -169,5 +176,39 @@ public interface Element {
      * scroll element to the center of the viewport
      */
     CENTER
+  }
+
+  /**
+   * Return type for the method that gets element size
+   */
+  interface ElementRectangle {
+
+    /**
+     * get X upper left coordinate
+     *
+     * @return integer
+     */
+    int getX();
+
+    /**
+     * get Y upper left coordinate
+     *
+     * @return integer
+     */
+    int getY();
+
+    /**
+     * get element width in pixes, can be 0
+     *
+     * @return width in pixels
+     */
+    int getWidth();
+
+    /**
+     * get element height in pixes, can be 0
+     *
+     * @return width in pixels
+     */
+    int getHeight();
   }
 }

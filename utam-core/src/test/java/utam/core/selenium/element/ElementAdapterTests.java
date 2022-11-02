@@ -38,6 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -46,6 +47,7 @@ import utam.core.MockUtilities;
 import utam.core.driver.Driver;
 import utam.core.element.DragAndDropOptions;
 import utam.core.element.Element;
+import utam.core.element.Element.ElementRectangle;
 import utam.core.element.Element.ScrollOptions;
 
 /**
@@ -331,5 +333,16 @@ public class ElementAdapterTests {
     NullPointerException e = expectThrows(NullPointerException.class,
         () -> new ElementAdapter(null, new MockUtilities().getDriverAdapter()).getWebElement());
     assertThat(e.getMessage(), containsString(ERR_NULL_ELEMENT));
+  }
+
+  @Test
+  public void testGetRect() {
+    MockUtilities mock = new MockUtilities();
+    when(mock.getWebElementMock().getRect()).thenReturn(new Rectangle(0,1,2,3));
+    ElementRectangle rectangle = mock.getElementAdapter().getRect();
+    assertThat(rectangle.getX(), equalTo(0));
+    assertThat(rectangle.getY(), equalTo(1));
+    assertThat(rectangle.getHeight(), equalTo(2));
+    assertThat(rectangle.getWidth(), equalTo(3));
   }
 }

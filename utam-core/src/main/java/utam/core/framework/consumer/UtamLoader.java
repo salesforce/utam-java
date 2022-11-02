@@ -7,6 +7,8 @@
  */
 package utam.core.framework.consumer;
 
+import java.time.Duration;
+import java.util.function.Supplier;
 import utam.core.driver.Document;
 import utam.core.driver.Navigation;
 import utam.core.element.FrameElement;
@@ -111,4 +113,27 @@ public interface UtamLoader {
    * @return navigation instance
    */
   Navigation getNavigation();
+
+  /**
+   * Utility method that does same as Driver.waitFor. Polling wait repeatedly applies expectations
+   * until truthy value is return (not null or boolean true).
+   *
+   * @param timeout timeout after which exception is thrown if condition is not met. If passed as
+   *                null, timeout from config is used
+   * @param isTrue  condition to apply
+   * @param message error message to throw if timeout is reached, can be null
+   * @param <T>     return type
+   * @return result of the applied expectations
+   */
+  <T> T waitFor(Supplier<T> isTrue, String message, Duration timeout);
+
+  /**
+   * Utility method that does same as Driver.waitFor and uses default explicit wait timeout
+   *
+   * @param isTrue  condition to apply
+   * @param message error message to throw if timeout is reached, can be null
+   * @param <T>     return type
+   * @return result of the applied expectations
+   */
+  <T> T waitFor(Supplier<T> isTrue, String message);
 }
