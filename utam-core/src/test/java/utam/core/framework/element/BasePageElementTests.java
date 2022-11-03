@@ -26,12 +26,14 @@ import static utam.core.selenium.element.ElementAdapter.SCROLL_TOP_VIA_JAVASCRIP
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
+import utam.core.element.Element.ElementRectangle;
 import utam.core.element.Locator;
 import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.LocatorBy;
@@ -262,7 +264,8 @@ public class BasePageElementTests {
     mock.getUtamElement().click();
     String errMessage = "javascript error: unknown JS error";
     doThrow(new JavascriptException(errMessage)).when(mock.getWebElementMock()).click();
-    JavascriptException e = expectThrows(JavascriptException.class, () -> mock.getUtamElement().click());
+    JavascriptException e = expectThrows(JavascriptException.class,
+        () -> mock.getUtamElement().click());
     assertThat(e.getMessage(), containsString(errMessage));
   }
 
@@ -279,5 +282,16 @@ public class BasePageElementTests {
     mock.getUtamElement().dragAndDrop(mock.getUtamElement(), 1);
     mock.getUtamElement().dragAndDropByOffset(1, 2);
     mock.getUtamElement().dragAndDropByOffset(1, 2, 1);
+  }
+
+  @Test
+  public void testGetRectangle() {
+    MockUtilities mock = new MockUtilities();
+    when(mock.getWebElementMock().getRect()).thenReturn(new Rectangle(1, 2, 3, 4));
+    ElementRectangle test = mock.getUtamElement().getRect();
+    assertThat(test.getX(), equalTo(1));
+    assertThat(test.getY(), equalTo(2));
+    assertThat(test.getWidth(), equalTo(4));
+    assertThat(test.getHeight(), equalTo(3));
   }
 }

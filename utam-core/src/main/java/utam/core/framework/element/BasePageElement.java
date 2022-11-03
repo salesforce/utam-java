@@ -16,6 +16,7 @@ import utam.core.element.DragAndDropOptions;
 import utam.core.element.Draggable;
 import utam.core.element.Editable;
 import utam.core.element.Element;
+import utam.core.element.Element.ElementRectangle;
 import utam.core.element.Element.ScrollOptions;
 import utam.core.element.Touchable;
 import utam.core.framework.UtamLogger;
@@ -228,5 +229,10 @@ public class BasePageElement extends UtamBaseImpl implements Actionable, Clickab
   @Override
   public void dragAndDropByOffset(int xOffset, int yOffset) {
     dragAndDropByOffset(xOffset, yOffset, 0);
+  }
+
+  @Override
+  public ElementRectangle getRect() {
+    return getElement().getRect();
   }
 }

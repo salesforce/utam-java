@@ -56,13 +56,12 @@ public class ElementAdapter implements Element {
   static final String SCROLL_CENTER_VIA_JAVASCRIPT = "arguments[0].scrollIntoView({block:'center'});";
   static final String BLUR_VIA_JAVASCRIPT = "arguments[0].blur();";
   static final String ERR_NULL_ELEMENT = "Element inside adapter is null";
+  static final String IS_PARENT_NODE_SHADOW_ROOT_JS = "return arguments[0].getRootNode() instanceof ShadowRoot;";
+  static final String ROOT_NODE_GET_ACTIVE_ELEMENT_JS = "return arguments[0].getRootNode().activeElement";
   private static final String SCROLL_INTO_VIEW_ERR =
       "element is still not visible or clickable after scroll into view";
   private static final String SCROLL_TO_DOCUMENT_ORIGIN_JS =
       "window.scrollTo(0,0);";
-  static final String IS_PARENT_NODE_SHADOW_ROOT_JS = "return arguments[0].getRootNode() instanceof ShadowRoot;";
-  static final String ROOT_NODE_GET_ACTIVE_ELEMENT_JS = "return arguments[0].getRootNode().activeElement";
-
   /**
    * The driver instance driving this element
    */
@@ -90,7 +89,8 @@ public class ElementAdapter implements Element {
    */
   ElementAdapter(Element element) {
     if (!(element instanceof ElementAdapter)) {
-      throw new UnsupportedOperationException("Internal bug in the utam-core: can't wrap element as shadow root");
+      throw new UnsupportedOperationException(
+          "Internal bug in the utam-core: can't wrap element as shadow root");
     }
     ElementAdapter elementAdapter = (ElementAdapter) element;
     this.webElement = new ShadowRootWebElement(elementAdapter.getWebElement());
@@ -119,7 +119,7 @@ public class ElementAdapter implements Element {
   public Element findElement(Locator locator, boolean isNullable) {
     // return null for not found element, otherwise throws or returns non empty list
     List<Element> res = findElements(locator, isNullable);
-    if(res == null) {
+    if (res == null) {
       return null;
     }
     return res.get(0);
@@ -132,7 +132,7 @@ public class ElementAdapter implements Element {
     // per Selenium spec, this returns empty list if element not found
     List<WebElement> found = getWebElement().findElements(by);
     if (found == null || found.isEmpty()) {
-      if(isNullable) {
+      if (isNullable) {
         return null;
       } else {
         throw new NoSuchElementException(getNotFoundErr(locator));
@@ -259,7 +259,7 @@ public class ElementAdapter implements Element {
     // return arguments[0].getRootNode() instanceof ShadowRoot";
     Object isShadowHost = driverAdapter.executeScript(IS_PARENT_NODE_SHADOW_ROOT_JS, self);
     Object activeElement;
-    if(Boolean.TRUE.equals(isShadowHost)) {
+    if (Boolean.TRUE.equals(isShadowHost)) {
       // 2. get active element from shadowRoot
       // return arguments[0].getRootNode().activeElement;
       activeElement = driverAdapter.executeScript(ROOT_NODE_GET_ACTIVE_ELEMENT_JS, self);

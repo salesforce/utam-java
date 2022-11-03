@@ -61,16 +61,16 @@ public class ElementAdapterTests {
   final static String ELEMENT_NOT_FOUND_ERROR = "can't find element with locator 'By.cssSelector: not_found'";
 
   static ElementAdapter findNotNullable(LocatorBy locator, Element scope) {
-    return  (ElementAdapter) scope.findElement(locator, false);
+    return (ElementAdapter) scope.findElement(locator, false);
   }
 
   static ElementAdapter findNullable(LocatorBy locator, Element scope) {
     Element res = scope.findElement(locator, true);
-    return res == null? null : (ElementAdapter) res;
+    return res == null ? null : (ElementAdapter) res;
   }
 
   static List<Element> findNotNullables(LocatorBy locator, Element scope) {
-    return  scope.findElements(locator, false);
+    return scope.findElements(locator, false);
   }
 
   static List<Element> findNullables(LocatorBy locator, Element scope) {
@@ -92,7 +92,8 @@ public class ElementAdapterTests {
   @Test
   public void testFindElementNotFound() {
     Element scope = new MockUtilities().getElementAdapter();
-    Exception e = expectThrows(NoSuchElementException.class, () -> findNotNullable(byCss(NOT_FOUND_SELECTOR), scope));
+    Exception e = expectThrows(NoSuchElementException.class,
+        () -> findNotNullable(byCss(NOT_FOUND_SELECTOR), scope));
     assertThat(e.getMessage(), containsString(ELEMENT_NOT_FOUND_ERROR));
   }
 
@@ -127,7 +128,8 @@ public class ElementAdapterTests {
   @Test
   public void testFindElementsNotFound() {
     Element scope = new MockUtilities().getElementAdapter();
-    Exception e = expectThrows(NoSuchElementException.class, () -> findNotNullables(byCss(NOT_FOUND_SELECTOR), scope));
+    Exception e = expectThrows(NoSuchElementException.class,
+        () -> findNotNullables(byCss(NOT_FOUND_SELECTOR), scope));
     assertThat(e.getMessage(), containsString(ELEMENT_NOT_FOUND_ERROR));
   }
 
@@ -179,7 +181,8 @@ public class ElementAdapterTests {
   @Test
   public void testIsExistingNotFound() {
     MockUtilities mock = new MockUtilities();
-    when(mock.getWebElementMock().isDisplayed()).thenThrow(org.openqa.selenium.NoSuchElementException.class);
+    when(mock.getWebElementMock().isDisplayed())
+        .thenThrow(org.openqa.selenium.NoSuchElementException.class);
     assertThat(mock.getElementAdapter().isExisting(), is(false));
   }
 
@@ -249,9 +252,13 @@ public class ElementAdapterTests {
     WebElement elementMock = mockUtils.getWebElementMock();
     Driver driverAdapterMock = mockUtils.getDriverAdapter();
     Element element = mockUtils.getElementAdapter();
-    when(driverAdapterMock.executeScript(contains(IS_PARENT_NODE_SHADOW_ROOT_JS), refEq(elementMock))).thenReturn(true);
+    when(driverAdapterMock
+        .executeScript(contains(IS_PARENT_NODE_SHADOW_ROOT_JS), refEq(elementMock)))
+        .thenReturn(true);
     assertThat("element has no focus", element.hasFocus(), is(false));
-    when(driverAdapterMock.executeScript(contains(ROOT_NODE_GET_ACTIVE_ELEMENT_JS), refEq(elementMock))).thenReturn(elementMock);
+    when(driverAdapterMock
+        .executeScript(contains(ROOT_NODE_GET_ACTIVE_ELEMENT_JS), refEq(elementMock)))
+        .thenReturn(elementMock);
     assertThat("element has focus", element.hasFocus(), is(true));
   }
 
@@ -305,7 +312,9 @@ public class ElementAdapterTests {
         .executeScript(contains(String.format(GET_SHADOW_ROOT_QUERY_SELECTOR_ALL, "css")),
             refEq(mock.getWebElementMock())))
         .thenReturn(Collections.singletonList(mock.getWebElementMock()));
-    assertThat(new ShadowRootElementAdapter(mock.getElementAdapter()).containsElements(byCss("css")), is(equalTo(1)));
+    assertThat(
+        new ShadowRootElementAdapter(mock.getElementAdapter()).containsElements(byCss("css")),
+        is(equalTo(1)));
   }
 
   @Test
@@ -317,15 +326,17 @@ public class ElementAdapterTests {
   @Test
   public void testDragAndDropWithTargetElement() {
     MockUtilities mock = new MockUtilities.MockDriver();
-    mock.getElementAdapter().dragAndDrop(new DragAndDropOptions.ByElement(mock.getElementAdapter()));
-    mock.getElementAdapter().dragAndDrop(new DragAndDropOptions.ByElement(mock.getElementAdapter(), 1));
+    mock.getElementAdapter()
+        .dragAndDrop(new DragAndDropOptions.ByElement(mock.getElementAdapter()));
+    mock.getElementAdapter()
+        .dragAndDrop(new DragAndDropOptions.ByElement(mock.getElementAdapter(), 1));
   }
 
   @Test
   public void testDragAndDropWithOffset() {
     MockUtilities mock = new MockUtilities.MockDriver();
-    mock.getElementAdapter().dragAndDrop(new DragAndDropOptions.ByOffset(1,1));
-    mock.getElementAdapter().dragAndDrop(new DragAndDropOptions.ByOffset(1,1,1));
+    mock.getElementAdapter().dragAndDrop(new DragAndDropOptions.ByOffset(1, 1));
+    mock.getElementAdapter().dragAndDrop(new DragAndDropOptions.ByOffset(1, 1, 1));
   }
 
   @Test
@@ -338,7 +349,7 @@ public class ElementAdapterTests {
   @Test
   public void testGetRect() {
     MockUtilities mock = new MockUtilities();
-    when(mock.getWebElementMock().getRect()).thenReturn(new Rectangle(0,1,2,3));
+    when(mock.getWebElementMock().getRect()).thenReturn(new Rectangle(0, 1, 2, 3));
     ElementRectangle rectangle = mock.getElementAdapter().getRect();
     assertThat(rectangle.getX(), equalTo(0));
     assertThat(rectangle.getY(), equalTo(1));
