@@ -225,6 +225,6 @@ public enum BasicElementActionType implements ActionType {
    * @return false if there is no method to check for presence in unit tests
    */
   boolean hasMethodToTest() {
-    return this != size && this != containsElement;
+    return this != size && this != containsElement && this != getRect;
   }
 }
