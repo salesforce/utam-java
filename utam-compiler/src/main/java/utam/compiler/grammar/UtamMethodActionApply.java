@@ -9,7 +9,6 @@ package utam.compiler.grammar;
 
 import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.helpers.BasicElementActionType.getActionType;
-import static utam.compiler.helpers.BasicElementActionType.getRect;
 import static utam.compiler.helpers.BasicElementActionType.size;
 import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
 import static utam.compiler.helpers.TypeUtilities.VOID;
