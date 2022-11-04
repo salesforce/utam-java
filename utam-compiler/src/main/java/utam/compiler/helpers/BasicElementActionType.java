@@ -24,25 +24,22 @@ import utam.core.element.BasicElement;
 /**
  * this enum links element actions with translator code <br>
  *
- * @see BasicElement as of 234 every method has enum here to use in translator
  * @author james.evans
+ * @see BasicElement as of 234 every method has enum here to use in translator
  * @since 234
  */
 public enum BasicElementActionType implements ActionType {
   /**
-   * contains element <br>
-   * returns whether an element contains the element specified by the selector <br>
-   * Throws exception if element not found within timeout
+   * contains element <br> returns whether an element contains the element specified by the selector
+   * <br> Throws exception if element not found within timeout
    */
   containsElement(PrimitiveType.BOOLEAN, SELECTOR, PrimitiveType.BOOLEAN),
   /**
-   * get value of the given attribute <br>
-   * returns value of the attribute with the given name
+   * get value of the given attribute <br> returns value of the attribute with the given name
    */
   getAttribute(PrimitiveType.STRING, PrimitiveType.STRING),
   /**
-   * get value of the given CSS property <br>
-   * returns value of the CSS property with the given name
+   * get value of the given CSS property <br> returns value of the CSS property with the given name
    */
   getCssPropertyValue(PrimitiveType.STRING, PrimitiveType.STRING),
   /**
@@ -50,66 +47,68 @@ public enum BasicElementActionType implements ActionType {
    */
   getClassAttribute(PrimitiveType.STRING),
   /**
+   * get coordinates and size. If invoked in compose, returns void
+   */
+  getRect(null),
+  /**
    * get inner text of the element <br>
    */
   getText(PrimitiveType.STRING),
   /**
-   * get value of the title attribute <br>
-   * returns value of the "title" attribute
+   * get value of the title attribute <br> returns value of the "title" attribute
    */
   getTitle(PrimitiveType.STRING),
   /**
-   * get value of the value attribute <br>
-   * returns value of the "value" attribute
+   * get value of the value attribute <br> returns value of the "value" attribute
    */
   getValue(PrimitiveType.STRING),
   /**
-   * returns true if element is found AND enabled <br>
-   * it's an immediate check, no waiting is involved. Never throws any exceptions, just returns
-   * true/false
+   * returns true if element is found AND enabled <br> it's an immediate check, no waiting is
+   * involved. Never throws any exceptions, just returns true/false
    *
    * <p>return true if element is present and enabled
    */
   isEnabled(PrimitiveType.BOOLEAN),
   /**
-   * focus on the element <br>
-   * executes javascript `arguments[0].focus();` <br>
-   * Throws exception if element not found within timeout
+   * focus on the element <br> executes javascript `arguments[0].focus();` <br> Throws exception if
+   * element not found within timeout
    */
   isFocused(PrimitiveType.BOOLEAN),
   /**
-   * check if element is present immediately <br>
-   * same as "present" but does not throw exception if false returned
+   * check if element is present immediately <br> same as "present" but does not throw exception if
+   * false returned
    */
   isPresent(PrimitiveType.BOOLEAN),
   /**
-   * check if element is displayed <br>
-   * same as "displayed" but does not throw exception if false returned
+   * check if element is displayed <br> same as "displayed" but does not throw exception if false
+   * returned
    */
   isVisible(PrimitiveType.BOOLEAN),
   /**
-   * Only applicable to the element marked as a list <br>
-   * Throws exception if element not found within timeout
+   * Only applicable to the element marked as a list <br> Throws exception if element not found
+   * within timeout
    *
    * <p>return number of found elements if element is marked as a list
    */
   size(PrimitiveType.NUMBER),
   /**
-   * wait for element absence <br>
-   * throws exception if fails
+   * wait for element absence <br> throws exception if fails
    */
   waitForAbsence(null),
   /**
-   * wait for element absence <br>
-   * throws TimeoutException if fails
+   * wait for element absence <br> throws TimeoutException if fails
    */
   waitForInvisible(null),
   /**
-   * wait for element visibility <br>
-   * throws TimeoutException if fails
+   * wait for element visibility <br> throws TimeoutException if fails
    */
   waitForVisible(null);
 
+  static final Integer ERROR_CODE_FOR_PARAMETERS = 110;
+  private static final List<TypeProvider> CONTAINS_LOCATOR = Stream.of(SELECTOR)
+      .collect(Collectors.toList());
+  private static final List<TypeProvider> CONTAINS_LOCATOR_AND_BOOLEAN = Stream
+      .of(SELECTOR, PrimitiveType.BOOLEAN).collect(Collectors.toList());
   // return type of the action
   private final TypeProvider returnType;
   // parameters accepted by the action
@@ -123,8 +122,6 @@ public enum BasicElementActionType implements ActionType {
     }
     this.returnType = Objects.requireNonNullElse(returnType, VOID);
   }
-
-  static final Integer ERROR_CODE_FOR_PARAMETERS = 110;
 
   /**
    * Gets the object representing the action type for the element
@@ -186,7 +183,8 @@ public enum BasicElementActionType implements ActionType {
   // used in unit tests
   @SuppressWarnings("rawtypes")
   Class[] getParameterClasses() {
-    return Stream.of(actionParameters).map(TypeUtilities::getClassFromFullName).toArray(Class[]::new);
+    return Stream.of(actionParameters).map(TypeUtilities::getClassFromFullName)
+        .toArray(Class[]::new);
   }
 
   // used in unit tests
@@ -200,20 +198,16 @@ public enum BasicElementActionType implements ActionType {
     return returnType;
   }
 
-  private static final List<TypeProvider> CONTAINS_LOCATOR = Stream.of(SELECTOR)
-      .collect(Collectors.toList());
-  private static final List<TypeProvider> CONTAINS_LOCATOR_AND_BOOLEAN = Stream
-      .of(SELECTOR, PrimitiveType.BOOLEAN).collect(Collectors.toList());
-
   @Override
   public List<TypeProvider> getParametersTypes(String parserContext, int parameterCount) {
     if (this == containsElement && (parameterCount == 1 || parameterCount == 2)) {
-      return parameterCount == 1? CONTAINS_LOCATOR : CONTAINS_LOCATOR_AND_BOOLEAN;
+      return parameterCount == 1 ? CONTAINS_LOCATOR : CONTAINS_LOCATOR_AND_BOOLEAN;
     } else {
       int expected = actionParameters.length;
       if (actionParameters.length != parameterCount) {
-        throw new UtamCompilationError(VALIDATION.getErrorMessage(ERROR_CODE_FOR_PARAMETERS, parserContext, this.name(),
-            String.valueOf(expected), String.valueOf(parameterCount)));
+        throw new UtamCompilationError(
+            VALIDATION.getErrorMessage(ERROR_CODE_FOR_PARAMETERS, parserContext, this.name(),
+                String.valueOf(expected), String.valueOf(parameterCount)));
       }
       return Stream.of(actionParameters).collect(Collectors.toList());
     }
@@ -225,11 +219,12 @@ public enum BasicElementActionType implements ActionType {
   }
 
   /**
-   * most action types have corresponding method for UI element, which we test in unit tests
-   * except for size or containsElement that has overloaded method and can't be found
+   * most action types have corresponding method for UI element, which we test in unit tests except
+   * for size or containsElement that has overloaded method and can't be found
+   *
    * @return false if there is no method to check for presence in unit tests
    */
   boolean hasMethodToTest() {
-    return this != size && this != containsElement;
+    return this != size && this != containsElement && this != getRect;
   }
 }
