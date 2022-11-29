@@ -28,7 +28,7 @@ import utam.core.element.FrameElement;
  */
 public class DocumentObject implements Document {
 
-  static final String DOM_READY_JAVASCRIPT = "document.readyState === 'complete'";
+  static final String DOM_READY_JAVASCRIPT = "return document.readyState === 'complete'";
   static final String ERR_CANT_ENTER_NULL_FRAME = "Can't enter null frame element";
 
   private final Driver driver;
