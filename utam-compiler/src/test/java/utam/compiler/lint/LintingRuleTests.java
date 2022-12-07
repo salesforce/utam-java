@@ -132,7 +132,6 @@ public class LintingRuleTests {
     LintingConfig configuration = new LintingConfigJson(
         DEFAULT_THROWS_ERROR,
         null,
-        null,
         new UniqueSelectorInsidePageObject(LintingError.ViolationLevel.warning, exceptions),
         new RequiredRootDescription(LintingError.ViolationLevel.warning, exceptions),
         null,
