@@ -60,7 +60,6 @@ public class LintingConfigJson implements LintingConfig {
       null,
       null,
       null,
-      null,
       null
   );
   private final List<LintingRuleImpl> localRules = new ArrayList<>();
@@ -72,7 +71,6 @@ public class LintingConfigJson implements LintingConfig {
   @JsonCreator
   LintingConfigJson(
       @JsonProperty(value = "throwError") Boolean interruptCompilation,
-      @JsonProperty(value = "outputFile") String outputFileName,
       @JsonProperty(value = "printToConsole") Boolean isPrintToConsole,
       @JsonProperty(value = "duplicateSelectors") UniqueSelectorInsidePageObject uniqueSelectors,
       @JsonProperty(value = "requiredRootDescription") RequiredRootDescription requiredRootDescription,
