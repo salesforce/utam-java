@@ -276,7 +276,6 @@ public class BasePageElementTests {
   public void testDoubleClick() {
     MockUtilities mock = new MockUtilities();
     mock.getUtamElement().doubleClick();
-    //verify(mock.getWebElementMock(), times(1));
   }
 
   @Test

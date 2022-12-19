@@ -23,8 +23,6 @@ import utam.core.framework.UtamLogger;
 import utam.core.framework.base.UtamBaseImpl;
 import utam.core.framework.consumer.UtamError;
 
-import java.time.Duration;
-
 /**
  * base element that wraps Element implementation with Driver waits, instantiated on the FOUND
  * element

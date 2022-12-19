@@ -7,8 +7,6 @@
  */
 package utam.core.element;
 
-import java.time.Duration;
-
 /**
  * interaction methods for clickable element
  * @author elizaveta.ivanova
