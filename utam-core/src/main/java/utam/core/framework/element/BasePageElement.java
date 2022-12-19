@@ -23,6 +23,8 @@ import utam.core.framework.UtamLogger;
 import utam.core.framework.base.UtamBaseImpl;
 import utam.core.framework.consumer.UtamError;
 
+import java.time.Duration;
+
 /**
  * base element that wraps Element implementation with Driver waits, instantiated on the FOUND
  * element
@@ -194,6 +196,25 @@ public class BasePageElement extends UtamBaseImpl implements Actionable, Clickab
         throw e;
       }
     }
+  }
+
+  @Override
+  public void doubleClick() {
+    log("double-click on the element");
+    getElement().doubleClick();
+  }
+
+  @Override
+  public void clickAndHold(Duration duration) {
+    log(String.format("click and hold the element for %d milliseconds",
+            duration.toMillis()));
+    getElement().clickAndHold(duration);
+  }
+
+  @Override
+  public void rightClick() {
+    log("perform secondary button click ('right-click' on element");
+    getElement().rightClick();
   }
 
   @Override

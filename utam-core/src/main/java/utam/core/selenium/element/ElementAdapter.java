@@ -11,6 +11,7 @@ import static utam.core.selenium.element.DriverAdapter.ERR_SUPPORTED_FOR_MOBILE;
 import static utam.core.selenium.element.DriverAdapter.getNotFoundErr;
 import static utam.core.selenium.element.DriverAdapter.getSeleniumDriver;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.openqa.selenium.By;
@@ -154,6 +155,24 @@ public class ElementAdapter implements Element {
   @Override
   public void click() {
     getWebElement().click();
+  }
+
+  @Override
+  public void doubleClick() {
+    Actions actions = new Actions(driver);
+    actions.doubleClick(getWebElement()).perform();
+  }
+
+  @Override
+  public void rightClick() {
+    Actions actions = new Actions(driver);
+    actions.contextClick(getWebElement()).perform();
+  }
+
+  @Override
+  public void clickAndHold(Duration duration) {
+    Actions actions = new Actions(driver);
+    actions.clickAndHold(getWebElement()).pause(duration).release().perform();
   }
 
   @Override

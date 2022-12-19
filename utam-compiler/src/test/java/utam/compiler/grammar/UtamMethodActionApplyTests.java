@@ -17,7 +17,8 @@ import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 import static utam.compiler.representation.PageObjectValidationTestHelper.validateMethod;
 
-import java.util.List;
+import java.util.*;
+
 import org.testng.annotations.Test;
 import utam.compiler.JsonBuilderTestUtility;
 import utam.compiler.helpers.PrimitiveType;
@@ -86,6 +87,29 @@ public class UtamMethodActionApplyTests {
     MethodInfo methodInfo = new MethodInfo(methodName);
     methodInfo.addCodeLine("TestElement test0 = this.getTestElement()");
     methodInfo.addCodeLine("test0.click()");
+    validateMethod(actualMethod, methodInfo);
+  }
+
+  @Test
+  public void testComposeWithBasicElementClickVariations() {
+    TranslationContext context = getContext("clickableElement");
+    PageObjectMethod actualMethod = context.getMethod("testDoubleClick");
+    MethodInfo methodInfo = new MethodInfo("testDoubleClick");
+    methodInfo.addCodeLine("TestElement test0 = this.getTestElement()");
+    methodInfo.addCodeLine("test0.doubleClick()");
+    validateMethod(actualMethod, methodInfo);
+
+    actualMethod = context.getMethod("testRightClick");
+    methodInfo = new MethodInfo("testRightClick");
+    methodInfo.addCodeLine("TestElement test0 = this.getTestElement()");
+    methodInfo.addCodeLine("test0.rightClick()");
+    validateMethod(actualMethod, methodInfo);
+
+    actualMethod = context.getMethod("testClickAndHold");
+    methodInfo = new MethodInfo("testClickAndHold");
+    methodInfo.addParameter(new MethodParameterInfo("duration", "Integer"));
+    methodInfo.addCodeLine("TestElement test0 = this.getTestElement()");
+    methodInfo.addCodeLine("test0.clickAndHold(duration)");
     validateMethod(actualMethod, methodInfo);
   }
 

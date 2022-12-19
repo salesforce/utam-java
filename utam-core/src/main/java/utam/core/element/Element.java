@@ -7,6 +7,7 @@
  */
 package utam.core.element;
 
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -73,6 +74,23 @@ public interface Element {
    * click on the element
    */
   void click();
+
+  /**
+   * perform a secondary-button click on the element
+   */
+  void rightClick();
+
+  /**
+   * click and hold the element
+   * @param duration the duration for which to hold.
+   *                 Using Duration.ZERO will hold the click indefinitely
+   */
+  void clickAndHold(Duration duration);
+
+  /**
+   * double-click on the element
+   */
+  void doubleClick();
 
   /**
    * provided as temporary workaround when regular click does not work

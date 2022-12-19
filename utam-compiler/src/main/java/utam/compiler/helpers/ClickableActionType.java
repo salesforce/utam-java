@@ -11,6 +11,8 @@ import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.helpers.BasicElementActionType.ERROR_CODE_FOR_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
+import java.sql.Array;
+import java.time.Duration;
 import java.util.ArrayList;
 import utam.compiler.UtamCompilationError;
 import utam.core.declarative.representation.TypeProvider;
@@ -30,10 +32,16 @@ public enum ClickableActionType implements ActionType {
    * click on the element using WebElement.click <br>
    * throws exception if fails
    */
-  click();
+  click,
+  doubleClick,
+  rightClick,
+  clickAndHold;
 
   // used in unit tests
   Class[] getParameterClasses() {
+    if (this == clickAndHold) {
+      return new Class[] { Duration.class };
+    }
     return new Class[0];
   }
 
@@ -50,11 +58,16 @@ public enum ClickableActionType implements ActionType {
   @Override
   public List<TypeProvider> getParametersTypes(String parserContext, int parameterCount) {
     int expected = 0;
+    List<TypeProvider> returned = new ArrayList<>();
+    if (this == clickAndHold) {
+      expected = 1;
+      returned.add(PrimitiveType.NUMBER);
+    }
     if (expected != parameterCount) {
       throw new UtamCompilationError(VALIDATION.getErrorMessage(ERROR_CODE_FOR_PARAMETERS, parserContext, this.name(),
           String.valueOf(expected), String.valueOf(parameterCount)));
     }
-    return new ArrayList<>();
+    return returned;
   }
 
   @Override

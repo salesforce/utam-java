@@ -99,12 +99,9 @@ public class ClickableActionTypeTests {
                   String.format("number of actual parameters is %d", params.length),
                   params.length,
                   is(equalTo(method.getParameterCount())));
-              // For now, all clickable element actions have zero parameters. Should
-              // a method exist that requires parameters the block of code below will
-              // be needed to validate their types.
-              // for (int i = 0; i < params.length; i++) {
-              //   assertThat(params[i], is(equalTo(method.getParameterTypes()[i])));
-              // }
+               for (int i = 0; i < params.length; i++) {
+                 assertThat(params[i], is(equalTo(method.getParameterTypes()[i])));
+               }
             });
   }
 }

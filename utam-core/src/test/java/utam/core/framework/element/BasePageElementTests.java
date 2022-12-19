@@ -38,6 +38,9 @@ import utam.core.element.Locator;
 import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.LocatorBy;
 
+import java.time.Duration;
+import java.util.MissingFormatArgumentException;
+
 /**
  * @author elizaveta.ivanova
  * @since 234
@@ -267,6 +270,25 @@ public class BasePageElementTests {
     JavascriptException e = expectThrows(JavascriptException.class,
         () -> mock.getUtamElement().click());
     assertThat(e.getMessage(), containsString(errMessage));
+  }
+
+  @Test
+  public void testDoubleClick() {
+    MockUtilities mock = new MockUtilities();
+    mock.getUtamElement().doubleClick();
+    //verify(mock.getWebElementMock(), times(1));
+  }
+
+  @Test
+  public void testClickAndHold() {
+    MockUtilities mock = new MockUtilities();
+    mock.getUtamElement().clickAndHold(Duration.ofMillis(5));
+  }
+
+  @Test
+  public void testRightClick() {
+    MockUtilities mock = new MockUtilities();
+    mock.getUtamElement().rightClick();
   }
 
   @Test
