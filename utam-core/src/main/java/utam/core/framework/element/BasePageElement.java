@@ -205,10 +205,10 @@ public class BasePageElement extends UtamBaseImpl implements Actionable, Clickab
   }
 
   @Override
-  public void clickAndHold(Duration duration) {
-    log(String.format("click and hold the element for %d milliseconds",
-            duration.toMillis()));
-    getElement().clickAndHold(duration);
+  public void clickAndHold(int holdDurationSec) {
+    log(String.format(
+            "click and hold the element for %d seconds", holdDurationSec));
+    getElement().clickAndHold(holdDurationSec);
   }
 
   @Override

@@ -84,8 +84,9 @@ public class ClickableActionTypeTests {
         .forEach(
             action -> {
               info(String.format("test element action '%s'", action));
+              Class[] paramClasses = action.getParameterClasses();
               Method method =
-                  getMethod(action.getElementClass(), action.name(), action.getParameterClasses());
+                  getMethod(action.getElementClass(), action.name(), paramClasses);
               assertThat(
                   String.format(
                       "action '%s' returns '%s', method returns '%s'",

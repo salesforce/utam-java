@@ -282,7 +282,7 @@ public class BasePageElementTests {
   @Test
   public void testClickAndHold() {
     MockUtilities mock = new MockUtilities();
-    mock.getUtamElement().clickAndHold(Duration.ofMillis(5));
+    mock.getUtamElement().clickAndHold(1);
   }
 
   @Test

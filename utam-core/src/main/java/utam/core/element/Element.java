@@ -82,10 +82,9 @@ public interface Element {
 
   /**
    * click and hold the element
-   * @param duration the duration for which to hold.
-   *                 Using Duration.ZERO will hold the click indefinitely
+   * @param holdDurationSec the duration in seconds for which to hold.
    */
-  void clickAndHold(Duration duration);
+  void clickAndHold(int holdDurationSec);
 
   /**
    * double-click on the element

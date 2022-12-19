@@ -162,7 +162,7 @@ public class ElementAdapterTests {
   @Test
   public void testClickAndHold() {
     MockUtilities mock = new MockUtilities();
-    mock.getElementAdapter().clickAndHold(Duration.ofMillis(5));
+    mock.getElementAdapter().clickAndHold(1);
   }
 
   @Test

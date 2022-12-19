@@ -32,9 +32,9 @@ public interface Clickable extends BasicElement {
   /**
    * click and hold the element for the duration specified, using
    * the Selenium Actions class.
-   * @param duration duration for holding the click on the element
+   * @param holdDurationSec duration in seconds for holding the click on the element
    */
-  void clickAndHold(Duration duration);
+  void clickAndHold(int holdDurationSec);
 
   /**
    * clicks on the element with the secondary mouse button, sometimes

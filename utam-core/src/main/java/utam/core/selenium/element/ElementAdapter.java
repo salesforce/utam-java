@@ -170,9 +170,11 @@ public class ElementAdapter implements Element {
   }
 
   @Override
-  public void clickAndHold(Duration duration) {
+  public void clickAndHold(int holdDurationSec) {
     Actions actions = new Actions(driver);
-    actions.clickAndHold(getWebElement()).pause(duration).release().perform();
+    actions.clickAndHold(getWebElement())
+            .pause(Duration.ofSeconds(holdDurationSec))
+            .release().perform();
   }
 
   @Override
