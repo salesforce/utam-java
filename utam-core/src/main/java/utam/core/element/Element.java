@@ -7,7 +7,6 @@
  */
 package utam.core.element;
 
-import java.time.Duration;
 import java.util.List;
 
 /**
