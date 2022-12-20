@@ -1,0 +1,48 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "type": [
+        "clickable"
+      ],
+      "selector": {
+        "css": ".css"
+      }
+    }
+  ],
+  "methods": [
+    {
+      "name": "testDoubleClick",
+      "compose": [
+        {
+          "element": "test",
+          "apply": "doubleClick"
+        }
+      ]
+    },
+    {
+      "name": "testRightClick",
+      "compose": [
+        {
+          "element": "test",
+          "apply": "rightClick"
+        }
+      ]
+    },
+    {
+      "name": "testClickAndHold",
+      "compose": [
+        {
+          "element": "test",
+          "apply": "clickAndHold",
+          "args": [
+            {
+              "name": "duration",
+              "type": "number"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -34,6 +34,7 @@ import static utam.core.selenium.element.ElementAdapter.SCROLL_TOP_VIA_JAVASCRIP
 import static utam.core.selenium.element.LocatorBy.byCss;
 import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR_ALL;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import org.openqa.selenium.By;
@@ -144,6 +145,24 @@ public class ElementAdapterTests {
     MockUtilities mock = new MockUtilities();
     mock.getElementAdapter().click();
     verify(mock.getWebElementMock(), times(1)).click();
+  }
+
+  @Test
+  public void testDoubleClick() {
+    MockUtilities mock = new MockUtilities();
+    mock.getElementAdapter().doubleClick();
+  }
+
+  @Test
+  public void testRightClick() {
+    MockUtilities mock = new MockUtilities();
+    mock.getElementAdapter().rightClick();
+  }
+
+  @Test
+  public void testClickAndHold() {
+    MockUtilities mock = new MockUtilities();
+    mock.getElementAdapter().clickAndHold(1);
   }
 
   @Test

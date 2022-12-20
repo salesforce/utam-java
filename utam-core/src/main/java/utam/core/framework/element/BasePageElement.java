@@ -197,6 +197,25 @@ public class BasePageElement extends UtamBaseImpl implements Actionable, Clickab
   }
 
   @Override
+  public void doubleClick() {
+    log("double-click on the element");
+    getElement().doubleClick();
+  }
+
+  @Override
+  public void clickAndHold(int holdDurationSec) {
+    log(String.format(
+            "click and hold the element for %d seconds", holdDurationSec));
+    getElement().clickAndHold(holdDurationSec);
+  }
+
+  @Override
+  public void rightClick() {
+    log("perform secondary button click ('right-click' on element");
+    getElement().rightClick();
+  }
+
+  @Override
   public void flick(int xOffset, int yOffset) {
     log(String.format("flick element at X '%d' Y '%d'", xOffset, yOffset));
     String originalContext = getDriver().getPageContext();

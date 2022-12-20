@@ -75,6 +75,22 @@ public interface Element {
   void click();
 
   /**
+   * perform a secondary-button click on the element
+   */
+  void rightClick();
+
+  /**
+   * click and hold the element
+   * @param holdDurationSec the duration in seconds for which to hold.
+   */
+  void clickAndHold(int holdDurationSec);
+
+  /**
+   * double-click on the element
+   */
+  void doubleClick();
+
+  /**
    * provided as temporary workaround when regular click does not work
    *
    * @deprecated when all browsers work as expected, will be removed

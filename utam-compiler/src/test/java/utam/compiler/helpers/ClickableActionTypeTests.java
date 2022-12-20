@@ -84,8 +84,9 @@ public class ClickableActionTypeTests {
         .forEach(
             action -> {
               info(String.format("test element action '%s'", action));
+              Class[] paramClasses = action.getParameterClasses();
               Method method =
-                  getMethod(action.getElementClass(), action.name(), action.getParameterClasses());
+                  getMethod(action.getElementClass(), action.name(), paramClasses);
               assertThat(
                   String.format(
                       "action '%s' returns '%s', method returns '%s'",
@@ -99,12 +100,9 @@ public class ClickableActionTypeTests {
                   String.format("number of actual parameters is %d", params.length),
                   params.length,
                   is(equalTo(method.getParameterCount())));
-              // For now, all clickable element actions have zero parameters. Should
-              // a method exist that requires parameters the block of code below will
-              // be needed to validate their types.
-              // for (int i = 0; i < params.length; i++) {
-              //   assertThat(params[i], is(equalTo(method.getParameterTypes()[i])));
-              // }
+               for (int i = 0; i < params.length; i++) {
+                 assertThat(params[i], is(equalTo(method.getParameterTypes()[i])));
+               }
             });
   }
 }

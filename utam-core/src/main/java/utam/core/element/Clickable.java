@@ -20,4 +20,23 @@ public interface Clickable extends BasicElement {
    * Throws exception if nothing found within timeout. <br>
    */
   void click();
+
+  /**
+   * double-clicks on the element using the Selenium Actions
+   * class.
+   */
+  void doubleClick();
+
+  /**
+   * click and hold the element for the duration specified, using
+   * the Selenium Actions class.
+   * @param holdDurationSec duration in seconds for holding the click on the element
+   */
+  void clickAndHold(int holdDurationSec);
+
+  /**
+   * clicks on the element with the secondary mouse button, sometimes
+   * referred to as a "right-click," using the Selenium Actions class.
+   */
+  void rightClick();
 }
