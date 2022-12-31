@@ -48,8 +48,8 @@ public class ClickableActionTypeTests {
   private static void validateAction(ActionType action, List<String> parameterTypes) {
     Set<String> parameterTypeStrings =
         action.getParametersTypes("test", parameterTypes.size()).stream()
-            .filter((type) -> !type.getSimpleName().isEmpty())
             .map(TypeProvider::getSimpleName)
+            .filter(simpleName -> !simpleName.isEmpty())
             .collect(Collectors.toSet());
 
     assertThat(parameterTypeStrings, containsInAnyOrder(parameterTypes.toArray()));

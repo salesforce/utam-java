@@ -113,7 +113,7 @@ public class UtamPageObject_Tests {
     UtamError e = expectThrows(UtamError.class,
         () -> new DeserializerUtilities().getResultFromString(json));
     assertThat(e.getMessage(),
-        containsString("error 902: root page object requires default selector property"));
+        containsString("error 902: root page object requires \"selector\" property"));
   }
 
   @Test
@@ -199,7 +199,7 @@ public class UtamPageObject_Tests {
     UtamCompilationError e = expectThrows(
         UtamCompilationError.class,
         () -> new DeserializerUtilities().getResultFromFile("validate/comments/singleLineComment"));
-    assertThat(e.getMessage(), containsString("error 900: incorrect format of the page object"));
+    assertThat(e.getMessage(), containsString(PARSER_ERROR_PREFIX));
     assertThat(e.getMessage(), containsString("ALLOW_COMMENTS"));
   }
 
@@ -208,7 +208,7 @@ public class UtamPageObject_Tests {
     UtamCompilationError e = expectThrows(
         UtamCompilationError.class,
         () -> new DeserializerUtilities().getResultFromFile("validate/comments/blockComment"));
-    assertThat(e.getMessage(), containsString("error 900: incorrect format of the page object"));
+    assertThat(e.getMessage(), containsString(PARSER_ERROR_PREFIX));
     assertThat(e.getMessage(), containsString("ALLOW_COMMENTS"));
   }
 }

@@ -61,7 +61,7 @@ public class UtamMethodActionGetterTests {
   @Test
   public void redundantArgsThrows() {
     testThrows("redundantArgs",
-        "error 108: method \"test\": expected number of parameters is 0, found 1");
+        "error 108: method \"test\" arguments: expected number of arguments is 0, found 1");
   }
 
   @Test

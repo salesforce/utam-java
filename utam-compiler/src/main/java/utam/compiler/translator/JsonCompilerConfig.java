@@ -77,7 +77,7 @@ public class JsonCompilerConfig {
         inputFiles.addAll(fileList);
       }
     } catch (IOException e) {
-      throw new IOException(String.format(ERR_READING_COMPILER_CONFIG, configFile.toString()), e);
+      throw new IOException(String.format(ERR_READING_COMPILER_CONFIG, configFile), e);
     }
   }
 

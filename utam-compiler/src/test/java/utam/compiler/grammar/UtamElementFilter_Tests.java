@@ -50,14 +50,21 @@ public class UtamElementFilter_Tests {
   public void testBasicElementWrongMethodInFilterThrows() {
     Exception e = expectCompilerErrorFromFile("validate/filter/basicFilterWrongMethod");
     assertThat(e.getMessage(), containsString(
-        "error 301: element \"test\" filter: unknown method \"wrong\" for basic element"));
+        "error 301: element \"test\" filter: unknown action \"wrong\" for basic element"));
+  }
+
+  @Test
+  public void testBasicElementUnsupportedMethodInFilterThrows() {
+    Exception e = expectCompilerErrorFromFile("validate/filter/basicFilterUnsupportedMethod");
+    assertThat(e.getMessage(), containsString(
+            "error 303: element \"test\" filter: unsupported action \"click\" for type \"Touchable\""));
   }
 
   @Test
   public void testCustomElementGetTextFilterWithWrongArgThrows() {
     Exception e = expectCompilerErrorFromFile("validate/filter/customWrongMatcherArg");
     assertThat(e.getMessage(), containsString(
-        "error 108: element \"test\" filter: expected number of parameters is 0, found 1"));
+        "error 108: element \"test\" filter arguments: expected number of arguments is 0, found 1"));
   }
 
   @Test
@@ -71,7 +78,7 @@ public class UtamElementFilter_Tests {
   public void testDuplicateArgsNamesThrows() {
     Exception e = expectCompilerErrorFromFile("validate/filter/basicFilterDuplicateArgs");
     assertThat(e.getMessage(),
-        containsString("duplicate parameters with name 'arg1' in the element \"element\""));
+        containsString("error 107: element \"element\" arguments: argument with name \"arg1\" is already declared"));
   }
 
   @Test

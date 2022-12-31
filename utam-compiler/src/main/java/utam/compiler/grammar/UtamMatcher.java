@@ -130,7 +130,7 @@ class UtamMatcher {
     @Override
     MatcherObject getMatcherObject(TranslationContext context) {
       String parserContext = String
-          .format("method \"%s\" statement matcher", methodContext.getName());
+          .format("method \"%s\" statement", methodContext.getName());
       UtamMatcher matcher = JsonDeserializer
           .readNode(matcherNode, UtamMatcher.class, VALIDATION.getErrorMessage(1200, parserContext));
       ArgumentsProvider provider = new ArgumentsProvider(matcher.argsNode, parserContext);

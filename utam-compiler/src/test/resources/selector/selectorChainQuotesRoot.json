@@ -1,0 +1,7 @@
+{
+  "selector": {
+    "classchain": "**/XCUIElementTypeStaticText[\"label == 'something'\"]"
+  },
+  "root": true
+}
+

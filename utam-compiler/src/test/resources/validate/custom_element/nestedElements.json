@@ -1,0 +1,20 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "type": "my/page/type",
+      "selector": {
+        "css": "css1"
+      },
+      "elements" : [
+        {
+          "name": "nested",
+          "selector": {
+            "css": "css2"
+          }
+        }
+      ]
+    }
+  ]
+}
+

@@ -55,7 +55,7 @@ public class MethodContextTests {
     UtamError e = expectThrows(UtamError.class,
         () -> context.setParameter(new Regular("name", STRING)));
     assertThat(e.getMessage(),
-        containsString("error 107: method \"test\": parameter with name \"name\" is already declared"));
+        containsString("error 107: method \"test\" arguments: argument with name \"name\" is already declared"));
   }
 
   @Test
@@ -66,7 +66,7 @@ public class MethodContextTests {
     UtamError e = expectThrows(UtamError.class,
         () -> setStatementParameter(context, new Regular("name", STRING)));
     assertThat(e.getMessage(),
-        containsString("error 107: method \"test\": parameter with name \"name\" is already declared"));
+        containsString("error 107: method \"test\" arguments: argument with name \"name\" is already declared"));
   }
 
   @Test
@@ -76,7 +76,7 @@ public class MethodContextTests {
     UtamError e = expectThrows(UtamError.class,
         () -> context.setParameter(new Literal(true, BOOLEAN)));
     assertThat(e.getMessage(),
-        containsString("error 105: method \"test\": literal arguments are not allowed"));
+        containsString("error 105: method \"test\" arguments: literal arguments are not allowed"));
   }
 
   @Test
@@ -92,7 +92,8 @@ public class MethodContextTests {
   @Test
   public void testComposeWithInvalidArgReferenceThrows() {
     test("referencedArgNotFound",
-        "error 502: method \"test\": statement parameter \"arg1\" is not found in declared method args");
+        "error 502: method \"test\": statement declares a reference to an \"arg1\" argument, " +
+                "but there is no matching argument at the method level");
   }
 
   @Test
@@ -101,12 +102,12 @@ public class MethodContextTests {
     UtamError e = expectThrows(UtamError.class,
         () -> context.setParameter(new Regular("arg", PARAMETER_REFERENCE)));
     assertThat(e.getMessage(), containsString(
-        "error 501: method \"test\": parameter \"arg\" at method level can't have type \"argumentReference\""));
+        "error 501: method \"test\" arguments: parameter \"arg\" at method level can't have type \"argumentReference\""));
   }
 
   @Test
   public void testSameParameterReusedThrows() {
-    test("sameArgsNames", "error 107: method \"test\": parameter with name \"arg1\" is already declared");
+    test("sameArgsNames", "error 107: method \"test\" arguments: argument with name \"arg1\" is already declared");
   }
 
   @Test

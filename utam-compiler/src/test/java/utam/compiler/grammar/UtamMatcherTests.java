@@ -26,15 +26,15 @@ public class UtamMatcherTests {
   public void testWrongArgsNumberThrows() {
     Exception e = expectCompilerErrorFromFile("matcher/wrongArgsNumber");
     assertThat(e.getMessage(), is(containsString(
-        "error 108: method \"matcherThrows\" statement matcher: expected number of parameters is 1, found 2")));
+        "error 108: method \"matcherThrows\" statement matcher arguments: expected number of arguments is 1, found 2")));
   }
 
   @Test
   public void testElementFilterWrongArgsTypeThrows() {
     Exception e = expectCompilerErrorFromFile("matcher/wrongArgsType");
     assertThat(e.getMessage(), is(containsString(
-        "error 109: method \"matcherThrows\" statement matcher: "
-            + "parameter \"true\" has incorrect type: expected \"String\", found \"Boolean\"")));
+        "error 109: method \"matcherThrows\" statement matcher arguments: " +
+                "argument \"true\" has incorrect type, expected \"String\", found \"Boolean\"")));
   }
 
   @Test
@@ -47,7 +47,7 @@ public class UtamMatcherTests {
   @Test
   public void testIncorrectMatcherTypeThrowsInFilter() {
     Exception e = expectCompilerErrorFromFile("matcher/incorrectMatcherInFilter");
-    assertThat(e.getMessage(), containsString("error 1202: element \"test\" filter: "
+    assertThat(e.getMessage(), containsString("error 1202: element \"test\" filter matcher: "
         + "expected type for matcher is \"Boolean\", found \"String\""));
   }
 }

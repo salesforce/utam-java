@@ -74,8 +74,7 @@ public class UtamElement_FrameTests {
         + "  ]}";
     Exception e = expectCompilerError(json);
     assertThat(e.getMessage(),
-        containsString("error 8: element \"test\": property \"elements\" is not supported, "
-            + "supported are: name, public, selector, type"));
+        containsString("error 205: element \"test\": only basic element can have nested elements or shadow root"));
   }
 
   @Test

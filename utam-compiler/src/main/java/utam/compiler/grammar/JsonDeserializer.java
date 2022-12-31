@@ -165,7 +165,7 @@ public final class JsonDeserializer extends
    * @param node json node
    * @return string representation
    */
-  static String nodeToString(JsonNode node) {
+  public static String nodeToString(JsonNode node) {
     if (isEmptyNode(node)) {
       return "null";
     }

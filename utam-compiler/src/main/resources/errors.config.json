@@ -1,5 +1,9 @@
 [
   {
+    "code": 7,
+    "message": "%s: property \"%s\" is not supported"
+  },
+  {
     "message": "%s: property \"%s\" is not supported, supported are: %s",
     "code": 8
   },
@@ -8,7 +12,7 @@
     "code": 9
   },
   {
-    "message": "%s: property \"%s\" should be a non empty string, instead found %s",
+    "message": "%s: property \"%s\" should be %s, instead found %s",
     "code": 10
   },
   {
@@ -24,56 +28,76 @@
     "code": 13
   },
   {
-    "message": "%s: incorrect argument format",
+    "message": "%s arguments: incorrect argument format",
     "docs": "https://utam.dev/grammar/spec#supported-argument-types",
     "code": 100
   },
   {
-    "message": "%s: unknown element with name \"%s\" is referenced as an argument",
+    "message": "%s arguments: unknown element with name \"%s\" is referenced as an argument",
     "code": 101
   },
   {
-    "message": "%s: unsupported literal argument type \"%s\", supported are: { %s }",
+    "message": "%s arguments: unsupported literal argument type \"%s\", supported are %s",
     "code": 102
   },
   {
     "code": 103,
-    "message": "%s: unsupported argument type \"%s\", supported are: { %s }"
+    "message": "%s arguments: unsupported argument type \"%s\", supported are %s"
   },
   {
     "code": 104,
-    "message": "%s: incorrect predicate format",
+    "message": "%s arguments: incorrect predicate format",
     "docs": "https://utam.dev/grammar/spec#explicit-waits"
   },
   {
     "code": 105,
-    "message": "%s: literal arguments are not allowed",
+    "message": "%s arguments: literal arguments are not allowed",
     "tip": "use \"name\", not \"value\""
   },
   {
     "code": 106,
-    "message": "%s: incorrect format of elementReference argument",
+    "message": "%s arguments: incorrect format of elementReference argument",
     "docs": "https://utam.dev/grammar/spec#element-reference"
   },
   {
     "code": 107,
-    "message": "%s: parameter with name \"%s\" is already declared"
+    "message": "%s arguments: argument with name \"%s\" is already declared"
   },
   {
     "code": 108,
-    "message": "%s: expected number of parameters is %s, found %s"
+    "message": "%s arguments: expected number of arguments is %s, found %s"
   },
   {
     "code": 109,
-    "message": "%s: parameter \"%s\" has incorrect type: expected \"%s\", found \"%s\""
+    "message": "%s arguments: argument \"%s\" has incorrect type, expected \"%s\", found \"%s\""
   },
   {
     "code": 110,
-    "message": "\"%s\": incorrect number of parameters for action \"%s\": expected %s, provided %s"
+    "message": "%s arguments: unknown selector parameter type \"%s\", only string and number are supported"
   },
   {
     "code": 111,
-    "message": "%s: unknown selector parameter type \"%s\", only string and number are supported"
+    "message": "%s arguments: either \"name\" or \"value\" is supported for an argument, not both"
+  },
+  {
+    "code": 112,
+    "message": "%s arguments: \"type\" is required for an argument \"%s\""
+  },
+  {
+    "code": 113,
+    "message": "%s arguments: either \"name\" or \"value\" is required for an argument"
+  },
+  {
+    "code": 114,
+    "message": "%s arguments: property \"description\" is not supported for literal or function argument"
+  },
+  {
+    "code": 115,
+    "message": "%s: basic type \"%s\" is not supported, valid values are: actionable, clickable, draggable, editable, touchable"
+  },
+  {
+    "code": 116,
+    "message": "%s: duplicate basic type \"%s\", basic type values must be unique"
   },
   {
     "code": 200,
@@ -81,7 +105,8 @@
   },
   {
     "code": 201,
-    "message": "element \"%s\": basic type \"%s\" is not supported, valid values are: actionable, clickable, draggable, editable, touchable"
+    "message": "element \"%s\": type \"%s\" is not supported, valid values are: custom, container, frame, actionable, clickable, draggable, editable, touchable",
+    "tip": "custom type must only contain alphanumeric characters with the schema [package-name]/[custom/path]/pageObject"
   },
   {
     "code": 202,
@@ -89,11 +114,15 @@
   },
   {
     "code": 203,
-    "message": "element \"%s\": list element can't have nested elements"
+    "message": "element \"%s\": element marked as a list cannot have nested elements or shadow root"
   },
   {
     "code": 204,
     "message": "element \"%s\": frame selector cannot have \"returnAll\" set to true"
+  },
+  {
+    "code": 205,
+    "message": "element \"%s\": only basic element can have nested elements or shadow root"
   },
   {
     "code": 300,
@@ -102,11 +131,16 @@
   },
   {
     "code": 301,
-    "message": "element \"%s\" filter: unknown method \"%s\" for basic element"
+    "message": "element \"%s\" filter: unknown action \"%s\" for basic element"
   },
   {
     "code": 302,
-    "message": "element \"%s\" filter: filter can only be set for list"
+    "message": "element \"%s\" filter: filter can only be set for list",
+    "tip": "add \"returnAll\" to selector or remove filter"
+  },
+  {
+    "code": 303,
+    "message": "element \"%s\" filter: unsupported action \"%s\" for type \"%s\""
   },
   {
     "code": 400,
@@ -115,7 +149,7 @@
   },
   {
     "code": 401,
-    "message": "abstract method \"%s\": return basic type \"%s\" is incorrect, valid values are: actionable, clickable, draggable, editable, touchable"
+    "message": "code not used"
   },
   {
     "code": 402,
@@ -132,15 +166,19 @@
   },
   {
     "code": 501,
-    "message": "%s: parameter \"%s\" at method level can't have type \"argumentReference\""
+    "message": "%s arguments: parameter \"%s\" at method level can't have type \"argumentReference\""
   },
   {
     "code": 502,
-    "message": "%s: statement parameter \"%s\" is not found in declared method args"
+    "message": "%s: statement declares a reference to an \"%s\" argument, but there is no matching argument at the method level"
   },
   {
     "code": 503,
     "message": "%s: declared parameter \"%s\" is never used"
+  },
+  {
+    "code": 504,
+    "message": "method \"%s\": method with the same name was already declared"
   },
   {
     "code": 600,
@@ -177,7 +215,7 @@
     "message": "method \"beforeLoad\" statement: only \"document\" or \"root\" elements are allowed"
   },
   {
-    "code" : 608,
+    "code": 608,
     "message": "method \"%s\" statement: \"returnSelf\" can only be invoked from a last statement"
   },
   {
@@ -201,7 +239,7 @@
     "message": "method \"%s\" statement: incorrect return type; expected \"%s\", provided is \"%s\""
   },
   {
-    "code" : 614,
+    "code": 614,
     "message": "method \"%s\" statement: to use chain previous statement should return custom type, but it returns \"%s\""
   },
   {
@@ -209,8 +247,12 @@
     "message": "method \"%s\" statement: nested waitFor is not supported"
   },
   {
-    "code" : 616,
+    "code": 616,
     "message": "method \"%s\" statement: first statement can't be marked as chain"
+  },
+  {
+    "code": 617,
+    "message": "method \"%s\" statement: unsupported action \"%s\" for type \"%s\""
   },
   {
     "code": 700,
@@ -248,7 +290,7 @@
   },
   {
     "code": 900,
-    "message": "incorrect format of the page object"
+    "message": "incorrect format of the page object \n%s"
   },
   {
     "code": 901,
@@ -258,7 +300,7 @@
   },
   {
     "code": 902,
-    "message": "root page object requires default selector property",
+    "message": "root page object requires \"selector\" property",
     "tip": "either remove [\"root\" : true] or add \"selector\" property"
   },
   {
@@ -281,11 +323,27 @@
   },
   {
     "code": 1002,
-    "message": "root selector: one of { %s } should be set for selector"
+    "message": "%s selector: one of \"css\", \"accessid\", \"uiautomator\" or \"classchain\" should be set"
   },
   {
     "code": 1003,
-    "message": "root selector: only one of selector types { %s } can be set"
+    "message": "%s selector: only one of one of \"css\", \"accessid\", \"uiautomator\" or \"classchain\" can be set"
+  },
+  {
+    "code": 1003,
+    "message": "%s selector: only one of one of \"css\", \"accessid\", \"uiautomator\" or \"classchain\" can be set"
+  },
+  {
+    "code": 1004,
+    "message": "%s selector: unsupported UiSelector method \"%s\", supported methods are: %s"
+  },
+  {
+    "code": 1005,
+    "message": "%s selector \"%s\": for class chain only one of supported quotes can be set, supported are %s"
+  },
+  {
+    "code": 1006,
+    "message": "%s selector \"%s\": for class chain only one of supported operators can be set, supported are %s"
   },
   {
     "message": "%s: incorrect format of elements inside shadow",
@@ -293,15 +351,15 @@
   },
   {
     "code": 1200,
-    "message": "%s: incorrect format of matcher"
+    "message": "%s matcher: incorrect format of matcher"
   },
   {
     "code": 1201,
-    "message": "%s: unsupported matcher type \"%s\", supported are %s"
+    "message": "%s matcher: unsupported matcher type \"%s\", supported are %s"
   },
   {
     "code": 1202,
-    "message": "%s: expected type for matcher is \"%s\", found \"%s\""
+    "message": "%s matcher: expected type for matcher is \"%s\", found \"%s\""
   },
   {
     "code": 2001,

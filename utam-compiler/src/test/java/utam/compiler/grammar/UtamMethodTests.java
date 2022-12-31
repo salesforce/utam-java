@@ -56,11 +56,13 @@ public class UtamMethodTests {
     test.addRawString("methods", "[{\"name\":\"test\", \"returnType\":[\"wrong\"]}]");
     Exception e = test.expectCompilerError();
     assertThat(e.getMessage(),
-        containsString("error 401: abstract method \"test\": return basic type \"[ \"wrong\" ]\" is incorrect"));
+        containsString("error 115: abstract method \"test\" return type: basic type \"[ \"wrong\" ]\" is not supported, " +
+                "valid values are: actionable, clickable, draggable, editable, touchable"));
   }
 
   @Test
   public void testComposeArgReferenceParameter() {
-    test("argReferenceParam", "error 501: method \"test\": parameter \"arg1\" at method level can't have type \"argumentReference\"");
+    test("argReferenceParam",
+            "error 501: method \"test\" arguments: parameter \"arg1\" at method level can't have type \"argumentReference\"");
   }
 }

@@ -56,25 +56,34 @@ public class UtamElement_BasicTests {
   @Test
   public void testElementWithListCantHaveNestedElements() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("listWithNestedElements"));
-    assertThat(e.getMessage(), containsString("error 203: element \"test\": list element can't have nested elements"));
+    assertThat(e.getMessage(), containsString("error 203: element \"test\": element marked as a list cannot have nested elements or shadow root"));
   }
 
   @Test
   public void testElementNodeWithInvalidArrayElementTypeThrows() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("wrongBasicTypeArray"));
-    assertThat(e.getMessage(), containsString("error 201: element \"test\": basic type \"[ true ]\" is not supported"));
+    assertThat(e.getMessage(), containsString("error 115: element \"test\" type: basic type \"true\" is not supported, " +
+            "valid values are: actionable, clickable, draggable, editable, touchable"));
   }
 
   @Test
   public void testElementTypeAsStringWithInvalidValueThrows() {
     UtamError e = expectThrows(UtamCompilationError.class, () -> getContext("wrongBasicType"));
-    assertThat(e.getMessage(), containsString("error 201: element \"test\": basic type \"wrong\" is not supported"));
+    assertThat(e.getMessage(), containsString("error 201: element \"test\": type \"wrong\" is not supported, valid values are: " +
+            "custom, container, frame, actionable, clickable, draggable, editable, touchable"));
   }
 
   @Test
   public void testElementNodeWithInvalidArrayElementThrows() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("wrongBasicTypeArrayElement"));
-    assertThat(e.getMessage(), containsString("error 201: element \"test\": basic type \"[ \"wrong\" ]\" is not supported"));
+    assertThat(e.getMessage(), containsString("error 115: element \"test\" type: basic type \"wrong\" is not supported, " +
+            "valid values are: actionable, clickable, draggable, editable, touchable"));
+  }
+
+  @Test
+  public void testElementNodeWithDuplicateTypeThrows() {
+    UtamError e = expectThrows(UtamError.class, () -> getContext("duplicateBasicType"));
+    assertThat(e.getMessage(), containsString("error 116: element \"test\" type: duplicate basic type \"clickable\", basic type values must be unique"));
   }
 
   @Test

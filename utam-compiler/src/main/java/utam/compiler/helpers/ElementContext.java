@@ -325,16 +325,6 @@ public abstract class ElementContext {
     public Basic(String name, TypeProvider elementType, Locator selector) {
       this(null, name, elementType, selector, new ArrayList<>(), false);
     }
-
-    /**
-     * Initializes a new instance of the Basic class, used only in unit tests
-     *
-     * @param elementType the type of the element
-     * @param selector    the selector for the element
-     */
-    public Basic(TypeProvider elementType, Locator selector) {
-      this(null, "test", elementType, selector, new ArrayList<>(), false);
-    }
   }
 
   /**
@@ -356,16 +346,6 @@ public abstract class ElementContext {
         TypeProvider elementType, Locator selector,
         List<MethodParameter> parameters, boolean isNullable) {
       super(scopeContext, name, elementType, selector, parameters, isNullable);
-    }
-
-    /**
-     * Initializes a new instance of the BasicReturnsAll class, used only in unit tests
-     *
-     * @param elementType the type of the element
-     * @param selector    the selector for the element
-     */
-    public BasicReturnsAll(TypeProvider elementType, Locator selector) {
-      this(null, "test", elementType, selector, new ArrayList<>(), false);
     }
 
     @Override
@@ -418,16 +398,6 @@ public abstract class ElementContext {
           helper.getLocator(),
           helper.getParameters(),
           false);
-    }
-
-    /**
-     * Initializes a new instance of the Frame class, used only in unit tests
-     *
-     * @param name        the name of the element
-     * @param cssSelector the selector for the frame
-     */
-    public Frame(String name, String cssSelector) {
-      this(null, name, new LocatorCodeGeneration(cssSelector));
     }
   }
 

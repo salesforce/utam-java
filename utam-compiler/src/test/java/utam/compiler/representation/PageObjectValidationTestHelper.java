@@ -169,8 +169,8 @@ public class PageObjectValidationTestHelper {
     // resulting generated Page Object code.
     List<String> actualAnnotationTextList =
         actualAnnotations.stream()
-            .filter(a -> !a.getAnnotationText().isEmpty())
             .map(AnnotationProvider::getAnnotationText)
+            .filter(annotationText -> !annotationText.isEmpty())
             .collect(Collectors.toList());
     assertThat(actualAnnotationTextList, is(equalTo(expectedAnnotationTextList)));
   }
