@@ -19,13 +19,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.UtamMethodActionApply.ApplyOperation;
-import utam.compiler.helpers.ActionType;
-import utam.compiler.helpers.MethodContext;
-import utam.compiler.helpers.ParameterUtils;
-import utam.compiler.helpers.ParametersContext;
+import utam.compiler.helpers.*;
 import utam.compiler.helpers.ParametersContext.StatementParametersContext;
-import utam.compiler.helpers.StatementContext;
-import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.compiler.representation.ComposeMethodStatement.Operand;
 import utam.core.declarative.representation.MethodParameter;
@@ -71,7 +66,11 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
     final List<String> predicateCode = new ArrayList<>();
     private final List<TypeProvider> classImports = new ArrayList<>();
 
-    OperationWithPredicate(ActionType action, TypeProvider returnType,
+    private final String nullableErrorMessage;
+
+    OperationWithPredicate(ActionType action,
+                           String nullableErrorMessage,
+                           TypeProvider returnType,
         List<ComposeMethodStatement> predicate) {
       super(action, returnType, new ArrayList<>(), null);
       for (ComposeMethodStatement statement : predicate) {
@@ -79,6 +78,7 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
         ParameterUtils.setImports(classImports, statement.getClassImports());
         getActionParameters().addAll(statement.getParameters());
       }
+      this.nullableErrorMessage = nullableErrorMessage == null? "" : ", " + nullableErrorMessage;
     }
 
     @Override
@@ -88,7 +88,7 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
           // predicate code may contain if statement, hence does not need ";"
           .map(str -> str + (str.endsWith("}") ? "" : ";"))
           .collect(Collectors.joining("\n"));
-      return String.format("%s(() -> {\n%s\n})", WAIT_FOR, wrappedCode);
+      return String.format("waitFor(() -> {\n%s\n}%s)", wrappedCode, nullableErrorMessage);
     }
 
     @Override
@@ -111,11 +111,12 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
     }
 
     private void checkFunctionParameter(String contextString, List<MethodParameter> parameters) {
-      if (parameters.size() != 1) {
+      if (parameters.isEmpty() || parameters.size() > 2) {
         String message = VALIDATION
-            .getErrorMessage(108, contextString, "1", String.valueOf(parameters.size()));
+            .getErrorMessage(108, contextString, "1 or 2", String.valueOf(parameters.size()));
         throw new UtamCompilationError(argsNode, message);
       }
+      // check that first parameter is function
       MethodParameter parameter = parameters.get(0);
       if (parameter != null) {
         String actualType = parameter.getType().getSimpleName();
@@ -123,6 +124,16 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
         String message = VALIDATION
             .getErrorMessage(109, contextString, parameterValue, "function", actualType);
         throw new UtamCompilationError(argsNode, message);
+      }
+      // check that message is string literal
+      if(parameters.size() == 2) {
+        parameter = parameters.get(1);
+        if(!parameter.isLiteral() || !parameter.getType().isSameType(PrimitiveType.STRING)) {
+          String actualType = parameter.getType().getSimpleName();
+          String message = VALIDATION
+                  .getErrorMessage(109, contextString, parameter.getValue(), "literal string", actualType);
+          throw new UtamCompilationError(argsNode, message);
+        }
       }
     }
 
@@ -139,17 +150,18 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
       methodContext.enterPredicateContext();
       ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
       ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
-      List<UtamArgument> arguments = argumentsProvider.getArguments(false);
+      List<UtamArgument> arguments = argumentsProvider.getArguments(UtamArgument.ArgsValidationMode.PREDICATE);
       List<MethodParameter> parameters = arguments
           .stream()
           .map(arg -> arg.asParameter(context, methodContext, parametersContext))
           .collect(Collectors.toList());
       checkFunctionParameter(parserContext, parameters);
-      List<ComposeMethodStatement> predicate = arguments.get(0)
+      List<ComposeMethodStatement> predicateStatements = arguments.get(0)
           .getPredicate(context, methodContext);
       methodContext.exitPredicateContext();
-      TypeProvider operationReturnType = predicate.get(predicate.size() - 1).getReturnType();
-      return new OperationWithPredicate(action, operationReturnType, predicate);
+      String nullableErrorMessage = parameters.size() == 2? parameters.get(1).getValue() : null;
+      TypeProvider operationReturnType = predicateStatements.get(predicateStatements.size() - 1).getReturnType();
+      return new OperationWithPredicate(action, nullableErrorMessage, operationReturnType, predicateStatements);
     }
 
     @Override

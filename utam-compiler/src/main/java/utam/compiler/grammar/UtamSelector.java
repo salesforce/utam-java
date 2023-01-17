@@ -144,7 +144,7 @@ class UtamSelector extends UtamRootSelector {
       List<TypeProvider> expectedArgsTypes = getParametersTypes(getLocator().getStringValue(), selectorHolder);
       ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
       ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
-      List<UtamArgument> arguments = provider.getArguments(true);
+      List<UtamArgument> arguments = provider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
       List<MethodParameter> parameters = arguments
           .stream()
           .map(arg -> arg.asParameter(context, methodContext, parametersContext))

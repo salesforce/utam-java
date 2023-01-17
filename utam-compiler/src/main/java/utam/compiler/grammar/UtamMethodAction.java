@@ -290,13 +290,13 @@ public abstract class UtamMethodAction {
     }
 
     /**
-     * get list of arguments
+     * get list of arguments after validation
      *
-     * @param isLiteralsAllowed boolean
-     * @return list
+     * @param argsValidationMode predicate and method declaration can't have literals
+     * @return list of args
      */
-    final List<UtamArgument> getArguments(boolean isLiteralsAllowed) {
-      return processArgsNode(argsNode, argsParserContext, isLiteralsAllowed);
+    List<UtamArgument> getArguments(UtamArgument.ArgsValidationMode argsValidationMode) {
+      return processArgsNode(argsNode, argsParserContext, argsValidationMode);
     }
 
     /**

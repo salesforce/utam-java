@@ -100,22 +100,32 @@ abstract class UtamArgument {
    *
    * @param argsNode          json node
    * @param parserContext     parser context
-   * @param isLiteralsAllowed true if literal args are allowed
+   * @param literalArgsValidationMode defines if literal args are allowed
    * @return list of declared arguments
    */
-  static List<UtamArgument> processArgsNode(JsonNode argsNode, String parserContext,
-      boolean isLiteralsAllowed) {
+  static List<UtamArgument> processArgsNode(JsonNode argsNode, String parserContext, ArgsValidationMode literalArgsValidationMode) {
     List<UtamArgument> args = VALIDATION
         .validateOptionalNotEmptyArray(argsNode, parserContext, "args");
     if(isEmptyNode(argsNode)) {
       return args;
     }
-    for (JsonNode argNode : argsNode) {
+    for (int i = 0; i < argsNode.size(); i++) {
+      JsonNode argNode = argsNode.get(i);
       VALIDATION.validateNotNullObject(argNode, parserContext, "argument");
+      boolean isLiteralsAllowed = literalArgsValidationMode == ArgsValidationMode.LITERAL_ALLOWED
+              || literalArgsValidationMode == ArgsValidationMode.PREDICATE && i == 1;
       UtamArgument arg = processArgNode(argNode, parserContext, isLiteralsAllowed);
       args.add(arg);
     }
     return args;
+  }
+
+  /**
+   * Validation mode - predicate and method declaration can't have literals
+   * @since 244
+   */
+  enum ArgsValidationMode {
+    LITERAL_ALLOWED, LITERAL_NOT_ALLOWED, PREDICATE;
   }
 
   private static UtamArgument processArgNode(JsonNode argNode, String parserContext,
@@ -422,7 +432,7 @@ abstract class UtamArgument {
       ElementContext elementContext = provider.getElementArgument(context, value);
       MethodDeclaration elementGetter = elementContext.getElementMethod().getDeclaration();
 
-      List<UtamArgument> args = provider.getArguments(true);
+      List<UtamArgument> args = provider.getArguments(ArgsValidationMode.LITERAL_ALLOWED);
       List<MethodParameter> parameters;
       if (args.isEmpty()) {
         // if args are not overwritten, get parameters from context

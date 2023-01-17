@@ -38,7 +38,7 @@ abstract class UtamMethod {
     VALIDATION.validateNotEmptyString(name, "method", "name");
     String parserContext = String.format("method \"%s\"", name);
     this.description = processMethodDescriptionNode(descriptionNode, parserContext);
-    this.arguments = processArgsNode(argsNode, parserContext, false);
+    this.arguments = processArgsNode(argsNode, parserContext, UtamArgument.ArgsValidationMode.LITERAL_NOT_ALLOWED);
   }
 
   /**

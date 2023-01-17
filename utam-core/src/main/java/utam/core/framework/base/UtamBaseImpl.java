@@ -83,8 +83,13 @@ public abstract class UtamBaseImpl implements UtamBase {
 
   @Override
   public final <T> T waitFor(Supplier<T> condition) {
+    return waitFor(condition, null);
+  }
+
+  @Override
+  public <T> T waitFor(Supplier<T> condition, String errorMessage) {
     log("wait for condition");
-    return getDriver().waitFor(condition, null, null);
+    return getDriver().waitFor(condition, errorMessage, null);
   }
 
   @Override

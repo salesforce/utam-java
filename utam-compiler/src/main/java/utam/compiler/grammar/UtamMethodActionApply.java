@@ -251,7 +251,7 @@ class UtamMethodActionApply extends UtamMethodAction {
       String parserContext = String.format("method \"%s\"", methodContext.getName());
       ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
       ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
-      List<UtamArgument> arguments = argumentsProvider.getArguments(true);
+      List<UtamArgument> arguments = argumentsProvider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
       arguments
           .stream()
           .map(argument -> argument.asParameter(context, methodContext, parametersContext))
@@ -337,7 +337,7 @@ class UtamMethodActionApply extends UtamMethodAction {
       String parserContext = String.format("method \"%s\"", methodContext.getName());
       ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
       ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
-      List<UtamArgument> arguments = argumentsProvider.getArguments(true);
+      List<UtamArgument> arguments = argumentsProvider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
       arguments
           .stream()
           .map(argument -> argument.asParameter(context, methodContext, parametersContext))

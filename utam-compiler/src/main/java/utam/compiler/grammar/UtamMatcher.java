@@ -100,7 +100,7 @@ class UtamMatcher {
           .readNode(matcherNode, UtamMatcher.class, VALIDATION.getErrorMessage(1200, parserContext)));
       ArgumentsProvider provider = new ArgumentsProvider(matcher.argsNode, parserContext);
       ParametersContext parametersContext = new StatementParametersContext(parserContext, context, null);
-      List<UtamArgument> arguments = provider.getArguments(true);
+      List<UtamArgument> arguments = provider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
       arguments
           .stream()
           .map(arg -> arg.asParameter(context, null, parametersContext))
@@ -135,7 +135,7 @@ class UtamMatcher {
           .readNode(matcherNode, UtamMatcher.class, VALIDATION.getErrorMessage(1200, parserContext));
       ArgumentsProvider provider = new ArgumentsProvider(matcher.argsNode, parserContext);
       ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
-      List<UtamArgument> arguments = provider.getArguments(true);
+      List<UtamArgument> arguments = provider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
       arguments
           .stream()
           .map(arg -> arg.asParameter(context, methodContext, parametersContext))

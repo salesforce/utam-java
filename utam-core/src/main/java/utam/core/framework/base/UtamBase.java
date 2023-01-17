@@ -81,4 +81,15 @@ public interface UtamBase {
    * @return result of the applied expectations
    */
   <T> T waitFor(Supplier<T> condition);
+
+  /**
+   * polling wait that repeatedly applies expectations until truthy value is return (not null or
+   * boolean true)
+   *
+   * @param condition    condition to wait for
+   * @param <T>          return type
+   * @param errorMessage message used in the thrown timeout exception
+   * @return result of the applied expectations
+   */
+  <T> T waitFor(Supplier<T> condition, String errorMessage);
 }

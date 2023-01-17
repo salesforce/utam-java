@@ -67,7 +67,7 @@ class UtamUtilityMethodAction {
     VALIDATION.validateNotEmptyString(externalClassPath, parserContext, "type");
     ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
     ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
-    List<UtamArgument> arguments = argumentsProvider.getArguments(true);
+    List<UtamArgument> arguments = argumentsProvider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
     arguments
         .stream()
         .map(arg -> arg.asParameter(context, methodContext, parametersContext))
