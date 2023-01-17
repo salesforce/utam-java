@@ -93,4 +93,9 @@ public final class ContainerElementPageObject extends ContainerElementImpl imple
   public <T> T waitFor(Supplier<T> condition) {
     throw new UtamCoreError(ERR_UNSUPPORTED_METHOD);
   }
+
+  @Override
+  public <T> T waitFor(Supplier<T> condition, String errorMessage) {
+    throw new UtamCoreError(ERR_UNSUPPORTED_METHOD);
+  }
 }

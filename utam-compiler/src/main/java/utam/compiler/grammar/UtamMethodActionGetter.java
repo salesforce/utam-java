@@ -90,7 +90,7 @@ class UtamMethodActionGetter extends UtamMethodAction {
           context,
           methodContext);
       ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
-      List<UtamArgument> arguments = provider.getArguments(true);
+      List<UtamArgument> arguments = provider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
       arguments
           .stream()
           .map(arg -> arg.asParameter(context, methodContext, parametersContext))
@@ -143,7 +143,7 @@ class UtamMethodActionGetter extends UtamMethodAction {
     private List<MethodParameter> getParameters() {
       String parserContext = String.format("method \"%s\"", methodContext.getName());
       ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
-      List<UtamArgument> arguments = provider.getArguments(true);
+      List<UtamArgument> arguments = provider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
       List<MethodParameter> getterNonLiteralParameters = elementContext.getGetterNonLiteralParameters();
       ParametersContext parametersContext = new StatementParametersContext(parserContext,
           context,

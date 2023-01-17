@@ -11,6 +11,9 @@
               "apply" : "isPresent"
             }
           ]
+        },
+        {
+          "value" : "message"
         }
       ]
     }

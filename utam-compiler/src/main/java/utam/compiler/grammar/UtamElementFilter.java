@@ -66,7 +66,7 @@ final class UtamElementFilter {
     VALIDATION.validateNotEmptyString(this.applyMethod, parserContext, "apply");
     ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
     ParametersContext parametersContext = new StatementParametersContext(parserContext, context, null);
-    List<UtamArgument> arguments = provider.getArguments(true);
+    List<UtamArgument> arguments = provider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
     arguments
         .stream()
         .map(arg -> arg.asParameter(context, null, parametersContext))

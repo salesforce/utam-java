@@ -81,7 +81,7 @@ public class UtamPageObjectBeforeLoadTests {
         + "BasePageElement proot0 = this.getRootElement();\n"
         + "Boolean pstatement0 = proot0.isPresent();\n"
         + "return pstatement0;\n"
-        + "})");
+        + "}, \"message\")");
     methodInfo.addCodeLine("return statement0");
     PageObjectValidationTestHelper.validateMethod(context.getMethod(METHOD_NAME), methodInfo);
   }

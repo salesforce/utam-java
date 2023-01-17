@@ -1,5 +1,4 @@
 {
-  "type" : "actionable",
   "methods": [
     {
       "name": "test",
@@ -12,12 +11,12 @@
               "predicate": [
                 {
                   "element" : "root",
-                  "apply" : "focus"
+                  "apply" : "isPresent"
                 }
               ]
             },
             {
-              "value" : "custom error message"
+              "value" : true
             }
           ]
         }

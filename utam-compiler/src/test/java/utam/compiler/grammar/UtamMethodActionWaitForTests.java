@@ -13,6 +13,7 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.expectThrows;
 
 import org.testng.annotations.Test;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
@@ -37,8 +38,17 @@ public class UtamMethodActionWaitForTests {
   @Test
   public void nestedPredicateThrows() {
     String expectedError = "error 615: method \"test\" statement: nested waitFor is not supported";
-    UtamError e = expectThrows(UtamError.class,
+    UtamError e = expectThrows(UtamCompilationError.class,
         () -> new DeserializerUtilities().getContext("validate/compose/nestedWait"));
+    assertThat(e.getMessage(), containsString(expectedError));
+  }
+
+  @Test
+  public void predicateWithIncorrectSecondArgsThrows() {
+    String expectedError = "error 109: method \"test\": parameter \"true\" has incorrect type: " +
+            "expected \"literal string\", found \"Boolean\"";
+    UtamError e = expectThrows(UtamCompilationError.class,
+            () -> new DeserializerUtilities().getContext("validate/compose/waitForIncorrectMessageArg"));
     assertThat(e.getMessage(), containsString(expectedError));
   }
 
@@ -113,7 +123,7 @@ public class UtamMethodActionWaitForTests {
         + "RootElement proot0 = this.getRoot();\n"
         + "proot0.focus();\n"
         + "return true;\n"
-        + "})");
+        + "}, \"custom error message\")");
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
   }
 
