@@ -40,14 +40,24 @@ public class UtamMatcherTests {
   @Test
   public void testIncorrectMatcherTypeThrowsInCompose() {
     Exception e = expectCompilerErrorFromFile("matcher/incorrectMatcherInCompose");
-    assertThat(e.getMessage(), containsString("error 1202: method \"matcherThrows\" statement matcher: "
-        + "expected type for matcher is \"Boolean\", found \"String\""));
+    assertThat(e.getMessage(), containsString("error 1202: method \"matcherThrows\" statement matcher: " +
+            "applied method returns type \"String\", " +
+            "which is only compatible with the following matchers - stringContains, stringEquals, notNull"));
   }
 
   @Test
   public void testIncorrectMatcherTypeThrowsInFilter() {
     Exception e = expectCompilerErrorFromFile("matcher/incorrectMatcherInFilter");
-    assertThat(e.getMessage(), containsString("error 1202: element \"test\" filter matcher: "
-        + "expected type for matcher is \"Boolean\", found \"String\""));
+    assertThat(e.getMessage(), containsString("error 1202: element \"test\" filter matcher: " +
+            "applied method returns type \"Boolean\", " +
+            "which is only compatible with the following matchers - isTrue, isFalse, notNull"));
+  }
+
+  @Test
+  public void testIncorrectMatcherTypeThrowsInFilterVoid() {
+    Exception e = expectCompilerErrorFromFile("matcher/incorrectMatcherForVoid");
+    assertThat(e.getMessage(), containsString("error 1202: method \"test\" statement matcher: " +
+            "applied method returns type \"void\", " +
+            "which is only compatible with the following matchers - none"));
   }
 }

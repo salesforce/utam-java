@@ -8,10 +8,16 @@
 package utam.compiler.representation;
 
 import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
+import static utam.compiler.helpers.MatcherType.*;
+import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.MatcherType;
+import utam.compiler.helpers.PrimitiveType;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.TypeProvider;
 
@@ -68,12 +74,38 @@ public class MatcherObject {
     return matcherType.getOperandType();
   }
 
+  /**
+   * Checks the operand is of the valid type
+   *
+   * @param operandType the operand type
+   */
   public void checkMatcherOperand(TypeProvider operandType) {
-    if (!matcherType.isCorrectOperandType(operandType)) {
+    if (!isCompatibleMatcher(operandType)) {
       String errorMsg = VALIDATION.getErrorMessage(1202,
-          errorContextString, matcherType.getOperandType().getSimpleName(),
-          operandType.getSimpleName());
+              errorContextString,
+              operandType.getSimpleName(),
+              getCompatibleMatchers(operandType));
       throw new UtamCompilationError(errorMsg);
     }
+  }
+
+  private boolean isCompatibleMatcher(TypeProvider operandType) {
+    if (matcherType == notNull) { // not null allows any type
+      return !operandType.isSameType(VOID);
+    }
+    return operandType.isSameType(matcherType.getOperandType());
+  }
+
+  private static String getCompatibleMatchers(TypeProvider operandType) {
+    if(operandType.isSameType(VOID)) {
+      return "none";
+    }
+    if(operandType.isSameType(PrimitiveType.STRING)) {
+      return Stream.of(stringContains, stringEquals, notNull).map(Enum::name).collect(Collectors.joining(", "));
+    }
+    if(operandType.isSameType(PrimitiveType.BOOLEAN)) {
+      return Stream.of(isTrue, isFalse, notNull).map(Enum::name).collect(Collectors.joining(", "));
+    }
+    return notNull.name();
   }
 }

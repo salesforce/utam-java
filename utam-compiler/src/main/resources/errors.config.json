@@ -359,7 +359,7 @@
   },
   {
     "code": 1202,
-    "message": "%s matcher: expected type for matcher is \"%s\", found \"%s\""
+    "message": "%s matcher: applied method returns type \"%s\", which is only compatible with the following matchers - %s"
   },
   {
     "code": 2001,

@@ -125,7 +125,7 @@ public final class JsonDeserializer extends
     } catch (Exception e) {
       ErrorSupplier error = processParserError(parser, e, context.getLintingObject().getName());
       if(error.getCause() == null) {
-        throw new UtamCompilationError(error.getMessage());
+        throw new UtamCompilationError(error.getMessage(), e);
       }
       throw new UtamCompilationError(error.getMessage(), error.getCause());
     }

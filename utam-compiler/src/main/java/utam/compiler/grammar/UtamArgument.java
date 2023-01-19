@@ -125,7 +125,7 @@ abstract class UtamArgument {
    * @since 244
    */
   enum ArgsValidationMode {
-    LITERAL_ALLOWED, LITERAL_NOT_ALLOWED, PREDICATE;
+    LITERAL_ALLOWED, LITERAL_NOT_ALLOWED, PREDICATE
   }
 
   private static UtamArgument processArgNode(JsonNode argNode, String parserContext,

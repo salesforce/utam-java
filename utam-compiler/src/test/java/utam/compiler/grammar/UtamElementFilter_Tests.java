@@ -64,7 +64,7 @@ public class UtamElementFilter_Tests {
   public void testCustomElementGetTextFilterWithWrongArgThrows() {
     Exception e = expectCompilerErrorFromFile("validate/filter/customWrongMatcherArg");
     assertThat(e.getMessage(), containsString(
-        "error 108: element \"test\" filter arguments: expected number of arguments is 0, found 1"));
+        "error 108: element \"test\" filter matcher arguments: expected number of arguments is 0, found 1"));
   }
 
   @Test
