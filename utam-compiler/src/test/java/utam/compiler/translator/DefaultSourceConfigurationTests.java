@@ -78,7 +78,7 @@ public class DefaultSourceConfigurationTests {
   @Test
   public void testRunWithDuplicatePageObjectsThrows() {
     TranslatorConfig configuration = new TranslatorConfigWithProfile(new DuplicatePageObjects(),
-        new DefaultTargetConfiguration("", "", "", UnitTestRunner.NONE, null, null));
+        new DefaultTargetConfiguration("", "", "", UnitTestRunner.NONE, null, null, null));
     DefaultTranslatorRunner translator = new DefaultTranslatorRunner(configuration);
     UtamError e = expectThrows(UtamError.class, translator::run);
     assertThat(

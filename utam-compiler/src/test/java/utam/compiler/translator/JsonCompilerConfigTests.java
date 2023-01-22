@@ -74,7 +74,7 @@ public class JsonCompilerConfigTests {
           new ArrayList<>(),
           new ArrayList<>(),
           new ArrayList<>(),
-          null);
+          null, null);
   }
 
   @Test

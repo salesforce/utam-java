@@ -26,5 +26,8 @@ out/
 release.properties
 # generated tests page objects
 utam-compiler/src/test/java/generated/**
+utam-compiler/src/test/java/errors/**
 **/*.config.json
 **/*sarif*
+**/utam.errors.txt
+

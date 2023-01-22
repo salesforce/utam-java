@@ -17,12 +17,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.JsonDeserializer;
 import utam.compiler.helpers.TranslationContext;
+import utam.core.declarative.errors.CompilerErrorsContext;
 import utam.core.declarative.lint.LintingContext;
 import utam.core.declarative.lint.LintingConfig;
 import utam.core.declarative.lint.LintingError;
@@ -185,6 +188,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     LintingConfig linting = translatorConfig.getLintingConfig();
     sourceConfig.recursiveScan();
     LintingContext lintingContext = linting.start();
+    CompilerErrorsContext errorsContext = translatorConfig.getErrorsConfig().newContext();
     for (String pageObjectURI : sourceConfig.getPageObjects()) {
       if (counter >= maxPageObjectsCounter) {
         break;
@@ -196,15 +200,34 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       String jsonSource = getStringFromReader(sourceConfig, pageObjectURI);
       JsonDeserializer deserializer = new JsonDeserializer(translationContext, jsonSource);
       PageObjectDeclaration object = deserializer.getObject();
-      setPageObject(pageObjectURI, object);
-      linting.lint(lintingContext, translationContext.getLintingObject());
+      if(object!=null) {
+        setPageObject(pageObjectURI, object);
+        linting.lint(lintingContext, translationContext.getLintingObject());
+      } else {
+        errorsContext.setError(translationContext.getCompilerError());
+      }
       counter++;
     }
     String reportPath = translatorConfig.getConfiguredTarget().getLintReportPath();
     List<LintingError> lintingErrors = linting.finish(lintingContext, reportPath);
     info(String.format("generated %d page objects, took %d msec", counter,
         System.currentTimeMillis() - timer));
-    return () -> lintingErrors;
+    RunnerOutput runnerOutput = new RunnerOutput() {
+      @Override
+      public List<LintingError> getLintingErrors() {
+        return lintingErrors;
+      }
+
+      @Override
+      public List<CompilerErrorsContext.CompilerError> getCompilationErrors() {
+        return errorsContext.getCompilerReport();
+      }
+    };
+    String compilationErrors = translatorConfig.getErrorsConfig().report(errorsContext);
+    if(compilationErrors != null) {
+      throw new UtamCompilationError(compilationErrors);
+    }
+    return runnerOutput;
   }
 
   /**

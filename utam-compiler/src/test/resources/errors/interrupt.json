@@ -1,0 +1,13 @@
+{
+  "pageObjectsRootDir": "/src/test/resources/errors",
+  "pageObjectsFilesMask": "(.*)\\.utam\\.json$",
+  "pageObjectsOutputDir": "/src/test/java",
+  "resourcesOutputDir": "/src/test/resources",
+  "module": "testerrors",
+  "namespaces": [
+    {
+      "typeMatch": "errors-spec",
+      "pathMatch": ".*/spec"
+    }
+  ]
+}

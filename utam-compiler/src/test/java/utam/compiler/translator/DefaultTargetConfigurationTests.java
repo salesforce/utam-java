@@ -130,7 +130,8 @@ public class DefaultTargetConfigurationTests {
         currentDir,
         UnitTestRunner.JUNIT,
         currentDir,
-        null
+        null,
+            null
     );
     assertThat(targetConfig.getUnitTestRunnerType(), is(equalTo(UnitTestRunner.JUNIT)));
     assertThat(targetConfig.getInjectionConfigRootFilePath(), is(equalTo(currentDir)));
@@ -216,6 +217,11 @@ public class DefaultTargetConfigurationTests {
 
     final void setConfigPath(String path) {
       this.configPath = path;
+    }
+
+    @Override
+    public String getErrorsReportPath() {
+      return null;
     }
   }
 

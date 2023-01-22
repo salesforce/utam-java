@@ -10,7 +10,6 @@ package utam.compiler.grammar;
 import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_COMMENTS;
 import static com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION;
 import static com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY;
-import static utam.compiler.UtamCompilationError.processParserError;
 import static utam.compiler.UtamCompilationError.processMapperError;
 import static utam.compiler.grammar.UtamProfile.getConfiguredProfiles;
 import static utam.compiler.helpers.AnnotationUtils.DEPRECATED_ANNOTATION;
@@ -123,11 +122,8 @@ public final class JsonDeserializer extends
       utamPageObject.compile(this.context);
       return utamPageObject;
     } catch (Exception e) {
-      ErrorSupplier error = processParserError(parser, e, context.getLintingObject().getName());
-      if(error.getCause() == null) {
-        throw new UtamCompilationError(error.getMessage(), e);
-      }
-      throw new UtamCompilationError(error.getMessage(), error.getCause());
+      this.context.processError(parser, e);
+      return null;
     }
   }
 
@@ -146,6 +142,9 @@ public final class JsonDeserializer extends
    * @return the Page Object declaration
    */
   public PageObjectDeclaration getObject() {
+    if(utamPageObject == null) {
+      return null;
+    }
     return new Object(utamPageObject, context);
   }
 

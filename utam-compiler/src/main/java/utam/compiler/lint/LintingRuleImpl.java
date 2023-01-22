@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.Set;
-
 import utam.core.declarative.lint.LintingContext;
 import utam.core.declarative.lint.LintingError;
 import utam.core.declarative.lint.LintingError.ViolationLevel;

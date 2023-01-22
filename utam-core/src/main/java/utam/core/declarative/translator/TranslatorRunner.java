@@ -9,6 +9,8 @@ package utam.core.declarative.translator;
 
 import java.io.IOException;
 import java.util.List;
+
+import utam.core.declarative.errors.CompilerErrorsContext;
 import utam.core.declarative.lint.LintingError;
 
 /**
@@ -56,5 +58,7 @@ public interface TranslatorRunner {
      * @return list of linting errors (except excluded)
      */
     List<LintingError> getLintingErrors();
+
+    List<CompilerErrorsContext.CompilerError> getCompilationErrors();
   }
 }

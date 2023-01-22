@@ -11,10 +11,7 @@ import static utam.compiler.translator.DefaultTranslatorConfiguration.CompilerOu
 
 import java.util.ArrayList;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.translator.DefaultSourceConfigurationTests;
-import utam.compiler.translator.DefaultTargetConfigurationTests;
-import utam.compiler.translator.DefaultTranslatorConfiguration;
-import utam.compiler.translator.TranslationTypesConfigJava;
+import utam.compiler.translator.*;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.translator.TranslationTypesConfig;
@@ -63,7 +60,7 @@ public class TestUtilities {
   public static DefaultTranslatorConfiguration getDefaultConfig() {
     TranslatorTargetConfig targetConfig = new DefaultTargetConfigurationTests.Mock();
     TranslatorSourceConfig sourceConfig = new DefaultSourceConfigurationTests.Mock();
-    return new DefaultTranslatorConfiguration(DEFAULT_COMPILER_OUTPUT_OPTIONS, null, sourceConfig,
+    return new DefaultTranslatorConfiguration(DEFAULT_COMPILER_OUTPUT_OPTIONS, null, new CompilerErrors.Throws(), sourceConfig,
         targetConfig, new ArrayList<>());
   }
 
