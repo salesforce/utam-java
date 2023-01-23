@@ -123,6 +123,7 @@ public final class JsonDeserializer extends
       return utamPageObject;
     } catch (Exception e) {
       this.context.processError(parser, e);
+      // if we collect errors from all objects, need to proceed without writing anything
       return null;
     }
   }
@@ -143,6 +144,7 @@ public final class JsonDeserializer extends
    */
   public PageObjectDeclaration getObject() {
     if(utamPageObject == null) {
+      // if we collect errors from all objects, need to proceed without writing anything
       return null;
     }
     return new Object(utamPageObject, context);

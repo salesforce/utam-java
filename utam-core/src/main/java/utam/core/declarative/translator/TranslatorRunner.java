@@ -58,7 +58,5 @@ public interface TranslatorRunner {
      * @return list of linting errors (except excluded)
      */
     List<LintingError> getLintingErrors();
-
-    List<CompilerErrorsContext.CompilerError> getCompilationErrors();
   }
 }

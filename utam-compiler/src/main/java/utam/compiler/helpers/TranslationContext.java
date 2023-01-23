@@ -33,6 +33,8 @@ import utam.compiler.helpers.ElementContext.Self;
 import utam.compiler.helpers.TypeUtilities.PageObjectWithNamesCollisionType;
 import utam.compiler.lint.PageObjectLintingImpl;
 import utam.compiler.representation.BasicElementGetterMethod;
+import utam.compiler.translator.CompilerErrors;
+import utam.compiler.translator.CompilerErrors.StringError;
 import utam.core.declarative.errors.CompilerErrorsContext;
 import utam.core.declarative.lint.PageObjectLinting;
 import utam.core.declarative.representation.PageClassField;
@@ -407,20 +409,27 @@ public class TranslationContext {
     return contextForLinting;
   }
 
+  /**
+   * Process compiler error - depending on config either throw or report
+   *
+   * @param parser           instance of the parser
+   * @param compilationError thrown error
+   */
   public void processError(JsonParser parser, Exception compilationError) {
-    UtamCompilationError.ErrorSupplier errorSupplier = processParserError(parser, compilationError, pageObjectURI);
-    if(this.translatorConfiguration.getErrorsConfig().isInterrupt()) {
+    UtamCompilationError.ErrorSupplier errorSupplier = processParserError(parser, compilationError,
+        pageObjectURI);
+    if (this.translatorConfiguration.getErrorsConfig().isInterrupt()) {
       throw new UtamCompilationError(errorSupplier.getMessage(), errorSupplier.getCause());
     } else {
-      this.error = new CompilerErrorsContext.CompilerError() {
-        @Override
-        public String toString() {
-          return errorSupplier.getMessage();
-        }
-      };
+      this.error = new StringError(errorSupplier.getMessage());
     }
   }
 
+  /**
+   * If generation was interrupted, return the error
+   *
+   * @return error object or null
+   */
   public CompilerErrorsContext.CompilerError getCompilerError() {
     return this.error;
   }

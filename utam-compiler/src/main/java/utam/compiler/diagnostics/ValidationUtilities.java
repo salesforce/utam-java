@@ -24,6 +24,9 @@ import utam.compiler.UtamCompilationError;
  */
 public class ValidationUtilities {
 
+  /**
+   * Global validation object for parsing without context
+   */
   public static final ValidationUtilities VALIDATION = new ValidationUtilities();
   private final JsonErrorsConfig errorsConfig;
 

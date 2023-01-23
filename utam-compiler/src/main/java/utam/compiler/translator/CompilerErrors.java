@@ -123,4 +123,23 @@ public abstract class CompilerErrors {
       return errors;
     }
   }
+
+  /**
+   * Simple compilation error
+   *
+   * @author elizaveta.ivanova
+   * @since 244
+   */
+  public static class StringError implements CompilerError {
+    private final String message;
+
+    public StringError(String message) {
+      this.message = message;
+    }
+
+    @Override
+    public String toString() {
+      return message;
+    }
+  }
 }

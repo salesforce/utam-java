@@ -57,13 +57,12 @@ public class JsonErrorsConfig {
     try {
       CollectionType javaType = mapper.getTypeFactory()
           .constructCollectionType(List.class, ErrorDetails.class);
-      mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
       List<ErrorDetails> errors = mapper.readValue(config, javaType);
       JsonErrorsConfig jsonErrorsConfig = new JsonErrorsConfig();
       errors.forEach(
           errorDetails -> jsonErrorsConfig.errorDetailsMap.put(errorDetails.code, errorDetails));
       return jsonErrorsConfig;
-    } catch (Throwable e) {
+    } catch (Exception e) {
       throw new IllegalStateException(String.format(ERR_READING_ERROR_CONFIG, configName), e);
     }
   }

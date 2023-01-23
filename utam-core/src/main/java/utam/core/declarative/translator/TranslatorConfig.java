@@ -77,5 +77,10 @@ public interface TranslatorConfig {
    */
   LintingConfig getLintingConfig();
 
+  /**
+   * Get errors configuration
+   *
+   * @return object
+   */
   CompilerErrorsConfig getErrorsConfig();
 }

@@ -11,7 +11,11 @@ import static utam.compiler.translator.DefaultTranslatorConfiguration.CompilerOu
 
 import java.util.ArrayList;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.translator.*;
+import utam.compiler.translator.CompilerErrors;
+import utam.compiler.translator.DefaultSourceConfigurationTests;
+import utam.compiler.translator.DefaultTargetConfigurationTests;
+import utam.compiler.translator.DefaultTranslatorConfiguration;
+import utam.compiler.translator.TranslationTypesConfigJava;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.translator.TranslationTypesConfig;

@@ -200,7 +200,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       String jsonSource = getStringFromReader(sourceConfig, pageObjectURI);
       JsonDeserializer deserializer = new JsonDeserializer(translationContext, jsonSource);
       PageObjectDeclaration object = deserializer.getObject();
-      if(object!=null) {
+      if (object != null) {
         setPageObject(pageObjectURI, object);
         linting.lint(lintingContext, translationContext.getLintingObject());
       } else {
@@ -212,22 +212,11 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     List<LintingError> lintingErrors = linting.finish(lintingContext, reportPath);
     info(String.format("generated %d page objects, took %d msec", counter,
         System.currentTimeMillis() - timer));
-    RunnerOutput runnerOutput = new RunnerOutput() {
-      @Override
-      public List<LintingError> getLintingErrors() {
-        return lintingErrors;
-      }
-
-      @Override
-      public List<CompilerErrorsContext.CompilerError> getCompilationErrors() {
-        return errorsContext.getCompilerReport();
-      }
-    };
     String compilationErrors = translatorConfig.getErrorsConfig().report(errorsContext);
     if(compilationErrors != null) {
       throw new UtamCompilationError(compilationErrors);
     }
-    return runnerOutput;
+    return () -> lintingErrors;
   }
 
   /**
