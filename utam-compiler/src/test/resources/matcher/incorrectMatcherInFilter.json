@@ -1,15 +1,20 @@
 {
-  "elements" : [
+  "elements": [
     {
-      "name" : "test",
-      "selector" : {
-        "css" : "css",
+      "name": "test",
+      "selector": {
+        "css": "css",
         "returnAll": true
       },
-      "filter" : {
-        "apply" : "getText",
-        "matcher" : {
-          "type" : "isTrue"
+      "filter": {
+        "apply": "isPresent",
+        "matcher": {
+          "type": "stringContains",
+          "args": [
+            {
+              "value": "string"
+            }
+          ]
         }
       }
     }

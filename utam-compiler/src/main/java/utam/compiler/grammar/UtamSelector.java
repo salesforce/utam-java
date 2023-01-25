@@ -8,6 +8,7 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
+import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.core.element.Locator.SELECTOR_INTEGER_PARAMETER;
 import static utam.core.element.Locator.SELECTOR_STRING_PARAMETER;
 
@@ -17,6 +18,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.UtamMethodAction.ArgumentsProvider;
 import utam.compiler.helpers.LocatorCodeGeneration;
@@ -83,7 +85,11 @@ class UtamSelector extends UtamRootSelector {
    */
   static UtamSelector processSelectorNode(JsonNode node, String elementName) {
     String parserContext = String.format("element \"%s\"", elementName);
-    return JsonDeserializer.readNode(node, UtamSelector.class, VALIDATION.getErrorMessage(1000, parserContext));
+    UtamSelector selector = readNode(node, UtamSelector.class, VALIDATION.getErrorMessage(1000, parserContext));
+    if(selector != null) {
+      selector.validateSelector(node, parserContext);
+    }
+    return selector;
   }
 
 
@@ -106,7 +112,7 @@ class UtamSelector extends UtamRootSelector {
         selectorStr = selectorStr.replaceFirst(SELECTOR_STRING_PARAMETER, "");
       } else {
         String selectorParameter = selectorStr.substring(index, index + 2);
-        throw new UtamCompilationError(VALIDATION.getErrorMessage(111, parserContext, selectorParameter));
+        throw new UtamCompilationError(VALIDATION.getErrorMessage(110, parserContext + " selector", selectorParameter));
       }
     }
     return res;

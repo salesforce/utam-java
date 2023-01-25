@@ -1,0 +1,7 @@
+{
+  "selector": {
+    "uiautomator": "new UiScrollable(new UiSelector().unsupported(\"com.salesforce.chatter:id/app_launcher_menu_item\")).scrollIntoView(resourceId(\"com.salesforce.chatter:id/app_launcher_menu_item\"))"
+  },
+  "root": true
+}
+

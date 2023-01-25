@@ -73,7 +73,7 @@ public class UtamSelectorTests {
     UtamSelector selector = new UtamSelector("selector[%f]");
     RuntimeException e = expectThrows(UtamCompilationError.class, () ->
         selector.getElementCodeGenerationHelper("test", getTestTranslationContext()));
-    assertThat(e.getMessage(), containsString("error 111: element \"test\": "
+    assertThat(e.getMessage(), containsString("error 110: element \"test\" selector arguments: "
         + "unknown selector parameter type \"%f\", only string and number are supported"));
   }
 
@@ -82,9 +82,8 @@ public class UtamSelectorTests {
     Exception e = expectCompilerErrorFromFile("selector/selectorWrongArgs");
     assertThat(
         e.getMessage(),
-        containsString(
-            "error 109: element \"test\" selector \"str[%s]\": parameter \"num\" has incorrect type: "
-                + "expected \"String\", found \"Integer\""));
+        containsString("error 109: element \"test\" selector \"str[%s]\" arguments: " +
+                "argument \"num\" has incorrect type, expected \"String\", found \"Integer\""));
   }
 
   @Test
@@ -92,7 +91,7 @@ public class UtamSelectorTests {
     Exception e = expectCompilerErrorFromFile("selector/selectorSameArgs");
     assertThat(e.getMessage(),
         containsString(
-            "error 107: element \"test\" selector \"str[%s] num[%s]\": parameter with name \"str\" is already declared"));
+            "error 107: element \"test\" selector \"str[%s] num[%s]\" arguments: argument with name \"str\" is already declared"));
   }
 
   @Test
@@ -120,5 +119,54 @@ public class UtamSelectorTests {
     assertThat(e.getMessage(),
         containsString(
             "error 1000: element \"test\": format of selector is incorrect"));
+  }
+
+  @Test
+  public void testInvalidUiAutomatorThrows() {
+    Exception e = expectCompilerErrorFromFile("selector/selectorUIAutomator");
+    assertThat(e.getMessage(),
+            containsString("error 1004: element \"test\" selector: unsupported UiSelector method \"unsupported\", supported methods are: " +
+                            "checkable, checked, classname, description, descriptioncontains, descriptionstartswith, enabled, selected, resourceid, resourceidmatches"));
+  }
+
+  @Test
+  public void testInvalidUiAutomatorRootThrows() {
+    Exception e = expectCompilerErrorFromFile("selector/selectorUIAutomatorRoot");
+    assertThat(e.getMessage(),
+            containsString("error 1004: element \"root\" selector: unsupported UiSelector method \"unsupported\", supported methods are: " +
+                    "checkable, checked, classname, description, descriptioncontains, descriptionstartswith, enabled, selected, resourceid, resourceidmatches"));
+  }
+
+  @Test
+  public void testInvalidUiAutomatorScrollableThrows() {
+    Exception e = expectCompilerErrorFromFile("selector/selectorUIAutomatorScrollable");
+    assertThat(e.getMessage(),
+            containsString("error 1004: element \"test\" selector: unsupported UiSelector method \"clickable\", supported methods are: scrollable, " +
+                    "checkable, checked, classname, description, descriptioncontains, descriptionstartswith, enabled, selected, resourceid, resourceidmatches"));
+  }
+
+  @Test
+  public void testInvalidUiAutomatorScrollableRootThrows() {
+    Exception e = expectCompilerErrorFromFile("selector/selectorUIAutomatorScrollableRoot");
+    assertThat(e.getMessage(),
+            containsString("error 1004: element \"root\" selector: unsupported UiSelector method \"unsupported\", supported methods are: scrollable, " +
+                    "checkable, checked, classname, description, descriptioncontains, descriptionstartswith, enabled, selected, resourceid, resourceidmatches"));
+  }
+
+  @Test
+  public void testInvalidChainOperatorThrows() {
+    Exception e = expectCompilerErrorFromFile("selector/selectorChainOperator");
+    assertThat(e.getMessage(),
+            containsString("error 1006: element \"test\" selector \"`label=='something'`\": " +
+                    "for class chain only one of supported operators can be set, " +
+                    "supported are ==,BEGINSWITH,ENDSWITH,CONTAINS,OR,AND"));
+  }
+
+  @Test
+  public void testInvalidChainQuoteRootThrows() {
+    Exception e = expectCompilerErrorFromFile("selector/selectorChainQuotesRoot");
+    assertThat(e.getMessage(),
+            containsString("error 1005: element \"root\" selector \"\"label == 'something'\"\": " +
+                    "for class chain only one of supported quotes can be set, supported are $,`"));
   }
 }

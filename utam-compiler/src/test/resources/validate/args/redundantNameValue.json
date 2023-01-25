@@ -1,0 +1,19 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element" : "root",
+          "apply" : "getAttribute",
+          "args": [
+            {
+              "value": "string literal",
+              "name" : "name"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

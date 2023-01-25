@@ -74,7 +74,7 @@ final class UtamElementFilter {
     VALIDATION.validateNotNullObject(matcherNode, parserContext, "matcher");
     MatcherObject matcher = new ElementFilterMatcherProvider(matcherNode, elementName).getMatcherObject(context);
     if (isBasicElement) {
-      ActionType actionType = getActionType(this.applyMethod, elementType, VALIDATION.getErrorMessage(301, elementName, this.applyMethod));
+      ActionType actionType = getActionType(this.applyMethod, elementType, elementName, null);
       matcher.checkMatcherOperand(actionType.getReturnType());
       List<TypeProvider> expectedArgsTypes = actionType
           .getParametersTypes(parserContext, arguments.size());

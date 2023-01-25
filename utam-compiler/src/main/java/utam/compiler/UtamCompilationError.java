@@ -117,10 +117,13 @@ public class UtamCompilationError extends UtamError {
       String message = error.getMessage();
       int index = message.contains(errSplitMarker) ? message.indexOf(errSplitMarker)
           + errSplitMarker.length() : 0;
-      errorMessage = String.format("%s: %s", VALIDATION.getErrorMessage(900), message.substring(index));
+      // empty string added because JS needs additional parameter for parser message
+      errorMessage = VALIDATION.getErrorMessage(900, "") + message.substring(index);
       errorCause = error.getCause();
       hasJsonSource = true;
-    } else { errorMessage = String.format("%s: %s", VALIDATION.getErrorMessage(900), error.getMessage());
+    } else {
+      // empty string added because JS needs additional parameter for parser message
+      errorMessage = VALIDATION.getErrorMessage(900, "") + error.getMessage();
       errorCause = error.getCause();
       hasJsonSource = false;
     }

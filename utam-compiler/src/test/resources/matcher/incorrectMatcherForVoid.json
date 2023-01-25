@@ -1,0 +1,19 @@
+{
+  "type": [
+    "clickable"
+  ],
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element": "root",
+          "apply": "click",
+          "matcher": {
+            "type": "isTrue"
+          }
+        }
+      ]
+    }
+  ]
+}

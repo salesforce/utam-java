@@ -8,7 +8,6 @@
 package utam.compiler.helpers;
 
 import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
-import static utam.compiler.helpers.BasicElementActionType.ERROR_CODE_FOR_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import utam.compiler.UtamCompilationError;
@@ -86,8 +85,9 @@ public enum ClickableActionType implements ActionType {
   @Override
   public List<TypeProvider> getParametersTypes(String parserContext, int parameterCount) {
     int expected = actionParameters.length;
+    String contextStr = String.format("%s action \"%s\"", parserContext, this.name());
     if (actionParameters.length != parameterCount) {
-      throw new UtamCompilationError(VALIDATION.getErrorMessage(ERROR_CODE_FOR_PARAMETERS, parserContext, this.name(),
+      throw new UtamCompilationError(VALIDATION.getErrorMessage(108, contextStr,
               String.valueOf(expected), String.valueOf(parameterCount)));
     }
     return Stream.of(actionParameters).collect(Collectors.toList());

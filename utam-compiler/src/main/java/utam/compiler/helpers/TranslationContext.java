@@ -38,7 +38,6 @@ import utam.core.declarative.representation.UnionType;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.core.declarative.translator.TranslatorConfig;
-import utam.core.framework.consumer.UtamError;
 
 /**
  * Instance of this type is created for every Page Object that is being translated, contains
@@ -48,9 +47,6 @@ import utam.core.framework.consumer.UtamError;
  * @since 228
  */
 public class TranslationContext {
-
-  static final String ERR_CONTEXT_DUPLICATE_METHOD = "duplicate method '%s'";
-  static final String ERR_CONTEXT_DUPLICATE_FIELD = "duplicate field '%s'";
   private final List<PageClassField> pageObjectFields = new ArrayList<>();
   private final List<PageObjectMethod> pageObjectMethods = new ArrayList<>();
   private final List<BasicElementGetterMethod> elementGetters = new ArrayList<>();
@@ -83,9 +79,9 @@ public class TranslationContext {
     this.translationTypesConfig = translatorConfiguration.getTranslationTypesConfig();
     this.translatorConfiguration = translatorConfiguration;
     // register elements to prevent names collisions
-    setElement(Document.DOCUMENT_ELEMENT);
-    setElement(Self.SELF_ELEMENT);
-    setElement(NAVIGATION_OBJECT);
+    setElement(Document.DOCUMENT_ELEMENT, null);
+    setElement(Self.SELF_ELEMENT, null);
+    setElement(NAVIGATION_OBJECT, null);
     // has impl prefixes
     this.pageObjectClassType = translationTypesConfig.getClassType(pageObjectURI);
     this.pageObjectInterfaceType = translationTypesConfig.getInterfaceType(pageObjectURI);
@@ -164,24 +160,16 @@ public class TranslationContext {
    * Sets the element context for this Page Object
    *
    * @param element the element context to set
+   * @param field field to set, can be null
    */
-  public void setElement(ElementContext element) {
+  public void setElement(ElementContext element, PageClassField field) {
     if (elementContextMap.containsKey(element.getName())) {
       throw new UtamCompilationError(VALIDATION.getErrorMessage(202, element.getName()));
     }
     elementContextMap.put(element.getName(), element);
-  }
-
-  /**
-   * Sets a field for this Page Object
-   *
-   * @param field the field to set
-   */
-  public void setClassField(PageClassField field) {
-    if (pageObjectFields.stream().anyMatch(f -> f.getName().equals(field.getName()))) {
-      throw new UtamError(String.format(ERR_CONTEXT_DUPLICATE_FIELD, field.getName()));
+    if(field != null) {
+      pageObjectFields.add(field);
     }
-    pageObjectFields.add(field);
   }
 
   /**
@@ -192,8 +180,7 @@ public class TranslationContext {
   public void setMethod(PageObjectMethod method) {
     // first check if same method already exists
     if (methodNames.contains(method.getDeclaration().getName())) {
-      throw new UtamError(
-          String.format(ERR_CONTEXT_DUPLICATE_METHOD, method.getDeclaration().getName()));
+      throw new UtamCompilationError(VALIDATION.getErrorMessage(504, method.getDeclaration().getName()));
     }
     // no duplicates - add method
     methodNames.add(method.getDeclaration().getName());

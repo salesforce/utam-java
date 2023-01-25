@@ -61,7 +61,7 @@ public class ValidationUtilities {
   }
 
   private String getEmptyStringError(String prefix, String propertyName, String actualValue) {
-    return getErrorMessage(10, prefix, propertyName, actualValue);
+    return getErrorMessage(10, prefix, propertyName, "a non empty string", actualValue);
   }
 
   /**

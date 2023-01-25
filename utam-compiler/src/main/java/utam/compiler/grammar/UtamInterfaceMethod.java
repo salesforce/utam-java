@@ -71,7 +71,8 @@ class UtamInterfaceMethod extends UtamMethod {
     if (returnTypeNode.isArray()) {
       for (JsonNode valueNode : returnTypeNode) {
         if (!valueNode.isTextual() || !isBasicType(valueNode.textValue())) {
-          String unsupportedArrayValueErr = VALIDATION.getErrorMessage(401, name, nodeToString(returnTypeNode));
+          String unsupportedArrayValueErr = VALIDATION.getErrorMessage(115,
+                  String.format("abstract method \"%s\" return type", name), nodeToString(returnTypeNode));
           throw new UtamCompilationError(returnTypeNode, unsupportedArrayValueErr);
         }
       }
@@ -85,8 +86,11 @@ class UtamInterfaceMethod extends UtamMethod {
     boolean isReturnsBasicType = isReturnBasicType(returnTypeNode);
     final ReturnType returnTypeObject;
     if (isReturnsBasicType) {
-      String errMessage = VALIDATION.getErrorMessage(401, name, nodeToString(returnTypeNode));
-      String[] basicUnionType = processBasicTypeNode(returnTypeNode, errMessage);
+      String structure = String.format("abstract method \"%s\" return type", name);
+      String[] basicUnionType = processBasicTypeNode(returnTypeNode, structure);
+      if(basicUnionType == null) {
+        throw new UtamCompilationError(returnTypeNode, VALIDATION.getErrorMessage(115, structure, nodeToString(returnTypeNode)));
+      }
       TypeProvider unionReturnType = asBasicOrUnionType(name, basicUnionType, false);
       returnTypeObject = new AbstractMethodBasicReturnType(unionReturnType, isReturnList);
     } else {

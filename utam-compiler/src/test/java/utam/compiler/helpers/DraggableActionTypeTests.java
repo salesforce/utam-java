@@ -55,9 +55,8 @@ public class DraggableActionTypeTests {
     RuntimeException e = expectThrows(RuntimeException.class,
         () -> action.getParametersTypes("test", 0));
     assertThat(e.getMessage(),
-        containsString(
-            "error 110: \"test\": incorrect number of parameters for action \"dragAndDrop\": "
-                + "expected (check documentation), provided 0"));
+        containsString("error 108: test action \"dragAndDrop\" arguments: " +
+                    "expected number of arguments is (check documentation), found 0"));
   }
 
   @Test

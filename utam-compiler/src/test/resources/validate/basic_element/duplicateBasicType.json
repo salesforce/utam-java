@@ -1,0 +1,11 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "type": ["clickable", "clickable"],
+      "selector": {
+        "css": "css"
+      }
+    }
+  ]
+}

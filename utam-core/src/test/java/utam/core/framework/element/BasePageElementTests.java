@@ -38,9 +38,6 @@ import utam.core.element.Locator;
 import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.LocatorBy;
 
-import java.time.Duration;
-import java.util.MissingFormatArgumentException;
-
 /**
  * @author elizaveta.ivanova
  * @since 234

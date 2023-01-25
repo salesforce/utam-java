@@ -1,0 +1,7 @@
+{
+  "selector": {
+    "uiautomator": "new UiSelector().unsupported()"
+  },
+  "root": true
+}
+

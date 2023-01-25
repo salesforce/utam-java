@@ -10,15 +10,11 @@ package utam.core.selenium.appium;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.testng.Assert.expectThrows;
-import static utam.core.selenium.appium.LocatorUIAutomator.ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD;
-import static utam.core.selenium.appium.LocatorUIAutomator.ERR_SELECTOR_UIAUTOMATOR_UISCROLLABLE_UNSUPPORTED_METHOD;
 
 import io.appium.java_client.MobileBy;
 import org.openqa.selenium.By;
 import org.testng.annotations.Test;
 import utam.core.element.Locator;
-import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.appium.LocatorUIAutomator.Method;
 import utam.core.selenium.element.LocatorBy;
 
@@ -41,60 +37,31 @@ public class LocatorUiAutomatorTests {
   }
 
   @Test
-  public void testCreationThrows() {
+  public void testCreationDoesNotThrow() {
     String selector1 = "unsupported";
-    expectThrows(UtamError.class, () -> new LocatorUIAutomator(selector1));
+    new LocatorUIAutomator(selector1);
   }
 
   @Test
   public void testValidateUIAutomatorSelectorIncludingPrefix() {
-    expectThrows(UtamError.class, () -> LocatorBy.byUiAutomator(
-        "new UiSelector().\"**/XCUIElementTypeStaticText[`label == 'something'`]\""));
-  }
-
-  @Test
-  public void testUnsupportedMethod() {
-    UtamError e = expectThrows(UtamError.class, () -> LocatorBy.byUiAutomator("unsupported()"));
-    assertThat(e.getMessage(),
-        is(equalTo(String.format(ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD, "unsupported"))));
-  }
-  
-  @Test
-  public void testUnsupportedMethodWithPrefix() {
-    UtamError e = expectThrows(UtamError.class, () -> LocatorBy.byUiAutomator("new UiSelector().unsupported()"));
-    assertThat(e.getMessage(),
-        is(equalTo(String.format(ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD, "unsupported"))));
-  }
-  
-  @Test
-  public void testUnsupportedUiScrollableMethod() {
-    UtamError e = expectThrows(UtamError.class, () -> LocatorBy.byUiAutomator("new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(unsupported())"));
-    assertThat(e.getMessage(),
-        is(equalTo(String.format(ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD, "unsupported"))));
-  }
-  
-  @Test
-  public void testUnsupportedUiScrollableMethodWithPrefix() {
-    UtamError e = expectThrows(UtamError.class, () -> LocatorBy.byUiAutomator("new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().unsupported())"));
-    assertThat(e.getMessage(),
-        is(equalTo(String.format(ERR_SELECTOR_UIAUTOMATOR_UNSUPPORTED_METHOD, "unsupported"))));
+    LocatorBy.byUiAutomator("new UiSelector().\"**/XCUIElementTypeStaticText[`label == 'something'`]\"");
   }
 
   @Test
   public void testSupportedMethods() {
     for (Method method : Method.values()) {
-      Locator locator = new LocatorUIAutomator(method.value + "()");
+      Locator locator = new LocatorUIAutomator(method.getValue() + "()");
       assertThat(locator.getStringValue(),
-            is(equalTo(method.value + "()")));
+            is(equalTo(method.getValue() + "()")));
     }
   }
   
   @Test
   public void testSupportedMethodsWithPrefix() {
     for (Method method : Method.values()) {
-      Locator locator = new LocatorUIAutomator("new UiSelector()." + method.value + "()");
+      Locator locator = new LocatorUIAutomator("new UiSelector()." + method.getValue() + "()");
       assertThat(locator.getStringValue(),
-            is(equalTo("new UiSelector()." + method.value + "()")));
+            is(equalTo("new UiSelector()." + method.getValue() + "()")));
     }
   }
   
@@ -123,19 +90,5 @@ public class LocatorUiAutomatorTests {
     By by = MobileBy.AndroidUIAutomator(selector);
     assertThat(locator.getValue(), is(equalTo(by)));
     assertThat(locator.getStringValue(), is(equalTo(selector)));
-  }
-  
-  @Test
-  public void testInvalidUiScrollableMethod() {
-    UtamError e = expectThrows(UtamError.class, () -> LocatorBy.byUiAutomator("new UiScrollable(new UiSelector().clickable(true)).scrollIntoView(resourceId(\"com.salesforce.chatter:id/app_launcher_menu_item\"))"));
-    assertThat(e.getMessage(),
-        is(equalTo(String.format(ERR_SELECTOR_UIAUTOMATOR_UISCROLLABLE_UNSUPPORTED_METHOD, "clickable"))));
-  }
-  
-  @Test
-  public void testUiScrollableUnsupportedMethod() {
-    UtamError e = expectThrows(UtamError.class, () -> LocatorBy.byUiAutomator("new UiScrollable(new UiSelector().unsupported(\"com.salesforce.chatter:id/app_launcher_menu_item\")).scrollIntoView(resourceId(\"com.salesforce.chatter:id/app_launcher_menu_item\"))"));
-    assertThat(e.getMessage(),
-        is(equalTo(String.format(ERR_SELECTOR_UIAUTOMATOR_UISCROLLABLE_UNSUPPORTED_METHOD, "unsupported"))));
   }
 }

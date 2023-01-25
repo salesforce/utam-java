@@ -104,7 +104,6 @@ public enum BasicElementActionType implements ActionType {
    */
   waitForVisible(null);
 
-  static final Integer ERROR_CODE_FOR_PARAMETERS = 110;
   private static final List<TypeProvider> CONTAINS_LOCATOR = Stream.of(SELECTOR)
       .collect(Collectors.toList());
   private static final List<TypeProvider> CONTAINS_LOCATOR_AND_BOOLEAN = Stream
@@ -128,10 +127,11 @@ public enum BasicElementActionType implements ActionType {
    *
    * @param apply       the string value of the action to retrieve
    * @param elementType the type of the element
-   * @param error       error message to throw if action not found
+   * @param elementName name of the element, can be null
+   * @param methodName  name of the method, can be null
    * @return the object representing the action type for the element
    */
-  public static ActionType getActionType(String apply, TypeProvider elementType, String error) {
+  public static ActionType getActionType(String apply, TypeProvider elementType, String elementName, String methodName) {
     // Element type is BaseElement, with no other actionable methods available.
     for (BasicElementActionType action : values()) {
       if (action.getApplyString().equals(apply)) {
@@ -139,7 +139,9 @@ public enum BasicElementActionType implements ActionType {
       }
     }
     if (!(elementType instanceof UnionType)) {
-      throw new UtamCompilationError(error);
+      String message = elementName == null ? VALIDATION.getErrorMessage(612, methodName, apply)
+              : VALIDATION.getErrorMessage(301, elementName, apply);
+      throw new UtamCompilationError(message);
     }
     List<TypeProvider> actionableTypes = ((UnionType) elementType).getExtendedTypes();
     for (TypeProvider actionableType : actionableTypes) {
@@ -177,7 +179,10 @@ public enum BasicElementActionType implements ActionType {
         }
       }
     }
-    throw new UtamCompilationError(error);
+    String type = actionableTypes.stream().map(TypeProvider::getSimpleName).collect(Collectors.joining(", "));
+    String message = elementName == null ? VALIDATION.getErrorMessage(617, methodName, apply, type) :
+            VALIDATION.getErrorMessage(303, elementName, apply, type);
+    throw new UtamCompilationError(message);
   }
 
   // used in unit tests
@@ -205,8 +210,9 @@ public enum BasicElementActionType implements ActionType {
     } else {
       int expected = actionParameters.length;
       if (actionParameters.length != parameterCount) {
+        String contextStr = String.format("%s action \"%s\"", parserContext, this.name());
         throw new UtamCompilationError(
-            VALIDATION.getErrorMessage(ERROR_CODE_FOR_PARAMETERS, parserContext, this.name(),
+            VALIDATION.getErrorMessage(108, contextStr,
                 String.valueOf(expected), String.valueOf(parameterCount)));
       }
       return Stream.of(actionParameters).collect(Collectors.toList());
