@@ -9,7 +9,6 @@ package utam.compiler.lint;
 
 import static java.util.Objects.requireNonNullElse;
 import static utam.compiler.translator.DefaultTargetConfiguration.getWriterWithDir;
-import static utam.core.framework.UtamLogger.info;
 
 import com.contrastsecurity.sarif.SarifSchema210;
 import com.fasterxml.jackson.annotation.JsonCreator;

@@ -1,0 +1,11 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "selector": {
+        "uiautomator": "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().unsupported())"
+      }
+    }
+  ]
+}
+

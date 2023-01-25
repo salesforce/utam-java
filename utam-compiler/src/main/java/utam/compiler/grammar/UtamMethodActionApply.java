@@ -263,8 +263,7 @@ class UtamMethodActionApply extends UtamMethodAction {
     @Override
     ApplyOperation getApplyOperation() {
       String methodName = methodContext.getName();
-      ActionType action = getActionType(apply, elementContext.getType(),
-          VALIDATION.getErrorMessage(612, methodName, apply));
+      ActionType action = getActionType(apply, elementContext.getType(), null, methodName);
       ReturnType declaredReturnType = getDeclaredReturnType(methodName);
       if (declaredReturnType.isReturnTypeSet()) {
         // if "returnType" is set - check if it's correct

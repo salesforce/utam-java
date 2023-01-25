@@ -16,6 +16,7 @@ import static utam.compiler.grammar.UtamElement.processElementsNode;
 import static utam.compiler.grammar.UtamMethod.processMethodsNode;
 import static utam.compiler.grammar.UtamProfile.processProfileNodes;
 import static utam.compiler.grammar.UtamRootDescription.processRootDescriptionNode;
+import static utam.compiler.grammar.UtamRootSelector.processRootSelectorNode;
 import static utam.compiler.grammar.UtamShadowElement.processShadowNode;
 import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.ReturnType.RETURN_VOID;
@@ -92,7 +93,7 @@ final class UtamPageObject {
       @JsonProperty(value = "exposeRootElement", defaultValue = "false") boolean isExposeRootElement,
       // root selector
       @JsonProperty(value = "root", defaultValue = "false") boolean isRootPageObject,
-      @JsonProperty(value = "selector") UtamRootSelector selector,
+      @JsonProperty(value = "selector") JsonNode selectorNode,
       // nested nodes
       @JsonProperty("shadow") JsonNode shadowNode,
       @JsonProperty("elements") JsonNode elementsNode,
@@ -116,12 +117,15 @@ final class UtamPageObject {
     this.shadow = processShadowNode(shadowNode, "root shadow");
     this.elements = processElementsNode(elementsNode, "root elements");
     this.exposeRootElement = isExposeRootElement;
-    this.type = processBasicTypeNode(typeNode,
-        VALIDATION.getErrorMessage(101, ROOT_ELEMENT_NAME, nodeToString(typeNode)));
+    String rootElementTypeStructure = "root element type";
+    this.type = processBasicTypeNode(typeNode, rootElementTypeStructure);
+    if(this.type == null) {
+      throw new UtamCompilationError(typeNode, VALIDATION.getErrorMessage(115, rootElementTypeStructure, nodeToString(typeNode)));
+    }
     this.beforeLoadNode = beforeLoadNode;
     this.beforeLoad = isEmptyNode(beforeLoadNode) ? new ArrayList<>()
         : processComposeNodes(BEFORE_LOAD_METHOD_NAME, beforeLoadNode);
-    this.rootLocator = selector == null ? null : selector.getLocator();
+    this.rootLocator = processRootSelectorNode(selectorNode);
     this.description = processRootDescriptionNode(descriptionNode);
     VALIDATION.validateIsObject(metadata, "page object root", "property \"metadata\"");
   }
@@ -217,7 +221,7 @@ final class UtamPageObject {
     }
     ElementContext rootElement = new ElementContext.Root(interfaceType, rootLocator, elementType,
         rootElementMethod);
-    context.setElement(rootElement);
+    context.setElement(rootElement, null);
     RootLinting rootLintingContext = new Root(!description.isEmpty(), description.hasAuthor(), rootLocator);
     context.getLintingObject().setRootContext(rootLintingContext);
     return rootElement;

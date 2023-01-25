@@ -11,14 +11,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.testng.Assert.expectThrows;
-import static utam.core.selenium.appium.LocatorClassChain.ERR_SELECTOR_CLASSCHAIN_UNSUPPORTED_OPERATOR;
-import static utam.core.selenium.appium.LocatorClassChain.ERR_SELECTOR_CLASSCHAIN_UNSUPPORTED_QUOTE;
 
 import io.appium.java_client.MobileBy;
 import org.testng.annotations.Test;
 import utam.core.element.Locator;
-import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.LocatorBy;
 
 /**
@@ -154,13 +150,6 @@ public class LocatorClassChainTests {
   }
 
   @Test
-  public void testValidateClassChainSelectorInCorrectQuote() {
-    UtamError e = expectThrows(UtamError.class,
-        () -> LocatorBy.byClassChain("**/XCUIElementTypeStaticText[\"label == 'something'\"]"));
-    assertThat(e.getMessage(), is(equalTo(ERR_SELECTOR_CLASSCHAIN_UNSUPPORTED_QUOTE)));
-  }
-
-  @Test
   public void testValidateClassChainSelectorNoAttribute() {
     String locator = "**/XCUIElementTypeStaticText";
     Locator locatorValue = LocatorBy.byClassChain(locator);
@@ -175,27 +164,4 @@ public class LocatorClassChainTests {
     assertThat(locatorValue.getValue(), is(equalTo(MobileBy.iOSClassChain(locator))));
     assertThat(locatorValue.getStringValue(), is(equalTo(locator)));
   }
-
-  @Test
-  public void testValidateClassChainSelectorUnsupportOperatorThrows() {
-    UtamError e = expectThrows(UtamError.class,
-        () -> LocatorBy
-            .byClassChain("**/XCUIElementTypeStaticText[$label STARTWITH 'something'$]"));
-    assertThat(e.getMessage(), is(equalTo(ERR_SELECTOR_CLASSCHAIN_UNSUPPORTED_OPERATOR)));
-  }
-
-  @Test
-  public void testValidateClassChainSelectorNoSpaceThrows() {
-    UtamError e = expectThrows(UtamError.class,
-        () -> LocatorBy.byClassChain("**/XCUIElementTypeStaticText[`label=='something'`]"));
-    assertThat(e.getMessage(), is(equalTo(ERR_SELECTOR_CLASSCHAIN_UNSUPPORTED_OPERATOR)));
-  }
-
-  @Test
-  public void testGetClassChainSelectorIncorrectAtSublevelThrows() {
-    UtamError e = expectThrows(UtamError.class, () -> LocatorBy.byClassChain(
-        "**/XCUIElementTypeCell[`name == 'cell.appTitle'`]/XCUIElementTypeStaticText[`name EQUALS 'something'`]"));
-    assertThat(e.getMessage(), is(equalTo(ERR_SELECTOR_CLASSCHAIN_UNSUPPORTED_OPERATOR)));
-  }
-
 }

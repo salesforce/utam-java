@@ -251,9 +251,8 @@ public class UtamMethodActionApplyTests {
   @Test
   public void testWrongArgsBasicActionThrows() {
     Exception e = expectCompilerErrorFromFile("validate/apply/wrongArgType");
-    assertThat(e.getMessage(), containsString(
-        "error 109: method \"test\": "
-            + "parameter \"str\" has incorrect type: expected \"BasicElement\", found \"String\""));
+    assertThat(e.getMessage(), containsString("error 109: method \"test\" arguments: " +
+            "argument \"str\" has incorrect type, expected \"BasicElement\", found \"String\""));
   }
 
   @Test

@@ -45,8 +45,7 @@ public class UtamMethodActionWaitForTests {
 
   @Test
   public void predicateWithIncorrectSecondArgsThrows() {
-    String expectedError = "error 109: method \"test\": parameter \"true\" has incorrect type: " +
-            "expected \"literal string\", found \"Boolean\"";
+    String expectedError = "error 109: method \"test\" arguments: argument \"true\" has incorrect type, expected \"literal string\", found \"Boolean\"";
     UtamError e = expectThrows(UtamCompilationError.class,
             () -> new DeserializerUtilities().getContext("validate/compose/waitForIncorrectMessageArg"));
     assertThat(e.getMessage(), containsString(expectedError));

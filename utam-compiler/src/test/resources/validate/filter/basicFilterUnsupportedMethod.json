@@ -1,0 +1,24 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "type": "touchable",
+      "selector": {
+        "css": "selector %s",
+        "returnAll": true,
+        "args": [
+          {
+            "name": "arg1",
+            "type": "string"
+          }
+        ]
+      },
+      "filter": {
+        "apply": "click",
+        "matcher": {
+          "type": "isTrue"
+        }
+      }
+    }
+  ]
+}

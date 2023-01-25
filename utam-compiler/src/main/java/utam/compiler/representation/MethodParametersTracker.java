@@ -14,6 +14,8 @@ import java.util.Set;
 import utam.compiler.UtamCompilationError;
 import utam.core.declarative.representation.MethodParameter;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
+
 /**
  * track duplicate method parameters
  *
@@ -21,8 +23,6 @@ import utam.core.declarative.representation.MethodParameter;
  * @since 236
  */
 public class MethodParametersTracker {
-
-  private static final String ERR_CONTEXT_DUPLICATE_PARAMETERS = "duplicate parameters with name '%s' in the %s";
 
   private final List<MethodParameter> methodParameters = new ArrayList<>();
   private final Set<String> parameterNames = new HashSet<>();
@@ -41,9 +41,7 @@ public class MethodParametersTracker {
     if(!parameter.isLiteral()) {
       String parameterName = parameter.getValue();
       if(parameterNames.contains(parameterName)) {
-        throw new UtamCompilationError(
-            String.format(
-                ERR_CONTEXT_DUPLICATE_PARAMETERS, parameterName, methodContext));
+        throw new UtamCompilationError(VALIDATION.getErrorMessage(107, methodContext, parameterName));
       }
       parameterNames.add(parameterName);
     }

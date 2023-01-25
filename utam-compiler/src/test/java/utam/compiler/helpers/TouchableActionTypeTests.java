@@ -59,8 +59,8 @@ public class TouchableActionTypeTests {
     List<String> parametersTypes = List.of("Integer", "Integer");
     List<String> parameterTypeStrings =
         action.getParametersTypes("test", 2).stream()
-            .filter((type) -> !type.getSimpleName().isEmpty())
             .map(TypeProvider::getSimpleName)
+            .filter(simpleName -> !simpleName.isEmpty())
             .collect(Collectors.toList());
 
     assertThat(parameterTypeStrings, containsInAnyOrder(parametersTypes.toArray()));

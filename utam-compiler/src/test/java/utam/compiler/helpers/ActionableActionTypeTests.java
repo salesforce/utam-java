@@ -71,7 +71,7 @@ public class ActionableActionTypeTests {
 
   private static ActionType getActionType(String apply, ElementContext elementContext) {
     TypeProvider elementType = elementContext.getType();
-    return BasicElementActionType.getActionType(apply, elementType, "error");
+    return BasicElementActionType.getActionType(apply, elementType, "elementName", null);
   }
 
   @Test
