@@ -42,10 +42,11 @@ public class ErrorConfigTests {
         () -> runCompiler("/src/test/resources/errors/report.json"));
     assertThat(e.getMessage(), containsString("page object 'errors-spec/pageObjects/error'"));
     assertThat(e.getMessage(), containsString(
-        "error 900: incorrect format of the page object: Unrecognized field \"error\""));
+        "error 900: incorrect format of the page object \n"
+            + "Unrecognized field \"error\""));
     assertThat(e.getMessage(), containsString("page object 'errors-spec/pageObjects/root'"));
     assertThat(e.getMessage(),
-        containsString("error 902: root page object requires default selector property"));
+        containsString("error 902: root page object requires \"selector\" property"));
   }
 
   @Test
