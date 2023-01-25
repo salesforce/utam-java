@@ -16,7 +16,6 @@ import org.openqa.selenium.WebDriver;
 import utam.core.element.Element;
 import utam.core.element.Locator;
 import utam.core.framework.context.PlatformType;
-import utam.core.selenium.element.Rect;
 
 /**
  * Driver interface allows to integrate any driver type, default is Selenium and Appium
@@ -161,10 +160,4 @@ public interface Driver {
   Set<String> getWindowHandles();
 
   WebDriver.TargetLocator switchTo();
-
-  Rect getRect();
-
-  void setRect(Rect rect);
-
-  void close();
 }

@@ -34,8 +34,7 @@ import java.util.Set;
  */
 public class NavigationTests {
 
-  public static final String TEST_URL = "http://www.testurl.com";
-  public static final String TEST_TAB = "test_tab";
+  public static final String TEST_URL = "http://www.example2.com";
 
   @Test
   public void testBackNavigation() {
@@ -60,21 +59,16 @@ public class NavigationTests {
   @Test
   public void testSwitchWindow() {
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
-//    MockUtilities mock = new MockUtilities();
     WebDriver driver = mock.getWebDriverMock();
     // Create a Map to store the associations between handles and URLs
-    Map<String, String> handleUrlMap = new HashMap<>();
+    Map<String, String> handleUrlMap = new HashMap<String, String>();
     handleUrlMap.put("tab1", "http://www.example1.com");
-    handleUrlMap.put(TEST_TAB, TEST_URL);
-    handleUrlMap.put("tab3", "http://www.example3.com");
-    handleUrlMap.put("tab4", "http://www.example4.com");
-    handleUrlMap.put("tab5", "http://www.example5.com");
-    handleUrlMap.put("tab6", "http://www.example6.com");
+    handleUrlMap.put("tab2", TEST_URL);
 
     // Specify the behavior of the getWindowHandles() method
-    Set<String> handles = new HashSet<>();
+    Set<String> handles = new HashSet<String>();
     handles.add("tab1");
-    handles.add(TEST_TAB);
+    handles.add("tab2");
     handles.add("tab3");
     handles.add("tab4");
     handles.add("tab5");
@@ -82,11 +76,14 @@ public class NavigationTests {
     when(driver.getWindowHandles()).thenReturn(handles);
 
     // Specify the behavior of the getCurrentUrl() method using the Map
-    when(driver.getWindowHandle()).thenReturn(TEST_TAB);
+    when(driver.getWindowHandle()).thenReturn("tab2");
     when(driver.getCurrentUrl()).thenAnswer(invocation -> handleUrlMap.get(driver.getWindowHandle()));
 
-    // Switch to test_url and assert the URL
+    // Switch to tab2 and assert the URL
     new NavigationImpl(mock.getDriverAdapter()).switchToWindow(TEST_URL);
+    String url1 = driver.getCurrentUrl();
     assertThat(driver.getCurrentUrl(), is(equalTo(TEST_URL)));
+
+
   }
 }

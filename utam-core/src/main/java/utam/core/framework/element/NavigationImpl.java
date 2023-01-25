@@ -7,11 +7,13 @@
  */
 package utam.core.framework.element;
 
+import org.openqa.selenium.WebDriver;
 import utam.core.driver.Driver;
 import utam.core.driver.Navigation;
-import utam.core.driver.Window;
 import utam.core.framework.consumer.UtamError;
+import utam.core.selenium.appium.MobileDriverAdapter;
 
+import java.net.URL;
 import java.util.Set;
 
 /**
@@ -41,45 +43,26 @@ public class NavigationImpl implements Navigation {
   }
 
   @Override
-  public Window switchToWindow(String url) {
+  public void switchToWindow(String url) {
     // save the current url in case we need to revert to it
     String initialHandle = this.driverAdapter.getWindowHandle();
 
     Set<String> windowHandles = this.driverAdapter.getWindowHandles();
-    boolean isFound = false;
+    boolean found = false;
     for(String handle : windowHandles) {
       this.driverAdapter.switchTo().window(handle);
-      if (driverAdapter.getUrl().equals(url)) {
-        isFound = true;
+      if(driverAdapter.getUrl().equals(url)) {
+        found = true;
         break;
       }
     }
 
-    if(!isFound) {
+    if(!found) {
       // revert to the original url
       this.driverAdapter.switchTo().window(initialHandle);
       throw new UtamError(ERR_NO_WINDOW_WITH_URL + url);
     }
 
-    return new WindowImpl(this.driverAdapter);
-  }
-
-  @Override
-  public void closeWindow(String targetUrl) {
-    String currentUrl = this.driverAdapter.getUrl();
-
-    if (targetUrl.equals(currentUrl)) {
-      this.driverAdapter.close();
-    } else {
-      this.switchToWindow(targetUrl);
-      this.driverAdapter.close();
-      this.switchToWindow(currentUrl);
-    }
-
-  }
-
-  @Override
-  public void closeWindow() {
-    this.driverAdapter.close();
+    //TODO need to return "Window" - ask what that is
   }
 }
