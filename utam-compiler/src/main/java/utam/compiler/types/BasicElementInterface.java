@@ -7,6 +7,8 @@
  */
 package utam.compiler.types;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
+import static utam.compiler.grammar.JsonDeserializer.nodeToString;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -89,10 +91,10 @@ public enum BasicElementInterface implements TypeProvider {
    * process Json node with basic types, applicable to root or basic elements
    *
    * @param typeNode Json node
-   * @param error    error message supplier
+   * @param structure  element or method return type
    * @return string array with basic types or empty array
    */
-  public static String[] processBasicTypeNode(JsonNode typeNode, String error) {
+  public static String[] processBasicTypeNode(JsonNode typeNode, String structure) {
     if (typeNode == null || typeNode.isNull()) {
       return new String[]{};
     }
@@ -103,17 +105,21 @@ public enum BasicElementInterface implements TypeProvider {
       List<String> values = new ArrayList<>();
       for (JsonNode valueNode : typeNode) {
         if (!valueNode.isTextual()) {
-          throw new UtamCompilationError(typeNode, error);
+          throw new UtamCompilationError(valueNode, VALIDATION.getErrorMessage(115, structure, nodeToString(valueNode)));
         }
         String valueStr = valueNode.textValue();
         if (!isBasicType(valueStr)) {
-          throw new UtamCompilationError(typeNode, error);
+          throw new UtamCompilationError(typeNode, VALIDATION.getErrorMessage(115, structure, valueStr));
+        }
+        if(values.contains(valueStr)) {
+          throw new UtamCompilationError(typeNode, VALIDATION.getErrorMessage(116, structure, valueStr));
         }
         values.add(valueStr);
       }
       return values.toArray(String[]::new);
     }
-    throw new UtamCompilationError(typeNode, error);
+    // should be checked by caller
+    return null;
   }
 
   @Override

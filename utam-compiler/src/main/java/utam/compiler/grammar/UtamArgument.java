@@ -125,7 +125,7 @@ abstract class UtamArgument {
    * @since 244
    */
   enum ArgsValidationMode {
-    LITERAL_ALLOWED, LITERAL_NOT_ALLOWED, PREDICATE;
+    LITERAL_ALLOWED, LITERAL_NOT_ALLOWED, PREDICATE
   }
 
   private static UtamArgument processArgNode(JsonNode argNode, String parserContext,
@@ -134,11 +134,20 @@ abstract class UtamArgument {
     if (isLiteral && !isLiteralsAllowed) {
       throw new UtamCompilationError(argNode, VALIDATION.getErrorMessage(105, parserContext));
     }
+    if(isLiteral && argNode.has("name")) {
+      throw new UtamCompilationError(argNode, VALIDATION.getErrorMessage(111, parserContext));
+    }
+    if(isLiteral && argNode.has("description")) {
+      throw new UtamCompilationError(argNode, VALIDATION.getErrorMessage(114, parserContext));
+    }
     String type;
     if (argNode.has("type")) {
       JsonNode typeNode = argNode.get("type");
       type = VALIDATION.validateNotNullOrEmptyString(typeNode, parserContext, "type");
       if (FUNCTION_TYPE_PROPERTY.equals(type)) {
+        if(argNode.has("description")) {
+          throw new UtamCompilationError(argNode, VALIDATION.getErrorMessage(114, parserContext));
+        }
         return readNode(argNode, UtamArgumentPredicate.class, VALIDATION.getErrorMessage(104, parserContext));
       }
       if (isLiteral && !getSupportedLiteralTypes().contains(type)) {
@@ -155,6 +164,9 @@ abstract class UtamArgument {
     }
     if (isLiteral) {
       return processLiteralNode(argNode, type, parserContext);
+    }
+    if (!argNode.has("name")) {
+      throw new UtamCompilationError(argNode, VALIDATION.getErrorMessage(113, parserContext));
     }
     UtamArgumentNonLiteral arg = readNode(argNode, UtamArgumentNonLiteral.class, VALIDATION.getErrorMessage(100, parserContext));
     VALIDATION.validateNotEmptyString(arg.name, parserContext, "name");
@@ -305,7 +317,7 @@ abstract class UtamArgument {
     @JsonCreator
     UtamArgumentNonLiteral(
         @JsonProperty(value = "name", required = true) String name,
-        @JsonProperty(value = "type", required = true) String type,
+        @JsonProperty(value = "type") String type,
         @JsonProperty(value = "description") String description) {
       this.type = type;
       this.name = name;
@@ -316,6 +328,9 @@ abstract class UtamArgument {
     MethodParameter asParameter(TranslationContext context,
         MethodContext methodContext,
         ParametersContext parametersContext) {
+      if (type == null) {
+        throw new UtamCompilationError(VALIDATION.getErrorMessage(112, String.format("method \"%s\"", methodContext.getName()), name));
+      }
       if (isPrimitiveType(type)) {
         return new Regular(name, PrimitiveType.fromString(type), this.description);
       }
@@ -427,7 +442,7 @@ abstract class UtamArgument {
     MethodParameter asParameter(TranslationContext context,
         MethodContext methodContext,
         ParametersContext parametersContext) {
-      String parserContext = String.format("method \"%s\", element \"%s\" reference", methodContext.getName(), value);
+      String parserContext = String.format("method \"%s\"", methodContext.getName());
       ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
       ElementContext elementContext = provider.getElementArgument(context, value);
       MethodDeclaration elementGetter = elementContext.getElementMethod().getDeclaration();

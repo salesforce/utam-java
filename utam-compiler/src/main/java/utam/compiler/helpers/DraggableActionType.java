@@ -8,7 +8,6 @@
 package utam.compiler.helpers;
 
 import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
-import static utam.compiler.helpers.BasicElementActionType.ERROR_CODE_FOR_PARAMETERS;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
@@ -67,8 +66,10 @@ public enum DraggableActionType implements ActionType {
         return ELEMENT_PARAMETERS;
       }
     }
-    throw new UtamCompilationError(VALIDATION.getErrorMessage(ERROR_CODE_FOR_PARAMETERS, parserContext, this.name(),
-          "(check documentation)", String.valueOf(parametersCount)));
+    String contextStr = String.format("%s action \"%s\"", parserContext, this.name());
+    throw new UtamCompilationError(
+            VALIDATION.getErrorMessage(108, contextStr,
+                    "(check documentation)", String.valueOf(parametersCount)));
   }
 
   @Override

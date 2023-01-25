@@ -1,0 +1,11 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "selector": {
+        "uiautomator": "new UiScrollable(new UiSelector().clickable(true)).scrollIntoView(resourceId(\"com.salesforce.chatter:id/app_launcher_menu_item\"))"
+      }
+    }
+  ]
+}
+

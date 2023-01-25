@@ -96,18 +96,4 @@ public enum MatcherType {
   public TypeProvider getOperandType() {
     return operandType;
   }
-
-  /**
-   * Checks the operand is of the valid type
-   *
-   * @param operandType the operand type
-   * @return true if the operand type is the correct type; otherwise, false
-   */
-  public boolean isCorrectOperandType(TypeProvider operandType) {
-    if (this == notNull) { // not null allows any type
-      return true;
-    }
-    TypeProvider expectedType = getOperandType();
-    return operandType.isSameType(expectedType);
-  }
 }

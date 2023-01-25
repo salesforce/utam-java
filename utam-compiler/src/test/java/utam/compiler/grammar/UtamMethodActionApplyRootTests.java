@@ -97,7 +97,15 @@ public class UtamMethodActionApplyRootTests {
     UtamError e = expectThrows(UtamError.class,
         () -> getResult("privateRootWrongAction"));
     assertThat(e.getMessage(),
-        containsString("error 612: method \"test\" statement: unknown method \"click\" for basic element"));
+        containsString("error 617: method \"test\" statement: unsupported action \"click\" for type \"Editable\""));
+  }
+
+  @Test
+  public void testPrivateRootUnknownActionThrows() {
+    UtamError e = expectThrows(UtamError.class,
+            () -> getResult("privateRootUnknownAction"));
+    assertThat(e.getMessage(),
+            containsString("error 612: method \"test\" statement: unknown method \"test\" for basic element"));
   }
 
   @Test

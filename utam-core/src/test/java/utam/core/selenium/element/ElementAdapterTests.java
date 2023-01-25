@@ -34,7 +34,6 @@ import static utam.core.selenium.element.ElementAdapter.SCROLL_TOP_VIA_JAVASCRIP
 import static utam.core.selenium.element.LocatorBy.byCss;
 import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR_ALL;
 
-import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import org.openqa.selenium.By;

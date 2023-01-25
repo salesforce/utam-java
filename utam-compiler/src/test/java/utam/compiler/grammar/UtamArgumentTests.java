@@ -44,7 +44,7 @@ public class UtamArgumentTests {
     String json = "{\"name\":\"name\", \"type\":\"string\"}, {\"name\":\"name\", \"type\":\"string\"}";
     Exception e = expectThrows(UtamCompilationError.class, () -> testArgs(json));
     assertThat(e.getMessage(), containsString(
-        "error 107: method \"test\": parameter with name \"name\" is already declared"));
+        "error 107: method \"test\" arguments: argument with name \"name\" is already declared"));
 
   }
 
@@ -53,7 +53,7 @@ public class UtamArgumentTests {
     String json = "{  \"name\" :  \"name\",  \"type\" : \"type\" }";
     Exception e = expectThrows(UtamCompilationError.class, () -> testArgs(json));
     assertThat(e.getMessage(), containsString(
-        "error 103: method \"test\": unsupported argument type \"type\", supported are"));
+        "error 103: method \"test\" arguments: unsupported argument type \"type\", supported are"));
   }
 
   @Test
@@ -101,8 +101,7 @@ public class UtamArgumentTests {
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
         containsString(
-            "error 101: method \"test\", element \"argName\" reference: "
-                + "unknown element with name \"argName\" is referenced"));
+            "error 101: method \"test\" arguments: unknown element with name \"argName\" is referenced"));
   }
 
   @Test
@@ -110,7 +109,7 @@ public class UtamArgumentTests {
     String json = "{ \"type\" : \"string\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error 100: method \"test\": incorrect argument format"));
+        containsString("error 113: method \"test\" arguments: either \"name\" or \"value\" is required for an argument"));
   }
 
   @Test
@@ -118,7 +117,7 @@ public class UtamArgumentTests {
     String json = "{ \"name\" : \"name\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error 100: method \"test\": incorrect argument format"));
+        containsString("error 112: method \"test\" arguments: \"type\" is required for an argument \"name\""));
   }
 
   @Test
@@ -127,7 +126,7 @@ public class UtamArgumentTests {
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
         containsString(
-            "error 102: method \"test\": unsupported literal argument type \"1.024\""));
+            "error 102: method \"test\" arguments: unsupported literal argument type \"1.024\""));
   }
 
   @Test
@@ -135,7 +134,7 @@ public class UtamArgumentTests {
     String json = "{ \"value\" : true, \"type\" : \"string\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error 100: method \"test\": incorrect argument format"));
+        containsString("error 100: method \"test\" arguments: incorrect argument format"));
   }
 
   @Test
@@ -143,7 +142,7 @@ public class UtamArgumentTests {
     String json = "{ \"value\" : true, \"name\" : \"name\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error 100: method \"test\": incorrect argument format"));
+        containsString("error 111: method \"test\" arguments: either \"name\" or \"value\" is supported for an argument, not both"));
   }
 
   @Test
@@ -151,7 +150,7 @@ public class UtamArgumentTests {
     String json = "{  \"name\" :  \"name\",  \"type\" : \"function\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error 104: method \"test\": incorrect predicate format"));
+        containsString("error 104: method \"test\" arguments: incorrect predicate format"));
   }
 
   @Test
@@ -159,7 +158,7 @@ public class UtamArgumentTests {
     String json = "{  \"value\" : { \"extra\" : true } }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error 102: method \"test\": unsupported literal argument type"));
+        containsString("error 102: method \"test\" arguments: unsupported literal argument type"));
   }
 
   @Test
@@ -167,7 +166,7 @@ public class UtamArgumentTests {
     String json = "{  \"value\" :  \"element\",  \"type\" : \"elementReference\", \"predicate\" : [] }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(), containsString(
-        "error 106: method \"test\": incorrect format of elementReference argument"));
+        "error 106: method \"test\" arguments: incorrect format of elementReference argument"));
   }
 
   @Test
@@ -176,7 +175,7 @@ public class UtamArgumentTests {
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
         containsString(
-            "error 103: method \"test\": unsupported argument type \"elementReference\""));
+            "error 103: method \"test\" arguments: unsupported argument type \"elementReference\", supported are"));
   }
 
   @Test
@@ -184,7 +183,7 @@ public class UtamArgumentTests {
     String json = "{  \"error\" : \"text\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
-        containsString("error 100: method \"test\": incorrect argument format"));
+        containsString("error 113: method \"test\" arguments: either \"name\" or \"value\" is required for an argument"));
   }
 
   @Test
@@ -199,11 +198,10 @@ public class UtamArgumentTests {
   @Test
   public void testEmptyNestedArgsThrows() {
     String json = "{  \"value\" :  \"root\",  \"type\" : \"elementReference\", \"args\": [] }";
-    //testArgs(json);
     Exception e = expectThrows(UtamCompilationError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
         containsString(
-            "error 12: method \"test\", element \"root\" reference: property \"args\" should be a not empty array"));
+            "error 12: method \"test\": property \"args\" should be a not empty array"));
   }
 
   @Test
@@ -265,13 +263,41 @@ public class UtamArgumentTests {
   public void testAbstractLiteralArgThrows() {
     RuntimeException e = expectThrows(UtamCompilationError.class,
         () -> new DeserializerUtilities().getContext("validate/args/abstractLiteralArg"));
-    assertThat(e.getMessage(), containsString("error 105: method \"test\": literal arguments are not allowed"));
+    assertThat(e.getMessage(), containsString("error 105: method \"test\" arguments: literal arguments are not allowed"));
   }
 
   @Test
   public void testComposeMethodLiteralArgThrows() {
     RuntimeException e = expectThrows(UtamCompilationError.class,
         () -> new DeserializerUtilities().getContext("validate/args/methodLiteralArg"));
-    assertThat(e.getMessage(), containsString("error 105: method \"test\": literal arguments are not allowed"));
+    assertThat(e.getMessage(), containsString("error 105: method \"test\" arguments: literal arguments are not allowed"));
+  }
+
+  @Test
+  public void testNameAndValueThrows() {
+    RuntimeException e = expectThrows(UtamCompilationError.class,
+            () -> new DeserializerUtilities().getContext("validate/args/redundantNameValue"));
+    assertThat(e.getMessage(), containsString("error 111: method \"test\" arguments: either \"name\" or \"value\" is supported for an argument"));
+  }
+
+  @Test
+  public void testMissingTypeThrows() {
+    RuntimeException e = expectThrows(UtamCompilationError.class,
+            () -> new DeserializerUtilities().getContext("validate/args/missingType"));
+    assertThat(e.getMessage(), containsString("error 112: method \"test\" arguments: \"type\" is required for an argument \"name\""));
+  }
+
+  @Test
+  public void testMissingNameAndValueThrows() {
+    RuntimeException e = expectThrows(UtamCompilationError.class,
+            () -> new DeserializerUtilities().getContext("validate/args/missingNameValue"));
+    assertThat(e.getMessage(), containsString("error 113: method \"test\" arguments: either \"name\" or \"value\" is required for an argument"));
+  }
+
+  @Test
+  public void testDescriptionInFunctionThrows() {
+    RuntimeException e = expectThrows(UtamCompilationError.class,
+            () -> new DeserializerUtilities().getContext("validate/args/descriptionInFunctionArg"));
+    assertThat(e.getMessage(), containsString("error 114: method \"test\" arguments: property \"description\" is not supported for literal or function argument"));
   }
 }

@@ -35,10 +35,17 @@ public class UtamElement_CustomTests {
 
   @Test
   public void testDuplicateArgsNamesThrows() {
-    UtamError e =
-        expectThrows(UtamError.class,
+    UtamCompilationError e =
+        expectThrows(UtamCompilationError.class,
             () -> new DeserializerUtilities().getContext("element/customDuplicateArgs")
                 .getMethod(METHOD_NAME));
-    assertThat(e.getMessage(), containsString("duplicate parameters"));
+    assertThat(e.getMessage(), containsString("error 107: method 'getTestElement' arguments: argument with name \"arg\" is already declared"));
+  }
+
+  @Test
+  public void testContainerCantHaveNestedElements() {
+    UtamCompilationError e = expectThrows(UtamCompilationError.class, () -> new DeserializerUtilities()
+            .getContext("validate/custom_element/nestedElements"));
+    assertThat(e.getMessage(), containsString("error 205: element \"test\": only basic element can have nested elements or shadow root"));
   }
 }

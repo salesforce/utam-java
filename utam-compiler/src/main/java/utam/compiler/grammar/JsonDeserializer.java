@@ -125,7 +125,7 @@ public final class JsonDeserializer extends
     } catch (Exception e) {
       ErrorSupplier error = processParserError(parser, e, context.getLintingObject().getName());
       if(error.getCause() == null) {
-        throw new UtamCompilationError(error.getMessage());
+        throw new UtamCompilationError(error.getMessage(), e);
       }
       throw new UtamCompilationError(error.getMessage(), error.getCause());
     }
@@ -165,7 +165,7 @@ public final class JsonDeserializer extends
    * @param node json node
    * @return string representation
    */
-  static String nodeToString(JsonNode node) {
+  public static String nodeToString(JsonNode node) {
     if (isEmptyNode(node)) {
       return "null";
     }

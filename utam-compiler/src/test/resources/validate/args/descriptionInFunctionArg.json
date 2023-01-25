@@ -1,0 +1,23 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "apply": "waitFor",
+          "args": [
+            {
+              "type": "function",
+              "description": "redundant",
+              "predicate": [
+                {
+                  "element": "root"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

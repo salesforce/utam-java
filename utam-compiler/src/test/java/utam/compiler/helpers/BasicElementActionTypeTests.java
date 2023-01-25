@@ -107,8 +107,8 @@ public class BasicElementActionTypeTests {
     ActionType action = BasicElementActionType.getAttribute;
     Set<String> parameterTypeStrings =
         action.getParametersTypes("test", 1).stream()
-            .filter((type) -> !type.getSimpleName().isEmpty())
             .map(TypeProvider::getSimpleName)
+            .filter(simpleName -> !simpleName.isEmpty())
             .collect(Collectors.toSet());
 
     assertThat(parameterTypeStrings, hasSize(1));
@@ -122,8 +122,8 @@ public class BasicElementActionTypeTests {
     ActionType action = BasicElementActionType.getCssPropertyValue;
     Set<String> parameterTypeStrings =
             action.getParametersTypes("test", 1).stream()
-                    .filter((type) -> !type.getSimpleName().isEmpty())
                     .map(TypeProvider::getSimpleName)
+                    .filter(simpleName -> !simpleName.isEmpty())
                     .collect(Collectors.toSet());
 
     assertThat(parameterTypeStrings, hasSize(1));

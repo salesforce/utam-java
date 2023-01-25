@@ -39,8 +39,8 @@ public class UtamRootSelectorTests {
     String json = "{ \"root\" : true, \"selector\" : {}}";
     RuntimeException e = expectThrows(
         UtamCompilationError.class,  () -> new DeserializerUtilities().getResultFromString(json));
-    assertThat(e.getMessage(), containsString("error 1002: root selector: "
-        + "one of { accessid, css, uiautomator, classchain } should be set for selector"));
+    assertThat(e.getMessage(), containsString("error 1002: element \"root\" selector: "
+        + "one of \"css\", \"accessid\", \"uiautomator\" or \"classchain\" should be set"));
   }
 
   @Test
@@ -48,7 +48,7 @@ public class UtamRootSelectorTests {
     String json = "{ \"root\" : true, \"selector\" : { \"css\": \"css\", \"accessid\": \"accessid\"}}";
     RuntimeException e = expectThrows(
         UtamCompilationError.class,  () -> new DeserializerUtilities().getResultFromString(json));
-    assertThat(e.getMessage(), containsString("error 1003: root selector: "
-        + "only one of selector types { accessid, css, uiautomator, classchain } can be set"));
+    assertThat(e.getMessage(), containsString("error 1003: element \"root\" selector: " +
+            "only one of one of \"css\", \"accessid\", \"uiautomator\" or \"classchain\" can be set"));
   }
 }

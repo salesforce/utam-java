@@ -1,0 +1,17 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "compose": [
+        {
+          "element" : "root",
+          "apply" : "getAttribute",
+          "args": [
+            {
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

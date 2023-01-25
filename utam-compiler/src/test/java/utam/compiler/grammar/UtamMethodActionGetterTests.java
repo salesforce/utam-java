@@ -54,14 +54,16 @@ public class UtamMethodActionGetterTests {
 
   @Test
   public void incorrectMatcherThrows() {
-    testThrows("incorrectMatcherType", "error 1202: method \"test\" statement matcher: "
-        + "expected type for matcher is \"Boolean\", found \"BasicElement\"");
+    String error = "error 1202: method \"test\" statement matcher: " +
+            "applied method returns type \"BasicElement\", " +
+            "which is only compatible with the following matchers - notNull";
+    testThrows("incorrectMatcherType", error);
   }
 
   @Test
   public void redundantArgsThrows() {
     testThrows("redundantArgs",
-        "error 108: method \"test\": expected number of parameters is 0, found 1");
+        "error 108: method \"test\" arguments: expected number of arguments is 0, found 1");
   }
 
   @Test

@@ -7,8 +7,6 @@
  */
 package utam.compiler.translator;
 
-import static utam.core.framework.UtamLogger.info;
-
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.FileNotFoundException;

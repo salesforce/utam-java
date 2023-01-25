@@ -19,14 +19,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
-import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_DUPLICATE_FIELD;
-import static utam.compiler.helpers.TranslationContext.ERR_CONTEXT_DUPLICATE_METHOD;
 import static utam.compiler.types.BasicElementInterface.editable;
 
 import org.testng.annotations.Test;
 import utam.compiler.grammar.DeserializerUtilities;
 import utam.core.declarative.representation.MethodDeclaration;
-import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.framework.consumer.UtamError;
@@ -103,28 +100,15 @@ public class TranslationContextTests {
     context.setMethod(method);
     assertThat(context.getMethods(), hasSize(1));
     UtamError e = expectThrows(UtamError.class, () -> context.setMethod(method));
-    assertThat(e.getMessage(), containsString(String.format(ERR_CONTEXT_DUPLICATE_METHOD, "name")));
+    assertThat(e.getMessage(), containsString("error 504: method \"name\": method with the same name was already declared"));
   }
 
   @Test
   public void testGetRootElement() {
     TranslationContext context = getTestTranslationContext();
     ElementContext defaultRoot = new ElementContext.Root(editable, null, editable, mock(PageObjectMethod.class));
-    context.setElement(defaultRoot);
+    context.setElement(defaultRoot, null);
     assertThat(context.getRootElement().getName(), is(equalTo(ElementContext.ROOT_ELEMENT_NAME)));
-  }
-
-  @Test
-  public void testDuplicateNames() {
-    PageClassField field = mock(PageClassField.class);
-    when(field.getName()).thenReturn("name");
-    TranslationContext context = getTestTranslationContext();
-    context.setClassField(field);
-    assertThat(context.getFields(), hasSize(1));
-    UtamError e = expectThrows(UtamError.class, () -> context.setClassField(field));
-    assertThat(
-        e.getMessage(),
-        containsString(String.format(ERR_CONTEXT_DUPLICATE_FIELD, field.getName())));
   }
 
   @Test
