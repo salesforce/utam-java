@@ -36,7 +36,8 @@ public class ErrorConfigTests {
   }
 
   @Test
-  public void testCombiningErrors() {
+  public void testCombiningErrorsIntoOneReport() {
+    // report.json config has "interruptCompilerOnError" set to false
     Exception e = expectThrows(UtamCompilationError.class,
         () -> runCompiler("/src/test/resources/errors/report.json"));
     assertThat(e.getMessage(), containsString("page object 'errors-spec/pageObjects/error'"));
@@ -49,6 +50,7 @@ public class ErrorConfigTests {
 
   @Test
   public void testDefaultCompilerInterruption() {
+    // interrupt.json config has no "interruptCompilerOnError", default is true
     Exception e = expectThrows(UtamCompilationError.class,
         () -> runCompiler("/src/test/resources/errors/interrupt.json"));
     assertThat(e.getMessage(), containsString("page object 'errors-spec/pageObjects/error'"));

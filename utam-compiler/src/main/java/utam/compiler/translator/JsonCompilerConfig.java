@@ -244,7 +244,7 @@ public class JsonCompilerConfig {
         @JsonProperty(value = "profiles") List<Profile> profiles,
         @JsonProperty(value = "copyright") List<String> copyright,
         @JsonProperty(value = "lint") LintingConfigJson lintingConfiguration,
-        @JsonProperty(value = "throwError") Boolean isErrorsReportFile
+        @JsonProperty(value = "interruptCompilerOnError") Boolean isErrorsReportFile
     ) {
       this.pageObjectsRootDirectory = pageObjectsRootDirectory;
       info(getConfigLoggerMessage("pageObjectsRootDir", pageObjectsRootDirectory));
