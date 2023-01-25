@@ -9,7 +9,10 @@ package utam.core.driver;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
+
+import org.openqa.selenium.WebDriver;
 import utam.core.element.Element;
 import utam.core.element.Locator;
 import utam.core.framework.context.PlatformType;
@@ -151,4 +154,10 @@ public interface Driver {
    * Navigates forward in the current browsing context (mobile or web)
    */
   void forward();
+
+  String getWindowHandle();
+
+  Set<String> getWindowHandles();
+
+  WebDriver.TargetLocator switchTo();
 }
