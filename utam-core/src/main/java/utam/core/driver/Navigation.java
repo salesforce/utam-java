@@ -7,6 +7,9 @@
  */
 package utam.core.driver;
 
+import java.net.URI;
+import java.net.URL;
+
 /**
  * Navigation interface exposing commands to navigate browsing web and mobile contexts
  *
@@ -24,4 +27,12 @@ public interface Navigation {
    * Command to navigate one step forward in the browsing context
    */
   void forward();
+
+  /**
+   * Command to navigate to an open window with the given url
+   */
+  void switchToWindow(String url);
+
+
+
 }

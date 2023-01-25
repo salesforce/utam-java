@@ -11,6 +11,7 @@ import static utam.core.framework.UtamLogger.error;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -220,6 +221,15 @@ public class DriverAdapter implements Driver {
   public void forward() {
     this.driver.navigate().forward();
   }
+
+  @Override
+  public String getWindowHandle() { return this.driver.getWindowHandle(); }
+
+  @Override
+  public Set<String> getWindowHandles() { return this.driver.getWindowHandles(); }
+
+  @Override
+  public WebDriver.TargetLocator switchTo() { return this.driver.switchTo(); }
 
   static class DriverWait extends FluentWait<Driver> {
 
