@@ -7,13 +7,10 @@
  */
 package utam.core.framework.element;
 
-import org.openqa.selenium.WebDriver;
 import utam.core.driver.Driver;
 import utam.core.driver.Navigation;
 import utam.core.framework.consumer.UtamError;
-import utam.core.selenium.appium.MobileDriverAdapter;
 
-import java.net.URL;
 import java.util.Set;
 
 /**
@@ -51,7 +48,7 @@ public class NavigationImpl implements Navigation {
     boolean found = false;
     for(String handle : windowHandles) {
       this.driverAdapter.switchTo().window(handle);
-      if(driverAdapter.getUrl().equals(url)) {
+      if (driverAdapter.getUrl().equals(url)) {
         found = true;
         break;
       }
