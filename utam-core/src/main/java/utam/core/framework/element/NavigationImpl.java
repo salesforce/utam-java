@@ -45,16 +45,16 @@ public class NavigationImpl implements Navigation {
     String initialHandle = this.driverAdapter.getWindowHandle();
 
     Set<String> windowHandles = this.driverAdapter.getWindowHandles();
-    boolean found = false;
+    boolean isFound = false;
     for(String handle : windowHandles) {
       this.driverAdapter.switchTo().window(handle);
       if (driverAdapter.getUrl().equals(url)) {
-        found = true;
+        isFound = true;
         break;
       }
     }
 
-    if(!found) {
+    if(!isFound) {
       // revert to the original url
       this.driverAdapter.switchTo().window(initialHandle);
       throw new UtamError(ERR_NO_WINDOW_WITH_URL + url);
