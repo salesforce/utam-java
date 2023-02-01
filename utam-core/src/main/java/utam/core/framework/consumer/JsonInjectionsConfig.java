@@ -151,6 +151,10 @@ public class JsonInjectionsConfig {
         ProfileImplementations mappingProfile) {
       mapping.put(profileName, mappingProfile);
     }
+
+    public boolean isEmpty() {
+      return mapping.isEmpty();
+    }
   }
 
   /**

@@ -28,11 +28,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.lint.LintingConfigJson;
+import utam.compiler.translator.CompilerErrors.Report;
 import utam.compiler.translator.DefaultSourceConfiguration.FilesScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.ScannerConfig;
 import utam.compiler.translator.DefaultSourceConfiguration.SourceWithoutPackages;
 import utam.compiler.translator.DefaultTranslatorConfiguration.CompilerOutputOptions;
+import utam.core.declarative.errors.CompilerErrorsConfig;
 import utam.core.declarative.lint.LintingConfig;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorConfig;
@@ -123,6 +125,11 @@ public class JsonCompilerConfig {
     return moduleConfig.getSourceConfig(filePathsRoot, inputFiles);
   }
 
+  CompilerErrorsConfig getErrorsConfig(TranslatorTargetConfig targetConfig) {
+    String absolutePath = targetConfig.getErrorsReportPath();
+    return absolutePath == null? new CompilerErrors.Throws() : new Report(absolutePath);
+  }
+
   /**
    * Gets the module name
    * @return the name of the module
@@ -167,7 +174,12 @@ public class JsonCompilerConfig {
     TranslatorSourceConfig sourceConfig = getSourceConfig();
     TranslatorTargetConfig targetConfig = getTargetConfig();
     List<ProfileConfiguration> profiles = getConfiguredProfiles();
-    return new DefaultTranslatorConfiguration(moduleConfig.outputOptions, moduleConfig.lintingConfiguration, sourceConfig, targetConfig, profiles);
+    CompilerErrorsConfig errorsConfig = getErrorsConfig(targetConfig);
+    return new DefaultTranslatorConfiguration(moduleConfig.outputOptions,
+        moduleConfig.lintingConfiguration,
+        errorsConfig,
+        sourceConfig,
+        targetConfig, profiles);
   }
 
   /**
@@ -193,6 +205,7 @@ public class JsonCompilerConfig {
     private final UnitTestRunner unitTestRunnerType;
     private final CompilerOutputOptions outputOptions;
     private final LintingConfig lintingConfiguration;
+    private final String compilerErrorsFile;
 
     /**
      * Initializes a new instance of the Module class. Instantiated via JSON deserialization.
@@ -230,7 +243,8 @@ public class JsonCompilerConfig {
         @JsonProperty(value = "namespaces") List<Namespace> namespaces,
         @JsonProperty(value = "profiles") List<Profile> profiles,
         @JsonProperty(value = "copyright") List<String> copyright,
-        @JsonProperty(value = "lint") LintingConfigJson lintingConfiguration
+        @JsonProperty(value = "lint") LintingConfigJson lintingConfiguration,
+        @JsonProperty(value = "interruptCompilerOnError") Boolean isErrorsReportFile
     ) {
       this.pageObjectsRootDirectory = pageObjectsRootDirectory;
       info(getConfigLoggerMessage("pageObjectsRootDir", pageObjectsRootDirectory));
@@ -268,6 +282,8 @@ public class JsonCompilerConfig {
       info(getConfigLoggerMessage("lint configuration", this.lintingConfiguration.toString()));
       this.lintingReportOutputFile = lintingOutputFile;
       info(getConfigLoggerMessage("lintingOutputFile", lintingOutputFile));
+      this.compilerErrorsFile = Boolean.FALSE == isErrorsReportFile? CompilerErrors.ERR_REPORT_FILE : null;
+      info(getConfigLoggerMessage("errorsReportFile", this.compilerErrorsFile));
     }
 
     void setUniqueProfiles(List<Profile> profiles) {
@@ -320,7 +336,7 @@ public class JsonCompilerConfig {
           compilerRootFolderName + resourcesOutputDir,
           unitTestRunnerType,
           compilerRootFolderName + unitTestsOutputDir,
-          lintingReportOutputFile);
+          lintingReportOutputFile, compilerErrorsFile);
     }
 
     /**

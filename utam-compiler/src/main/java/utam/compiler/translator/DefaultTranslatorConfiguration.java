@@ -10,6 +10,7 @@ package utam.compiler.translator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import utam.compiler.lint.LintingConfigJson;
 import utam.compiler.translator.DefaultSourceConfiguration.FilesScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.RecursiveScanner;
 import utam.compiler.translator.DefaultSourceConfiguration.ScannerConfig;
+import utam.core.declarative.errors.CompilerErrorsConfig;
 import utam.core.declarative.lint.LintingConfig;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslationTypesConfig;
@@ -42,6 +44,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   private final TranslatorTargetConfig translatorTargetConfig;
   private final LintingConfig lintingConfiguration;
   private final CompilerOutputOptions outputOptions;
+  private final CompilerErrorsConfig compilerErrorsConfig;
 
   /**
    * Initializes a new instance of the translator configuration class
@@ -57,6 +60,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   DefaultTranslatorConfiguration(
       CompilerOutputOptions outputOptions,
       LintingConfig lintingConfiguration,
+      CompilerErrorsConfig errorsConfig,
       TranslationTypesConfig typesConfig,
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig,
@@ -69,6 +73,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
       setConfiguredProfile(profileDefinition);
     }
     this.lintingConfiguration = LintingConfigJson.getLintingConfig(lintingConfiguration);
+    this.compilerErrorsConfig = errorsConfig;
   }
 
   /**
@@ -84,10 +89,12 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   public DefaultTranslatorConfiguration(
       CompilerOutputOptions outputOptions,
       LintingConfig lintingConfiguration,
+      CompilerErrorsConfig errorsConfig,
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig,
       List<ProfileConfiguration> profileDefinitions) {
-    this(outputOptions, lintingConfiguration, new TranslationTypesConfigJava(), sourceConfig,
+    this(outputOptions, lintingConfiguration, errorsConfig, new TranslationTypesConfigJava(),
+        sourceConfig,
         targetConfig, profileDefinitions);
   }
 
@@ -106,7 +113,8 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig,
       List<ProfileConfiguration> profileDefinitions) {
-    this(outputOptions, null, new TranslationTypesConfigJava(), sourceConfig, targetConfig,
+    this(outputOptions, null, new CompilerErrors.Throws(), new TranslationTypesConfigJava(),
+        sourceConfig, targetConfig,
         profileDefinitions);
   }
 
@@ -151,7 +159,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
    * @throws IOException if packages config is missing
    */
   public static ScannerConfig getScannerConfig(File packageMapFile) throws IOException {
-    FileInputStream packageInput = new FileInputStream(packageMapFile.toString());
+    InputStream packageInput = new FileInputStream(packageMapFile.toString());
     Properties packageProperties = new Properties();
     packageProperties.load(packageInput);
     return new ScannerConfig(packageProperties.entrySet().stream()
@@ -230,6 +238,11 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   @Override
   public LintingConfig getLintingConfig() {
     return lintingConfiguration;
+  }
+
+  @Override
+  public CompilerErrorsConfig getErrorsConfig() {
+    return compilerErrorsConfig;
   }
 
   /**

@@ -198,7 +198,7 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
           profileDirectory == null ? "" : profileDirectory.toString(),
           testRunner,
           unitTestDirectoryPath,
-          null
+          null, null
       );
 
       if (packageMappingFile == null) {
@@ -218,6 +218,7 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
       return new DefaultTranslatorConfiguration(
           outputOptions,
           null,
+          new CompilerErrors.Throws(),
           sourceConfig,
           targetConfig,
           getConfiguredProfiles(profileDefinitionsFile));
@@ -252,6 +253,14 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
       returnCode = RUNTIME_ERR;
     }
     return returnCode;
+  }
+
+  void test() throws IOException {
+    TranslatorConfig translatorConfig = getTranslationConfig();
+    TranslatorRunner translator = new DefaultTranslatorRunner(translatorConfig);
+    translator.run();
+    translator.write();
+    translator.writeDependenciesConfigs();
   }
 }
 

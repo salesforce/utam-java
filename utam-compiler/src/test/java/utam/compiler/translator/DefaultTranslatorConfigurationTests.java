@@ -41,11 +41,11 @@ public class DefaultTranslatorConfigurationTests {
     TranslatorConfig config = new DefaultTranslatorConfiguration(
         options,
         null,
+        new CompilerErrors.Throws(),
         typesConfig,
         sourceConfig,
         targetConfig,
-        Collections.singletonList(profileConfiguration)
-    );
+        Collections.singletonList(profileConfiguration));
     assertThat(config, is(notNullValue()));
     assertThat(config.getConfiguredTarget(), is(sameInstance(targetConfig)));
     assertThat(config.getConfiguredSource(), is(sameInstance(sourceConfig)));
