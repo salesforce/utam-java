@@ -59,4 +59,11 @@ public interface TranslatorTargetConfig {
    * @return string with path
    */
   String getLintReportPath();
+
+  /**
+   * Absolute path to put errors report
+   *
+   * @return string with path or null
+   */
+  String getErrorsReportPath();
 }

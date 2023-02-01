@@ -71,7 +71,7 @@ public class JsonCompilerOutputTests {
   @Test
   public void testEmptyMap() {
     String res = new JsonCompilerOutput(new HashMap<>()).writeConfigToString();
-    assertThat(res, is(equalTo("{ }\n")));
+    assertThat(res, is(equalTo("")));
   }
 
   @Test
@@ -79,7 +79,7 @@ public class JsonCompilerOutputTests {
     Map<Profile, Map<String, String>> dependenciesMap = new HashMap<>();
     dependenciesMap.put(DUMMY_PROFILE, new HashMap<>());
     String res = new JsonCompilerOutput(dependenciesMap).writeConfigToString();
-    assertThat(res, is(equalTo("{ }\n")));
+    assertThat(res, is(equalTo("")));
   }
 
   @Test

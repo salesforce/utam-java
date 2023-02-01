@@ -9,6 +9,8 @@ package utam.core.declarative.translator;
 
 import java.io.IOException;
 import java.util.List;
+
+import utam.core.declarative.errors.CompilerErrorsContext;
 import utam.core.declarative.lint.LintingError;
 
 /**

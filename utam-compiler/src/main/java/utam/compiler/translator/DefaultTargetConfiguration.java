@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.translator.TranslatorTargetConfig;
 import utam.core.declarative.translator.UnitTestRunner;
@@ -35,6 +36,7 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
   private final String unitTestDirectory;
   private final UnitTestRunner unitTestRunner;
   private final String lintReportFile;
+  private final String compilerErrorsReportFile;
 
   /**
    * compiler output configuration
@@ -54,7 +56,8 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
       String resourcesHomePath,
       UnitTestRunner unitTestRunner,
       String unitTestDirectory,
-      String lintReportFile) {
+      String lintReportFile,
+      String compilerErrorsFile) {
     this.resourcesHomePath = resourcesHomePath;
     this.targetPath = targetPath;
     if (unitTestDirectory == null || unitTestDirectory.isEmpty()) {
@@ -64,6 +67,7 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
     }
     this.unitTestRunner = unitTestRunner == null ? UnitTestRunner.NONE : unitTestRunner;
     this.lintReportFile = getSarifFilePath(compilerRoot, lintReportFile);
+    this.compilerErrorsReportFile = getErrorsReportPath(resourcesHomePath, compilerErrorsFile);
   }
 
   /**
@@ -76,7 +80,7 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
    */
   public DefaultTargetConfiguration(String compilerRoot, String targetPath,
       String resourcesHomePath) {
-    this(compilerRoot, targetPath, resourcesHomePath, null, null, null);
+    this(compilerRoot, targetPath, resourcesHomePath, null, null, null, null);
   }
 
   private static String getSarifFilePath(String compilerRoot, String relativeFile) {
@@ -89,6 +93,15 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
     return
         targetPath.endsWith(File.separator) ? targetPath + fileName
             : targetPath + File.separator + fileName;
+  }
+
+  private static String getErrorsReportPath(String resourcesOutputDir, String errorsReportFile) {
+    if(errorsReportFile == null) {
+      return null;
+    }
+    String targetPath = resourcesOutputDir == null ? System.getProperty("user.dir") : resourcesOutputDir;
+    return targetPath.endsWith(File.separator) ? targetPath + errorsReportFile
+        : targetPath + File.separator + errorsReportFile;
   }
 
   @SuppressWarnings("UnstableApiUsage")
@@ -156,5 +169,10 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
   @Override
   public String getLintReportPath() {
     return lintReportFile;
+  }
+
+  @Override
+  public String getErrorsReportPath() {
+    return compilerErrorsReportFile;
   }
 }

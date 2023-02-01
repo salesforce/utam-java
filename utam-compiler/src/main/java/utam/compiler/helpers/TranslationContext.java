@@ -7,6 +7,7 @@
  */
 package utam.compiler.helpers;
 
+import static utam.compiler.UtamCompilationError.processParserError;
 import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.helpers.ElementContext.DOCUMENT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.Document.DOCUMENT_ELEMENT;
@@ -24,12 +25,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.core.JsonParser;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.ElementContext.Document;
 import utam.compiler.helpers.ElementContext.Self;
 import utam.compiler.helpers.TypeUtilities.PageObjectWithNamesCollisionType;
 import utam.compiler.lint.PageObjectLintingImpl;
 import utam.compiler.representation.BasicElementGetterMethod;
+import utam.compiler.translator.CompilerErrors;
+import utam.compiler.translator.CompilerErrors.StringError;
+import utam.core.declarative.errors.CompilerErrorsContext;
 import utam.core.declarative.lint.PageObjectLinting;
 import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -66,6 +72,8 @@ public class TranslationContext {
   private final PageObjectLinting contextForLinting;
   private boolean isImplementationPageObject = false;
   private TypeProvider pageObjectInterfaceType;
+
+  private CompilerErrorsContext.CompilerError error = null;
 
   /**
    * Initializes a new instance of the TranslationContext class
@@ -400,4 +408,30 @@ public class TranslationContext {
   public PageObjectLinting getLintingObject() {
     return contextForLinting;
   }
+
+  /**
+   * Process compiler error - depending on config either throw or report
+   *
+   * @param parser           instance of the parser
+   * @param compilationError thrown error
+   */
+  public void processError(JsonParser parser, Exception compilationError) {
+    UtamCompilationError.ErrorSupplier errorSupplier = processParserError(parser, compilationError,
+        pageObjectURI);
+    if (this.translatorConfiguration.getErrorsConfig().isInterrupt()) {
+      throw new UtamCompilationError(errorSupplier.getMessage(), errorSupplier.getCause());
+    } else {
+      this.error = new StringError(errorSupplier.getMessage());
+    }
+  }
+
+  /**
+   * If generation was interrupted, return the error
+   *
+   * @return error object or null
+   */
+  public CompilerErrorsContext.CompilerError getCompilerError() {
+    return this.error;
+  }
+
 }
