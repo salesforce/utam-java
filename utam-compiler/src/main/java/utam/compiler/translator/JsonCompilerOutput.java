@@ -67,6 +67,9 @@ class JsonCompilerOutput {
    * @throws IOException if file operation fails
    */
   void writeConfig(Writer writer) throws IOException {
+    if(mapping.isEmpty()) {
+      return;
+    }
     SimpleModule module = new SimpleModule();
     module.addSerializer(Mapping.class, new Serializer());
     ObjectMapper mapper = new ObjectMapper();

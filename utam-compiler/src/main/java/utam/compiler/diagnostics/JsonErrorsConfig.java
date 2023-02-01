@@ -9,9 +9,9 @@ package utam.compiler.diagnostics;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -59,11 +59,11 @@ public class JsonErrorsConfig {
           .constructCollectionType(List.class, ErrorDetails.class);
       List<ErrorDetails> errors = mapper.readValue(config, javaType);
       JsonErrorsConfig jsonErrorsConfig = new JsonErrorsConfig();
-      errors.forEach(errorDetails -> jsonErrorsConfig.errorDetailsMap.put(errorDetails.code, errorDetails));
+      errors.forEach(
+          errorDetails -> jsonErrorsConfig.errorDetailsMap.put(errorDetails.code, errorDetails));
       return jsonErrorsConfig;
-    } catch (IOException e) {
-      throw new IllegalStateException(
-          String.format(ERR_READING_ERROR_CONFIG, configName) + e.getMessage());
+    } catch (Exception e) {
+      throw new IllegalStateException(String.format(ERR_READING_ERROR_CONFIG, configName), e);
     }
   }
 
