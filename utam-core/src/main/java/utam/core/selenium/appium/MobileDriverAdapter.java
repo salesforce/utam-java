@@ -85,12 +85,11 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
           warning("Context switch to webview '" + contextHandle + "' failed. Error : " + e.getMessage());
           continue;
         }
-        if (newDriver == null) {
-          continue; // ignore null and try next handle
-        }
-        String newTitle = newDriver.getTitle();
-        if (!newTitle.isEmpty() && newTitle.equalsIgnoreCase(title)) {
-          return newDriver;
+        if (newDriver != null) {
+          String newTitle = newDriver.getTitle();
+          if (!newTitle.isEmpty() && newTitle.equalsIgnoreCase(title)) {
+            return newDriver;
+          }
         }
       }
     }
