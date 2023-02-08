@@ -82,7 +82,7 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
         try {
           newDriver = (AppiumDriver) appiumDriver.context(contextHandle);
         } catch (WebDriverException e) {
-          warning("Context switch to webview '" + contextHandle + "' failed. Error : " + e.getMessage());
+          warning(String.format("Context switch to webview '%s' failed. Error: %s", contextHandle, e.getMessage()));
           continue;
         }
         if (newDriver != null) {
