@@ -16,6 +16,21 @@
           "apply": "getUrl"
         }
       ]
+    },
+    {
+      "name": "testSwitch",
+      "compose": [
+        {
+          "element": "navigation",
+          "apply": "switchToWindow",
+          "args": [
+            {
+              "name": "URL",
+              "type": "string"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
