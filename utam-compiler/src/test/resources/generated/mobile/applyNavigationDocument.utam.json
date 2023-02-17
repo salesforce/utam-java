@@ -12,6 +12,16 @@
           "apply": "forward"
         },
         {
+          "element": "navigation",
+          "apply": "switchToWindow",
+            "args": [
+              {
+                "name": "url",
+                "type": "string"
+              }
+            ]
+        },
+        {
           "element": "document",
           "apply": "getUrl"
         }
