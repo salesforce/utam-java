@@ -16,12 +16,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
+
+import org.openqa.selenium.*;
 import org.openqa.selenium.WebDriver.Options;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.FluentWait;
 import utam.core.driver.Driver;
 import utam.core.driver.DriverConfig;
@@ -230,6 +227,25 @@ public class DriverAdapter implements Driver {
 
   @Override
   public WebDriver.TargetLocator switchTo() { return this.driver.switchTo(); }
+
+  @Override
+  public Rect getRect() {
+    WebDriver.Window window = this.driver.manage().window();
+    Point windowPoint = window.getPosition();
+    Dimension windowSize = window.getSize();
+    return new Rect(windowPoint, windowSize);
+  }
+
+  @Override
+  public void setRect(Rect rect) {
+    this.driver.manage().window().setPosition(rect.getPoint());
+    this.driver.manage().window().setSize(rect.getDimension());
+  }
+
+  @Override
+  public void close() {
+    this.driver.close();
+  }
 
   static class DriverWait extends FluentWait<Driver> {
 
