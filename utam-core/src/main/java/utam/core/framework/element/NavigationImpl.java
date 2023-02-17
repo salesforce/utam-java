@@ -9,6 +9,7 @@ package utam.core.framework.element;
 
 import utam.core.driver.Driver;
 import utam.core.driver.Navigation;
+import utam.core.driver.Window;
 import utam.core.framework.consumer.UtamError;
 
 import java.util.Set;
@@ -40,7 +41,7 @@ public class NavigationImpl implements Navigation {
   }
 
   @Override
-  public void switchToWindow(String url) {
+  public Window switchToWindow(String url) {
     // save the current url in case we need to revert to it
     String initialHandle = this.driverAdapter.getWindowHandle();
 
@@ -60,6 +61,25 @@ public class NavigationImpl implements Navigation {
       throw new UtamError(ERR_NO_WINDOW_WITH_URL + url);
     }
 
-    //TODO need to return "Window" - ask what that is
+    return new WindowImpl(this.driverAdapter);
+  }
+
+  @Override
+  public void closeWindow(String targetUrl) {
+    String currentUrl = this.driverAdapter.getUrl();
+
+    if (targetUrl.equals(currentUrl)) {
+      this.driverAdapter.close();
+    } else {
+      this.switchToWindow(targetUrl);
+      this.driverAdapter.close();
+      this.switchToWindow(currentUrl);
+    }
+
+  }
+
+  @Override
+  public void closeWindow() {
+    this.driverAdapter.close();
   }
 }
