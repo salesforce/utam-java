@@ -37,6 +37,12 @@ the repository, and execute
 
 This will update or install the required dependencies, and build the project.
 
+Note that when building the project, either from a command line or within
+an IDE, compilation is expected to be done on the entire project, not on
+individual modules. In the command line, this means the above command should
+be executed at the root directory of the project clone; in an IDE, you should
+execute compilation on the entire project in the IDE.
+
 ## Contributing
 Contributions are handled using GitHub pull requests. All new code must be
 accompanied by unit tests, and all existing unit tests must pass before
