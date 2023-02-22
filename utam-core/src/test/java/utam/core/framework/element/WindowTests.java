@@ -3,7 +3,7 @@ package utam.core.framework.element;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
@@ -11,6 +11,7 @@ import org.openqa.selenium.WebDriver;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
+import utam.core.driver.Window;
 import utam.core.selenium.element.Rect;
 
 /**
@@ -59,7 +60,13 @@ public class WindowTests {
 
     @Test
     public void testClose() {
+        Window window = new WindowImpl(mock.getDriverAdapter());
 
+        when(driver.getWindowHandle()).thenReturn("www.example.com");
+
+        window.close();
+
+        verify(driver, times(1)).close();
     }
 
     @Test
