@@ -59,6 +59,8 @@ public class MockUtilities {
   private final ElementAdapter elementAdapter;
   private final BasePageElement utamElement;
   private final FrameElement frameElement;
+  private final WebDriver.Options optionsMock;
+  private final WebDriver.Window windowMock;
 
   public MockUtilities(Class<? extends WebDriver> driverType) {
     webDriverMock = mock(driverType, withSettings().extraInterfaces(
@@ -77,6 +79,12 @@ public class MockUtilities {
     }
     TargetLocator targetLocator = mock(TargetLocator.class);
     when(webDriverMock.switchTo()).thenReturn(targetLocator);
+
+    optionsMock = mock(WebDriver.Options.class);
+    windowMock = mock(WebDriver.Window.class);
+
+    when(webDriverMock.manage()).thenReturn(optionsMock);
+    when(webDriverMock.manage().window()).thenReturn(windowMock);
   }
 
   public MockUtilities() {
@@ -171,6 +179,10 @@ public class MockUtilities {
   public BasePageElement getUtamElement() {
     return utamElement;
   }
+
+  public WebDriver.Options getOtionnsMock() { return optionsMock; }
+
+  public WebDriver.Window getWindowMock() { return windowMock; }
 
   //sometimes Driver Adaptor should be mocked to intercept method calls
   public static class MockDriver extends MockUtilities {
