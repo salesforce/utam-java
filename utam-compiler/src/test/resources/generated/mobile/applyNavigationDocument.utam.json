@@ -16,10 +16,24 @@
           "apply": "switchToWindow",
             "args": [
               {
-                "name": "url",
+                "name": "url1",
                 "type": "string"
               }
             ]
+        },
+        {
+          "element": "navigation",
+          "apply": "closeWindow",
+          "args": [
+            {
+              "name": "url2",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "element": "navigation",
+          "apply": "closeWindow"
         },
         {
           "element": "document",
