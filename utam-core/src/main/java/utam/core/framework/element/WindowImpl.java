@@ -10,6 +10,7 @@ package utam.core.framework.element;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.driver.Window;
+import utam.core.framework.base.PageObjectsFactory;
 import utam.core.selenium.element.Rect;
 
 /**
@@ -21,9 +22,11 @@ public class WindowImpl implements Window {
 
     private final Driver driverAdapter;
     private final String windowHandle;
+    private final PageObjectsFactory factory;
 
-    public WindowImpl(Driver driverAdapter) {
-        this.driverAdapter = driverAdapter;
+    public WindowImpl(PageObjectsFactory factory) {
+        this.factory = factory;
+        this.driverAdapter = factory.getDriver();
         this.windowHandle = driverAdapter.getWindowHandle();
     }
 
@@ -48,7 +51,6 @@ public class WindowImpl implements Window {
 
     @Override
     public Document getDocument() {
-        //TODO return relevant document, Jim should reply on slack to tell us what he wants this to do
-        return null;
+        return this.factory.getDocument();
     }
 }

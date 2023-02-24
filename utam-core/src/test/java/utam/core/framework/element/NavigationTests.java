@@ -43,7 +43,7 @@ public class NavigationTests {
     Navigation navigationMock = mock(Navigation.class);
     WebDriver driver = mock.getWebDriverMock();
     when(driver.navigate()).thenReturn(navigationMock);
-    new NavigationImpl(mock.getDriverAdapter()).back();
+    new NavigationImpl(mock.getFactory()).back();
     verify(navigationMock, times(1)).back();
   }
 
@@ -53,7 +53,7 @@ public class NavigationTests {
     Navigation navigationMock = mock(Navigation.class);
     AppiumDriver driver = mock.getAppiumDriverMock();
     when(driver.navigate()).thenReturn(navigationMock);
-    new NavigationImpl(mock.getDriverAdapter()).forward();
+    new NavigationImpl(mock.getFactory()).forward();
     verify(navigationMock, times(1)).forward();
   }
 
@@ -86,7 +86,7 @@ public class NavigationTests {
     when(driver.getCurrentUrl()).thenAnswer(invocation -> handleUrlMap.get(driver.getWindowHandle()));
 
     // Switch to test_url and assert the URL
-    new NavigationImpl(mock.getDriverAdapter()).switchToWindow(TEST_URL);
+    new NavigationImpl(mock.getFactory()).switchToWindow(TEST_URL);
     assertThat(driver.getCurrentUrl(), is(equalTo(TEST_URL)));
   }
 }

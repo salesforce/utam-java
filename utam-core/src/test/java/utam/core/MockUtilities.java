@@ -173,7 +173,7 @@ public class MockUtilities {
   }
 
   public Navigation getNavigation() {
-    return new NavigationImpl(getDriverAdapter());
+    return new NavigationImpl(getFactory());
   }
 
   public BasePageElement getUtamElement() {

@@ -10,6 +10,7 @@ package utam.core.framework.element;
 import utam.core.driver.Driver;
 import utam.core.driver.Navigation;
 import utam.core.driver.Window;
+import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.consumer.UtamError;
 
 import java.util.Set;
@@ -25,9 +26,11 @@ public class NavigationImpl implements Navigation {
   static final String ERR_NO_WINDOW_WITH_URL = "can't find window with url ";
 
   private final Driver driverAdapter;
+  private final PageObjectsFactory factory;
 
-  public NavigationImpl(Driver driverAdapter) {
-    this.driverAdapter = driverAdapter;
+  public NavigationImpl(PageObjectsFactory factory) {
+    this.factory = factory;
+    this.driverAdapter = factory.getDriver();
   }
 
   @Override
@@ -61,7 +64,7 @@ public class NavigationImpl implements Navigation {
       throw new UtamError(ERR_NO_WINDOW_WITH_URL + url);
     }
 
-    return new WindowImpl(this.driverAdapter);
+    return new WindowImpl(this.factory);
   }
 
   @Override

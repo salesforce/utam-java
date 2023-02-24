@@ -37,7 +37,7 @@ public class WindowTests {
         when(driver.manage().window().getPosition()).thenReturn(p);
         when(driver.manage().window().getSize()).thenReturn(d);
 
-        Rect rect = new WindowImpl(mock.getDriverAdapter()).getRect();
+        Rect rect = new WindowImpl(mock.getFactory()).getRect();
         assertThat(rect.getPoint(), is(equalTo(p)));
         assertThat(rect.getDimension(), is(equalTo(d)));
     }
@@ -51,7 +51,7 @@ public class WindowTests {
         when(driver.manage().window().getPosition()).thenReturn(p);
         when(driver.manage().window().getSize()).thenReturn(d);
 
-        WindowImpl window = new WindowImpl(mock.getDriverAdapter());
+        WindowImpl window = new WindowImpl(mock.getFactory());
         window.setRect(r);
 
         assertThat(window.getRect().getPoint(), is(equalTo(r.getPoint())));
@@ -60,7 +60,7 @@ public class WindowTests {
 
     @Test
     public void testClose() {
-        Window window = new WindowImpl(mock.getDriverAdapter());
+        Window window = new WindowImpl(mock.getFactory());
 
         when(driver.getWindowHandle()).thenReturn("www.example.com");
 
