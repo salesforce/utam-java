@@ -7,10 +7,13 @@
  */
 package utam.core.selenium.appium;
 
+import static utam.core.framework.UtamLogger.warning;
+
 import io.appium.java_client.AppiumDriver;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import utam.core.driver.Driver;
 import utam.core.driver.DriverConfig;
@@ -75,10 +78,18 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
     Set<String> contextHandles = appiumDriver.getContextHandles();
     for (String contextHandle : contextHandles) {
       if (!contextHandle.equals(NATIVE_CONTEXT_HANDLE)) {
-        AppiumDriver newDriver = (AppiumDriver) appiumDriver.context(contextHandle);
-        String newTitle = newDriver.getTitle();
-        if (!newTitle.isEmpty() && newTitle.equalsIgnoreCase(title)) {
-          return newDriver;
+        AppiumDriver newDriver;
+        try {
+          newDriver = (AppiumDriver) appiumDriver.context(contextHandle);
+        } catch (WebDriverException e) {
+          warning(String.format("Context switch to webview '%s' failed. Error: %s", contextHandle, e.getMessage()));
+          continue;
+        }
+        if (newDriver != null) {
+          String newTitle = newDriver.getTitle();
+          if (!newTitle.isEmpty() && newTitle.equalsIgnoreCase(title)) {
+            return newDriver;
+          }
         }
       }
     }
