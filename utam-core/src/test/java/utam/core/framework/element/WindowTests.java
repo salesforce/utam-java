@@ -71,7 +71,8 @@ public class WindowTests {
 
     @Test
     public void testGetDocument() {
-        //TODO write test
+        Window window = new WindowImpl(mock.getFactory());
 
+        assertThat(window.getDocument(), is(equalTo(mock.getFactory().getDocument())));
     }
 }
