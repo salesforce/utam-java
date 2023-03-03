@@ -27,14 +27,14 @@ public class UtamShadowElement_Tests {
     test.addRawString("shadow", "{} ");
     Exception e = test.expectCompilerError();
     assertThat(e.getMessage(), containsString(
-        "error 12: root shadow: property \"elements\" should be a not empty array"));
+        "error 12: root shadow: property \"elements\" should be a non-empty array"));
   }
 
   @Test
   public void testNestedShadowMissingElements() {
     Exception e = expectCompilerErrorFromFile("validate/shadow/nestedElementsMissing");
     assertThat(e.getMessage(), containsString(
-        "error 12: element \"parent\" shadow: property \"elements\" should be a not empty array"));
+        "error 12: element \"parent\" shadow: property \"elements\" should be a non-empty array"));
   }
 
   @Test
@@ -48,6 +48,6 @@ public class UtamShadowElement_Tests {
   public void testNestedShadowElementsEmptyArray() {
     Exception e = expectCompilerErrorFromFile("validate/shadow/nestedElementsNotArray");
     assertThat(e.getMessage(), containsString(
-        "error 12: element \"parent\" shadow: property \"elements\" should be a not empty array"));
+        "error 12: element \"parent\" shadow: property \"elements\" should be a non-empty array"));
   }
 }

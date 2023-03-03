@@ -83,7 +83,7 @@ public class UtamProfile_Tests {
     jsonTest.addString("implements", "my/pageobjects/type");
     Exception e = jsonTest.expectCompilerError();
     assertThat(e.getMessage(), containsString("error 12: page object root: "
-        + "property \"profile\" should be a not empty array"));
+        + "property \"profile\" should be a non-empty array"));
   }
 
   @Test
