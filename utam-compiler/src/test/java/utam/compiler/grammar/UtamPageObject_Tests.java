@@ -100,7 +100,7 @@ public class UtamPageObject_Tests {
     UtamError e = expectThrows(UtamCompilationError.class,
         () -> new DeserializerUtilities().getResultFromString(json));
     assertThat(e.getMessage(),
-        containsString("error 901: non root page object can't have selector"));
+        containsString("error 901: non-root page object can't have selector"));
   }
 
   /**
@@ -190,7 +190,7 @@ public class UtamPageObject_Tests {
       UtamError e = expectThrows(UtamError.class,
           () -> new DeserializerUtilities().getResultFromString(json));
       assertThat(e.getMessage(), containsString(
-          "error 13: page object root: property \"metadata\" should be a non empty object"));
+          "error 13: page object root: property \"metadata\" should be a non-empty object"));
     });
   }
 

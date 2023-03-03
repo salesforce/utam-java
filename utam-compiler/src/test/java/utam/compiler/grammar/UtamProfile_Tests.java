@@ -47,7 +47,7 @@ public class UtamProfile_Tests {
     test.addString("implements", "my/pageobjects/type");
     Exception e = test.expectCompilerError();
     assertThat(e.getMessage(), containsString(
-        "error 806: profile \"name\": values can either be string or non empty string array"));
+        "error 806: profile \"name\": values can either be string or non-empty string array"));
   }
 
   @Test
@@ -57,7 +57,7 @@ public class UtamProfile_Tests {
     jsonTest.addString("implements", "my/pageobjects/type");
     Exception e = jsonTest.expectCompilerError();
     assertThat(e.getMessage(),
-        containsString("error 11: profile \"name\": array member should be a non empty string, instead found number"));
+        containsString("error 11: profile \"name\": array member should be a non-empty string, instead found number"));
   }
 
   @Test

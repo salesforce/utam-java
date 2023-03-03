@@ -80,7 +80,7 @@ public class UtamMethodActionGetterTests {
 
   @Test
   public void testChainCantBeApplied() {
-    String expectedError = "error 614: method \"test\" statement: to use chain previous statement should return custom type, but it returns \"BasicElement\"";
+    String expectedError = "error 614: method \"test\" statement: to use chain, previous statement should return custom type, but it returns \"BasicElement\"";
     testThrows("chainNotAllowed", expectedError);
   }
 
