@@ -151,7 +151,7 @@ public class UtamRootDescriptionTests {
         () -> new DeserializerUtilities()
             .getResultFromString("{ \"description\" : { \"text\" : [] } }"));
     assertThat(e.getMessage(), containsString(
-        "error 12: page object description: property \"text\" should be a not empty array"));
+        "error 12: page object description: property \"text\" should be a non-empty array"));
   }
 
   @Test

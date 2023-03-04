@@ -49,6 +49,6 @@ public class UtamRootSelectorTests {
     RuntimeException e = expectThrows(
         UtamCompilationError.class,  () -> new DeserializerUtilities().getResultFromString(json));
     assertThat(e.getMessage(), containsString("error 1003: element \"root\" selector: " +
-            "only one of one of \"css\", \"accessid\", \"uiautomator\" or \"classchain\" can be set"));
+            "only one of \"css\", \"accessid\", \"uiautomator\" or \"classchain\" can be set"));
   }
 }

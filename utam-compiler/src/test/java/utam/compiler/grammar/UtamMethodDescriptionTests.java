@@ -187,7 +187,7 @@ public class UtamMethodDescriptionTests {
     Exception e = expectThrows(UtamCompilationError.class, () -> getMethodDeclaration("validate/method_comments/empty_text_array",
         "test"));
     assertThat(e.getMessage(),
-        containsString("error 12: method \"test\" description: property \"text\" should be a not empty array"));
+        containsString("error 12: method \"test\" description: property \"text\" should be a non-empty array"));
   }
 
   @Test

@@ -164,6 +164,6 @@ public class UtamMethodActionApplyRootTests {
         "[{ \"name\" : \"test\", \"compose\" : [ true ]}]");
     Exception e = test.expectCompilerError();
     assertThat(e.getMessage(), containsString(
-        "error 13: method \"test\": compose statement should be a non empty object"));
+        "error 13: method \"test\": compose statement should be a non-empty object"));
   }
 }
