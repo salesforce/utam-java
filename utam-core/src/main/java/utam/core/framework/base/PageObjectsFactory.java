@@ -44,7 +44,12 @@ public interface PageObjectsFactory {
    */
   void bootstrap(PageObject instance, Element element, Locator locator);
 
-    Document getDocument();
+  /**
+   * Get Document instance
+   *
+   * @return instance of the document implementation
+   */
+  Document getDocument();
 
     /**
    * create instance of a Root Page Object
