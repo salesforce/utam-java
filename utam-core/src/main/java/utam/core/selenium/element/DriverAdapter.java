@@ -244,8 +244,12 @@ public class DriverAdapter implements Driver {
 
   @Override
   public void setRect(Rect rect) {
-    this.driver.manage().window().setPosition(rect.getPoint());
-    this.driver.manage().window().setSize(rect.getDimension());
+    int posX = rect.getX();
+    int posY = rect.getY();
+    int width = rect.getWidth();
+    int height = rect.getHeight();
+    this.driver.manage().window().setPosition(new Point(posX, posY));
+    this.driver.manage().window().setSize(new Dimension(width, height));
   }
 
   @Override

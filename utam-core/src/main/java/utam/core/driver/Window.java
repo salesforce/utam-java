@@ -7,7 +7,6 @@
  */
 package utam.core.driver;
 
-import org.openqa.selenium.Rectangle;
 import utam.core.selenium.element.Rect;
 
 /**

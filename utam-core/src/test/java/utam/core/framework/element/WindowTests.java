@@ -38,8 +38,10 @@ public class WindowTests {
         when(driver.manage().window().getSize()).thenReturn(d);
 
         Rect rect = new WindowImpl(mock.getFactory()).getRect();
-        assertThat(rect.getPoint(), is(equalTo(p)));
-        assertThat(rect.getDimension(), is(equalTo(d)));
+        assertThat(rect.getX(), is(equalTo(p.getX())));
+        assertThat(rect.getY(), is(equalTo(p.getY())));
+        assertThat(rect.getWidth(), is(equalTo(d.getWidth())));
+        assertThat(rect.getHeight(), is(equalTo(d.getHeight())));
     }
 
     @Test
@@ -54,8 +56,10 @@ public class WindowTests {
         WindowImpl window = new WindowImpl(mock.getFactory());
         window.setRect(r);
 
-        assertThat(window.getRect().getPoint(), is(equalTo(r.getPoint())));
-        assertThat(window.getRect().getDimension(), is(equalTo(r.getDimension())));
+        assertThat(window.getRect().getX(), is(equalTo(r.getX())));
+        assertThat(window.getRect().getY(), is(equalTo(r.getY())));
+        assertThat(window.getRect().getWidth(), is(equalTo(r.getWidth())));
+        assertThat(window.getRect().getHeight(), is(equalTo(r.getHeight())));
     }
 
     @Test
