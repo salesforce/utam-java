@@ -180,10 +180,6 @@ public class MockUtilities {
     return utamElement;
   }
 
-  public WebDriver.Options getOtionnsMock() { return optionsMock; }
-
-  public WebDriver.Window getWindowMock() { return windowMock; }
-
   //sometimes Driver Adaptor should be mocked to intercept method calls
   public static class MockDriver extends MockUtilities {
 
