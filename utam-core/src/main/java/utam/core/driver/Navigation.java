@@ -7,9 +7,6 @@
  */
 package utam.core.driver;
 
-import java.net.URI;
-import java.net.URL;
-
 /**
  * Navigation interface exposing commands to navigate browsing web and mobile contexts
  *
