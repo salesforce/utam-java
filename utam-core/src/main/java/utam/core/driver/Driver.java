@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import org.openqa.selenium.WebDriver;
 import utam.core.element.Element;
 import utam.core.element.Locator;
 import utam.core.framework.context.PlatformType;
@@ -160,7 +159,7 @@ public interface Driver {
 
   Set<String> getWindowHandles();
 
-  WebDriver.TargetLocator switchTo();
+  void switchTo(String windowHandle);
 
   Rect getRect();
 

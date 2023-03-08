@@ -43,9 +43,9 @@ public class WindowImpl implements Window {
         if (currentWindowHandle.equals(this.windowHandle)) {
             this.driverAdapter.close();
         } else {
-            this.driverAdapter.switchTo().window(this.windowHandle);
+            this.driverAdapter.switchTo(this.windowHandle);
             this.driverAdapter.close();
-            this.driverAdapter.switchTo().window(currentWindowHandle);
+            this.driverAdapter.switchTo(currentWindowHandle);
         }
     }
 

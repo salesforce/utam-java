@@ -232,7 +232,7 @@ public class DriverAdapter implements Driver {
   public Set<String> getWindowHandles() { return this.driver.getWindowHandles(); }
 
   @Override
-  public WebDriver.TargetLocator switchTo() { return this.driver.switchTo(); }
+  public void switchTo(String windowHandle) { this.driver.switchTo().window(windowHandle); }
 
   @Override
   public Rect getRect() {
