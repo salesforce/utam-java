@@ -41,12 +41,12 @@ public class UtamMethodTests {
 
   @Test
   public void testComposeEmptyStatementsThrows() {
-    test("emptyCompose", "error 12: method \"test\": property \"compose\" should be a not empty array");
+    test("emptyCompose", "error 12: method \"test\": property \"compose\" should be a non-empty array");
   }
 
   @Test
   public void testComposeNullStatementsThrows() {
-    test("nullCompose", "error 12: method \"test\": property \"compose\" should be a not empty array");
+    test("nullCompose", "error 12: method \"test\": property \"compose\" should be a non-empty array");
   }
 
   @Test

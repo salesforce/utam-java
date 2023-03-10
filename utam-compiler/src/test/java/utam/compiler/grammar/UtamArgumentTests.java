@@ -201,7 +201,7 @@ public class UtamArgumentTests {
     Exception e = expectThrows(UtamCompilationError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
         containsString(
-            "error 12: method \"test\": property \"args\" should be a not empty array"));
+            "error 12: method \"test\": property \"args\" should be a non-empty array"));
   }
 
   @Test
@@ -210,7 +210,7 @@ public class UtamArgumentTests {
     Exception e = expectThrows(UtamCompilationError.class, () -> testArgs(json));
     assertThat(e.getMessage(),
         containsString(
-            "error 13: method \"test\": argument should be a non empty object"));
+            "error 13: method \"test\": argument should be a non-empty object"));
   }
 
   @Test

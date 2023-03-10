@@ -16,15 +16,15 @@
     "code": 10
   },
   {
-    "message": "%s: array member should be a non empty string, instead found %s",
+    "message": "%s: array member should be a non-empty string, instead found %s",
     "code": 11
   },
   {
-    "message": "%s: property \"%s\" should be a not empty array",
+    "message": "%s: property \"%s\" should be a non-empty array",
     "code": 12
   },
   {
-    "message": "%s: %s should be a non empty object",
+    "message": "%s: %s should be a non-empty object",
     "code": 13
   },
   {
@@ -216,7 +216,7 @@
   },
   {
     "code": 608,
-    "message": "method \"%s\" statement: \"returnSelf\" can only be invoked from a last statement"
+    "message": "method \"%s\" statement: \"returnSelf\" can only be invoked from the last statement"
   },
   {
     "code": 609,
@@ -240,7 +240,7 @@
   },
   {
     "code": 614,
-    "message": "method \"%s\" statement: to use chain previous statement should return custom type, but it returns \"%s\""
+    "message": "method \"%s\" statement: to use chain, previous statement should return custom type, but it returns \"%s\""
   },
   {
     "code": 615,
@@ -286,7 +286,7 @@
   },
   {
     "code": 806,
-    "message": "profile \"%s\": values can either be string or non empty string array"
+    "message": "profile \"%s\": values can either be string or non-empty string array"
   },
   {
     "code": 900,
@@ -294,7 +294,7 @@
   },
   {
     "code": 901,
-    "message": "non root page object can't have selector",
+    "message": "non-root page object can't have selector",
     "docs": "https://utam.dev/grammar/spec#root-element",
     "tip": "either remove \"selector\" property or remove [\"root\" : true]"
   },
@@ -327,11 +327,7 @@
   },
   {
     "code": 1003,
-    "message": "%s selector: only one of one of \"css\", \"accessid\", \"uiautomator\" or \"classchain\" can be set"
-  },
-  {
-    "code": 1003,
-    "message": "%s selector: only one of one of \"css\", \"accessid\", \"uiautomator\" or \"classchain\" can be set"
+    "message": "%s selector: only one of \"css\", \"accessid\", \"uiautomator\" or \"classchain\" can be set"
   },
   {
     "code": 1004,
