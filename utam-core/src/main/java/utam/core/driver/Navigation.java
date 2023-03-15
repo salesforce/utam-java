@@ -27,13 +27,15 @@ public interface Navigation {
 
   /**
    * Command to navigate to an open window with the given url
+   *
+   * @param url the url of the window to navigate to
    */
   Window switchToWindow(String url);
 
   /**
    * Closes the window navigated to the specified URL
    *
-   * @param url
+   * @param url the url of the window to be closed
    */
   void closeWindow(String url);
 
