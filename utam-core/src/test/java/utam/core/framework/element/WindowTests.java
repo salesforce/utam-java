@@ -67,18 +67,14 @@ public class WindowTests {
     @Test
     public void testClose() {
         Window window = new WindowImpl(mock.getFactory());
-
         when(driver.getWindowHandle()).thenReturn("www.example.com");
-
         window.close();
-
         verify(driver, times(1)).close();
     }
 
     @Test
     public void testGetDocument() {
         Window window = new WindowImpl(mock.getFactory());
-
         assertThat(window.getDocument(), is(equalTo(mock.getFactory().getDocument())));
     }
 }
