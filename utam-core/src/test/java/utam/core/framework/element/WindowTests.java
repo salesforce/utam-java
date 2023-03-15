@@ -22,8 +22,8 @@ import utam.core.selenium.element.Rect;
  * @author william.sandy
  */
 public class WindowTests {
-    MockUtilities mock;
-    WebDriver driver;
+    private MockUtilities mock;
+    private WebDriver driver;
 
     @BeforeMethod
     void setup() {
