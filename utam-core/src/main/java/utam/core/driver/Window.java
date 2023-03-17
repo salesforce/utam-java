@@ -37,6 +37,7 @@ public interface Window {
 
   /**
    * Gets the document object associated with this window
+   *
    * @return document object associated with this window
    */
   Document getDocument();
