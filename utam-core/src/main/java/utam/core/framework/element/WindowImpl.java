@@ -20,37 +20,41 @@ import utam.core.selenium.element.Rect;
  */
 public class WindowImpl implements Window {
 
-    private final Driver driverAdapter;
-    private final String windowHandle;
-    private final PageObjectsFactory factory;
+  private final Driver driverAdapter;
+  private final String windowHandle;
+  private final PageObjectsFactory factory;
 
-    public WindowImpl(PageObjectsFactory factory) {
-        this.factory = factory;
-        this.driverAdapter = factory.getDriver();
-        this.windowHandle = driverAdapter.getWindowHandle();
+  public WindowImpl(PageObjectsFactory factory) {
+    this.factory = factory;
+    this.driverAdapter = factory.getDriver();
+    this.windowHandle = driverAdapter.getWindowHandle();
+  }
+
+  @Override
+  public Rect getRect() {
+    return this.driverAdapter.getRect();
+  }
+
+  @Override
+  public void setRect(Rect rect) {
+    this.driverAdapter.setRect(rect);
+  }
+
+  @Override
+  public void close() {
+    String currentWindowHandle = this.driverAdapter.getWindowHandle();
+
+    if (currentWindowHandle.equals(this.windowHandle)) {
+      this.driverAdapter.close();
+    } else {
+      this.driverAdapter.switchTo(this.windowHandle);
+      this.driverAdapter.close();
+      this.driverAdapter.switchTo(currentWindowHandle);
     }
+  }
 
-    @Override
-    public Rect getRect() { return this.driverAdapter.getRect(); }
-
-    @Override
-    public void setRect(Rect rect) { this.driverAdapter.setRect(rect); }
-
-    @Override
-    public void close() {
-        String currentWindowHandle = this.driverAdapter.getWindowHandle();
-
-        if (currentWindowHandle.equals(this.windowHandle)) {
-            this.driverAdapter.close();
-        } else {
-            this.driverAdapter.switchTo(this.windowHandle);
-            this.driverAdapter.close();
-            this.driverAdapter.switchTo(currentWindowHandle);
-        }
-    }
-
-    @Override
-    public Document getDocument() {
-        return this.factory.getDocument();
-    }
+  @Override
+  public Document getDocument() {
+    return this.factory.getDocument();
+  }
 }
