@@ -64,8 +64,8 @@ public class DriverAdapter implements Driver {
     Options options = this.driver.manage();
     if (options != null && options.timeouts() != null) { // for mock both can be null
       options
-          .timeouts()
-          .implicitlyWait(this.driverConfig.getImplicitTimeout().toSeconds(), TimeUnit.SECONDS);
+              .timeouts()
+              .implicitlyWait(this.driverConfig.getImplicitTimeout().toSeconds(), TimeUnit.SECONDS);
     }
   }
 
@@ -80,13 +80,13 @@ public class DriverAdapter implements Driver {
       return new Object[0];
     }
     return Stream.of(parameters).map(p ->
-        p instanceof ElementAdapter ? ((ElementAdapter) p).getWebElement() : p
+            p instanceof ElementAdapter ? ((ElementAdapter) p).getWebElement() : p
     ).toArray(Object[]::new);
   }
 
   static String getNotFoundErr(Locator by) {
     return String
-        .format("%s with locator '%s'", ERR_ELEMENT_NOT_FOUND_PREFIX, by.getValue().toString());
+            .format("%s with locator '%s'", ERR_ELEMENT_NOT_FOUND_PREFIX, by.getValue().toString());
   }
 
   static WebDriver getSeleniumDriver(Driver driver) {
@@ -158,7 +158,7 @@ public class DriverAdapter implements Driver {
     Duration waitDuration = timeout == null ? driverConfig.getExplicitTimeout() : timeout;
     String errorMessage = message == null ? "wait for condition" : message;
     DriverWait driverWait = new DriverWait(this, waitDuration, driverConfig.getPollingInterval(),
-        errorMessage);
+            errorMessage);
     return driverWait.until((driver) -> isTrue.get());
   }
 
