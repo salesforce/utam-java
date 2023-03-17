@@ -22,59 +22,59 @@ import utam.core.selenium.element.Rect;
  * @author william.sandy
  */
 public class WindowTests {
-    private MockUtilities mock;
-    private WebDriver driver;
+  private MockUtilities mock;
+  private WebDriver driver;
 
-    @BeforeMethod
-    void setup() {
-        mock = new MockUtilities();
-        driver = mock.getWebDriverMock();
-    }
+  @BeforeMethod
+  void setup() {
+    mock = new MockUtilities();
+    driver = mock.getWebDriverMock();
+  }
 
-    @Test
-    public void testGetRect() {
-        Point p = new Point(64, 32);
-        Dimension d = new Dimension(200, 800);
+  @Test
+  public void testGetRect() {
+    Point p = new Point(64, 32);
+    Dimension d = new Dimension(200, 800);
 
-        when(driver.manage().window().getPosition()).thenReturn(p);
-        when(driver.manage().window().getSize()).thenReturn(d);
+    when(driver.manage().window().getPosition()).thenReturn(p);
+    when(driver.manage().window().getSize()).thenReturn(d);
 
-        Rect rect = new WindowImpl(mock.getFactory()).getRect();
-        assertThat(rect.getX(), is(equalTo(p.getX())));
-        assertThat(rect.getY(), is(equalTo(p.getY())));
-        assertThat(rect.getWidth(), is(equalTo(d.getWidth())));
-        assertThat(rect.getHeight(), is(equalTo(d.getHeight())));
-    }
+    Rect rect = new WindowImpl(mock.getFactory()).getRect();
+    assertThat(rect.getX(), is(equalTo(p.getX())));
+    assertThat(rect.getY(), is(equalTo(p.getY())));
+    assertThat(rect.getWidth(), is(equalTo(d.getWidth())));
+    assertThat(rect.getHeight(), is(equalTo(d.getHeight())));
+  }
 
-    @Test
-    public void testSetRect() {
-        Point p = new Point(64, 32);
-        Dimension d = new Dimension(200, 800);
-        Rect r = new Rect(p, d);
+  @Test
+  public void testSetRect() {
+    Point p = new Point(64, 32);
+    Dimension d = new Dimension(200, 800);
+    Rect r = new Rect(p, d);
 
-        when(driver.manage().window().getPosition()).thenReturn(p);
-        when(driver.manage().window().getSize()).thenReturn(d);
+    when(driver.manage().window().getPosition()).thenReturn(p);
+    when(driver.manage().window().getSize()).thenReturn(d);
 
-        WindowImpl window = new WindowImpl(mock.getFactory());
-        window.setRect(r);
+    WindowImpl window = new WindowImpl(mock.getFactory());
+    window.setRect(r);
 
-        assertThat(window.getRect().getX(), is(equalTo(r.getX())));
-        assertThat(window.getRect().getY(), is(equalTo(r.getY())));
-        assertThat(window.getRect().getWidth(), is(equalTo(r.getWidth())));
-        assertThat(window.getRect().getHeight(), is(equalTo(r.getHeight())));
-    }
+    assertThat(window.getRect().getX(), is(equalTo(r.getX())));
+    assertThat(window.getRect().getY(), is(equalTo(r.getY())));
+    assertThat(window.getRect().getWidth(), is(equalTo(r.getWidth())));
+    assertThat(window.getRect().getHeight(), is(equalTo(r.getHeight())));
+  }
 
-    @Test
-    public void testClose() {
-        Window window = new WindowImpl(mock.getFactory());
-        when(driver.getWindowHandle()).thenReturn("www.example.com");
-        window.close();
-        verify(driver, times(1)).close();
-    }
+  @Test
+  public void testClose() {
+    Window window = new WindowImpl(mock.getFactory());
+    when(driver.getWindowHandle()).thenReturn("www.example.com");
+    window.close();
+    verify(driver, times(1)).close();
+  }
 
-    @Test
-    public void testGetDocument() {
-        Window window = new WindowImpl(mock.getFactory());
-        assertThat(window.getDocument(), is(equalTo(mock.getFactory().getDocument())));
-    }
+  @Test
+  public void testGetDocument() {
+    Window window = new WindowImpl(mock.getFactory());
+    assertThat(window.getDocument(), is(equalTo(mock.getFactory().getDocument())));
+  }
 }
