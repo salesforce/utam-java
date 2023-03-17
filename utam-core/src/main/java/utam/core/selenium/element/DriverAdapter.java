@@ -226,13 +226,19 @@ public class DriverAdapter implements Driver {
   }
 
   @Override
-  public String getWindowHandle() { return this.driver.getWindowHandle(); }
+  public String getWindowHandle() {
+    return this.driver.getWindowHandle();
+  }
 
   @Override
-  public Set<String> getWindowHandles() { return this.driver.getWindowHandles(); }
+  public Set<String> getWindowHandles() {
+    return this.driver.getWindowHandles();
+  }
 
   @Override
-  public void switchTo(String windowHandle) { this.driver.switchTo().window(windowHandle); }
+  public void switchTo(String windowHandle) {
+    this.driver.switchTo().window(windowHandle);
+  }
 
   @Override
   public Rect getRect() {
