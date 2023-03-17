@@ -51,7 +51,7 @@ public interface PageObjectsFactory {
    */
   Document getDocument();
 
-    /**
+  /**
    * create instance of a Root Page Object
    *
    * @param rootPageObjectType Page Object type
