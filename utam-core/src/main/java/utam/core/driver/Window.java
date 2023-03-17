@@ -16,26 +16,28 @@ import utam.core.selenium.element.Rect;
  */
 public interface Window {
 
-    /**
-     * Gets the rectangle of the window
-     * @return Rectangle of the window
-     */
-    Rect getRect();
+  /**
+   * Gets the rectangle containing the size and position of the window with the current command focus
+   *
+   * @return Rectangle of the window
+   */
+  Rect getRect();
 
-    /**
-     * Sets the rectangle of the window
-     * @param rect the rectangle of the window
-     */
-    void setRect(Rect rect);
+  /**
+   * Sets the rectangle containing the size and position of the window with the current command focus
+   *
+   * @param rect the rectangle of the window
+   */
+  void setRect(Rect rect);
 
-    /**
-     * Closes the window
-     */
-    void close();
+  /**
+   * Closes the window with the current command focus
+   */
+  void close();
 
-    /**
-     * Gets the document object associated with this window
-     * @return document object associated with this window
-     */
-    Document getDocument();
+  /**
+   * Gets the document object associated with this window
+   * @return document object associated with this window
+   */
+  Document getDocument();
 }
