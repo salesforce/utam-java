@@ -55,7 +55,7 @@ public class UtamLoaderImpl implements UtamLoader {
     this.driver = driver;
     this.factory = new PageObjectsFactoryImpl(loaderConfig, driver);
     this.document = new DocumentObject(factory);
-    this.navigation = new NavigationImpl(driver);
+    this.navigation = new NavigationImpl(factory);
   }
 
   /**
@@ -68,7 +68,7 @@ public class UtamLoaderImpl implements UtamLoader {
     this.driver = WebDriverFactory.getAdapter(webDriver, loaderConfig.getDriverConfig());
     this.factory = new PageObjectsFactoryImpl(loaderConfig, driver);
     this.document = new DocumentObject(factory);
-    this.navigation = new NavigationImpl(driver);
+    this.navigation = new NavigationImpl(factory);
   }
 
   /**

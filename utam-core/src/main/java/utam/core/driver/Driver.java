@@ -9,10 +9,13 @@ package utam.core.driver;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
+
 import utam.core.element.Element;
 import utam.core.element.Locator;
 import utam.core.framework.context.PlatformType;
+import utam.core.selenium.element.Rect;
 
 /**
  * Driver interface allows to integrate any driver type, default is Selenium and Appium
@@ -151,4 +154,45 @@ public interface Driver {
    * Navigates forward in the current browsing context (mobile or web)
    */
   void forward();
+
+  /**
+   * Get window handle for the currently focussed window
+   *
+   * @return the window handle of the currently focussed window
+   */
+  String getWindowHandle();
+
+  /**
+   * Get the set of all window handles currently open in this driver
+   * This can be used to iterate over all currently open windows in the driver
+   *
+   * @return the set of all window handles currently open in this driver
+   */
+  Set<String> getWindowHandles();
+
+  /**
+   * Switch focus to the window with the specified window handle
+   *
+   * @param windowHandle the window handle to have focus switched to
+   */
+  void switchTo(String windowHandle);
+
+  /**
+   * Get the Rect of the currently focused window
+   *
+   * @return the Rect of the currently focused window
+   */
+  Rect getRect();
+
+  /**
+   * Set the Rect of the currently focused window
+   *
+   * @param rect the Rect to set the currently focused window to
+   */
+  void setRect(Rect rect);
+
+  /**
+   * Close the currently focused window
+   */
+  void close();
 }

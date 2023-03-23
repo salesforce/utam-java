@@ -24,4 +24,24 @@ public interface Navigation {
    * Command to navigate one step forward in the browsing context
    */
   void forward();
+
+  /**
+   * Command to navigate to an open window with the given url
+   *
+   * @param url the url of the window to navigate to
+   */
+  Window switchToWindow(String url);
+
+  /**
+   * Closes the window navigated to the specified URL
+   *
+   * @param url the url of the window to be closed
+   */
+  void closeWindow(String url);
+
+  /**
+   * Closes the current window
+   */
+  void closeWindow();
+
 }

@@ -50,7 +50,7 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
       Driver driver) {
     this.pageObjectContext = pageObjectContext;
     this.driver = driver;
-    this.navigation = new NavigationImpl(driver);
+    this.navigation = new NavigationImpl(this);
     this.document = new DocumentObject(this);
   }
 
@@ -107,6 +107,11 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
   @Override
   public Driver getDriver() {
     return driver;
+  }
+
+  @Override
+  public Document getDocument() {
+    return document;
   }
 
   @Override

@@ -11,12 +11,16 @@ import static utam.core.framework.UtamLogger.error;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
@@ -60,8 +64,8 @@ public class DriverAdapter implements Driver {
     Options options = this.driver.manage();
     if (options != null && options.timeouts() != null) { // for mock both can be null
       options
-          .timeouts()
-          .implicitlyWait(this.driverConfig.getImplicitTimeout().toSeconds(), TimeUnit.SECONDS);
+              .timeouts()
+              .implicitlyWait(this.driverConfig.getImplicitTimeout().toSeconds(), TimeUnit.SECONDS);
     }
   }
 
@@ -76,13 +80,13 @@ public class DriverAdapter implements Driver {
       return new Object[0];
     }
     return Stream.of(parameters).map(p ->
-        p instanceof ElementAdapter ? ((ElementAdapter) p).getWebElement() : p
+            p instanceof ElementAdapter ? ((ElementAdapter) p).getWebElement() : p
     ).toArray(Object[]::new);
   }
 
   static String getNotFoundErr(Locator by) {
     return String
-        .format("%s with locator '%s'", ERR_ELEMENT_NOT_FOUND_PREFIX, by.getValue().toString());
+            .format("%s with locator '%s'", ERR_ELEMENT_NOT_FOUND_PREFIX, by.getValue().toString());
   }
 
   static WebDriver getSeleniumDriver(Driver driver) {
@@ -154,7 +158,7 @@ public class DriverAdapter implements Driver {
     Duration waitDuration = timeout == null ? driverConfig.getExplicitTimeout() : timeout;
     String errorMessage = message == null ? "wait for condition" : message;
     DriverWait driverWait = new DriverWait(this, waitDuration, driverConfig.getPollingInterval(),
-        errorMessage);
+            errorMessage);
     return driverWait.until((driver) -> isTrue.get());
   }
 
@@ -219,6 +223,44 @@ public class DriverAdapter implements Driver {
   @Override
   public void forward() {
     this.driver.navigate().forward();
+  }
+
+  @Override
+  public String getWindowHandle() {
+    return this.driver.getWindowHandle();
+  }
+
+  @Override
+  public Set<String> getWindowHandles() {
+    return this.driver.getWindowHandles();
+  }
+
+  @Override
+  public void switchTo(String windowHandle) {
+    this.driver.switchTo().window(windowHandle);
+  }
+
+  @Override
+  public Rect getRect() {
+    WebDriver.Window window = this.driver.manage().window();
+    Point windowPoint = window.getPosition();
+    Dimension windowSize = window.getSize();
+    return new Rect(windowPoint, windowSize);
+  }
+
+  @Override
+  public void setRect(Rect rect) {
+    int posX = rect.getX();
+    int posY = rect.getY();
+    int width = rect.getWidth();
+    int height = rect.getHeight();
+    this.driver.manage().window().setPosition(new Point(posX, posY));
+    this.driver.manage().window().setSize(new Dimension(width, height));
+  }
+
+  @Override
+  public void close() {
+    this.driver.close();
   }
 
   static class DriverWait extends FluentWait<Driver> {

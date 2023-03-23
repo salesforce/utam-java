@@ -7,6 +7,7 @@
  */
 package utam.core.framework.base;
 
+import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.element.Element;
 import utam.core.element.Locator;
@@ -42,6 +43,13 @@ public interface PageObjectsFactory {
    * @param locator  root locator
    */
   void bootstrap(PageObject instance, Element element, Locator locator);
+
+  /**
+   * Get Document instance
+   *
+   * @return instance of the document implementation
+   */
+  Document getDocument();
 
   /**
    * create instance of a Root Page Object
