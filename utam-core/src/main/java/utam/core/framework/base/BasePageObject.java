@@ -18,6 +18,7 @@ import utam.core.element.Locator;
 import utam.core.framework.UtamCoreError;
 import utam.core.framework.consumer.ContainerElement;
 import utam.core.framework.element.BasePageElement;
+import utam.core.declarative.metrics.RuntimeMetrics;
 
 /**
  * base class for any UTAM page object, analogue of the UtamBasePageObject in JS library
@@ -33,6 +34,8 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   private Document document;
   private Navigation navigation;
   private Locator locatorInsideScope;
+
+  private RuntimeMetrics metrics;
 
   /**
    * Initializes a new instance of the BasePageObject class.
@@ -94,13 +97,14 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
    * @param navigation singleton instance of the navigation object
    */
   final void initialize(PageObjectsFactory factory, Element element, Locator locator,
-      Document document, Navigation navigation) {
+      Document document, Navigation navigation, RuntimeMetrics metrics) {
     this.factory = factory;
     this.locatorInsideScope = locator;
     this.document = document;
     this.navigation = navigation;
     setDriver(factory.getDriver());
     setElement(element);
+    this.metrics = metrics;
   }
 
   private PageObjectsFactory getFactory() {
@@ -114,6 +118,7 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
 
   @Override
   public Object load() {
+    getMetrics().report(this);
     // for non root PO element is already found, for root we override this method
     return this;
   }
@@ -212,5 +217,9 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   public interface HasElementGetter {
 
     Element getElement();
+  }
+
+  protected RuntimeMetrics getMetrics() {
+    return this.metrics;
   }
 }

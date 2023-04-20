@@ -7,6 +7,8 @@
  */
 package utam.core.framework.base;
 
+import utam.core.declarative.metrics.RuntimeMetrics;
+
 /**
  * base interface for all utam page objects <br>
  * methods have default implementations to mock external POs
@@ -23,5 +25,4 @@ public interface PageObject extends UtamBase {
    * @return An Object that can be cast to the appropriate PageObject type
    */
   Object load();
-
 }

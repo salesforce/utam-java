@@ -7,6 +7,7 @@
  */
 package utam.core.framework.base;
 
+import utam.core.declarative.metrics.RuntimeMetrics;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.element.Element;

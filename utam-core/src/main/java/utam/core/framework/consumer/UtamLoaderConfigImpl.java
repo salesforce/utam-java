@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import utam.core.declarative.metrics.RuntimeMetrics;
 import utam.core.driver.DriverConfig;
 import utam.core.framework.UtamLogger;
 import utam.core.framework.base.PageObject;
@@ -54,6 +55,7 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
   private Duration pollingInterval;
   // mobile bridge app title, by default empty string
   private String bridgeAppTitle;
+  private RuntimeMetrics metrics;
 
   /**
    * Initializes a new instance of the UtamLoaderConfigImpl class
@@ -92,6 +94,7 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
     this.explicitTimeout = DEFAULT_EXPLICIT_TIMEOUT;
     this.pollingInterval = DEFAULT_POLLING_INTERVAL;
     this.bridgeAppTitle = "";
+    //this.metrics = config.;
   }
 
   /**

@@ -14,6 +14,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import utam.core.declarative.metrics.RuntimeMetrics;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.driver.Navigation;
@@ -89,7 +90,7 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
               instance.getClass(), BasePageObject.class.getName()));
     }
     BasePageObject pageObject = (BasePageObject) instance;
-    pageObject.initialize(this, element, locator, document, navigation);
+    pageObject.initialize(this, element, locator, document, navigation, pageObjectContext.getMetrics());
     bootstrapElements(pageObject);
     PlatformType mobileContextType = PlatformType.from(pageObject.getClass());
     // only mobile driver implementation actually changes context

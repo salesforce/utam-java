@@ -11,6 +11,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import utam.core.declarative.metrics.RuntimeMetrics;
 import utam.core.framework.UtamCoreError;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageObject;
@@ -29,27 +30,32 @@ public class PageObjectContextImpl implements PageObjectContext {
   private final Map<Class<? extends PageObject>, Class> activeBeans;
   private final Map<Class<? extends PageObject>, Class> defaultBeans;
 
+  private final RuntimeMetrics metrics;
+
   /**
    * Initializes a new instance of the PageObjectContextImpl class
    *
    * @param activeBeans  the active beans in the Page Object
    * @param defaultBeans beans for default profile
+   * @param metrics interface to report PO usages
    */
   public PageObjectContextImpl(
       Map<Class<? extends PageObject>, Class> activeBeans,
-      Map<Class<? extends PageObject>, Class> defaultBeans
+      Map<Class<? extends PageObject>, Class> defaultBeans,
+      RuntimeMetrics metrics
   ) {
     this.activeBeans = activeBeans;
     this.defaultBeans = defaultBeans;
+    this.metrics = metrics;
   }
 
   /**
-   * Initializes a new instance of the PageObjectContextImpl class, left for compatibility with older versions
+   * Initializes a new instance of the PageObjectContextImpl class, left for compatibility with older versions and for unit tests
    *
    * @param activeBeans the active beans in the Page Object
    */
   public PageObjectContextImpl(Map<Class<? extends PageObject>, Class> activeBeans) {
-    this(activeBeans, new HashMap<>());
+    this(activeBeans, new HashMap<>(), null);
   }
 
   /**
@@ -101,5 +107,10 @@ public class PageObjectContextImpl implements PageObjectContext {
         | InvocationTargetException e) {
       throw new UtamError(String.format(ERR_GET_INSTANCE_BY_NAME, type.getName()), e);
     }
+  }
+
+  @Override
+  public RuntimeMetrics getMetrics() {
+    return metrics;
   }
 }

@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import utam.core.element.Locator;
 import utam.core.framework.UtamCoreError;
 import utam.core.framework.consumer.ContainerElement;
+import utam.core.declarative.metrics.RuntimeMetrics;
 
 /**
  * Page Object that acts as a wrapper for a ContainerElement. Only used in compatibility mode.
@@ -97,5 +98,10 @@ public final class ContainerElementPageObject extends ContainerElementImpl imple
   @Override
   public <T> T waitFor(Supplier<T> condition, String errorMessage) {
     throw new UtamCoreError(ERR_UNSUPPORTED_METHOD);
+  }
+
+  @Override
+  public RuntimeMetrics getMetrics() {
+    return null;
   }
 }

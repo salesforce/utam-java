@@ -7,6 +7,7 @@
  */
 package utam.core.framework.consumer;
 
+import utam.core.declarative.metrics.RuntimeMetrics;
 import utam.core.framework.base.PageObject;
 
 /**
@@ -25,4 +26,6 @@ public interface PageObjectContext {
    * @return instance of the given type depending on profiles config
    */
   <T extends PageObject> T getBean(Class<T> type);
+
+  RuntimeMetrics getMetrics();
 }
