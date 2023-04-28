@@ -7,9 +7,11 @@
  */
 package utam.core.framework.element;
 
+import org.openqa.selenium.NoSuchWindowException;
 import utam.core.driver.Driver;
 import utam.core.driver.Navigation;
 import utam.core.driver.Window;
+import utam.core.framework.UtamLogger;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.consumer.UtamError;
 
@@ -23,7 +25,9 @@ import java.util.Set;
  */
 public class NavigationImpl implements Navigation {
 
-  static final String ERR_NO_WINDOW_WITH_URL = "can't find window with url ";
+  static final String ERR_NO_WINDOW_WITH_URL = "can't find window with url %s";
+  static final String ERR_NO_INITIAL_WINDOW =
+          "window with url %s not found, and the previous window was closed";
 
   private final Driver driverAdapter;
   private final PageObjectsFactory factory;
@@ -46,7 +50,12 @@ public class NavigationImpl implements Navigation {
   @Override
   public Window switchToWindow(String url) {
     // save the current url in case we need to revert to it
-    String initialHandle = this.driverAdapter.getWindowHandle();
+    String initialHandle = null;
+    try {
+      initialHandle = this.driverAdapter.getWindowHandle();
+    } catch (NoSuchWindowException e) {
+      UtamLogger.info("No currently focused window");
+    }
 
     Set<String> windowHandles = this.driverAdapter.getWindowHandles();
     boolean isFound = false;
@@ -59,9 +68,13 @@ public class NavigationImpl implements Navigation {
     }
 
     if (!isFound) {
+      if (initialHandle == null) {
+        throw new UtamError(String.format(ERR_NO_INITIAL_WINDOW, url));
+      }
+
       // revert to the original url
       this.driverAdapter.switchTo(initialHandle);
-      throw new UtamError(ERR_NO_WINDOW_WITH_URL + url);
+      throw new UtamError(String.format(ERR_NO_WINDOW_WITH_URL, url));
     }
 
     return new WindowImpl(this.factory);
