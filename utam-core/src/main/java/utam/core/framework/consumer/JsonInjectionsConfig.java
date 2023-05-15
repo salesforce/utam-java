@@ -15,6 +15,10 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -56,8 +60,15 @@ public class JsonInjectionsConfig {
       if (!resources.isEmpty()) {
         for (URL resource : resources) {
           UtamLogger.info(String.format("Reading injections config file %s", filename));
-          Mapping mapping = new ObjectMapper().readValue(resource, Mapping.class);
-          mapping.setInjectionsMapping(map);
+          try (InputStream resourceStream = resource.openStream();
+               InputStreamReader resourceStreamReader = new InputStreamReader(resourceStream);
+               BufferedReader resourceReader = new BufferedReader(resourceStreamReader)) {
+            String resourceValue = resourceReader.lines().collect(Collectors.joining(System.lineSeparator()));
+            if (!resourceValue.isBlank()) {
+              Mapping mapping = new ObjectMapper().readValue(resourceValue, Mapping.class);
+              mapping.setInjectionsMapping(map);
+            }
+          }
         }
       } else {
         // we can't throw here because of distribution plugin:
