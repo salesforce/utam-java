@@ -58,6 +58,13 @@ public class JsonInjectionsConfigTests {
   }
 
   @Test
+  public void testEmptyConfigFile() {
+    Map<String, ProfileContext> map = new JsonInjectionsConfig()
+            .readDependenciesConfig("config/emptyFile.config.json");
+    assertThat(map, is(anEmptyMap()));
+  }
+
+  @Test
   public void testReloadingProfile() {
     UtamLoaderConfig loaderConfig = new UtamLoaderConfigImpl("config/module1.config.json", "config/module2.config.json");
     // read from module1.config.json
