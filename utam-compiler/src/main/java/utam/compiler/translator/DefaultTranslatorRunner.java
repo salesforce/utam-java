@@ -14,7 +14,6 @@ import static utam.core.framework.consumer.UtamLoaderConfigImpl.DEFAULT_PROFILE;
 
 import com.google.common.io.CharStreams;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -247,25 +246,13 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     }
     String moduleName = translatorConfig.getModuleName();
     String configPath = buildDependenciesConfigPath(moduleName);
-    info("write dependencies config " + configPath);
-    Writer writer;
-    try {
-      writer = new FileWriter(configPath);
-    } catch (IOException e) {
-      String err = String.format("error creating dependencies config %s", configPath);
-      throw new UtamRunnerError(err, e);
-    }
-    writeDependenciesConfigs(writer);
+    JsonCompilerOutput output = getCompilerOutput();
+    output.writeConfigToFile(configPath);
   }
 
   // separate method to trigger from tests
-  final void writeDependenciesConfigs(Writer writer) {
-    JsonCompilerOutput jsonCompilerOutput = new JsonCompilerOutput(profileDependenciesMapping);
-    try {
-      jsonCompilerOutput.writeConfig(writer);
-    } catch (IOException e) {
-      throw new UtamRunnerError("error while writing dependencies config", e);
-    }
+  final JsonCompilerOutput getCompilerOutput() {
+    return new JsonCompilerOutput(profileDependenciesMapping);
   }
 
   // used from tests and during compilation
