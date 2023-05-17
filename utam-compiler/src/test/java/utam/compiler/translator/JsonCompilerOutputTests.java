@@ -78,8 +78,13 @@ public class JsonCompilerOutputTests {
   public void testEmptyPairs() {
     Map<Profile, Map<String, String>> dependenciesMap = new HashMap<>();
     dependenciesMap.put(DUMMY_PROFILE, new HashMap<>());
-    String res = new JsonCompilerOutput(dependenciesMap).writeConfigToString();
+    JsonCompilerOutput output = new JsonCompilerOutput(dependenciesMap);
+    String res = output.writeConfigToString();
     assertThat(res, is(equalTo("")));
+    String tmpFilePath = System.getProperty("user.dir") + File.separator + ("test.empty.json");
+    output.writeConfigToFile(tmpFilePath);
+    File f = new File(tmpFilePath);
+    assertThat("empty dependencies config should not create empty file", f.exists(), is(false));
   }
 
   @Test

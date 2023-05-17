@@ -381,10 +381,9 @@ public class DefaultTranslatorRunnerTests {
     when(object.isClassWithInterface()).thenReturn(false);
     when(object.getImplementation()).thenReturn(classMock);
     translator.setPageObject("name", object);
-    Writer w = new StringWriter();
-    translator.writeDependenciesConfigs(w);
+    String dependencies = translator.getCompilerOutput().writeConfigToString();
     String expectedConfigStr = getCompilerOutputAsString("compiler/default.expected.json");
-    assertThat(w.toString(), is(equalTo(expectedConfigStr)));
+    assertThat(dependencies, is(equalTo(expectedConfigStr)));
   }
 
   @Test

@@ -7,6 +7,8 @@
  */
 package utam.compiler.translator;
 
+import static utam.core.framework.UtamLogger.info;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
@@ -14,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -66,10 +69,7 @@ class JsonCompilerOutput {
    * @param writer target file
    * @throws IOException if file operation fails
    */
-  void writeConfig(Writer writer) throws IOException {
-    if(mapping.isEmpty()) {
-      return;
-    }
+  private void writeConfig(Writer writer) throws IOException {
     SimpleModule module = new SimpleModule();
     module.addSerializer(Mapping.class, new Serializer());
     ObjectMapper mapper = new ObjectMapper();
@@ -79,12 +79,30 @@ class JsonCompilerOutput {
     mapper.registerModule(module).writer(formatter).writeValue(writer, mapping);
   }
 
+  void writeConfigToFile(String configPath) {
+    if(mapping.isEmpty()) {
+      info("skip writing empty dependencies config " + configPath);
+      return;
+    }
+    info("write dependencies config " + configPath);
+    try {
+      Writer writer = new FileWriter(configPath);
+      writeConfig(writer);
+    } catch (IOException e) {
+      String err = String.format("error creating dependencies config %s", configPath);
+      throw new UtamRunnerError(err, e);
+    }
+  }
+
   /**
    * used in tests - write config to string
    *
    * @return written config as a string
    */
   String writeConfigToString() {
+    if(mapping.isEmpty()) {
+      return "";
+    }
     try {
       Writer writer = new StringWriter();
       writeConfig(writer);
