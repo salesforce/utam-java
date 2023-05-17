@@ -1,0 +1,32 @@
+{
+  "description": {
+    "author": "author",
+    "text": [
+      "text"
+    ]
+  },
+  "elements": [
+    {
+      "name": "single",
+      "selector": {
+        "css": "css"
+      }
+    },
+    {
+      "name": "list1",
+      "type": "my/custom/type",
+      "selector": {
+        "css": "css",
+        "returnAll" : true
+      }
+    },
+    {
+      "name": "list2",
+      "type": "my/custom/type",
+      "selector": {
+        "css": "css",
+        "returnAll" : true
+      }
+    }
+  ]
+}

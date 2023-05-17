@@ -37,7 +37,6 @@ import java.io.IOException;
 import java.io.Reader;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import utam.compiler.lint.LintingRuleImpl.RequiredAuthor;
 
 /**
  * Test that SARIF file output has correct values
@@ -96,18 +95,18 @@ public class SarifConverterTests {
     assertThat(toolComponent.getRules(), hasSize(8));
 
     // rule properties
-    String ruleId = RequiredAuthor.RULE_ID;
+    String ruleId = "ULR03";
     ReportingDescriptor rule = toolComponent.getRules().stream()
         .filter(r -> r.getId().equals(ruleId)).findAny().orElse(null);
     assertThat(rule, notNullValue());
-    assertThat(rule.getName(), equalTo(RequiredAuthor.NAME));
-    assertThat(rule.getShortDescription().getText(), equalTo(RequiredAuthor.DESCRIPTION));
+    assertThat(rule.getName(), equalTo("Required author"));
+    assertThat(rule.getShortDescription().getText(), equalTo("Check description at the root level has an author"));
 
     // results
     assertThat(run.getResults(), hasSize(2));
     Result result = run.getResults().get(0);
     assertThat(result, notNullValue());
-    assertThat(result.getLevel(), equalTo(Level.ERROR));
+    assertThat(result.getLevel(), equalTo(Level.WARNING));
     assertThat(result.getKind(), equalTo(Kind.FAIL));
 
     result = run.getResults().get(1);
@@ -116,10 +115,10 @@ public class SarifConverterTests {
     assertThat(result.getLevel(), equalTo(Level.WARNING));
     assertThat(result.getKind(), equalTo(Kind.FAIL));
     assertThat(result.getMessage().getId(), equalTo("2005"));
-    assertThat(result.getMessage().getText(), equalTo("property \"author\" is missing in the root description"));
+    assertThat(result.getMessage().getText(), equalTo("warning 2005: property \"author\" is missing in the root description"));
     assertThat(result.getFixes(), hasSize(1));
     Fix fix = result.getFixes().iterator().next();
-    assertThat(fix.getDescription().getText(), equalTo(RequiredAuthor.FIX));
+    assertThat(fix.getDescription().getText(), equalTo("add \"author\" property to the root description"));
 
     // source location
     assertThat(result.getLocations(), hasSize(1));

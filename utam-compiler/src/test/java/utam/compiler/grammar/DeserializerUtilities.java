@@ -14,6 +14,7 @@ import static utam.compiler.grammar.TestUtilities.getDefaultConfig;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.TestUtilities.TestTranslationContext;
@@ -77,7 +78,11 @@ public class DeserializerUtilities {
 
   public TranslationContext getContextWithPath(String fileName) {
     String testFileName = fileName + ".json";
-    String path = DeserializerUtilities.class.getClassLoader().getResource(testFileName).getFile();
+    URL url = DeserializerUtilities.class.getClassLoader().getResource(testFileName);
+    if(url == null) {
+      throw new AssertionError(String.format(" File %s does not exist!", testFileName));
+    }
+    String path = url.getFile();
     String content = getJsonString(fileName);
     try {
       return getResultFromString(content, path).translationContext;

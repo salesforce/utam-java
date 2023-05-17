@@ -201,7 +201,6 @@ public class JsonCompilerConfig {
     private final String pageObjectsOutputDir;
     private final String resourcesOutputDir;
     private final String unitTestsOutputDir;
-    private final String lintingReportOutputFile;
     private final UnitTestRunner unitTestRunnerType;
     private final CompilerOutputOptions outputOptions;
     private final LintingConfig lintingConfiguration;
@@ -237,7 +236,6 @@ public class JsonCompilerConfig {
         @JsonProperty(value = "pageObjectsRootDir") String pageObjectsRootDirectory,
         @JsonProperty(value = "pageObjectsOutputDir", required = true) String pageObjectsOutputDir,
         @JsonProperty(value = "resourcesOutputDir", required = true) String resourcesOutputDir,
-        @JsonProperty(value = "lintingOutputFile") String lintingOutputFile,
         @JsonProperty(value = "unitTestsOutputDir") final String unitTestDirectory,
         @JsonProperty(value = "unitTestsRunner", defaultValue = "NONE") UnitTestRunner unitTestRunner,
         @JsonProperty(value = "namespaces") List<Namespace> namespaces,
@@ -280,8 +278,6 @@ public class JsonCompilerConfig {
           Objects.requireNonNullElse(copyright, new ArrayList<>()));
       this.lintingConfiguration = LintingConfigJson.getLintingConfig(lintingConfiguration);
       info(getConfigLoggerMessage("lint configuration", this.lintingConfiguration.toString()));
-      this.lintingReportOutputFile = lintingOutputFile;
-      info(getConfigLoggerMessage("lintingOutputFile", lintingOutputFile));
       this.compilerErrorsFile = Boolean.FALSE == isErrorsReportFile? CompilerErrors.ERR_REPORT_FILE : null;
       info(getConfigLoggerMessage("errorsReportFile", this.compilerErrorsFile));
     }
@@ -336,7 +332,7 @@ public class JsonCompilerConfig {
           compilerRootFolderName + resourcesOutputDir,
           unitTestRunnerType,
           compilerRootFolderName + unitTestsOutputDir,
-          lintingReportOutputFile, compilerErrorsFile);
+          compilerErrorsFile);
     }
 
     /**

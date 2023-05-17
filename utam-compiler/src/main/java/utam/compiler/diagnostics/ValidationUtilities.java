@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import utam.compiler.UtamCompilationError;
+import utam.core.declarative.lint.LintingError.ViolationLevel;
 
 /**
  * Static validation utilities. JSON Parser does not have access to TranslationContext and compiler
@@ -56,8 +57,8 @@ public class ValidationUtilities {
    * @param args optional args
    * @return error message
    */
-  public String getLintingMessage(Integer code, String... args) {
-    return errorsConfig.getLintingMessage(code, args);
+  public String getLintingMessage(ViolationLevel violationLevel, Integer code, String... args) {
+    return errorsConfig.getLintingMessage(violationLevel, code, args);
   }
 
   private String getEmptyStringError(String prefix, String propertyName, String actualValue) {

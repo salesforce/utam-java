@@ -130,7 +130,6 @@ public class DefaultTargetConfigurationTests {
         currentDir,
         UnitTestRunner.JUNIT,
         currentDir,
-        null,
             null
     );
     assertThat(targetConfig.getUnitTestRunnerType(), is(equalTo(UnitTestRunner.JUNIT)));
@@ -138,10 +137,10 @@ public class DefaultTargetConfigurationTests {
     String typeName = "utam/MyPage";
     TypeProvider type = new FromString(typeName);
     assertThat(targetConfig.getPageObjectClassPath(type),
-        is(equalTo((currentDir + "/utam/MyPage.java").replace("/", File.separator))));
+        is(equalTo(currentDir + File.separator + "utam" + File.separator + "MyPage.java")));
     assertThat(targetConfig.getPageObjectTestClassPath(type),
-        is(equalTo((currentDir + "/utam/MyPageTests.java").replace("/", File.separator))));
-    assertThat(targetConfig.getLintReportPath(), is(equalTo(currentDir + "/utam-lint.sarif")));
+        is(equalTo(currentDir + File.separator + "utam" + File.separator + "MyPageTests.java")));
+    assertThat(targetConfig.getLintReportPath(), is(equalTo(currentDir)));
   }
 
   @Test

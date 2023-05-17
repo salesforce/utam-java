@@ -1,0 +1,26 @@
+{
+  "description": {
+    "author": "author",
+    "text": [
+      "text"
+    ]
+  },
+  "elements": [
+    {
+      "name": "basic",
+      "selector": {
+        "css": "my-test-custom"
+      }
+    },
+    {
+      "name": "button",
+      "type": "actionable",
+      "selector": {
+        "css": "button"
+      }
+    }
+  ]
+}
+
+
+

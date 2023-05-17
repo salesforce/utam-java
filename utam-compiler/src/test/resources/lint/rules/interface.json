@@ -1,5 +1,6 @@
 {
   "interface": true,
+  "root": true,
   "methods" : [
     {
       "name" : "test"

@@ -16,11 +16,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import utam.compiler.lint.JsonLintRulesConfig.LintRuleOverride;
 import utam.compiler.lint.LintingRuleImpl.ElementsWithDifferentTypes;
 import utam.compiler.lint.LintingRuleImpl.RequiredAuthor;
 import utam.compiler.lint.LintingRuleImpl.RequiredMethodDescription;
@@ -44,14 +47,20 @@ import utam.core.framework.UtamLogger;
  */
 public class LintingConfigJson implements LintingConfig {
 
-  static final String LINTING_EXCEPTION_PREFIX = "UTAM linting failures:\n";
-  static final boolean DEFAULT_THROWS_ERROR = false;
+  private static final String LINTING_EXCEPTION_PREFIX = "UTAM linting failures:\n";
   /**
-   * default configuration when config is empty
+   * default name for output sarif report
    */
-  static final LintingConfig DEFAULT_LINTING_CONFIG = new LintingConfigJson(
-      DEFAULT_THROWS_ERROR,
+  private static final String DEFAULT_SARIF_OUTPUT_FILE = "utam-lint.sarif";
+  /**
+   * default configuration when config is empty, public because used from different package by
+   * runner
+   */
+  public static final LintingConfig DEFAULT_LINTING_CONFIG = new LintingConfigJson(
+      false,
+      false,
       null,
+      DEFAULT_SARIF_OUTPUT_FILE,
       null,
       null,
       null,
@@ -65,32 +74,36 @@ public class LintingConfigJson implements LintingConfig {
   private final List<LintingRuleImpl> globalRules = new ArrayList<>();
   private final boolean isInterruptCompilation;
   private final boolean isPrintToConsole;
+  private final boolean isDisabled;
+  private final String lintingOutputFile;
   private final SarifConverter sarifConverter;
 
   @JsonCreator
   LintingConfigJson(
+      @JsonProperty(value = "disable") Boolean isDisabled,
       @JsonProperty(value = "throwError") Boolean interruptCompilation,
       @JsonProperty(value = "printToConsole") Boolean isPrintToConsole,
-      @JsonProperty(value = "duplicateSelectors") UniqueSelectorInsidePageObject uniqueSelectors,
-      @JsonProperty(value = "requiredRootDescription") RequiredRootDescription requiredRootDescription,
-      @JsonProperty(value = "requiredAuthor") RequiredAuthor requiredAuthor,
-      @JsonProperty(value = "requiredMethodDescription") RequiredMethodDescription requiredMethodDescription,
-      @JsonProperty(value = "requiredSingleShadowRoot") SingleShadowBoundaryAllowed singleShadowBoundaryAllowed,
-      @JsonProperty(value = "duplicateRootSelectors") UniqueRootSelector uniqueRootSelectors,
-      @JsonProperty(value = "elementCantHaveRootSelector") RootSelectorExistsForElement rootSelectorExists,
-      @JsonProperty(value = "duplicateCustomSelectors") ElementsWithDifferentTypes customWrongType) {
-    isInterruptCompilation = requireNonNullElse(interruptCompilation, DEFAULT_THROWS_ERROR);
+      @JsonProperty(value = "lintingOutputFile") String lintingOutputFile,
+      @JsonProperty(value = "duplicateSelectors") LintRuleOverride uniqueSelectors,
+      @JsonProperty(value = "requiredRootDescription") LintRuleOverride requiredRootDescription,
+      @JsonProperty(value = "requiredAuthor") LintRuleOverride requiredAuthor,
+      @JsonProperty(value = "requiredMethodDescription") LintRuleOverride requiredMethodDescription,
+      @JsonProperty(value = "requiredSingleShadowRoot") LintRuleOverride singleShadowBoundaryAllowed,
+      @JsonProperty(value = "duplicateRootSelectors") LintRuleOverride uniqueRootSelectors,
+      @JsonProperty(value = "elementCantHaveRootSelector") LintRuleOverride rootSelectorExists,
+      @JsonProperty(value = "duplicateCustomSelectors") LintRuleOverride customWrongType) {
+    this.isDisabled = requireNonNullElse(isDisabled, false);
+    this.lintingOutputFile = requireNonNullElse(lintingOutputFile, DEFAULT_SARIF_OUTPUT_FILE);
+    this.isInterruptCompilation = requireNonNullElse(interruptCompilation, false);
     this.isPrintToConsole = requireNonNullElse(isPrintToConsole, true);
-    localRules.add(requireNonNullElse(uniqueSelectors, UniqueSelectorInsidePageObject.DEFAULT));
-    localRules.add(requireNonNullElse(requiredRootDescription, RequiredRootDescription.DEFAULT));
-    localRules.add(requireNonNullElse(requiredAuthor, RequiredAuthor.DEFAULT));
-    localRules
-        .add(requireNonNullElse(requiredMethodDescription, RequiredMethodDescription.DEFAULT));
-    localRules
-        .add(requireNonNullElse(singleShadowBoundaryAllowed, SingleShadowBoundaryAllowed.DEFAULT));
-    globalRules.add(requireNonNullElse(uniqueRootSelectors, UniqueRootSelector.DEFAULT));
-    globalRules.add(requireNonNullElse(rootSelectorExists, RootSelectorExistsForElement.DEFAULT));
-    globalRules.add(requireNonNullElse(customWrongType, ElementsWithDifferentTypes.DEFAULT));
+    localRules.add(new UniqueSelectorInsidePageObject(uniqueSelectors));
+    localRules.add(new RequiredRootDescription(requiredRootDescription));
+    localRules.add(new RequiredAuthor(requiredAuthor));
+    localRules.add(new RequiredMethodDescription(requiredMethodDescription));
+    localRules.add(new SingleShadowBoundaryAllowed(singleShadowBoundaryAllowed));
+    globalRules.add(new UniqueRootSelector(uniqueRootSelectors));
+    globalRules.add(new RootSelectorExistsForElement(rootSelectorExists));
+    globalRules.add(new ElementsWithDifferentTypes(customWrongType));
     List<LintingRule> rules = new ArrayList<>(localRules);
     rules.addAll(globalRules);
     sarifConverter = new SarifConverter(rules);
@@ -122,59 +135,47 @@ public class LintingConfigJson implements LintingConfig {
 
   @Override
   public void lint(LintingContext context, PageObjectLinting pageObjectContext) {
-    for (LintingRuleImpl rule : localRules) {
-      if (rule.isEnabled(pageObjectContext)) {
-        rule.validate(context.getErrors(), pageObjectContext);
+    if(!isDisabled) {
+      for (LintingRuleImpl rule : localRules) {
+        if (rule.isEnabled(pageObjectContext)) {
+          rule.validate(context.getErrors(), pageObjectContext);
+        }
       }
+      context.addPageObject(pageObjectContext);
     }
-    context.addPageObject(pageObjectContext);
   }
 
   @Override
-  public List<LintingError> finish(LintingContext context, String reportFilePath) {
-    List<LintingError> errors = context.getErrors();
-    for (LintingRuleImpl rule : globalRules) {
-      rule.validate(errors, context);
-    }
-    writeSarifResults(reportFilePath, context, errors);
-    reportToConsole(errors);
-    return errors;
-  }
-
-  private void reportToConsole(List<LintingError> errors) {
-    String warningsMsg = errors.stream()
-        .filter(err -> err.getLevel() == LintingError.ViolationLevel.warning)
-        .map(LintingError::getFullMessage)
-        .collect(Collectors.joining(" \n"));
-    String errorsMsg = errors.stream()
-        .filter(err -> err.getLevel() == LintingError.ViolationLevel.error)
-        .map(LintingError::getFullMessage)
-        .collect(Collectors.joining(" \n"));
-    // log warnings
-    if (!warningsMsg.isEmpty() && isPrintToConsole) {
-      UtamLogger.warning("\n" + warningsMsg);
-    }
-    // log or throw errors
-    if (!errorsMsg.isEmpty()) {
-      if (isInterruptCompilation) {
-        throw new UtamLintingError(LINTING_EXCEPTION_PREFIX + errorsMsg);
+  public void finish(LintingContext context) {
+    if(!isDisabled) {
+      List<PageObjectLinting> all = context.getAllPageObjects();
+      for (int i = 0; i < all.size(); i++) {
+        PageObjectLinting first = all.get(i);
+        for (int j = i + 1; j < all.size(); j++) {
+          PageObjectLinting second = all.get(j);
+          for (LintingRuleImpl rule : globalRules) {
+            rule.validate(first, second, context);
+          }
+        }
       }
-      if (isPrintToConsole) {
-        UtamLogger.error("\n" + errorsMsg);
+      String errorMessage = reportToConsole(context.getErrors());
+      if(isInterruptCompilation) {
+        throw new UtamLintingError(LINTING_EXCEPTION_PREFIX + errorMessage);
       }
     }
   }
 
-  private void writeSarifResults(String reportFilePath, LintingContext context,
-      List<LintingError> errors) {
-    if (reportFilePath != null) { //can be null in tests
+  @Override
+  public void writeReport(LintingContext context, String compilerRoot) {
+    if(!isDisabled) {
+      String reportFilePath = getSarifFilePath(compilerRoot);
       try {
         Writer writer = getWriterWithDir(reportFilePath);
         ObjectMapper mapper = new ObjectMapper();
         DefaultPrettyPrinter formatter = new DefaultPrettyPrinter()
             .withObjectIndenter(new DefaultIndenter("  ", "\n"))
             .withArrayIndenter(new DefaultIndenter("  ", "\n"));
-        SarifSchema210 sarifSchema210 = sarifConverter.convert(context, errors);
+        SarifSchema210 sarifSchema210 = sarifConverter.convert(context, context.getErrors());
         UtamLogger.info(String.format("Write results of linting to %s", reportFilePath));
         mapper.writer(formatter).writeValue(writer, sarifSchema210);
       } catch (IOException e) {
@@ -182,5 +183,36 @@ public class LintingConfigJson implements LintingConfig {
         throw new UtamLintingError(err, e);
       }
     }
+  }
+
+  private String getSarifFilePath(String compilerRoot) {
+    String fileName = Objects.requireNonNullElse(lintingOutputFile, DEFAULT_SARIF_OUTPUT_FILE);
+    String targetPath = compilerRoot == null ? System.getProperty("user.dir") : compilerRoot;
+    return
+        targetPath.endsWith(File.separator) ? targetPath + fileName
+            : targetPath + File.separator + fileName;
+  }
+
+  private String reportToConsole(List<LintingError> errors) {
+    String errorsMsg = errors.stream()
+        .filter(err -> err.getLevel() == LintingError.ViolationLevel.error)
+        .map(LintingError::getFullMessage)
+        .collect(Collectors.joining(" \n"));
+    if(!isPrintToConsole) {
+      return errorsMsg;
+    }
+    String warningsMsg = errors.stream()
+        .filter(err -> err.getLevel() == LintingError.ViolationLevel.warning)
+        .map(LintingError::getFullMessage)
+        .collect(Collectors.joining(" \n"));
+    // log warnings
+    if (!warningsMsg.isEmpty()) {
+      UtamLogger.warning("\n" + warningsMsg);
+    }
+    // log or throw errors
+    if (!errorsMsg.isEmpty()) {
+      UtamLogger.error("\n" + errorsMsg);
+    }
+    return errorsMsg;
   }
 }

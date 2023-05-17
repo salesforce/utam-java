@@ -28,7 +28,6 @@ import utam.compiler.helpers.TranslationContext;
 import utam.core.declarative.errors.CompilerErrorsContext;
 import utam.core.declarative.lint.LintingContext;
 import utam.core.declarative.lint.LintingConfig;
-import utam.core.declarative.lint.LintingError;
 import utam.core.declarative.representation.PageObjectClass;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.PageObjectInterface;
@@ -208,15 +207,15 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       }
       counter++;
     }
-    String reportPath = translatorConfig.getConfiguredTarget().getLintReportPath();
-    List<LintingError> lintingErrors = linting.finish(lintingContext, reportPath);
+    linting.finish(lintingContext);
+    linting.writeReport(lintingContext, translatorConfig.getConfiguredTarget().getLintReportPath());
     info(String.format("generated %d page objects, took %d msec", counter,
         System.currentTimeMillis() - timer));
     String compilationErrors = translatorConfig.getErrorsConfig().report(errorsContext);
     if(compilationErrors != null) {
       throw new UtamCompilationError(compilationErrors);
     }
-    return () -> lintingErrors;
+    return lintingContext::getErrors;
   }
 
   /**

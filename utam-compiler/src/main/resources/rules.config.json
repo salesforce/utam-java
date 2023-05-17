@@ -1,0 +1,66 @@
+[
+    {
+        "ruleId": "ULR01",
+        "errorCode": 2001,
+        "name": "Unique local selectors",
+        "description": "Check for unique selectors inside same file. By default warning because list element can have same selector",
+        "help": "remove duplicate elements: \"%s\" or \"%s\"",
+        "violation": "warning"
+    },
+    {
+        "ruleId": "ULR02",
+        "errorCode": 2002,
+        "name": "Required root description",
+        "description": "Check description at the root level",
+        "help": "add \"description\" property at the root",
+        "violation": "warning"
+    },
+    {
+        "ruleId": "ULR03",
+        "errorCode": 2005,
+        "name": "Required author",
+        "description": "Check description at the root level has an author",
+        "help": "add \"author\" property to the root description",
+        "violation": "warning"
+    },
+    {
+        "ruleId": "ULR04",
+        "errorCode": 2003,
+        "name": "Required method description",
+        "description": "Check every compose method has description",
+        "help": "add \"description\" property to the method \"%s\"",
+        "violation": "warning"
+    },
+    {
+        "ruleId": "ULR05",
+        "errorCode": 2004,
+        "name": "Single shadowRoot",
+        "description": "Check only one shadowRoot present at the component root",
+        "help": "remove \"shadow\" under element \"%s\" and create separate page object for its content",
+        "violation": "warning"
+    },
+    {
+        "ruleId": "ULR06",
+        "errorCode": 3001,
+        "name": "Unique root selector",
+        "description": "Check root selector is unique across all page objects",
+        "help": "remove one of the page objects with same root selector: \"%s\" or \"%s\"",
+        "violation": "warning"
+    },
+    {
+        "ruleId": "ULR07",
+        "errorCode": 3002,
+        "name": "Root selector usage",
+        "description": "Root selector should match only custom elements of the same type",
+        "help": "change the element \"%s\" type to the type of the page object \"%s\"",
+        "violation": "warning"
+    },
+    {
+        "ruleId": "ULR08",
+        "errorCode": 3003,
+        "name": "Custom selector",
+        "description": "Element with custom tag should have same type across all page objects",
+        "help": "change the element \"%s\" type to the same type as the element \"%s\" in page object \"%s\"",
+        "violation": "warning"
+    }
+]

@@ -9,11 +9,8 @@ package utam.compiler.lint;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import utam.core.declarative.lint.PageObjectLinting;
@@ -31,8 +28,8 @@ public class PageObjectLintingImpl implements PageObjectLinting {
   private final String name;
   private final String filePath;
   private final String type;
-  private final Map<String, List<ElementLinting>> locatorsMap = new HashMap<>();
-  private final Map<String, MethodLinting> methodsMap = new HashMap<>();
+  private final List<ElementLinting> elements = new ArrayList<>();
+  private final List<MethodLinting> methods = new ArrayList<>();
   private final Set<String> shadowRoots = new HashSet<>();
   private final File fileScanner;
   private RootLinting rootContext;
@@ -43,7 +40,9 @@ public class PageObjectLintingImpl implements PageObjectLinting {
     String dir = System.getProperty("user.dir");
     // file path should be relative to project root for SARIF
     // for unit tests path is dummy hence condition
-    this.filePath = pageObjectFilePath.contains(dir) ? pageObjectFilePath.substring(dir.length() + 1) : pageObjectFilePath;
+    this.filePath =
+        pageObjectFilePath.contains(dir) ? pageObjectFilePath.substring(dir.length() + 1)
+            : pageObjectFilePath;
     this.type = type.getFullName();
     this.fileScanner = pageObjectFilePath.contains(dir) ? new File(pageObjectFilePath) : null;
   }
@@ -73,26 +72,18 @@ public class PageObjectLintingImpl implements PageObjectLinting {
   }
 
   @Override
-  public Collection<MethodLinting> getMethods() {
-    return methodsMap.values();
-  }
-
-  @Override
-  public Set<String> getAllLocators() {
-    return locatorsMap.keySet();
+  public List<MethodLinting> getMethods() {
+    return methods;
   }
 
   @Override
   public void setElement(ElementLinting element) {
-    if (!locatorsMap.containsKey(element.getLocator())) {
-      locatorsMap.put(element.getLocator(), new ArrayList<>());
-    }
-    locatorsMap.get(element.getLocator()).add(element);
+    elements.add(element);
   }
 
   @Override
   public void setMethod(MethodLinting method) {
-    methodsMap.put(method.getName(), method);
+    methods.add(method);
   }
 
   @Override
@@ -121,8 +112,44 @@ public class PageObjectLintingImpl implements PageObjectLinting {
   }
 
   @Override
-  public List<ElementLinting> getElementsByLocator(String locator) {
-    return locatorsMap.getOrDefault(locator, null);
+  public List<ElementLinting> getElements() {
+    return elements;
+  }
+
+  /**
+   * helper class to remember element selector information
+   *
+   * @author elizaveta.ivanova
+   * @since 246
+   */
+  public static class ElementSelector {
+
+    private final Object objectValue;
+    private final String stringValue;
+    private final boolean isList;
+
+    public ElementSelector(Locator locator, boolean isList) {
+      this.objectValue = locator.getValue();
+      this.stringValue = locator.getStringValue();
+      this.isList = isList;
+    }
+  }
+
+  /**
+   * helper class to check element's scope (parent and shadow root)
+   *
+   * @author elizaveta.ivanova
+   * @since 246
+   */
+  public static class ElementScope {
+
+    private final String parentName;
+    private final boolean isInsideShadow;
+
+    public ElementScope(String parentName, boolean isInsideShadow) {
+      this.parentName = parentName;
+      this.isInsideShadow = isInsideShadow;
+    }
   }
 
   /**
@@ -137,23 +164,21 @@ public class PageObjectLintingImpl implements PageObjectLinting {
     public static final String LINTING_CONTAINER_TYPE = "container";
     public static final String LINTING_FRAME_TYPE = "frame";
 
-    private final String locator;
+    private final ElementSelector selector;
     private final String type;
-    private final String parentName;
+    final ElementScope scope;
     private final String name;
-    private final boolean isList;
 
-    public Element(String name, String type, Object locator, String parentName, boolean isList) {
+    public Element(String name, String type, ElementSelector selector, ElementScope scope) {
       this.type = type;
-      this.locator = locator == null ? null : locator.toString();
-      this.parentName = parentName;
+      this.selector = selector;
+      this.scope = scope;
       this.name = name;
-      this.isList = isList;
     }
 
     @Override
     public String getLocator() {
-      return locator;
+      return selector.stringValue;
     }
 
     @Override
@@ -167,13 +192,33 @@ public class PageObjectLintingImpl implements PageObjectLinting {
     }
 
     @Override
-    public String getParentScope() {
-      return parentName;
+    public boolean isSameScope(ElementLinting element) {
+      ElementScope firstScope = this.scope;
+      ElementScope secondScope = ((Element) element).scope;
+      if (firstScope == null) {
+        return secondScope == null;
+      }
+      if (secondScope == null || firstScope.isInsideShadow != secondScope.isInsideShadow) {
+        return false;
+      }
+      if (firstScope.parentName == null) {
+        return secondScope.parentName == null;
+      }
+      return firstScope.parentName.equals(secondScope.parentName);
     }
 
     @Override
-    public boolean isList() {
-      return isList;
+    public boolean isSameLocator(ElementLinting element) {
+      ElementSelector first = this.selector;
+      ElementSelector second = ((Element) element).selector;
+      if (first == null ^ second == null) {
+        return false;
+      }
+      if (first.objectValue.equals(second.objectValue)) {
+        // duplicates allowed if one is a list, but not both
+        return first.isList == second.isList;
+      }
+      return false;
     }
   }
 
@@ -214,12 +259,12 @@ public class PageObjectLintingImpl implements PageObjectLinting {
 
     private final boolean hasRootDescription;
     private final boolean hasAuthor;
-    private final String locator;
+    private final Element element;
 
-    public Root(boolean hasRootDescription, boolean hasAuthor, Locator locator) {
+    public Root(boolean hasRootDescription, boolean hasAuthor, ElementSelector selector) {
       this.hasRootDescription = hasRootDescription;
       this.hasAuthor = hasAuthor;
-      this.locator = locator == null ? null : locator.getValue().toString();
+      this.element = selector == null ? null : new Element("root", null, selector, null);
     }
 
     @Override
@@ -233,8 +278,13 @@ public class PageObjectLintingImpl implements PageObjectLinting {
     }
 
     @Override
-    public String getLocator() {
-      return locator;
+    public ElementLinting getRootElement() {
+      return element;
+    }
+
+    @Override
+    public boolean isRoot() {
+      return this.element != null;
     }
   }
 }

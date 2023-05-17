@@ -1,16 +1,17 @@
 package utam.compiler.lint;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
+import static utam.compiler.lint.JsonLintRulesConfig.getConfiguredRule;
 import static utam.compiler.lint.PageObjectLintingImpl.isCustomElement;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Scanner;
 import java.util.Set;
+import utam.compiler.lint.JsonLintRulesConfig.LintRuleOverride;
+import utam.compiler.lint.JsonLintRulesConfig.LintingRuleObject;
 import utam.core.declarative.lint.LintingContext;
 import utam.core.declarative.lint.LintingError;
 import utam.core.declarative.lint.LintingError.ViolationLevel;
@@ -35,16 +36,17 @@ abstract class LintingRuleImpl implements LintingRule {
   private final Set<String> exceptions;
   private final String name;
   private final String description;
+  final String help;
 
-  private LintingRuleImpl(String ruleId, String name, String description,
-      ViolationLevel violationLevel, Integer errorCode, Set<String> exceptions) {
-    this.violationLevel = Objects
-        .requireNonNullElse(violationLevel, LintingError.ViolationLevel.error);
-    this.errorCode = errorCode;
-    this.exceptions = Objects.requireNonNullElse(exceptions, new HashSet<>());
-    this.name = name;
-    this.description = description;
+  private LintingRuleImpl(String ruleId, LintRuleOverride override) {
+    LintingRuleObject configuredRule = getConfiguredRule(ruleId);
+    this.violationLevel = override == null? configuredRule.violation : override.violationLevel;
+    this.errorCode = configuredRule.errorCode;
+    this.exceptions = override == null? new HashSet<>() : override.exceptions;
+    this.name = configuredRule.name;
+    this.description = configuredRule.description;
     this.ruleId = ruleId;
+    this.help = configuredRule.help;
   }
 
   @Override
@@ -70,9 +72,10 @@ abstract class LintingRuleImpl implements LintingRule {
    */
   final LintingError getError(PageObjectLinting context, int lineNumber,
       String fixSuggestion, String... args) {
+    String errMessage = VALIDATION.getLintingMessage(violationLevel, errorCode, args);
     return new LintingErrorImpl(ruleId, violationLevel, fixSuggestion, context, lineNumber,
         errorCode,
-        args);
+        errMessage);
   }
 
   @Override
@@ -80,8 +83,10 @@ abstract class LintingRuleImpl implements LintingRule {
   }
 
   @Override
-  public void validate(List<LintingError> errors, LintingContext context) {
+  public void validate(PageObjectLinting first, PageObjectLinting second, LintingContext context) {
+
   }
+
 
   @Override
   public String getId() {
@@ -139,7 +144,7 @@ abstract class LintingRuleImpl implements LintingRule {
   }
 
   /**
-   * Check for unique selectors inside same file. By default warning because list element can have
+   * Check for unique selectors inside same file. Note: list element can have
    * same selector
    *
    * @author elizaveta.ivanova
@@ -147,38 +152,26 @@ abstract class LintingRuleImpl implements LintingRule {
    */
   static class UniqueSelectorInsidePageObject extends LintingRuleImpl {
 
-    static final UniqueSelectorInsidePageObject DEFAULT = new UniqueSelectorInsidePageObject(
-        LintingError.ViolationLevel.error, new HashSet<>());
-    static final String RULE_ID = "ULR01";
-    private static final String NAME = "Unique local selectors";
-    private static final String DESCRIPTION = "Check for unique selectors inside same file. "
-        + "By default warning because list element can have same selector";
-    private static final String FIX = "remove duplicate elements: \"%s\" or \"%s\"";
     private static final FileSearchContext SEARCH_CONTEXT = new FileSearchContextImpl(
         new String[]{"elements"});
 
-    @JsonCreator
-    UniqueSelectorInsidePageObject(
-        @JsonProperty(value = "violation") ViolationLevel ruleType,
-        @JsonProperty(value = "exclude") Set<String> exceptions) {
-      super(RULE_ID, NAME, DESCRIPTION, ruleType, 2001, exceptions);
+    UniqueSelectorInsidePageObject(LintRuleOverride override) {
+      super("ULR01", override);
     }
 
     @Override
     public void validate(List<LintingError> errors, PageObjectLinting pageObject) {
       if (isEnabled(pageObject)) {
-        for (String locator : pageObject.getAllLocators()) {
-          List<ElementLinting> elements = pageObject.getElementsByLocator(locator);
-          for (int i = 1; i < elements.size(); i++) {
-            ElementLinting first = elements.get(i - 1);
-            ElementLinting second = elements.get(i);
-            if (first.getParentScope().equals(second.getParentScope())
-                // lists can have duplicates
-                && !first.isList() && !second.isList()) {
+        List<ElementLinting> elements = pageObject.getElements();
+        for (int i = 0; i < elements.size(); i++) {
+          ElementLinting first = elements.get(i);
+          for (int j = i + 1; j < elements.size(); j++) {
+            ElementLinting second = elements.get(j);
+            if (first.isSameScope(second) && first.isSameLocator(second)) {
               errors.add(getError(pageObject,
                   pageObject.findCodeLine(SEARCH_CONTEXT, second.getName()),
-                  String.format(FIX, first.getName(), second.getName()),
-                  locator,
+                  String.format(this.help, first.getName(), second.getName()),
+                  first.getLocator(),
                   second.getName(),
                   first.getName()));
             }
@@ -195,30 +188,17 @@ abstract class LintingRuleImpl implements LintingRule {
    * @since 242
    */
   static class RequiredRootDescription extends LintingRuleImpl {
-
-    static final RequiredRootDescription DEFAULT = new RequiredRootDescription(
-        // warning because it's optional property
-        LintingError.ViolationLevel.warning,
-        new HashSet<>());
-    static final String RULE_ID = "ULR02";
-    private static final String NAME = "Required root description";
-    private static final String DESCRIPTION = "Check description at the root level";
-    private static final String FIX = "add \"description\" property at the root";
     private static final FileSearchContext SEARCH_CONTEXT = new FileSearchContextImpl(
         new String[0]);
 
-
-    @JsonCreator
-    RequiredRootDescription(
-        @JsonProperty(value = "violation") ViolationLevel ruleType,
-        @JsonProperty(value = "exclude") Set<String> exceptions) {
-      super(RULE_ID, NAME, DESCRIPTION, ruleType, 2002, exceptions);
+    RequiredRootDescription(LintRuleOverride override) {
+      super("ULR02", override);
     }
 
     @Override
     public void validate(List<LintingError> errors, PageObjectLinting pageObject) {
       if (isEnabled(pageObject) && !pageObject.getRootContext().hasDescription()) {
-        errors.add(getError(pageObject, pageObject.findCodeLine(SEARCH_CONTEXT, ROOT_LINE), FIX));
+        errors.add(getError(pageObject, pageObject.findCodeLine(SEARCH_CONTEXT, ROOT_LINE), this.help));
       }
     }
   }
@@ -230,23 +210,10 @@ abstract class LintingRuleImpl implements LintingRule {
    * @since 242
    */
   static class RequiredAuthor extends LintingRuleImpl {
-
-    static final RequiredAuthor DEFAULT = new RequiredAuthor(
-        // warning because it's optional property
-        LintingError.ViolationLevel.warning,
-        new HashSet<>());
-    static final String RULE_ID = "ULR03";
-    static final String NAME = "Required author";
-    static final String DESCRIPTION = "Check description at the root level has an author";
-    static final String FIX = "add \"author\" property to the root description";
     private static final FileSearchContext SEARCH_CONTEXT = new FileSearchContextImpl(
         new String[0]);
-
-    @JsonCreator
-    RequiredAuthor(
-        @JsonProperty(value = "violation") ViolationLevel ruleType,
-        @JsonProperty(value = "exclude") Set<String> exceptions) {
-      super(RULE_ID, NAME, DESCRIPTION, ruleType, 2005, exceptions);
+    RequiredAuthor(LintRuleOverride override) {
+      super("ULR03", override);
     }
 
     @Override
@@ -255,7 +222,7 @@ abstract class LintingRuleImpl implements LintingRule {
           && !pageObject.getRootContext()
           .hasAuthor()) {
         errors.add(getError(pageObject,
-            pageObject.findCodeLine(SEARCH_CONTEXT, "description"), FIX));
+            pageObject.findCodeLine(SEARCH_CONTEXT, "description"), this.help));
       }
     }
   }
@@ -267,23 +234,11 @@ abstract class LintingRuleImpl implements LintingRule {
    * @since 242
    */
   static class RequiredMethodDescription extends LintingRuleImpl {
-
-    static final RequiredMethodDescription DEFAULT = new RequiredMethodDescription(
-        // warning because it's optional property
-        LintingError.ViolationLevel.warning,
-        new HashSet<>());
-    static final String RULE_ID = "ULR04";
-    private static final String NAME = "Required method description";
-    private static final String DESCRIPTION = "Check every compose method has description";
-    private static final String FIX = "add \"description\" property to the method \"%s\"";
     private static final FileSearchContext SEARCH_CONTEXT = new FileSearchContextImpl(
         new String[]{"methods"});
 
-    @JsonCreator
-    RequiredMethodDescription(
-        @JsonProperty(value = "violation") ViolationLevel ruleType,
-        @JsonProperty(value = "exclude") Set<String> exceptions) {
-      super(RULE_ID, NAME, DESCRIPTION, ruleType, 2003, exceptions);
+    RequiredMethodDescription(LintRuleOverride override) {
+      super("ULR04", override);
     }
 
     @Override
@@ -293,7 +248,7 @@ abstract class LintingRuleImpl implements LintingRule {
           if (!method.hasDescription()) {
             errors.add(getError(pageObject,
                 pageObject.findCodeLine(SEARCH_CONTEXT, method.getName()),
-                String.format(FIX, method.getName()),
+                String.format(this.help, method.getName()),
                 method.getName()));
           }
         }
@@ -308,21 +263,8 @@ abstract class LintingRuleImpl implements LintingRule {
    * @since 242
    */
   static class SingleShadowBoundaryAllowed extends LintingRuleImpl {
-
-    static final SingleShadowBoundaryAllowed DEFAULT = new SingleShadowBoundaryAllowed(
-        // warning because it depends on the team
-        LintingError.ViolationLevel.warning,
-        new HashSet<>());
-    static final String RULE_ID = "ULR05";
-    private static final String NAME = "Single shadowRoot";
-    private static final String DESCRIPTION = "Check only one shadowRoot present at the component root";
-    private static final String FIX = "remove \"shadow\" under element \"%s\" and create separate page object for its content";
-
-    @JsonCreator
-    SingleShadowBoundaryAllowed(
-        @JsonProperty(value = "violation") ViolationLevel ruleType,
-        @JsonProperty(value = "exclude") Set<String> exceptions) {
-      super(RULE_ID, NAME, DESCRIPTION, ruleType, 2004, exceptions);
+    SingleShadowBoundaryAllowed(LintRuleOverride override) {
+      super("ULR05", override);
     }
 
     @Override
@@ -333,7 +275,7 @@ abstract class LintingRuleImpl implements LintingRule {
               new String[]{"elements", elementName});
           errors.add(getError(pageObject,
               pageObject.findCodeLine(context, "shadow"),
-              String.format(FIX, elementName), elementName));
+              String.format(this.help, elementName), elementName));
         }
       }
     }
@@ -347,49 +289,33 @@ abstract class LintingRuleImpl implements LintingRule {
    */
   static class UniqueRootSelector extends LintingRuleImpl {
 
-    static final UniqueRootSelector DEFAULT = new UniqueRootSelector(
-        LintingError.ViolationLevel.error,
-        new HashSet<>());
-    static final String RULE_ID = "ULR06";
-    private static final String NAME = "Unique root selector";
-    private static final String DESCRIPTION = "Check root selector is unique across all page objects";
-    private static final String FIX = "remove one of the page objects with same root selector: \"%s\" or \"%s\"";
     private static final FileSearchContext SEARCH_CONTEXT = new FileSearchContextImpl(
         new String[0]);
 
-    @JsonCreator
-    UniqueRootSelector(
-        @JsonProperty(value = "violation") ViolationLevel ruleType,
-        @JsonProperty(value = "exclude") Set<String> exceptions) {
-      super(RULE_ID, NAME, DESCRIPTION, ruleType, 3001, exceptions);
+    UniqueRootSelector(LintRuleOverride override) {
+      super("ULR06", override);
     }
 
+    private boolean isSameRoot(PageObjectLinting first, PageObjectLinting second) {
+      if(first.getRootContext().isRoot() && second.getRootContext().isRoot()) {
+        return first.getRootContext().getRootElement().isSameLocator(second.getRootContext()
+            .getRootElement());
+      }
+      return false;
+    }
     @Override
-    public void validate(List<LintingError> errors, LintingContext context) {
-      Set<String> processedLocators = new HashSet<>();
-      for (PageObjectLinting pageObjectContext : context.getAllPageObjects()) {
-        if (isEnabled(pageObjectContext)) {
-          String locatorKey = pageObjectContext.getRootContext().getLocator();
-          if (locatorKey != null && !processedLocators.contains(locatorKey)) {
-            List<PageObjectLinting> pageObjects = context.getByRootLocator(locatorKey);
-            if (pageObjects != null && pageObjects.size() > 1) {
-              for (int i = 0; i < pageObjects.size() - 1; i++) {
-                PageObjectLinting first = pageObjects.get(i);
-                if (isEnabled(first)) {
-                  PageObjectLinting second = pageObjects.get(i + 1);
-                  errors.add(getError(first,
-                      first.findCodeLine(SEARCH_CONTEXT, "selector"),
-                      String.format(FIX, first.getName(), second.getName()),
-                      locatorKey, second.getName()));
-                }
-              }
-            }
-            processedLocators.add(locatorKey);
-          }
-        }
+    public void validate(PageObjectLinting first, PageObjectLinting second,
+        LintingContext context) {
+      if (isEnabled(first) && isEnabled(second) && isSameRoot(first, second)) {
+        String locator = first.getRootContext().getRootElement().getLocator();
+        context.getErrors().add(getError(first,
+            first.findCodeLine(SEARCH_CONTEXT, "selector"),
+            String.format(this.help, first.getName(), second.getName()),
+            locator, second.getName()));
       }
     }
   }
+
 
   /**
    * Root selector should match only custom elements of the same type as root selector's PO
@@ -398,51 +324,33 @@ abstract class LintingRuleImpl implements LintingRule {
    * @since 242
    */
   static class RootSelectorExistsForElement extends LintingRuleImpl {
-
-    static final RootSelectorExistsForElement DEFAULT = new RootSelectorExistsForElement(
-        LintingError.ViolationLevel.error,
-        new HashSet<>());
-    static final String RULE_ID = "ULR07";
-    private static final String NAME = "Root selector usage";
-    private static final String DESCRIPTION = "Root selector should match only custom elements of the same type";
-    private static final String FIX = "change the element \"%s\" type to the type of the page object \"%s\"";
     private static final FileSearchContext SEARCH_CONTEXT = new FileSearchContextImpl(
         new String[]{"elements"});
 
-    @JsonCreator
-    RootSelectorExistsForElement(
-        @JsonProperty(value = "violation") ViolationLevel ruleType,
-        @JsonProperty(value = "exclude") Set<String> exceptions) {
-      super(RULE_ID, NAME, DESCRIPTION, ruleType, 3002, exceptions);
+    RootSelectorExistsForElement(LintRuleOverride override) {
+      super("ULR07", override);
     }
 
+    private static boolean isRootDuplicateLocator(PageObjectLinting first, ElementLinting element) {
+      if(first.getTypeFullName().equals(element.getTypeFullName())) {
+        // if element is same type as page object
+        return false;
+      }
+      return first.getRootContext().getRootElement().isSameLocator(element);
+    }
     @Override
-    public void validate(List<LintingError> errors, LintingContext context) {
-      for (PageObjectLinting pageObjectContext : context.getAllPageObjects()) {
-        if (isEnabled(pageObjectContext)) {
-          for (String elementSelector : pageObjectContext.getAllLocators()) {
-            List<PageObjectLinting> existingPageObjects = context.getByRootLocator(elementSelector);
-            if (existingPageObjects != null) {
-              // report only first error that is not for same PO, others mean there are violation of rule 3001
-              PageObjectLinting existingPageObject = existingPageObjects
-                  .stream()
-                  .filter(po -> !po.getName().equals(pageObjectContext.getName()))
-                  .findAny()
-                  .orElse(null); // null returned if it's same PO
-              if (existingPageObject != null) {
-                String existingPageObjectType = existingPageObject.getTypeFullName();
-                for (ElementLinting element : pageObjectContext
-                    .getElementsByLocator(elementSelector)) {
-                  if (!element.getTypeFullName().equals(existingPageObjectType)) {
-                    errors.add(getError(pageObjectContext,
-                        pageObjectContext.findCodeLine(SEARCH_CONTEXT, element.getName()),
-                        String.format(FIX, element.getName(), existingPageObjectType),
-                        element.getName(),
-                        existingPageObjectType));
-                  }
-                }
-              }
-            }
+    public void validate(PageObjectLinting first, PageObjectLinting second,
+        LintingContext context) {
+      if (isEnabled(first) && isEnabled(second) && first.getRootContext().isRoot()) {
+        String existingPageObjectType = first.getTypeFullName();
+        for(ElementLinting element : second.getElements()) {
+          if(isRootDuplicateLocator(first, element)) {
+            String violatedElementName = element.getName();
+            context.getErrors().add(getError(second,
+                second.findCodeLine(SEARCH_CONTEXT, violatedElementName),
+                String.format(this.help, violatedElementName, existingPageObjectType),
+                violatedElementName,
+                existingPageObjectType));
           }
         }
       }
@@ -474,56 +382,47 @@ abstract class LintingRuleImpl implements LintingRule {
    */
   static class ElementsWithDifferentTypes extends LintingRuleImpl {
 
-    static final ElementsWithDifferentTypes DEFAULT = new ElementsWithDifferentTypes(
-        LintingError.ViolationLevel.error, new HashSet<>());
-    static final String RULE_ID = "ULR08";
-    private static final String NAME = "Custom selector";
-    private static final String DESCRIPTION = "Element with custom tag should have same type across all page objects";
-    private static final String FIX = "change the element \"%s\" type to the same type as the element \"%s\" in page object \"%s\"";
     private static final FileSearchContext SEARCH_CONTEXT = new FileSearchContextImpl(
         new String[]{"elements"});
 
-    @JsonCreator
-    ElementsWithDifferentTypes(
-        @JsonProperty(value = "violation") ViolationLevel ruleType,
-        @JsonProperty(value = "exclude") Set<String> exceptions) {
-      super(RULE_ID, NAME, DESCRIPTION, ruleType, 3003, exceptions);
+    ElementsWithDifferentTypes(LintRuleOverride override) {
+      super("ULR08", override);
+    }
+
+    private static boolean isSameCustomLocatorButDifferentTypes(ElementLinting first,
+        ElementLinting second) {
+      // if element is same type, locator is irrelevant, could be duplicate or not
+      if (!isCustomLocator(first) || !isCustomLocator(second) || first.getTypeFullName().equals(second.getTypeFullName())) {
+        return false;
+      }
+      return first.isSameLocator(second) && (isCustomElement(first) || isCustomElement(second))
+          && !first.getTypeFullName().equals(second.getTypeFullName());
+    }
+
+    private static boolean isCustomLocator(ElementLinting element) {
+      return element.getLocator().contains("-");
     }
 
     @Override
-    public void validate(List<LintingError> errors, LintingContext context) {
-      final Set<String> processedLocators = new HashSet<>();
-      for (PageObjectLinting pageObjectContext : context.getAllPageObjects()) {
-        if (isEnabled(pageObjectContext)) {
-          for (String locator : pageObjectContext.getAllLocators()) {
-            if (locator.contains("-") && !processedLocators.contains(locator)) {
-              String pageObjectUnderTest = pageObjectContext.getName();
-              for (PageObjectLinting existing : context.getAllPageObjects()) {
-                if (!isEnabled(existing) || existing.getName().equals(pageObjectUnderTest)
-                    || !existing.getAllLocators().contains(locator)) {
-                  continue;
-                }
-                List<ElementLinting> elementsUnderTest = pageObjectContext
-                    .getElementsByLocator(locator);
-                List<ElementLinting> existingElements = existing.getElementsByLocator(locator);
-                for (ElementLinting existingElement : existingElements) {
-                  for (ElementLinting element : elementsUnderTest) {
-                    if ((isCustomElement(existingElement) || isCustomElement(element))
-                        && !existingElement.getTypeFullName().equals(element.getTypeFullName())) {
-                      errors.add(getError(pageObjectContext,
-                          pageObjectContext.findCodeLine(SEARCH_CONTEXT, element.getName()),
-                          String.format(FIX, element.getName(), existingElement.getName(),
-                              existing.getName()),
-                          locator,
-                          element.getName(),
-                          existingElement.getName(),
-                          existing.getName(),
-                          element.getTypeFullName()));
-                    }
-                  }
-                  // to avoid reporting duplicates
-                  processedLocators.add(locator);
-                }
+    public void validate(PageObjectLinting first, PageObjectLinting second,
+        LintingContext context) {
+      if (isEnabled(first) && isEnabled(second)) {
+        for (ElementLinting firstElement : first.getElements()) {
+          if (isCustomLocator(firstElement)) { // for custom tags only
+            String firstElementName = firstElement.getName();
+            String firstElementLocator = firstElement.getLocator();
+            for (ElementLinting secondElement : second.getElements()) {
+              if (isSameCustomLocatorButDifferentTypes(firstElement, secondElement)) {
+                String secondElementName = secondElement.getName();
+                context.getErrors().add(getError(second,
+                    second.findCodeLine(SEARCH_CONTEXT, secondElementName),
+                    String.format(this.help, secondElementName, firstElementName,
+                        second.getName()),
+                    firstElementLocator,
+                    secondElementName,
+                    firstElementName,
+                    second.getName(),
+                    secondElement.getTypeFullName()));
               }
             }
           }

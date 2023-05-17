@@ -2,10 +2,10 @@
   "pageObjectsRootDir": "",
   "pageObjectsOutputDir": "",
   "resourcesOutputDir": "",
-  "lintingOutputFile": "test.sarif.json",
   "lint": {
+    "lintingOutputFile": "test.sarif.json",
     "requiredRootDescription": {
-      "violation": "warning"
+      "violation": "error"
     },
     "duplicateSelectors": {
       "violation": "disabled"

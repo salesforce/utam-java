@@ -129,8 +129,7 @@ public abstract class JavadocObject {
       // Java files cross-platform.
       String sourceFileRelativePath = context.getJsonPath().replace("\\", "/");
       List<String> javadoc = new ArrayList<>(text);
-      javadoc.add(String
-          .format("%screated from JSON %s", text.isEmpty() ? "" : ", ", sourceFileRelativePath));
+      javadoc.add(String.format("created from JSON %s", sourceFileRelativePath));
       // add line @author team_name
       javadoc.add(String.format("@author %s", (author == null ? "UTAM" : author)));
       // add line @version with timestamp

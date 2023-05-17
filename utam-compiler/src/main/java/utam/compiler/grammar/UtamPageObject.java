@@ -34,6 +34,7 @@ import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities.FromClass;
+import utam.compiler.lint.PageObjectLintingImpl.ElementSelector;
 import utam.compiler.lint.PageObjectLintingImpl.Method;
 import utam.compiler.lint.PageObjectLintingImpl.Root;
 import utam.compiler.representation.BeforeLoadMethod;
@@ -161,7 +162,7 @@ final class UtamPageObject {
     }
   }
 
-  final void compile(TranslationContext context) {
+  void compile(TranslationContext context) {
     if (this.isAbstract) {
       validateAbstract();
     } else {
@@ -222,7 +223,8 @@ final class UtamPageObject {
     ElementContext rootElement = new ElementContext.Root(interfaceType, rootLocator, elementType,
         rootElementMethod);
     context.setElement(rootElement, null);
-    RootLinting rootLintingContext = new Root(!description.isEmpty(), description.hasAuthor(), rootLocator);
+    ElementSelector rootSelector = rootLocator != null? new ElementSelector(rootLocator, false) : null;
+    RootLinting rootLintingContext = new Root(!description.isEmpty(), description.hasAuthor(), rootSelector);
     context.getLintingObject().setRootContext(rootLintingContext);
     return rootElement;
   }

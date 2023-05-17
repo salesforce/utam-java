@@ -25,14 +25,6 @@ public interface LintingContext {
   List<PageObjectLinting> getAllPageObjects();
 
   /**
-   * Get list of page objects by root locator. List because there can be duplicates.
-   *
-   * @param rootLocator root locator, not null
-   * @return all linting contexts with a given root
-   */
-  List<PageObjectLinting> getByRootLocator(String rootLocator);
-
-  /**
    * Add a page object information to the linting context
    *
    * @param pageObject result of the page object linting
