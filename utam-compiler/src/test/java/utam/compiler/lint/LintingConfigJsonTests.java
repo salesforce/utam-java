@@ -7,14 +7,11 @@
  */
 package utam.compiler.lint;
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.lint.LintingConfigJson.LINTING_EXCEPTION_PREFIX;
-import static utam.compiler.lint.LintingErrorImpl.buildFullErrorMessage;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,11 +53,12 @@ public class LintingConfigJsonTests {
     TranslatorRunner runner = getRunner("changeDefaultConfig");
     List<LintingError> errors = runner.run().getLintingErrors();
     assertThat(errors, hasSize(1));
-    LintingError error = errors.get(0);
-    String errMsg = buildFullErrorMessage("utam/pageObjects/test", error,
-        "root description is missing");
-    assertThat(errors.get(0).getFullMessage(), equalTo(errMsg));
-    String outputFile = System.getProperty("user.dir") + "/src/test/resources/lint/changeDefaultConfig/test.sarif.json";
+    assertThat(errors.get(0).getFullMessage(),
+        equalTo("lint rule ULR02 failure in page object utam/pageObjects/test: "
+            + "error 2002: root description is missing; "
+            + "add \"description\" property at the root"));
+    String outputFile = System.getProperty("user.dir")
+        + "/src/test/resources/lint/changeDefaultConfig/test.sarif.json";
     assertThat(new File(outputFile).exists(), is(true));
   }
 
@@ -69,7 +67,8 @@ public class LintingConfigJsonTests {
     TranslatorRunner runner = getRunner("changeGlobalRules");
     List<LintingError> errors = runner.run().getLintingErrors();
     assertThat(errors, hasSize(0));
-    String outputFile = System.getProperty("user.dir") + "/src/test/resources/lint/changeGlobalRules/utam-lint.sarif";
+    String outputFile = System.getProperty("user.dir")
+        + "/src/test/resources/lint/changeGlobalRules/utam-lint.sarif";
     assertThat(new File(outputFile).exists(), is(true));
   }
 
@@ -77,7 +76,8 @@ public class LintingConfigJsonTests {
   public void testDoNotProduceSarifReport() {
     TranslatorRunner runner = getRunner("ignore");
     runner.run();
-    String outputFile = System.getProperty("user.dir") + "/src/test/resources/lint/ignore/utam-lint.sarif";
+    String outputFile =
+        System.getProperty("user.dir") + "/src/test/resources/lint/ignore/utam-lint.sarif";
     assertThat(new File(outputFile).exists(), is(false));
   }
 
@@ -86,8 +86,9 @@ public class LintingConfigJsonTests {
     TranslatorRunner runner = getRunner("throwConfig");
     Exception e = expectThrows(UtamLintingError.class, runner::run);
     assertThat(e.getMessage(),
-        containsString("lint ULR01 error in page object utam/pageObjects/test: "
-            + "duplicate selector \"By.cssSelector: .one\" for the elements \"two\" and \"one\""));
-    assertThat(e.getMessage(), containsString(LINTING_EXCEPTION_PREFIX));
+        equalTo("UTAM linting failures:\n"
+            + "lint rule ULR01 failure in page object utam/pageObjects/test: "
+            + "error 2001: duplicate selector \".one\" for the elements \"two\" and \"one\"; "
+            + "remove duplicate elements: \"one\" or \"two\""));
   }
 }

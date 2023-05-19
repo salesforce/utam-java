@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.TEST_URI;
 import static utam.compiler.grammar.TestUtilities.getJsonStringDeserializer;
-import static utam.compiler.lint.LintingRuleTests.TEST_DEFAULT_LINTING_CONFIG;
+import static utam.compiler.lint.LintingConfigJson.DEFAULT_LINTING_CONFIG;
 import static utam.compiler.translator.DefaultSourceConfigurationTests.TranslatorConfigWithProfile.TEST_PROFILE;
 import static utam.compiler.translator.DefaultTargetConfigurationTests.PAGE_OBJECT_IMPL_CLASS_NAME;
 import static utam.compiler.translator.DefaultTargetConfigurationTests.PAGE_OBJECT_INTERFACE_CLASS_NAME;
@@ -251,7 +251,7 @@ public class DefaultTranslatorRunnerTests {
         sourceConfig, targetConfig) {
       @Override
       public LintingConfig getLintingConfig() {
-        return TEST_DEFAULT_LINTING_CONFIG;
+        return DEFAULT_LINTING_CONFIG;
       }
     };
     translatorConfig.setConfiguredProfile(new StringValueProfileConfig("driver", "chrome"));

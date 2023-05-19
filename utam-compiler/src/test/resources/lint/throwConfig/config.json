@@ -3,6 +3,9 @@
   "pageObjectsOutputDir": "",
   "resourcesOutputDir": "",
   "lint": {
-    "throwError": true
+    "throwError": true,
+    "duplicateSelectors": {
+      "violation" : "error"
+    }
   }
 }

@@ -1,0 +1,28 @@
+{
+  "description": {
+    "author": "author",
+    "text": [
+      "text"
+    ]
+  },
+  "elements": [
+    {
+      "name": "customSameType",
+      "type": "test/lint/roottype/root",
+      "selector": {
+        "css": "root-selector"
+      }
+    }
+  ],
+  "shadow": {
+    "elements": [
+      {
+        "name": "customDifferentType",
+        "type": "my/test/different",
+        "selector": {
+          "css": "root-selector"
+        }
+      }
+    ]
+  }
+}

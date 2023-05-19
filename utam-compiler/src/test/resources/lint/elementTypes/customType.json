@@ -1,0 +1,18 @@
+{
+  "description": {
+    "author": "author",
+    "text": [
+      "text"
+    ]
+  },
+  "elements": [
+    {
+      "name": "test",
+      "type": "my/test/custom",
+      "selector": {
+        "css": "my-test-custom"
+      }
+    }
+  ]
+}
+

@@ -8,29 +8,14 @@
 package utam.compiler.lint;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static utam.compiler.lint.LintingConfigJson.DEFAULT_LINTING_CONFIG;
-import static utam.compiler.lint.LintingConfigJson.DEFAULT_THROWS_ERROR;
-import static utam.compiler.lint.LintingErrorImpl.buildFullErrorMessage;
 
-import java.io.File;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import org.testng.annotations.Test;
 import utam.compiler.grammar.DeserializerUtilities;
 import utam.compiler.helpers.TranslationContext;
-import utam.compiler.lint.LintingRuleImpl.ElementsWithDifferentTypes;
-import utam.compiler.lint.LintingRuleImpl.RequiredAuthor;
-import utam.compiler.lint.LintingRuleImpl.RequiredMethodDescription;
-import utam.compiler.lint.LintingRuleImpl.RequiredRootDescription;
-import utam.compiler.lint.LintingRuleImpl.RootSelectorExistsForElement;
-import utam.compiler.lint.LintingRuleImpl.SingleShadowBoundaryAllowed;
-import utam.compiler.lint.LintingRuleImpl.UniqueRootSelector;
-import utam.compiler.lint.LintingRuleImpl.UniqueSelectorInsidePageObject;
 import utam.core.declarative.lint.LintingConfig;
 import utam.core.declarative.lint.LintingContext;
 import utam.core.declarative.lint.LintingError;
@@ -43,60 +28,91 @@ import utam.core.declarative.lint.LintingError;
  */
 public class LintingRuleTests {
 
-  public static final LintingConfig TEST_DEFAULT_LINTING_CONFIG = DEFAULT_LINTING_CONFIG;
-
-  private static List<LintingError> test(String[] jsonFiles, LintingConfig linting) {
+  private static List<LintingError> test(String[] jsonFiles) {
+    LintingConfig linting = DEFAULT_LINTING_CONFIG;
     LintingContext context = linting.start();
     for (String jsonFile : jsonFiles) {
       TranslationContext translationContext = new DeserializerUtilities("test/" + jsonFile)
           .getContextWithPath(jsonFile);
       linting.lint(context, translationContext.getLintingObject());
     }
-    String sarifFile = System.getProperty("user.dir") + File.separator + "utam-lint.sarif";
-    return linting.finish(context, sarifFile);
+    linting.finish(context);
+    linting.writeReport(context, null);
+    return context.getErrors();
   }
 
-  private static List<LintingError> test(String jsonFile, LintingConfig linting) {
+  private static List<LintingError> test(String jsonFile) {
     String[] files = new String[]{jsonFile};
-    return test(files, linting);
+    return test(files);
   }
 
   @Test
-  public void testDefaultConfigForOneFile() {
-    List<LintingError> errors = test("lint/defaultConfig", TEST_DEFAULT_LINTING_CONFIG);
-    String fileName = "test/lint/defaultConfig";
+  public void testDuplicateSelectorsInsideOneFile() {
+    List<LintingError> errors = test("lint/rules/defaultConfig");
     assertThat(errors, hasSize(5));
     LintingError error = errors.get(0);
-    assertThat(error.getFullMessage(), containsString(
-        buildFullErrorMessage(fileName, error,
-            "duplicate selector \"By.cssSelector: :scope > *:first-child\" for the elements \"container2\" and \"container1\"")));
-    assertThat(error.getRuleId(), equalTo(UniqueSelectorInsidePageObject.RULE_ID));
+    assertThat(error.getFullMessage(),
+        equalTo("lint rule ULR01 failure in page object test/lint/rules/defaultConfig: "
+            + "warning 2001: duplicate selector \".two\" for the elements \"three\" and \"two\"; "
+            + "remove duplicate elements: \"two\" or \"three\""));
+    assertThat(error.getRuleId(), equalTo("ULR01"));
     assertThat(error.getFixSuggestion(),
-        equalTo("remove duplicate elements: \"container1\" or \"container2\""));
-    assertThat(error.getSourceLine(), equalTo(41));
-    error = errors.get(1);
-    assertThat(error.getMessage(), containsString(
-        "duplicate selector \"By.cssSelector: .two\" for the elements \"three\" and \"two\""));
+        equalTo("remove duplicate elements: \"two\" or \"three\""));
     assertThat(error.getSourceLine(), equalTo(21));
-    error = errors.get(2);
-    assertThat(error.getFullMessage(), containsString(
-        buildFullErrorMessage(fileName, error, "root description is missing")));
-    assertThat(error.getRuleId(), equalTo(RequiredRootDescription.RULE_ID));
+    error = errors.get(1);
+    assertThat(error.getFullMessage(),
+        equalTo("lint rule ULR01 failure in page object test/lint/rules/defaultConfig: "
+            + "warning 2001: duplicate selector \":scope > *:first-child\" for the elements \"container2\" and \"container1\"; "
+            + "remove duplicate elements: \"container1\" or \"container2\""));
+  }
+
+  @Test
+  public void testTwoContainersWithSameEmptySelector() {
+    List<LintingError> errors = test("lint/rules/twoContainers");
+    assertThat(errors, hasSize(1));
+    assertThat(errors.get(0).getFullMessage(),
+        equalTo("lint rule ULR01 failure in page object test/lint/rules/twoContainers: "
+            + "warning 2001: duplicate selector \":scope > *:first-child\" for the elements \"container2\" and \"container1\"; "
+            + "remove duplicate elements: \"container1\" or \"container2\""));
+  }
+
+  @Test
+  public void testListCanHaveSameSelector() {
+    List<LintingError> errors = test("lint/rules/listSelector");
+    assertThat(errors, hasSize(1));
+    assertThat(errors.get(0).getFullMessage(),
+        equalTo("lint rule ULR01 failure in page object test/lint/rules/listSelector: "
+            + "warning 2001: duplicate selector \"css\" for the elements \"list2\" and \"list1\"; "
+            + "remove duplicate elements: \"list1\" or \"list2\""));
+  }
+
+  @Test
+  public void testRequiredDescription() {
+    List<LintingError> errors = test("lint/rules/defaultConfig");
+    assertThat(errors, hasSize(5));
+    LintingError error = errors.get(2);
+    assertThat(error.getFullMessage(),
+        equalTo("lint rule ULR02 failure in page object test/lint/rules/defaultConfig: "
+            + "warning 2002: root description is missing; "
+            + "add \"description\" property at the root"));
+    assertThat(error.getRuleId(), equalTo("ULR02"));
     assertThat(error.getFixSuggestion(), equalTo("add \"description\" property at the root"));
     assertThat(error.getSourceLine(), equalTo(1));
     error = errors.get(3);
-    assertThat(error.getFullMessage(), containsString(
-        buildFullErrorMessage(fileName, error,
-            "method \"nodescription\" does not have description")));
-    assertThat(error.getRuleId(), equalTo(RequiredMethodDescription.RULE_ID));
+    assertThat(error.getFullMessage(),
+        equalTo("lint rule ULR04 failure in page object test/lint/rules/defaultConfig: "
+            + "warning 2003: method \"nodescription\" does not have description; "
+            + "add \"description\" property to the method \"nodescription\""));
+    assertThat(error.getRuleId(), equalTo("ULR04"));
     assertThat(error.getFixSuggestion(),
         equalTo("add \"description\" property to the method \"nodescription\""));
     assertThat(error.getSourceLine(), equalTo(47));
     error = errors.get(4);
-    assertThat(error.getFullMessage(), containsString(
-        buildFullErrorMessage(fileName, error,
-            "only root shadow boundary is allowed, please create another page object for the element \"three\"")));
-    assertThat(error.getRuleId(), equalTo(SingleShadowBoundaryAllowed.RULE_ID));
+    assertThat(error.getFullMessage(),
+        equalTo("lint rule ULR05 failure in page object test/lint/rules/defaultConfig: "
+            + "warning 2004: only root shadow boundary is allowed, please create another page object for the element \"three\"; "
+            + "remove \"shadow\" under element \"three\" and create separate page object for its content"));
+    assertThat(error.getRuleId(), equalTo("ULR05"));
     assertThat(error.getFixSuggestion(), equalTo(
         "remove \"shadow\" under element \"three\" and create separate page object for its content"));
     assertThat(error.getSourceLine(), equalTo(25));
@@ -104,88 +120,121 @@ public class LintingRuleTests {
 
   @Test
   public void testElementDescriptionCanBeEmpty() {
-    List<LintingError> errors = test("lint/elementDescription", TEST_DEFAULT_LINTING_CONFIG);
+    List<LintingError> errors = test("lint/rules/elementDescription");
     assertThat(errors, hasSize(0));
   }
 
   @Test
   public void testAuthorCantBeEmpty() {
-    List<LintingError> errors = test("lint/rootNoAuthor", TEST_DEFAULT_LINTING_CONFIG);
+    List<LintingError> errors = test("lint/rules/rootNoAuthor");
     assertThat(errors, hasSize(1));
     LintingError error = errors.get(0);
-    assertThat(error.getFullMessage(), containsString(
-        buildFullErrorMessage("test/lint/rootNoAuthor", errors.get(0),
-            "property \"author\" is missing in the root description")));
-    assertThat(error.getRuleId(), equalTo(RequiredAuthor.RULE_ID));
+    assertThat(error.getFullMessage(),
+        equalTo("lint rule ULR03 failure in page object test/lint/rules/rootNoAuthor: "
+            + "warning 2005: property \"author\" is missing in the root description; "
+            + "add \"author\" property to the root description"));
+    assertThat(error.getRuleId(), equalTo("ULR03"));
     assertThat(error.getSourceLine(), equalTo(2));
   }
 
   @Test
+  public void testShadowBoundaryRule() {
+    List<LintingError> errors = test("lint/rules/defaultConfig");
+    assertThat(errors, hasSize(5));
+    LintingError error = errors.get(4);
+    assertThat(error.getFullMessage(),
+        equalTo("lint rule ULR05 failure in page object test/lint/rules/defaultConfig: "
+            + "warning 2004: only root shadow boundary is allowed, please create another page object for the element \"three\"; "
+            + "remove \"shadow\" under element \"three\" and create separate page object for its content"));
+    assertThat(error.getRuleId(), equalTo("ULR05"));
+    assertThat(error.getFixSuggestion(), equalTo(
+        "remove \"shadow\" under element \"three\" and create separate page object for its content"));
+    assertThat(error.getSourceLine(), equalTo(25));
+  }
+
+  @Test
   public void testRulesAppliedToInterface() {
-    List<LintingError> errors = test("lint/interface", TEST_DEFAULT_LINTING_CONFIG);
+    List<LintingError> errors = test("lint/rules/interface");
     assertThat(errors, hasSize(2));
   }
 
   @Test
-  public void testExceptionsAreApplied() {
-    Set<String> exceptions = Collections.singleton("test/lint/defaultConfig");
-    LintingConfig configuration = new LintingConfigJson(
-        DEFAULT_THROWS_ERROR,
-        null,
-        new UniqueSelectorInsidePageObject(LintingError.ViolationLevel.warning, exceptions),
-        new RequiredRootDescription(LintingError.ViolationLevel.warning, exceptions),
-        null,
-        new RequiredMethodDescription(LintingError.ViolationLevel.warning, exceptions),
-        new SingleShadowBoundaryAllowed(LintingError.ViolationLevel.warning, exceptions),
-        null,
-        null,
-        null
-    );
-    List<LintingError> errors = test("lint/defaultConfig", configuration);
+  public void testDuplicateRootSelectors() {
+    String[] files = new String[]{
+        "lint/rootSelectors/one",
+        "lint/rootSelectors/two",
+        "lint/rootSelectors/three"
+    };
+    List<LintingError> errors = test(files);
+    assertThat(errors, hasSize(3));
+    LintingError error = errors.get(0);
+    assertThat(error.getFullMessage(),
+        equalTo("lint rule ULR06 failure in page object test/lint/rootSelectors/one: "
+            + "warning 3001: same root selector \"root-selector\" is used as a root selector in the page object test/lint/rootSelectors/two; "
+            + "remove one of the page objects with same root selector: \"test/lint/rootSelectors/one\" or \"test/lint/rootSelectors/two\""));
+    assertThat(error.getRuleId(), equalTo("ULR06"));
+    assertThat(error.getSourceLine(), equalTo(9));
+    assertThat(errors.get(1).getFullMessage(),
+        equalTo("lint rule ULR06 failure in page object test/lint/rootSelectors/one: "
+            + "warning 3001: same root selector \"root-selector\" is used as a root selector in the page object test/lint/rootSelectors/three; "
+            + "remove one of the page objects with same root selector: \"test/lint/rootSelectors/one\" or \"test/lint/rootSelectors/three\""));
+    assertThat(errors.get(2).getFullMessage(),
+        equalTo("lint rule ULR06 failure in page object test/lint/rootSelectors/two: "
+            + "warning 3001: same root selector \"root-selector\" is used as a root selector in the page object test/lint/rootSelectors/three; "
+            + "remove one of the page objects with same root selector: \"test/lint/rootSelectors/two\" or \"test/lint/rootSelectors/three\""));
+  }
+
+  @Test
+  public void testElementTypeSameAsRoot() {
+    String[] files = new String[]{
+        "lint/rootType/root",
+        "lint/rootType/elements"
+    };
+    List<LintingError> errors = test(files);
+    assertThat(errors, hasSize(1));
+    assertThat(errors.get(0).getFullMessage(),
+        equalTo("lint rule ULR07 failure in page object test/lint/rootType/elements: "
+            + "warning 3002: element \"customDifferentType\" should have type \"test.lint.roottype.Root\" because it uses its root selector; "
+            + "change the element \"customDifferentType\" type to the type of the page object \"test.lint.roottype.Root\""));
+  }
+
+  @Test
+  public void testElementsOfSameTypeProduceNoError() {
+    String[] files = new String[]{
+        "lint/elementTypes/customType",
+        "lint/elementTypes/anotherCustomType"
+    };
+    List<LintingError> errors = test(files);
     assertThat(errors, hasSize(0));
+  }
+
+  @Test
+  public void testBasicAndCustomTypesViolation() {
+    String[] files = new String[]{
+        "lint/elementTypes/basicType",
+        "lint/elementTypes/customType"
+    };
+    List<LintingError> errors = test(files);
+    assertThat(errors, hasSize(1));
+    assertThat(errors.get(0).getFullMessage(),
+        equalTo("lint rule ULR08 failure in page object test/lint/elementTypes/customType: warning 3003: "
+            + "custom selector \"my-test-custom\" of the element \"test\" is used for an element \"basic\" in the page object test/lint/elementTypes/customType, but has a different type \"my.test.Custom\"; "
+            + "change the element \"test\" type to the same type as the element \"basic\" in page object \"test/lint/elementTypes/customType\""));
   }
 
 
   @Test
-  public void testMultipleFilesWithDefaultConfig() {
+  public void testContainerAndCustomType() {
     String[] files = new String[]{
-        "lint/hasDifferentRootSelector",
-        "lint/hasRootSelector",
-        "lint/hasSameRootSelector",
-        "lint/hasAnotherSameRootSelector"
+        "lint/elementTypes/customType",
+        "lint/elementTypes/containerType"
     };
-    List<LintingError> errors = test(files, TEST_DEFAULT_LINTING_CONFIG);
-    assertThat(errors, hasSize(5));
+    List<LintingError> errors = test(files);
+    assertThat(errors, hasSize(1));
+    assertThat(errors.get(0).getFullMessage(),
+        equalTo("lint rule ULR08 failure in page object test/lint/elementTypes/containerType: warning 3003: "
+            + "custom selector \"my-test-custom\" of the element \"container\" is used for an element \"test\" in the page object test/lint/elementTypes/containerType, but has a different type \"container\"; "
+            + "change the element \"container\" type to the same type as the element \"test\" in page object \"test/lint/elementTypes/containerType\""));
 
-    LintingError error = errors.get(0);
-    assertThat(error.getFullMessage(), containsString(
-        buildFullErrorMessage("test/lint/hasRootSelector", error,
-            "same root selector \"By.cssSelector: root\" is used as a root selector in the page object test/lint/hasSameRootSelector")));
-    assertThat(error.getRuleId(), equalTo(UniqueRootSelector.RULE_ID));
-    assertThat(error.getSourceLine(), equalTo(9));
-    assertThat(error.getFixSuggestion(), equalTo(
-        "remove one of the page objects with same root selector: \"test/lint/hasRootSelector\" or \"test/lint/hasSameRootSelector\""));
-    assertThat(errors.get(1).getMessage(), containsString("same root selector"));
-
-    error = errors.get(2);
-    assertThat(error.getFullMessage(), containsString(
-        buildFullErrorMessage("test/lint/hasDifferentRootSelector", error,
-            "element \"sameAsRootBasic\" should have type \"test.lint.HasRootSelector\" because it uses its root selector")));
-    assertThat(error.getRuleId(), equalTo(RootSelectorExistsForElement.RULE_ID));
-    assertThat(error.getFixSuggestion(), equalTo(
-        "change the element \"sameAsRootBasic\" type to the type of the page object \"test.lint.HasRootSelector\""));
-    assertThat(error.getSourceLine(), equalTo(15));
-
-    assertThat(errors.get(3).getMessage(), containsString(
-        "custom selector \"By.cssSelector: custom-duplicate\" of the element \"custom\" is used for an element \"basic\" in the page object test/lint/hasSameRootSelector, but has a different type"));
-    error = errors.get(4);
-    assertThat(error.getFullMessage(), endsWith(
-        buildFullErrorMessage("test/lint/hasRootSelector", error,
-            "custom selector \"By.cssSelector: custom-duplicate\" of the element \"custom\" is used for an element \"customDuplicate\" "
-                + "in the page object test/lint/hasAnotherSameRootSelector, but has a different type \"my.custom.Type\"")));
-    assertThat(error.getRuleId(), equalTo(ElementsWithDifferentTypes.RULE_ID));
-    assertThat(error.getFixSuggestion(), equalTo(
-        "change the element \"custom\" type to the same type as the element \"customDuplicate\" in page object \"test/lint/hasAnotherSameRootSelector\""));
-    assertThat(error.getSourceLine(), equalTo(15));
   }
 }

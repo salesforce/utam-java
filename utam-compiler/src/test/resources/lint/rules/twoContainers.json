@@ -1,0 +1,26 @@
+{
+  "description": {
+    "author": "author",
+    "text": [
+      "text"
+    ]
+  },
+  "shadow": {
+    "elements": [
+      {
+        "name": "containerInShadow",
+        "type": "container"
+      }
+    ]
+  },
+  "elements": [
+    {
+      "name": "container1",
+      "type": "container"
+    },
+    {
+      "name": "container2",
+      "type": "container"
+    }
+  ]
+}

@@ -70,7 +70,6 @@ public class JsonCompilerConfigTests {
           null,
           null,
           null,
-          null,
           new ArrayList<>(),
           new ArrayList<>(),
           new ArrayList<>(),

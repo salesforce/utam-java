@@ -8,7 +8,6 @@
 package utam.core.declarative.lint;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -69,7 +68,7 @@ public interface PageObjectLinting {
    *
    * @return methods
    */
-  Collection<MethodLinting> getMethods();
+  List<MethodLinting> getMethods();
 
   /**
    * Add element information to linting context
@@ -102,17 +101,9 @@ public interface PageObjectLinting {
   /**
    * Get all elements by a certain locator
    *
-   * @param locator locator string to find all elements by it
    * @return elements map, key is locator as string
    */
-  List<ElementLinting> getElementsByLocator(String locator);
-
-  /**
-   * Get all locators to iterate by linting
-   *
-   * @return set
-   */
-  Set<String> getAllLocators();
+  List<ElementLinting> getElements();
 
   /**
    * Context to search for the line inside the file
@@ -155,11 +146,18 @@ public interface PageObjectLinting {
     boolean hasAuthor();
 
     /**
-     * Get String with root locator, for example "By.css('.css')"
+     * Get root element for root locator
      *
-     * @return string
+     * @return root element
      */
-    String getLocator();
+    ElementLinting getRootElement();
+
+    /**
+     * Check if page object has root selector
+     *
+     * @return true if it does
+     */
+    boolean isRoot();
   }
 
   /**
@@ -192,18 +190,19 @@ public interface PageObjectLinting {
     String getTypeFullName();
 
     /**
-     * Get parent scope to check duplicate selectors
+     * Parent scope can be same for elements inside and outside shadow root
      *
-     * @return string
+     * @return true if element is inside shadow
      */
-    String getParentScope();
+    boolean isSameScope(ElementLinting element);
 
     /**
-     * Lists are allowed to have duplicates
+     * Check if element has same locator as another element
      *
-     * @return true if element is a list
+     * @param element element to check against
+     * @return true if same
      */
-    boolean isList();
+    boolean isSameLocator(ElementLinting element);
   }
 
   /**

@@ -198,7 +198,7 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
           profileDirectory == null ? "" : profileDirectory.toString(),
           testRunner,
           unitTestDirectoryPath,
-          null, null
+          null
       );
 
       if (packageMappingFile == null) {

@@ -7,8 +7,6 @@
  */
 package utam.compiler.lint;
 
-import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
-
 import utam.core.declarative.lint.LintingError;
 import utam.core.declarative.lint.PageObjectLinting;
 
@@ -35,32 +33,18 @@ class LintingErrorImpl implements LintingError {
       PageObjectLinting pageObject,
       int sourceLine,
       Integer errorCode,
-      String... args) {
+      String errorMessage) {
     this.ruleId = ruleId;
     this.level = level;
     this.id = String.valueOf(errorCode);
-    this.errorMessage = VALIDATION.getLintingMessage(errorCode, args);
+    this.errorMessage = errorMessage;
     this.pageObjectPath = pageObject.getJsonFilePath();
-    this.fullErrorMessage = buildFullErrorMessage(pageObject.getName(), this, this.errorMessage);
+    this.fullErrorMessage = String.format("lint rule %s failure in page object %s: %s; %s",
+        ruleId, pageObject.getName(), this.errorMessage, fixSuggestion);
     this.fixSuggesion = fixSuggestion;
     this.sourceLine = sourceLine;
   }
 
-  /**
-   * Build full error message that includes ruleId and page object name to print in UTAM logs. Not
-   * private because used in the unit tests.
-   *
-   * @param pageObjectName URI of the page page object
-   * @param error          linting error object
-   * @param shortMessage   short message used by SARIF
-   * @return string
-   */
-  static String buildFullErrorMessage(String pageObjectName, LintingError error,
-      String shortMessage) {
-    LintingErrorImpl err = (LintingErrorImpl) error;
-    return String.format("lint %s %s in page object %s: %s", err.ruleId,
-        err.level.name(), pageObjectName, shortMessage);
-  }
 
   @Override
   public String getMessage() {

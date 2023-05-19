@@ -28,10 +28,11 @@ public interface LintingRule {
   /**
    * Apply rule to all page objects to cross check them
    *
-   * @param errors  container to report errors
+   * @param first   first page object (already linted)
+   * @param second  second page object (already linted)
    * @param context all page objects under linting
    */
-  void validate(List<LintingError> errors, LintingContext context);
+  void validate(PageObjectLinting first, PageObjectLinting second, LintingContext context);
 
   /**
    * Get unique rule ID in the format ULR(number)

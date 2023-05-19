@@ -155,6 +155,9 @@ public class UtamCompilationError extends UtamError {
   }
 
   private static UtamCompilationError unwrapCompilerError(Throwable error) {
+    if (error instanceof NullPointerException) {
+      return new UtamCompilationError("Error", error);
+    }
     if (error instanceof UtamCompilationError) {
       return (UtamCompilationError) error;
     }

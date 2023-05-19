@@ -33,7 +33,6 @@ import utam.compiler.helpers.ElementContext.Self;
 import utam.compiler.helpers.TypeUtilities.PageObjectWithNamesCollisionType;
 import utam.compiler.lint.PageObjectLintingImpl;
 import utam.compiler.representation.BasicElementGetterMethod;
-import utam.compiler.translator.CompilerErrors;
 import utam.compiler.translator.CompilerErrors.StringError;
 import utam.core.declarative.errors.CompilerErrorsContext;
 import utam.core.declarative.lint.PageObjectLinting;

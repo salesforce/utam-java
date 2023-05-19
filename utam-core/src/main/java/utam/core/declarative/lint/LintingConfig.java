@@ -7,8 +7,6 @@
  */
 package utam.core.declarative.lint;
 
-import java.util.List;
-
 /**
  * Configuration for linting
  *
@@ -36,8 +34,15 @@ public interface LintingConfig {
    * every page object and then reports results to SARIF and UTAM logs
    *
    * @param context        linting context
-   * @param reportFilePath absolute path to sarif report
-   * @return list of errors
    */
-  List<LintingError> finish(LintingContext context, String reportFilePath);
+  void finish(LintingContext context);
+
+  /**
+   * Run linting to collect errors across all page objects. Executed after applying linting for
+   * every page object and then reports results to SARIF and UTAM logs
+   *
+   * @param context        linting context
+   * @param pathToReport   directory where to put report
+   */
+  void writeReport(LintingContext context, String pathToReport);
 }

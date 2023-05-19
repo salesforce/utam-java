@@ -12,7 +12,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.lint.LintingRuleTests.TEST_DEFAULT_LINTING_CONFIG;
+import static utam.compiler.lint.LintingConfigJson.DEFAULT_LINTING_CONFIG;
 import static utam.compiler.translator.DefaultSourceConfiguration.ERR_DUPLICATE_PAGE_OBJECT;
 import static utam.compiler.translator.DefaultSourceConfiguration.ERR_IO_DURING_SCAN;
 import static utam.compiler.translator.DefaultSourceConfiguration.ERR_MISSING_SOURCE_PATH;
@@ -78,7 +78,7 @@ public class DefaultSourceConfigurationTests {
   @Test
   public void testRunWithDuplicatePageObjectsThrows() {
     TranslatorConfig configuration = new TranslatorConfigWithProfile(new DuplicatePageObjects(),
-        new DefaultTargetConfiguration("", "", "", UnitTestRunner.NONE, null, null, null));
+        new DefaultTargetConfiguration("", "", "", UnitTestRunner.NONE, null, null));
     DefaultTranslatorRunner translator = new DefaultTranslatorRunner(configuration);
     UtamError e = expectThrows(UtamError.class, translator::run);
     assertThat(
@@ -172,7 +172,7 @@ public class DefaultSourceConfigurationTests {
 
     @Override
     public LintingConfig getLintingConfig() {
-      return TEST_DEFAULT_LINTING_CONFIG;
+      return DEFAULT_LINTING_CONFIG;
     }
   }
 

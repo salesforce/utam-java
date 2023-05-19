@@ -27,15 +27,13 @@ import utam.core.declarative.translator.UnitTestRunner;
  * @since 228
  */
 public class DefaultTargetConfiguration implements TranslatorTargetConfig {
-
-  private static final String DEFAULT_SARIF_OUTPUT_FILE = "utam-lint.sarif";
   private static final String SRC_DIRECTORY_MARKER = File.separator + "main" + File.separator;
   private static final String TEST_DIRECTORY_MARKER = File.separator + "test" + File.separator;
   private final String resourcesHomePath;
   private final String targetPath;
   private final String unitTestDirectory;
   private final UnitTestRunner unitTestRunner;
-  private final String lintReportFile;
+  private final String compilerRoot;
   private final String compilerErrorsReportFile;
 
   /**
@@ -48,7 +46,6 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
    * @param unitTestRunner    the test runner to use when generating unit tests
    * @param unitTestDirectory the root output directory where generated unit tests for generated
    *                          Page Objects will be written
-   * @param lintReportFile    the output path for linting report file
    */
   public DefaultTargetConfiguration(
       String compilerRoot,
@@ -56,7 +53,6 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
       String resourcesHomePath,
       UnitTestRunner unitTestRunner,
       String unitTestDirectory,
-      String lintReportFile,
       String compilerErrorsFile) {
     this.resourcesHomePath = resourcesHomePath;
     this.targetPath = targetPath;
@@ -66,7 +62,7 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
       this.unitTestDirectory = unitTestDirectory;
     }
     this.unitTestRunner = unitTestRunner == null ? UnitTestRunner.NONE : unitTestRunner;
-    this.lintReportFile = getSarifFilePath(compilerRoot, lintReportFile);
+    this.compilerRoot = compilerRoot;
     this.compilerErrorsReportFile = getErrorsReportPath(resourcesHomePath, compilerErrorsFile);
   }
 
@@ -80,19 +76,7 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
    */
   public DefaultTargetConfiguration(String compilerRoot, String targetPath,
       String resourcesHomePath) {
-    this(compilerRoot, targetPath, resourcesHomePath, null, null, null, null);
-  }
-
-  private static String getSarifFilePath(String compilerRoot, String relativeFile) {
-    if(relativeFile != null && relativeFile.isEmpty()) {
-      // FIXME - add separate config parameter, temporary loop hole to not write report
-      return null;
-    }
-    String targetPath = compilerRoot == null ? System.getProperty("user.dir") : compilerRoot;
-    String fileName = relativeFile == null ? DEFAULT_SARIF_OUTPUT_FILE : relativeFile;
-    return
-        targetPath.endsWith(File.separator) ? targetPath + fileName
-            : targetPath + File.separator + fileName;
+    this(compilerRoot, targetPath, resourcesHomePath, null, null, null);
   }
 
   private static String getErrorsReportPath(String resourcesOutputDir, String errorsReportFile) {
@@ -168,7 +152,7 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
 
   @Override
   public String getLintReportPath() {
-    return lintReportFile;
+    return compilerRoot;
   }
 
   @Override

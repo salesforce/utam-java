@@ -1,0 +1,12 @@
+{
+  "description": {
+    "author": "author",
+    "text": [
+      "text"
+    ]
+  },
+  "root": true,
+  "selector": {
+    "css": "root-selector"
+  }
+}

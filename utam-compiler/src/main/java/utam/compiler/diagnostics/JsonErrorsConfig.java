@@ -9,7 +9,6 @@ package utam.compiler.diagnostics;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import java.net.URL;
@@ -18,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingFormatArgumentException;
+import utam.core.declarative.lint.LintingError.ViolationLevel;
 
 /**
  * Mapping for pre-configured compiler error codes
@@ -86,16 +86,18 @@ public class JsonErrorsConfig {
   /**
    * read error message by code and replace %s by args if any
    *
+   * @param violationLevel linting violation level
    * @param code string code
    * @param args replacement for part of the messages that are context dependent
    * @return string with message or throws an error
    */
-  public String getLintingMessage(Integer code, String... args) {
+  public String getLintingMessage(ViolationLevel violationLevel, Integer code, String... args) {
     if (!errorDetailsMap.containsKey(code)) {
       throw new IllegalArgumentException(String.format(ERR_CODE_NOT_CONFIGURED, code));
     }
     ErrorDetails errorDetails = errorDetailsMap.get(code);
-    return errorDetails.getStringMessage(args);
+    String message = errorDetails.getStringMessage(args);
+    return String.format("%s %s: %s", violationLevel.name(), code, message);
   }
 
   /**
