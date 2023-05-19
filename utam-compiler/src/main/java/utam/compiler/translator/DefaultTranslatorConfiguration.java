@@ -30,8 +30,6 @@ import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorSourceConfig;
 import utam.core.declarative.translator.TranslatorTargetConfig;
 
-import javax.annotation.Nullable;
-
 /**
  * The default configuration object for executing the generator in a runner class
  *
@@ -263,7 +261,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
         new ArrayList<>());
 
     final String moduleName;
-    final @Nullable String pageObjectsVersion;
+    final String pageObjectsVersion;
     final List<String> configuredCopyright;
 
     /**
@@ -274,7 +272,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
     public CompilerOutputOptions(String moduleName, String pageObjectsVersion,
         List<String> configuredCopyright) {
       this.moduleName = moduleName;
-      this.pageObjectsVersion = (pageObjectsVersion != null && !pageObjectsVersion.isEmpty() ? pageObjectsVersion : null);
+      this.pageObjectsVersion = pageObjectsVersion;
       this.configuredCopyright = configuredCopyright;
     }
   }

@@ -45,8 +45,6 @@ import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslationTypesConfig;
 import utam.core.declarative.translator.TranslatorConfig;
 
-import javax.annotation.Nullable;
-
 /**
  * Instance of this type is created for every Page Object that is being translated, contains
  * reference to the Page Object context and translator context
@@ -375,7 +373,6 @@ public class TranslationContext {
    *
    * @return string
    */
-  @Nullable
   public String getConfiguredVersion() {
     return this.translatorConfiguration.getPageObjectsVersion();
   }

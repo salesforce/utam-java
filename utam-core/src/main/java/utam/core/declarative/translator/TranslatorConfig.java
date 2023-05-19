@@ -13,8 +13,6 @@ import java.util.List;
 import utam.core.declarative.errors.CompilerErrorsConfig;
 import utam.core.declarative.lint.LintingConfig;
 
-import javax.annotation.Nullable;
-
 /**
  * configuration for translator
  *
@@ -61,9 +59,9 @@ public interface TranslatorConfig {
   /**
    * version of the page objects to add to the JavaDoc
    *
-   * @return Version, if available
+   * @return Version, if available. It could be empty.
    */
-  @Nullable String getPageObjectsVersion();
+  String getPageObjectsVersion();
 
   /**
    * if configured, page object code can have copyright header
