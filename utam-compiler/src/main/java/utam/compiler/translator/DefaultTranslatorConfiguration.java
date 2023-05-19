@@ -272,9 +272,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
     public CompilerOutputOptions(String moduleName, String pageObjectsVersion,
         List<String> configuredCopyright) {
       this.moduleName = moduleName;
-      this.pageObjectsVersion = (pageObjectsVersion == null || pageObjectsVersion.isEmpty()) ?
-          LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-          : pageObjectsVersion;
+      this.pageObjectsVersion = pageObjectsVersion;
       this.configuredCopyright = configuredCopyright;
     }
   }

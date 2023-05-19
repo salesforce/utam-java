@@ -59,7 +59,7 @@ public interface TranslatorConfig {
   /**
    * version of the page objects to add to the JavaDoc
    *
-   * @return not nullable string
+   * @return Version, if available. It could be empty.
    */
   String getPageObjectsVersion();
 

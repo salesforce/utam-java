@@ -236,7 +236,7 @@ public class JsonCompilerConfigTests {
         new File(System.getProperty("user.dir")),
         null);
     assertThat(config.getModuleName(), is(emptyString()));
-    assertThat(config.getVersion(), startsWith(String.valueOf(LocalDate.now().getYear())));
+    assertThat(config.getVersion(), is(emptyString()));
     assertThat(config.getCopyright(), is(empty()));
 
     Module module = config.getModule();
