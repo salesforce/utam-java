@@ -133,8 +133,10 @@ public abstract class JavadocObject {
           .format("%screated from JSON %s", text.isEmpty() ? "" : ", ", sourceFileRelativePath));
       // add line @author team_name
       javadoc.add(String.format("@author %s", (author == null ? "UTAM" : author)));
-      // add line @version with timestamp
-      javadoc.add(String.format("%s %s", VERSION_TAG, version));
+      // add line @version, if not empty
+      if (version != null && !version.isEmpty()) {
+        javadoc.add(String.format("%s %s", VERSION_TAG, version));
+      }
       // add line @deprecated
       if (deprecated != null) {
         javadoc.add(String.format("@deprecated %s", deprecated));

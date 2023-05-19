@@ -56,5 +56,6 @@ public class DefaultTranslatorConfigurationTests {
     List<String> copyright = config.getCopyright();
     assertThat(copyright, hasSize(1));
     assertThat(copyright.get(0), is(equalTo("copyright")));
+    assertThat(config.getPageObjectsVersion(), equalTo("version"));
   }
 }

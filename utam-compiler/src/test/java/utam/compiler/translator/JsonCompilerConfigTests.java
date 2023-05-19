@@ -9,6 +9,7 @@ package utam.compiler.translator;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anEmptyMap;
@@ -236,7 +237,7 @@ public class JsonCompilerConfigTests {
         new File(System.getProperty("user.dir")),
         null);
     assertThat(config.getModuleName(), is(emptyString()));
-    assertThat(config.getVersion(), startsWith(String.valueOf(LocalDate.now().getYear())));
+    assertThat(config.getVersion(), is(nullValue()));
     assertThat(config.getCopyright(), is(empty()));
 
     Module module = config.getModule();
