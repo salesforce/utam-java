@@ -171,7 +171,7 @@ public class LintingConfigJson implements LintingConfig {
 
   @Override
   public void writeReport(LintingContext context, String compilerRoot) {
-    if(!isDisabled && this.isWriteSerifReport) {
+    if(!isDisabled && isWriteSerifReport) {
     String reportFilePath = getSarifFilePath(compilerRoot);
       try {
         Writer writer = getWriterWithDir(reportFilePath);
