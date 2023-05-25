@@ -3,6 +3,6 @@
   "pageObjectsOutputDir": "",
   "resourcesOutputDir": "",
   "lint": {
-    "writeOutputFile": false
+    "writeSerifReport": false
   }
 }
