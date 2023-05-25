@@ -2,5 +2,7 @@
   "pageObjectsRootDir": "",
   "pageObjectsOutputDir": "",
   "resourcesOutputDir": "",
-  "lintingOutputFile": ""
+  "lint": {
+    "lintingOutputFile": ""
+  }
 }
