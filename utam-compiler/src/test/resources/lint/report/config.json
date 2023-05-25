@@ -1,8 +1,5 @@
 {
   "pageObjectsRootDir": "",
   "pageObjectsOutputDir": "",
-  "resourcesOutputDir": "",
-  "lint": {
-    "disable": true
-  }
+  "resourcesOutputDir": ""
 }
