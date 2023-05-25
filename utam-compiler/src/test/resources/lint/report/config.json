@@ -1,5 +1,8 @@
 {
   "pageObjectsRootDir": "",
   "pageObjectsOutputDir": "",
-  "resourcesOutputDir": ""
+  "resourcesOutputDir": "",
+  "lint" : {
+    "lintingOutputFile": "utam-lint.sarif"
+  }
 }

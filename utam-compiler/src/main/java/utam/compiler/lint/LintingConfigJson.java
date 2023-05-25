@@ -49,14 +49,19 @@ public class LintingConfigJson implements LintingConfig {
 
   private static final String LINTING_EXCEPTION_PREFIX = "UTAM linting failures:\n";
   /**
+   * default name for output sarif report
+   */
+  private static final String DEFAULT_SARIF_OUTPUT_FILE = "utam-lint.sarif";
+  /**
    * default configuration when config is empty, public because used from different package by
    * runner
    */
   public static final LintingConfig DEFAULT_LINTING_CONFIG = new LintingConfigJson(
       false,
       false,
+      false,
       null,
-      null,
+      DEFAULT_SARIF_OUTPUT_FILE,
       null,
       null,
       null,
@@ -73,10 +78,12 @@ public class LintingConfigJson implements LintingConfig {
   private final boolean isDisabled;
   private final String lintingOutputFile;
   private final SarifConverter sarifConverter;
+  private final boolean isWriteSarifReport;
 
   @JsonCreator
   LintingConfigJson(
       @JsonProperty(value = "disable") Boolean isDisabled,
+      @JsonProperty(value = "writeSarifReport") Boolean isWriteSarif,
       @JsonProperty(value = "throwError") Boolean interruptCompilation,
       @JsonProperty(value = "printToConsole") Boolean isPrintToConsole,
       @JsonProperty(value = "lintingOutputFile") String lintingOutputFile,
@@ -89,7 +96,8 @@ public class LintingConfigJson implements LintingConfig {
       @JsonProperty(value = "elementCantHaveRootSelector") LintRuleOverride rootSelectorExists,
       @JsonProperty(value = "duplicateCustomSelectors") LintRuleOverride customWrongType) {
     this.isDisabled = requireNonNullElse(isDisabled, false);
-    this.lintingOutputFile = lintingOutputFile;
+    this.lintingOutputFile = requireNonNullElse(lintingOutputFile, DEFAULT_SARIF_OUTPUT_FILE);
+    this.isWriteSarifReport = requireNonNullElse(isWriteSarif, false);
     this.isInterruptCompilation = requireNonNullElse(interruptCompilation, false);
     this.isPrintToConsole = requireNonNullElse(isPrintToConsole, true);
     localRules.add(new UniqueSelectorInsidePageObject(uniqueSelectors));
@@ -163,7 +171,7 @@ public class LintingConfigJson implements LintingConfig {
 
   @Override
   public void writeReport(LintingContext context, String compilerRoot) {
-    if (!isDisabled && lintingOutputFile != null) {
+    if (!isDisabled && lintingOutputFile != null && isWriteSarifReport) {
       String reportFilePath = getSarifFilePath(compilerRoot);
       try {
         Writer writer = getWriterWithDir(reportFilePath);
