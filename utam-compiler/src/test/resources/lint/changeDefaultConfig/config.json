@@ -4,7 +4,6 @@
   "resourcesOutputDir": "",
   "lint": {
     "lintingOutputFile": "test.sarif.json",
-    "writeSarifReport": true,
     "requiredRootDescription": {
       "violation": "error"
     },
