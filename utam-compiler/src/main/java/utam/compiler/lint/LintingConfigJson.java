@@ -169,7 +169,7 @@ public class LintingConfigJson implements LintingConfig {
   public void writeReport(LintingContext context, String compilerRoot) {
     if(!isDisabled) {
       String reportFilePath = getSarifFilePath(compilerRoot);
-      if (!"".equals(reportFilePath)) {
+      if (!reportFilePath.isEmpty()) {
         try {
           Writer writer = getWriterWithDir(reportFilePath);
           ObjectMapper mapper = new ObjectMapper();
@@ -189,7 +189,7 @@ public class LintingConfigJson implements LintingConfig {
 
   private String getSarifFilePath(String compilerRoot) {
     String fileName = Objects.requireNonNullElse(lintingOutputFile, DEFAULT_SARIF_OUTPUT_FILE);
-    if ("".equals(fileName)) {
+    if (fileName.isEmpty()) {
       return "";
     }
     String targetPath = compilerRoot == null ? System.getProperty("user.dir") : compilerRoot;
