@@ -58,7 +58,7 @@ public class LintingConfigJson implements LintingConfig {
    */
   public static final LintingConfig DEFAULT_LINTING_CONFIG = new LintingConfigJson(
       false,
-      false,
+      true,
       false,
       null,
       DEFAULT_SARIF_OUTPUT_FILE,
@@ -97,7 +97,7 @@ public class LintingConfigJson implements LintingConfig {
       @JsonProperty(value = "duplicateCustomSelectors") LintRuleOverride customWrongType) {
     this.isDisabled = requireNonNullElse(isDisabled, false);
     this.lintingOutputFile = requireNonNullElse(lintingOutputFile, DEFAULT_SARIF_OUTPUT_FILE);
-    this.isWriteSarifReport = requireNonNullElse(isWriteSarif, false);
+    this.isWriteSarifReport = requireNonNullElse(isWriteSarif, true);
     this.isInterruptCompilation = requireNonNullElse(interruptCompilation, false);
     this.isPrintToConsole = requireNonNullElse(isPrintToConsole, true);
     localRules.add(new UniqueSelectorInsidePageObject(uniqueSelectors));
