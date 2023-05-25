@@ -3,6 +3,6 @@
   "pageObjectsOutputDir": "",
   "resourcesOutputDir": "",
   "lint": {
-    "lintingOutputFile": ""
+    "writeOutputFile": false
   }
 }

@@ -58,6 +58,7 @@ public class LintingConfigJson implements LintingConfig {
    */
   public static final LintingConfig DEFAULT_LINTING_CONFIG = new LintingConfigJson(
       false,
+      true,
       false,
       null,
       DEFAULT_SARIF_OUTPUT_FILE,
@@ -75,12 +76,14 @@ public class LintingConfigJson implements LintingConfig {
   private final boolean isInterruptCompilation;
   private final boolean isPrintToConsole;
   private final boolean isDisabled;
+  private final boolean isWritingLintFile;
   private final String lintingOutputFile;
   private final SarifConverter sarifConverter;
 
   @JsonCreator
   LintingConfigJson(
       @JsonProperty(value = "disable") Boolean isDisabled,
+      @JsonProperty(value = "writeOutputFile") Boolean isWritingLintFile,
       @JsonProperty(value = "throwError") Boolean interruptCompilation,
       @JsonProperty(value = "printToConsole") Boolean isPrintToConsole,
       @JsonProperty(value = "lintingOutputFile") String lintingOutputFile,
@@ -93,6 +96,7 @@ public class LintingConfigJson implements LintingConfig {
       @JsonProperty(value = "elementCantHaveRootSelector") LintRuleOverride rootSelectorExists,
       @JsonProperty(value = "duplicateCustomSelectors") LintRuleOverride customWrongType) {
     this.isDisabled = requireNonNullElse(isDisabled, false);
+    this.isWritingLintFile = requireNonNullElse(isWritingLintFile, true);
     this.lintingOutputFile = requireNonNullElse(lintingOutputFile, DEFAULT_SARIF_OUTPUT_FILE);
     this.isInterruptCompilation = requireNonNullElse(interruptCompilation, false);
     this.isPrintToConsole = requireNonNullElse(isPrintToConsole, true);
@@ -167,31 +171,26 @@ public class LintingConfigJson implements LintingConfig {
 
   @Override
   public void writeReport(LintingContext context, String compilerRoot) {
-    if(!isDisabled) {
-      String reportFilePath = getSarifFilePath(compilerRoot);
-      if (!reportFilePath.isEmpty()) {
-        try {
-          Writer writer = getWriterWithDir(reportFilePath);
-          ObjectMapper mapper = new ObjectMapper();
-          DefaultPrettyPrinter formatter = new DefaultPrettyPrinter()
-                  .withObjectIndenter(new DefaultIndenter("  ", "\n"))
-                  .withArrayIndenter(new DefaultIndenter("  ", "\n"));
-          SarifSchema210 sarifSchema210 = sarifConverter.convert(context, context.getErrors());
-          UtamLogger.info(String.format("Write results of linting to %s", reportFilePath));
-          mapper.writer(formatter).writeValue(writer, sarifSchema210);
-        } catch (IOException e) {
-          String err = String.format("error creating linting log %s", reportFilePath);
-          throw new UtamLintingError(err, e);
-        }
+    if(!isDisabled && this.isWritingLintFile) {
+    String reportFilePath = getSarifFilePath(compilerRoot);
+      try {
+        Writer writer = getWriterWithDir(reportFilePath);
+        ObjectMapper mapper = new ObjectMapper();
+        DefaultPrettyPrinter formatter = new DefaultPrettyPrinter()
+                .withObjectIndenter(new DefaultIndenter("  ", "\n"))
+                .withArrayIndenter(new DefaultIndenter("  ", "\n"));
+        SarifSchema210 sarifSchema210 = sarifConverter.convert(context, context.getErrors());
+        UtamLogger.info(String.format("Write results of linting to %s", reportFilePath));
+        mapper.writer(formatter).writeValue(writer, sarifSchema210);
+      } catch (IOException e) {
+        String err = String.format("error creating linting log %s", reportFilePath);
+        throw new UtamLintingError(err, e);
       }
     }
   }
 
   private String getSarifFilePath(String compilerRoot) {
     String fileName = Objects.requireNonNullElse(lintingOutputFile, DEFAULT_SARIF_OUTPUT_FILE);
-    if (fileName.isEmpty()) {
-      return "";
-    }
     String targetPath = compilerRoot == null ? System.getProperty("user.dir") : compilerRoot;
     return
         targetPath.endsWith(File.separator) ? targetPath + fileName
