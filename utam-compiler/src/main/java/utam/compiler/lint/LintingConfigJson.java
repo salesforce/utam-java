@@ -76,14 +76,14 @@ public class LintingConfigJson implements LintingConfig {
   private final boolean isInterruptCompilation;
   private final boolean isPrintToConsole;
   private final boolean isDisabled;
-  private final boolean isWritingLintFile;
+  private final boolean isWriteSerifReport;
   private final String lintingOutputFile;
   private final SarifConverter sarifConverter;
 
   @JsonCreator
   LintingConfigJson(
       @JsonProperty(value = "disable") Boolean isDisabled,
-      @JsonProperty(value = "writeOutputFile") Boolean isWritingLintFile,
+      @JsonProperty(value = "writeSerifReport") Boolean isWriteSerifReport,
       @JsonProperty(value = "throwError") Boolean interruptCompilation,
       @JsonProperty(value = "printToConsole") Boolean isPrintToConsole,
       @JsonProperty(value = "lintingOutputFile") String lintingOutputFile,
@@ -96,7 +96,7 @@ public class LintingConfigJson implements LintingConfig {
       @JsonProperty(value = "elementCantHaveRootSelector") LintRuleOverride rootSelectorExists,
       @JsonProperty(value = "duplicateCustomSelectors") LintRuleOverride customWrongType) {
     this.isDisabled = requireNonNullElse(isDisabled, false);
-    this.isWritingLintFile = requireNonNullElse(isWritingLintFile, true);
+    this.isWriteSerifReport = requireNonNullElse(isWriteSerifReport, true);
     this.lintingOutputFile = requireNonNullElse(lintingOutputFile, DEFAULT_SARIF_OUTPUT_FILE);
     this.isInterruptCompilation = requireNonNullElse(interruptCompilation, false);
     this.isPrintToConsole = requireNonNullElse(isPrintToConsole, true);
@@ -171,7 +171,7 @@ public class LintingConfigJson implements LintingConfig {
 
   @Override
   public void writeReport(LintingContext context, String compilerRoot) {
-    if(!isDisabled && this.isWritingLintFile) {
+    if(!isDisabled && this.isWriteSerifReport) {
     String reportFilePath = getSarifFilePath(compilerRoot);
       try {
         Writer writer = getWriterWithDir(reportFilePath);
