@@ -3,6 +3,7 @@
   "pageObjectsOutputDir": "",
   "resourcesOutputDir": "",
   "lint": {
+    "lintingOutputFile": "utam-lint.sarif",
     "duplicateRootSelectors": {
       "violation" : "warning",
       "exclude": [

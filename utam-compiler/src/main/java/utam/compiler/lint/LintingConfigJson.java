@@ -49,10 +49,6 @@ public class LintingConfigJson implements LintingConfig {
 
   private static final String LINTING_EXCEPTION_PREFIX = "UTAM linting failures:\n";
   /**
-   * default name for output sarif report
-   */
-  private static final String DEFAULT_SARIF_OUTPUT_FILE = "utam-lint.sarif";
-  /**
    * default configuration when config is empty, public because used from different package by
    * runner
    */
@@ -60,7 +56,7 @@ public class LintingConfigJson implements LintingConfig {
       false,
       false,
       null,
-      DEFAULT_SARIF_OUTPUT_FILE,
+      null,
       null,
       null,
       null,
@@ -93,7 +89,7 @@ public class LintingConfigJson implements LintingConfig {
       @JsonProperty(value = "elementCantHaveRootSelector") LintRuleOverride rootSelectorExists,
       @JsonProperty(value = "duplicateCustomSelectors") LintRuleOverride customWrongType) {
     this.isDisabled = requireNonNullElse(isDisabled, false);
-    this.lintingOutputFile = requireNonNullElse(lintingOutputFile, DEFAULT_SARIF_OUTPUT_FILE);
+    this.lintingOutputFile = lintingOutputFile;
     this.isInterruptCompilation = requireNonNullElse(interruptCompilation, false);
     this.isPrintToConsole = requireNonNullElse(isPrintToConsole, true);
     localRules.add(new UniqueSelectorInsidePageObject(uniqueSelectors));
@@ -167,7 +163,7 @@ public class LintingConfigJson implements LintingConfig {
 
   @Override
   public void writeReport(LintingContext context, String compilerRoot) {
-    if(!isDisabled) {
+    if(!isDisabled && lintingOutputFile!=null) {
       String reportFilePath = getSarifFilePath(compilerRoot);
       try {
         Writer writer = getWriterWithDir(reportFilePath);
@@ -186,11 +182,10 @@ public class LintingConfigJson implements LintingConfig {
   }
 
   private String getSarifFilePath(String compilerRoot) {
-    String fileName = Objects.requireNonNullElse(lintingOutputFile, DEFAULT_SARIF_OUTPUT_FILE);
     String targetPath = compilerRoot == null ? System.getProperty("user.dir") : compilerRoot;
     return
-        targetPath.endsWith(File.separator) ? targetPath + fileName
-            : targetPath + File.separator + fileName;
+        targetPath.endsWith(File.separator) ? targetPath + lintingOutputFile
+            : targetPath + File.separator + lintingOutputFile;
   }
 
   private String reportToConsole(List<LintingError> errors) {
