@@ -59,6 +59,7 @@ public class LintingConfigJson implements LintingConfig {
   public static final LintingConfig DEFAULT_LINTING_CONFIG = new LintingConfigJson(
       false,
       false,
+      false,
       null,
       DEFAULT_SARIF_OUTPUT_FILE,
       null,
@@ -77,10 +78,12 @@ public class LintingConfigJson implements LintingConfig {
   private final boolean isDisabled;
   private final String lintingOutputFile;
   private final SarifConverter sarifConverter;
+  private final boolean isWriteSarifReport;
 
   @JsonCreator
   LintingConfigJson(
       @JsonProperty(value = "disable") Boolean isDisabled,
+      @JsonProperty(value = "writeSarifReport") Boolean isWriteSarif,
       @JsonProperty(value = "throwError") Boolean interruptCompilation,
       @JsonProperty(value = "printToConsole") Boolean isPrintToConsole,
       @JsonProperty(value = "lintingOutputFile") String lintingOutputFile,
@@ -94,6 +97,7 @@ public class LintingConfigJson implements LintingConfig {
       @JsonProperty(value = "duplicateCustomSelectors") LintRuleOverride customWrongType) {
     this.isDisabled = requireNonNullElse(isDisabled, false);
     this.lintingOutputFile = requireNonNullElse(lintingOutputFile, DEFAULT_SARIF_OUTPUT_FILE);
+    this.isWriteSarifReport = requireNonNullElse(isWriteSarif, false);
     this.isInterruptCompilation = requireNonNullElse(interruptCompilation, false);
     this.isPrintToConsole = requireNonNullElse(isPrintToConsole, true);
     localRules.add(new UniqueSelectorInsidePageObject(uniqueSelectors));
@@ -167,7 +171,7 @@ public class LintingConfigJson implements LintingConfig {
 
   @Override
   public void writeReport(LintingContext context, String compilerRoot) {
-    if(!isDisabled) {
+    if (!isDisabled && lintingOutputFile != null && isWriteSarifReport) {
       String reportFilePath = getSarifFilePath(compilerRoot);
       try {
         Writer writer = getWriterWithDir(reportFilePath);
@@ -186,11 +190,10 @@ public class LintingConfigJson implements LintingConfig {
   }
 
   private String getSarifFilePath(String compilerRoot) {
-    String fileName = Objects.requireNonNullElse(lintingOutputFile, DEFAULT_SARIF_OUTPUT_FILE);
     String targetPath = compilerRoot == null ? System.getProperty("user.dir") : compilerRoot;
     return
-        targetPath.endsWith(File.separator) ? targetPath + fileName
-            : targetPath + File.separator + fileName;
+        targetPath.endsWith(File.separator) ? targetPath + lintingOutputFile
+            : targetPath + File.separator + lintingOutputFile;
   }
 
   private String reportToConsole(List<LintingError> errors) {

@@ -3,6 +3,7 @@
   "pageObjectsOutputDir": "",
   "resourcesOutputDir": "",
   "lint": {
+    "writeSarifReport": true,
     "duplicateRootSelectors": {
       "violation" : "warning",
       "exclude": [

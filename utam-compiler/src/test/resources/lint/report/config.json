@@ -3,7 +3,6 @@
   "pageObjectsOutputDir": "",
   "resourcesOutputDir": "",
   "lint" : {
-    "writeSarifReport": true,
-    "lintingOutputFile": "../sarif.json"
+    "lintingOutputFile": "utam-lint.sarif"
   }
 }
