@@ -169,24 +169,29 @@ public class LintingConfigJson implements LintingConfig {
   public void writeReport(LintingContext context, String compilerRoot) {
     if(!isDisabled) {
       String reportFilePath = getSarifFilePath(compilerRoot);
-      try {
-        Writer writer = getWriterWithDir(reportFilePath);
-        ObjectMapper mapper = new ObjectMapper();
-        DefaultPrettyPrinter formatter = new DefaultPrettyPrinter()
-            .withObjectIndenter(new DefaultIndenter("  ", "\n"))
-            .withArrayIndenter(new DefaultIndenter("  ", "\n"));
-        SarifSchema210 sarifSchema210 = sarifConverter.convert(context, context.getErrors());
-        UtamLogger.info(String.format("Write results of linting to %s", reportFilePath));
-        mapper.writer(formatter).writeValue(writer, sarifSchema210);
-      } catch (IOException e) {
-        String err = String.format("error creating linting log %s", reportFilePath);
-        throw new UtamLintingError(err, e);
+      if (!"".equals(reportFilePath)) {
+        try {
+          Writer writer = getWriterWithDir(reportFilePath);
+          ObjectMapper mapper = new ObjectMapper();
+          DefaultPrettyPrinter formatter = new DefaultPrettyPrinter()
+                  .withObjectIndenter(new DefaultIndenter("  ", "\n"))
+                  .withArrayIndenter(new DefaultIndenter("  ", "\n"));
+          SarifSchema210 sarifSchema210 = sarifConverter.convert(context, context.getErrors());
+          UtamLogger.info(String.format("Write results of linting to %s", reportFilePath));
+          mapper.writer(formatter).writeValue(writer, sarifSchema210);
+        } catch (IOException e) {
+          String err = String.format("error creating linting log %s", reportFilePath);
+          throw new UtamLintingError(err, e);
+        }
       }
     }
   }
 
   private String getSarifFilePath(String compilerRoot) {
     String fileName = Objects.requireNonNullElse(lintingOutputFile, DEFAULT_SARIF_OUTPUT_FILE);
+    if ("".equals(fileName)) {
+      return "";
+    }
     String targetPath = compilerRoot == null ? System.getProperty("user.dir") : compilerRoot;
     return
         targetPath.endsWith(File.separator) ? targetPath + fileName

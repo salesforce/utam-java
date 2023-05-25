@@ -73,11 +73,20 @@ public class LintingConfigJsonTests {
   }
 
   @Test
-  public void testDoNotProduceSarifReport() {
+  public void testDoNotProduceSarifReportWhenDisabled() {
     TranslatorRunner runner = getRunner("ignore");
     runner.run();
     String outputFile =
         System.getProperty("user.dir") + "/src/test/resources/lint/ignore/utam-lint.sarif";
+    assertThat(new File(outputFile).exists(), is(false));
+  }
+
+  @Test
+  public void testDoNotProduceSarifReport() {
+    TranslatorRunner runner = getRunner("noOutputFile");
+    runner.run();
+    String outputFile =
+            System.getProperty("user.dir") + "/src/test/resources/lint/ignore/utam-lint.sarif";
     assertThat(new File(outputFile).exists(), is(false));
   }
 
