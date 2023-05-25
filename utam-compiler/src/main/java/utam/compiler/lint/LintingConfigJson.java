@@ -177,8 +177,8 @@ public class LintingConfigJson implements LintingConfig {
         Writer writer = getWriterWithDir(reportFilePath);
         ObjectMapper mapper = new ObjectMapper();
         DefaultPrettyPrinter formatter = new DefaultPrettyPrinter()
-                .withObjectIndenter(new DefaultIndenter("  ", "\n"))
-                .withArrayIndenter(new DefaultIndenter("  ", "\n"));
+            .withObjectIndenter(new DefaultIndenter("  ", "\n"))
+            .withArrayIndenter(new DefaultIndenter("  ", "\n"));
         SarifSchema210 sarifSchema210 = sarifConverter.convert(context, context.getErrors());
         UtamLogger.info(String.format("Write results of linting to %s", reportFilePath));
         mapper.writer(formatter).writeValue(writer, sarifSchema210);
