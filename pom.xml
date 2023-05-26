@@ -108,26 +108,26 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
 
-        <maven.assembly.plugin.version>3.3.0</maven.assembly.plugin.version>
+        <maven.assembly.plugin.version>3.6.0</maven.assembly.plugin.version>
         <maven.clean.plugin.version>3.2.0</maven.clean.plugin.version>
-        <maven.compiler.plugin.version>3.10.1</maven.compiler.plugin.version>
-        <maven.deploy.plugin.version>3.0.0-M2</maven.deploy.plugin.version>
-        <maven.gpg.plugin.version>3.0.1</maven.gpg.plugin.version>
-        <maven.install.plugin.version>3.0.0-M1</maven.install.plugin.version>
-        <maven.jar.plugin.version>3.2.2</maven.jar.plugin.version>
-        <maven.javadoc.plugin.version>3.3.2</maven.javadoc.plugin.version>
-        <maven.release.plugin.version>3.0.0-M5</maven.release.plugin.version>
-        <maven.source.plugin.version>3.2.1</maven.source.plugin.version>
-        <maven.surefire.plugin.version>3.0.0-M6</maven.surefire.plugin.version>
-        <maven.exec.plugin.version>3.0.0</maven.exec.plugin.version>
+        <maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
+        <maven.deploy.plugin.version>3.1.1</maven.deploy.plugin.version>
+        <maven.gpg.plugin.version>3.1.0</maven.gpg.plugin.version>
+        <maven.install.plugin.version>3.1.1</maven.install.plugin.version>
+        <maven.jar.plugin.version>3.3.0</maven.jar.plugin.version>
+        <maven.javadoc.plugin.version>3.5.0</maven.javadoc.plugin.version>
+        <maven.release.plugin.version>3.0.0</maven.release.plugin.version>
+        <maven.source.plugin.version>3.3.0</maven.source.plugin.version>
+        <maven.surefire.plugin.version>3.1.0</maven.surefire.plugin.version>
+        <maven.exec.plugin.version>3.1.0</maven.exec.plugin.version>
 
         <selenium.version>3.141.59</selenium.version>
         <appium.version>7.6.0</appium.version>
-        <slf4j.version>1.7.36</slf4j.version>
-        <jackson.version>2.13.2</jackson.version>
+        <slf4j.version>2.0.7</slf4j.version>
+        <jackson.version>2.15.1</jackson.version>
         <google.java.format.version>1.15.0</google.java.format.version>
-        <picocli-version>4.6.3</picocli-version>
-        <testng.version>7.5</testng.version>
+        <picocli-version>4.7.3</picocli-version>
+        <testng.version>7.8.0</testng.version>
         <junit.version>4.13.2</junit.version>
         <mockito.version>2.21.0</mockito.version>
         <hamcrest.version>2.2</hamcrest.version>
@@ -168,6 +168,11 @@
                 <groupId>io.appium</groupId>
                 <artifactId>java-client</artifactId>
                 <version>${appium.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
