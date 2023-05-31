@@ -123,9 +123,12 @@ public class NavigationImpl implements Navigation {
       throw new UtamError(ERR_SETUP_NOT_RUN);
     }
 
+    int oldWindowCount = getWindowCount();
+    this.driverAdapter.waitFor(() -> getWindowCount() > oldWindowCount, "wait for a new window to open", null);
+
     this.setupForNewWindow = false;
 
-    return null;
+    return currentWindow();
   }
 
   @Override
