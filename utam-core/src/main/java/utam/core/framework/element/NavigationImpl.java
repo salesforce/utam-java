@@ -124,11 +124,19 @@ public class NavigationImpl implements Navigation {
     }
 
     int oldWindowCount = getWindowCount();
+    Set<String> oldWindowHandles = this.driverAdapter.getWindowHandles();
+
+    // Wait for the window count to increase indicating a new window
     this.driverAdapter.waitFor(() -> getWindowCount() > oldWindowCount, "wait for a new window to open", null);
 
-    this.setupForNewWindow = false;
+    // The difference between the sets of old and new window handles should be the new windows handle
+    // Note: if more than one window opens this method will return first that appears in the list of window handles
+    Set<String> currentWindowHandles = this.driverAdapter.getWindowHandles();
+    currentWindowHandles.removeAll(oldWindowHandles);
+    String newWindowsHandle = currentWindowHandles.toArray(new String[0])[0];
 
-    return currentWindow();
+    this.setupForNewWindow = false;
+    return switchToWindow(newWindowsHandle);
   }
 
   @Override
