@@ -34,6 +34,8 @@ public class NavigationImpl implements Navigation {
   private final Driver driverAdapter;
   private final PageObjectsFactory factory;
   private boolean setupForNewWindow = false;
+  private int oldWindowCount;
+  Set<String> oldWindowHandles;
 
   public NavigationImpl(PageObjectsFactory factory) {
     this.factory = factory;
@@ -114,6 +116,9 @@ public class NavigationImpl implements Navigation {
 
   @Override
   public void setupWaitForNewWindow() {
+    oldWindowCount = getWindowCount();
+    oldWindowHandles = this.driverAdapter.getWindowHandles();
+
     this.setupForNewWindow = true;
   }
 
@@ -122,9 +127,6 @@ public class NavigationImpl implements Navigation {
     if (!this.setupForNewWindow) {
       throw new UtamError(ERR_SETUP_NOT_RUN);
     }
-
-    int oldWindowCount = getWindowCount();
-    Set<String> oldWindowHandles = this.driverAdapter.getWindowHandles();
 
     // Wait for the window count to increase indicating a new window
     this.driverAdapter.waitFor(() -> getWindowCount() > oldWindowCount, "wait for a new window to open", null);
@@ -135,7 +137,10 @@ public class NavigationImpl implements Navigation {
     currentWindowHandles.removeAll(oldWindowHandles);
     String newWindowsHandle = currentWindowHandles.toArray(new String[0])[0];
 
+    oldWindowCount = -1;
+    oldWindowHandles = null;
     this.setupForNewWindow = false;
+
     return switchToWindow(newWindowsHandle);
   }
 
