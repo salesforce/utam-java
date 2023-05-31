@@ -107,7 +107,7 @@ public class NavigationImpl implements Navigation {
 
   @Override
   public Window currentWindow() {
-    return null;
+    return new WindowImpl(this.factory);
   }
 
   @Override
