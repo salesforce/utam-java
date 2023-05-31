@@ -12,6 +12,7 @@ import utam.core.driver.Driver;
 import utam.core.driver.Navigation;
 import utam.core.driver.Window;
 import utam.core.framework.UtamLogger;
+import utam.core.framework.base.PageObject;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.consumer.UtamError;
 
@@ -97,5 +98,35 @@ public class NavigationImpl implements Navigation {
   @Override
   public void closeWindow() {
     this.driverAdapter.close();
+  }
+
+  @Override
+  public int getWindowCount() {
+    return 0;
+  }
+
+  @Override
+  public Window currentWindow() {
+    return null;
+  }
+
+  @Override
+  public void setupWaitForNewWindow() {
+
+  }
+
+  @Override
+  public Window waitForNewWindow() {
+    return null;
+  }
+
+  @Override
+  public PageObject waitForNewWindowAndLoad() {
+    return null;
+  }
+
+  @Override
+  public PageObject switchToWindowAndLoad(String url) {
+    return null;
   }
 }
