@@ -14,6 +14,7 @@ import utam.core.driver.Window;
 import utam.core.framework.UtamLogger;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.PageObjectsFactory;
+import utam.core.framework.base.RootPageObject;
 import utam.core.framework.consumer.UtamError;
 
 import java.util.Set;
@@ -145,16 +146,16 @@ public class NavigationImpl implements Navigation {
   }
 
   @Override
-  public PageObject waitForNewWindowAndLoad() {
+  public PageObject waitForNewWindowAndLoad(Class<? extends RootPageObject> pageObjectType) {
     waitForNewWindow();
 
-    return null;
+    return factory.getPageContext().getBean(pageObjectType);
   }
 
   @Override
-  public PageObject switchToWindowAndLoad(String url) {
+  public PageObject switchToWindowAndLoad(String url, Class<? extends RootPageObject> pageObjectType) {
     switchToWindow(url);
 
-    return null;
+    return factory.getPageContext().getBean(pageObjectType);
   }
 }

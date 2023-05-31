@@ -8,6 +8,7 @@
 package utam.core.driver;
 
 import utam.core.framework.base.PageObject;
+import utam.core.framework.base.RootPageObject;
 
 /**
  * Navigation interface exposing commands to navigate browsing web and mobile contexts
@@ -78,7 +79,7 @@ public interface Navigation {
    *
    * @return a Page Object that is a new root
    */
-  PageObject waitForNewWindowAndLoad();
+  PageObject waitForNewWindowAndLoad(Class<? extends RootPageObject> pageObjectType);
 
   /**
    * Switches to the window navigated to the specified URL and loads a Page Object that is a new root
@@ -86,6 +87,6 @@ public interface Navigation {
    * @param url the url of the window to navigate to
    * @return a Page Object that is a new root
    */
-  PageObject switchToWindowAndLoad(String url);
+  PageObject switchToWindowAndLoad(String url, Class<? extends RootPageObject> pageObjectType);
 
 }
