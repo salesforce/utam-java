@@ -102,7 +102,7 @@ public class NavigationImpl implements Navigation {
 
   @Override
   public int getWindowCount() {
-    return 0;
+    return this.driverAdapter.getWindowHandle().length();
   }
 
   @Override
