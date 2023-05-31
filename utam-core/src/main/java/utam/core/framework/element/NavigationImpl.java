@@ -141,6 +141,8 @@ public class NavigationImpl implements Navigation {
 
   @Override
   public PageObject waitForNewWindowAndLoad() {
+    waitForNewWindow();
+
     return null;
   }
 
