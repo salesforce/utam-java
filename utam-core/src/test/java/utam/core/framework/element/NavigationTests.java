@@ -89,4 +89,22 @@ public class NavigationTests {
     new NavigationImpl(mock.getFactory()).switchToWindow(TEST_URL);
     assertThat(driver.getCurrentUrl(), is(equalTo(TEST_URL)));
   }
+
+  @Test
+  public void testGetWindowCount() {}
+
+  @Test
+  public void testCurrentWindow() {}
+
+  @Test
+  public void testWaitForNewWindowWithoutSetup() {}
+
+  @Test
+  public void testWaitForNewWindowWithSetup() {}
+
+  @Test
+  public void testWaitForNewWindowAndLoad() {}
+
+  @Test
+  public void testSwitchToWindowAndLoad() {}
 }
