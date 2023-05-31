@@ -7,6 +7,8 @@
  */
 package utam.core.driver;
 
+import utam.core.framework.base.PageObject;
+
 /**
  * Navigation interface exposing commands to navigate browsing web and mobile contexts
  *
@@ -43,5 +45,47 @@ public interface Navigation {
    * Closes the current window
    */
   void closeWindow();
+
+  /**
+   * Gets the number of currently opened managed windows
+   *
+   * @return the number of currently opened managed windows
+   */
+  int getWindowCount();
+
+  /**
+   * Gets the window with the current command context
+   *
+   * @return the window with the current command context
+   */
+  Window currentWindow();
+
+  /**
+   * Sets up a wait for a new window to appear after taking a subsequent action
+   */
+  void setupWaitForNewWindow();
+
+  /**
+   * Waits for a new window to be opened and switches the command context to the new window;
+   * if called without a prior call to setupWaitForNewWindow, an exception is thrown
+   *
+   * @return the new window
+   */
+  Window waitForNewWindow();
+
+  /**
+   * Waits for a new window to be opened, switches to it, and loads a Page Object that is a new root
+   *
+   * @return a Page Object that is a new root
+   */
+  PageObject waitForNewWindowAndLoad();
+
+  /**
+   * Switches to the window navigated to the specified URL and loads a Page Object that is a new root
+   *
+   * @param url the url of the window to navigate to
+   * @return a Page Object that is a new root
+   */
+  PageObject switchToWindowAndLoad(String url);
 
 }
