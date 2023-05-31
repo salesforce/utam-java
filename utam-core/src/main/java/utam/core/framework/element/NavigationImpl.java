@@ -29,9 +29,11 @@ public class NavigationImpl implements Navigation {
   static final String ERR_NO_WINDOW_WITH_URL = "can't find window with url %s";
   static final String ERR_NO_INITIAL_WINDOW =
           "window with url %s not found, and the previous window was closed";
+  static final String ERR_SETUP_NOT_RUN = "setupWaitForNewWindow must be run before waitForNewWindow";
 
   private final Driver driverAdapter;
   private final PageObjectsFactory factory;
+  private boolean setupForNewWindow = false;
 
   public NavigationImpl(PageObjectsFactory factory) {
     this.factory = factory;
@@ -112,11 +114,17 @@ public class NavigationImpl implements Navigation {
 
   @Override
   public void setupWaitForNewWindow() {
-
+    this.setupForNewWindow = true;
   }
 
   @Override
   public Window waitForNewWindow() {
+    if (!this.setupForNewWindow) {
+      throw new UtamError(ERR_SETUP_NOT_RUN);
+    }
+
+    this.setupForNewWindow = false;
+
     return null;
   }
 
