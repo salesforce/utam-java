@@ -126,7 +126,39 @@ public class NavigationTests {
   }
 
   @Test
-  public void testWaitForNewWindowWithSetup() {}
+  public void testWaitForNewWindowWithSetup() throws InterruptedException {
+    MockUtilities mock = new MockUtilities();
+    WebDriver driver = mock.getWebDriverMock();
+
+    // Create a Map to store the associations between handles and URLs
+    Map<String, String> handleUrlMap = new HashMap<>();
+    handleUrlMap.put("tab1", "http://www.example1.com");
+
+    // Specify the behavior of the getWindowHandles() method
+    Set<String> handles = new HashSet<>();
+    handles.add("tab1");
+    when(driver.getWindowHandle()).thenReturn("tab1");
+    when(driver.getWindowHandles()).thenReturn(handles);
+    when(driver.getCurrentUrl()).thenAnswer(invocation -> handleUrlMap.get(driver.getWindowHandle()));
+
+    NavigationImpl navigation = new NavigationImpl(mock.getFactory());
+    AtomicBoolean finishedWaiting = new AtomicBoolean(false);
+
+    Thread waitForThread = new Thread(() -> {
+      navigation.waitForNewWindow();
+      finishedWaiting.set(true);
+    });
+    navigation.setupWaitForNewWindow();
+    waitForThread.start();
+
+    assertThat(finishedWaiting.get(), is(false));
+
+    handles.add("tab2");
+    handleUrlMap.put("tab2", "http://www.example2.com");
+
+    Thread.sleep(1000);
+    assertThat(finishedWaiting.get(), is(true));
+  }
 
   @Test
   public void testWaitForNewWindowAndLoad() {}
