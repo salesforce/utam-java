@@ -91,7 +91,25 @@ public class NavigationTests {
   }
 
   @Test
-  public void testGetWindowCount() {}
+  public void testGetWindowCount() {
+    MockUtilities mock = new MockUtilities();
+    WebDriver driver = mock.getWebDriverMock();
+
+    // Specify the behavior of the getWindowHandles() method
+    Set<String> handles = new HashSet<>();
+    handles.add("tab1");
+    when(driver.getWindowHandles()).thenReturn(handles);
+
+    assertThat(new NavigationImpl(mock.getFactory()).getWindowCount(), is(equalTo(1)));
+
+    handles.add("tab2");
+    handles.add("tab3");
+    handles.add("tab4");
+    handles.add("tab5");
+    handles.add("tab6");
+
+    assertThat(new NavigationImpl(mock.getFactory()).getWindowCount(), is(equalTo(6)));
+  }
 
   @Test
   public void testCurrentWindow() {}
