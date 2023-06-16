@@ -136,7 +136,7 @@ public class NavigationImpl implements Navigation {
     // Note: if more than one window opens this method will return first that appears in the list of window handles
     Set<String> currentWindowHandles = this.driverAdapter.getWindowHandles();
     currentWindowHandles.removeAll(oldWindowHandles);
-    String newWindowsHandle = currentWindowHandles.toArray(new String[0])[0];
+    String newWindowsHandle = currentWindowHandles.toArray(new String[1])[0];
 
     oldWindowCount = -1;
     oldWindowHandles = null;
