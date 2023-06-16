@@ -14,17 +14,20 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertThrows;
 
 import io.appium.java_client.AppiumDriver;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Navigation;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
+import utam.core.framework.consumer.UtamError;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Test for the Navigation implementation
@@ -115,7 +118,12 @@ public class NavigationTests {
   public void testCurrentWindow() {}
 
   @Test
-  public void testWaitForNewWindowWithoutSetup() {}
+  public void testWaitForNewWindowWithoutSetup() {
+    MockUtilities mock = new MockUtilities();
+
+    NavigationImpl navigation = new NavigationImpl(mock.getFactory());
+    assertThrows(UtamError.class, () -> navigation.waitForNewWindow());
+  }
 
   @Test
   public void testWaitForNewWindowWithSetup() {}
