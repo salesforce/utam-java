@@ -132,7 +132,7 @@ public class NavigationTests {
     MockUtilities mock = new MockUtilities();
 
     NavigationImpl navigation = new NavigationImpl(mock.getFactory());
-    assertThrows(UtamError.class, () -> navigation.waitForNewWindow());
+    assertThrows(UtamError.class, navigation::waitForNewWindow);
   }
 
   @Test
