@@ -17,6 +17,7 @@ import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.consumer.UtamError;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -118,7 +119,7 @@ public class NavigationImpl implements Navigation {
   @Override
   public void setupWaitForNewWindow() {
     oldWindowCount = getWindowCount();
-    oldWindowHandles = this.driverAdapter.getWindowHandles();
+    oldWindowHandles = new HashSet<>(this.driverAdapter.getWindowHandles());
 
     this.setupForNewWindow = true;
   }
@@ -134,7 +135,7 @@ public class NavigationImpl implements Navigation {
 
     // The difference between the sets of old and new window handles should be the new windows handle
     // Note: if more than one window opens this method will return first that appears in the list of window handles
-    Set<String> currentWindowHandles = this.driverAdapter.getWindowHandles();
+    Set<String> currentWindowHandles = new HashSet<>(this.driverAdapter.getWindowHandles());
     currentWindowHandles.removeAll(oldWindowHandles);
     String newWindowsHandle = currentWindowHandles.toArray(new String[1])[0];
 
@@ -142,7 +143,8 @@ public class NavigationImpl implements Navigation {
     oldWindowHandles = null;
     this.setupForNewWindow = false;
 
-    return switchToWindow(newWindowsHandle);
+    this.driverAdapter.switchTo(newWindowsHandle);
+    return new WindowImpl(this.factory);
   }
 
   @Override
