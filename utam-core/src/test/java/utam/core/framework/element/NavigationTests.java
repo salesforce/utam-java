@@ -10,17 +10,17 @@ package utam.core.framework.element;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertThrows;
 
 import io.appium.java_client.AppiumDriver;
+import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Navigation;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
+import utam.core.driver.Window;
 import utam.core.framework.consumer.UtamError;
 
 import java.util.HashMap;
@@ -127,36 +127,35 @@ public class NavigationTests {
 
   @Test
   public void testWaitForNewWindowWithSetup() throws InterruptedException {
+    // Setup
     MockUtilities mock = new MockUtilities();
     WebDriver driver = mock.getWebDriverMock();
-
-    // Create a Map to store the associations between handles and URLs
-    Map<String, String> handleUrlMap = new HashMap<>();
-    handleUrlMap.put("tab1", "http://www.example1.com");
-
-    // Specify the behavior of the getWindowHandles() method
-    Set<String> handles = new HashSet<>();
-    handles.add("tab1");
-    when(driver.getWindowHandle()).thenReturn("tab1");
-    when(driver.getWindowHandles()).thenReturn(handles);
-    when(driver.getCurrentUrl()).thenAnswer(invocation -> handleUrlMap.get(driver.getWindowHandle()));
-
     NavigationImpl navigation = new NavigationImpl(mock.getFactory());
     AtomicBoolean finishedWaiting = new AtomicBoolean(false);
 
+    // Hashmap mocks currently open windows
+    Map<String, String> handleUrlMap = new HashMap();
+    handleUrlMap.put("tab1", "http://www.example1.com");
+    when(driver.getWindowHandles()).thenReturn(handleUrlMap.keySet());
+
+    // Thread for testing the wait
     Thread waitForThread = new Thread(() -> {
       navigation.waitForNewWindow();
       finishedWaiting.set(true);
     });
+
+    // Setup and start the method
     navigation.setupWaitForNewWindow();
     waitForThread.start();
 
+    // The method should not finish until a new window is opened
     assertThat(finishedWaiting.get(), is(false));
 
-    handles.add("tab2");
+    // Mocks the opening of a new window by adding another handle to the map
     handleUrlMap.put("tab2", "http://www.example2.com");
 
-    Thread.sleep(1000);
+    // After 'opening a new window' the waitFor should return
+    waitForThread.join(1000);
     assertThat(finishedWaiting.get(), is(true));
   }
 
