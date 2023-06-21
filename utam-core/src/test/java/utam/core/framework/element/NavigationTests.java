@@ -182,7 +182,7 @@ public class NavigationTests {
     when(driver.getWindowHandles()).thenReturn(handleUrlMap.keySet());
 
     // Thread for testing the wait
-    AtomicReference<PageObject> pageObject = new AtomicReference<PageObject>(null);
+    AtomicReference<PageObject> pageObject = new AtomicReference<>(null);
     Thread waitForThread = new Thread(() -> {
       pageObject.set(navigation.waitForNewWindowAndLoad(TestLoad.class));
       finishedWaiting.set(true);
