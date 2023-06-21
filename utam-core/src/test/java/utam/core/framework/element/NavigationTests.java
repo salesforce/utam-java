@@ -120,7 +120,12 @@ public class NavigationTests {
   }
 
   @Test
-  public void testCurrentWindow() {}
+  public void testCurrentWindow() {
+    MockUtilities mock = new MockUtilities();
+
+    NavigationImpl navigation = new NavigationImpl(mock.getFactory());
+    assertThat(navigation.currentWindow().getClass(), is(WindowImpl.class));
+  }
 
   @Test
   public void testWaitForNewWindowWithoutSetup() {
@@ -172,7 +177,7 @@ public class NavigationTests {
     AtomicBoolean finishedWaiting = new AtomicBoolean(false);
 
     // Hashmap mocks currently open windows
-    Map<String, String> handleUrlMap = new HashMap();
+    Map<String, String> handleUrlMap = new HashMap<>();
     handleUrlMap.put("tab1", "http://www.example1.com");
     when(driver.getWindowHandles()).thenReturn(handleUrlMap.keySet());
 
