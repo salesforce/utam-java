@@ -10,7 +10,10 @@ package utam.core.framework.element;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
 import io.appium.java_client.AppiumDriver;
@@ -20,7 +23,10 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Navigation;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
-import utam.core.driver.Window;
+import utam.core.framework.base.BasePageObject;
+import utam.core.framework.base.PageMarker;
+import utam.core.framework.base.PageObject;
+import utam.core.framework.base.RootPageObject;
 import utam.core.framework.consumer.UtamError;
 
 import java.util.HashMap;
