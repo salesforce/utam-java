@@ -199,7 +199,29 @@ public class NavigationTests {
   }
 
   @Test
-  public void testSwitchToWindowAndLoad() {}
+  public void testSwitchToWindowAndLoad() {
+    MockUtilities mock = new MockUtilities(AppiumDriver.class);
+    WebDriver driver = mock.getWebDriverMock();
+    // Create a Map to store the associations between handles and URLs
+    Map<String, String> handleUrlMap = new HashMap<>();
+    handleUrlMap.put("tab1", "http://www.example1.com");
+    handleUrlMap.put("tab2", "http://www.example2.com");
+
+    // Specify the behavior of the getWindowHandles() method
+    HashSet<String> handles = new HashSet<>();
+    handles.add("tab1");
+    handles.add("tab2");
+    when(driver.getWindowHandles()).thenReturn(handles);
+
+    // Specify the behavior of the getCurrentUrl() method using the Map
+    when(driver.getWindowHandle()).thenReturn("tab2");
+    when(driver.getCurrentUrl()).thenAnswer(invocation -> handleUrlMap.get(driver.getWindowHandle()));
+
+    // Switch to test_url and assert the URL
+    PageObject pageObject = new NavigationImpl(mock.getFactory()).switchToWindowAndLoad("http://www.example2.com", TestLoad.class);
+    assertThat(driver.getCurrentUrl(), is(equalTo("http://www.example2.com")));
+    assertThat(pageObject.getClass(), is(TestLoad.class));
+  }
 
   @PageMarker.Find(css = "found")
   static class TestLoad extends BasePageObject implements RootPageObject {
