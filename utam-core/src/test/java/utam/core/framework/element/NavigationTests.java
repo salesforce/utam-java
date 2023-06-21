@@ -17,8 +17,6 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
 import io.appium.java_client.AppiumDriver;
-import org.mockito.Mockito;
-import org.mockito.stubbing.Answer;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Navigation;
 import org.testng.annotations.Test;
@@ -34,6 +32,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Test for the Navigation implementation
@@ -166,8 +165,40 @@ public class NavigationTests {
   }
 
   @Test
-  public void testWaitForNewWindowAndLoad() {}
+  public void testWaitForNewWindowAndLoad() throws InterruptedException {
+    MockUtilities mock = new MockUtilities();
+    WebDriver driver = mock.getWebDriverMock();
+    NavigationImpl navigation = new NavigationImpl(mock.getFactory());
+    AtomicBoolean finishedWaiting = new AtomicBoolean(false);
+
+    // Hashmap mocks currently open windows
+    Map<String, String> handleUrlMap = new HashMap();
+    handleUrlMap.put("tab1", "http://www.example1.com");
+    when(driver.getWindowHandles()).thenReturn(handleUrlMap.keySet());
+
+    // Thread for testing the wait
+    AtomicReference<PageObject> pageObject = new AtomicReference<PageObject>(null);
+    Thread waitForThread = new Thread(() -> {
+      pageObject.set(navigation.waitForNewWindowAndLoad(TestLoad.class));
+      finishedWaiting.set(true);
+    });
+
+    // Setup and start the method
+    navigation.setupWaitForNewWindow();
+    waitForThread.start();
+
+    handleUrlMap.put("tab2", "http://www.example2.com");
+    waitForThread.join();
+
+    assertThat(pageObject.get().getClass(), equalTo(TestLoad.class));
+  }
 
   @Test
   public void testSwitchToWindowAndLoad() {}
+
+  @PageMarker.Find(css = "found")
+  static class TestLoad extends BasePageObject implements RootPageObject {
+    // has to be public for reflection to create instance
+    public TestLoad() {}
+  }
 }
