@@ -35,9 +35,7 @@ public class NavigationImpl implements Navigation {
 
   private final Driver driverAdapter;
   private final PageObjectsFactory factory;
-  private boolean setupForNewWindow = false;
-  private int oldWindowCount;
-  Set<String> oldWindowHandles;
+  Set<String> trackedWindowHandles;
 
   public NavigationImpl(PageObjectsFactory factory) {
     this.factory = factory;
@@ -118,30 +116,25 @@ public class NavigationImpl implements Navigation {
 
   @Override
   public void setupWaitForNewWindow() {
-    oldWindowCount = getWindowCount();
-    oldWindowHandles = new HashSet<>(this.driverAdapter.getWindowHandles());
-
-    this.setupForNewWindow = true;
+    trackedWindowHandles = new HashSet<>(this.driverAdapter.getWindowHandles());
   }
 
   @Override
   public Window waitForNewWindow() {
-    if (!this.setupForNewWindow) {
+    if (this.trackedWindowHandles == null) {
       throw new UtamError(ERR_SETUP_NOT_RUN);
     }
 
     // Wait for the window count to increase indicating a new window
-    this.driverAdapter.waitFor(() -> getWindowCount() > oldWindowCount, "wait for a new window to open", null);
+    this.driverAdapter.waitFor(() -> getWindowCount() > trackedWindowHandles.size(), "wait for a new window to open", null);
 
     // The difference between the sets of old and new window handles should be the new windows handle
     // Note: if more than one window opens this method will return first that appears in the list of window handles
     Set<String> currentWindowHandles = new HashSet<>(this.driverAdapter.getWindowHandles());
-    currentWindowHandles.removeAll(oldWindowHandles);
+    currentWindowHandles.removeAll(trackedWindowHandles);
     String newWindowsHandle = currentWindowHandles.toArray(new String[1])[0];
 
-    oldWindowCount = -1;
-    oldWindowHandles = null;
-    this.setupForNewWindow = false;
+    trackedWindowHandles = null;
 
     this.driverAdapter.switchTo(newWindowsHandle);
     return new WindowImpl(this.factory);
