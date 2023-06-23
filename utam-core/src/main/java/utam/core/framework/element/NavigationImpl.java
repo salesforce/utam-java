@@ -141,14 +141,14 @@ public class NavigationImpl implements Navigation {
   }
 
   @Override
-  public PageObject waitForNewWindowAndLoad(Class<? extends RootPageObject> pageObjectType) {
+  public <T extends RootPageObject> T waitForNewWindowAndLoad(Class<T> type) {
     waitForNewWindow();
 
     return factory.getPageContext().getBean(pageObjectType);
   }
 
   @Override
-  public PageObject switchToWindowAndLoad(String url, Class<? extends RootPageObject> pageObjectType) {
+  public <T extends RootPageObject> T switchToNewWindowAndLoad(String url, Class<T> type) {
     switchToWindow(url);
 
     return factory.getPageContext().getBean(pageObjectType);

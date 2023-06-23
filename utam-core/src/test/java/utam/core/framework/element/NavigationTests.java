@@ -199,7 +199,7 @@ public class NavigationTests {
   }
 
   @Test
-  public void testSwitchToWindowAndLoad() {
+  public void testSwitchToNewWindowAndLoad() {
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
     WebDriver driver = mock.getWebDriverMock();
     // Create a Map to store the associations between handles and URLs
@@ -218,7 +218,7 @@ public class NavigationTests {
     when(driver.getCurrentUrl()).thenAnswer(invocation -> handleUrlMap.get(driver.getWindowHandle()));
 
     // Switch to test_url and assert the URL
-    PageObject pageObject = new NavigationImpl(mock.getFactory()).switchToWindowAndLoad("http://www.example2.com", TestLoad.class);
+    PageObject pageObject = new NavigationImpl(mock.getFactory()).switchToNewWindowAndLoad("http://www.example2.com", TestLoad.class);
     assertThat(driver.getCurrentUrl(), is(equalTo("http://www.example2.com")));
     assertThat(pageObject.getClass(), is(TestLoad.class));
   }

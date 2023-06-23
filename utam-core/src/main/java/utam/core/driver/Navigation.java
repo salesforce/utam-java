@@ -77,16 +77,18 @@ public interface Navigation {
   /**
    * Waits for a new window to be opened, switches to it, and loads a Page Object that is a new root
    *
+   * @param type the type of page object to load
    * @return a Page Object that is a new root
    */
-  PageObject waitForNewWindowAndLoad(Class<? extends RootPageObject> pageObjectType);
+  <T extends RootPageObject> T waitForNewWindowAndLoad(Class<T> type);
 
   /**
    * Switches to the window navigated to the specified URL and loads a Page Object that is a new root
    *
    * @param url the url of the window to navigate to
+   * @param type the type of page object to load
    * @return a Page Object that is a new root
    */
-  PageObject switchToWindowAndLoad(String url, Class<? extends RootPageObject> pageObjectType);
+  <T extends RootPageObject> T switchToNewWindowAndLoad(String url, Class<T> type);
 
 }
