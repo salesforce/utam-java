@@ -31,7 +31,7 @@ public class NavigationImpl implements Navigation {
   static final String ERR_NO_WINDOW_WITH_URL = "can't find window with url %s";
   static final String ERR_NO_INITIAL_WINDOW =
           "window with url %s not found, and the previous window was closed";
-  static final String ERR_SETUP_NOT_RUN = "setupWaitForNewWindow must be run before waitForNewWindow";
+  static final String ERR_SETUP_NOT_RUN = "setupWaitForNewWindow must be called before waitForNewWindow";
 
   private final Driver driverAdapter;
   private final PageObjectsFactory factory;
