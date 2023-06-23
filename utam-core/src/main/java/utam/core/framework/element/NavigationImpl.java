@@ -12,7 +12,6 @@ import utam.core.driver.Driver;
 import utam.core.driver.Navigation;
 import utam.core.driver.Window;
 import utam.core.framework.UtamLogger;
-import utam.core.framework.base.PageObject;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.consumer.UtamError;

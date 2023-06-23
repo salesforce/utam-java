@@ -7,7 +7,6 @@
  */
 package utam.core.driver;
 
-import utam.core.framework.base.PageObject;
 import utam.core.framework.base.RootPageObject;
 
 /**
