@@ -200,7 +200,7 @@ public class NavigationTests {
 
   @Test
   public void testSwitchToNewWindowAndLoad() {
-    MockUtilities mock = new MockUtilities(AppiumDriver.class);
+    MockUtilities mock = new MockUtilities();
     WebDriver driver = mock.getWebDriverMock();
     // Create a Map to store the associations between handles and URLs
     Map<String, String> handleUrlMap = new HashMap<>();
