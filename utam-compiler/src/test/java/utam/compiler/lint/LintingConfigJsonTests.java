@@ -95,9 +95,6 @@ public class LintingConfigJsonTests {
     TranslatorRunner runner = getRunner("throwConfig");
     Exception e = expectThrows(UtamLintingError.class, runner::run);
     assertThat(e.getMessage(),
-        equalTo("UTAM linting failures:\n"
-            + "lint rule ULR01 failure in page object utam/pageObjects/test: "
-            + "error 2001: duplicate selector \".one\" for the elements \"two\" and \"one\"; "
-            + "remove duplicate elements: \"one\" or \"two\""));
+        equalTo("UTAM linting failed, please check SARIF report utam-lint.sarif"));
   }
 }
