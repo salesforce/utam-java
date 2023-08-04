@@ -1,8 +1,9 @@
 {
   "root": true,
   "selector": {
-    "css": ".one"
+    "css": "css"
   },
+  "description": "text",
   "elements": [
     {
       "name": "one",

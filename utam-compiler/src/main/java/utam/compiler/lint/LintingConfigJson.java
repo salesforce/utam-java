@@ -57,7 +57,6 @@ public class LintingConfigJson implements LintingConfig {
   public static final LintingConfig DEFAULT_LINTING_CONFIG = new LintingConfigJson(
       false,
       false,
-      true,
       DEFAULT_SARIF_OUTPUT_FILE,
       null,
       null,
@@ -72,7 +71,6 @@ public class LintingConfigJson implements LintingConfig {
   private final List<LintingRuleImpl> globalRules = new ArrayList<>();
   private final boolean isInterruptCompilation;
   private final boolean isDisabled;
-  private final boolean isVerboseBuild;
   private final String lintingOutputFile;
   private final SarifConverter sarifConverter;
 
@@ -80,7 +78,6 @@ public class LintingConfigJson implements LintingConfig {
   LintingConfigJson(
       @JsonProperty(value = "disable") Boolean isDisabled,
       @JsonProperty(value = "throwError") Boolean interruptCompilation,
-      @JsonProperty(value = "verbose") Boolean isVerboseBuild,
       @JsonProperty(value = "lintingOutputFile") String lintingOutputFile,
       @JsonProperty(value = "duplicateSelectors") LintRuleOverride uniqueSelectors,
       @JsonProperty(value = "requiredRootDescription") LintRuleOverride requiredRootDescription,
@@ -93,7 +90,6 @@ public class LintingConfigJson implements LintingConfig {
     this.isDisabled = requireNonNullElse(isDisabled, false);
     this.lintingOutputFile = requireNonNullElse(lintingOutputFile, DEFAULT_SARIF_OUTPUT_FILE);
     this.isInterruptCompilation = requireNonNullElse(interruptCompilation, false);
-    this.isVerboseBuild = requireNonNullElse(isVerboseBuild, true);
     localRules.add(new UniqueSelectorInsidePageObject(uniqueSelectors));
     localRules.add(new RequiredRootDescription(requiredRootDescription));
     localRules.add(new RequiredAuthor(requiredAuthor));
@@ -170,21 +166,16 @@ public class LintingConfigJson implements LintingConfig {
             .withObjectIndenter(new DefaultIndenter("  ", "\n"))
             .withArrayIndenter(new DefaultIndenter("  ", "\n"));
         SarifSchema210 sarifSchema210 = sarifConverter.convert(context, context.getErrors());
-        if(isVerboseBuild) {
-          UtamLogger.info(String.format("Write results of linting to %s", reportFilePath));
-        }
+        UtamLogger.info(String.format("Write results of linting to %s", reportFilePath));
         mapper.writer(formatter).writeValue(writer, sarifSchema210);
       } catch (IOException e) {
-        if(isVerboseBuild) {
-          String err = String.format("error creating linting log %s", reportFilePath);
-          // we do not want to throw error to not interrupt build
-          throw new RuntimeException(err, e);
-        }
+        String err = String.format("error creating linting log %s", reportFilePath);
+        throw new IllegalStateException(err, e);
       }
       boolean hasErrors = context.getErrors().stream().anyMatch(lintingError -> lintingError.getLevel().equals(
           ViolationLevel.error));
       if(hasErrors && isInterruptCompilation) {
-        throw new UtamLintingError(String.format("UTAM linting failed, please check SARIF report %s", this.lintingOutputFile));
+        throw new UtamLintingError("UTAM linting failed, please check SARIF report " + this.lintingOutputFile);
       }
     }
   }
