@@ -33,6 +33,7 @@ import utam.compiler.lint.LintingRuleImpl.UniqueRootSelector;
 import utam.compiler.lint.LintingRuleImpl.UniqueSelectorInsidePageObject;
 import utam.core.declarative.lint.LintingConfig;
 import utam.core.declarative.lint.LintingContext;
+import utam.core.declarative.lint.LintingError.ViolationLevel;
 import utam.core.declarative.lint.LintingRule;
 import utam.core.declarative.lint.PageObjectLinting;
 import utam.core.framework.UtamLogger;
@@ -155,9 +156,6 @@ public class LintingConfigJson implements LintingConfig {
           }
         }
       }
-      if(isInterruptCompilation) {
-        throw new UtamLintingError(String.format("UTAM linting failed, please check SARIF report %s", this.lintingOutputFile));
-      }
     }
   }
 
@@ -182,6 +180,11 @@ public class LintingConfigJson implements LintingConfig {
           // we do not want to throw error to not interrupt build
           throw new RuntimeException(err, e);
         }
+      }
+      boolean hasErrors = context.getErrors().stream().anyMatch(lintingError -> lintingError.getLevel().equals(
+          ViolationLevel.error));
+      if(hasErrors && isInterruptCompilation) {
+        throw new UtamLintingError(String.format("UTAM linting failed, please check SARIF report %s", this.lintingOutputFile));
       }
     }
   }
