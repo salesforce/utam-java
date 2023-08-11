@@ -48,6 +48,11 @@ public class LintingConfigJsonTests {
     }
   }
 
+  private static File getOutputSarifFile(String relativePath, String fileName) {
+    String filePath = String.join(File.separator, ROOT_DIR, relativePath, fileName);
+    return new File(filePath);
+  }
+
   @Test
   public void testChangingDefaultRulesWithOneFile() {
     TranslatorRunner runner = getRunner("changeDefaultConfig");
@@ -57,9 +62,8 @@ public class LintingConfigJsonTests {
         equalTo("lint rule ULR02 failure in page object utam/pageObjects/test: "
             + "error 2002: root description is missing; "
             + "add \"description\" property at the root"));
-    String outputFile = System.getProperty("user.dir")
-        + "/src/test/resources/lint/changeDefaultConfig/test.sarif.json";
-    assertThat(new File(outputFile).exists(), is(true));
+    File sarif = getOutputSarifFile("changeDefaultConfig", "test.sarif.json");
+    assertThat(sarif.exists(), is(true));
   }
 
   @Test
@@ -67,27 +71,16 @@ public class LintingConfigJsonTests {
     TranslatorRunner runner = getRunner("changeGlobalRules");
     List<LintingError> errors = runner.run().getLintingErrors();
     assertThat(errors, hasSize(0));
-    String outputFile = System.getProperty("user.dir")
-        + "/src/test/resources/lint/changeGlobalRules/utam-lint.sarif";
-    assertThat(new File(outputFile).exists(), is(true));
-  }
-
-  @Test
-  public void testDoNotProduceSarifReport() {
-    TranslatorRunner runner = getRunner("report");
-    runner.run();
-    String outputFile =
-        System.getProperty("user.dir") + "/src/test/resources/lint/ignore/utam-lint.sarif";
-    assertThat(new File(outputFile).exists(), is(false));
+    File sarif = getOutputSarifFile("changeGlobalRules", "utam-lint.sarif");
+    assertThat(sarif.exists(), is(true));
   }
 
   @Test
   public void testLintingDisabled() {
     TranslatorRunner runner = getRunner("ignore");
     runner.run();
-    String outputFile =
-        System.getProperty("user.dir") + "/src/test/resources/lint/ignore/utam-lint.sarif";
-    assertThat(new File(outputFile).exists(), is(false));
+    File sarif = getOutputSarifFile("ignore", "utam-lint.sarif");
+    assertThat(sarif.exists(), is(false));
   }
 
   @Test
@@ -95,9 +88,16 @@ public class LintingConfigJsonTests {
     TranslatorRunner runner = getRunner("throwConfig");
     Exception e = expectThrows(UtamLintingError.class, runner::run);
     assertThat(e.getMessage(),
-        equalTo("UTAM linting failures:\n"
-            + "lint rule ULR01 failure in page object utam/pageObjects/test: "
-            + "error 2001: duplicate selector \".one\" for the elements \"two\" and \"one\"; "
-            + "remove duplicate elements: \"one\" or \"two\""));
+        equalTo("UTAM linting failed, please check SARIF report utam-lint.sarif"));
+    File sarif = getOutputSarifFile("throwConfig", "utam-lint.sarif");
+    assertThat(sarif.exists(), is(true));
+  }
+
+  @Test
+  public void testLintingDoesNotThrowIfConfiguredWithoutErrors() {
+    TranslatorRunner runner = getRunner("throwConfigPass");
+    runner.run();
+    File sarif = getOutputSarifFile("throwConfigPass", "utam-lint.sarif");
+    assertThat(sarif.exists(), is(true));
   }
 }
