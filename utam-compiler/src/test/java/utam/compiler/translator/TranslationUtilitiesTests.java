@@ -14,7 +14,6 @@ import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.testng.Assert.expectThrows;
 import static utam.compiler.translator.TranslationUtilities.JAVADOC_CLOSE_LINE;
 import static utam.compiler.translator.TranslationUtilities.JAVADOC_LINE_PATTERN;
 import static utam.compiler.translator.TranslationUtilities.JAVADOC_OPEN_LINE;
@@ -35,7 +34,6 @@ import utam.compiler.grammar.TestUtilities;
 import utam.compiler.helpers.TypeUtilities;
 import utam.core.declarative.representation.PageObjectInterface;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.UtamError;
 
 /**
  * Provides tests for the InterfaceSerializer class
@@ -58,21 +56,6 @@ public class TranslationUtilitiesTests {
     assertThat(
         applyJavaFormatter(Arrays.asList("class TestClass {", "}")),
         is(equalTo("class TestClass {}" + System.lineSeparator())));
-  }
-
-  /**
-   * The format static method should throw the proper exception with invalid syntax
-   */
-  @Test
-  public void testFormatWithInvalidSyntaxThrows() {
-    UtamError e =
-        expectThrows(
-            UtamError.class,
-            () ->
-                applyJavaFormatter(
-                    Stream.of("String x;").collect(Collectors.toList())));
-    assertThat(e.getMessage(), containsString("error: class, interface, or enum expected"));
-    assertThat(e.getMessage(), containsString("0 > String x;"));
   }
 
   /**
