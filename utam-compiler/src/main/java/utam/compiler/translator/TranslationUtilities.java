@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.UtamError;
 
 /**
  * utilities for java code generation
@@ -108,11 +107,9 @@ public class TranslationUtilities {
     try {
       return new Formatter().formatSource(code);
     } catch (FormatterException e) {
-      // add number at the beginning of the new line, helps process error message from formatter
-      for (int i = 0; i < in.size(); i++) {
-        in.set(i, String.format("%d > %s", i, in.get(i)));
-      }
-      throw new UtamError(e.getMessage() + "\n" + String.join(NEW_LINE, in));
+      throw new UtamRunnerError(String.format("Generated Java code can't be formatted, error: \"%s\".\n"
+          + "Copy code to IDE to see the issue, most common issue is invalid element name that can't be made into Java variable.\n\n%s",
+          e.getMessage(), code));
     }
   }
 
