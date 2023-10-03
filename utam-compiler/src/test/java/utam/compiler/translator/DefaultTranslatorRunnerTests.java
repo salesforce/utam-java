@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hamcrest.Matchers;
 import org.testng.annotations.Test;
+import utam.compiler.grammar.DeserializerUtilities;
 import utam.compiler.grammar.TestUtilities;
 import utam.compiler.helpers.TypeUtilities.FromString;
 import utam.compiler.translator.DefaultSourceConfigurationTests.TranslatorConfigWithProfile;
@@ -394,5 +395,14 @@ public class DefaultTranslatorRunnerTests {
     translator.setImplementation(DEFAULT_PROFILE, "type1", "type2");
     Exception e = expectThrows(UtamRunnerError.class, translator::writeDependenciesConfigs);
     assertThat(e.getMessage(), containsString(ERR_MODULE_NAME_NOT_CONFIGURED));
+  }
+
+  @Test
+  public void testJavaFormatterThrows() {
+    UtamRunnerError e = expectThrows(UtamRunnerError.class,
+        () -> new DeserializerUtilities().getContext("validate/translator/elementName"));
+    assertThat(e.getMessage(), containsString("Generated Java code can't be formatted"));
+    assertThat(e.getMessage(), containsString("@ElementMarker.Find(css = \"css\")\n"
+        + "private ElementLocation test-error;"));
   }
 }

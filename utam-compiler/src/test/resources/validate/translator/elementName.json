@@ -1,0 +1,10 @@
+{
+  "elements": [
+    {
+      "name": "test-error",
+      "selector": {
+        "css": "css"
+      }
+    }
+  ]
+}
