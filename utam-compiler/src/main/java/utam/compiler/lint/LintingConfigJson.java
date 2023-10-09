@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import utam.compiler.lint.JsonLintRulesConfig.LintRuleOverride;
 import utam.compiler.lint.LintingRuleImpl.ElementsWithDifferentTypes;
 import utam.compiler.lint.LintingRuleImpl.RequiredAuthor;
+import utam.compiler.lint.LintingRuleImpl.RequiredMetadata;
 import utam.compiler.lint.LintingRuleImpl.RequiredMethodDescription;
 import utam.compiler.lint.LintingRuleImpl.RequiredRootDescription;
 import utam.compiler.lint.LintingRuleImpl.RootSelectorExistsForElement;
@@ -65,6 +66,7 @@ public class LintingConfigJson implements LintingConfig {
       null,
       null,
       null,
+      null,
       null
   );
   private final List<LintingRuleImpl> localRules = new ArrayList<>();
@@ -86,7 +88,8 @@ public class LintingConfigJson implements LintingConfig {
       @JsonProperty(value = "requiredSingleShadowRoot") LintRuleOverride singleShadowBoundaryAllowed,
       @JsonProperty(value = "duplicateRootSelectors") LintRuleOverride uniqueRootSelectors,
       @JsonProperty(value = "elementCantHaveRootSelector") LintRuleOverride rootSelectorExists,
-      @JsonProperty(value = "duplicateCustomSelectors") LintRuleOverride customWrongType) {
+      @JsonProperty(value = "duplicateCustomSelectors") LintRuleOverride customWrongType,
+      @JsonProperty(value = "requiredMetadata") LintRuleOverride requiredMetadata) {
     this.isDisabled = requireNonNullElse(isDisabled, false);
     this.lintingOutputFile = requireNonNullElse(lintingOutputFile, DEFAULT_SARIF_OUTPUT_FILE);
     this.isInterruptCompilation = requireNonNullElse(interruptCompilation, false);
@@ -95,6 +98,7 @@ public class LintingConfigJson implements LintingConfig {
     localRules.add(new RequiredAuthor(requiredAuthor));
     localRules.add(new RequiredMethodDescription(requiredMethodDescription));
     localRules.add(new SingleShadowBoundaryAllowed(singleShadowBoundaryAllowed));
+    localRules.add(new RequiredMetadata(requiredMetadata));
     globalRules.add(new UniqueRootSelector(uniqueRootSelectors));
     globalRules.add(new RootSelectorExistsForElement(rootSelectorExists));
     globalRules.add(new ElementsWithDifferentTypes(customWrongType));

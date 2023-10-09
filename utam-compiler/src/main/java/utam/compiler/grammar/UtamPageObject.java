@@ -13,6 +13,7 @@ import static utam.compiler.grammar.JsonDeserializer.nodeToString;
 import static utam.compiler.grammar.UtamComposeMethod.getComposeStatements;
 import static utam.compiler.grammar.UtamComposeMethod.processComposeNodes;
 import static utam.compiler.grammar.UtamElement.processElementsNode;
+import static utam.compiler.grammar.UtamMetadata.processMetadataNode;
 import static utam.compiler.grammar.UtamMethod.processMethodsNode;
 import static utam.compiler.grammar.UtamProfile.processProfileNodes;
 import static utam.compiler.grammar.UtamRootDescription.processRootDescriptionNode;
@@ -35,6 +36,7 @@ import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities.FromClass;
 import utam.compiler.lint.PageObjectLintingImpl.ElementSelector;
+import utam.compiler.lint.PageObjectLintingImpl.Metadata;
 import utam.compiler.lint.PageObjectLintingImpl.Method;
 import utam.compiler.lint.PageObjectLintingImpl.Root;
 import utam.compiler.representation.BeforeLoadMethod;
@@ -82,6 +84,7 @@ final class UtamPageObject {
   private final List<UtamMethod> methods;
   private final List<UtamElement> elements;
   private final UtamShadowElement shadow;
+  private final UtamMetadata metadata;
 
   @JsonCreator
   UtamPageObject(
@@ -128,7 +131,7 @@ final class UtamPageObject {
         : processComposeNodes(BEFORE_LOAD_METHOD_NAME, beforeLoadNode);
     this.rootLocator = processRootSelectorNode(selectorNode);
     this.description = processRootDescriptionNode(descriptionNode);
-    VALIDATION.validateIsObject(metadata, "page object root", "property \"metadata\"");
+    this.metadata = processMetadataNode(metadata);
   }
 
   private void validateAbstract() {
@@ -224,7 +227,8 @@ final class UtamPageObject {
         rootElementMethod);
     context.setElement(rootElement, null);
     ElementSelector rootSelector = rootLocator != null? new ElementSelector(rootLocator, false) : null;
-    RootLinting rootLintingContext = new Root(!description.isEmpty(), description.hasAuthor(), rootSelector);
+    Metadata metadataLinting = this.metadata != null ? new Metadata(this.metadata.getMetadataProperties()) : null;
+    RootLinting rootLintingContext = new Root(!description.isEmpty(), description.hasAuthor(), rootSelector, metadataLinting);
     context.getLintingObject().setRootContext(rootLintingContext);
     return rootElement;
   }

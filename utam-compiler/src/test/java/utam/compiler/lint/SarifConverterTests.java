@@ -92,7 +92,7 @@ public class SarifConverterTests {
     assertThat(toolComponent.getName(), equalTo(SARIF_NAME));
     assertThat(toolComponent.getInformationUri(), equalTo(SARIF_INFORMATION_URI));
     assertThat(toolComponent.getSemanticVersion(), equalTo(SARIF_SEMANTIC_VERSION.value()));
-    assertThat(toolComponent.getRules(), hasSize(8));
+    assertThat(toolComponent.getRules(), hasSize(9));
 
     // rule properties
     String ruleId = "ULR03";

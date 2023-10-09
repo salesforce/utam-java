@@ -1,0 +1,60 @@
+{
+  "metadata": {
+    "status": "internal",
+    "scrumTeam": "UTAM"
+  },
+  "root": true,
+  "selector": {
+    "css": ".one"
+  },
+  "elements": [
+    {
+      "name": "one",
+      "selector": {
+        "css": ".one"
+      }
+    },
+    {
+      "name": "two",
+      "type" : "container",
+      "selector": {
+        "css": ".two"
+      }
+    },
+    {
+      "name": "three",
+      "selector": {
+        "css": ".two"
+      },
+      "shadow" : {
+        "elements" : [
+          {
+            "name": "inshadow",
+            "selector": {
+              "css": ".two"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "container1",
+      "type" : "container"
+    },
+    {
+      "name": "container2",
+      "type" : "container"
+    }
+  ],
+  "methods" : [
+    {
+      "name" : "nodescription",
+      "compose" : [
+        {
+          "element" : "root",
+          "apply" : "isPresent"
+        }
+      ]
+    }
+  ]
+}

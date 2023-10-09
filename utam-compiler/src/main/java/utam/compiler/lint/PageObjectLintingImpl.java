@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import utam.core.declarative.lint.PageObjectLinting;
@@ -250,6 +251,34 @@ public class PageObjectLintingImpl implements PageObjectLinting {
   }
 
   /**
+   * Metadata object information for linting
+   *
+   * @author james.evans
+   * @since 248
+   */
+  public static class Metadata implements MetadataLinting {
+
+    private final Map<String, Object> metadataProperties;
+
+    public Metadata(Map<String, Object> metadata) {
+      this.metadataProperties = metadata;
+    }
+
+    @Override
+    public boolean hasMetadataProperty(String propertyName) {
+      return metadataProperties.containsKey(propertyName);
+    }
+
+    @Override
+    public Object getMetadataPropertyValue(String propertyName) {
+      if (!this.metadataProperties.containsKey(propertyName)) {
+        return null;
+      }
+      return metadataProperties.get(propertyName);
+    }
+  }
+
+  /**
    * Root information for linting
    *
    * @author elizaveta.ivanova
@@ -260,11 +289,13 @@ public class PageObjectLintingImpl implements PageObjectLinting {
     private final boolean hasRootDescription;
     private final boolean hasAuthor;
     private final Element element;
+    private final Metadata metadata;
 
-    public Root(boolean hasRootDescription, boolean hasAuthor, ElementSelector selector) {
+    public Root(boolean hasRootDescription, boolean hasAuthor, ElementSelector selector, Metadata metadata) {
       this.hasRootDescription = hasRootDescription;
       this.hasAuthor = hasAuthor;
       this.element = selector == null ? null : new Element("root", null, selector, null);
+      this.metadata = metadata;
     }
 
     @Override
@@ -280,6 +311,16 @@ public class PageObjectLintingImpl implements PageObjectLinting {
     @Override
     public ElementLinting getRootElement() {
       return element;
+    }
+
+    @Override
+    public MetadataLinting getMetadata() {
+      return this.metadata;
+    }
+
+    @Override
+    public boolean hasMetadata() {
+      return this.metadata != null;
     }
 
     @Override
