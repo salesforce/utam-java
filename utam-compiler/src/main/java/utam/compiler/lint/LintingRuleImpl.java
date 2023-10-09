@@ -248,11 +248,9 @@ abstract class LintingRuleImpl implements LintingRule {
 
     RequiredMetadata(LintRuleOverride override) {
       super("ULR09", override);
-      if (override != null && override.additionalConfig != null && override.additionalConfig.getAdditionalConfigValues().containsKey("requiredProperties")) {
-        this.requiredProperties = (List<Object>)override.additionalConfig.getAdditionalConfigValues().get("requiredProperties");
-      } else {
-        this.requiredProperties = null;
-      }
+      this.requiredProperties =
+          override == null || override.additionalConfig == null ? null :
+              (List<Object>)override.additionalConfig.getAdditionalConfigValue("requiredProperties");
     }
 
     @Override

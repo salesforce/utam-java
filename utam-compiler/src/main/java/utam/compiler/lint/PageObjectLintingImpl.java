@@ -11,9 +11,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
-import utam.compiler.grammar.UtamMetadata;
 import utam.core.declarative.lint.PageObjectLinting;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Locator;
@@ -258,20 +258,23 @@ public class PageObjectLintingImpl implements PageObjectLinting {
    */
   public static class Metadata implements MetadataLinting {
 
-    private final UtamMetadata metadata;
+    private final Map<String, Object> metadataProperties;
 
-    public Metadata(UtamMetadata metadata) {
-      this.metadata = metadata;
+    public Metadata(Map<String, Object> metadata) {
+      this.metadataProperties = metadata;
     }
 
     @Override
     public boolean hasMetadataProperty(String propertyName) {
-      return metadata.hasProperty(propertyName);
+      return metadataProperties.containsKey(propertyName);
     }
 
     @Override
     public Object getMetadataPropertyValue(String propertyName) {
-      return metadata.getPropertyValue(propertyName);
+      if (!this.metadataProperties.containsKey(propertyName)) {
+        return null;
+      }
+      return metadataProperties.get(propertyName);
     }
   }
 

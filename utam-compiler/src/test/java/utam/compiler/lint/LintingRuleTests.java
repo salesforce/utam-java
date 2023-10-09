@@ -283,7 +283,7 @@ public class LintingRuleTests {
     List<LintingError> errors = test(linting, files);
     assertThat(errors, hasSize(1));
     assertThat(errors.get(0).getFullMessage(),
-        equalTo("lint rule ULR09 failure in page object test/lint/metadata/pageWithoutMetadata: warning 4001: "
+        equalTo("lint rule ULR09 failure in page object test/lint/metadata/pageWithoutMetadata: warning 2006: "
             + "property \"metadata\" is missing or misconfigured in the root; add \"metadata\" "
             + "property whose value is a non-empty object to the root"));
   }
@@ -307,7 +307,7 @@ public class LintingRuleTests {
     List<LintingError> errors = test(linting, files);
     assertThat(errors, hasSize(1));
     assertThat(errors.get(0).getFullMessage(),
-        equalTo("lint rule ULR09 failure in page object test/lint/metadata/pageWithMissingMetadataProperty: warning 4001: "
+        equalTo("lint rule ULR09 failure in page object test/lint/metadata/pageWithMissingMetadataProperty: warning 2006: "
             + "property \"metadata\" is missing or misconfigured in the root; add a property named "
             + "\"status\" to the metadata object in the page object"));
   }
@@ -321,7 +321,7 @@ public class LintingRuleTests {
     List<LintingError> errors = test(linting, files);
     assertThat(errors, hasSize(1));
     assertThat(errors.get(0).getFullMessage(),
-        equalTo("lint rule ULR09 failure in page object test/lint/metadata/pageWithInvalidMetadataProperty: warning 4001: "
+        equalTo("lint rule ULR09 failure in page object test/lint/metadata/pageWithInvalidMetadataProperty: warning 2006: "
             + "property \"metadata\" is missing or misconfigured in the root; set the \"status\" "
             + "metadata property to one of the following values: public, internal, private"));
   }
@@ -335,7 +335,7 @@ public class LintingRuleTests {
     List<LintingError> errors = test(linting, files);
     assertThat(errors, hasSize(1));
     assertThat(errors.get(0).getFullMessage(),
-        equalTo("lint rule ULR09 failure in page object test/lint/metadata/pageWithEmptyMetadataProperty: warning 4001: "
+        equalTo("lint rule ULR09 failure in page object test/lint/metadata/pageWithEmptyMetadataProperty: warning 2006: "
             + "property \"metadata\" is missing or misconfigured in the root; set the \"scrumTeam\" "
             + "metadata property a non-empty value"));
   }

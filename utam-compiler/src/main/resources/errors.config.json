@@ -378,6 +378,10 @@
     "message": "property \"author\" is missing in the root description"
   },
   {
+    "code": 2006,
+    "message": "property \"metadata\" is missing or misconfigured in the root"
+  },
+  {
     "code": 3001,
     "message": "same root selector \"%s\" is used as a root selector in the page object %s"
   },
@@ -388,9 +392,5 @@
   {
     "code": 3003,
     "message": "custom selector \"%s\" of the element \"%s\" is used for an element \"%s\" in the page object %s, but has a different type \"%s\""
-  },
-  {
-    "code": 4001,
-    "message": "property \"metadata\" is missing or misconfigured in the root"
   }
 ]

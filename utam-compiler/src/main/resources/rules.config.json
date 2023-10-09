@@ -65,7 +65,7 @@
     },
     {
         "ruleId": "ULR09",
-        "errorCode": 4001,
+        "errorCode": 2006,
         "name": "Required metadata property",
         "description": "Check page object contains a metadata property with proper structure",
         "help": "add \"metadata\" property whose value is a non-empty object to the root",

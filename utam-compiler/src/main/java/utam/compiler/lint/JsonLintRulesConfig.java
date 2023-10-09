@@ -100,20 +100,21 @@ class JsonLintRulesConfig {
         @JsonProperty(value = "additionalConfiguration") JsonNode additionalConfig) {
       this.exceptions = Objects.requireNonNullElse(exceptions, new HashSet<>());
       this.violationLevel = Objects.requireNonNullElse(violationLevel, ViolationLevel.warning);
-      this.additionalConfig = additionalConfig != null ? new AdditionalLintRuleOverrideConfigValues(additionalConfig) : null;
+      this.additionalConfig =
+          additionalConfig != null ? new AdditionalLintRuleOverrideConfigValues(additionalConfig) : null;
     }
   }
 
   static class AdditionalLintRuleOverrideConfigValues {
     final Map<String, Object> additionalConfigValues;
 
-    public AdditionalLintRuleOverrideConfigValues(JsonNode node) {
-      this.additionalConfigValues = new ObjectMapper().convertValue(
-          node, new TypeReference<HashMap<String, Object>>() {});
+    AdditionalLintRuleOverrideConfigValues(JsonNode node) {
+      this.additionalConfigValues = new ObjectMapper().convertValue(node,
+          new TypeReference<HashMap<String, Object>>() {});
     }
 
-    public Map<String, Object> getAdditionalConfigValues() {
-      return this.additionalConfigValues;
+    Object getAdditionalConfigValue(String configValueName) {
+      return this.additionalConfigValues.getOrDefault(configValueName, null);
     }
   }
 }
