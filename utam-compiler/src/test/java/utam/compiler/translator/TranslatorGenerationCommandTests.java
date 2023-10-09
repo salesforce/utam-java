@@ -90,7 +90,7 @@ public class TranslatorGenerationCommandTests {
   @Test
   public void testJsonConfigWithOtherArgsThrows() {
     TranslatorGenerationCommand command = new TranslatorGenerationCommand();
-    command.jsonConfig = new File("utam.presence.config.json");
+    command.jsonConfig = new File("utam.config.json");
     command.inputDirectory = new File("input");
     TranslatorConfig config = command.getTranslationConfig();
     assertThat(config, is(nullValue()));
