@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import utam.compiler.lint.JsonLintRulesConfig.LintRuleOverride;
@@ -19,6 +20,7 @@ import utam.core.declarative.lint.LintingRule;
 import utam.core.declarative.lint.PageObjectLinting;
 import utam.core.declarative.lint.PageObjectLinting.ElementLinting;
 import utam.core.declarative.lint.PageObjectLinting.FileSearchContext;
+import utam.core.declarative.lint.PageObjectLinting.MetadataLinting;
 import utam.core.declarative.lint.PageObjectLinting.MethodLinting;
 
 /**
@@ -228,6 +230,74 @@ abstract class LintingRuleImpl implements LintingRule {
   }
 
   /**
+   * Check metadata object for presence, and for presence and proper values of properties.
+   *
+   * @author james.evans
+   * @since 248
+   */
+  static class RequiredMetadata extends LintingRuleImpl {
+    private static final FileSearchContext SEARCH_CONTEXT = new FileSearchContextImpl(
+        new String[0]);
+    private static final String MISSING_METADATA_PROPERTY_ERROR =
+        "add a property named \"%s\" to the metadata object in the page object";
+    private static final String INVALID_METADATA_PROPERTY_VALUE =
+        "set the \"%s\" metadata property to one of the following values: %s";
+    private static final String EMPTY_METADATA_PROPERTY_VALUE =
+        "set the \"%s\" metadata property a non-empty value";
+    private final List<Object> requiredProperties;
+
+    RequiredMetadata(LintRuleOverride override) {
+      super("ULR09", override);
+      if (override != null && override.additionalConfig != null && override.additionalConfig.getAdditionalConfigValues().containsKey("requiredProperties")) {
+        this.requiredProperties = (List<Object>)override.additionalConfig.getAdditionalConfigValues().get("requiredProperties");
+      } else {
+        this.requiredProperties = null;
+      }
+    }
+
+    @Override
+    public void validate(List<LintingError> errors, PageObjectLinting pageObject) {
+      if (isEnabled(pageObject)) {
+        if (!pageObject.getRootContext().hasMetadata()) {
+          errors.add(getError(pageObject,
+              pageObject.findCodeLine(SEARCH_CONTEXT, ROOT_LINE), this.help));
+        } else {
+          if (requiredProperties != null) {
+            MetadataLinting metadataLinting = pageObject.getRootContext().getMetadata();
+            for (Object propertyObject : requiredProperties) {
+              Map<String, Object> requiredProperty = (Map<String, Object>) propertyObject;
+              String propertyName = requiredProperty.get("name").toString();
+              if (!metadataLinting.hasMetadataProperty(propertyName)) {
+                errors.add(getError(pageObject,
+                    pageObject.findCodeLine(SEARCH_CONTEXT, ROOT_LINE),
+                    String.format(MISSING_METADATA_PROPERTY_ERROR, propertyName)));
+              } else {
+                String propertyValue = metadataLinting.getMetadataPropertyValue(propertyName)
+                    .toString();
+                if (requiredProperty.containsKey("values")) {
+                  List<String> validValues = (List<String>) requiredProperty.get("values");
+                  if (!validValues.contains(propertyValue)) {
+                    errors.add(getError(pageObject,
+                        pageObject.findCodeLine(SEARCH_CONTEXT, ROOT_LINE),
+                        String.format(INVALID_METADATA_PROPERTY_VALUE, propertyName,
+                            String.join(", ", validValues))));
+                  }
+                } else {
+                  if (propertyValue.isBlank() || propertyValue.isEmpty()) {
+                    errors.add(getError(pageObject,
+                        pageObject.findCodeLine(SEARCH_CONTEXT, ROOT_LINE),
+                        String.format(EMPTY_METADATA_PROPERTY_VALUE, propertyName)));
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /**
    * Check every method has description
    *
    * @author elizaveta.ivanova
@@ -315,7 +385,6 @@ abstract class LintingRuleImpl implements LintingRule {
       }
     }
   }
-
 
   /**
    * Root selector should match only custom elements of the same type as root selector's PO

@@ -388,5 +388,9 @@
   {
     "code": 3003,
     "message": "custom selector \"%s\" of the element \"%s\" is used for an element \"%s\" in the page object %s, but has a different type \"%s\""
+  },
+  {
+    "code": 4001,
+    "message": "property \"metadata\" is missing or misconfigured in the root"
   }
 ]

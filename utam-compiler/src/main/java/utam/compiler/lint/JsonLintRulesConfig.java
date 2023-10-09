@@ -9,6 +9,8 @@ package utam.compiler.lint;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import java.net.URL;
@@ -90,12 +92,28 @@ class JsonLintRulesConfig {
   static class LintRuleOverride {
     final Set<String> exceptions;
     final ViolationLevel violationLevel;
+    final AdditionalLintRuleOverrideConfigValues additionalConfig;
     @JsonCreator
     LintRuleOverride(
         @JsonProperty(value = "violation") ViolationLevel violationLevel,
-        @JsonProperty(value = "exclude") Set<String> exceptions) {
+        @JsonProperty(value = "exclude") Set<String> exceptions,
+        @JsonProperty(value = "additionalConfiguration") JsonNode additionalConfig) {
       this.exceptions = Objects.requireNonNullElse(exceptions, new HashSet<>());
       this.violationLevel = Objects.requireNonNullElse(violationLevel, ViolationLevel.warning);
+      this.additionalConfig = additionalConfig != null ? new AdditionalLintRuleOverrideConfigValues(additionalConfig) : null;
+    }
+  }
+
+  static class AdditionalLintRuleOverrideConfigValues {
+    final Map<String, Object> additionalConfigValues;
+
+    public AdditionalLintRuleOverrideConfigValues(JsonNode node) {
+      this.additionalConfigValues = new ObjectMapper().convertValue(
+          node, new TypeReference<HashMap<String, Object>>() {});
+    }
+
+    public Map<String, Object> getAdditionalConfigValues() {
+      return this.additionalConfigValues;
     }
   }
 }

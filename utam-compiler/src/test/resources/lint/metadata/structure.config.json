@@ -1,0 +1,46 @@
+{
+  "pageObjectsRootDir": "",
+  "pageObjectsOutputDir": "",
+  "resourcesOutputDir": "",
+  "lint": {
+    "lintingOutputFile": "test.sarif.json",
+    "duplicateSelectors": {
+      "violation": "disabled"
+    },
+    "requiredRootDescription": {
+      "violation": "disabled"
+    },
+    "requiredAuthor": {
+      "violation": "disabled"
+    },
+    "requiredMethodDescription": {
+      "violation": "disabled"
+    },
+    "requiredSingleShadowRoot": {
+      "violation": "disabled"
+    },
+    "duplicateRootSelectors": {
+      "violation" : "disabled"
+    },
+    "elementCantHaveRootSelector" : {
+      "violation" : "disabled"
+    },
+    "duplicateCustomSelectors": {
+      "violation" : "disabled"
+    },
+    "requiredMetadata": {
+      "violation": "warning",
+      "additionalConfiguration": {
+        "requiredProperties": [
+          {
+            "name": "status",
+            "values": [ "public", "internal", "private" ]
+          },
+          {
+            "name": "scrumTeam"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -153,11 +153,50 @@ public interface PageObjectLinting {
     ElementLinting getRootElement();
 
     /**
+     * Gets the metadata element from the root of the page object
+     *
+     * @return metadata element
+     */
+    MetadataLinting getMetadata();
+
+    /**
+     * Check if page object has a metadata element
+     *
+     * @return true if it does
+     */
+    boolean hasMetadata();
+
+    /**
      * Check if page object has root selector
      *
      * @return true if it does
      */
     boolean isRoot();
+  }
+
+  /**
+   * Linting information about the metadata property
+   *
+   * @author james.evans
+   * @since 248
+   */
+  interface MetadataLinting {
+
+    /**
+     * Check if value object of metadata property has a property with the given name
+     *
+     * @param propertyName the name of the property to check for
+     * @return true if the property exists in the value object of the metadata property
+     */
+    boolean hasMetadataProperty(String propertyName);
+
+    /**
+     * Gets the value of the named property from the metadata property object.
+     *
+     * @param propertyName the name of hte property for which to retrieve the value
+     * @return the value of the property if it exists, otherwise null
+     */
+    Object getMetadataPropertyValue(String propertyName);
   }
 
   /**

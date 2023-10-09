@@ -12,13 +12,21 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static utam.compiler.lint.LintingConfigJson.DEFAULT_LINTING_CONFIG;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import org.testng.annotations.Test;
 import utam.compiler.grammar.DeserializerUtilities;
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.lint.JsonLintRulesConfig.LintRuleOverride;
+import utam.compiler.translator.DefaultTranslatorRunner;
+import utam.compiler.translator.JsonCompilerConfig;
 import utam.core.declarative.lint.LintingConfig;
 import utam.core.declarative.lint.LintingContext;
 import utam.core.declarative.lint.LintingError;
+import utam.core.declarative.lint.LintingError.ViolationLevel;
+import utam.core.declarative.translator.TranslatorRunner;
 
 /**
  * Test linting functionality
@@ -27,9 +35,28 @@ import utam.core.declarative.lint.LintingError;
  * @since 242
  */
 public class LintingRuleTests {
+  private static final String ROOT_DIR = String
+      .join(File.separator, System.getProperty("user.dir"), "src", "test", "resources", "lint");
+
+  private static LintingConfig getLintingConfigFromFile(String folder, String fileName) {
+    String relativeRoot = String.join(File.separator, ROOT_DIR, folder);
+    String configFile = String.join(File.separator, "lint", folder, fileName);
+    File config = new File(
+        LintingRuleTests.class.getClassLoader().getResource(configFile).getFile());
+    try {
+      JsonCompilerConfig jsonCompilerConfig = new JsonCompilerConfig(config, new File(relativeRoot),
+          new ArrayList<>());
+      return jsonCompilerConfig.getTranslatorConfig().getLintingConfig();
+    } catch (IOException e) {
+      throw new AssertionError(e);
+    }
+  }
 
   private static List<LintingError> test(String[] jsonFiles) {
-    LintingConfig linting = DEFAULT_LINTING_CONFIG;
+    return test(DEFAULT_LINTING_CONFIG, jsonFiles);
+  }
+
+  private static List<LintingError> test(LintingConfig linting, String[] jsonFiles) {
     LintingContext context = linting.start();
     for (String jsonFile : jsonFiles) {
       TranslationContext translationContext = new DeserializerUtilities("test/" + jsonFile)
@@ -222,7 +249,6 @@ public class LintingRuleTests {
             + "change the element \"test\" type to the same type as the element \"basic\" in page object \"test/lint/elementTypes/customType\""));
   }
 
-
   @Test
   public void testContainerAndCustomType() {
     String[] files = new String[]{
@@ -236,5 +262,81 @@ public class LintingRuleTests {
             + "custom selector \"my-test-custom\" of the element \"container\" is used for an element \"test\" in the page object test/lint/elementTypes/containerType, but has a different type \"container\"; "
             + "change the element \"container\" type to the same type as the element \"test\" in page object \"test/lint/elementTypes/containerType\""));
 
+  }
+
+  @Test
+  public void testRequiredMetadata() {
+    LintingConfig linting = getLintingConfigFromFile("metadata", "presence.config.json");
+    String[] files = new String[] {
+        "lint/metadata/pageWithMetadata"
+    };
+    List<LintingError> errors = test(linting, files);
+    assertThat(errors, hasSize(0));
+  }
+
+  @Test
+  public void testMissingMetadata() {
+    LintingConfig linting = getLintingConfigFromFile("metadata", "presence.config.json");
+    String[] files = new String[] {
+        "lint/metadata/pageWithoutMetadata"
+    };
+    List<LintingError> errors = test(linting, files);
+    assertThat(errors, hasSize(1));
+    assertThat(errors.get(0).getFullMessage(),
+        equalTo("lint rule ULR09 failure in page object test/lint/metadata/pageWithoutMetadata: warning 4001: "
+            + "property \"metadata\" is missing or misconfigured in the root; add \"metadata\" "
+            + "property whose value is a non-empty object to the root"));
+  }
+
+  @Test
+  public void testMetadataWithRequiredProperties() {
+    LintingConfig linting = getLintingConfigFromFile("metadata", "structure.config.json");
+    String[] files = new String[] {
+        "lint/metadata/pageWithMetadata"
+    };
+    List<LintingError> errors = test(linting, files);
+    assertThat(errors, hasSize(0));
+  }
+
+  @Test
+  public void testMetadataWithMissingRequiredProperty() {
+    LintingConfig linting = getLintingConfigFromFile("metadata", "structure.config.json");
+    String[] files = new String[] {
+        "lint/metadata/pageWithMissingMetadataProperty"
+    };
+    List<LintingError> errors = test(linting, files);
+    assertThat(errors, hasSize(1));
+    assertThat(errors.get(0).getFullMessage(),
+        equalTo("lint rule ULR09 failure in page object test/lint/metadata/pageWithMissingMetadataProperty: warning 4001: "
+            + "property \"metadata\" is missing or misconfigured in the root; add a property named "
+            + "\"status\" to the metadata object in the page object"));
+  }
+
+  @Test
+  public void testMetadataWithInvalidRequiredPropertyValue() {
+    LintingConfig linting = getLintingConfigFromFile("metadata", "structure.config.json");
+    String[] files = new String[] {
+        "lint/metadata/pageWithInvalidMetadataProperty"
+    };
+    List<LintingError> errors = test(linting, files);
+    assertThat(errors, hasSize(1));
+    assertThat(errors.get(0).getFullMessage(),
+        equalTo("lint rule ULR09 failure in page object test/lint/metadata/pageWithInvalidMetadataProperty: warning 4001: "
+            + "property \"metadata\" is missing or misconfigured in the root; set the \"status\" "
+            + "metadata property to one of the following values: public, internal, private"));
+  }
+
+  @Test
+  public void testMetadataWithEmptyRequiredPropertyValue() {
+    LintingConfig linting = getLintingConfigFromFile("metadata", "structure.config.json");
+    String[] files = new String[] {
+        "lint/metadata/pageWithEmptyMetadataProperty"
+    };
+    List<LintingError> errors = test(linting, files);
+    assertThat(errors, hasSize(1));
+    assertThat(errors.get(0).getFullMessage(),
+        equalTo("lint rule ULR09 failure in page object test/lint/metadata/pageWithEmptyMetadataProperty: warning 4001: "
+            + "property \"metadata\" is missing or misconfigured in the root; set the \"scrumTeam\" "
+            + "metadata property a non-empty value"));
   }
 }

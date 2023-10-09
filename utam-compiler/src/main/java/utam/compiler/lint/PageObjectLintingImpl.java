@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
+import utam.compiler.grammar.UtamMetadata;
 import utam.core.declarative.lint.PageObjectLinting;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Locator;
@@ -250,6 +251,31 @@ public class PageObjectLintingImpl implements PageObjectLinting {
   }
 
   /**
+   * Metadata object information for linting
+   *
+   * @author james.evans
+   * @since 248
+   */
+  public static class Metadata implements MetadataLinting {
+
+    private final UtamMetadata metadata;
+
+    public Metadata(UtamMetadata metadata) {
+      this.metadata = metadata;
+    }
+
+    @Override
+    public boolean hasMetadataProperty(String propertyName) {
+      return metadata.hasProperty(propertyName);
+    }
+
+    @Override
+    public Object getMetadataPropertyValue(String propertyName) {
+      return metadata.getPropertyValue(propertyName);
+    }
+  }
+
+  /**
    * Root information for linting
    *
    * @author elizaveta.ivanova
@@ -260,11 +286,13 @@ public class PageObjectLintingImpl implements PageObjectLinting {
     private final boolean hasRootDescription;
     private final boolean hasAuthor;
     private final Element element;
+    private final Metadata metadata;
 
-    public Root(boolean hasRootDescription, boolean hasAuthor, ElementSelector selector) {
+    public Root(boolean hasRootDescription, boolean hasAuthor, ElementSelector selector, Metadata metadata) {
       this.hasRootDescription = hasRootDescription;
       this.hasAuthor = hasAuthor;
       this.element = selector == null ? null : new Element("root", null, selector, null);
+      this.metadata = metadata;
     }
 
     @Override
@@ -280,6 +308,16 @@ public class PageObjectLintingImpl implements PageObjectLinting {
     @Override
     public ElementLinting getRootElement() {
       return element;
+    }
+
+    @Override
+    public MetadataLinting getMetadata() {
+      return this.metadata;
+    }
+
+    @Override
+    public boolean hasMetadata() {
+      return this.metadata != null;
     }
 
     @Override

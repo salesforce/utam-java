@@ -62,5 +62,13 @@
         "description": "Element with custom tag should have same type across all page objects",
         "help": "change the element \"%s\" type to the same type as the element \"%s\" in page object \"%s\"",
         "violation": "warning"
+    },
+    {
+        "ruleId": "ULR09",
+        "errorCode": 4001,
+        "name": "Required metadata property",
+        "description": "Check page object contains a metadata property with proper structure",
+        "help": "add \"metadata\" property whose value is a non-empty object to the root",
+        "violation": "disabled"
     }
 ]
