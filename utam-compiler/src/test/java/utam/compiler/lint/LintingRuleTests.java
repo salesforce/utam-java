@@ -114,6 +114,16 @@ public class LintingRuleTests {
   }
 
   @Test
+  public void testListCanHaveSameSelectorWithFilters() {
+    List<LintingError> errors = test("lint/rules/listSelectorWithFilters");
+    assertThat(errors, hasSize(1));
+    assertThat(errors.get(0).getFullMessage(),
+        equalTo("lint rule ULR01 failure in page object test/lint/rules/listSelectorWithFilters: "
+            + "warning 2001: duplicate selector \"css\" for the elements \"list4\" and \"list2\"; "
+            + "remove duplicate elements: \"list2\" or \"list4\""));
+  }
+
+  @Test
   public void testRequiredDescription() {
     List<LintingError> errors = test("lint/rules/defaultConfig");
     assertThat(errors, hasSize(5));

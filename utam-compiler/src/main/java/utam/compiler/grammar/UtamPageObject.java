@@ -226,7 +226,9 @@ final class UtamPageObject {
     ElementContext rootElement = new ElementContext.Root(interfaceType, rootLocator, elementType,
         rootElementMethod);
     context.setElement(rootElement, null);
-    ElementSelector rootSelector = rootLocator != null? new ElementSelector(rootLocator, false) : null;
+    ElementSelector rootSelector = rootLocator != null ?
+        new ElementSelector(rootLocator, false, null, null) :
+        null;
     Metadata metadataLinting = this.metadata != null ? new Metadata(this.metadata.getMetadataProperties()) : null;
     RootLinting rootLintingContext = new Root(!description.isEmpty(), description.hasAuthor(), rootSelector, metadataLinting);
     context.getLintingObject().setRootContext(rootLintingContext);
