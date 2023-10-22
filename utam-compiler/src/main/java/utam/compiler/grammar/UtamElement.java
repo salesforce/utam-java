@@ -291,7 +291,8 @@ public final class UtamElement {
               scopeElement.getName(),
               isExpandScopeShadowRoot,
               isReturnList));
-      ElementSelector lintingSelector = new ElementSelector(locator, selector.isReturnAll());
+      ElementSelector lintingSelector = new ElementSelector(locator, selector.isReturnAll(),
+          filter != null ? filter.applyMethod : null, filter != null ? filterMatcher.getMatcherType() : null);
       ElementLinting lintingContext = new Element(name, elementType.getFullName(),
           lintingSelector, new ElementScope(scopeElement.getName(), isExpandScopeShadowRoot));
       context.getLintingObject().setElement(lintingContext);
@@ -381,7 +382,8 @@ public final class UtamElement {
           isExpandScopeShadowRoot,
           isList
       ));
-      ElementSelector lintingSelector = new ElementSelector(locator, selector.isReturnAll());
+      ElementSelector lintingSelector = new ElementSelector(locator, selector.isReturnAll(),
+          filter != null ? filter.applyMethod : null, filter != null ? filterMatcher.getMatcherType() : null);
       ElementLinting lintingContext = new Element(name, LINTING_BASIC_TYPE,
           lintingSelector, new ElementScope(scopeElement.getName(), isExpandScopeShadowRoot));
       context.getLintingObject().setElement(lintingContext);
@@ -431,7 +433,8 @@ public final class UtamElement {
       elementContext.setElementMethod(method, context);
       context.setElement(elementContext, null);
       context.setMethod(method);
-      ElementSelector lintingSelector = new ElementSelector(locator.getLocator(), selector.isReturnAll());
+      ElementSelector lintingSelector = new ElementSelector(locator.getLocator(),
+          selector.isReturnAll(), null, null);
       ElementLinting lintingContext = new Element(name, LINTING_CONTAINER_TYPE,
           lintingSelector, new ElementScope(scopeElement.getName(), isExpandScopeShadowRoot));
       context.getLintingObject().setElement(lintingContext);
@@ -474,7 +477,8 @@ public final class UtamElement {
       elementContext.setElementMethod(method, context);
       context.setElement(elementContext, field);
       context.setMethod(method);
-      ElementSelector lintingSelector = new ElementSelector(locator.getLocator(), selector.isReturnAll());
+      ElementSelector lintingSelector = new ElementSelector(locator.getLocator(),
+          selector.isReturnAll(), null, null);
       ElementLinting lintingContext = new Element(name, LINTING_FRAME_TYPE,
           lintingSelector, new ElementScope(scopeElement.getName(), isExpandScopeShadowRoot));
       context.getLintingObject().setElement(lintingContext);

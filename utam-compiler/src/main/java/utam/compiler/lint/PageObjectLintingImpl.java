@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+import utam.compiler.helpers.MatcherType;
 import utam.core.declarative.lint.PageObjectLinting;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.element.Locator;
@@ -128,11 +129,15 @@ public class PageObjectLintingImpl implements PageObjectLinting {
     private final Object objectValue;
     private final String stringValue;
     private final boolean isList;
+    private final String filterApplyMethod;
+    private final MatcherType filterMatcherType;
 
-    public ElementSelector(Locator locator, boolean isList) {
+    public ElementSelector(Locator locator, boolean isList, String filterApplyMethod, MatcherType filterMatcherType) {
       this.objectValue = locator.getValue();
       this.stringValue = locator.getStringValue();
       this.isList = isList;
+      this.filterApplyMethod = filterApplyMethod;
+      this.filterMatcherType = filterMatcherType;
     }
   }
 
@@ -216,8 +221,26 @@ public class PageObjectLintingImpl implements PageObjectLinting {
         return false;
       }
       if (first.objectValue.equals(second.objectValue)) {
-        // duplicates allowed if one is a list, but not both
-        return first.isList == second.isList;
+        if (!first.isList && !second.isList) {
+          return true;
+        }
+        // duplicates allowed if one is a list and the other is not
+        if (first.isList && second.isList) {
+          // if both are lists, duplicates allowed if one has a
+          // filter and the other does not, or if both have filters,
+          // but filter on different methods
+          if (first.filterApplyMethod == null && second.filterApplyMethod == null) {
+            return true;
+          }
+          if (first.filterApplyMethod != null && second.filterApplyMethod != null &&
+              first.filterApplyMethod.equals(second.filterApplyMethod)) {
+            // if both have filters on same method, duplicates allowed
+            // if matcher type is different
+            return first.filterMatcherType != null && second.filterMatcherType != null &&
+                first.filterMatcherType.equals(second.filterMatcherType);
+          }
+        }
+        return false;
       }
       return false;
     }
