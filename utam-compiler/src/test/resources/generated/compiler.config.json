@@ -49,6 +49,10 @@
     {
       "typeMatch": "generated-container",
       "pathMatch": ".*/container"
+    },
+    {
+      "typeMatch": "generated-wait",
+      "pathMatch": ".*/wait"
     }
   ],
   "copyright" : [

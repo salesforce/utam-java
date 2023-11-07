@@ -165,6 +165,25 @@ final class UtamPageObject {
     }
   }
 
+  /**
+   * Some functionality in compiler can lead to adjusting JSON itself. This method runs post process
+   */
+  void preProcess() {
+    if (shadow != null) {
+      shadow.elements.forEach(utamElement -> utamElement.preProcessElement(this));
+    }
+    elements.forEach(utamElement -> utamElement.preProcessElement(this));
+  }
+
+  /**
+   * As result of post-processing, compiler can add a method
+   *
+   * @param composeMethod method to add
+   */
+  void setComposeMethod(UtamComposeMethod composeMethod) {
+    this.methods.add(composeMethod);
+  }
+
   void compile(TranslationContext context) {
     if (this.isAbstract) {
       validateAbstract();

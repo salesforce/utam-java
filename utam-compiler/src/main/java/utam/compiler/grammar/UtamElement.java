@@ -29,8 +29,10 @@ import static utam.compiler.types.BasicElementUnionType.asBasicOrUnionType;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Collections;
 import java.util.List;
 import utam.compiler.UtamCompilationError;
+import utam.compiler.grammar.UtamMethodActionWaitFor.UtamMethodActionWaitForElement;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementUnitTestHelper;
 import utam.compiler.helpers.LocatorCodeGeneration;
@@ -77,9 +79,10 @@ public final class UtamElement {
   private final Boolean isNullable;
   private final Traversal traversal;
   private final UtamMethodDescription description;
-  private final Boolean isPublic; // should be nullable as it's redundant for root
+  private final Boolean isPublic;
   private final UtamElementFilter filter;
   private UtamSelector selector;
+  private final Boolean isWait;
 
   @JsonCreator
   UtamElement(
@@ -87,6 +90,7 @@ public final class UtamElement {
       @JsonProperty(value = "name", required = true) String name,
       @JsonProperty(value = "public") Boolean isPublic,
       @JsonProperty(value = "nullable") Boolean isNullable,
+      @JsonProperty(value = "wait") Boolean isWait,
       @JsonProperty(value = "selector") JsonNode selectorNode,
       @JsonProperty(value = "filter") JsonNode filterNode,
       @JsonProperty("shadow") JsonNode shadowNode,
@@ -103,6 +107,7 @@ public final class UtamElement {
     this.elements = processElementsNode(elementsNode, validationContext + " elements");
     this.traversal = processTypeNode(type);
     this.description = processMethodDescriptionNode(descriptionNode, validationContext);
+    this.isWait = isWait;
   }
 
   /**
@@ -154,6 +159,32 @@ public final class UtamElement {
 
   private boolean isNullable() {
     return Boolean.TRUE.equals(isNullable);
+  }
+
+  private boolean isWait() {
+    return Boolean.TRUE.equals(isWait);
+  }
+
+  /**
+   * Some functionality in compiler can lead to adjusting JSON itself, for example "wait"
+   *
+   * @param pageObject de-serialized page object
+   */
+  void preProcessElement(UtamPageObject pageObject) {
+    if (isWait()) {
+      String methodName = "waitFor" + name.substring(0, 1).toUpperCase() + name.substring(1);
+      UtamMethodDescription description = new UtamMethodDescription(
+          Collections.singletonList(String.format("method that waits for element \"%s\"", name)),
+          null, null, null);
+      List<UtamMethodAction> compose = Collections.singletonList(
+          new UtamMethodActionWaitForElement(name));
+      UtamComposeMethod composeMethod = new UtamComposeMethod(methodName, description, compose);
+      pageObject.setComposeMethod(composeMethod);
+    }
+    if (shadow != null) {
+      shadow.elements.forEach(utamElement -> utamElement.preProcessElement(pageObject));
+    }
+    elements.forEach(utamElement -> utamElement.preProcessElement(pageObject));
   }
 
   void traverse(

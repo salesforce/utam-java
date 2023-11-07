@@ -119,6 +119,7 @@ public final class JsonDeserializer extends
     try {
       ObjectMapper mapper = getObjectMapperWithSettings();
       UtamPageObject utamPageObject = mapper.readValue(parser, UtamPageObject.class);
+      utamPageObject.preProcess();
       utamPageObject.compile(this.context);
       return utamPageObject;
     } catch (Exception e) {
@@ -133,7 +134,7 @@ public final class JsonDeserializer extends
    *
    * @return the Page Object translation context
    */
-  public final TranslationContext getPageObjectContext() {
+  public TranslationContext getPageObjectContext() {
     return context;
   }
 

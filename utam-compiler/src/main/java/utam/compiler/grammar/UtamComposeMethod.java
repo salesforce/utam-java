@@ -50,6 +50,11 @@ class UtamComposeMethod extends UtamMethod {
     this.composeList = processComposeNodes(name, composeNodes);
   }
 
+  UtamComposeMethod(String name, UtamMethodDescription description, List<UtamMethodAction> compose) {
+    super(name, description);
+    this.composeList = compose;
+  }
+
   /**
    * process compose method nodes
    *

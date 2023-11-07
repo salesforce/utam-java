@@ -34,6 +34,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -378,6 +379,16 @@ abstract class UtamArgument {
         @JsonProperty(value = "predicate", required = true) JsonNode conditionsNode) {
       super(name, type, description);
       this.conditions = processComposeNodes("predicate", conditionsNode);
+    }
+
+    /**
+     * This constructor is used to add waitForElement
+     *
+     * @param getterInvocation statement that invokes geter
+     */
+    UtamArgumentPredicate(UtamMethodAction getterInvocation) {
+      super(null, "function", null);
+      this.conditions = Collections.singletonList(getterInvocation);
     }
 
     @Override

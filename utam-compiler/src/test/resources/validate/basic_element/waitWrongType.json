@@ -1,0 +1,11 @@
+{
+  "elements" : [
+    {
+      "name": "basicPublicElement",
+      "selector": {
+        "css": "basicElement"
+      },
+      "wait": "string"
+    }
+  ]
+}

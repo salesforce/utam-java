@@ -1,0 +1,37 @@
+{
+  "id": "chatcmpl-8APozyRgm42cz1kSRF7mLYGuu3m4n",
+  "generations": [
+    {
+      "id": "ac7e245e-0a8d-4cc5-842a-e8cd31b77d9a",
+      "text": "ComponentAttributes:\n- hasLightDomEnabled: boolean, true if component markup includes string lwc:render-mode=\"light\".\n\nElements:\n- button - button - Represents a clickable button - returnAll: false - type: Clickable,Actionable,Custom\n- primitiveIconStart - lightning-primitive-icon.slds-button__icon.slds-button__icon_left - Represents the icon on the left side of the button - returnAll: false - type: Custom\n- primitiveIconEnd - lightning-primitive-icon.slds-button__icon.slds-button__icon_right - Represents the icon on the right side of the button - returnAll: false - type: Custom\n- content - slot - Represents the content of the component - returnAll: false - type: Container\n\nNote: Since there are no editable or draggable elements in this component, none were included in the list.",
+      "parameters": {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null
+      },
+      "generation_safety_score": {
+        "safety_score": 0.99996,
+        "category_scores": {
+          "toxicity": 0.0,
+          "hate": 0.0,
+          "identity": 0.0,
+          "violence": 0.0,
+          "physical": 0.0,
+          "sexual": 0.0,
+          "profanity": 0.0
+        }
+      }
+    }
+  ],
+  "prompt": null,
+  "parameters": {
+    "created": 1697493229,
+    "usage": {
+      "completion_tokens": 176,
+      "prompt_tokens": 2720,
+      "total_tokens": 2896
+    },
+    "model": "gpt-3.5-turbo-0301",
+    "object": "chat.completion"
+  }
+}
