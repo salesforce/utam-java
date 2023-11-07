@@ -172,19 +172,28 @@ public final class UtamElement {
    */
   void preProcessElement(UtamPageObject pageObject) {
     if (isWait()) {
-      String methodName = "waitFor" + name.substring(0, 1).toUpperCase() + name.substring(1);
-      UtamMethodDescription description = new UtamMethodDescription(
-          Collections.singletonList(String.format("method that waits for element \"%s\"", name)),
-          null, null, null);
-      List<UtamMethodAction> compose = Collections.singletonList(
-          new UtamMethodActionWaitForElement(name));
-      UtamComposeMethod composeMethod = new UtamComposeMethod(methodName, description, compose);
+      UtamComposeMethod composeMethod = buildWaitForComposeMethod();
       pageObject.setComposeMethod(composeMethod);
     }
     if (shadow != null) {
       shadow.elements.forEach(utamElement -> utamElement.preProcessElement(pageObject));
     }
     elements.forEach(utamElement -> utamElement.preProcessElement(pageObject));
+  }
+
+  /**
+   * Build compose method to wait for the element
+   *
+   * @return UtamComposeMethod object
+   */
+  private UtamComposeMethod buildWaitForComposeMethod() {
+    String methodName = "waitFor" + name.substring(0, 1).toUpperCase() + name.substring(1);
+    UtamMethodDescription description = new UtamMethodDescription(
+        Collections.singletonList(String.format("method that waits for element \"%s\"", name)),
+        null, null, null);
+    List<UtamMethodAction> compose = Collections.singletonList(
+        new UtamMethodActionWaitForElement(name));
+    return new UtamComposeMethod(methodName, description, compose);
   }
 
   void traverse(
