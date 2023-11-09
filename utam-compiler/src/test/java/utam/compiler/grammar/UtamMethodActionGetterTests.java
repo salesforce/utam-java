@@ -12,6 +12,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.helpers.TypeUtilities.COLLECTOR_IMPORT;
+import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.representation.PageObjectValidationTestHelper.validateMethodEmptyImports;
 
 import java.util.List;
@@ -88,12 +89,6 @@ public class UtamMethodActionGetterTests {
   public void testChainNeedsReturn() {
     testThrows("chainNeedsReturn",
         "error 605: method \"test\" statement: can't infer return type for \"element\", please provide a \"returnType\"");
-  }
-
-  @Test
-  public void testContainerElementNeedsReturn() {
-    testThrows("containerNeedsReturn",
-        "error 604: method \"test\" statement: statement that invokes container method needs a \"returnType\"");
   }
 
   @Test
@@ -334,6 +329,19 @@ public class UtamMethodActionGetterTests {
     MethodInfo expected = new MethodInfo("testGetter", "SettingsPanelElement");
     expected.addCodeLine("SettingsPanelElement statement0 = this.getSettingsPanel()");
     expected.addCodeLine("return statement0");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
+
+  @Test
+  public void testContainerGetterWithoutArgs(){
+    String methodName = "composeContainer";
+    PageObjectMethod method = getContext("containerCompose").getMethod(methodName);
+    MethodInfo expected = new MethodInfo(methodName, "T");
+    expected.addParameter(new MethodParameterInfo("pageObjectType", "Class<T>"));
+    expected.addCodeLine("T statement0 = this.getContainerElement(pageObjectType)");
+    expected.addCodeLine("return statement0");
+    expected.addImportedTypes(PAGE_OBJECT.getFullName());
+    expected.addImpliedImportedTypes(PAGE_OBJECT.getFullName());
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 }

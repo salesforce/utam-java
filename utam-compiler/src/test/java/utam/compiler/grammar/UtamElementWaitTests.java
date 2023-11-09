@@ -10,6 +10,7 @@ package utam.compiler.grammar;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 
 import org.testng.annotations.Test;
 import utam.compiler.UtamCompilationError;
@@ -79,6 +80,22 @@ public class UtamElementWaitTests {
     MethodInfo expected = new MethodInfo(methodName, "FrameElement");
     expected.addCodeLine("FrameElement statement0 = this.waitFor(() -> {\n"
         + "FrameElement pstatement0 = this.getFrameElementElement();\n"
+        + "return pstatement0;\n"
+        + "})");
+    expected.addCodeLine("return statement0");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
+
+  @Test
+  public void testWaitInContainer() {
+    String methodName = "waitForContainer";
+    PageObjectMethod method = getMethod("generated/wait/waitForContainer.utam", methodName);
+    MethodInfo expected = new MethodInfo(methodName, "T");
+    expected.addParameter(new MethodParameterInfo("pageObjectType", "Class<T>"));
+    expected.addImportedTypes(PAGE_OBJECT.getFullName());
+    expected.addImpliedImportedTypes(PAGE_OBJECT.getFullName());
+    expected.addCodeLine("T statement0 = this.waitFor(() -> {\n"
+        + "T pstatement0 = this.getContainerElement(pageObjectType);\n"
         + "return pstatement0;\n"
         + "})");
     expected.addCodeLine("return statement0");

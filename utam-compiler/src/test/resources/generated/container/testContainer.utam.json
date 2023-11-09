@@ -63,5 +63,15 @@
         "css": "container"
       }
     }
+  ],
+  "methods": [
+    {
+      "name": "composeContainer",
+      "compose": [
+        {
+          "element": "container"
+        }
+      ]
+    }
   ]
 }

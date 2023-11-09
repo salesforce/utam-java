@@ -1,0 +1,12 @@
+{
+  "elements": [
+    {
+      "type": "container",
+      "name": "container",
+      "selector": {
+        "css": "container"
+      },
+      "wait": true
+    }
+  ]
+}
