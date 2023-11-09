@@ -1,0 +1,35 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "customElementWithFilter",
+        "type": "generated-wait/pageObjects/waitForBasicElement",
+        "selector": {
+          "css": "custom-element",
+          "returnAll": true
+        },
+        "filter": {
+          "apply": "getText",
+          "matcher": {
+            "type": "stringEquals",
+            "args": [
+              {
+                "name": "matcherArg",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "wait": true
+      },
+      {
+        "name": "frameElement",
+        "type": "frame",
+        "selector": {
+          "css": "frame"
+        },
+        "wait": true
+      }
+    ]
+  }
+}

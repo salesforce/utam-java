@@ -14,6 +14,7 @@ import static utam.compiler.grammar.UtamArgument.processArgsNode;
 import static utam.compiler.grammar.UtamMethodDescription.processMethodDescriptionNode;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.ArrayList;
 import java.util.List;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParametersContext;
@@ -39,6 +40,18 @@ abstract class UtamMethod {
     String parserContext = String.format("method \"%s\"", name);
     this.description = processMethodDescriptionNode(descriptionNode, parserContext);
     this.arguments = processArgsNode(argsNode, parserContext, UtamArgument.ArgsValidationMode.LITERAL_NOT_ALLOWED);
+  }
+
+  /**
+   * Constructor is used to add custom compose method, for example waitForElement
+   *
+   * @param name        name of the method
+   * @param description description text
+   */
+  UtamMethod(String name, UtamMethodDescription description) {
+    this.name = name;
+    this.description = description;
+    this.arguments = new ArrayList<>();
   }
 
   /**

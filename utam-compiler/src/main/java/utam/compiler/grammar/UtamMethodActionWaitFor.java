@@ -15,9 +15,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
+import utam.compiler.grammar.UtamArgument.UtamArgumentPredicate;
 import utam.compiler.grammar.UtamMethodActionApply.ApplyOperation;
 import utam.compiler.helpers.*;
 import utam.compiler.helpers.ParametersContext.StatementParametersContext;
@@ -150,7 +152,7 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
       methodContext.enterPredicateContext();
       ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
       ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
-      List<UtamArgument> arguments = argumentsProvider.getArguments(UtamArgument.ArgsValidationMode.PREDICATE);
+      List<UtamArgument> arguments = getArguments(argumentsProvider);
       List<MethodParameter> parameters = arguments
           .stream()
           .map(arg -> arg.asParameter(context, methodContext, parametersContext))
@@ -164,9 +166,45 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
       return new OperationWithPredicate(action, nullableErrorMessage, operationReturnType, predicateStatements);
     }
 
+    // we override this method for waitForElement
+    List<UtamArgument> getArguments(ArgumentsProvider argumentsProvider) {
+      return argumentsProvider.getArguments(UtamArgument.ArgsValidationMode.PREDICATE);
+    }
+
     @Override
     Operand getOperand() {
       return SELF_OPERAND;
+    }
+  }
+
+  /**
+   * Compose statement to wait for element by invoking its getter
+   *
+   * @author elizaveta.ivanova
+   * @since 248
+   */
+  static class UtamMethodActionWaitForElement extends UtamMethodActionWaitFor {
+
+    private final List<UtamArgument> args;
+
+    UtamMethodActionWaitForElement(String elementName) {
+      super(null, "waitFor", null, null, false);
+      UtamMethodAction getter = new UtamMethodActionGetter(elementName, null, null, null, null,
+          false);
+      UtamArgument argument = new UtamArgumentPredicate(getter);
+      this.args = Collections.singletonList(argument);
+    }
+
+    @Override
+    Statement getStatement(TranslationContext context, MethodContext methodContext,
+        StatementContext statementContext) {
+      // instead of returning provided args, we always infer them from element
+      return new PredicateStatement(context, methodContext, statementContext) {
+        @Override
+        List<UtamArgument> getArguments(ArgumentsProvider argumentsProvider) {
+          return args;
+        }
+      };
     }
   }
 }
