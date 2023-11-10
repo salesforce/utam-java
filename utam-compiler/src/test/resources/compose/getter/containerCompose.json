@@ -1,0 +1,18 @@
+{
+  "elements": [
+    {
+      "name": "container",
+      "type": "container"
+    }
+  ],
+  "methods": [
+    {
+      "name": "composeContainer",
+      "compose": [
+        {
+          "element": "container"
+        }
+      ]
+    }
+  ]
+}

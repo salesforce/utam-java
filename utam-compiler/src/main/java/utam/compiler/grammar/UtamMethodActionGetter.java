@@ -20,7 +20,6 @@ import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.UtamMethodActionApply.ApplyOperation;
 import utam.compiler.helpers.ActionType;
 import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.ElementContext.ElementType;
 import utam.compiler.helpers.MethodContext;
 import utam.compiler.helpers.ParametersContext;
 import utam.compiler.helpers.ParametersContext.StatementParametersContext;
@@ -174,11 +173,6 @@ class UtamMethodActionGetter extends UtamMethodAction {
       context.setMethodUsage(elementContext.getElementGetterName());
       String methodName = methodContext.getName();
       MethodDeclaration elementGetter = elementContext.getElementMethod().getDeclaration();
-      boolean isContainer = elementContext.getElementNodeType() == ElementType.CONTAINER;
-      if (isContainer && !statementContext.hasDeclaredReturn()) {
-        // for container return type is PageObject
-        throw new UtamCompilationError(VALIDATION.getErrorMessage(604, methodName));
-      }
       TypeProvider returnType = statementContext.hasDeclaredReturn() ? statementContext
           .getDeclaredStatementReturnOrNull(context) : elementGetter.getReturnType();
       if (statementContext.hasDeclaredReturn()) {

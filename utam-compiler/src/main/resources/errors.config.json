@@ -199,10 +199,6 @@
     "message": "method \"%s\" statement: \"returnAll\" property can't be set without setting return type in a compose statement"
   },
   {
-    "code": 604,
-    "message": "method \"%s\" statement: statement that invokes container method needs a \"returnType\""
-  },
-  {
     "code": 605,
     "message": "method \"%s\" statement: can't infer return type for \"%s\", please provide a \"returnType\""
   },
