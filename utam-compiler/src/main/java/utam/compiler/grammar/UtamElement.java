@@ -83,6 +83,7 @@ public final class UtamElement {
   private final UtamElementFilter filter;
   private UtamSelector selector;
   private final Boolean isWait;
+  private final Boolean isLoad;
 
   @JsonCreator
   UtamElement(
@@ -91,6 +92,7 @@ public final class UtamElement {
       @JsonProperty(value = "public") Boolean isPublic,
       @JsonProperty(value = "nullable") Boolean isNullable,
       @JsonProperty(value = "wait") Boolean isWait,
+      @JsonProperty(value = "load") Boolean isLoad,
       @JsonProperty(value = "selector") JsonNode selectorNode,
       @JsonProperty(value = "filter") JsonNode filterNode,
       @JsonProperty("shadow") JsonNode shadowNode,
@@ -108,6 +110,7 @@ public final class UtamElement {
     this.traversal = processTypeNode(type);
     this.description = processMethodDescriptionNode(descriptionNode, validationContext);
     this.isWait = isWait;
+    this.isLoad = isLoad;
   }
 
   /**
@@ -164,16 +167,24 @@ public final class UtamElement {
   private boolean isWait() {
     return Boolean.TRUE.equals(isWait);
   }
-
+  private boolean isLoad() {
+    return Boolean.TRUE.equals(isLoad);
+  }
+  private boolean isWaitOrLoad() {return isLoad() || isWait();}
+  private boolean isPrivateWait() {return isLoad() && !isWait();}
   /**
    * Some functionality in compiler can lead to adjusting JSON itself, for example "wait"
    *
    * @param pageObject de-serialized page object
    */
   void preProcessElement(UtamPageObject pageObject) {
-    if (isWait()) {
+    if (isWaitOrLoad()) {
       UtamComposeMethod composeMethod = buildWaitForComposeMethod();
       pageObject.setComposeMethod(composeMethod);
+      //add to beforeLoad
+      if(isLoad()){
+        pageObject.getBeforeLoad().add(buildApplyForLoad(composeMethod.name));
+      }
     }
     if (shadow != null) {
       shadow.elements.forEach(utamElement -> utamElement.preProcessElement(pageObject));
@@ -192,8 +203,17 @@ public final class UtamElement {
         Collections.singletonList(String.format("method that waits for element \"%s\"", name)),
         null, null, null);
     List<UtamMethodAction> compose = Collections.singletonList(
-        new UtamMethodActionWaitForElement(name));
-    return new UtamComposeMethod(methodName, description, compose);
+        new UtamMethodActionWaitForElement(name, isLoad()));
+    return new UtamComposeMethod(methodName, description, compose, !isPrivateWait());
+  }
+
+  /**
+   * get apply for beforeload
+   *
+   * @return UtamComposeMethod object
+   */
+  private UtamMethodAction buildApplyForLoad(String methodName) {
+    return new UtamMethodActionApply(null, methodName, null, null, null, null, false);
   }
 
   void traverse(

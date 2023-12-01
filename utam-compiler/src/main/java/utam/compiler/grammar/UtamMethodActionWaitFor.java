@@ -186,19 +186,27 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
   static class UtamMethodActionWaitForElement extends UtamMethodActionWaitFor {
 
     private final List<UtamArgument> args;
+    private final boolean isNoArgsAllowed;
 
-    UtamMethodActionWaitForElement(String elementName) {
+    UtamMethodActionWaitForElement(String elementName, boolean isNoArgsAllowed) {
       super(null, "waitFor", null, null, false);
       UtamMethodAction getter = new UtamMethodActionGetter(elementName, null, null, null, null,
           false);
       UtamArgument argument = new UtamArgumentPredicate(getter);
       this.args = Collections.singletonList(argument);
+      this.isNoArgsAllowed = isNoArgsAllowed;
     }
 
     @Override
     Statement getStatement(TranslationContext context, MethodContext methodContext,
         StatementContext statementContext) {
       // instead of returning provided args, we always infer them from element
+      // if it is a 'load' declaration then the element cannot have arguments.
+      if (isNoArgsAllowed && args.size()!=1) {
+        String message = VALIDATION.getErrorMessage(618, methodContext.getName());
+        throw new UtamCompilationError(message);
+      }
+
       return new PredicateStatement(context, methodContext, statementContext) {
         @Override
         List<UtamArgument> getArguments(ArgumentsProvider argumentsProvider) {

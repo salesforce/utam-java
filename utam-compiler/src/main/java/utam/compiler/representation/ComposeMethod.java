@@ -33,7 +33,7 @@ public class ComposeMethod implements PageObjectMethod {
   private final List<TypeProvider> imports = new ArrayList<>();
   private final TypeProvider returns;
   private final JavadocObject javadoc;
-
+  private final boolean isPublic;
   /**
    * Initializes a new instance of the ComposeMethod class
    *
@@ -65,6 +65,33 @@ public class ComposeMethod implements PageObjectMethod {
         returnType,
         parameters,
         description);
+    this.isPublic = true;
+  }
+
+  public ComposeMethod(String methodName,
+                       TypeProvider returnType,
+                       List<MethodParameter> parameters,
+                       List<ComposeMethodStatement> statements,
+                       UtamMethodDescription description,
+                       boolean isPublic) {
+    this.name = methodName;
+    this.returns = returnType;
+    statements.forEach(
+            statement -> {
+              code.addAll(statement.getCodeLines());
+              ParameterUtils.setImports(imports, statement.getImports());
+              ParameterUtils.setImports(classImports, statement.getClassImports());
+            });
+    this.parameters = new ArrayList<>(parameters);
+    if(!returnType.isSameType(VOID)) {
+      ParameterUtils.setImport(imports, returnType);
+      ParameterUtils.setImport(classImports, returnType);
+    }
+    this.javadoc = new MethodJavadoc(name,
+            returnType,
+            parameters,
+            description);
+    this.isPublic = isPublic;
   }
 
   @Override
@@ -84,7 +111,7 @@ public class ComposeMethod implements PageObjectMethod {
 
   @Override
   public boolean isPublic() {
-    return true;
+    return isPublic;
   }
 
 }

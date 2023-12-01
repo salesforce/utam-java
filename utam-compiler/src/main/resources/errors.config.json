@@ -251,6 +251,10 @@
     "message": "method \"%s\" statement: unsupported action \"%s\" for type \"%s\""
   },
   {
+    "code": 618,
+    "message": "method \"%s\" statement: unsupported load declaration for element with arguments, \"%s\""
+  },
+  {
     "code": 700,
     "message": "%s: format of the description is incorrect",
     "docs": "https://utam.dev/grammar/spec#method-description"
