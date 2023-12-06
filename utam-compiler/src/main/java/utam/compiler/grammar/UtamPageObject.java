@@ -86,6 +86,10 @@ final class UtamPageObject {
   private final UtamShadowElement shadow;
   private final UtamMetadata metadata;
 
+  List<UtamMethodAction> getBeforeLoad() {
+    return beforeLoad;
+  }
+
   @JsonCreator
   UtamPageObject(
       @JsonProperty(value = "implements") String implementsType,

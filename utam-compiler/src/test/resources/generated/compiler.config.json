@@ -53,6 +53,10 @@
     {
       "typeMatch": "generated-wait",
       "pathMatch": ".*/wait"
+    },
+    {
+      "typeMatch": "generated-load",
+      "pathMatch": ".*/load"
     }
   ],
   "copyright" : [

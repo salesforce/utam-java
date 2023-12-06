@@ -1,0 +1,19 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "basicElement",
+        "selector": {
+          "css": "basicElement[%s]",
+          "args": [
+            {
+              "name": "selectorArg",
+              "type": "string"
+            }
+          ]
+        },
+        "load": true
+      }
+    ]
+  }
+}
