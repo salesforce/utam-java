@@ -97,4 +97,8 @@ final class UtamElementFilter {
   boolean isFindFirst() {
     return this.isFindFirst;
   }
+
+  boolean hasMatcherArgs() {
+    return matcherNode.get("args") != null && matcherNode.get("args").isEmpty();
+  }
 }

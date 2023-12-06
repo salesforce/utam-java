@@ -167,11 +167,18 @@ public final class UtamElement {
   private boolean isWait() {
     return Boolean.TRUE.equals(isWait);
   }
+
   private boolean isLoad() {
     return Boolean.TRUE.equals(isLoad);
   }
-  private boolean isWaitOrLoad() {return isLoad() || isWait();}
-  private boolean isPrivateWait() {return isLoad() && !isWait();}
+
+  private boolean isWaitOrLoad() {
+    return isLoad() || isWait();
+  }
+
+  private boolean isPrivateWait() {
+    return isLoad() && !isWait();
+  }
   /**
    * Some functionality in compiler can lead to adjusting JSON itself, for example "wait"
    *
@@ -182,7 +189,7 @@ public final class UtamElement {
       UtamComposeMethod composeMethod = buildWaitForComposeMethod();
       pageObject.setComposeMethod(composeMethod);
       //add to beforeLoad
-      if(isLoad()){
+      if (isLoad()) {
         validateElementArgumentsForLoad();
         pageObject.getBeforeLoad().add(buildApplyForLoad(composeMethod.name));
       }
@@ -208,14 +215,9 @@ public final class UtamElement {
     return new UtamComposeMethod(methodName, description, compose, !isPrivateWait());
   }
 
-  /**
-   * Element with "load" should not have parameters.
-   *
-   * @return
-   */
   private void validateElementArgumentsForLoad() {
     if ((selector != null && selector.hasArgsNode())
-            || (filter != null && !filter.getMatcherParameters().isEmpty()
+            || (filter != null && filter.hasMatcherArgs()
             || (traversal instanceof Container))) {
       String message = VALIDATION.getErrorMessage(206, name);
       throw new UtamCompilationError(message);

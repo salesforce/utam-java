@@ -10,14 +10,12 @@ package utam.compiler.grammar;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT;
 import static utam.compiler.grammar.UtamPageObject.BEFORE_LOAD_METHOD_NAME;
 
 import org.testng.annotations.Test;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.representation.PageObjectValidationTestHelper;
 import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
-import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
 import utam.core.declarative.representation.PageObjectMethod;
 
 /**
@@ -118,4 +116,54 @@ public class UtamElementLoadTests {
         expectedBeforeLoad.addCodeLine("return this");
     }
 
+    @Test
+    public void testLoadElementWithFilterNoArguments() {
+        String methodName = "waitForBasicElement";
+        PageObjectMethod method = getMethod("generated/load/loadFilterElement.utam", methodName);
+        MethodInfo expected = new MethodInfo(methodName, "BasicElement");
+        expected.setNotPublic();
+        expected.addCodeLine("BasicElement statement0 = this.waitFor(() -> {\n"
+                + "BasicElement pstatement0 = this.getBasicElement();\n"
+                + "return pstatement0;\n"
+                + "})");
+        expected.addCodeLine("return statement0");
+        PageObjectValidationTestHelper.validateMethod(method, expected);
+
+        //verify beforeLoad method has call to both private wait methods
+        PageObjectMethod beforeLoadMethod = getMethod("generated/load/loadFilterElement.utam", BEFORE_LOAD_METHOD_NAME);
+        MethodInfo expectedBeforeLoad = new MethodInfo(BEFORE_LOAD_METHOD_NAME, "Object");
+        expectedBeforeLoad.addCodeLine("this.waitForBasicElement()");
+        expectedBeforeLoad.addCodeLine("return this");
+
+    }
+
+    @Test
+    public void testLoadContainer() {
+        Exception e = expectThrows(
+                UtamCompilationError.class,
+                () -> getMethod("validate/basic_element/loadContainer", "test"));
+        assertThat(e.getMessage(),
+                containsString("element \"container\": load declaration not supported for element with arguments"));
+
+    }
+
+    @Test
+    public void testElementWithArguments() {
+        Exception e = expectThrows(
+                UtamCompilationError.class,
+                () -> getMethod("validate/basic_element/loadElementWithArguments", "test"));
+        assertThat(e.getMessage(),
+                containsString("element \"basicElement\": load declaration not supported for element with arguments"));
+
+    }
+
+    @Test
+    public void testElementWithFilterArguments() {
+        Exception e = expectThrows(
+                UtamCompilationError.class,
+                () -> getMethod("validate/basic_element/loadFilterElementWithArgs", "getTest"));
+        assertThat(e.getMessage(),
+                containsString("element \"test\": load declaration not supported for element with arguments"));
+
+    }
 }

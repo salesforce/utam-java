@@ -86,10 +86,6 @@ final class UtamPageObject {
   private final UtamShadowElement shadow;
   private final UtamMetadata metadata;
 
-  List<UtamMethodAction> getBeforeLoad() {
-    return beforeLoad;
-  }
-
   @JsonCreator
   UtamPageObject(
       @JsonProperty(value = "implements") String implementsType,
@@ -268,5 +264,9 @@ final class UtamPageObject {
       throw new UtamCompilationError(beforeLoadNode, VALIDATION.getErrorMessage(904));
     }
     return new BeforeLoadMethod(methodContext, statements);
+  }
+
+  List<UtamMethodAction> getBeforeLoad() {
+    return beforeLoad;
   }
 }
