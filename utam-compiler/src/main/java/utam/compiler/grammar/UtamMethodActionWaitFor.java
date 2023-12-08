@@ -189,9 +189,8 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
     private final List<UtamArgument> args;
     private final boolean isNoArgsAllowed;
     private final String elementName;
-    private final String elementGetterName;
 
-    UtamMethodActionWaitForElement(String elementName, boolean isNoArgsAllowed, boolean isPublicElement) {
+    UtamMethodActionWaitForElement(String elementName, boolean isNoArgsAllowed) {
       super(null, "waitFor", null, null, false);
       UtamMethodAction getter = new UtamMethodActionGetter(elementName, null, null, null, null,
           false);
@@ -199,18 +198,13 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
       this.args = Collections.singletonList(argument);
       this.isNoArgsAllowed = isNoArgsAllowed;
       this.elementName = elementName;
-      this.elementGetterName = getElementGetterName(elementName, isPublicElement);
-    }
-    private static final String getElementGetterName(String elementName, boolean isPublicElement) {
-      //similar logic in BasicElementUnionType.getBasicTypeName?
-      return "get" + elementName.substring(0, 1).toUpperCase() + elementName.substring(1) + (isPublicElement ? "" : "Element");
     }
 
     @Override
     Statement getStatement(TranslationContext context, MethodContext methodContext,
         StatementContext statementContext) {
-      /* The validation is performed here as we do not know args at the time of construction*/
-      if (isNoArgsAllowed && context.getMethod(this.elementGetterName) != null && (context.getMethod(this.elementGetterName).getDeclaration().getParameters().size() > 0)) {
+      //validation is performed here as args are not available at the time of construction
+      if (isNoArgsAllowed && (context.getElement(this.elementName).getElementMethod().getDeclaration().getParameters().size() > 0)) {
         String message = VALIDATION.getErrorMessage(206, this.elementName);
         throw new UtamCompilationError(message);
       }

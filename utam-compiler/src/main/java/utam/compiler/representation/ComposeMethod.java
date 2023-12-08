@@ -42,7 +42,7 @@ public class ComposeMethod implements PageObjectMethod {
    * @param parameters  the list of parameters of the method
    * @param statements  the list of statments of the method
    * @param description method description in Json
-   * @param description method access modifier
+   * @param isPublic method access modifier
    */
   public ComposeMethod(String methodName,
                        TypeProvider returnType,

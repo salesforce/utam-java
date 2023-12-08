@@ -209,14 +209,15 @@ public final class UtamElement {
         Collections.singletonList(String.format("method that waits for element \"%s\"", name)),
         null, null, null);
     List<UtamMethodAction> compose = Collections.singletonList(
-        new UtamMethodActionWaitForElement(name, isLoad(), isPublic()));
+        new UtamMethodActionWaitForElement(name, isLoad()));
     return new UtamComposeMethod(methodName, description, compose, !isPrivateWait());
   }
 
   /**
-   * get apply for beforeload
+   * get apply to add to beforeload method
    *
-   * @return UtamComposeMethod object
+   * @param methodName
+   * @return
    */
   private UtamMethodAction buildApplyForLoad(String methodName) {
     return new UtamMethodActionApply(null, methodName, null, null, null, null, false);

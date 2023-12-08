@@ -160,6 +160,40 @@ public class UtamElementLoadTests {
     }
 
     @Test
+    public void testLoadNestedFilters() {
+        //first basic element inside scope element with filter
+        String methodName = "waitForBasicElement";
+        PageObjectMethod method = getMethod("generated/load/loadNestedFilter.utam", methodName);
+        MethodInfo expected = new MethodInfo(methodName, "BasicElement");
+        expected.setNotPublic();
+        expected.addCodeLine("BasicElement statement0 = this.waitFor(() -> {\n"
+                + "BasicElement pstatement0 = this.getBasicElementElement();\n"
+                + "return pstatement0;\n"
+                + "})");
+        expected.addCodeLine("return statement0");
+        PageObjectValidationTestHelper.validateMethod(method, expected);
+
+        //second basic element with filter inside second scope element
+        String methodTwoName = "waitForSecondElement";
+        PageObjectMethod methodTwo = getMethod("generated/load/loadNestedFilter.utam", methodTwoName);
+        MethodInfo expectedTwo = new MethodInfo(methodTwoName, "BasicElement");
+        expectedTwo.setNotPublic();
+        expectedTwo.addCodeLine("BasicElement statement0 = this.waitFor(() -> {\n"
+                + "BasicElement pstatement0 = this.getSecondElementElement();\n"
+                + "return pstatement0;\n"
+                + "})");
+        expectedTwo.addCodeLine("return statement0");
+        PageObjectValidationTestHelper.validateMethod(methodTwo, expectedTwo);
+
+        //verify beforeLoad method has call to both private wait methods
+        PageObjectMethod beforeLoadMethod = getMethod("generated/load/loadFilterElement.utam", BEFORE_LOAD_METHOD_NAME);
+        MethodInfo expectedBeforeLoad = new MethodInfo(BEFORE_LOAD_METHOD_NAME, "Object");
+        expectedBeforeLoad.addCodeLine("this.waitForBasicElement()");
+        expectedBeforeLoad.addCodeLine("this.waitForSecondElement()");
+        expectedBeforeLoad.addCodeLine("return this");
+    }
+
+    @Test
     public void testLoadContainer() {
         Exception e = expectThrows(
                 UtamCompilationError.class,

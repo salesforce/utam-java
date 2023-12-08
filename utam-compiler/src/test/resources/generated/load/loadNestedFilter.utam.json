@@ -1,0 +1,56 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "scope",
+        "selector": {
+          "css": ".css",
+          "returnAll": true
+        },
+        "filter": {
+          "apply": "isVisible",
+          "matcher": {
+            "type": "isTrue"
+          },
+          "findFirst": true
+        },
+        "elements": [
+          {
+            "name": "basicElement",
+            "selector": {
+              "css": "basicElement"
+            },
+            "load": true
+          }
+        ]
+      }
+    ]
+  },
+  "elements": [
+    {
+      "name": "scopeFlat",
+      "selector": {
+        "css": ".scopeFlat"
+      },
+      "shadow" : {
+        "elements": [
+          {
+            "name": "secondElement",
+            "selector": {
+              "css": ".second",
+              "returnAll": true
+            },
+            "filter": {
+              "apply": "isVisible",
+              "matcher": {
+                "type": "isTrue"
+              },
+              "findFirst": true
+            },
+            "load": true
+          }
+        ]
+      }
+    }
+  ]
+}
