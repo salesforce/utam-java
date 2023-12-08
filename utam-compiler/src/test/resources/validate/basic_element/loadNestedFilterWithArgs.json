@@ -1,0 +1,36 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "scope",
+        "selector": {
+          "css": "scope[%s]",
+          "args": [
+            {
+              "name": "selectorArg",
+              "type": "string"
+            }
+          ]
+        },
+        "elements": [
+          {
+            "name": "test",
+            "selector": {
+              "css": ".css",
+              "returnAll": true
+            },
+            "filter": {
+              "apply": "isVisible",
+              "matcher": {
+                "type": "isTrue"
+              },
+              "findFirst": true
+            },
+            "load": true,
+            "public": true
+          }
+        ]
+      }
+    ]
+  }
+}

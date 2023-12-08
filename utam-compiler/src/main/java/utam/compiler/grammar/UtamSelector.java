@@ -164,4 +164,8 @@ class UtamSelector extends UtamRootSelector {
   boolean isReturnAll() {
     return isReturnAll;
   }
+
+  boolean hasArgsNode() {
+    return argsNode != null;
+  }
 }

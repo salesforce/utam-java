@@ -1,0 +1,29 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "basicPublicElement",
+        "type": [
+          "clickable",
+          "editable"
+        ],
+        "selector": {
+          "css": "basicElement[test]"
+        },
+        "load": true,
+        "public": true
+      }
+    ]
+  },
+  "methods": [
+    {
+      "name": "getText",
+      "compose": [
+        {
+          "element": "root",
+          "apply": "getText"
+        }
+      ]
+    }
+  ]
+}

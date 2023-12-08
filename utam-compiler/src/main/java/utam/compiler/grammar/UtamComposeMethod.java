@@ -39,7 +39,7 @@ import utam.core.declarative.representation.TypeProvider;
 class UtamComposeMethod extends UtamMethod {
 
   private final List<UtamMethodAction> composeList;
-
+  private final boolean isPublic;
   @JsonCreator
   UtamComposeMethod(
       @JsonProperty(value = "name", required = true) String name,
@@ -48,6 +48,7 @@ class UtamComposeMethod extends UtamMethod {
       @JsonProperty("description") JsonNode descriptionNode) {
     super(name, descriptionNode, argsNode);
     this.composeList = processComposeNodes(name, composeNodes);
+    this.isPublic = true;
   }
 
   /**
@@ -58,9 +59,10 @@ class UtamComposeMethod extends UtamMethod {
    * @param compose     statements
    */
   UtamComposeMethod(String name, UtamMethodDescription description,
-      List<UtamMethodAction> compose) {
+      List<UtamMethodAction> compose, boolean isPublic) {
     super(name, description);
     this.composeList = compose;
+    this.isPublic = isPublic;
   }
 
   /**
@@ -176,7 +178,8 @@ class UtamComposeMethod extends UtamMethod {
         lastStatementReturnType,
         parameters,
         statements,
-        description
+        description,
+        isPublic
     );
   }
 }

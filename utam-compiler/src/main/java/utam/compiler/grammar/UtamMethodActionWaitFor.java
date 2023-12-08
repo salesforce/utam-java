@@ -26,6 +26,7 @@ import utam.compiler.helpers.ParametersContext.StatementParametersContext;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.compiler.representation.ComposeMethodStatement.Operand;
 import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 
 /**
@@ -186,18 +187,28 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
   static class UtamMethodActionWaitForElement extends UtamMethodActionWaitFor {
 
     private final List<UtamArgument> args;
+    private final boolean isNoArgsAllowed;
+    private final String elementName;
 
-    UtamMethodActionWaitForElement(String elementName) {
+    UtamMethodActionWaitForElement(String elementName, boolean isNoArgsAllowed) {
       super(null, "waitFor", null, null, false);
       UtamMethodAction getter = new UtamMethodActionGetter(elementName, null, null, null, null,
           false);
       UtamArgument argument = new UtamArgumentPredicate(getter);
       this.args = Collections.singletonList(argument);
+      this.isNoArgsAllowed = isNoArgsAllowed;
+      this.elementName = elementName;
     }
 
     @Override
     Statement getStatement(TranslationContext context, MethodContext methodContext,
         StatementContext statementContext) {
+      //validation is performed here as args are not available at the time of construction
+      if (isNoArgsAllowed && (context.getElement(this.elementName).getElementMethod().getDeclaration().getParameters().size() > 0)) {
+        String message = VALIDATION.getErrorMessage(206, this.elementName);
+        throw new UtamCompilationError(message);
+      }
+
       // instead of returning provided args, we always infer them from element
       return new PredicateStatement(context, methodContext, statementContext) {
         @Override

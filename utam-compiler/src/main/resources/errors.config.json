@@ -125,6 +125,10 @@
     "message": "element \"%s\": only basic element can have nested elements or shadow root"
   },
   {
+    "code": 206,
+    "message": "element \"%s\": property \"load\" is not supported for element with arguments, filter or for container element"
+  },
+  {
     "code": 300,
     "message": "element \"%s\" filter: incorrect format of element filter",
     "docs": "https://utam.dev/grammar/spec#element-filter"

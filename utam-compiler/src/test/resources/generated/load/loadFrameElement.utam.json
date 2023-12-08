@@ -1,0 +1,14 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "frameElement",
+        "type": "frame",
+        "selector": {
+          "css": "frame"
+        },
+        "load": true
+      }
+    ]
+  }
+}

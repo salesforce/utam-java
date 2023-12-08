@@ -1,0 +1,28 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "basicPrivateElement",
+        "type": [
+          "clickable",
+          "editable"
+        ],
+        "selector": {
+          "css": "basicElement[test]"
+        },
+        "load": true
+      }
+    ]
+  },
+  "methods": [
+    {
+      "name": "getText",
+      "compose": [
+        {
+          "element": "root",
+          "apply": "getText"
+        }
+      ]
+    }
+  ]
+}

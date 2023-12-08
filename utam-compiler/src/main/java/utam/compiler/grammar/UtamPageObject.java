@@ -265,4 +265,8 @@ final class UtamPageObject {
     }
     return new BeforeLoadMethod(methodContext, statements);
   }
+
+  List<UtamMethodAction> getBeforeLoad() {
+    return beforeLoad;
+  }
 }

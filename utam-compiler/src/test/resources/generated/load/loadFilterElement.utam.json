@@ -1,0 +1,21 @@
+{
+  "elements": [
+    {
+      "name": "basicElement",
+      "public": true,
+      "selector": {
+        "css": ".css",
+        "returnAll": true
+      },
+      "filter": {
+        "apply": "isVisible",
+        "matcher": {
+          "type": "isTrue"
+        },
+        "findFirst": true
+      },
+      "load": true
+    }
+  ]
+}
+

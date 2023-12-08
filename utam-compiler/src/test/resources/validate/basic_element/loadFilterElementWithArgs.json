@@ -1,0 +1,25 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "selector": {
+        "css": ".css",
+        "returnAll": true
+      },
+      "filter": {
+        "apply": "getText",
+        "matcher": {
+          "type": "stringEquals",
+          "args": [
+            {
+              "name": "text",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "load": true,
+      "public": true
+    }
+  ]
+}
