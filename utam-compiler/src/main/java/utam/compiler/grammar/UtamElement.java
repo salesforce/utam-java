@@ -216,8 +216,8 @@ public final class UtamElement {
   /**
    * get apply to add to beforeload method
    *
-   * @param methodName
-   * @return
+   * @param methodName method invocation code to be added to load()
+   * @return UtamMethodAction object
    */
   private UtamMethodAction buildApplyForLoad(String methodName) {
     return new UtamMethodActionApply(null, methodName, null, null, null, null, false);
