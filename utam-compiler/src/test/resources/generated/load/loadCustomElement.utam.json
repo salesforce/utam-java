@@ -1,0 +1,14 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "customElement",
+        "type": "generated-load/pageObjects/loadBasicPrivateElement",
+        "selector": {
+          "css": "customElement[test]"
+        },
+        "load": true
+      }
+    ]
+  }
+}

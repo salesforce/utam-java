@@ -1,0 +1,27 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "scope",
+        "selector": {
+          "css": "scope[%s]",
+          "args": [
+            {
+              "name": "selectorArg",
+              "type": "string"
+            }
+          ]
+        },
+        "elements": [
+          {
+            "name": "basicElement",
+            "selector": {
+              "css": "basicElement"
+            },
+            "load": true
+          }
+        ]
+      }
+    ]
+  }
+}

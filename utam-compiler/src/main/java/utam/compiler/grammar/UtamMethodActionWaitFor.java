@@ -26,6 +26,7 @@ import utam.compiler.helpers.ParametersContext.StatementParametersContext;
 import utam.compiler.representation.ComposeMethodStatement;
 import utam.compiler.representation.ComposeMethodStatement.Operand;
 import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
 
 /**
@@ -186,18 +187,34 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
   static class UtamMethodActionWaitForElement extends UtamMethodActionWaitFor {
 
     private final List<UtamArgument> args;
+    private final boolean isNoArgsAllowed;
+    private final String elementName;
+    private final String elementGetterName;
 
-    UtamMethodActionWaitForElement(String elementName) {
+    UtamMethodActionWaitForElement(String elementName, boolean isNoArgsAllowed, boolean isPublicElement) {
       super(null, "waitFor", null, null, false);
       UtamMethodAction getter = new UtamMethodActionGetter(elementName, null, null, null, null,
           false);
       UtamArgument argument = new UtamArgumentPredicate(getter);
       this.args = Collections.singletonList(argument);
+      this.isNoArgsAllowed = isNoArgsAllowed;
+      this.elementName = elementName;
+      this.elementGetterName = getElementGetterName(elementName, isPublicElement);
+    }
+    private static final String getElementGetterName(String elementName, boolean isPublicElement) {
+      //similar logic in BasicElementUnionType.getBasicTypeName?
+      return "get" + elementName.substring(0, 1).toUpperCase() + elementName.substring(1) + (isPublicElement ? "" : "Element");
     }
 
     @Override
     Statement getStatement(TranslationContext context, MethodContext methodContext,
         StatementContext statementContext) {
+      /* The validation is performed here as we do not know args at the time of construction*/
+      if (isNoArgsAllowed && context.getMethod(this.elementGetterName) != null && (context.getMethod(this.elementGetterName).getDeclaration().getParameters().size() > 0)) {
+        String message = VALIDATION.getErrorMessage(206, this.elementName);
+        throw new UtamCompilationError(message);
+      }
+
       // instead of returning provided args, we always infer them from element
       return new PredicateStatement(context, methodContext, statementContext) {
         @Override

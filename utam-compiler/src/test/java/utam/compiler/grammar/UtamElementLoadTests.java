@@ -97,6 +97,28 @@ public class UtamElementLoadTests {
     }
 
     @Test
+    public void testLoadInCustomElement() {
+        //verify private wait method is created for private element
+        String privateElementWaitMethodName = "waitForCustomElement";
+        PageObjectMethod privateElementWaitMethod = getMethod("generated/load/loadCustomElement.utam", privateElementWaitMethodName);
+        MethodInfo expectedPrivateWait = new MethodInfo(privateElementWaitMethodName, "LoadBasicPrivateElement");
+        expectedPrivateWait.setNotPublic();
+        expectedPrivateWait.addCodeLine("LoadBasicPrivateElement statement0 = this.waitFor(() -> {\n"
+                + "LoadBasicPrivateElement pstatement0 = this.getCustomElementElement();\n"
+                + "return pstatement0;\n"
+                + "})");
+        expectedPrivateWait.addCodeLine("return statement0");
+        PageObjectValidationTestHelper.validateMethod(privateElementWaitMethod, expectedPrivateWait);
+
+        //verify beforeLoad method has call to both private wait methods
+        PageObjectMethod beforeLoadMethod = getMethod("generated/load/loadCustomElement.utam", BEFORE_LOAD_METHOD_NAME);
+        MethodInfo expectedBeforeLoad = new MethodInfo(BEFORE_LOAD_METHOD_NAME, "Object");
+        expectedBeforeLoad.addCodeLine("this.waitForCustomElement()");
+        expectedBeforeLoad.addCodeLine("return this");
+        PageObjectValidationTestHelper.validateMethod(beforeLoadMethod, expectedBeforeLoad);
+    }
+
+    @Test
     public void testLoadInFrame() {
         String methodName = "waitForFrameElement";
         PageObjectMethod method = getMethod("generated/load/loadFrameElement.utam", methodName);
@@ -143,7 +165,7 @@ public class UtamElementLoadTests {
                 UtamCompilationError.class,
                 () -> getMethod("validate/basic_element/loadContainer", "test"));
         assertThat(e.getMessage(),
-                containsString("element \"container\": load declaration not supported for element with arguments"));
+                containsString("element \"container\": property \"load\" is not supported for element with arguments, filter or for container element"));
 
     }
 
@@ -153,8 +175,7 @@ public class UtamElementLoadTests {
                 UtamCompilationError.class,
                 () -> getMethod("validate/basic_element/loadElementWithArguments", "test"));
         assertThat(e.getMessage(),
-                containsString("element \"basicElement\": load declaration not supported for element with arguments"));
-
+                containsString("element \"basicElement\": property \"load\" is not supported for element with arguments, filter or for container element"));
     }
 
     @Test
@@ -163,7 +184,38 @@ public class UtamElementLoadTests {
                 UtamCompilationError.class,
                 () -> getMethod("validate/basic_element/loadFilterElementWithArgs", "getTest"));
         assertThat(e.getMessage(),
-                containsString("element \"test\": load declaration not supported for element with arguments"));
+                containsString("element \"test\": property \"load\" is not supported for element with arguments, filter or for container element"));
 
+    }
+
+    @Test
+    public void testLoadInNestedBasicElement() {
+        //verify private wait method is created for private element
+        String privateElementWaitMethodName = "waitForBasicElement";
+        PageObjectMethod privateElementWaitMethod = getMethod("generated/load/loadNested.utam", privateElementWaitMethodName);
+        MethodInfo expectedPrivateWait = new MethodInfo(privateElementWaitMethodName, "BasicElement");
+        expectedPrivateWait.setNotPublic();
+        expectedPrivateWait.addCodeLine("BasicElement statement0 = this.waitFor(() -> {\n"
+                + "BasicElement pstatement0 = this.getBasicElementElement();\n"
+                + "return pstatement0;\n"
+                + "})");
+        expectedPrivateWait.addCodeLine("return statement0");
+        PageObjectValidationTestHelper.validateMethod(privateElementWaitMethod, expectedPrivateWait);
+
+        //verify beforeLoad method has call to both private wait methods
+        PageObjectMethod beforeLoadMethod = getMethod("generated/load/loadNested.utam", BEFORE_LOAD_METHOD_NAME);
+        MethodInfo expectedBeforeLoad = new MethodInfo(BEFORE_LOAD_METHOD_NAME, "Object");
+        expectedBeforeLoad.addCodeLine("this.waitForBasicElement()");
+        expectedBeforeLoad.addCodeLine("return this");
+        PageObjectValidationTestHelper.validateMethod(beforeLoadMethod, expectedBeforeLoad);
+    }
+
+    @Test
+    public void testLoadInNestedBasicElementWithArgs() {
+        Exception e = expectThrows(
+                UtamCompilationError.class,
+                () -> getMethod("validate/basic_element/loadNestedElementWithArgs", "getTest"));
+        assertThat(e.getMessage(),
+                containsString("element \"basicElement\": property \"load\" is not supported for element with arguments, filter or for container element"));
     }
 }

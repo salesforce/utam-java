@@ -1,0 +1,21 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "scope",
+        "selector": {
+          "css": "scope"
+        },
+        "elements": [
+          {
+            "name": "basicElement",
+            "selector": {
+              "css": "basicElement"
+            },
+            "load": true
+          }
+        ]
+      }
+    ]
+  }
+}

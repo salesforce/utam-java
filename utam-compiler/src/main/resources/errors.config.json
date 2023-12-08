@@ -126,7 +126,7 @@
   },
   {
     "code": 206,
-    "message": "element \"%s\": load declaration not supported for element with arguments"
+    "message": "element \"%s\": property \"load\" is not supported for element with arguments, filter or for container element"
   },
   {
     "code": 300,

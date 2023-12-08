@@ -188,9 +188,7 @@ public final class UtamElement {
     if (isWaitOrLoad()) {
       UtamComposeMethod composeMethod = buildWaitForComposeMethod();
       pageObject.setComposeMethod(composeMethod);
-      //add to beforeLoad
       if (isLoad()) {
-        validateElementArgumentsForLoad();
         pageObject.getBeforeLoad().add(buildApplyForLoad(composeMethod.name));
       }
     }
@@ -211,17 +209,8 @@ public final class UtamElement {
         Collections.singletonList(String.format("method that waits for element \"%s\"", name)),
         null, null, null);
     List<UtamMethodAction> compose = Collections.singletonList(
-        new UtamMethodActionWaitForElement(name));
+        new UtamMethodActionWaitForElement(name, isLoad(), isPublic()));
     return new UtamComposeMethod(methodName, description, compose, !isPrivateWait());
-  }
-
-  private void validateElementArgumentsForLoad() {
-    if ((selector != null && selector.hasArgsNode())
-            || (filter != null && filter.hasMatcherArgs()
-            || (traversal instanceof Container))) {
-      String message = VALIDATION.getErrorMessage(206, name);
-      throw new UtamCompilationError(message);
-    }
   }
 
   /**
