@@ -252,4 +252,14 @@ public class UtamElementLoadTests {
         assertThat(e.getMessage(),
                 containsString("element \"basicElement\": property \"load\" is not supported for element with arguments, filter or for container element"));
     }
+
+    @Test
+    public void testNestedFilterElementWithScopeArguments() {
+        Exception e = expectThrows(
+                UtamCompilationError.class,
+                () -> getMethod("validate/basic_element/loadNestedFilterWithArgs", "getTest"));
+        assertThat(e.getMessage(),
+                containsString("element \"test\": property \"load\" is not supported for element with arguments, filter or for container element"));
+
+    }
 }
