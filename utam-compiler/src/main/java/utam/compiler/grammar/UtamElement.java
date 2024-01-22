@@ -176,7 +176,7 @@ public final class UtamElement {
   }
 
   private boolean isPrivateWait() {
-    return isLoad() && !isWait();
+    return (isLoad() && !isWait()) || Boolean.FALSE.equals(isPublic);
   }
 
   /**
