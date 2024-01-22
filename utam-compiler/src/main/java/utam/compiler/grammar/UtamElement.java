@@ -177,7 +177,7 @@ public final class UtamElement {
   }
 
   private boolean isPrivateWait() {
-    return isLoad() && !isWait();
+    return (isLoad() && !isWait()) || Boolean.FALSE.equals(isPublic);
   }
   /**
    * Some functionality in compiler can lead to adjusting JSON itself, for example "wait"

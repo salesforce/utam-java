@@ -189,8 +189,12 @@ public class TranslationContext {
     if (methodNames.contains(method.getDeclaration().getName())) {
       throw new UtamCompilationError(VALIDATION.getErrorMessage(504, method.getDeclaration().getName()));
     }
-    // no duplicates - add method
-    methodNames.add(method.getDeclaration().getName());
+
+    // no duplicates - add method if it is public to prevent collisions
+    if (method.isPublic()) {
+      methodNames.add(method.getDeclaration().getName());
+    }
+
     if (method instanceof BasicElementGetterMethod) {
       elementGetters.add((BasicElementGetterMethod) method);
     } else {
