@@ -99,6 +99,7 @@ public class TranslationContextTests {
     MethodDeclaration declaration = mock(MethodDeclaration.class);
     when(declaration.getName()).thenReturn("name");
     when(method.getDeclaration()).thenReturn(declaration);
+    when(method.isPublic()).thenReturn(true);
     TranslationContext context = getTestTranslationContext();
     context.setMethod(method);
     assertThat(context.getMethods(), hasSize(1));
