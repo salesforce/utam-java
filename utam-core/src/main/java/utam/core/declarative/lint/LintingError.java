@@ -37,8 +37,7 @@ public interface LintingError {
   String getMessage();
 
   /**
-   * Full message includes information about error code and page object name to print to console
-   * log
+   * Full message includes information about error code and page object name to print to console log
    *
    * @return string
    */

@@ -31,13 +31,15 @@ import utam.core.framework.element.BasePageElement;
  */
 public class BasicElementBuilder {
 
-  static final String NULL_SCOPE_ERR = "Scope of locator '%s' can't be null because element is not marked as nullable";
+  static final String NULL_SCOPE_ERR =
+      "Scope of locator '%s' can't be null because element is not marked as nullable";
 
   private final Driver driver;
   private final Element scope;
   private final ElementLocation elementLocation;
 
-  BasicElementBuilder(PageObjectsFactory factory, BasicElement scopeElement, ElementLocation elementLocation) {
+  BasicElementBuilder(
+      PageObjectsFactory factory, BasicElement scopeElement, ElementLocation elementLocation) {
     this.driver = factory.getDriver();
     this.scope = getUnwrappedElement(scopeElement);
     this.elementLocation = elementLocation;
@@ -46,7 +48,8 @@ public class BasicElementBuilder {
 
   static void checkNullScope(Element scope, ElementLocation elementLocation) {
     if (scope == null && !elementLocation.findContext.isNullable()) {
-      throw new NoSuchElementException(String.format(NULL_SCOPE_ERR, elementLocation.locator.getStringValue()));
+      throw new NoSuchElementException(
+          String.format(NULL_SCOPE_ERR, elementLocation.locator.getStringValue()));
     }
   }
 
@@ -57,7 +60,8 @@ public class BasicElementBuilder {
    * @return unwrapped Element
    */
   public static Element getUnwrappedElement(BasicElement basicElement) {
-    if(basicElement == null) { // sometimes scope can be passed as null if element is inside nullable
+    if (basicElement
+        == null) { // sometimes scope can be passed as null if element is inside nullable
       return null;
     }
     if (basicElement instanceof BasePageElement) {
@@ -75,13 +79,14 @@ public class BasicElementBuilder {
   /**
    * set parameters in actionable
    *
-   * @param type     interface type of the actionable
+   * @param type interface type of the actionable
    * @param implType implementation type of the actionable
-   * @param <T>      element type
-   * @param <R>      implementation type
+   * @param <T> element type
+   * @param <R> implementation type
    * @return instance with parameters set in selector
    */
-  public <T extends BasicElement, R extends BasePageElement> T build(Class<T> type, Class<R> implType) {
+  public <T extends BasicElement, R extends BasePageElement> T build(
+      Class<T> type, Class<R> implType) {
     // if element is not nullable - this throws an error
     ElementLocation.ElementFound element = this.elementLocation.find(scope);
 
@@ -96,14 +101,15 @@ public class BasicElementBuilder {
   /**
    * set parameters in actionable, then find it and apply filter to return first match
    *
-   * @param type     interface type of the actionable
+   * @param type interface type of the actionable
    * @param implType implementation type of the actionable
-   * @param filter   to apply to found list
-   * @param <T>      element type
-   * @param <R>      implementation type
+   * @param filter to apply to found list
+   * @param <T> element type
+   * @param <R> implementation type
    * @return instance with parameters set in selector
    */
-  public <T extends BasicElement, R extends BasePageElement> T build(Class<T> type, Class<R> implType, Predicate<T> filter) {
+  public <T extends BasicElement, R extends BasePageElement> T build(
+      Class<T> type, Class<R> implType, Predicate<T> filter) {
     // if element is not nullable - this throws an error
     List<T> list = buildList(type, implType);
 
@@ -116,7 +122,7 @@ public class BasicElementBuilder {
       }
     }
     // if no match found and element is nullable - return null
-    if(elementLocation.findContext.isNullable()) {
+    if (elementLocation.findContext.isNullable()) {
       return null;
     }
     // if none found that match condition - throw
@@ -126,13 +132,14 @@ public class BasicElementBuilder {
   /**
    * set parameters in actionable, then find all elements and return list
    *
-   * @param type       interface type of the actionable
-   * @param implType   implementation type of the actionable
-   * @param <T>        element type
-   * @param <R>        implementation type
+   * @param type interface type of the actionable
+   * @param implType implementation type of the actionable
+   * @param <T> element type
+   * @param <R> implementation type
    * @return list of instances with index in selector
    */
-  public <T extends BasicElement, R extends BasePageElement> List<T> buildList(Class<T> type, Class<R> implType) {
+  public <T extends BasicElement, R extends BasePageElement> List<T> buildList(
+      Class<T> type, Class<R> implType) {
     // if element is not nullable - this throws an error
     List<ElementLocation.ElementFound> elementsFound = elementLocation.findList(scope);
 
@@ -141,8 +148,7 @@ public class BasicElementBuilder {
       return null;
     }
 
-    return elementsFound
-        .stream()
+    return elementsFound.stream()
         .map(el -> (T) createInstance(implType, el.getFoundElement(), driver))
         .collect(Collectors.toList());
   }
@@ -150,14 +156,15 @@ public class BasicElementBuilder {
   /**
    * set parameters in actionable, then find it and apply filter to return all elements that match
    *
-   * @param type       type of the actionable
-   * @param implType   implementation type of the actionable
-   * @param filter     to apply to found list
-   * @param <T>        element type
-   * @param <R>        implementation type
+   * @param type type of the actionable
+   * @param implType implementation type of the actionable
+   * @param filter to apply to found list
+   * @param <T> element type
+   * @param <R> implementation type
    * @return instance with parameters set in selector
    */
-  public <T extends BasicElement, R extends BasePageElement> List<T> buildList(Class<T> type, Class<R> implType, Predicate<T> filter) {
+  public <T extends BasicElement, R extends BasePageElement> List<T> buildList(
+      Class<T> type, Class<R> implType, Predicate<T> filter) {
     // if element is not nullable - this throws an error
     List<T> list = buildList(type, implType);
 
@@ -171,6 +178,7 @@ public class BasicElementBuilder {
 
   /**
    * same as build(FrameElement.class, FrameElementImpl.class)
+   *
    * @return frame element instance
    */
   public FrameElement buildFrame() {

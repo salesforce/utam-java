@@ -13,10 +13,7 @@ import static org.hamcrest.core.Is.is;
 import static org.testng.Assert.assertThrows;
 
 import org.testng.annotations.Test;
-import utam.core.framework.base.BasePageObject;
-import utam.core.framework.base.PageObject;
 import utam.core.framework.consumer.UtamError;
-import utam.core.framework.base.ImperativeProvider;
 
 /**
  * @author elizaveta.ivanova
@@ -42,14 +39,12 @@ public class ImperativeProviderTests {
 
   static class ErrorUtils extends ImperativeProvider<TestPage> {
 
-    ErrorUtils(String str) {
-    }
+    ErrorUtils(String str) {}
   }
 
   static class Utils extends ImperativeProvider<TestPage> {
 
-    Utils() {
-    }
+    Utils() {}
   }
 
   static class TestPageImpl extends BasePageObject implements TestPage {

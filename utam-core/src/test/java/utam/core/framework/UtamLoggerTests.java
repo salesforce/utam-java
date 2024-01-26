@@ -7,11 +7,10 @@
  */
 package utam.core.framework;
 
-import org.slf4j.event.Level;
-import org.testng.annotations.Test;
-
 import java.util.Arrays;
 import java.util.List;
+import org.slf4j.event.Level;
+import org.testng.annotations.Test;
 
 /**
  * Provides tests for the UtamLogger class

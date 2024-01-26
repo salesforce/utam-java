@@ -16,14 +16,10 @@ package utam.core.element;
  */
 public interface Locator<T> {
 
-  /**
-   * string parameter indicator
-   */
+  /** string parameter indicator */
   String SELECTOR_STRING_PARAMETER = "%s";
 
-  /**
-   * integer parameter indicator
-   */
+  /** integer parameter indicator */
   String SELECTOR_INTEGER_PARAMETER = "%d";
 
   /**

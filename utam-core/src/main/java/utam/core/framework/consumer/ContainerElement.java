@@ -12,7 +12,7 @@ import utam.core.element.Locator;
 import utam.core.framework.base.PageObject;
 
 /**
- * Element that can be used as scope to load any UTAM page object with a given type. 
+ * Element that can be used as scope to load any UTAM page object with a given type.
  *
  * @author elizaveta.ivanova
  * @since 228
@@ -23,8 +23,8 @@ public interface ContainerElement {
    * Load UTAM Page object using current element as scope
    *
    * @param utamPageObjectType type to load
-   * @param injectRootLocator  inject root into created page object instance
-   * @param <T>                UTAM page object type
+   * @param injectRootLocator inject root into created page object instance
+   * @param <T> UTAM page object type
    * @return UTAM page object instance
    */
   <T extends PageObject> T load(Class<T> utamPageObjectType, Locator injectRootLocator);
@@ -33,8 +33,8 @@ public interface ContainerElement {
    * Load list of UTAM Page object using current element as a scope
    *
    * @param utamPageObjectType type to load
-   * @param injectRootLocator  inject root into created page object instance
-   * @param <T>                UTAM page object type
+   * @param injectRootLocator inject root into created page object instance
+   * @param <T> UTAM page object type
    * @return UTAM page object instance
    */
   <T extends PageObject> List<T> loadList(Class<T> utamPageObjectType, Locator injectRootLocator);
@@ -44,9 +44,9 @@ public interface ContainerElement {
    * inside the container element
    *
    * @param externalObjectInsideContainer external (non-UTAM page object that should be loaded
-   *                                      inside UTAM container)
+   *     inside UTAM container)
    * @deprecated not supported outside Salesforce engineering teams. Compatibility mode and Selenium
-   * only.
+   *     only.
    */
   @Deprecated
   void setScope(Contained externalObjectInsideContainer);

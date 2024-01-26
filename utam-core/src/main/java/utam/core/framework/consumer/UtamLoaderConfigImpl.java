@@ -59,7 +59,7 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
    * Initializes a new instance of the UtamLoaderConfigImpl class
    *
    * @param resourceWithConfig a string resource containing configuration information to configure
-   *                           the loader
+   *     the loader
    */
   public UtamLoaderConfigImpl(String resourceWithConfig) {
     this(loadConfig(new DeserializerFromUrl(resourceWithConfig)));
@@ -74,9 +74,7 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
     this(loadConfig(new DeserializerFromFile(fileWithConfig)));
   }
 
-  /**
-   * Initializes a new instance of the UtamLoaderConfigImpl class
-   */
+  /** Initializes a new instance of the UtamLoaderConfigImpl class */
   public UtamLoaderConfigImpl() {
     this(new JsonLoaderConfig());
   }
@@ -114,15 +112,17 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
   /**
    * based on profile name get context
    *
-   * @param profileName   profile name
+   * @param profileName profile name
    * @param mergedContext map with all contexts
    * @return profile context to collect beans
    */
-  private ProfileContext getProfileContext(String profileName,
-      Map<String, ProfileContext> mergedContext) {
+  private ProfileContext getProfileContext(
+      String profileName, Map<String, ProfileContext> mergedContext) {
     String profileValue = activeProfiles.get(profileName);
     String profileKey = new StringValueProfile(profileName, profileValue).getKey();
-    return mergedContext.containsKey(profileKey)? mergedContext.get(profileKey) : getEmptyProfileContext();
+    return mergedContext.containsKey(profileKey)
+        ? mergedContext.get(profileKey)
+        : getEmptyProfileContext();
   }
 
   @Override
@@ -133,8 +133,8 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
     // map: key - profile key, value - profile context merged from multiple modules
     Map<String, ProfileContext> mergedContext = new HashMap<>();
     for (String moduleName : dependenciesModules) {
-      Map<String, ProfileContext> moduleConfig = new JsonInjectionsConfig()
-            .readDependenciesConfig(moduleName);
+      Map<String, ProfileContext> moduleConfig =
+          new JsonInjectionsConfig().readDependenciesConfig(moduleName);
       mergeDependencies(mergedContext, defaultProfileContext, moduleConfig);
     }
     Map<Class<? extends PageObject>, Class> beans = new HashMap<>();
@@ -142,8 +142,8 @@ public class UtamLoaderConfigImpl implements UtamLoaderConfig {
       ProfileContext profileContext = getProfileContext(profileName, mergedContext);
       mergeBeans(beans, profileContext);
     }
-    Map<Class<? extends PageObject>, Class> defaultBeans = mergeBeans(new HashMap<>(),
-        defaultProfileContext);
+    Map<Class<? extends PageObject>, Class> defaultBeans =
+        mergeBeans(new HashMap<>(), defaultProfileContext);
     return new PageObjectContextImpl(beans, defaultBeans);
   }
 

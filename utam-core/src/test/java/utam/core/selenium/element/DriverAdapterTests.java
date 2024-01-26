@@ -45,7 +45,6 @@ import utam.core.element.Element;
 import utam.core.framework.consumer.UtamError;
 import utam.core.framework.context.PlatformType;
 
-
 public class DriverAdapterTests {
 
   @Test
@@ -57,9 +56,7 @@ public class DriverAdapterTests {
     assertThat(adapter.getSeleniumDriver(), is(notNullValue()));
   }
 
-  /**
-   * Tests that the executeJavaScript method will execute JavaScript
-   */
+  /** Tests that the executeJavaScript method will execute JavaScript */
   @Test
   public void testExecuteScript() {
     MockUtilities mock = new MockUtilities();
@@ -74,22 +71,28 @@ public class DriverAdapterTests {
 
   @Test
   public void testSetPageContextToNative() {
-    IllegalStateException e = expectThrows(IllegalStateException.class,
-        () -> new MockUtilities().getDriverAdapter().setPageContextToNative());
+    IllegalStateException e =
+        expectThrows(
+            IllegalStateException.class,
+            () -> new MockUtilities().getDriverAdapter().setPageContextToNative());
     assertThat(e.getMessage(), containsString(ERR_SUPPORTED_FOR_MOBILE));
   }
 
   @Test
   public void testSetPageContextToWebView() {
-    IllegalStateException e = expectThrows(IllegalStateException.class,
-        () -> new MockUtilities().getDriverAdapter().setPageContextToWebView("title"));
+    IllegalStateException e =
+        expectThrows(
+            IllegalStateException.class,
+            () -> new MockUtilities().getDriverAdapter().setPageContextToWebView("title"));
     assertThat(e.getMessage(), containsString(ERR_SUPPORTED_FOR_MOBILE));
   }
 
   @Test
   public void testGetContext() {
-    IllegalStateException e = expectThrows(IllegalStateException.class,
-        () -> new MockUtilities().getDriverAdapter().getPageContext());
+    IllegalStateException e =
+        expectThrows(
+            IllegalStateException.class,
+            () -> new MockUtilities().getDriverAdapter().getPageContext());
     assertThat(e.getMessage(), containsString(ERR_SUPPORTED_FOR_MOBILE));
   }
 
@@ -99,8 +102,7 @@ public class DriverAdapterTests {
     assertThrows(() -> mock.getDriverAdapter().findElement(LocatorBy.byCss("not-existing")));
     when(mock.getWebDriverMock().findElement(By.cssSelector("test")))
         .thenReturn(mock(WebElement.class));
-    assertThat(mock.getDriverAdapter().findElement(LocatorBy.byCss("test")),
-        is(notNullValue()));
+    assertThat(mock.getDriverAdapter().findElement(LocatorBy.byCss("test")), is(notNullValue()));
   }
 
   @Test
@@ -123,8 +125,8 @@ public class DriverAdapterTests {
   public void testWaitForThrowsTimeout() {
     Driver driver = new MockUtilities().getDriverAdapter();
     Instant start = Instant.now();
-    TimeoutException e = expectThrows(TimeoutException.class,
-        () -> driver.waitFor(() -> null, "test", null));
+    TimeoutException e =
+        expectThrows(TimeoutException.class, () -> driver.waitFor(() -> null, "test", null));
     Instant stop = Instant.now();
     assertThat(Duration.between(start, stop).toSecondsPart(), is(lessThanOrEqualTo(1)));
     assertThat(e.getMessage(), containsString("Expected condition failed: test"));
@@ -139,9 +141,16 @@ public class DriverAdapterTests {
   public void testWaitForThrowsNullPointer() {
     Driver driver = new MockUtilities().getDriverAdapter();
     Instant start = Instant.now();
-    NullPointerException e = expectThrows(NullPointerException.class, () -> driver.waitFor(() -> {
-      throw new NullPointerException("my error");
-    }, "test", Duration.ofSeconds(3)));
+    NullPointerException e =
+        expectThrows(
+            NullPointerException.class,
+            () ->
+                driver.waitFor(
+                    () -> {
+                      throw new NullPointerException("my error");
+                    },
+                    "test",
+                    Duration.ofSeconds(3)));
     Instant stop = Instant.now();
     assertThat(e.getMessage(), containsString("my error"));
     assertThat(Duration.between(start, stop).toSecondsPart(), is(greaterThanOrEqualTo(3)));
@@ -151,11 +160,17 @@ public class DriverAdapterTests {
   public void testWaitForThrowsSeleniumException() {
     Driver driver = new MockUtilities().getDriverAdapter();
     Instant start = Instant.now();
-    NoSuchElementException e = expectThrows(NoSuchElementException.class, () -> driver
-        .waitFor(() -> driver.findElement(LocatorBy.byCss("css")), "test", Duration.ofSeconds(3)));
+    NoSuchElementException e =
+        expectThrows(
+            NoSuchElementException.class,
+            () ->
+                driver.waitFor(
+                    () -> driver.findElement(LocatorBy.byCss("css")),
+                    "test",
+                    Duration.ofSeconds(3)));
     Instant stop = Instant.now();
-    assertThat(e.getMessage(),
-        containsString("can't find element with locator 'By.cssSelector: css'"));
+    assertThat(
+        e.getMessage(), containsString("can't find element with locator 'By.cssSelector: css'"));
     assertThat(Duration.between(start, stop).toSecondsPart(), is(greaterThanOrEqualTo(3)));
   }
 

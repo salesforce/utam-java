@@ -44,48 +44,55 @@ public class LocatorUiAutomatorTests {
 
   @Test
   public void testValidateUIAutomatorSelectorIncludingPrefix() {
-    LocatorBy.byUiAutomator("new UiSelector().\"**/XCUIElementTypeStaticText[`label == 'something'`]\"");
+    LocatorBy.byUiAutomator(
+        "new UiSelector().\"**/XCUIElementTypeStaticText[`label == 'something'`]\"");
   }
 
   @Test
   public void testSupportedMethods() {
     for (Method method : Method.values()) {
       Locator locator = new LocatorUIAutomator(method.getValue() + "()");
-      assertThat(locator.getStringValue(),
-            is(equalTo(method.getValue() + "()")));
+      assertThat(locator.getStringValue(), is(equalTo(method.getValue() + "()")));
     }
   }
-  
+
   @Test
   public void testSupportedMethodsWithPrefix() {
     for (Method method : Method.values()) {
       Locator locator = new LocatorUIAutomator("new UiSelector()." + method.getValue() + "()");
-      assertThat(locator.getStringValue(),
-            is(equalTo("new UiSelector()." + method.getValue() + "()")));
+      assertThat(
+          locator.getStringValue(), is(equalTo("new UiSelector()." + method.getValue() + "()")));
     }
   }
-  
+
   @Test
   public void testUiScrollable() {
-    String selector = "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(resourceId(\"com.salesforce.chatter:id/app_launcher_menu_item\"))";
+    String selector =
+        "new UiScrollable(new"
+            + " UiSelector().scrollable(true)).scrollIntoView(resourceId(\"com.salesforce.chatter:id/app_launcher_menu_item\"))";
     Locator<By> locator = new LocatorUIAutomator(selector);
     By by = MobileBy.AndroidUIAutomator(selector);
     assertThat(locator.getValue(), is(equalTo(by)));
     assertThat(locator.getStringValue(), is(equalTo(selector)));
   }
-  
+
   @Test
   public void testUiScrollableWithInnerUiSelector() {
-    String selector = "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().resourceId(\"com.salesforce.chatter:id/app_launcher_menu_item\"))";
+    String selector =
+        "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new"
+            + " UiSelector().resourceId(\"com.salesforce.chatter:id/app_launcher_menu_item\"))";
     Locator<By> locator = new LocatorUIAutomator(selector);
     By by = MobileBy.AndroidUIAutomator(selector);
     assertThat(locator.getValue(), is(equalTo(by)));
     assertThat(locator.getStringValue(), is(equalTo(selector)));
   }
-  
+
   @Test
   public void testUiScrollableWithResourceId() {
-    String selector = "new UiScrollable(new UiSelector().resourceId(\"com.salesforce.fieldservice.app:id/work_view\")).scrollIntoView(new UiSelector().resourceId(\"com.salesforce.chatter:id/app_launcher_menu_item\"))";
+    String selector =
+        "new UiScrollable(new"
+            + " UiSelector().resourceId(\"com.salesforce.fieldservice.app:id/work_view\")).scrollIntoView(new"
+            + " UiSelector().resourceId(\"com.salesforce.chatter:id/app_launcher_menu_item\"))";
     Locator<By> locator = new LocatorUIAutomator(selector);
     By by = MobileBy.AndroidUIAutomator(selector);
     assertThat(locator.getValue(), is(equalTo(by)));

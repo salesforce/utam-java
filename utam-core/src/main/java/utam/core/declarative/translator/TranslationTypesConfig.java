@@ -35,6 +35,7 @@ public interface TranslationTypesConfig {
 
   /**
    * get utility type
+   *
    * @param utilityURI string with utility type name
    * @return type of the utility
    */

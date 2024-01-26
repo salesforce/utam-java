@@ -34,11 +34,8 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   private Navigation navigation;
   private Locator locatorInsideScope;
 
-  /**
-   * Initializes a new instance of the BasePageObject class.
-   */
-  protected BasePageObject() {
-  }
+  /** Initializes a new instance of the BasePageObject class. */
+  protected BasePageObject() {}
 
   /**
    * Get instance of the root element. Not Nullable. Method is not final because overridden for Root
@@ -87,14 +84,18 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   /**
    * During bootstrap assign values injected by page objects factory
    *
-   * @param factory    instance of the factory
-   * @param element    root element (not null!)
-   * @param locator    root locator (not null!)
-   * @param document   singleton instance of the document object
+   * @param factory instance of the factory
+   * @param element root element (not null!)
+   * @param locator root locator (not null!)
+   * @param document singleton instance of the document object
    * @param navigation singleton instance of the navigation object
    */
-  final void initialize(PageObjectsFactory factory, Element element, Locator locator,
-      Document document, Navigation navigation) {
+  final void initialize(
+      PageObjectsFactory factory,
+      Element element,
+      Locator locator,
+      Document document,
+      Navigation navigation) {
     this.factory = factory;
     this.locatorInsideScope = locator;
     this.document = document;
@@ -128,7 +129,7 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
    * scopes custom element in certain location
    *
    * @param scopeElement scope element (can be root)
-   * @param location     locator and expand/nullable flags
+   * @param location locator and expand/nullable flags
    * @return builder
    */
   protected final CustomElementBuilder custom(BasicElement scopeElement, ElementLocation location) {
@@ -139,7 +140,7 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
    * scopes basic element in certain location
    *
    * @param scopeElement scope element (can be root)
-   * @param location     locator and expand/nullable flags
+   * @param location locator and expand/nullable flags
    * @return builder
    */
   protected final BasicElementBuilder basic(BasicElement scopeElement, ElementLocation location) {
@@ -149,12 +150,12 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   /**
    * scopes custom element in certain location
    *
-   * @param scopeElement       scope element (can be root)
+   * @param scopeElement scope element (can be root)
    * @param isExpandShadowRoot expand flag
    * @return builder
    */
-  protected final ContainerElement container(BasicElement scopeElement,
-      boolean isExpandShadowRoot) {
+  protected final ContainerElement container(
+      BasicElement scopeElement, boolean isExpandShadowRoot) {
     return new ContainerElementImpl(getFactory(), scopeElement, isExpandShadowRoot);
   }
 
@@ -162,7 +163,7 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
    * Gets the instance of the imperative extensions for this Page Object
    *
    * @param type Class of the class containing the imperative extensions for this Page Object
-   * @param <T>  type name of the imperative extension class
+   * @param <T> type name of the imperative extension class
    * @return the instance of the class containing the imperative extensions for thie Page Object
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -176,31 +177,32 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   /**
    * create instance of the proxy type that implements custom union type
    *
-   * @param element   this element will be used as a proxy
+   * @param element this element will be used as a proxy
    * @param unionType interface to implement
-   * @param <T>       type bound
+   * @param <T> type bound
    * @return instance of the proxy object
    */
   protected final <T extends BasicElement> T getProxy(BasePageElement element, Class<T> unionType) {
-    return (T) Proxy.newProxyInstance(
-        this.getClass().getClassLoader(),
-        new Class[]{unionType, HasElementGetter.class},
-        (proxy, method, args) -> {
-          try {
-            // without it reflection throws "object is not an instance of declaring class" because
-            if (method.getName().equals("getElement")) {
-              return element.getElement();
-            } else {
-              method.setAccessible(true);
-              // NB: DURING DEBUG STEP INSIDE THIS METHOD
-              return method.invoke(element, args);
-            }
-          } catch (Exception e) {
-            throw new UtamCoreError(String.format("Unable to invoke method '%s'", method.getName()),
-                e);
-          }
-        }
-    );
+    return (T)
+        Proxy.newProxyInstance(
+            this.getClass().getClassLoader(),
+            new Class[] {unionType, HasElementGetter.class},
+            (proxy, method, args) -> {
+              try {
+                // without it reflection throws "object is not an instance of declaring class"
+                // because
+                if (method.getName().equals("getElement")) {
+                  return element.getElement();
+                } else {
+                  method.setAccessible(true);
+                  // NB: DURING DEBUG STEP INSIDE THIS METHOD
+                  return method.invoke(element, args);
+                }
+              } catch (Exception e) {
+                throw new UtamCoreError(
+                    String.format("Unable to invoke method '%s'", method.getName()), e);
+              }
+            });
   }
 
   /**

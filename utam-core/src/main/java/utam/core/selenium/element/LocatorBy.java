@@ -24,10 +24,9 @@ import utam.core.selenium.appium.LocatorUIAutomator;
  */
 public abstract class LocatorBy implements Locator<By> {
 
-  /**
-   * The string value of the locator
-   */
+  /** The string value of the locator */
   protected final String stringValue;
+
   private final int parametersCount;
 
   /**
@@ -91,34 +90,38 @@ public abstract class LocatorBy implements Locator<By> {
   }
 
   @Override
-  public LocatorBy setParameters(Object...parameters) {
+  public LocatorBy setParameters(Object... parameters) {
     if (parameters == null || parameters.length == 0) {
       if (parametersCount > 0) {
-        throw new ArrayIndexOutOfBoundsException(String
-            .format("Locator '%s' requires %d parameters, none were provided", stringValue,
-                parametersCount));
+        throw new ArrayIndexOutOfBoundsException(
+            String.format(
+                "Locator '%s' requires %d parameters, none were provided",
+                stringValue, parametersCount));
       }
     }
-    if(parametersCount == 0) {
+    if (parametersCount == 0) {
       return this;
     }
     if (parametersCount > parameters.length) {
-      throw new ArrayIndexOutOfBoundsException(String
-          .format("Locator '%s' requires %d parameters, only %d were provided", stringValue,
-              parametersCount, parameters.length));
+      throw new ArrayIndexOutOfBoundsException(
+          String.format(
+              "Locator '%s' requires %d parameters, only %d were provided",
+              stringValue, parametersCount, parameters.length));
     }
-    Object[] values = Arrays.copyOfRange(parameters, parameters.length - parametersCount, parameters.length);
+    Object[] values =
+        Arrays.copyOfRange(parameters, parameters.length - parametersCount, parameters.length);
     String mutableValue = String.format(stringValue, values);
     return getCopy(mutableValue);
   }
 
   /**
    * Gets a copy of a locator object
+   *
    * @param valueWithParameters the value to use
    * @return the locator object
    */
   // public because used from other package
-  abstract public LocatorBy getCopy(String valueWithParameters);
+  public abstract LocatorBy getCopy(String valueWithParameters);
 
   @Override
   public String getStringValue() {

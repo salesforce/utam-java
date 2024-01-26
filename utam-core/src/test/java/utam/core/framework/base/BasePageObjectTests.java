@@ -52,15 +52,17 @@ public class BasePageObjectTests {
 
   private static class TestPageObject extends BasePageObject {}
 
-  interface UnionType extends Actionable, Clickable { }
+  interface UnionType extends Actionable, Clickable {}
 
   @SuppressWarnings("unused")
   static class ElementDeclaration extends BasePageObject {
 
     @ElementMarker.Find(css = "css")
     ElementLocation one;
+
     @ElementMarker.Find(css = "css", nullable = true)
     ElementLocation two;
+
     @ElementMarker.Find(css = "css", expand = true)
     ElementLocation three;
 

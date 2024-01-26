@@ -9,7 +9,6 @@ package utam.core.declarative.translator;
 
 import java.util.Collection;
 import java.util.List;
-
 import utam.core.declarative.errors.CompilerErrorsConfig;
 import utam.core.declarative.lint.LintingConfig;
 

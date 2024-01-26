@@ -22,8 +22,7 @@ public interface CompilerErrorsContext {
    *
    * @param error instance of the error
    */
-  default void setError(CompilerError error) {
-  }
+  default void setError(CompilerError error) {}
 
   /**
    * Get report with errors for all page objects. By default null because first error throws.
@@ -40,7 +39,5 @@ public interface CompilerErrorsContext {
    * @author elizaveta.ivanova
    * @since 244
    */
-  interface CompilerError {
-
-  }
+  interface CompilerError {}
 }

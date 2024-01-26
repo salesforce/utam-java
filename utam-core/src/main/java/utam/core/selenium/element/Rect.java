@@ -4,8 +4,7 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 
 /**
- * Rect wrapper
- * A wrapper around Selenium's Rect (rectangle) object
+ * Rect wrapper A wrapper around Selenium's Rect (rectangle) object
  *
  * @author william.sandy
  */

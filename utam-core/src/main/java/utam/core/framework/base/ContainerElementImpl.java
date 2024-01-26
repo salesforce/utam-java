@@ -36,21 +36,26 @@ class ContainerElementImpl implements ContainerElement {
   final Element containerScope;
   private final FindContext findContext;
 
-  ContainerElementImpl(PageObjectsFactory factory, BasicElement scopeElement, boolean isExpandShadowRoot) {
+  ContainerElementImpl(
+      PageObjectsFactory factory, BasicElement scopeElement, boolean isExpandShadowRoot) {
     this(factory, getUnwrappedElement(scopeElement), isExpandShadowRoot);
   }
 
-  ContainerElementImpl(PageObjectsFactory factory, Element scopeElement, boolean isExpandShadowRoot) {
+  ContainerElementImpl(
+      PageObjectsFactory factory, Element scopeElement, boolean isExpandShadowRoot) {
     this.factory = factory;
     this.containerScope = scopeElement;
     this.findContext = FindContext.Type.build(false, isExpandShadowRoot);
-    if(containerScope == null) {
+    if (containerScope == null) {
       throw new NoSuchElementException(NULL_SCOPE_ERR);
     }
   }
 
   ContainerElementImpl(ContainerElementImpl containerElement) {
-    this(containerElement.factory, containerElement.containerScope, containerElement.findContext.isExpandScopeShadowRoot());
+    this(
+        containerElement.factory,
+        containerElement.containerScope,
+        containerElement.findContext.isExpandScopeShadowRoot());
   }
 
   @Override
@@ -69,7 +74,8 @@ class ContainerElementImpl implements ContainerElement {
     ElementLocation elementLocation = new ElementLocation(locator, findContext);
     // findContext not nullable so can't be null
     Element scopeElement = elementLocation.find(this.containerScope).getFoundElement();
-    ContainerElementImpl containerElement = new ContainerElementImpl(factory, scopeElement, findContext.isExpandScopeShadowRoot());
+    ContainerElementImpl containerElement =
+        new ContainerElementImpl(factory, scopeElement, findContext.isExpandScopeShadowRoot());
     return new ContainerElementPageObject(containerElement);
   }
 

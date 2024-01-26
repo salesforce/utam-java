@@ -7,6 +7,8 @@
  */
 package utam.core.framework.element;
 
+import java.util.HashSet;
+import java.util.Set;
 import org.openqa.selenium.NoSuchWindowException;
 import utam.core.driver.Driver;
 import utam.core.driver.Navigation;
@@ -15,9 +17,6 @@ import utam.core.framework.UtamLogger;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.consumer.UtamError;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Navigation implementation
@@ -29,8 +28,9 @@ public class NavigationImpl implements Navigation {
 
   static final String ERR_NO_WINDOW_WITH_URL = "can't find window with url %s";
   static final String ERR_NO_INITIAL_WINDOW =
-          "window with url %s not found, and the previous window was closed";
-  static final String ERR_SETUP_NOT_RUN = "setupWaitForNewWindow must be called before waitForNewWindow";
+      "window with url %s not found, and the previous window was closed";
+  static final String ERR_SETUP_NOT_RUN =
+      "setupWaitForNewWindow must be called before waitForNewWindow";
 
   private final Driver driverAdapter;
   private final PageObjectsFactory factory;
@@ -95,7 +95,6 @@ public class NavigationImpl implements Navigation {
       this.driverAdapter.close();
       this.switchToWindow(currentUrl);
     }
-
   }
 
   @Override
@@ -125,10 +124,15 @@ public class NavigationImpl implements Navigation {
     }
 
     // Wait for the window count to increase indicating a new window
-    this.driverAdapter.waitFor(() -> getWindowCount() > trackedWindowHandles.size(), "wait for a new window to open", null);
+    this.driverAdapter.waitFor(
+        () -> getWindowCount() > trackedWindowHandles.size(),
+        "wait for a new window to open",
+        null);
 
-    // The difference between the sets of old and new window handles should be the new windows handle
-    // Note: if more than one window opens this method will return first that appears in the list of window handles
+    // The difference between the sets of old and new window handles should be the new windows
+    // handle
+    // Note: if more than one window opens this method will return first that appears in the list of
+    // window handles
     Set<String> currentWindowHandles = new HashSet<>(this.driverAdapter.getWindowHandles());
     currentWindowHandles.removeAll(trackedWindowHandles);
     String newWindowsHandle = currentWindowHandles.toArray(new String[1])[0];

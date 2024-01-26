@@ -45,9 +45,7 @@ public interface DragAndDropOptions {
    */
   Integer getYOffset();
 
-  /**
-   * drag by element options helper
-   */
+  /** drag by element options helper */
   class ByElement implements DragAndDropOptions {
 
     private final Element targetElement;
@@ -56,7 +54,7 @@ public interface DragAndDropOptions {
     /**
      * Initializes a new instance of the DragAndDropOptions class
      *
-     * @param targetElement   the target element
+     * @param targetElement the target element
      * @param holdDurationSec the duration to hold the gesture, in seconds
      */
     public ByElement(Element targetElement, int holdDurationSec) {
@@ -95,9 +93,7 @@ public interface DragAndDropOptions {
     }
   }
 
-  /**
-   * drag by offset options helper
-   */
+  /** drag by offset options helper */
   class ByOffset implements DragAndDropOptions {
 
     private final int x, y;
@@ -106,8 +102,8 @@ public interface DragAndDropOptions {
     /**
      * Initializes a new instance of the ByOffset class
      *
-     * @param xOffset         the horizontal offset
-     * @param yOffset         the vertical offset
+     * @param xOffset the horizontal offset
+     * @param yOffset the vertical offset
      * @param holdDurationSec the duration to hold the gesture, in seconds
      */
     public ByOffset(int xOffset, int yOffset, int holdDurationSec) {

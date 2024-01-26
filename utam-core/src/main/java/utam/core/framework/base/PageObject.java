@@ -23,5 +23,4 @@ public interface PageObject extends UtamBase {
    * @return An Object that can be cast to the appropriate PageObject type
    */
   Object load();
-
 }

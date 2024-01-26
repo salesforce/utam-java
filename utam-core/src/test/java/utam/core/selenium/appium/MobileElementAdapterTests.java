@@ -27,8 +27,8 @@ public class MobileElementAdapterTests {
   public void testFlickIOS() {
     MockUtilities mock = new MockUtilities(IOSDriver.class);
     when(mock.getMobileDriverAdapter().getWebViewElement()).thenReturn(mock.getWebElementMock());
-    when(mock.getWebElementMock().getLocation()).thenReturn(new Point(1,2));
-    when(mock.getWebElementMock().getRect()).thenReturn(new Rectangle(1,2, 10, 20));
+    when(mock.getWebElementMock().getLocation()).thenReturn(new Point(1, 2));
+    when(mock.getWebElementMock().getRect()).thenReturn(new Rectangle(1, 2, 10, 20));
     when(mock.getWebElementMock().getSize()).thenReturn(new Dimension(10, 20));
     String title = "title";
     when(mock.getAppiumDriverMock().getTitle()).thenReturn(title);
@@ -40,8 +40,8 @@ public class MobileElementAdapterTests {
   public void testFlickAndroid() {
     MockUtilities mock = new MockUtilities(AndroidDriver.class);
     when(mock.getMobileDriverAdapter().getWebViewElement()).thenReturn(mock.getWebElementMock());
-    when(mock.getWebElementMock().getLocation()).thenReturn(new Point(1,2));
-    when(mock.getWebElementMock().getRect()).thenReturn(new Rectangle(1,2, 10, 20));
+    when(mock.getWebElementMock().getLocation()).thenReturn(new Point(1, 2));
+    when(mock.getWebElementMock().getRect()).thenReturn(new Rectangle(1, 2, 10, 20));
     when(mock.getWebElementMock().getSize()).thenReturn(new Dimension(10, 20));
     String title = "title";
     when(mock.getAppiumDriverMock().getTitle()).thenReturn(title);

@@ -248,7 +248,8 @@ public class ShadowRootWebElementTests {
     assertThat(
         iae.getMessage(),
         containsString(
-            "Must search for subelements of a shadowRoot element with By.ByCssSelector. Instead got: "));
+            "Must search for subelements of a shadowRoot element with By.ByCssSelector. Instead"
+                + " got: "));
   }
 
   /**
@@ -268,8 +269,11 @@ public class ShadowRootWebElementTests {
   public void testFindElements() {
     when(((WrapsDriver) mockWebElement).getWrappedDriver()).thenReturn(mockDriver);
     ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
-    when(shadowRootWebElement.getExecutor().executeScript(
-            String.format(GET_SHADOW_ROOT_QUERY_SELECTOR_ALL, GOOD_CSS_SELECTOR), mockWebElement))
+    when(shadowRootWebElement
+            .getExecutor()
+            .executeScript(
+                String.format(GET_SHADOW_ROOT_QUERY_SELECTOR_ALL, GOOD_CSS_SELECTOR),
+                mockWebElement))
         .thenReturn(Collections.singletonList(mockWebElement));
 
     assertThat(shadowRootWebElement.findElements(mockByWithCss).contains(mockWebElement), is(true));
@@ -283,9 +287,10 @@ public class ShadowRootWebElementTests {
   public void testFindElement() {
     when(((WrapsDriver) mockWebElement).getWrappedDriver()).thenReturn(mockDriver);
     ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
-    when(shadowRootWebElement.getExecutor().executeScript(
-            String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, GOOD_CSS_SELECTOR),
-            mockWebElement))
+    when(shadowRootWebElement
+            .getExecutor()
+            .executeScript(
+                String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, GOOD_CSS_SELECTOR), mockWebElement))
         .thenReturn(mockWebElement);
     assertThat(shadowRootWebElement.findElement(mockByWithCss), is(mockWebElement));
   }
@@ -358,7 +363,9 @@ public class ShadowRootWebElementTests {
   @Test
   public void testFindElementInShadowNotFound() {
     Element scope = new ShadowRootElementAdapter(new MockUtilities().getElementAdapter());
-    Exception e = expectThrows(NoSuchElementException.class, () -> findNotNullable(byCss(NOT_FOUND_SELECTOR), scope));
+    Exception e =
+        expectThrows(
+            NoSuchElementException.class, () -> findNotNullable(byCss(NOT_FOUND_SELECTOR), scope));
     assertThat(e.getMessage(), containsString(ELEMENT_NOT_FOUND_ERROR));
   }
 
@@ -389,7 +396,9 @@ public class ShadowRootWebElementTests {
   @Test
   public void testFindElementsInShadowNotFound() {
     Element scope = new ShadowRootElementAdapter(new MockUtilities().getElementAdapter());
-    Exception e = expectThrows(NoSuchElementException.class, () -> findNotNullables(byCss(NOT_FOUND_SELECTOR), scope));
+    Exception e =
+        expectThrows(
+            NoSuchElementException.class, () -> findNotNullables(byCss(NOT_FOUND_SELECTOR), scope));
     assertThat(e.getMessage(), containsString(ELEMENT_NOT_FOUND_ERROR));
   }
 

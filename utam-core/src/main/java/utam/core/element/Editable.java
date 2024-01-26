@@ -41,6 +41,7 @@ public interface Editable extends BasicElement {
 
   /**
    * press one key on the keyboard
+   *
    * @see org.openqa.selenium.Keys for possible string values
    * @param key string representing a key like "Enter" or "Space"
    */

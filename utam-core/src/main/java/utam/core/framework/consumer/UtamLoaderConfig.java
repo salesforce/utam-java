@@ -22,7 +22,8 @@ public interface UtamLoaderConfig {
 
   /**
    * set active profile with intention to correctly pick implementing class if there are overrides
-   * <br> for each jar with dependencies it will try to find dependencies config and add overrides
+   * <br>
+   * for each jar with dependencies it will try to find dependencies config and add overrides
    * injected class
    *
    * @param profile active profile

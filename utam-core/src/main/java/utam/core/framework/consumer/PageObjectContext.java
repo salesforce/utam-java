@@ -21,7 +21,7 @@ public interface PageObjectContext {
    * create instance of the given type based on config
    *
    * @param type PO type
-   * @param <T>  type bound
+   * @param <T> type bound
    * @return instance of the given type depending on profiles config
    */
   <T extends PageObject> T getBean(Class<T> type);

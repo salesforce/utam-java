@@ -17,30 +17,21 @@ import java.time.Duration;
  */
 public class DriverConfig {
 
-  /**
-   * The default implicit wait timeout of zero
-   */
+  /** The default implicit wait timeout of zero */
   public static final Duration DEFAULT_IMPLICIT_TIMEOUT = Duration.ZERO;
 
-  /**
-   * The default explicit wait timeout of 20 seconds
-   */
+  /** The default explicit wait timeout of 20 seconds */
   public static final Duration DEFAULT_EXPLICIT_TIMEOUT = Duration.ofSeconds(20);
 
-  /**
-   * The default explicit wait timeout for mock objects of 1 second
-   */
+  /** The default explicit wait timeout for mock objects of 1 second */
   public static final Duration DEFAULT_EXPLICIT_TIMEOUT_MOCK = Duration.ofSeconds(1);
 
-  /**
-   * The default polling interval of 200 milliseconds
-   */
+  /** The default polling interval of 200 milliseconds */
   public static final Duration DEFAULT_POLLING_INTERVAL = Duration.ofMillis(200);
 
-  public static final DriverConfig TEST_SIMULATOR_DRIVER_CONFIG = new DriverConfig(
-      DEFAULT_IMPLICIT_TIMEOUT,
-      DEFAULT_EXPLICIT_TIMEOUT_MOCK,
-      DEFAULT_POLLING_INTERVAL, "");
+  public static final DriverConfig TEST_SIMULATOR_DRIVER_CONFIG =
+      new DriverConfig(
+          DEFAULT_IMPLICIT_TIMEOUT, DEFAULT_EXPLICIT_TIMEOUT_MOCK, DEFAULT_POLLING_INTERVAL, "");
 
   private final Duration implicitTimeout;
   private final Duration explicitTimeout;
@@ -53,7 +44,7 @@ public class DriverConfig {
    * @param implicitTimeout the implicit wait timeout for finding elements
    * @param explicitTimeout the explicit wait timeout for actions
    * @param pollingInterval the polling interval used to poll for conditions
-   * @param bridgeAppTitle  bridge app title for mobile app
+   * @param bridgeAppTitle bridge app title for mobile app
    */
   public DriverConfig(
       Duration implicitTimeout,
@@ -64,7 +55,7 @@ public class DriverConfig {
     this.explicitTimeout = explicitTimeout;
     this.pollingInterval = pollingInterval;
     // default has to be empty string, not null
-    this.bridgeAppTitle = bridgeAppTitle == null? "" : bridgeAppTitle;
+    this.bridgeAppTitle = bridgeAppTitle == null ? "" : bridgeAppTitle;
   }
 
   /**
@@ -73,7 +64,10 @@ public class DriverConfig {
    * @param bridgeAppTitle bridge app title for mobile app
    */
   public DriverConfig(String bridgeAppTitle) {
-    this(DEFAULT_IMPLICIT_TIMEOUT, DEFAULT_EXPLICIT_TIMEOUT, DEFAULT_POLLING_INTERVAL,
+    this(
+        DEFAULT_IMPLICIT_TIMEOUT,
+        DEFAULT_EXPLICIT_TIMEOUT,
+        DEFAULT_POLLING_INTERVAL,
         bridgeAppTitle);
   }
 

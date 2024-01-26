@@ -35,15 +35,11 @@ import utam.core.framework.consumer.UtamError;
  */
 public class ElementAdapter implements Element {
 
-  /**
-   * The JavaScript snippet used to scroll elements into view to the top of the viewport
-   */
+  /** The JavaScript snippet used to scroll elements into view to the top of the viewport */
   public static final String SCROLL_TOP_VIA_JAVASCRIPT =
       "return arguments[0].scrollIntoView(true);";
 
-  /**
-   * The JavaScript snippet used to scroll elements into view to the center of the viewport
-   */
+  /** The JavaScript snippet used to scroll elements into view to the center of the viewport */
   public static final String SCROLL_INTO_VIEW_JS =
       "if (document.documentElement"
           + " && document.documentElement.style"
@@ -52,28 +48,31 @@ public class ElementAdapter implements Element {
           + "} else {"
           + "arguments[0].scrollIntoView(false);"
           + "}";
+
   static final String CLICK_VIA_JAVASCRIPT = "arguments[0].click();";
   static final String FOCUS_VIA_JAVASCRIPT = "arguments[0].focus();";
-  static final String SCROLL_CENTER_VIA_JAVASCRIPT = "arguments[0].scrollIntoView({block:'center'});";
+  static final String SCROLL_CENTER_VIA_JAVASCRIPT =
+      "arguments[0].scrollIntoView({block:'center'});";
   static final String BLUR_VIA_JAVASCRIPT = "arguments[0].blur();";
   static final String ERR_NULL_ELEMENT = "Element inside adapter is null";
-  static final String IS_PARENT_NODE_SHADOW_ROOT_JS = "return arguments[0].getRootNode() instanceof ShadowRoot;";
-  static final String ROOT_NODE_GET_ACTIVE_ELEMENT_JS = "return arguments[0].getRootNode().activeElement";
+  static final String IS_PARENT_NODE_SHADOW_ROOT_JS =
+      "return arguments[0].getRootNode() instanceof ShadowRoot;";
+  static final String ROOT_NODE_GET_ACTIVE_ELEMENT_JS =
+      "return arguments[0].getRootNode().activeElement";
   private static final String SCROLL_INTO_VIEW_ERR =
       "element is still not visible or clickable after scroll into view";
-  private static final String SCROLL_TO_DOCUMENT_ORIGIN_JS =
-      "window.scrollTo(0,0);";
-  /**
-   * The driver instance driving this element
-   */
+  private static final String SCROLL_TO_DOCUMENT_ORIGIN_JS = "window.scrollTo(0,0);";
+
+  /** The driver instance driving this element */
   protected final Driver driverAdapter;
+
   private final WebElement webElement;
   private final WebDriver driver;
 
   /**
    * Initializes a new instance of the ElementAdapter class
    *
-   * @param element       the WebElement to wrap
+   * @param element the WebElement to wrap
    * @param driverAdapter the driver used to drive the element
    */
   public ElementAdapter(WebElement element, Driver driverAdapter) {
@@ -172,9 +171,11 @@ public class ElementAdapter implements Element {
   @Override
   public void clickAndHold(int holdDurationSec) {
     Actions actions = new Actions(driver);
-    actions.clickAndHold(getWebElement())
-            .pause(Duration.ofSeconds(holdDurationSec))
-            .release().perform();
+    actions
+        .clickAndHold(getWebElement())
+        .pause(Duration.ofSeconds(holdDurationSec))
+        .release()
+        .perform();
   }
 
   @Override
@@ -336,15 +337,9 @@ public class ElementAdapter implements Element {
       }
     } else {
       // if duration is set - start from moving to source, click and hold
-      builder
-          .moveToElement(source)
-          .clickAndHold(source)
-          .pause(options.getHoldDuration());
+      builder.moveToElement(source).clickAndHold(source).pause(options.getHoldDuration());
       if (target != null) {
-        builder
-            .moveToElement(target)
-            .pause(options.getHoldDuration())
-            .release(target);
+        builder.moveToElement(target).pause(options.getHoldDuration()).release(target);
       } else {
         builder
             .moveByOffset(options.getXOffset(), options.getYOffset())

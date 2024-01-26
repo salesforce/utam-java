@@ -17,19 +17,13 @@ import utam.core.framework.consumer.UtamError;
  * @since 226
  */
 public enum UnitTestRunner {
-  /**
-   * Do not use a unit test runner
-   */
+  /** Do not use a unit test runner */
   NONE,
 
-  /**
-   * Generated unit test to use JUnit
-   */
+  /** Generated unit test to use JUnit */
   JUNIT,
 
-  /**
-   * Generated unit tests to use TestNG
-   */
+  /** Generated unit tests to use TestNG */
   TESTNG;
 
   /**
@@ -44,8 +38,10 @@ public enum UnitTestRunner {
       try {
         runner = valueOf(unitTestRunner.toUpperCase());
       } catch (IllegalArgumentException iae) {
-        UtamLogger.error(String.format("Unsupported runner type: '%s' is not supported, " +
-                "check your configuration", unitTestRunner));
+        UtamLogger.error(
+            String.format(
+                "Unsupported runner type: '%s' is not supported, " + "check your configuration",
+                unitTestRunner));
         throw new UtamError(iae.getMessage());
       }
     } else {
@@ -58,12 +54,13 @@ public enum UnitTestRunner {
   /**
    * Validates that the unit test directory is correct
    *
-   * @param unitTestRunner    the unit test runner to use
+   * @param unitTestRunner the unit test runner to use
    * @param unitTestDirectory the directory containing unit tests
    * @return the unit test directory
    */
-  public static String validateUnitTestDirectory(UnitTestRunner unitTestRunner, String unitTestDirectory) {
-    if(unitTestRunner == null || unitTestRunner == NONE) {
+  public static String validateUnitTestDirectory(
+      UnitTestRunner unitTestRunner, String unitTestDirectory) {
+    if (unitTestRunner == null || unitTestRunner == NONE) {
       return "";
     }
     return unitTestDirectory;

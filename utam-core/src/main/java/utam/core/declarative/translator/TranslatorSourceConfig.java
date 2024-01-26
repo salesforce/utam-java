@@ -36,9 +36,7 @@ public interface TranslatorSourceConfig {
    */
   Collection<String> getPageObjects();
 
-  /**
-   * traverse and scan input folder to find all files with declarative POs
-   */
+  /** traverse and scan input folder to find all files with declarative POs */
   void recursiveScan();
 
   /**

@@ -7,11 +7,10 @@
  */
 package utam.core.declarative.representation;
 
-import org.testng.annotations.Test;
-import utam.core.declarative.representation.AnnotationProvider;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+
+import org.testng.annotations.Test;
 
 /**
  * Tests the default implementation and static members of the AnnotationProvider interface

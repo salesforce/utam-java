@@ -63,9 +63,10 @@ public class MockUtilities {
   private final WebDriver.Window windowMock;
 
   public MockUtilities(Class<? extends WebDriver> driverType) {
-    webDriverMock = mock(driverType, withSettings().extraInterfaces(
-        JavascriptExecutor.class,
-        SearchContext.class));
+    webDriverMock =
+        mock(
+            driverType,
+            withSettings().extraInterfaces(JavascriptExecutor.class, SearchContext.class));
     webElementMock = mock(WebElement.class, withSettings().extraInterfaces(WrapsDriver.class));
     when(((WrapsDriver) webElementMock).getWrappedDriver()).thenReturn(webDriverMock);
     driverAdapter = setDriverAdapter(driverType);
@@ -100,7 +101,8 @@ public class MockUtilities {
   }
 
   ElementAdapter setElementAdapter(Class<? extends WebDriver> driverType) {
-    return isMobileMock(driverType) ? new MobileElementAdapter(webElementMock, driverAdapter)
+    return isMobileMock(driverType)
+        ? new MobileElementAdapter(webElementMock, driverAdapter)
         : new ElementAdapter(webElementMock, driverAdapter);
   }
 
@@ -128,11 +130,13 @@ public class MockUtilities {
 
   public void setShadowMock(WebElement element, String cssSelector) {
     ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(element);
-    when(shadowRootWebElement.getExecutor().executeScript(
-        String.format(GET_SHADOW_ROOT_QUERY_SELECTOR_ALL, cssSelector), element))
+    when(shadowRootWebElement
+            .getExecutor()
+            .executeScript(String.format(GET_SHADOW_ROOT_QUERY_SELECTOR_ALL, cssSelector), element))
         .thenReturn(Collections.singletonList(element));
-    when(shadowRootWebElement.getExecutor().executeScript(
-        String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, cssSelector), element))
+    when(shadowRootWebElement
+            .getExecutor()
+            .executeScript(String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, cssSelector), element))
         .thenReturn(element);
   }
 
@@ -180,7 +184,7 @@ public class MockUtilities {
     return utamElement;
   }
 
-  //sometimes Driver Adaptor should be mocked to intercept method calls
+  // sometimes Driver Adaptor should be mocked to intercept method calls
   public static class MockDriver extends MockUtilities {
 
     public MockDriver() {
@@ -200,7 +204,7 @@ public class MockUtilities {
     }
   }
 
-  //sometimes Element Adaptor should be mocked to intercept method calls
+  // sometimes Element Adaptor should be mocked to intercept method calls
   public static class MockAdapter extends MockUtilities {
 
     public MockAdapter() {

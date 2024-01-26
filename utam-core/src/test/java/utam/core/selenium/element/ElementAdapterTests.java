@@ -57,8 +57,9 @@ import utam.core.element.Element.ScrollOptions;
  */
 public class ElementAdapterTests {
 
-  final static String NOT_FOUND_SELECTOR = "not_found";
-  final static String ELEMENT_NOT_FOUND_ERROR = "can't find element with locator 'By.cssSelector: not_found'";
+  static final String NOT_FOUND_SELECTOR = "not_found";
+  static final String ELEMENT_NOT_FOUND_ERROR =
+      "can't find element with locator 'By.cssSelector: not_found'";
 
   static ElementAdapter findNotNullable(LocatorBy locator, Element scope) {
     return (ElementAdapter) scope.findElement(locator, false);
@@ -92,8 +93,9 @@ public class ElementAdapterTests {
   @Test
   public void testFindElementNotFound() {
     Element scope = new MockUtilities().getElementAdapter();
-    Exception e = expectThrows(NoSuchElementException.class,
-        () -> findNotNullable(byCss(NOT_FOUND_SELECTOR), scope));
+    Exception e =
+        expectThrows(
+            NoSuchElementException.class, () -> findNotNullable(byCss(NOT_FOUND_SELECTOR), scope));
     assertThat(e.getMessage(), containsString(ELEMENT_NOT_FOUND_ERROR));
   }
 
@@ -128,8 +130,9 @@ public class ElementAdapterTests {
   @Test
   public void testFindElementsNotFound() {
     Element scope = new MockUtilities().getElementAdapter();
-    Exception e = expectThrows(NoSuchElementException.class,
-        () -> findNotNullables(byCss(NOT_FOUND_SELECTOR), scope));
+    Exception e =
+        expectThrows(
+            NoSuchElementException.class, () -> findNotNullables(byCss(NOT_FOUND_SELECTOR), scope));
     assertThat(e.getMessage(), containsString(ELEMENT_NOT_FOUND_ERROR));
   }
 
@@ -270,12 +273,12 @@ public class ElementAdapterTests {
     WebElement elementMock = mockUtils.getWebElementMock();
     Driver driverAdapterMock = mockUtils.getDriverAdapter();
     Element element = mockUtils.getElementAdapter();
-    when(driverAdapterMock
-        .executeScript(contains(IS_PARENT_NODE_SHADOW_ROOT_JS), refEq(elementMock)))
+    when(driverAdapterMock.executeScript(
+            contains(IS_PARENT_NODE_SHADOW_ROOT_JS), refEq(elementMock)))
         .thenReturn(true);
     assertThat("element has no focus", element.hasFocus(), is(false));
-    when(driverAdapterMock
-        .executeScript(contains(ROOT_NODE_GET_ACTIVE_ELEMENT_JS), refEq(elementMock)))
+    when(driverAdapterMock.executeScript(
+            contains(ROOT_NODE_GET_ACTIVE_ELEMENT_JS), refEq(elementMock)))
         .thenReturn(elementMock);
     assertThat("element has focus", element.hasFocus(), is(true));
   }
@@ -291,8 +294,11 @@ public class ElementAdapterTests {
   @Test
   public void testScrollToTop() {
     MockUtilities mock = new MockUtilities.MockDriver();
-    when(mock.getElementAdapter().isDisplayed()).thenReturn(false).thenReturn(false)
-        .thenReturn(false).thenReturn(true);
+    when(mock.getElementAdapter().isDisplayed())
+        .thenReturn(false)
+        .thenReturn(false)
+        .thenReturn(false)
+        .thenReturn(true);
     mock.getElementAdapter().scrollIntoView(ScrollOptions.TOP);
     verify(mock.getDriverAdapter(), times(2))
         .executeScript(SCROLL_TOP_VIA_JAVASCRIPT, mock.getWebElementMock());
@@ -327,8 +333,9 @@ public class ElementAdapterTests {
   public void testContainsElementInShadow() {
     MockUtilities mock = new MockUtilities();
     when(mock.getExecutorMock()
-        .executeScript(contains(String.format(GET_SHADOW_ROOT_QUERY_SELECTOR_ALL, "css")),
-            refEq(mock.getWebElementMock())))
+            .executeScript(
+                contains(String.format(GET_SHADOW_ROOT_QUERY_SELECTOR_ALL, "css")),
+                refEq(mock.getWebElementMock())))
         .thenReturn(Collections.singletonList(mock.getWebElementMock()));
     assertThat(
         new ShadowRootElementAdapter(mock.getElementAdapter()).containsElements(byCss("css")),
@@ -359,8 +366,10 @@ public class ElementAdapterTests {
 
   @Test
   public void testGetWebElement() {
-    NullPointerException e = expectThrows(NullPointerException.class,
-        () -> new ElementAdapter(null, new MockUtilities().getDriverAdapter()).getWebElement());
+    NullPointerException e =
+        expectThrows(
+            NullPointerException.class,
+            () -> new ElementAdapter(null, new MockUtilities().getDriverAdapter()).getWebElement());
     assertThat(e.getMessage(), containsString(ERR_NULL_ELEMENT));
   }
 

@@ -19,8 +19,8 @@ import utam.core.driver.Driver;
 import utam.core.driver.DriverConfig;
 import utam.core.element.Element;
 import utam.core.framework.consumer.UtamError;
-import utam.core.framework.context.PlatformType;
 import utam.core.framework.context.MobilePlatformType;
+import utam.core.framework.context.PlatformType;
 import utam.core.selenium.element.DriverAdapter;
 
 /**
@@ -34,15 +34,14 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
 
   static final String WEBVIEW_CONTEXT_HANDLE_PREFIX = "WEBVIEW";
   static final String NATIVE_CONTEXT_HANDLE = "NATIVE_APP";
-  static final String ERR_BRIDGE_TITLE_NULL =
-      "Bridge application title is null, please configure";
+  static final String ERR_BRIDGE_TITLE_NULL = "Bridge application title is null, please configure";
 
   private final MobilePlatformType mobilePlatform;
 
   /**
    * Initializes a new instance of the MobileDriverAdapter class
    *
-   * @param driver       the driver to use
+   * @param driver the driver to use
    * @param driverConfig the driver config to use
    */
   public MobileDriverAdapter(AppiumDriver driver, DriverConfig driverConfig) {
@@ -55,25 +54,25 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
   }
 
   final boolean isIOSPlatform() {
-    return mobilePlatform == MobilePlatformType.IOS ||
-            mobilePlatform == MobilePlatformType.IOS_PHONE ||
-            mobilePlatform == MobilePlatformType.IOS_TABLET;
+    return mobilePlatform == MobilePlatformType.IOS
+        || mobilePlatform == MobilePlatformType.IOS_PHONE
+        || mobilePlatform == MobilePlatformType.IOS_TABLET;
   }
 
   final Boolean isWebViewAvailable() {
     AppiumDriver appiumDriver = getAppiumDriver();
     Set<String> contextHandles = appiumDriver.getContextHandles();
-    return contextHandles.stream().
-        anyMatch(handle -> handle.contains(WEBVIEW_CONTEXT_HANDLE_PREFIX));
+    return contextHandles.stream()
+        .anyMatch(handle -> handle.contains(WEBVIEW_CONTEXT_HANDLE_PREFIX));
   }
 
   final AppiumDriver switchToWebView(String title) {
     AppiumDriver appiumDriver = getAppiumDriver();
     if (!isIOSPlatform()) {
-        // Set current context to native to get the updated available contexts
-        // Otherwise, the closed webview that is the current context will not be dropped
-        // from the return of getContextHandles. This is Android unique. 
-        setPageContextToNative();
+      // Set current context to native to get the updated available contexts
+      // Otherwise, the closed webview that is the current context will not be dropped
+      // from the return of getContextHandles. This is Android unique.
+      setPageContextToNative();
     }
     Set<String> contextHandles = appiumDriver.getContextHandles();
     for (String contextHandle : contextHandles) {
@@ -82,7 +81,10 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
         try {
           newDriver = (AppiumDriver) appiumDriver.context(contextHandle);
         } catch (WebDriverException e) {
-          warning(String.format("Context switch to webview '%s' failed. Error: %s", contextHandle, e.getMessage()));
+          warning(
+              String.format(
+                  "Context switch to webview '%s' failed. Error: %s",
+                  contextHandle, e.getMessage()));
           continue;
         }
         if (newDriver != null) {
@@ -96,12 +98,12 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
     // For the Appium chromedriver limitation to handle multiple WebViews,
     // If switch to context fail to find the target WebView, then switch to
     // use window
-    if (mobilePlatform == MobilePlatformType.ANDROID ||
-        mobilePlatform == MobilePlatformType.ANDROID_PHONE ||
-        mobilePlatform == MobilePlatformType.ANDROID_TABLET) {
+    if (mobilePlatform == MobilePlatformType.ANDROID
+        || mobilePlatform == MobilePlatformType.ANDROID_PHONE
+        || mobilePlatform == MobilePlatformType.ANDROID_TABLET) {
       Set<String> windowHandles = appiumDriver.getWindowHandles();
       for (String windowHandle : windowHandles) {
-        if(!windowHandle.equals(NATIVE_CONTEXT_HANDLE)) {
+        if (!windowHandle.equals(NATIVE_CONTEXT_HANDLE)) {
           AppiumDriver newDriver = (AppiumDriver) appiumDriver.switchTo().window(windowHandle);
           String currentTitle = newDriver.getTitle();
           if (!currentTitle.isEmpty() && currentTitle.equalsIgnoreCase(title)) {

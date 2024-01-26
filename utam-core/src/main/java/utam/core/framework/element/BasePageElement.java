@@ -30,22 +30,22 @@ import utam.core.framework.consumer.UtamError;
  * @author elizaveta.ivanova
  * @since 234
  */
-public class BasePageElement extends UtamBaseImpl implements Actionable, Clickable, Editable,
-    Touchable, Draggable {
+public class BasePageElement extends UtamBaseImpl
+    implements Actionable, Clickable, Editable, Touchable, Draggable {
 
   /**
-   * Do not delete! Class needs constructor without parameters because we use Java Reflection to create
-   * an instance
+   * Do not delete! Class needs constructor without parameters because we use Java Reflection to
+   * create an instance
+   *
    * @see BasePageElement createInstance static method
    */
-  public BasePageElement() {
-  }
+  public BasePageElement() {}
 
   /**
    * Build instance of the BasePageElement using Java Reflection
    *
    * @param element element to inject
-   * @param driver  driver instance
+   * @param driver driver instance
    * @return instance of the element
    */
   public static BasePageElement createInstance(Element element, Driver driver) {
@@ -56,15 +56,15 @@ public class BasePageElement extends UtamBaseImpl implements Actionable, Clickab
    * Build instance of the basic type using Java Reflection
    *
    * @param implType type to build
-   * @param element  element to inject
-   * @param driver   driver instance
-   * @param <T>      bound for BasicElement
-   * @param <R>      bound for BasePageElement
+   * @param element element to inject
+   * @param driver driver instance
+   * @param <T> bound for BasicElement
+   * @param <R> bound for BasePageElement
    * @return instance of the element
    */
   public static <T extends BasicElement, R extends BasePageElement> T createInstance(
       Class<R> implType, Element element, Driver driver) {
-    if(element == null) {
+    if (element == null) {
       return null;
     }
     try {
@@ -74,8 +74,7 @@ public class BasePageElement extends UtamBaseImpl implements Actionable, Clickab
       return (T) instance;
     } catch (ReflectiveOperationException e) {
       throw new UtamError(
-          String.format("Error creating instance of type '%s'", implType.getSimpleName()),
-          e);
+          String.format("Error creating instance of type '%s'", implType.getSimpleName()), e);
     }
   }
 
@@ -183,9 +182,9 @@ public class BasePageElement extends UtamBaseImpl implements Actionable, Clickab
     try {
       getElement().click();
     } catch (Exception e) {
-      if (e.getMessage()
-          .contains("javascript error: Cannot read") && e.getMessage()
-              .contains("defaultView") && e.getMessage().contains("undefined")) {
+      if (e.getMessage().contains("javascript error: Cannot read")
+          && e.getMessage().contains("defaultView")
+          && e.getMessage().contains("undefined")) {
         UtamLogger.error(
             "Error from WebElement.click(), attempting to execute javascript click instead...");
         UtamLogger.error(e);
@@ -204,8 +203,7 @@ public class BasePageElement extends UtamBaseImpl implements Actionable, Clickab
 
   @Override
   public void clickAndHold(int holdDurationSec) {
-    log(String.format(
-            "click and hold the element for %d seconds", holdDurationSec));
+    log(String.format("click and hold the element for %d seconds", holdDurationSec));
     getElement().clickAndHold(holdDurationSec);
   }
 
@@ -230,7 +228,8 @@ public class BasePageElement extends UtamBaseImpl implements Actionable, Clickab
 
   @Override
   public void dragAndDrop(BasicElement target, int holdDurationSec) {
-    DragAndDropOptions options = new DragAndDropOptions.ByElement(((BasePageElement)target).getElement(), holdDurationSec);
+    DragAndDropOptions options =
+        new DragAndDropOptions.ByElement(((BasePageElement) target).getElement(), holdDurationSec);
     getElement().dragAndDrop(options);
   }
 

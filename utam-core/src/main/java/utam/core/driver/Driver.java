@@ -11,7 +11,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
-
 import utam.core.element.Element;
 import utam.core.element.Locator;
 import utam.core.framework.context.PlatformType;
@@ -28,7 +27,7 @@ public interface Driver {
   /**
    * executes given javascript
    *
-   * @param script     string with javascript code
+   * @param script string with javascript code
    * @param parameters parameters passed to the script
    * @return result of the script execution
    */
@@ -63,10 +62,10 @@ public interface Driver {
    * true)
    *
    * @param timeout timeout after which exception is thrown if condition is not met. If passed as
-   *                null, timeout from config is used
-   * @param isTrue  condition to apply
+   *     null, timeout from config is used
+   * @param isTrue condition to apply
    * @param message error message to throw if timeout is reached, can be null
-   * @param <T>     return type
+   * @param <T> return type
    * @return result of the applied expectations
    */
   <T> T waitFor(Supplier<T> isTrue, String message, Duration timeout);
@@ -125,9 +124,7 @@ public interface Driver {
    */
   void setPageContext(PlatformType mobileContextType);
 
-  /**
-   * mobile only: set active page context to NATIVE_APP
-   */
+  /** mobile only: set active page context to NATIVE_APP */
   void setPageContextToNative();
 
   /**
@@ -145,14 +142,10 @@ public interface Driver {
    */
   boolean isNativeContext();
 
-  /**
-   * Navigates backward in the current browsing context (mobile or web)
-   */
+  /** Navigates backward in the current browsing context (mobile or web) */
   void back();
 
-  /**
-   * Navigates forward in the current browsing context (mobile or web)
-   */
+  /** Navigates forward in the current browsing context (mobile or web) */
   void forward();
 
   /**
@@ -163,8 +156,8 @@ public interface Driver {
   String getWindowHandle();
 
   /**
-   * Get the set of all window handles currently open in this driver
-   * This can be used to iterate over all currently open windows in the driver
+   * Get the set of all window handles currently open in this driver This can be used to iterate
+   * over all currently open windows in the driver
    *
    * @return the set of all window handles currently open in this driver
    */
@@ -191,8 +184,6 @@ public interface Driver {
    */
   void setRect(Rect rect);
 
-  /**
-   * Close the currently focused window
-   */
+  /** Close the currently focused window */
   void close();
 }

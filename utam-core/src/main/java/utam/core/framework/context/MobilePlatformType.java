@@ -10,7 +10,6 @@ package utam.core.framework.context;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
-
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
@@ -23,44 +22,28 @@ import org.openqa.selenium.WebDriver;
  */
 public enum MobilePlatformType implements Profile {
 
-  /**
-   * mobile web platform
-   */
+  /** mobile web platform */
   WEB,
 
-  /**
-   * android platform
-   */
+  /** android platform */
   ANDROID,
 
-  /**
-   * android tablet platform
-   */
+  /** android tablet platform */
   ANDROID_TABLET,
 
-  /**
-   * android phone platform
-   */
+  /** android phone platform */
   ANDROID_PHONE,
 
-  /**
-   * ios platform
-   */
+  /** ios platform */
   IOS,
 
-  /**
-   * ios tablet platform
-   */
+  /** ios tablet platform */
   IOS_TABLET,
 
-  /**
-   * ios phone platform
-   */
+  /** ios phone platform */
   IOS_PHONE;
 
-  /**
-   * Mobile platform profile name
-   */
+  /** Mobile platform profile name */
   public static final String PLATFORM_PROFILE_NAME = "platform";
 
   /**
@@ -96,7 +79,7 @@ public enum MobilePlatformType implements Profile {
     }
     if (driver instanceof AppiumDriver) {
       // mock passed from test
-      if(((AppiumDriver) driver).getCapabilities() == null) {
+      if (((AppiumDriver) driver).getCapabilities() == null) {
         return WEB;
       }
       Platform platform = ((AppiumDriver) driver).getCapabilities().getPlatform();
@@ -109,7 +92,6 @@ public enum MobilePlatformType implements Profile {
     }
     return WEB;
   }
-
 
   @Override
   public String getName() {
@@ -124,22 +106,25 @@ public enum MobilePlatformType implements Profile {
   private static boolean isIPad(WebDriver driver) {
     Object deviceObject = ((AppiumDriver) driver).getSessionDetail("device");
     if (deviceObject != null) {
-        return "iPad".equalsIgnoreCase(deviceObject.toString());
+      return "iPad".equalsIgnoreCase(deviceObject.toString());
     }
     return false;
   }
 
   private static boolean isTablet(WebDriver driver) {
-    Capabilities caps = ((AppiumDriver)driver).getCapabilities();
+    Capabilities caps = ((AppiumDriver) driver).getCapabilities();
     Object deviceScreenSizeObject = caps.getCapability("deviceScreenSize");
     Object deviceScreenDensityObject = caps.getCapability("deviceScreenDensity");
 
     // For android, based on https://developer.android.com/training/multiscreen/screensizes
-    // when device's dp is equal or bigger than 600, will be treated as tablet, otherwise will be phone
+    // when device's dp is equal or bigger than 600, will be treated as tablet, otherwise will be
+    // phone
     if (deviceScreenSizeObject != null && deviceScreenDensityObject != null) {
-        int dp = Integer.parseInt(deviceScreenSizeObject.toString().split("[xX]")[0])
-                * 160 / Integer.parseInt(deviceScreenDensityObject.toString());
-        return dp >= 600;
+      int dp =
+          Integer.parseInt(deviceScreenSizeObject.toString().split("[xX]")[0])
+              * 160
+              / Integer.parseInt(deviceScreenDensityObject.toString());
+      return dp >= 600;
     }
     return false;
   }

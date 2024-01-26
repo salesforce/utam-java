@@ -25,11 +25,8 @@ public abstract class UtamBaseImpl implements UtamBase {
   private Driver driver;
   private Element element;
 
-  /**
-   * Initializes a new instance of the UtamBaseImpl class
-   */
-  protected UtamBaseImpl() {
-  }
+  /** Initializes a new instance of the UtamBaseImpl class */
+  protected UtamBaseImpl() {}
 
   /**
    * Gets the element for this implementation
@@ -71,6 +68,7 @@ public abstract class UtamBaseImpl implements UtamBase {
 
   /**
    * Logs a message
+   *
    * @param message the message to log
    */
   protected final void log(String message) {
@@ -118,7 +116,8 @@ public abstract class UtamBaseImpl implements UtamBase {
 
   @Override
   public final boolean containsElement(Locator locator, boolean isExpandShadow) {
-    Element transformed = isExpandShadow? new ShadowRootElementAdapter(getElement()) : getElement();
+    Element transformed =
+        isExpandShadow ? new ShadowRootElementAdapter(getElement()) : getElement();
     return transformed.containsElements(locator) > 0;
   }
 

@@ -13,6 +13,4 @@ package utam.core.framework.base;
  * @author elizaveta.ivanova
  * @since 226
  */
-public interface RootPageObject extends PageObject {
-
-}
+public interface RootPageObject extends PageObject {}

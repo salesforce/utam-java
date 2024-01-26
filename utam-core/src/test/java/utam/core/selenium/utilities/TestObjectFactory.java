@@ -8,6 +8,7 @@ import static org.mockito.Mockito.withSettings;
 import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR;
 import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR_ALL;
 import static utam.core.selenium.element.ShadowRootWebElement.SHADOW_ROOT_DETECTION_SCRIPT_FRAGMENT;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -53,8 +54,7 @@ public class TestObjectFactory extends WebDriverSimulatorObjectFactory {
       if (elementInfo.getParentElementName() == null) {
         when(driver.findElements(elementInfo.getCssSelector()))
             .thenReturn(Collections.singletonList(elementInfo.getElement()));
-        when(driver.findElement(elementInfo.getCssSelector()))
-            .thenReturn(elementInfo.getElement());
+        when(driver.findElement(elementInfo.getCssSelector())).thenReturn(elementInfo.getElement());
       }
 
       // If this is set for more than one element then only the last element would be mocked.
@@ -94,7 +94,7 @@ public class TestObjectFactory extends WebDriverSimulatorObjectFactory {
                 .collect(Collectors.toList());
         when(elementInfo.getElement().findElements(By.cssSelector(selector)))
             .thenReturn(childElements);
-        if(childElements.size() > 0) {
+        if (childElements.size() > 0) {
           when(elementInfo.getElement().findElement(By.cssSelector(selector)))
               .thenReturn(childElements.get(0));
         }
@@ -110,11 +110,11 @@ public class TestObjectFactory extends WebDriverSimulatorObjectFactory {
         when(((JavascriptExecutor) driver)
                 .executeScript(contains(finderScriptAll), refEq(elementInfo.getElement())))
             .thenReturn(shadowChildElements);
-        if(shadowChildElements.size() > 0) {
+        if (shadowChildElements.size() > 0) {
           String finderScript =
               String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, selector.replace("'", "\\'"));
           when(((JavascriptExecutor) driver)
-              .executeScript(contains(finderScript), refEq(elementInfo.getElement())))
+                  .executeScript(contains(finderScript), refEq(elementInfo.getElement())))
               .thenReturn(shadowChildElements.get(0));
         }
       }
@@ -126,14 +126,11 @@ public class TestObjectFactory extends WebDriverSimulatorObjectFactory {
   public WebElement createElement(String elementName) {
     return mock(
         WebElement.class,
-        withSettings()
-            .name(elementName)
-            .extraInterfaces(WrapsDriver.class, SearchContext.class));
+        withSettings().name(elementName).extraInterfaces(WrapsDriver.class, SearchContext.class));
   }
 
   @Override
-  public void setElementAttribute(WebElement element, String attributeName,
-      String attributeValue) {
+  public void setElementAttribute(WebElement element, String attributeName, String attributeValue) {
     when(element.getAttribute(attributeName)).thenReturn(attributeValue);
   }
 
@@ -146,5 +143,4 @@ public class TestObjectFactory extends WebDriverSimulatorObjectFactory {
   public void setElementVisibility(WebElement element, boolean isVisible) {
     when(element.isDisplayed()).thenReturn(isVisible);
   }
-
 }

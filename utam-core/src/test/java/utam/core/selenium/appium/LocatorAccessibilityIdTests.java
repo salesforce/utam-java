@@ -7,11 +7,11 @@
  */
 package utam.core.selenium.appium;
 
-import io.appium.java_client.MobileBy;
-import org.testng.annotations.Test;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+
+import io.appium.java_client.MobileBy;
+import org.testng.annotations.Test;
 
 /**
  * tests for mobile locators

@@ -67,7 +67,8 @@ public class PageObjectTests {
   @Test
   public void testInScopeMethod() {
     TestPageImpl testPage = new TestPageImpl();
-    assertThat(testPage.custom(testPage.getRootElement(), testPage.element),
+    assertThat(
+        testPage.custom(testPage.getRootElement(), testPage.element),
         is(instanceOf(CustomElementBuilder.class)));
   }
 
@@ -80,7 +81,8 @@ public class PageObjectTests {
   @Test
   public void testInContainerMethod() {
     TestPageImpl testPage = new TestPageImpl();
-    assertThat(testPage.container(testPage.getRootElement(), false),
+    assertThat(
+        testPage.container(testPage.getRootElement(), false),
         is(instanceOf(ContainerElementImpl.class)));
   }
 
@@ -91,8 +93,12 @@ public class PageObjectTests {
     final ElementLocation element = new ElementLocation(LocatorBy.byCss("css"), EXISTING);
 
     TestPageImpl() {
-      initialize(mock.getFactory(), mock.getElementAdapter(),
-          LocatorBy.byCss("root"), mock.getDocument(), mock.getNavigation());
+      initialize(
+          mock.getFactory(),
+          mock.getElementAdapter(),
+          LocatorBy.byCss("root"),
+          mock.getDocument(),
+          mock.getNavigation());
     }
   }
 }

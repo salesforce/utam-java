@@ -7,9 +7,8 @@
  */
 package utam.core.declarative.translator;
 
-import utam.core.framework.context.Profile;
-
 import java.util.Set;
+import utam.core.framework.context.Profile;
 
 /**
  * profile configuration for translator <br>

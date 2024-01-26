@@ -25,9 +25,7 @@ import utam.core.selenium.element.LocatorBy;
  */
 public class LocatorClassChainTests {
 
-  /**
-   * An ElementLocatorClassChain object should be able to be created
-   */
+  /** An ElementLocatorClassChain object should be able to be created */
   @Test
   public void testElementLocatorClassChainCreation() {
     String selector = "selector";
@@ -38,9 +36,7 @@ public class LocatorClassChainTests {
     assertThat(locator.setParameters("parameters"), is(sameInstance(locator)));
   }
 
-  /**
-   * The applyParameters method should modify the CSS selector string
-   */
+  /** The applyParameters method should modify the CSS selector string */
   @Test
   public void testApplyParameters() {
     String selector = "selector::nth-of-type(%d)";
@@ -135,7 +131,8 @@ public class LocatorClassChainTests {
 
   @Test
   public void testGetClassChainSelectorWithContainsAnd() {
-    String locator = "**/XCUIElementTypeStaticText[`label CONTAINS 'something' AND text == 'fake value'`]";
+    String locator =
+        "**/XCUIElementTypeStaticText[`label CONTAINS 'something' AND text == 'fake value'`]";
     Locator locatorValue = LocatorBy.byClassChain(locator);
     assertThat(locatorValue.getValue(), is(equalTo(MobileBy.iOSClassChain(locator))));
     assertThat(locatorValue.getStringValue(), is(equalTo(locator)));
@@ -143,7 +140,8 @@ public class LocatorClassChainTests {
 
   @Test
   public void testGetClassChainSelectorWithMultipleLevels() {
-    String locator = "**/XCUIElementTypeCell[`name == 'cell.appTitle'`]/XCUIElementTypeStaticText[-1]";
+    String locator =
+        "**/XCUIElementTypeCell[`name == 'cell.appTitle'`]/XCUIElementTypeStaticText[-1]";
     Locator locatorValue = LocatorBy.byClassChain(locator);
     assertThat(locatorValue.getValue(), is(equalTo(MobileBy.iOSClassChain(locator))));
     assertThat(locatorValue.getStringValue(), is(equalTo(locator)));
@@ -159,7 +157,9 @@ public class LocatorClassChainTests {
 
   @Test
   public void testValidateClassChainSelectorWithSlashInAttribut() {
-    String locator = "**/XCUIElementTypeStaticText[`text == 'https://q3lex.lightning.force.com/lightning/r/Account/0019A00000K9wzfQAB/view'`]";
+    String locator =
+        "**/XCUIElementTypeStaticText[`text =="
+            + " 'https://q3lex.lightning.force.com/lightning/r/Account/0019A00000K9wzfQAB/view'`]";
     Locator locatorValue = LocatorBy.byClassChain(locator);
     assertThat(locatorValue.getValue(), is(equalTo(MobileBy.iOSClassChain(locator))));
     assertThat(locatorValue.getStringValue(), is(equalTo(locator)));

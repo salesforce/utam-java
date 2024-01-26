@@ -8,9 +8,8 @@
 package utam.core.selenium.utilities;
 
 class PrivateConstructorFactory extends TestObjectFactory {
-  private PrivateConstructorFactory() {
-  }
-  
+  private PrivateConstructorFactory() {}
+
   static TestObjectFactory getFactory() {
     return new PrivateConstructorFactory();
   }

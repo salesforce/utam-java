@@ -16,7 +16,8 @@ import utam.core.framework.UtamCoreError;
 import utam.core.framework.base.PageObject;
 
 /**
- * creates empty profile context to use for custom overrides <br> does not read from configs
+ * creates empty profile context to use for custom overrides <br>
+ * does not read from configs
  *
  * @author elizaveta.ivanova
  * @since 232
@@ -26,17 +27,11 @@ public class DefaultProfileContext implements ProfileContext {
   static final String ERR_GET_CLASS_BY_NAME = "can't find class with name %s";
   private static final String DEFAULT_PROFILE_KEY = DEFAULT_PROFILE.getKey();
 
-
-  /**
-   * map with configured beans. key - interface class, value - name of the implementing class
-   */
+  /** map with configured beans. key - interface class, value - name of the implementing class */
   private final Map<Class<? extends PageObject>, String> beans = new HashMap<>();
 
-  /**
-   * initializes empty profile context
-   */
-  DefaultProfileContext() {
-  }
+  /** initializes empty profile context */
+  DefaultProfileContext() {}
 
   /**
    * Initializes a new instance of the ProfileContext class from Json dependencies config
@@ -79,10 +74,12 @@ public class DefaultProfileContext implements ProfileContext {
    *
    * @param combinedConfig map to collect all configs
    * @param defaultContext default context is collected separately
-   * @param moduleConfig   dependencies config from specific module
+   * @param moduleConfig dependencies config from specific module
    */
-  public static void mergeDependencies(Map<String, ProfileContext> combinedConfig,
-      ProfileContext defaultContext, Map<String, ProfileContext> moduleConfig) {
+  public static void mergeDependencies(
+      Map<String, ProfileContext> combinedConfig,
+      ProfileContext defaultContext,
+      Map<String, ProfileContext> moduleConfig) {
     for (String profileKey : moduleConfig.keySet()) {
       if (DEFAULT_PROFILE_KEY.equals(profileKey)) {
         mergeContexts(defaultContext, moduleConfig.get(profileKey));
@@ -99,7 +96,7 @@ public class DefaultProfileContext implements ProfileContext {
   /**
    * merge two contexts with same profile from different modules
    *
-   * @param alreadyLoaded  previously loaded
+   * @param alreadyLoaded previously loaded
    * @param profileContext added
    */
   private static void mergeContexts(ProfileContext alreadyLoaded, ProfileContext profileContext) {
@@ -112,17 +109,20 @@ public class DefaultProfileContext implements ProfileContext {
   /**
    * build beans map from profile context
    *
-   * @param beans          target map
+   * @param beans target map
    * @param profileContext source context
    * @return target map
    */
   public static Map<Class<? extends PageObject>, Class> mergeBeans(
       Map<Class<? extends PageObject>, Class> beans, ProfileContext profileContext) {
-    profileContext.getConfiguredBeans().forEach(beanType -> {
-      String name = profileContext.getBeanName(beanType);
-      Class implementation = getClassFromName(name);
-      beans.put(beanType, implementation);
-    });
+    profileContext
+        .getConfiguredBeans()
+        .forEach(
+            beanType -> {
+              String name = profileContext.getBeanName(beanType);
+              Class implementation = getClassFromName(name);
+              beans.put(beanType, implementation);
+            });
     return beans;
   }
 

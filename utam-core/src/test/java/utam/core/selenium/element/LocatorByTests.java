@@ -35,9 +35,7 @@ public class LocatorByTests {
     assertThat(getParametersCount("testString[%f]"), is(equalTo(0)));
   }
 
-  /**
-   * The equals method should return true for the same AbstractLocator
-   */
+  /** The equals method should return true for the same AbstractLocator */
   @Test
   public void testEqualsOverride() {
     LocatorBy locator = LocatorByCss.byCss("css");
@@ -60,11 +58,13 @@ public class LocatorByTests {
   @Test
   public void testSetParameters() {
     assertThat(LocatorByCss.byCss("css").setParameters(true).getStringValue(), is(equalTo("css")));
-    assertThat(LocatorByCss.byCss("css[text='%s']").setParameters("str").getStringValue(),
+    assertThat(
+        LocatorByCss.byCss("css[text='%s']").setParameters("str").getStringValue(),
         is(equalTo("css[text='str']")));
-    assertThat(LocatorByCss.byCss("css[%d]").setParameters(1).getStringValue(),
-        is(equalTo("css[1]")));
-    assertThat(LocatorByCss.byCss("css[%d][%s]").setParameters(1, "text").getStringValue(),
+    assertThat(
+        LocatorByCss.byCss("css[%d]").setParameters(1).getStringValue(), is(equalTo("css[1]")));
+    assertThat(
+        LocatorByCss.byCss("css[%d][%s]").setParameters(1, "text").getStringValue(),
         is(equalTo("css[1][text]")));
     assertThat(
         "only necessary parameters will be applied - subset st the end of the array",
@@ -74,11 +74,14 @@ public class LocatorByTests {
 
   @Test
   public void testSetParametersThrows() {
-    assertThrows(ArrayIndexOutOfBoundsException.class,
+    assertThrows(
+        ArrayIndexOutOfBoundsException.class,
         () -> LocatorByCss.byCss("css[%d][%d]").setParameters());
-    assertThrows(IllegalFormatConversionException.class,
+    assertThrows(
+        IllegalFormatConversionException.class,
         () -> LocatorByCss.byCss("css[%d]").setParameters("str"));
-    assertThrows(ArrayIndexOutOfBoundsException.class,
+    assertThrows(
+        ArrayIndexOutOfBoundsException.class,
         () -> LocatorByCss.byCss("css[%d][%d]").setParameters(1));
   }
 }

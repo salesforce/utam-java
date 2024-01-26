@@ -33,14 +33,18 @@ public class JsonLoaderConfigTests {
   public void testValidLoaderConfig() {
     JsonLoaderConfig config = getConfig("loaderconfig/test_loader_config.json");
     assertThat(config.getInjectionConfigs(), hasSize(2));
-    assertThat(config.getInjectionConfigs(), containsInAnyOrder("module1.config.json", "module2.config.json"));
+    assertThat(
+        config.getInjectionConfigs(),
+        containsInAnyOrder("module1.config.json", "module2.config.json"));
   }
 
   @Test
   public void testValidLoaderConfigWithDuplicates() {
     JsonLoaderConfig config = getConfig("loaderconfig/test_duplicate_config.json");
     assertThat(config.getInjectionConfigs(), hasSize(2));
-    assertThat(config.getInjectionConfigs(), containsInAnyOrder("module1.config.json", "module2.config.json"));
+    assertThat(
+        config.getInjectionConfigs(),
+        containsInAnyOrder("module1.config.json", "module2.config.json"));
   }
 
   @Test
@@ -59,8 +63,9 @@ public class JsonLoaderConfigTests {
 
   @Test
   public void testJsonUnknownPropertiesThrow() {
-    Exception e = expectThrows(RuntimeException.class,
-        () -> getConfig("loaderconfig/test_incorrect_config.json"));
+    Exception e =
+        expectThrows(
+            RuntimeException.class, () -> getConfig("loaderconfig/test_incorrect_config.json"));
     assertThat(e.getMessage(), containsString(ERR_READING_LOADER_CONFIG));
     assertThat(e.getCause().getMessage(), containsString("Unrecognized field \"modules\""));
   }

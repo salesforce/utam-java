@@ -12,19 +12,18 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static utam.core.framework.context.MobilePlatformType.PLATFORM_PROFILE_NAME;
-import static utam.core.selenium.appium.MobileDriverUtils.getActivePlatformProfile;
-import static utam.core.framework.context.MobilePlatformType.ANDROID_TABLET;
 import static utam.core.framework.context.MobilePlatformType.ANDROID_PHONE;
+import static utam.core.framework.context.MobilePlatformType.ANDROID_TABLET;
 import static utam.core.framework.context.MobilePlatformType.IOS_PHONE;
 import static utam.core.framework.context.MobilePlatformType.IOS_TABLET;
+import static utam.core.framework.context.MobilePlatformType.PLATFORM_PROFILE_NAME;
 import static utam.core.framework.context.MobilePlatformType.WEB;
 import static utam.core.framework.context.MobilePlatformType.fromDriver;
+import static utam.core.selenium.appium.MobileDriverUtils.getActivePlatformProfile;
 
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
-
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;

@@ -12,8 +12,9 @@ import utam.core.framework.base.UtamBase;
 public interface BasicElement extends UtamBase {
 
   /**
-   * returns true if element is found AND enabled <br> it's an immediate check, no waiting is
-   * involved. Never throws any exceptions, just returns true/false
+   * returns true if element is found AND enabled <br>
+   * it's an immediate check, no waiting is involved. Never throws any exceptions, just returns
+   * true/false
    *
    * @return true if element is present and enabled
    */
@@ -21,8 +22,9 @@ public interface BasicElement extends UtamBase {
 
   /**
    * Returns string value of a given attribute, returns the value of the attribute matching the
-   * name. <br> Throws exception if element not found within timeout or could not return attribute
-   * value or returned null value.
+   * name. <br>
+   * Throws exception if element not found within timeout or could not return attribute value or
+   * returned null value.
    *
    * @param attribute name of the attribute
    * @return string value of the attribute
@@ -37,8 +39,9 @@ public interface BasicElement extends UtamBase {
   String getClassAttribute();
 
   /**
-   * Returns string with the innerText of an element. <br> Throws exception if element not found
-   * within timeout or could not return innerText or returned null value.
+   * Returns string with the innerText of an element. <br>
+   * Throws exception if element not found within timeout or could not return innerText or returned
+   * null value.
    *
    * @return inner text from the element
    */

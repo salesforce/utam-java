@@ -13,5 +13,4 @@ package utam.core.element;
  * @author james.evans
  * @since 236
  */
-public interface FrameElement extends BasicElement {
-}
+public interface FrameElement extends BasicElement {}

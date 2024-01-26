@@ -13,8 +13,8 @@ import utam.core.framework.base.PageMarker;
 import utam.core.framework.consumer.TestLoaderConfigPageObject;
 
 @PageMarker.Find(css = "root")
-public class TestLoaderConfigPageObjectImpl extends BasePageObject implements
-    TestLoaderConfigPageObject {
+public class TestLoaderConfigPageObjectImpl extends BasePageObject
+    implements TestLoaderConfigPageObject {
 
   @Override
   public Locator getRoot() {
