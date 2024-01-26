@@ -38,99 +38,104 @@ import utam.core.driver.Navigation;
  */
 public abstract class ElementMethod {
 
-  private static final MethodDeclaration DOCUMENT_GETTER_DECLARATION = new MethodDeclarationImpl(
-      "getDocument",
-      new ArrayList<>(),
-      new FromClass(Document.class),
-      Collections.emptyList(),
-      null);
+  private static final MethodDeclaration DOCUMENT_GETTER_DECLARATION =
+      new MethodDeclarationImpl(
+          "getDocument",
+          new ArrayList<>(),
+          new FromClass(Document.class),
+          Collections.emptyList(),
+          null);
 
-  private static final MethodDeclaration NAVIGATION_GETTER_DECLARATION = new MethodDeclarationImpl(
-      "getNavigation",
-      new ArrayList<>(),
-      new FromClass(Navigation.class),
-      Collections.emptyList(),
-      null);
-  /**
-   * The Page Object method for a document getter
-   */
-  public static final PageObjectMethod DOCUMENT_GETTER = new PageObjectMethod() {
-    @Override
-    public MethodDeclaration getDeclaration() {
-      return DOCUMENT_GETTER_DECLARATION;
-    }
+  private static final MethodDeclaration NAVIGATION_GETTER_DECLARATION =
+      new MethodDeclarationImpl(
+          "getNavigation",
+          new ArrayList<>(),
+          new FromClass(Navigation.class),
+          Collections.emptyList(),
+          null);
 
-    @Override
-    public List<String> getCodeLines() {
-      return Collections
-          .singletonList("this.getDocument()");
-    }
+  /** The Page Object method for a document getter */
+  public static final PageObjectMethod DOCUMENT_GETTER =
+      new PageObjectMethod() {
+        @Override
+        public MethodDeclaration getDeclaration() {
+          return DOCUMENT_GETTER_DECLARATION;
+        }
 
-    @Override
-    public List<TypeProvider> getClassImports() {
-      return Collections.emptyList();
-    }
+        @Override
+        public List<String> getCodeLines() {
+          return Collections.singletonList("this.getDocument()");
+        }
 
-    @Override
-    public boolean isPublic() {
-      return false;
-    }
-  };
+        @Override
+        public List<TypeProvider> getClassImports() {
+          return Collections.emptyList();
+        }
 
-  /**
-   * The Page Object method for a document getter
-   */
-  public static final PageObjectMethod NAVIGATION_GETTER = new PageObjectMethod() {
-    @Override
-    public MethodDeclaration getDeclaration() {
-      return NAVIGATION_GETTER_DECLARATION;
-    }
+        @Override
+        public boolean isPublic() {
+          return false;
+        }
+      };
 
-    @Override
-    public List<String> getCodeLines() {
-      return Collections
-          .singletonList("this.getNavigation()");
-    }
+  /** The Page Object method for a document getter */
+  public static final PageObjectMethod NAVIGATION_GETTER =
+      new PageObjectMethod() {
+        @Override
+        public MethodDeclaration getDeclaration() {
+          return NAVIGATION_GETTER_DECLARATION;
+        }
 
-    @Override
-    public List<TypeProvider> getClassImports() {
-      return Collections.emptyList();
-    }
+        @Override
+        public List<String> getCodeLines() {
+          return Collections.singletonList("this.getNavigation()");
+        }
 
-    @Override
-    public boolean isPublic() {
-      return false;
-    }
-  };
+        @Override
+        public List<TypeProvider> getClassImports() {
+          return Collections.emptyList();
+        }
+
+        @Override
+        public boolean isPublic() {
+          return false;
+        }
+      };
 
   static String getScopeElementCode(ElementContext scopeElement) {
     String methodName = scopeElement.getElementMethod().getDeclaration().getName();
     String scopeVariableName = scopeElement.getName();
     String parameters = ParameterUtils.getParametersValuesString(scopeElement.getParameters());
-    return String
-        .format("BasicElement %s = this.%s(%s)", scopeVariableName, methodName, parameters);
+    return String.format(
+        "BasicElement %s = this.%s(%s)", scopeVariableName, methodName, parameters);
   }
 
-  static String getElementLocationCode(String locationFieldName,
-      List<MethodParameter> locatorParameters) {
+  static String getElementLocationCode(
+      String locationFieldName, List<MethodParameter> locatorParameters) {
     if (locatorParameters.isEmpty()) {
       return String.format("this.%s", locationFieldName);
     }
-    return String.format("this.%s.setParameters(%s)", locationFieldName,
-        getParametersValuesString(locatorParameters));
+    return String.format(
+        "this.%s.setParameters(%s)",
+        locationFieldName, getParametersValuesString(locatorParameters));
   }
 
-  private static List<String> getElementMethodCode(ElementContext element,
-      List<MethodParameter> locatorParameters, TypeProvider implClass, boolean isList) {
+  private static List<String> getElementMethodCode(
+      ElementContext element,
+      List<MethodParameter> locatorParameters,
+      TypeProvider implClass,
+      boolean isList) {
     List<String> code = new ArrayList<>();
     code.add(getScopeElementCode(element.getScopeElement()));
     String scopeVariableName = element.getScopeElement().getName();
-    code.add(String.format("return basic(%s, %s).%s(%s.class, %s.class)",
-        scopeVariableName,
-        getElementLocationCode(element.getName(), locatorParameters),
-        isList ? "buildList" : "build",
-        element.getType().getSimpleName(),
-        implClass.getSimpleName()));
+    code.add(
+        String.format(
+            "return basic(%s, %s).%s(%s.class, %s.class)",
+            scopeVariableName,
+            getElementLocationCode(element.getName(), locatorParameters),
+            isList ? "buildList" : "build",
+            element.getType().getSimpleName(),
+            implClass.getSimpleName()));
     return code;
   }
 
@@ -149,16 +154,14 @@ public abstract class ElementMethod {
     ParameterUtils.setImport(imports, returnType);
   }
 
-  private static void setClassImports(List<TypeProvider> classImports, TypeProvider interfaceType,
-      TypeProvider implType) {
+  private static void setClassImports(
+      List<TypeProvider> classImports, TypeProvider interfaceType, TypeProvider implType) {
     ParameterUtils.setImport(classImports, interfaceType);
     ParameterUtils.setImport(classImports, implType);
     ParameterUtils.setImport(classImports, BASIC_ELEMENT);
   }
 
-  /**
-   * represents an element getter method for a basic element
-   */
+  /** represents an element getter method for a basic element */
   public static final class Single extends BasicElementGetterMethod {
 
     private final List<String> methodCode;
@@ -169,16 +172,23 @@ public abstract class ElementMethod {
     /**
      * Initializes a new instance of the Single class
      *
-     * @param element           the element to get
+     * @param element the element to get
      * @param locatorParameters the list of parameters for the locator of the element
-     * @param isPublic          a value indicating whether the element is public
-     * @param implType          the type provider for the implementation type
-     * @param description       method description in Json
+     * @param isPublic a value indicating whether the element is public
+     * @param implType the type provider for the implementation type
+     * @param description method description in Json
      */
-    public Single(ElementContext element, List<MethodParameter> locatorParameters, boolean isPublic,
-        TypeProvider implType, UtamMethodDescription description) {
-      super(getElementGetterMethodName(element.getName(), isPublic), isPublic,
-          element.getGetterReturnType(), description);
+    public Single(
+        ElementContext element,
+        List<MethodParameter> locatorParameters,
+        boolean isPublic,
+        TypeProvider implType,
+        UtamMethodDescription description) {
+      super(
+          getElementGetterMethodName(element.getName(), isPublic),
+          isPublic,
+          element.getGetterReturnType(),
+          description);
       this.methodCode = getElementMethodCode(element, locatorParameters, implType, false);
       this.parametersTracker.setMethodParameters(element.getParameters());
       setInterfaceImports(imports, returnType);
@@ -189,10 +199,7 @@ public abstract class ElementMethod {
     @Override
     public MethodDeclaration getDeclaration() {
       List<MethodParameter> parameters = parametersTracker.getMethodParameters();
-      JavadocObject javadoc = new MethodJavadoc(methodName,
-          returnType,
-          parameters,
-          description);
+      JavadocObject javadoc = new MethodJavadoc(methodName, returnType, parameters, description);
       return new MethodDeclarationImpl(methodName, parameters, returnType, imports, javadoc);
     }
 
@@ -217,9 +224,7 @@ public abstract class ElementMethod {
     }
   }
 
-  /**
-   * represents an element getter method for a list of basic element
-   */
+  /** represents an element getter method for a list of basic element */
   public static final class Multiple extends BasicElementGetterMethod {
 
     private final List<String> methodCode;
@@ -231,14 +236,18 @@ public abstract class ElementMethod {
     /**
      * Initializes a new instance of the Multiple class
      *
-     * @param element           the element to get
+     * @param element the element to get
      * @param locatorParameters the list of parameters for the locator of the element
-     * @param isPublic          a value indicating whether the element is public
-     * @param implType          the type provider for the implementation type
-     * @param description       method description in Json
+     * @param isPublic a value indicating whether the element is public
+     * @param implType the type provider for the implementation type
+     * @param description method description in Json
      */
-    public Multiple(ElementContext element, List<MethodParameter> locatorParameters,
-        boolean isPublic, TypeProvider implType, UtamMethodDescription description) {
+    public Multiple(
+        ElementContext element,
+        List<MethodParameter> locatorParameters,
+        boolean isPublic,
+        TypeProvider implType,
+        UtamMethodDescription description) {
       super(getElementGetterMethodName(element.getName(), isPublic), isPublic, null, description);
       this.methodCode = getElementMethodCode(element, locatorParameters, implType, true);
       this.parametersTracker.setMethodParameters(element.getParameters());
@@ -251,15 +260,9 @@ public abstract class ElementMethod {
     @Override
     public MethodDeclaration getDeclaration() {
       List<MethodParameter> parameters = parametersTracker.getMethodParameters();
-      JavadocObject javadoc = new MethodJavadoc(methodName,
-          listReturnType,
-          parameters,
-          description);
-      return new MethodDeclarationImpl(
-          methodName,
-          parameters,
-          listReturnType,
-          imports, javadoc);
+      JavadocObject javadoc =
+          new MethodJavadoc(methodName, listReturnType, parameters, description);
+      return new MethodDeclarationImpl(methodName, parameters, listReturnType, imports, javadoc);
     }
 
     @Override
@@ -283,9 +286,7 @@ public abstract class ElementMethod {
     }
   }
 
-  /**
-   * represents an element getter method for a filtered element
-   */
+  /** represents an element getter method for a filtered element */
   public static final class Filtered extends BasicElementGetterMethod {
 
     private final List<String> code = new ArrayList<>();
@@ -296,19 +297,19 @@ public abstract class ElementMethod {
     /**
      * Initializes a new instance of the Filtered class
      *
-     * @param scopeElement      the context of the scope element
-     * @param elementName       the name of the element
-     * @param elementType       the element type
-     * @param implType          the type provider for the implementation type
+     * @param scopeElement the context of the scope element
+     * @param elementName the name of the element
+     * @param elementType the element type
+     * @param implType the type provider for the implementation type
      * @param locatorParameters the list of parameters for the locator of the element
-     * @param isPublic          a value indicating whether the element is public
-     * @param applyMethod       the method to apply in filtering the element
-     * @param applyParameters   the list of parameters to use in the filter
-     * @param matcherType       the type of matcher for the filter
+     * @param isPublic a value indicating whether the element is public
+     * @param applyMethod the method to apply in filtering the element
+     * @param applyParameters the list of parameters to use in the filter
+     * @param matcherType the type of matcher for the filter
      * @param matcherParameters the list of parameters for the matcher
-     * @param isFindFirstMatch  a value indicting whether to only return the first match of the
-     *                          filter
-     * @param description       method description in Json
+     * @param isFindFirstMatch a value indicting whether to only return the first match of the
+     *     filter
+     * @param description method description in Json
      */
     public Filtered(
         ElementContext scopeElement,
@@ -323,8 +324,11 @@ public abstract class ElementMethod {
         List<MethodParameter> matcherParameters,
         boolean isFindFirstMatch,
         UtamMethodDescription description) {
-      super(getElementGetterMethodName(elementName, isPublic), isPublic,
-          isFindFirstMatch ? elementType : wrapAsList(elementType), description);
+      super(
+          getElementGetterMethodName(elementName, isPublic),
+          isPublic,
+          isFindFirstMatch ? elementType : wrapAsList(elementType),
+          description);
       parametersTracker.setMethodParameters(scopeElement.getParameters());
       parametersTracker.setMethodParameters(locatorParameters);
       parametersTracker.setMethodParameters(applyParameters);
@@ -332,36 +336,35 @@ public abstract class ElementMethod {
       setInterfaceImports(imports, returnType);
       setClassImports(classImports, returnType, implType);
       setFilterParameterClassImports();
-      String predicateCode = getPredicateCode(applyMethod, applyParameters, matcherType,
-          matcherParameters);
+      String predicateCode =
+          getPredicateCode(applyMethod, applyParameters, matcherType, matcherParameters);
       code.add(getScopeElementCode(scopeElement));
       String scopeVariableName = scopeElement.getName();
       String locationCode = getElementLocationCode(elementName, locatorParameters);
-      code.add(String.format(
-          "return basic(%s, %s).%s(%s.class, %s.class, %s)",
-          scopeVariableName,
-          locationCode,
-          isFindFirstMatch ? "build" : "buildList",
-          elementType.getSimpleName(),
-          implType.getSimpleName(),
-          predicateCode));
+      code.add(
+          String.format(
+              "return basic(%s, %s).%s(%s.class, %s.class, %s)",
+              scopeVariableName,
+              locationCode,
+              isFindFirstMatch ? "build" : "buildList",
+              elementType.getSimpleName(),
+              implType.getSimpleName(),
+              predicateCode));
       this.unionType = asUnionTypeOrNull(implType);
     }
 
     private void setFilterParameterClassImports() {
       // For non-primitive method parameters added by a filter, we must add class imports
       // for those types or the generated code will not be compilable by javac.
-      parametersTracker.getMethodParameters()
+      parametersTracker
+          .getMethodParameters()
           .forEach(param -> ParameterUtils.setImport(classImports, param.getType()));
     }
 
     @Override
     public MethodDeclaration getDeclaration() {
       List<MethodParameter> parameters = parametersTracker.getMethodParameters();
-      JavadocObject javadoc = new MethodJavadoc(methodName,
-          returnType,
-          parameters,
-          description);
+      JavadocObject javadoc = new MethodJavadoc(methodName, returnType, parameters, description);
       return new MethodDeclarationImpl(methodName, parameters, returnType, imports, javadoc);
     }
 

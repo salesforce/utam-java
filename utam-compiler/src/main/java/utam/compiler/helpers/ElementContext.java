@@ -30,19 +30,13 @@ import utam.core.selenium.element.LocatorBy;
  */
 public abstract class ElementContext {
 
-  /**
-   * The name of the root element
-   */
+  /** The name of the root element */
   public static final String ROOT_ELEMENT_NAME = "root";
 
-  /**
-   * The name of the document object
-   */
+  /** The name of the document object */
   public static final String DOCUMENT_ELEMENT_NAME = "document";
 
-  /**
-   * The name of the navigation object
-   */
+  /** The name of the navigation object */
   static final String NAVIGATION_OBJECT_NAME = "navigation";
 
   static final String SELF_ELEMENT_NAME = "self";
@@ -60,13 +54,13 @@ public abstract class ElementContext {
   /**
    * Initializes a new instance of the ElementContext class
    *
-   * @param elementType  the kind of element (basic, custom, container, etc.)
+   * @param elementType the kind of element (basic, custom, container, etc.)
    * @param scopeContext the element context containing the scope
-   * @param name         the name of the element
-   * @param type         the type of the element
-   * @param selector     the selector for the element
-   * @param parameters   the parameters to use to find the element
-   * @param isNullable   a value indicating whether the element is nullable
+   * @param name the name of the element
+   * @param type the type of the element
+   * @param selector the selector for the element
+   * @param parameters the parameters to use to find the element
+   * @param isNullable a value indicating whether the element is nullable
    */
   ElementContext(
       ElementType elementType,
@@ -149,9 +143,7 @@ public abstract class ElementContext {
    * @return list of non-literal parameters
    */
   public final List<MethodParameter> getGetterNonLiteralParameters() {
-    return getElementMethod().getDeclaration()
-        .getParameters()
-        .stream()
+    return getElementMethod().getDeclaration().getParameters().stream()
         .filter(parameter -> !parameter.isLiteral())
         .collect(Collectors.toList());
   }
@@ -228,7 +220,7 @@ public abstract class ElementContext {
    * Register element getter method, throw NPE if method already exists. Then traverse scope
    * elements and set their usage.
    *
-   * @param method  the method to set as the element getter
+   * @param method the method to set as the element getter
    * @param context context is used to set scope element method usage
    */
   public void setElementMethod(PageObjectMethod method, TranslationContext context) {
@@ -245,65 +237,45 @@ public abstract class ElementContext {
     return getElementMethod().getDeclaration().getName();
   }
 
-  /**
-   * The node types of elements
-   */
+  /** The node types of elements */
   public enum ElementType {
-    /**
-     * A basic element
-     */
+    /** A basic element */
     BASIC,
 
-    /**
-     * An element that represents another Page Object
-     */
+    /** An element that represents another Page Object */
     CUSTOM,
 
-    /**
-     * A container element
-     */
+    /** A container element */
     CONTAINER,
 
-    /**
-     * An element representing a frame or iframe
-     */
+    /** An element representing a frame or iframe */
     FRAME,
 
-    /**
-     * An element representing the root element
-     */
+    /** An element representing the root element */
     ROOT,
 
-    /**
-     * An element representing itself
-     */
+    /** An element representing itself */
     SELF,
 
-    /**
-     * An element representing the enclosing document
-     */
+    /** An element representing the enclosing document */
     DOCUMENT,
 
-    /**
-     * An object for access to driver navigation
-     */
+    /** An object for access to driver navigation */
     NAVIGATION
   }
 
-  /**
-   * Represents a basic element (on of actionable group)
-   */
+  /** Represents a basic element (on of actionable group) */
   public static class Basic extends ElementContext {
 
     /**
      * Initializes a new instance of the Basic class
      *
      * @param scopeContext the element context containing the scope
-     * @param name         the name of the element
-     * @param elementType  the type of the element
-     * @param selector     the selector for the element
-     * @param parameters   the parameters to use to find the element
-     * @param isNullable   a value indicating whether the element is nullable
+     * @param name the name of the element
+     * @param elementType the type of the element
+     * @param selector the selector for the element
+     * @param parameters the parameters to use to find the element
+     * @param isNullable a value indicating whether the element is nullable
      */
     public Basic(
         ElementContext scopeContext,
@@ -318,33 +290,35 @@ public abstract class ElementContext {
     /**
      * Initializes a new instance of the Basic class, used only in unit tests
      *
-     * @param name        the name of the element
+     * @param name the name of the element
      * @param elementType the type of the element
-     * @param selector    the selector for the element
+     * @param selector the selector for the element
      */
     public Basic(String name, TypeProvider elementType, Locator selector) {
       this(null, name, elementType, selector, new ArrayList<>(), false);
     }
   }
 
-  /**
-   * Represents a list of basic elements (on of actionable group)
-   */
+  /** Represents a list of basic elements (on of actionable group) */
   public static class BasicReturnsAll extends Basic {
 
     /**
      * Initializes a new instance of the BasicReturnsAll class
      *
      * @param scopeContext the element context containing the scope
-     * @param name         the name of the element
-     * @param elementType  the type of the element
-     * @param selector     the selector for the element
-     * @param parameters   the parameters to use to find the element
-     * @param isNullable   a value indicating whether the element is nullable
+     * @param name the name of the element
+     * @param elementType the type of the element
+     * @param selector the selector for the element
+     * @param parameters the parameters to use to find the element
+     * @param isNullable a value indicating whether the element is nullable
      */
-    public BasicReturnsAll(ElementContext scopeContext, String name,
-        TypeProvider elementType, Locator selector,
-        List<MethodParameter> parameters, boolean isNullable) {
+    public BasicReturnsAll(
+        ElementContext scopeContext,
+        String name,
+        TypeProvider elementType,
+        Locator selector,
+        List<MethodParameter> parameters,
+        boolean isNullable) {
       super(scopeContext, name, elementType, selector, parameters, isNullable);
     }
 
@@ -354,16 +328,14 @@ public abstract class ElementContext {
     }
   }
 
-  /**
-   * Represents a container element ("type" : "container")
-   */
+  /** Represents a container element ("type" : "container") */
   public static class Container extends ElementContext {
 
     /**
      * Initializes a new instance of the Container class
      *
      * @param scopeContext the element context containing the scope
-     * @param name         the name of the element
+     * @param name the name of the element
      */
     public Container(ElementContext scopeContext, String name) {
       super(
@@ -377,17 +349,15 @@ public abstract class ElementContext {
     }
   }
 
-  /**
-   * Represents a frame element ("type" : "frame")
-   */
+  /** Represents a frame element ("type" : "frame") */
   public static class Frame extends ElementContext {
 
     /**
      * Initializes a new instance of the Frame class
      *
      * @param scopeContext the element context containing the scope
-     * @param name         the name of the element
-     * @param helper       the helper for generating the locator code
+     * @param name the name of the element
+     * @param helper the helper for generating the locator code
      */
     public Frame(ElementContext scopeContext, String name, LocatorCodeGeneration helper) {
       super(
@@ -401,9 +371,7 @@ public abstract class ElementContext {
     }
   }
 
-  /**
-   * Represents a root element
-   */
+  /** Represents a root element */
   public static final class Root extends ElementContext {
 
     private final TypeProvider enclosingPageObjectType;
@@ -412,13 +380,16 @@ public abstract class ElementContext {
      * Initializes a new instance of the Root class
      *
      * @param enclosingPageObjectType the type of the enclosing Page Object
-     * @param selector                the selector for the element
-     * @param rootType                the type of the root element
+     * @param selector the selector for the element
+     * @param rootType the type of the root element
      */
-    public Root(TypeProvider enclosingPageObjectType, Locator selector, TypeProvider rootType,
+    public Root(
+        TypeProvider enclosingPageObjectType,
+        Locator selector,
+        TypeProvider rootType,
         PageObjectMethod rootElementMethod) {
-      super(ElementType.ROOT, null, ROOT_ELEMENT_NAME, rootType, selector, new ArrayList<>(),
-          false);
+      super(
+          ElementType.ROOT, null, ROOT_ELEMENT_NAME, rootType, selector, new ArrayList<>(), false);
       registerElementMethod(rootElementMethod);
       this.enclosingPageObjectType = enclosingPageObjectType;
     }
@@ -433,24 +404,26 @@ public abstract class ElementContext {
     }
   }
 
-  /**
-   * Represents a list of "custom" elements: other Page Objects
-   */
+  /** Represents a list of "custom" elements: other Page Objects */
   public static class CustomReturnsAll extends Custom {
 
     /**
      * Initializes a new instance of the CustomReturnsAll class
      *
      * @param scopeContext the element context containing the scope
-     * @param elementName  the name of the element
-     * @param type         the type of the element
-     * @param locator      the selector for the element
-     * @param parameters   the parameters to use to find the element
-     * @param isNullable   a value indicating whether the element is nullable
+     * @param elementName the name of the element
+     * @param type the type of the element
+     * @param locator the selector for the element
+     * @param parameters the parameters to use to find the element
+     * @param isNullable a value indicating whether the element is nullable
      */
-    public CustomReturnsAll(ElementContext scopeContext, String elementName,
-        TypeProvider type, Locator locator,
-        List<MethodParameter> parameters, boolean isNullable) {
+    public CustomReturnsAll(
+        ElementContext scopeContext,
+        String elementName,
+        TypeProvider type,
+        Locator locator,
+        List<MethodParameter> parameters,
+        boolean isNullable) {
       super(scopeContext, elementName, type, locator, parameters, isNullable);
     }
 
@@ -460,20 +433,18 @@ public abstract class ElementContext {
     }
   }
 
-  /**
-   * Represents a "custom" element: another Page Object
-   */
+  /** Represents a "custom" element: another Page Object */
   public static class Custom extends ElementContext {
 
     /**
      * Initializes a new instance of the Custom class
      *
      * @param scopeContext the element context containing the scope
-     * @param elementName  the name of the element
-     * @param type         the type of the element
-     * @param locator      the selector for the element
-     * @param parameters   the parameters to use to find the element
-     * @param isNullable   a value indicating whether the element is nullable
+     * @param elementName the name of the element
+     * @param type the type of the element
+     * @param locator the selector for the element
+     * @param parameters the parameters to use to find the element
+     * @param isNullable a value indicating whether the element is nullable
      */
     public Custom(
         ElementContext scopeContext,
@@ -489,29 +460,24 @@ public abstract class ElementContext {
      * Initializes a new instance of the Custom class, used only in unit tests
      *
      * @param elementName the name of the element
-     * @param type        the type of the element
-     * @param selector    the selector for the element
+     * @param type the type of the element
+     * @param selector the selector for the element
      */
     Custom(String elementName, TypeProvider type, Locator selector) {
       this(null, elementName, type, selector, new ArrayList<>(), false);
     }
   }
 
-  /**
-   * Represents the Document
-   */
+  /** Represents the Document */
   public static class Document extends ElementContext {
 
-    /**
-     * The document element context
-     */
+    /** The document element context */
     public static final ElementContext DOCUMENT_ELEMENT = new Document();
 
-    /**
-     * Initializes a new instance of the Document class
-     */
+    /** Initializes a new instance of the Document class */
     private Document() {
-      super(ElementType.DOCUMENT,
+      super(
+          ElementType.DOCUMENT,
           null,
           DOCUMENT_ELEMENT_NAME,
           null,
@@ -522,28 +488,22 @@ public abstract class ElementContext {
     }
   }
 
-  /**
-   * Represents self element (or "this")
-   */
+  /** Represents self element (or "this") */
   static class Self extends ElementContext {
 
-    /**
-     * The self element context
-     */
+    /** The self element context */
     static final ElementContext SELF_ELEMENT = new Self();
 
-    /**
-     * Initializes a new instance of the Self class
-     */
+    /** Initializes a new instance of the Self class */
     private Self() {
-      super(ElementType.SELF,
+      super(
+          ElementType.SELF,
           null,
           SELF_ELEMENT_NAME,
           null,
           EMPTY_SELECTOR,
           Collections.emptyList(),
           false);
-
     }
   }
 
@@ -555,16 +515,13 @@ public abstract class ElementContext {
    */
   public static class Navigation extends ElementContext {
 
-    /**
-     * The document element context
-     */
+    /** The document element context */
     public static final ElementContext NAVIGATION_OBJECT = new Navigation();
 
-    /**
-     * Initializes a new instance of the Document class
-     */
+    /** Initializes a new instance of the Document class */
     private Navigation() {
-      super(ElementType.NAVIGATION,
+      super(
+          ElementType.NAVIGATION,
           null,
           NAVIGATION_OBJECT_NAME,
           null,

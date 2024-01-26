@@ -26,14 +26,13 @@ public class ProfileContextTests {
     DefaultProfileContext profile = new DefaultProfileContext();
     assertThat(profile.getBeanName(null), is(nullValue()));
     profile.setBean(TestLoaderConfigPageObject.class, "class");
-    assertThat(profile.getBeanName(TestLoaderConfigPageObject.class),
-        is(equalTo("class")));
+    assertThat(profile.getBeanName(TestLoaderConfigPageObject.class), is(equalTo("class")));
   }
 
   @Test
   public void testNonExistingClassThrows() {
     UtamError error = expectThrows(UtamError.class, () -> getClassFromName("utam.test.Error"));
-    assertThat(error.getMessage(),
-        is(equalTo(String.format(ERR_GET_CLASS_BY_NAME, "utam.test.Error"))));
+    assertThat(
+        error.getMessage(), is(equalTo(String.format(ERR_GET_CLASS_BY_NAME, "utam.test.Error"))));
   }
 }

@@ -9,28 +9,24 @@ package utam.core.framework.consumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+
 import org.testng.annotations.Test;
 
 /**
  * Provides tests for the UtamError class
- * @author james.evans
  *
+ * @author james.evans
  */
 public class UtamErrorTests {
-  
-  /**
-   * A valid UtamError instance should be able to be created
-   */
+
+  /** A valid UtamError instance should be able to be created */
   @Test
   public void testCreation() {
     UtamError error = new UtamError("foo");
     assertThat(error.getMessage(), is(equalTo("foo")));
   }
-  
-  /**
-   * A valid UtamError instance should be able to be created with an
-   * underlying exception
-   */
+
+  /** A valid UtamError instance should be able to be created with an underlying exception */
   @Test
   public void testCreationWithCause() {
     UtamError error = new UtamError("bar", new UnsupportedOperationException("baz"));

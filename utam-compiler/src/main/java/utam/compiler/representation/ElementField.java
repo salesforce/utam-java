@@ -10,11 +10,10 @@ package utam.compiler.representation;
 import static utam.compiler.helpers.TypeUtilities.ELEMENT_FIELD;
 
 import java.util.Collections;
+import java.util.List;
 import utam.core.declarative.representation.AnnotationProvider;
 import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.TypeProvider;
-
-import java.util.List;
 
 /**
  * representation of the page object element
@@ -30,7 +29,7 @@ public final class ElementField implements PageClassField {
   /**
    * Initializes a new instance of the ElementField class
    *
-   * @param name       the name of the element
+   * @param name the name of the element
    * @param annotation the annotation provider for generating the field annotation
    */
   public ElementField(String name, AnnotationProvider annotation) {

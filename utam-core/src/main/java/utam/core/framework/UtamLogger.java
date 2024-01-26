@@ -7,34 +7,30 @@
  */
 package utam.core.framework;
 
-import org.slf4j.LoggerFactory;
+import java.util.List;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
-import java.util.List;
-
-/**
- * Logger for UTAM operations
- */
+/** Logger for UTAM operations */
 public class UtamLogger {
 
-  /**
-   * Logger used to log messages
-   */
+  /** Logger used to log messages */
   static Logger UTAM_LOGGER = null;
 
   /**
-   * Static initializer used to create logger and set property for formatting log messages.
-   * There may be other ways to accomplish this without using such a little-used language
-   * construct. Those should be investigated for the best approach. Note that for further
-   * control over formatting of log messages, one might extend the Formatter class, and set
-   * the property to use that class for formatting log messages.
+   * Static initializer used to create logger and set property for formatting log messages. There
+   * may be other ways to accomplish this without using such a little-used language construct. Those
+   * should be investigated for the best approach. Note that for further control over formatting of
+   * log messages, one might extend the Formatter class, and set the property to use that class for
+   * formatting log messages.
    */
   static {
-    System.setProperty("java.util.logging.SimpleFormatter.format",
-        "%1$tT %3$s %4$-7s: %5$s %6$s%n");
+    System.setProperty(
+        "java.util.logging.SimpleFormatter.format", "%1$tT %3$s %4$-7s: %5$s %6$s%n");
     UTAM_LOGGER = LoggerFactory.getLogger("utam");
   }
+
   /**
    * Log message at info level
    *
@@ -59,7 +55,7 @@ public class UtamLogger {
    * Log a message at an arbitrary level
    *
    * @param priority level to use to log the message
-   * @param message  messages to log
+   * @param message messages to log
    */
   public static void log(Level priority, String message) {
     if (message != null && !message.isEmpty()) {

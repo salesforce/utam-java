@@ -36,7 +36,8 @@ public abstract class PageMarker {
   }
 
   /**
-   * root selector annotation <br> can contain %s
+   * root selector annotation <br>
+   * can contain %s
    */
   @Target(ElementType.TYPE)
   @Retention(RetentionPolicy.RUNTIME)
@@ -71,9 +72,7 @@ public abstract class PageMarker {
     String uiautomator() default "";
   }
 
-  /**
-   * page context type annotation
-   */
+  /** page context type annotation */
   @Target(ElementType.TYPE)
   @Retention(RetentionPolicy.RUNTIME)
   public @interface Switch {

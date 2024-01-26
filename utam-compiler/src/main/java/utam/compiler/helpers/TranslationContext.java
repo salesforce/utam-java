@@ -17,6 +17,7 @@ import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.SELF_ELEMENT_NAME;
 import static utam.compiler.helpers.ElementContext.Self.SELF_ELEMENT;
 
+import com.fasterxml.jackson.core.JsonParser;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.core.JsonParser;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.ElementContext.Document;
 import utam.compiler.helpers.ElementContext.Self;
@@ -64,10 +63,10 @@ public class TranslationContext {
   private final Set<String> usedPrivateMethods = new HashSet<>();
   private final Map<String, ElementUnitTestHelper> testableElements = new HashMap<>();
   private final TypeProvider pageObjectClassType;
-  /**
-   * track possible names collisions for custom elements types
-   */
+
+  /** track possible names collisions for custom elements types */
   private final Map<String, TypeProvider> customTypesMap = new HashMap<>();
+
   private final PageObjectLinting contextForLinting;
   private boolean isImplementationPageObject = false;
   private TypeProvider pageObjectInterfaceType;
@@ -77,11 +76,12 @@ public class TranslationContext {
   /**
    * Initializes a new instance of the TranslationContext class
    *
-   * @param pageObjectURI           the Page Object URI
-   * @param filePath                path to the JSON source file, used by SARIF to link with source file
+   * @param pageObjectURI the Page Object URI
+   * @param filePath path to the JSON source file, used by SARIF to link with source file
    * @param translatorConfiguration the translator configuration
    */
-  public TranslationContext(String pageObjectURI, String filePath, TranslatorConfig translatorConfiguration) {
+  public TranslationContext(
+      String pageObjectURI, String filePath, TranslatorConfig translatorConfiguration) {
     this.pageObjectURI = pageObjectURI;
     this.translationTypesConfig = translatorConfiguration.getTranslationTypesConfig();
     this.translatorConfiguration = translatorConfiguration;
@@ -92,13 +92,14 @@ public class TranslationContext {
     // has impl prefixes
     this.pageObjectClassType = translationTypesConfig.getClassType(pageObjectURI);
     this.pageObjectInterfaceType = translationTypesConfig.getInterfaceType(pageObjectURI);
-    this.contextForLinting = new PageObjectLintingImpl(pageObjectURI, filePath, this.pageObjectInterfaceType);
+    this.contextForLinting =
+        new PageObjectLintingImpl(pageObjectURI, filePath, this.pageObjectInterfaceType);
   }
 
   /**
    * Gets a value indicating that the Page Object is an implementation-only Page Object
    *
-   * @return true if the Page Object is  an implementation-only Page Object; otherwise, false
+   * @return true if the Page Object is an implementation-only Page Object; otherwise, false
    */
   public boolean isImplementationPageObject() {
     return isImplementationPageObject;
@@ -142,7 +143,8 @@ public class TranslationContext {
     TypeProvider type = translationTypesConfig.getInterfaceType(typeStr);
     if (customTypesMap.containsKey(type.getSimpleName())) {
       TypeProvider alreadyDeclared = customTypesMap.get(type.getSimpleName());
-      // if simple name is same, but full is not - resolve collision by using full name instead short name
+      // if simple name is same, but full is not - resolve collision by using full name instead
+      // short name
       // this allows to avoid importing class with simple names twice
       if (!alreadyDeclared.getFullName().equals(type.getFullName())) {
         type = new PageObjectWithNamesCollisionType(type);
@@ -174,7 +176,7 @@ public class TranslationContext {
       throw new UtamCompilationError(VALIDATION.getErrorMessage(202, element.getName()));
     }
     elementContextMap.put(element.getName(), element);
-    if(field != null) {
+    if (field != null) {
       pageObjectFields.add(field);
     }
   }
@@ -187,7 +189,8 @@ public class TranslationContext {
   public void setMethod(PageObjectMethod method) {
     // first check if same method already exists
     if (methodNames.contains(method.getDeclaration().getName())) {
-      throw new UtamCompilationError(VALIDATION.getErrorMessage(504, method.getDeclaration().getName()));
+      throw new UtamCompilationError(
+          VALIDATION.getErrorMessage(504, method.getDeclaration().getName()));
     }
     // no duplicates - add method
     methodNames.add(method.getDeclaration().getName());
@@ -258,8 +261,7 @@ public class TranslationContext {
    * @return the profile configuration or null
    */
   public ProfileConfiguration getConfiguredProfile(String name) {
-    return translatorConfiguration.getConfiguredProfiles()
-        .stream()
+    return translatorConfiguration.getConfiguredProfiles().stream()
         .filter(configuration -> configuration.getPropertyKey().equals(name))
         .findAny()
         .orElse(null);
@@ -283,15 +285,17 @@ public class TranslationContext {
    * @return the named method on the Page Object
    */
   public PageObjectMethod getMethod(String name) {
-    PageObjectMethod result = pageObjectMethods.stream()
-        .filter(method -> method.getDeclaration().getName().equals(name))
-        .findFirst()
-        .orElse(null);
+    PageObjectMethod result =
+        pageObjectMethods.stream()
+            .filter(method -> method.getDeclaration().getName().equals(name))
+            .findFirst()
+            .orElse(null);
     if (result == null) {
-      result = elementGetters.stream()
-          .filter(method -> method.getDeclaration().getName().equals(name))
-          .findFirst()
-          .orElse(null);
+      result =
+          elementGetters.stream()
+              .filter(method -> method.getDeclaration().getName().equals(name))
+              .findFirst()
+              .orElse(null);
     }
     if (result == null) {
       throw new AssertionError(String.format("method '%s' not found in JSON", name));
@@ -300,8 +304,8 @@ public class TranslationContext {
   }
 
   /**
-   * used from unit test deserializer to get full list of elements <br> some elements are not
-   * declared as fields
+   * used from unit test deserializer to get full list of elements <br>
+   * some elements are not declared as fields
    *
    * @return collection of element contexts
    */
@@ -313,7 +317,7 @@ public class TranslationContext {
    * remember element for unit test deserializer
    *
    * @param elementName name of the element
-   * @param helper      information used to generate unit test
+   * @param helper information used to generate unit test
    */
   public void setTestableElement(String elementName, ElementUnitTestHelper helper) {
     this.testableElements.put(elementName, helper);
@@ -322,8 +326,9 @@ public class TranslationContext {
   private List<BasicElementGetterMethod> getBasicElementsGetters() {
     // only used element getter should be returned
     return elementGetters.stream()
-        .filter(getter -> getter.isPublic() || usedPrivateMethods
-            .contains(getter.getDeclaration().getName()))
+        .filter(
+            getter ->
+                getter.isPublic() || usedPrivateMethods.contains(getter.getDeclaration().getName()))
         .collect(Collectors.toList());
   }
 
@@ -337,17 +342,19 @@ public class TranslationContext {
     List<UnionType> unionTypes = new ArrayList<>();
     if (isImplementationPageObject()) {
       // if impl only PO has private basic elements - declare interface as well
-      getters.forEach(getter -> {
-        if (!getter.isPublic() && getter.getInterfaceUnionType() != null) {
-          unionTypes.add(getter.getInterfaceUnionType());
-        }
-      });
+      getters.forEach(
+          getter -> {
+            if (!getter.isPublic() && getter.getInterfaceUnionType() != null) {
+              unionTypes.add(getter.getInterfaceUnionType());
+            }
+          });
     }
-    getters.forEach(getter -> {
-      if (getter.getClassUnionType() != null) {
-        unionTypes.add(getter.getClassUnionType());
-      }
-    });
+    getters.forEach(
+        getter -> {
+          if (getter.getClassUnionType() != null) {
+            unionTypes.add(getter.getClassUnionType());
+          }
+        });
     return unionTypes;
   }
 
@@ -359,11 +366,12 @@ public class TranslationContext {
   public List<UnionType> getInterfaceUnionTypes() {
     List<BasicElementGetterMethod> getters = getBasicElementsGetters();
     List<UnionType> unionTypes = new ArrayList<>();
-    getters.forEach(getter -> {
-      if (getter.getInterfaceUnionType() != null) {
-        unionTypes.add(getter.getInterfaceUnionType());
-      }
-    });
+    getters.forEach(
+        getter -> {
+          if (getter.getInterfaceUnionType() != null) {
+            unionTypes.add(getter.getInterfaceUnionType());
+          }
+        });
     return unionTypes;
   }
 
@@ -411,12 +419,12 @@ public class TranslationContext {
   /**
    * Process compiler error - depending on config either throw or report
    *
-   * @param parser           instance of the parser
+   * @param parser instance of the parser
    * @param compilationError thrown error
    */
   public void processError(JsonParser parser, Exception compilationError) {
-    UtamCompilationError.ErrorSupplier errorSupplier = processParserError(parser, compilationError,
-        pageObjectURI);
+    UtamCompilationError.ErrorSupplier errorSupplier =
+        processParserError(parser, compilationError, pageObjectURI);
     if (this.translatorConfiguration.getErrorsConfig().isInterrupt()) {
       throw new UtamCompilationError(errorSupplier.getMessage(), errorSupplier.getCause());
     } else {
@@ -432,5 +440,4 @@ public class TranslationContext {
   public CompilerErrorsContext.CompilerError getCompilerError() {
     return this.error;
   }
-
 }

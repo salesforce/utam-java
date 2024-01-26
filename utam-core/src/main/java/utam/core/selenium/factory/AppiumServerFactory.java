@@ -13,7 +13,6 @@ import static utam.core.selenium.factory.SystemProperties.getNodeJSPath;
 import io.appium.java_client.service.local.AppiumDriverLocalService;
 import io.appium.java_client.service.local.AppiumServiceBuilder;
 import io.appium.java_client.service.local.flags.GeneralServerFlag;
-
 import java.io.File;
 
 /**
@@ -38,8 +37,7 @@ public class AppiumServerFactory {
     serviceBuilder.withAppiumJS(new File(getAppiumPath()));
     serviceBuilder.withArgument(GeneralServerFlag.SESSION_OVERRIDE);
     serviceBuilder.usingAnyFreePort();
-    AppiumDriverLocalService service = AppiumDriverLocalService
-            .buildService(serviceBuilder);
+    AppiumDriverLocalService service = AppiumDriverLocalService.buildService(serviceBuilder);
     service.clearOutPutStreams();
     service.enableDefaultSlf4jLoggingOfOutputData();
     return service;

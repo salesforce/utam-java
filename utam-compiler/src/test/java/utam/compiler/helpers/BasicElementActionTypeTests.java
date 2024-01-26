@@ -1,8 +1,10 @@
 package utam.compiler.helpers;
 
-import org.testng.annotations.Test;
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.element.BasicElement;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static utam.compiler.helpers.TypeUtilities.VOID;
+import static utam.compiler.helpers.TypeUtilities.getClassFromFullName;
+import static utam.core.framework.UtamLogger.info;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -10,12 +12,9 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static utam.compiler.helpers.TypeUtilities.VOID;
-import static utam.compiler.helpers.TypeUtilities.getClassFromFullName;
-import static utam.core.framework.UtamLogger.info;
+import org.testng.annotations.Test;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.element.BasicElement;
 
 public class BasicElementActionTypeTests {
 
@@ -29,16 +28,20 @@ public class BasicElementActionTypeTests {
       return clazz.getDeclaredMethod(methodName, parameters);
     } catch (NoSuchMethodException e) {
       // some methods are declared in parent interface
-      Class parent = clazz.getInterfaces().length > 0? clazz.getInterfaces()[0] : null;
+      Class parent = clazz.getInterfaces().length > 0 ? clazz.getInterfaces()[0] : null;
       try {
         return parent.getDeclaredMethod(methodName, parameters);
       } catch (Exception eParent) {
         throw new AssertionError(
-            String.format("method '%s' with parameters {%s} not found in class %s or its parent %s",
+            String.format(
+                "method '%s' with parameters {%s} not found in class %s or its parent %s",
                 methodName,
-                Stream.of(parameters).filter(Objects::nonNull).map(Class::getSimpleName)
+                Stream.of(parameters)
+                    .filter(Objects::nonNull)
+                    .map(Class::getSimpleName)
                     .collect(Collectors.joining(",")),
-                clazz.getName(), parent.getName()));
+                clazz.getName(),
+                parent.getName()));
       }
     }
   }
@@ -64,7 +67,9 @@ public class BasicElementActionTypeTests {
               assertThat(
                   String.format(
                       "action '%s' returns '%s', method returns '%s'",
-                      action, action.getReturnType().getSimpleName(), method.getReturnType().getName()),
+                      action,
+                      action.getReturnType().getSimpleName(),
+                      method.getReturnType().getName()),
                   sameType(action.getReturnType(), method.getReturnType()),
                   is(true));
               Class[] params = action.getParameterClasses();
@@ -121,10 +126,10 @@ public class BasicElementActionTypeTests {
   public void testGetCssPropertyValue() {
     ActionType action = BasicElementActionType.getCssPropertyValue;
     Set<String> parameterTypeStrings =
-            action.getParametersTypes("test", 1).stream()
-                    .map(TypeProvider::getSimpleName)
-                    .filter(simpleName -> !simpleName.isEmpty())
-                    .collect(Collectors.toSet());
+        action.getParametersTypes("test", 1).stream()
+            .map(TypeProvider::getSimpleName)
+            .filter(simpleName -> !simpleName.isEmpty())
+            .collect(Collectors.toSet());
 
     assertThat(parameterTypeStrings, hasSize(1));
     assertThat(parameterTypeStrings.iterator().next(), is(equalTo(STRING_TYPE_NAME)));
@@ -162,16 +167,16 @@ public class BasicElementActionTypeTests {
   }
 
   static boolean sameType(TypeProvider actual, Class expected) {
-    if(actual.isSameType(VOID)) {
+    if (actual.isSameType(VOID)) {
       return expected.getName().toLowerCase().contains("void");
     }
-    if(expected.equals(getClassFromFullName(actual))) {
+    if (expected.equals(getClassFromFullName(actual))) {
       return true;
     }
-    if(actual == PrimitiveType.NUMBER) {
+    if (actual == PrimitiveType.NUMBER) {
       return expected.getName().toLowerCase().startsWith("int");
     }
-    if(actual == PrimitiveType.BOOLEAN) {
+    if (actual == PrimitiveType.BOOLEAN) {
       return expected.getName().equalsIgnoreCase(actual.getSimpleName());
     }
     return false;

@@ -7,18 +7,6 @@
  */
 package utam.core.selenium.factory;
 
-import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.ios.IOSDriver;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.DesiredCapabilities;
-
-import utam.core.driver.Driver;
-import utam.core.driver.DriverType;
-import org.testng.annotations.Test;
-import utam.core.selenium.appium.MobileDriverAdapter;
-import utam.core.selenium.element.DriverAdapter;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -29,6 +17,17 @@ import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.factory.WebDriverFactory.ERR_UNKNOWN_DRIVER_TYPE;
 import static utam.core.selenium.factory.WebDriverFactory.getAdapter;
+
+import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.ios.IOSDriver;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.testng.annotations.Test;
+import utam.core.driver.Driver;
+import utam.core.driver.DriverType;
+import utam.core.selenium.appium.MobileDriverAdapter;
+import utam.core.selenium.element.DriverAdapter;
 
 /**
  * @author elizaveta.ivanova

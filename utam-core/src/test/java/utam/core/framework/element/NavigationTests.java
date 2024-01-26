@@ -17,6 +17,12 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
 import io.appium.java_client.AppiumDriver;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Navigation;
 import org.testng.annotations.Test;
@@ -26,13 +32,6 @@ import utam.core.framework.base.PageMarker;
 import utam.core.framework.base.PageObject;
 import utam.core.framework.base.RootPageObject;
 import utam.core.framework.consumer.UtamError;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Test for the Navigation implementation
@@ -68,7 +67,7 @@ public class NavigationTests {
   @Test
   public void testSwitchWindow() {
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
-//    MockUtilities mock = new MockUtilities();
+    //    MockUtilities mock = new MockUtilities();
     WebDriver driver = mock.getWebDriverMock();
     // Create a Map to store the associations between handles and URLs
     Map<String, String> handleUrlMap = new HashMap<>();
@@ -91,7 +90,8 @@ public class NavigationTests {
 
     // Specify the behavior of the getCurrentUrl() method using the Map
     when(driver.getWindowHandle()).thenReturn(TEST_TAB);
-    when(driver.getCurrentUrl()).thenAnswer(invocation -> handleUrlMap.get(driver.getWindowHandle()));
+    when(driver.getCurrentUrl())
+        .thenAnswer(invocation -> handleUrlMap.get(driver.getWindowHandle()));
 
     // Switch to test_url and assert the URL
     new NavigationImpl(mock.getFactory()).switchToWindow(TEST_URL);
@@ -149,10 +149,12 @@ public class NavigationTests {
     when(driver.getWindowHandles()).thenReturn(handleUrlMap.keySet());
 
     // Thread for testing the wait
-    Thread waitForThread = new Thread(() -> {
-      navigation.waitForNewWindow();
-      finishedWaiting.set(true);
-    });
+    Thread waitForThread =
+        new Thread(
+            () -> {
+              navigation.waitForNewWindow();
+              finishedWaiting.set(true);
+            });
 
     // Setup and start the method
     navigation.setupWaitForNewWindow();
@@ -183,10 +185,12 @@ public class NavigationTests {
 
     // Thread for testing the wait
     AtomicReference<PageObject> pageObject = new AtomicReference<>(null);
-    Thread waitForThread = new Thread(() -> {
-      pageObject.set(navigation.waitForNewWindowAndLoad(TestLoad.class));
-      finishedWaiting.set(true);
-    });
+    Thread waitForThread =
+        new Thread(
+            () -> {
+              pageObject.set(navigation.waitForNewWindowAndLoad(TestLoad.class));
+              finishedWaiting.set(true);
+            });
 
     // Setup and start the method
     navigation.setupWaitForNewWindow();
@@ -215,10 +219,13 @@ public class NavigationTests {
 
     // Specify the behavior of the getCurrentUrl() method using the Map
     when(driver.getWindowHandle()).thenReturn("tab2");
-    when(driver.getCurrentUrl()).thenAnswer(invocation -> handleUrlMap.get(driver.getWindowHandle()));
+    when(driver.getCurrentUrl())
+        .thenAnswer(invocation -> handleUrlMap.get(driver.getWindowHandle()));
 
     // Switch to test_url and assert the URL
-    PageObject pageObject = new NavigationImpl(mock.getFactory()).switchToNewWindowAndLoad("http://www.example2.com", TestLoad.class);
+    PageObject pageObject =
+        new NavigationImpl(mock.getFactory())
+            .switchToNewWindowAndLoad("http://www.example2.com", TestLoad.class);
     assertThat(driver.getCurrentUrl(), is(equalTo("http://www.example2.com")));
     assertThat(pageObject.getClass(), is(TestLoad.class));
   }

@@ -14,11 +14,11 @@ import java.util.function.Supplier;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.element.Element;
+import utam.core.element.FrameElement;
 import utam.core.element.Locator;
 import utam.core.framework.UtamCoreError;
 import utam.core.framework.base.PageObjectsFactory;
 import utam.core.framework.base.RootPageObject;
-import utam.core.element.FrameElement;
 
 /**
  * implementation of the document object
@@ -36,6 +36,7 @@ public class DocumentObject implements Document {
 
   /**
    * Initializes a new instance of the DocumentObject class
+   *
    * @param factory the PageObjectsFactory used to create Page Object instances.
    */
   public DocumentObject(PageObjectsFactory factory) {
@@ -50,7 +51,10 @@ public class DocumentObject implements Document {
 
   @Override
   public void waitForDocumentReady() {
-    driver.waitFor(() -> (Boolean) driver.executeScript(DOM_READY_JAVASCRIPT), "wait for DOM ready state", null);
+    driver.waitFor(
+        () -> (Boolean) driver.executeScript(DOM_READY_JAVASCRIPT),
+        "wait for DOM ready state",
+        null);
   }
 
   @Override
@@ -67,7 +71,7 @@ public class DocumentObject implements Document {
 
   @Override
   public void enterFrame(FrameElement frame) {
-    if(frame == null) {
+    if (frame == null) {
       throw new UtamCoreError(ERR_CANT_ENTER_NULL_FRAME);
     }
     Element element = getUnwrappedElement(frame);

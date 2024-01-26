@@ -27,6 +27,7 @@ public class BasicElementUnionTypeImpl extends FromString implements UnionType {
 
   /**
    * Initializes a new instance of the BasicElementUnionTypeImpl class
+   *
    * @param implementedInterface the interface to be implemented
    */
   public BasicElementUnionTypeImpl(TypeProvider implementedInterface) {
@@ -41,9 +42,10 @@ public class BasicElementUnionTypeImpl extends FromString implements UnionType {
 
   @Override
   public List<String> getDeclarationCode() {
-    String code = String
-        .format("public static class %s extends %s implements %s {}", getSimpleName(),
-            extendedType.getSimpleName(), implementedInterface.getSimpleName());
+    String code =
+        String.format(
+            "public static class %s extends %s implements %s {}",
+            getSimpleName(), extendedType.getSimpleName(), implementedInterface.getSimpleName());
     return Collections.singletonList(code);
   }
 }

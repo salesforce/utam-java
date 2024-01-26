@@ -17,14 +17,10 @@ import utam.core.framework.base.RootPageObject;
  */
 public interface Navigation {
 
-  /**
-   * Command to navigate one step backward in the browsing context
-   */
+  /** Command to navigate one step backward in the browsing context */
   void back();
 
-  /**
-   * Command to navigate one step forward in the browsing context
-   */
+  /** Command to navigate one step forward in the browsing context */
   void forward();
 
   /**
@@ -41,9 +37,7 @@ public interface Navigation {
    */
   void closeWindow(String url);
 
-  /**
-   * Closes the current window
-   */
+  /** Closes the current window */
   void closeWindow();
 
   /**
@@ -60,14 +54,12 @@ public interface Navigation {
    */
   Window currentWindow();
 
-  /**
-   * Sets up a wait for a new window to appear after taking a subsequent action
-   */
+  /** Sets up a wait for a new window to appear after taking a subsequent action */
   void setupWaitForNewWindow();
 
   /**
-   * Waits for a new window to be opened and switches the command context to the new window;
-   * if called without a prior call to setupWaitForNewWindow, an exception is thrown
+   * Waits for a new window to be opened and switches the command context to the new window; if
+   * called without a prior call to setupWaitForNewWindow, an exception is thrown
    *
    * @return the new window
    */
@@ -82,12 +74,12 @@ public interface Navigation {
   <T extends RootPageObject> T waitForNewWindowAndLoad(Class<T> type);
 
   /**
-   * Switches to the window navigated to the specified URL and loads a Page Object that is a new root
+   * Switches to the window navigated to the specified URL and loads a Page Object that is a new
+   * root
    *
    * @param url the url of the window to navigate to
    * @param type the type of page object to load
    * @return a Page Object that is a new root
    */
   <T extends RootPageObject> T switchToNewWindowAndLoad(String url, Class<T> type);
-
 }

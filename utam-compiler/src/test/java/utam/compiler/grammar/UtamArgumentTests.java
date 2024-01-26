@@ -32,7 +32,8 @@ public class UtamArgumentTests {
 
   private static void testArgs(String argJson) {
     JsonBuilderTestUtility test = new JsonBuilderTestUtility();
-    test.addRawString("methods",
+    test.addRawString(
+        "methods",
         String.format(
             "[{ \"name\" : \"test\", \"compose\" : [ {\"apply\": \"self\", \"args\": [%s]} ]}]",
             argJson));
@@ -41,19 +42,25 @@ public class UtamArgumentTests {
 
   @Test
   public void testDuplicateNamesThrows() {
-    String json = "{\"name\":\"name\", \"type\":\"string\"}, {\"name\":\"name\", \"type\":\"string\"}";
+    String json =
+        "{\"name\":\"name\", \"type\":\"string\"}, {\"name\":\"name\", \"type\":\"string\"}";
     Exception e = expectThrows(UtamCompilationError.class, () -> testArgs(json));
-    assertThat(e.getMessage(), containsString(
-        "error 107: method \"test\" arguments: argument with name \"name\" is already declared"));
-
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 107: method \"test\" arguments: argument with name \"name\" is already"
+                + " declared"));
   }
 
   @Test
   public void testUnknownTypeThrows() {
     String json = "{  \"name\" :  \"name\",  \"type\" : \"type\" }";
     Exception e = expectThrows(UtamCompilationError.class, () -> testArgs(json));
-    assertThat(e.getMessage(), containsString(
-        "error 103: method \"test\" arguments: unsupported argument type \"type\", supported are"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 103: method \"test\" arguments: unsupported argument type \"type\", supported"
+                + " are"));
   }
 
   @Test
@@ -91,7 +98,9 @@ public class UtamArgumentTests {
 
   @Test
   public void testSelectorArgByValueWithArgs() {
-    String json = "{  \"type\" : \"locator\", \"value\" : { \"css\" : \"css[%s]\" , \"args\" : [{ \"value\" : \"1\"}] } }";
+    String json =
+        "{  \"type\" : \"locator\", \"value\" : { \"css\" : \"css[%s]\" , \"args\" : [{ \"value\" :"
+            + " \"1\"}] } }";
     testArgs(json);
   }
 
@@ -99,32 +108,40 @@ public class UtamArgumentTests {
   public void testUnknownElementThrows() {
     String json = "{  \"value\" :  \"argName\",  \"type\" : \"elementReference\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
-    assertThat(e.getMessage(),
+    assertThat(
+        e.getMessage(),
         containsString(
-            "error 101: method \"test\" arguments: unknown element with name \"argName\" is referenced"));
+            "error 101: method \"test\" arguments: unknown element with name \"argName\" is"
+                + " referenced"));
   }
 
   @Test
   public void testNameMissingThrows() {
     String json = "{ \"type\" : \"string\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
-    assertThat(e.getMessage(),
-        containsString("error 113: method \"test\" arguments: either \"name\" or \"value\" is required for an argument"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 113: method \"test\" arguments: either \"name\" or \"value\" is required for an"
+                + " argument"));
   }
 
   @Test
   public void testTypeMissingThrows() {
     String json = "{ \"name\" : \"name\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
-    assertThat(e.getMessage(),
-        containsString("error 112: method \"test\" arguments: \"type\" is required for an argument \"name\""));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 112: method \"test\" arguments: \"type\" is required for an argument \"name\""));
   }
 
   @Test
   public void testUnsupportedValueThrows() {
     String json = "{ \"value\": 1.024 }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
-    assertThat(e.getMessage(),
+    assertThat(
+        e.getMessage(),
         containsString(
             "error 102: method \"test\" arguments: unsupported literal argument type \"1.024\""));
   }
@@ -133,7 +150,8 @@ public class UtamArgumentTests {
   public void testRedundantValueWithTypeThrows() {
     String json = "{ \"value\" : true, \"type\" : \"string\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
-    assertThat(e.getMessage(),
+    assertThat(
+        e.getMessage(),
         containsString("error 100: method \"test\" arguments: incorrect argument format"));
   }
 
@@ -141,15 +159,19 @@ public class UtamArgumentTests {
   public void testRedundantValueWithNameThrows() {
     String json = "{ \"value\" : true, \"name\" : \"name\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
-    assertThat(e.getMessage(),
-        containsString("error 111: method \"test\" arguments: either \"name\" or \"value\" is supported for an argument, not both"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 111: method \"test\" arguments: either \"name\" or \"value\" is supported for an"
+                + " argument, not both"));
   }
 
   @Test
   public void testMissingPredicate() {
     String json = "{  \"name\" :  \"name\",  \"type\" : \"function\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
-    assertThat(e.getMessage(),
+    assertThat(
+        e.getMessage(),
         containsString("error 104: method \"test\" arguments: incorrect predicate format"));
   }
 
@@ -157,70 +179,84 @@ public class UtamArgumentTests {
   public void testArgByValueUnknownObjectThrows() {
     String json = "{  \"value\" : { \"extra\" : true } }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
-    assertThat(e.getMessage(),
+    assertThat(
+        e.getMessage(),
         containsString("error 102: method \"test\" arguments: unsupported literal argument type"));
   }
 
   @Test
   public void testElementReferenceRedundantPredicate() {
-    String json = "{  \"value\" :  \"element\",  \"type\" : \"elementReference\", \"predicate\" : [] }";
+    String json =
+        "{  \"value\" :  \"element\",  \"type\" : \"elementReference\", \"predicate\" : [] }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
-    assertThat(e.getMessage(), containsString(
-        "error 106: method \"test\" arguments: incorrect format of elementReference argument"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 106: method \"test\" arguments: incorrect format of elementReference argument"));
   }
 
   @Test
   public void testElementReferenceNameMandatoryThrows() {
     String json = "{  \"type\" : \"elementReference\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
-    assertThat(e.getMessage(),
+    assertThat(
+        e.getMessage(),
         containsString(
-            "error 103: method \"test\" arguments: unsupported argument type \"elementReference\", supported are"));
+            "error 103: method \"test\" arguments: unsupported argument type \"elementReference\","
+                + " supported are"));
   }
 
   @Test
   public void testUnsupportedPropertyThrows() {
     String json = "{  \"error\" : \"text\" }";
     UtamError e = expectThrows(UtamError.class, () -> testArgs(json));
-    assertThat(e.getMessage(),
-        containsString("error 113: method \"test\" arguments: either \"name\" or \"value\" is required for an argument"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 113: method \"test\" arguments: either \"name\" or \"value\" is required for an"
+                + " argument"));
   }
 
   @Test
   public void testNonStringTypeThrows() {
     String json = "{  \"value\" :  \"string\",  \"type\" : {} }";
     Exception e = expectThrows(UtamCompilationError.class, () -> testArgs(json));
-    assertThat(e.getMessage(),
+    assertThat(
+        e.getMessage(),
         containsString(
-            "error 10: method \"test\": property \"type\" should be a non empty string, instead found object"));
+            "error 10: method \"test\": property \"type\" should be a non empty string, instead"
+                + " found object"));
   }
 
   @Test
   public void testEmptyNestedArgsThrows() {
     String json = "{  \"value\" :  \"root\",  \"type\" : \"elementReference\", \"args\": [] }";
     Exception e = expectThrows(UtamCompilationError.class, () -> testArgs(json));
-    assertThat(e.getMessage(),
-        containsString(
-            "error 12: method \"test\": property \"args\" should be a non-empty array"));
+    assertThat(
+        e.getMessage(),
+        containsString("error 12: method \"test\": property \"args\" should be a non-empty array"));
   }
 
   @Test
   public void testArgNotObjectThrows() {
     String json = "[]";
     Exception e = expectThrows(UtamCompilationError.class, () -> testArgs(json));
-    assertThat(e.getMessage(),
-        containsString(
-            "error 13: method \"test\": argument should be a non-empty object"));
+    assertThat(
+        e.getMessage(),
+        containsString("error 13: method \"test\": argument should be a non-empty object"));
   }
 
   @Test
   public void testPageObjectNonLiteralParameterWhenReturningVoid() {
-    PageObjectMethod method = new DeserializerUtilities()
-        .getContext("compose/args/nonLiteralPageObject").getMethod("test");
+    PageObjectMethod method =
+        new DeserializerUtilities()
+            .getContext("compose/args/nonLiteralPageObject")
+            .getMethod("test");
     MethodInfo expected = new MethodInfo("test");
     // if return type is not page object itself, use Class with wildcards
     // void test(Class<? extends PageObject> param), but T test(Class<T extends PageObject> param)
-    assertThat(method.getDeclaration().getCodeLine(), is("void test(Class<? extends PageObject> param)"));
+    assertThat(
+        method.getDeclaration().getCodeLine(), is("void test(Class<? extends PageObject> param)"));
     expected.addParameter(new MethodParameterInfo("param", "Class<? extends PageObject>"));
     expected.addImpliedImportedTypes(PAGE_OBJECT.getFullName());
     expected.addImportedTypes(PAGE_OBJECT.getFullName());
@@ -230,12 +266,17 @@ public class UtamArgumentTests {
 
   @Test
   public void testRootPageObjectNonLiteralParameterWhenReturningVoid() {
-    PageObjectMethod method = new DeserializerUtilities()
-        .getContext("compose/args/nonLiteralRootPageObject").getMethod("test");
+    PageObjectMethod method =
+        new DeserializerUtilities()
+            .getContext("compose/args/nonLiteralRootPageObject")
+            .getMethod("test");
     MethodInfo expected = new MethodInfo("test");
     // if return type is not page object itself, use Class with wildcards
-    // void test(Class<? extends RootPageObject> param), but T test(Class<T extends RootPageObject> param)
-    assertThat(method.getDeclaration().getCodeLine(), is("void test(Class<? extends RootPageObject> param)"));
+    // void test(Class<? extends RootPageObject> param), but T test(Class<T extends RootPageObject>
+    // param)
+    assertThat(
+        method.getDeclaration().getCodeLine(),
+        is("void test(Class<? extends RootPageObject> param)"));
     expected.addParameter(new MethodParameterInfo("param", "Class<? extends RootPageObject>"));
     expected.addImpliedImportedTypes(ROOT_PAGE_OBJECT.getFullName());
     expected.addImportedTypes(ROOT_PAGE_OBJECT.getFullName());
@@ -245,12 +286,17 @@ public class UtamArgumentTests {
 
   @Test
   public void testRootPageObjectNonLiteralParameterWhenReturningNonVoid() {
-    PageObjectMethod method = new DeserializerUtilities()
-        .getContext("compose/args/nonLiteralRootPageObjectReturns").getMethod("test");
+    PageObjectMethod method =
+        new DeserializerUtilities()
+            .getContext("compose/args/nonLiteralRootPageObjectReturns")
+            .getMethod("test");
     MethodInfo expected = new MethodInfo("test", "T");
     // if return type is not page object itself, use Class with wildcards
-    // void test(Class<? extends RootPageObject> param), but T test(Class<T extends RootPageObject> param)
-    assertThat(method.getDeclaration().getCodeLine(), is("<T extends RootPageObject> T test(Class<T> param)"));
+    // void test(Class<? extends RootPageObject> param), but T test(Class<T extends RootPageObject>
+    // param)
+    assertThat(
+        method.getDeclaration().getCodeLine(),
+        is("<T extends RootPageObject> T test(Class<T> param)"));
     expected.addParameter(new MethodParameterInfo("param", "Class<T>"));
     expected.addImpliedImportedTypes(ROOT_PAGE_OBJECT.getFullName());
     expected.addImportedTypes(ROOT_PAGE_OBJECT.getFullName());
@@ -261,43 +307,74 @@ public class UtamArgumentTests {
 
   @Test
   public void testAbstractLiteralArgThrows() {
-    RuntimeException e = expectThrows(UtamCompilationError.class,
-        () -> new DeserializerUtilities().getContext("validate/args/abstractLiteralArg"));
-    assertThat(e.getMessage(), containsString("error 105: method \"test\" arguments: literal arguments are not allowed"));
+    RuntimeException e =
+        expectThrows(
+            UtamCompilationError.class,
+            () -> new DeserializerUtilities().getContext("validate/args/abstractLiteralArg"));
+    assertThat(
+        e.getMessage(),
+        containsString("error 105: method \"test\" arguments: literal arguments are not allowed"));
   }
 
   @Test
   public void testComposeMethodLiteralArgThrows() {
-    RuntimeException e = expectThrows(UtamCompilationError.class,
-        () -> new DeserializerUtilities().getContext("validate/args/methodLiteralArg"));
-    assertThat(e.getMessage(), containsString("error 105: method \"test\" arguments: literal arguments are not allowed"));
+    RuntimeException e =
+        expectThrows(
+            UtamCompilationError.class,
+            () -> new DeserializerUtilities().getContext("validate/args/methodLiteralArg"));
+    assertThat(
+        e.getMessage(),
+        containsString("error 105: method \"test\" arguments: literal arguments are not allowed"));
   }
 
   @Test
   public void testNameAndValueThrows() {
-    RuntimeException e = expectThrows(UtamCompilationError.class,
+    RuntimeException e =
+        expectThrows(
+            UtamCompilationError.class,
             () -> new DeserializerUtilities().getContext("validate/args/redundantNameValue"));
-    assertThat(e.getMessage(), containsString("error 111: method \"test\" arguments: either \"name\" or \"value\" is supported for an argument"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 111: method \"test\" arguments: either \"name\" or \"value\" is supported for an"
+                + " argument"));
   }
 
   @Test
   public void testMissingTypeThrows() {
-    RuntimeException e = expectThrows(UtamCompilationError.class,
+    RuntimeException e =
+        expectThrows(
+            UtamCompilationError.class,
             () -> new DeserializerUtilities().getContext("validate/args/missingType"));
-    assertThat(e.getMessage(), containsString("error 112: method \"test\" arguments: \"type\" is required for an argument \"name\""));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 112: method \"test\" arguments: \"type\" is required for an argument \"name\""));
   }
 
   @Test
   public void testMissingNameAndValueThrows() {
-    RuntimeException e = expectThrows(UtamCompilationError.class,
+    RuntimeException e =
+        expectThrows(
+            UtamCompilationError.class,
             () -> new DeserializerUtilities().getContext("validate/args/missingNameValue"));
-    assertThat(e.getMessage(), containsString("error 113: method \"test\" arguments: either \"name\" or \"value\" is required for an argument"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 113: method \"test\" arguments: either \"name\" or \"value\" is required for an"
+                + " argument"));
   }
 
   @Test
   public void testDescriptionInFunctionThrows() {
-    RuntimeException e = expectThrows(UtamCompilationError.class,
+    RuntimeException e =
+        expectThrows(
+            UtamCompilationError.class,
             () -> new DeserializerUtilities().getContext("validate/args/descriptionInFunctionArg"));
-    assertThat(e.getMessage(), containsString("error 114: method \"test\" arguments: property \"description\" is not supported for literal or function argument"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 114: method \"test\" arguments: property \"description\" is not supported for"
+                + " literal or function argument"));
   }
 }

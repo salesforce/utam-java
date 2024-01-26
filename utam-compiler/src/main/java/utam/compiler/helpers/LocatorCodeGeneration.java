@@ -33,12 +33,12 @@ public class LocatorCodeGeneration {
   /**
    * Initializes a new instance of the LocatorCodeGeneration class
    *
-   * @param type       the type of selector
-   * @param locator    the locator
+   * @param type the type of selector
+   * @param locator the locator
    * @param parameters the list of parameters
    */
-  public LocatorCodeGeneration(SelectorType type, Locator locator,
-      List<MethodParameter> parameters) {
+  public LocatorCodeGeneration(
+      SelectorType type, Locator locator, List<MethodParameter> parameters) {
     this.locator = locator;
     this.parameters = parameters;
     this.builderValue = getSelectorAsString(type, locator.getStringValue(), parameters);
@@ -54,12 +54,14 @@ public class LocatorCodeGeneration {
     this(SelectorType.css, LocatorBy.byCss(locatorCss), Collections.emptyList());
   }
 
-  private static String getSelectorAsString(SelectorType type, String valueStr,
-      List<MethodParameter> parameters) {
+  private static String getSelectorAsString(
+      SelectorType type, String valueStr, List<MethodParameter> parameters) {
     String escapedValue = escapeDoubleQuotes(valueStr);
-    String stringValue = parameters.isEmpty() ? String.format("\"%s\"", escapedValue) :
-        String.format("String.format(\"%s\", %s)", escapedValue,
-            getParametersValuesString(parameters));
+    String stringValue =
+        parameters.isEmpty()
+            ? String.format("\"%s\"", escapedValue)
+            : String.format(
+                "String.format(\"%s\", %s)", escapedValue, getParametersValuesString(parameters));
     return String.format(type.pattern, SELECTOR.getSimpleName(), stringValue);
   }
 
@@ -78,6 +80,7 @@ public class LocatorCodeGeneration {
 
   /**
    * Gets the parameters of the locator
+   *
    * @return the list of parameters of the locator
    */
   public List<MethodParameter> getParameters() {
@@ -86,6 +89,7 @@ public class LocatorCodeGeneration {
 
   /**
    * Gets the locator
+   *
    * @return the locator
    */
   public Locator getLocator() {
@@ -94,6 +98,7 @@ public class LocatorCodeGeneration {
 
   /**
    * Gets a literal parameter
+   *
    * @return the literal parameter for the locator
    */
   public MethodParameter getLiteralParameter() {
@@ -102,28 +107,18 @@ public class LocatorCodeGeneration {
     return new Literal(strValue, SELECTOR, nestedParameters);
   }
 
-  /**
-   * The types of selectors usable
-   */
+  /** The types of selectors usable */
   public enum SelectorType {
-    /**
-     * A CSS selector
-     */
+    /** A CSS selector */
     css("%s.byCss(%s)"),
 
-    /**
-     * An accessibility ID for mobile applications
-     */
+    /** An accessibility ID for mobile applications */
     accessid("%s.byAccessibilityId(%s)"),
 
-    /**
-     * A class chain for iOS applications
-     */
+    /** A class chain for iOS applications */
     classchain("%s.byClassChain(%s)"),
 
-    /**
-     * A UIAutomator locator for Android applications
-     */
+    /** A UIAutomator locator for Android applications */
     uiautomator("%s.byUiAutomator(%s)");
 
     private final String pattern;

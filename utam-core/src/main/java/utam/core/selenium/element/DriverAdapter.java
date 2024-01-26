@@ -16,12 +16,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Point;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebElement;
@@ -41,10 +40,9 @@ import utam.core.framework.context.PlatformType;
  */
 public class DriverAdapter implements Driver {
 
-  /**
-   * Error prefix for element not found, used in tests to validate right message
-   */
+  /** Error prefix for element not found, used in tests to validate right message */
   public static final String ERR_ELEMENT_NOT_FOUND_PREFIX = "can't find element";
+
   static final String ERR_SUPPORTED_FOR_MOBILE = "method is applicable only for iOS/Android";
   static final String ERR_CANT_ENTER_NULL_FRAME = "Can't enter null frame element";
   // not final because can be reset
@@ -54,7 +52,7 @@ public class DriverAdapter implements Driver {
   /**
    * Initializes a new instance of the DriverAdapter class
    *
-   * @param driver       the driver instance
+   * @param driver the driver instance
    * @param driverConfig the driver configuration object
    */
   public DriverAdapter(WebDriver driver, DriverConfig driverConfig) {
@@ -64,8 +62,8 @@ public class DriverAdapter implements Driver {
     Options options = this.driver.manage();
     if (options != null && options.timeouts() != null) { // for mock both can be null
       options
-              .timeouts()
-              .implicitlyWait(this.driverConfig.getImplicitTimeout().toSeconds(), TimeUnit.SECONDS);
+          .timeouts()
+          .implicitlyWait(this.driverConfig.getImplicitTimeout().toSeconds(), TimeUnit.SECONDS);
     }
   }
 
@@ -79,14 +77,14 @@ public class DriverAdapter implements Driver {
     if (parameters == null || parameters.length == 0) {
       return new Object[0];
     }
-    return Stream.of(parameters).map(p ->
-            p instanceof ElementAdapter ? ((ElementAdapter) p).getWebElement() : p
-    ).toArray(Object[]::new);
+    return Stream.of(parameters)
+        .map(p -> p instanceof ElementAdapter ? ((ElementAdapter) p).getWebElement() : p)
+        .toArray(Object[]::new);
   }
 
   static String getNotFoundErr(Locator by) {
-    return String
-            .format("%s with locator '%s'", ERR_ELEMENT_NOT_FOUND_PREFIX, by.getValue().toString());
+    return String.format(
+        "%s with locator '%s'", ERR_ELEMENT_NOT_FOUND_PREFIX, by.getValue().toString());
   }
 
   static WebDriver getSeleniumDriver(Driver driver) {
@@ -157,8 +155,8 @@ public class DriverAdapter implements Driver {
   public <T> T waitFor(Supplier<T> isTrue, String message, Duration timeout) {
     Duration waitDuration = timeout == null ? driverConfig.getExplicitTimeout() : timeout;
     String errorMessage = message == null ? "wait for condition" : message;
-    DriverWait driverWait = new DriverWait(this, waitDuration, driverConfig.getPollingInterval(),
-            errorMessage);
+    DriverWait driverWait =
+        new DriverWait(this, waitDuration, driverConfig.getPollingInterval(), errorMessage);
     return driverWait.until((driver) -> isTrue.get());
   }
 

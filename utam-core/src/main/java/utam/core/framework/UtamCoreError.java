@@ -17,9 +17,7 @@ import utam.core.framework.consumer.UtamError;
  */
 public class UtamCoreError extends UtamError {
 
-  /**
-   * Default serial version ID for serializable object
-   */
+  /** Default serial version ID for serializable object */
   private static final long serialVersionUID = 1L;
 
   /**
@@ -35,7 +33,7 @@ public class UtamCoreError extends UtamError {
    * Initializes a new instance of the UtamCoreError class
    *
    * @param message message of the error
-   * @param e       underlying exception of the error
+   * @param e underlying exception of the error
    */
   public UtamCoreError(String message, Exception e) {
     super(message, e);

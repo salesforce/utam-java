@@ -41,8 +41,10 @@ import utam.core.framework.consumer.UtamError;
  */
 public class DefaultSourceConfiguration implements TranslatorSourceConfig {
 
-  static final String ERR_MISSING_SOURCE_PATH = "source path for Page Object '%s' is not configured";
-  static final String ERR_DUPLICATE_PAGE_OBJECT = "source for Page Object '%s' is already configured";
+  static final String ERR_MISSING_SOURCE_PATH =
+      "source path for Page Object '%s' is not configured";
+  static final String ERR_DUPLICATE_PAGE_OBJECT =
+      "source for Page Object '%s' is already configured";
   static final String ERR_IO_DURING_SCAN = "Error while scanning file(s) path %s";
   private static final String PAGE_OBJECT_URI_FORMAT = "%s/pageObjects/%s";
   private final Map<String, String> sourcePath = new HashMap<>();
@@ -52,17 +54,15 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
   /**
    * Initializes a new instance of the DefaultSourceConfiguration class
    *
-   * @param scannerConfig      configuration to scan for page object sources
-   * @param scanner         scanner for page object sources Page Objects will be written
+   * @param scannerConfig configuration to scan for page object sources
+   * @param scanner scanner for page object sources Page Objects will be written
    */
   public DefaultSourceConfiguration(ScannerConfig scannerConfig, RecursiveScanner scanner) {
     this.scanner = scanner;
     this.scannerConfig = scannerConfig;
   }
 
-  /**
-   * Initializes a new instance of the DefaultSourceConfiguration class, only used by unit tests
-   */
+  /** Initializes a new instance of the DefaultSourceConfiguration class, only used by unit tests */
   // used in tests
   DefaultSourceConfiguration() {
     this(new ScannerConfig(new HashMap<>()), new RecursiveScanner(null));
@@ -71,8 +71,8 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
   /**
    * parse file path to extract PO name
    *
-   * @param packageName   name of package is used in matcher
-   * @param filePath      full file path
+   * @param packageName name of package is used in matcher
+   * @param filePath full file path
    * @param fileMaskRegex regex with mask for JSON to extract page object name
    */
   void preProcess(String packageName, Path filePath, String fileMaskRegex) {
@@ -89,8 +89,8 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
     Matcher matcher = relativePattern.matcher(filePath.toString());
     // gets text inside () of the mask, usually PO file name
     final String relativePath = matcher.find() ? matcher.group(1) : "";
-    final String relativePageObjectName = relativePath.replaceAll(Pattern.quote("."), "/")
-        .replace(File.separator, "/");
+    final String relativePageObjectName =
+        relativePath.replaceAll(Pattern.quote("."), "/").replace(File.separator, "/");
     return String.format(PAGE_OBJECT_URI_FORMAT, packageName, relativePageObjectName);
   }
 
@@ -131,8 +131,8 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
   }
 
   /**
-   * scan files recursively to find JSON files with Page Objects,
-   * public because used in downstream projects
+   * scan files recursively to find JSON files with Page Objects, public because used in downstream
+   * projects
    *
    * @author elizaveta.ivanova
    */
@@ -152,15 +152,17 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
     void scan(DefaultSourceConfiguration config, String packageName, String fileMaskRegex) {
       PathMatcher matcher = FileSystems.getDefault().getPathMatcher("regex:" + fileMaskRegex);
       try {
-        Files.walkFileTree(rootFolder, new SimpleFileVisitor<>() {
-          @Override
-          public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-            if (matcher.matches(file)) {
-              config.preProcess(packageName, file, fileMaskRegex);
-            }
-            return FileVisitResult.CONTINUE;
-          }
-        });
+        Files.walkFileTree(
+            rootFolder,
+            new SimpleFileVisitor<>() {
+              @Override
+              public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                if (matcher.matches(file)) {
+                  config.preProcess(packageName, file, fileMaskRegex);
+                }
+                return FileVisitResult.CONTINUE;
+              }
+            });
       } catch (IOException | NullPointerException e) {
         throw new UtamRunnerError(String.format(ERR_IO_DURING_SCAN, rootFolder), e);
       }
@@ -168,8 +170,8 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
   }
 
   /**
-   * unlike regular scanner, accepts list of files instead traversing,
-   * public because used in downstream projects
+   * unlike regular scanner, accepts list of files instead traversing, public because used in
+   * downstream projects
    *
    * @author elizaveta.ivanova
    */
@@ -197,7 +199,6 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
           .filter(file -> relativePattern.matcher(file.toString()).matches())
           .forEach(file -> config.preProcess(packageName, file.toPath(), fileMaskRegex));
     }
-
   }
 
   /**
@@ -214,11 +215,13 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
      * Initializes a new instance of the ScannerConfig class
      *
      * @param pageObjectFileMask the file mask for Page Object description files
-     * @param packagesMapping    the map of directories to packages
+     * @param packagesMapping the map of directories to packages
      */
     public ScannerConfig(String pageObjectFileMask, Map<String, String> packagesMapping) {
-      packagesMapping.forEach((key, value) ->
-          this.packagesMapping.put(key, createPlatformAwareRegex(value + "/" + pageObjectFileMask)));
+      packagesMapping.forEach(
+          (key, value) ->
+              this.packagesMapping.put(
+                  key, createPlatformAwareRegex(value + "/" + pageObjectFileMask)));
     }
 
     /**
@@ -226,7 +229,7 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
      *
      * @param packagesMapping the map of directories to packages
      */
-   public ScannerConfig(Map<String, String> packagesMapping) {
+    public ScannerConfig(Map<String, String> packagesMapping) {
       this(DEFAULT_JSON_FILE_MASK_REGEX, packagesMapping);
     }
 
@@ -253,11 +256,13 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
     /**
      * Initializes a new instance of the SourceWithoutPackages class
      *
-     * @param rootFolder          the root folder to scan
+     * @param rootFolder the root folder to scan
      * @param pageObjectsFileMask the file mask for Page Object description files
      */
     SourceWithoutPackages(String rootFolder, String pageObjectsFileMask) {
-      super(new ScannerConfig(pageObjectsFileMask, new HashMap<>()), new RecursiveScanner(rootFolder));
+      super(
+          new ScannerConfig(pageObjectsFileMask, new HashMap<>()),
+          new RecursiveScanner(rootFolder));
       this.pageObjectFileMask = pageObjectsFileMask;
       this.rootFolder = rootFolder == null ? null : Paths.get(rootFolder);
     }
@@ -266,15 +271,17 @@ public class DefaultSourceConfiguration implements TranslatorSourceConfig {
     public void recursiveScan() {
       PathMatcher matcher = FileSystems.getDefault().getPathMatcher("regex:" + pageObjectFileMask);
       try {
-        Files.walkFileTree(rootFolder, new SimpleFileVisitor<>() {
-          @Override
-          public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-            if (matcher.matches(file)) {
-              preProcess(DEFAULT_PACKAGE_NAME, file, pageObjectFileMask);
-            }
-            return FileVisitResult.CONTINUE;
-          }
-        });
+        Files.walkFileTree(
+            rootFolder,
+            new SimpleFileVisitor<>() {
+              @Override
+              public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                if (matcher.matches(file)) {
+                  preProcess(DEFAULT_PACKAGE_NAME, file, pageObjectFileMask);
+                }
+                return FileVisitResult.CONTINUE;
+              }
+            });
       } catch (IOException | NullPointerException e) {
         throw new UtamRunnerError(String.format(ERR_IO_DURING_SCAN, rootFolder), e);
       }

@@ -48,9 +48,8 @@ import utam.core.declarative.representation.TypeProvider;
 public abstract class UtamMethodAction {
 
   static final Operand SELF_OPERAND = new ConstOperand("this");
-  private static final Set<String> BEFORE_LOAD_ELEMENTS = Stream
-      .of(DOCUMENT_ELEMENT_NAME, ROOT_ELEMENT_NAME).collect(
-          Collectors.toSet());
+  private static final Set<String> BEFORE_LOAD_ELEMENTS =
+      Stream.of(DOCUMENT_ELEMENT_NAME, ROOT_ELEMENT_NAME).collect(Collectors.toSet());
   final String elementName;
   // if set to true, action should be applied to the result of the previous statement
   final boolean isChain;
@@ -69,10 +68,12 @@ public abstract class UtamMethodAction {
       boolean isChain) {
     this.argsNode = argsNode;
     this.hasMatcher = !isEmptyNode(matcherNode);
-    this.matcherProvider = (context, methodContext) ->
-        isEmptyNode(matcherNode) ? null
-            : new ComposeStatementMatcherProvider(matcherNode, methodContext)
-                .getMatcherObject(context);
+    this.matcherProvider =
+        (context, methodContext) ->
+            isEmptyNode(matcherNode)
+                ? null
+                : new ComposeStatementMatcherProvider(matcherNode, methodContext)
+                    .getMatcherObject(context);
     this.elementName = elementName;
     this.isChain = isChain;
     this.isReturnList = isReturnList;
@@ -107,7 +108,8 @@ public abstract class UtamMethodAction {
    * @param methodContext method context has method name
    */
   final void checkBeforeLoadElements(MethodContext methodContext) {
-    if (BEFORE_LOAD_METHOD_NAME.equals(methodContext.getName()) && elementName != null
+    if (BEFORE_LOAD_METHOD_NAME.equals(methodContext.getName())
+        && elementName != null
         && !BEFORE_LOAD_ELEMENTS.contains(elementName)) {
       String message = VALIDATION.getErrorMessage(607);
       throw new UtamCompilationError(message);
@@ -117,26 +119,26 @@ public abstract class UtamMethodAction {
   /**
    * Get abstraction object between JSON and statement representation
    *
-   * @param context          translation context
-   * @param methodContext    method context
+   * @param context translation context
+   * @param methodContext method context
    * @param statementContext statement context
    * @return object
    */
-  abstract Statement getStatement(TranslationContext context, MethodContext methodContext,
-      StatementContext statementContext);
+  abstract Statement getStatement(
+      TranslationContext context, MethodContext methodContext, StatementContext statementContext);
 
   /**
    * Create a compose statement object from mapped Java entity. This method creates a structure that
    * will be used to generate the code for a given object in the `compose` array. Each object in the
    * `compose` array from the JSON PO will create one `ComposeMethodStatement`.
    *
-   * @param context          current PO context
-   * @param methodContext    context of the current method being compiled
+   * @param context current PO context
+   * @param methodContext context of the current method being compiled
    * @param statementContext statement context to collect args
    * @return compose method statement
    */
-  ComposeMethodStatement getComposeAction(TranslationContext context, MethodContext methodContext,
-      StatementContext statementContext) {
+  ComposeMethodStatement getComposeAction(
+      TranslationContext context, MethodContext methodContext, StatementContext statementContext) {
     Statement statement = getStatement(context, methodContext, statementContext);
     // operand should be invoked first because of order of parameters
     Operand operand = statement.getOperand();
@@ -170,13 +172,15 @@ public abstract class UtamMethodAction {
    * @author elizaveta.ivanova
    * @since 240
    */
-  static abstract class Statement {
+  abstract static class Statement {
 
     final TranslationContext context;
     final MethodContext methodContext;
     final StatementContext statementContext;
 
-    Statement(TranslationContext context, MethodContext methodContext,
+    Statement(
+        TranslationContext context,
+        MethodContext methodContext,
         StatementContext statementContext) {
       this.statementContext = statementContext;
       this.context = context;
@@ -221,7 +225,7 @@ public abstract class UtamMethodAction {
 
     @Override
     public List<TypeProvider> getParametersTypes(String parserContext, int parameterCount) {
-      return null; //parameter types are not checked for custom action
+      return null; // parameter types are not checked for custom action
     }
 
     @Override
@@ -254,7 +258,7 @@ public abstract class UtamMethodAction {
      * Initializes a new instance of the ConstOperand class
      *
      * @param strValue the value of the operand
-     * @param isList   a value indicating whether this operand is a list
+     * @param isList a value indicating whether this operand is a list
      */
     public ConstOperand(String strValue, boolean isList) {
       this.strValue = strValue;
@@ -278,7 +282,7 @@ public abstract class UtamMethodAction {
    * @author elizaveta.ivanova
    * @since 238
    */
-  final static class ArgumentsProvider {
+  static final class ArgumentsProvider {
 
     final JsonNode argsNode;
     final String argsParserContext;
@@ -302,7 +306,7 @@ public abstract class UtamMethodAction {
     /**
      * wrap getting an element
      *
-     * @param context     translation context
+     * @param context translation context
      * @param elementName element name
      * @return element context
      */

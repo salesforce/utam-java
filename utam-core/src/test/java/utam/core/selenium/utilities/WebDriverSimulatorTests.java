@@ -7,17 +7,17 @@
  */
 package utam.core.selenium.utilities;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.testng.annotations.Test;
-import utam.core.framework.consumer.UtamError;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.utilities.WebDriverSimulator.ELEMENT_ALREADY_EXISTS;
 import static utam.core.selenium.utilities.WebDriverSimulator.ELEMENT_SELECTOR_NOT_SET;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.testng.annotations.Test;
+import utam.core.framework.consumer.UtamError;
 
 public class WebDriverSimulatorTests {
 
@@ -170,22 +170,18 @@ public class WebDriverSimulatorTests {
   @Test
   public void testNoPublicConstructorThrows() {
     assertThat(PrivateConstructorFactory.getFactory(), is(not(nullValue())));
-    UtamError e = expectThrows(
-        UtamError.class,
-        () -> new WebDriverSimulator(PrivateConstructorFactory.class));
-    assertThat(
-        e.getMessage(),
-        containsString("does not have a public parameterless constructor"));
+    UtamError e =
+        expectThrows(
+            UtamError.class, () -> new WebDriverSimulator(PrivateConstructorFactory.class));
+    assertThat(e.getMessage(), containsString("does not have a public parameterless constructor"));
   }
-  
+
   @Test
   public void testConstructorThrowingExceptionThrows() {
-    UtamError e = expectThrows(
-        UtamError.class,
-        () -> new WebDriverSimulator(ThrowingConstructorFactory.class));
+    UtamError e =
+        expectThrows(
+            UtamError.class, () -> new WebDriverSimulator(ThrowingConstructorFactory.class));
     assertThat(
-        e.getMessage(),
-        containsString("unexpected error executing constructor to factory class"));
+        e.getMessage(), containsString("unexpected error executing constructor to factory class"));
   }
-  
 }

@@ -33,7 +33,9 @@ public class InterfaceMethodTests {
 
   private static PageObjectInterface getInterface(String fileName) {
     return new DeserializerUtilities()
-        .getResultFromFile("interface/" + fileName).getPageObject().getInterface();
+        .getResultFromFile("interface/" + fileName)
+        .getPageObject()
+        .getInterface();
   }
 
   private static MethodDeclaration getMethod(PageObjectInterface result) {
@@ -53,23 +55,29 @@ public class InterfaceMethodTests {
     assertThat(method.getImports(), hasSize(1));
     assertListImport(method.getImports().get(0));
     assertThat(result.getUnionTypes(), hasSize(1));
-    assertThat(result.getUnionTypes().get(0).getDeclarationCode().get(0),
+    assertThat(
+        result.getUnionTypes().get(0).getDeclarationCode().get(0),
         is("interface GetTestElement extends Actionable {}"));
   }
 
   @Test
   public void testMethodReturnsListOfBasicElementsImplOnly() {
-    PageObjectClass result = new DeserializerUtilities()
-        .getResultFromFile("interface/returnListOfBasicElementsImpl").getPageObject()
-        .getImplementation();
+    PageObjectClass result =
+        new DeserializerUtilities()
+            .getResultFromFile("interface/returnListOfBasicElementsImpl")
+            .getPageObject()
+            .getImplementation();
     PageObjectMethod method = result.getMethods().get(0);
-    assertThat(method.getDeclaration().getCodeLine(),
-        is(equalTo("List<GetTestElement> getTest()")));
+    assertThat(
+        method.getDeclaration().getCodeLine(), is(equalTo("List<GetTestElement> getTest()")));
     assertThat(method.getClassImports(), hasSize(greaterThanOrEqualTo(1)));
     assertListImport(method.getClassImports().get(0));
     assertThat(result.getUnionTypes(), hasSize(1));
-    assertThat(result.getUnionTypes().get(0).getDeclarationCode().get(0),
-        is("public static class GetTestElementImpl extends BasePageElement implements GetTestElement {}"));
+    assertThat(
+        result.getUnionTypes().get(0).getDeclarationCode().get(0),
+        is(
+            "public static class GetTestElementImpl extends BasePageElement implements"
+                + " GetTestElement {}"));
   }
 
   @Test
@@ -79,7 +87,8 @@ public class InterfaceMethodTests {
     assertThat(method.getCodeLine(), is(equalTo("GetTestElement getTest()")));
     assertThat(method.getImports(), is(emptyIterable()));
     assertThat(result.getUnionTypes(), hasSize(1));
-    assertThat(result.getUnionTypes().get(0).getDeclarationCode().get(0),
+    assertThat(
+        result.getUnionTypes().get(0).getDeclarationCode().get(0),
         is("interface GetTestElement extends Actionable {}"));
   }
 

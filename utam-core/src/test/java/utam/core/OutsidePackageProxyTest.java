@@ -39,7 +39,7 @@ public class OutsidePackageProxyTest {
     getUnwrappedElement(element);
   }
 
-  interface UnionType extends Actionable, Clickable { }
+  interface UnionType extends Actionable, Clickable {}
 
   @SuppressWarnings("WeakerAccess")
   @PageMarker.Find(css = "root")

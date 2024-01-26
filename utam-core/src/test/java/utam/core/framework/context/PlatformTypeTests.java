@@ -34,9 +34,7 @@ import utam.core.framework.base.PageMarker.Switch;
  */
 public class PlatformTypeTests {
 
-  /**
-   * The fromString method should return valid values for known types
-   */
+  /** The fromString method should return valid values for known types */
   @Test
   public void testFromString() {
     assertThat(PlatformType.fromString("native"), is(equalTo(PlatformType.NATIVE)));
@@ -47,14 +45,11 @@ public class PlatformTypeTests {
     assertThat(PlatformType.fromString(""), is(nullValue()));
   }
 
-  /**
-   * The fromString method should throw the appropriate exception for unknown types
-   */
+  /** The fromString method should throw the appropriate exception for unknown types */
   @Test
   public void testFromStringWithUnknownTypeThrows() {
-    Exception e = expectThrows(
-        IllegalArgumentException.class,
-        () -> PlatformType.fromString("illegal"));
+    Exception e =
+        expectThrows(IllegalArgumentException.class, () -> PlatformType.fromString("illegal"));
     assertThat(e.getMessage(), containsString("No enum constant"));
   }
 
@@ -70,21 +65,14 @@ public class PlatformTypeTests {
     verify(driver, times(2)).setPageContext(WEB);
   }
 
-
   @Switch(WEB)
   @Find(css = "css")
-  public static class TestContextSwitchWeb extends BaseRootPageObject {
-
-  }
+  public static class TestContextSwitchWeb extends BaseRootPageObject {}
 
   @Switch(NATIVE)
   @Find(css = "css")
-  public static class TestContextSwitchNative extends BaseRootPageObject {
-
-  }
+  public static class TestContextSwitchNative extends BaseRootPageObject {}
 
   @Find(css = "css")
-  public static class TestContextSwitchEmpty extends BaseRootPageObject {
-
-  }
+  public static class TestContextSwitchEmpty extends BaseRootPageObject {}
 }

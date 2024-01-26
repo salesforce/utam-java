@@ -54,7 +54,7 @@ public interface TypeProvider {
    *
    * @param anotherType the type provider to declare
    * @return true if the type provider represents the same type as this type provider; otherwise,
-   * false
+   *     false
    */
   default boolean isSameType(TypeProvider anotherType) {
     return anotherType != null

@@ -52,10 +52,12 @@ import utam.core.declarative.representation.TypeProvider;
 @JsonDeserialize
 class UtamMethodActionApply extends UtamMethodAction {
 
-  private static final Operand DOCUMENT_OPERAND = new ConstOperand(String.format("this.%s()",
-      Document.DOCUMENT_ELEMENT.getElementGetterName()));
-  private static final Operand NAVIGATION_OPERAND = new ConstOperand(String.format("this.%s()",
-      Navigation.NAVIGATION_OBJECT.getElementGetterName()));
+  private static final Operand DOCUMENT_OPERAND =
+      new ConstOperand(
+          String.format("this.%s()", Document.DOCUMENT_ELEMENT.getElementGetterName()));
+  private static final Operand NAVIGATION_OPERAND =
+      new ConstOperand(
+          String.format("this.%s()", Navigation.NAVIGATION_OBJECT.getElementGetterName()));
 
   private final String apply;
 
@@ -73,13 +75,14 @@ class UtamMethodActionApply extends UtamMethodAction {
   }
 
   @Override
-  Statement getStatement(TranslationContext context, MethodContext methodContext,
-      StatementContext statementContext) {
+  Statement getStatement(
+      TranslationContext context, MethodContext methodContext, StatementContext statementContext) {
     String parserContext = String.format("method \"%s\"", methodContext.getName());
     VALIDATION.validateNotNullOrEmptyString(apply, parserContext, "apply");
     if (isChain) {
       chainValidations(statementContext, methodContext.getName());
-      // if statement is marked as a chain, it should be applied to previous result, so "element" is redundant
+      // if statement is marked as a chain, it should be applied to previous result, so "element" is
+      // redundant
       if (elementName != null) {
         String message = VALIDATION.getErrorMessage(606, methodContext.getName());
         throw new UtamCompilationError(message);
@@ -153,12 +156,13 @@ class UtamMethodActionApply extends UtamMethodAction {
         return codeLines;
       }
       String variableType = elementContext.getGetterReturnType().getSimpleName();
-      String callGetter = String
-          .format("%s %s = %s", variableType, elementVariableName, getElementGetterString());
+      String callGetter =
+          String.format("%s %s = %s", variableType, elementVariableName, getElementGetterString());
       codeLines.add(callGetter);
       if (elementContext.isNullable()) {
         String exitValue =
-            statementReturn.isSameType(VOID) ? "return"
+            statementReturn.isSameType(VOID)
+                ? "return"
                 : (String.format("return %s", statementReturn.getFalsyValue()));
         codeLines.add(String.format("if (%s == null) { %s; }", elementVariableName, exitValue));
       }
@@ -197,12 +201,13 @@ class UtamMethodActionApply extends UtamMethodAction {
     private final TypeProvider returnType;
 
     /**
-     * @param action           method to invoke
-     * @param returnType       returnType from action, for waitFor it's last predicate
+     * @param action method to invoke
+     * @param returnType returnType from action, for waitFor it's last predicate
      * @param actionParameters parameters for method invocation
-     * @param matcher          matcher object
+     * @param matcher matcher object
      */
-    ApplyOperation(ActionType action,
+    ApplyOperation(
+        ActionType action,
         TypeProvider returnType,
         List<MethodParameter> actionParameters,
         MatcherObject matcher) {
@@ -228,9 +233,8 @@ class UtamMethodActionApply extends UtamMethodAction {
 
     @Override
     protected String getInvocationString() {
-      return String.format("%s(%s)",
-          action.getApplyString(),
-          getParametersValuesString(actionParameters));
+      return String.format(
+          "%s(%s)", action.getApplyString(), getParametersValuesString(actionParameters));
     }
   }
 
@@ -242,18 +246,22 @@ class UtamMethodActionApply extends UtamMethodAction {
    */
   class BasicApplyStatement extends ApplyStatement {
 
-    BasicApplyStatement(TranslationContext context, MethodContext methodContext,
-        StatementContext statementContext, ElementContext elementContext) {
+    BasicApplyStatement(
+        TranslationContext context,
+        MethodContext methodContext,
+        StatementContext statementContext,
+        ElementContext elementContext) {
       super(context, methodContext, statementContext, elementContext);
     }
 
     private List<MethodParameter> getBasicActionParameters(ActionType action) {
       String parserContext = String.format("method \"%s\"", methodContext.getName());
       ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
-      ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
-      List<UtamArgument> arguments = argumentsProvider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
-      arguments
-          .stream()
+      ParametersContext parametersContext =
+          new StatementParametersContext(parserContext, context, methodContext);
+      List<UtamArgument> arguments =
+          argumentsProvider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
+      arguments.stream()
           .map(argument -> argument.asParameter(context, methodContext, parametersContext))
           .forEach(parametersContext::setParameter);
       List<TypeProvider> expectedTypes = action.getParametersTypes(parserContext, arguments.size());
@@ -268,13 +276,16 @@ class UtamMethodActionApply extends UtamMethodAction {
       if (declaredReturnType.isReturnTypeSet()) {
         // if "returnType" is set - check if it's correct
         TypeProvider declaredReturn = declaredReturnType.getReturnType(context);
-        TypeProvider expectedReturn = hasMatcher ? PrimitiveType.BOOLEAN :
-            (elementContext.isReturnAll() ? wrapAsList(action.getReturnType())
-                : action.getReturnType());
+        TypeProvider expectedReturn =
+            hasMatcher
+                ? PrimitiveType.BOOLEAN
+                : (elementContext.isReturnAll()
+                    ? wrapAsList(action.getReturnType())
+                    : action.getReturnType());
         if (!expectedReturn.isSameType(declaredReturn)) {
-          String errorMsg = VALIDATION.getErrorMessage(613, methodName,
-              expectedReturn.getSimpleName(),
-              declaredReturn.getSimpleName());
+          String errorMsg =
+              VALIDATION.getErrorMessage(
+                  613, methodName, expectedReturn.getSimpleName(), declaredReturn.getSimpleName());
           throw new UtamCompilationError(errorMsg);
         }
       }
@@ -304,8 +315,11 @@ class UtamMethodActionApply extends UtamMethodAction {
 
     final ElementContext elementContext;
 
-    ApplyStatement(TranslationContext context, MethodContext methodContext,
-        StatementContext statementContext, ElementContext elementContext) {
+    ApplyStatement(
+        TranslationContext context,
+        MethodContext methodContext,
+        StatementContext statementContext,
+        ElementContext elementContext) {
       super(context, methodContext, statementContext);
       this.elementContext = elementContext;
     }
@@ -316,17 +330,18 @@ class UtamMethodActionApply extends UtamMethodAction {
       ElementsUsageTracker usageTracker = methodContext.getElementUsageTracker();
       String elementName = elementContext.getName();
       if (usageTracker.isReusedElement(elementName)) {
-        return new ElementOperand(elementContext,
-            usageTracker.getReusedElementVariable(elementName));
+        return new ElementOperand(
+            elementContext, usageTracker.getReusedElementVariable(elementName));
       }
       String elementVariableName = statementContext.getElementVariableName(elementName);
       // remember that element is used to not propagate its parameters to method for second time
       // if element is already used in a previous statement, parameters were already added
       // should be done AFTER statement is created
       usageTracker.setElementUsage(elementVariableName, elementContext);
-      String parserContext = String
-          .format("method \"%s\", element \"%s\"", methodContext.getName(), elementName);
-      ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
+      String parserContext =
+          String.format("method \"%s\", element \"%s\"", methodContext.getName(), elementName);
+      ParametersContext parametersContext =
+          new StatementParametersContext(parserContext, context, methodContext);
       elementContext.getParameters().forEach(parametersContext::setParameter);
       List<MethodParameter> parameters = parametersContext.getParameters();
       return new ElementOperand(elementContext, elementVariableName, parameters);
@@ -334,11 +349,12 @@ class UtamMethodActionApply extends UtamMethodAction {
 
     List<MethodParameter> getActionParameters() {
       String parserContext = String.format("method \"%s\"", methodContext.getName());
-      ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
+      ParametersContext parametersContext =
+          new StatementParametersContext(parserContext, context, methodContext);
       ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
-      List<UtamArgument> arguments = argumentsProvider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
-      arguments
-          .stream()
+      List<UtamArgument> arguments =
+          argumentsProvider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
+      arguments.stream()
           .map(argument -> argument.asParameter(context, methodContext, parametersContext))
           .forEach(parametersContext::setParameter);
       return parametersContext.getParameters();
@@ -346,13 +362,16 @@ class UtamMethodActionApply extends UtamMethodAction {
 
     @Override
     ApplyOperation getApplyOperation() {
-      // in case of self invocations make sure that private method is declared because it's being called from another method
+      // in case of self invocations make sure that private method is declared because it's being
+      // called from another method
       context.setMethodUsage(apply);
-      TypeProvider defaultReturnType = statementContext.isLastStatement() ?
-          methodContext.getDeclaredReturnType().getReturnTypeOrDefault(context, VOID) : VOID;
-      TypeProvider operationReturnType = statementContext
-          .getDeclaredReturnOrDefault(context, methodContext.getDeclaredReturnType(),
-              defaultReturnType);
+      TypeProvider defaultReturnType =
+          statementContext.isLastStatement()
+              ? methodContext.getDeclaredReturnType().getReturnTypeOrDefault(context, VOID)
+              : VOID;
+      TypeProvider operationReturnType =
+          statementContext.getDeclaredReturnOrDefault(
+              context, methodContext.getDeclaredReturnType(), defaultReturnType);
       ActionType action = new CustomActionType(apply, operationReturnType);
       List<MethodParameter> parameters = getActionParameters();
       // matcher parameters should be set after action parameters
@@ -383,8 +402,10 @@ class UtamMethodActionApply extends UtamMethodAction {
    */
   class ChainApplyStatement extends ApplyStatement {
 
-    ChainApplyStatement(TranslationContext context,
-        MethodContext methodContext, StatementContext statementContext) {
+    ChainApplyStatement(
+        TranslationContext context,
+        MethodContext methodContext,
+        StatementContext statementContext) {
       super(context, methodContext, statementContext, null);
     }
 

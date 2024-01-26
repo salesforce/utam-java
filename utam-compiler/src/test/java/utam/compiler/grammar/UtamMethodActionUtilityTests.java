@@ -43,9 +43,11 @@ public class UtamMethodActionUtilityTests {
     PageObjectMethod method = context.getMethod(methodName);
     MethodInfo methodInfo = new MethodInfo(methodName, "CustomReturnType");
     methodInfo.addImportedTypes("utam.extension.pageobjects.CustomReturnType");
-    methodInfo.addImpliedImportedTypes(UTILS_IMPORT, UTILITY_IMPORT, "utam.extension.pageobjects.CustomReturnType");
+    methodInfo.addImpliedImportedTypes(
+        UTILS_IMPORT, UTILITY_IMPORT, "utam.extension.pageobjects.CustomReturnType");
     methodInfo.addCodeLine(
-        "CustomReturnType statement0 = CustomExtensionUtils.getFieldValue(new UtamUtilitiesContext(this), fieldType)");
+        "CustomReturnType statement0 = CustomExtensionUtils.getFieldValue(new"
+            + " UtamUtilitiesContext(this), fieldType)");
     methodInfo.addCodeLine("return statement0");
     methodInfo.addParameter(new MethodParameterInfo("fieldType", "String"));
     PageObjectValidationTestHelper.validateMethod(method, methodInfo);
@@ -57,11 +59,16 @@ public class UtamMethodActionUtilityTests {
     PageObjectMethod method = context.getMethod(methodName);
     MethodInfo expected = new MethodInfo(methodName, "List<String>");
     expected.addImpliedImportedTypes(UTILS_IMPORT, UTILITY_IMPORT);
-    expected.addImpliedImportedTypes("utam.extension.pageobjects.CustomReturnType", LIST_IMPORT, COLLECTOR_IMPORT_STR);
+    expected.addImpliedImportedTypes(
+        "utam.extension.pageobjects.CustomReturnType", LIST_IMPORT, COLLECTOR_IMPORT_STR);
     expected.addImportedTypes(LIST_IMPORT);
-    expected.addCodeLine("CustomReturnType statement0 = CustomExtensionUtils.utilityMethod1(new UtamUtilitiesContext(this))");
+    expected.addCodeLine(
+        "CustomReturnType statement0 = CustomExtensionUtils.utilityMethod1(new"
+            + " UtamUtilitiesContext(this))");
     expected.addCodeLine("List<CustomReturnType> statement1 = statement0.method1()");
-    expected.addCodeLine("List<String> statement2 = statement1.stream().flatMap(element -> element.method2().stream()).collect(Collectors.toList())");
+    expected.addCodeLine(
+        "List<String> statement2 = statement1.stream().flatMap(element ->"
+            + " element.method2().stream()).collect(Collectors.toList())");
     expected.addCodeLine("return statement2");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }

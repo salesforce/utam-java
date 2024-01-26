@@ -7,11 +7,11 @@
  */
 package utam.core.selenium.utilities;
 
-import org.openqa.selenium.*;
-import utam.core.framework.consumer.UtamError;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import org.openqa.selenium.*;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * Creates a simulation of a site that can be used with WebDriver, including a mock driver instance
@@ -25,7 +25,8 @@ public class WebDriverSimulator {
   static final String ELEMENT_SELECTOR_NOT_SET =
       "element '%s': selector may not be null or the empty string";
   private static final String NO_PARAMETERLESS_CONSTRUCTOR_FOR_FACTORY =
-      "factory class '%s' does not have a public parameterless constructor, or is in a nested class";
+      "factory class '%s' does not have a public parameterless constructor, or is in a nested"
+          + " class";
   private static final String ERROR_EXECUTING_CONSTRUCTOR_FOR_FACTORY =
       "unexpected error executing constructor to factory class '%s'";
 
@@ -35,6 +36,7 @@ public class WebDriverSimulator {
 
   /**
    * Creates a new instance of the simulator
+   *
    * @param objectFactoryClass the class of an factory for creating driver and element instances
    */
   public WebDriverSimulator(Class<? extends WebDriverSimulatorObjectFactory> objectFactoryClass) {
@@ -43,22 +45,18 @@ public class WebDriverSimulator {
       ctor = objectFactoryClass.getConstructor();
     } catch (NoSuchMethodException | SecurityException e) {
       throw new UtamError(
-          String.format(
-              NO_PARAMETERLESS_CONSTRUCTOR_FOR_FACTORY,
-              objectFactoryClass.getName()),
-          e);
+          String.format(NO_PARAMETERLESS_CONSTRUCTOR_FOR_FACTORY, objectFactoryClass.getName()), e);
     }
-    
+
     WebDriverSimulatorObjectFactory factory = null;
     try {
       factory = ctor.newInstance();
-    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+    } catch (InstantiationException
+        | IllegalAccessException
+        | IllegalArgumentException
         | InvocationTargetException e) {
       throw new UtamError(
-          String.format(
-              ERROR_EXECUTING_CONSTRUCTOR_FOR_FACTORY,
-              objectFactoryClass.getName()),
-          e);
+          String.format(ERROR_EXECUTING_CONSTRUCTOR_FOR_FACTORY, objectFactoryClass.getName()), e);
     }
 
     this.objectFactory = factory;
@@ -125,12 +123,12 @@ public class WebDriverSimulator {
       }
 
       if (selector == null || selector.isEmpty()) {
-        throw new UnsupportedOperationException(String.format(ELEMENT_SELECTOR_NOT_SET, elementName));
+        throw new UnsupportedOperationException(
+            String.format(ELEMENT_SELECTOR_NOT_SET, elementName));
       }
 
       if (knownElements.containsKey(elementName)) {
-        throw new UnsupportedOperationException(
-            String.format(ELEMENT_ALREADY_EXISTS, elementName));
+        throw new UnsupportedOperationException(String.format(ELEMENT_ALREADY_EXISTS, elementName));
       }
 
       this.name = elementName;
@@ -240,15 +238,15 @@ public class WebDriverSimulator {
       return this;
     }
 
-   /**
+    /**
      * Sets the visibility for the element when the Selenium isDisplayed method is called
      *
-     * @param isVisible  the boolean visibility value
+     * @param isVisible the boolean visibility value
      * @return this WebElementInfo object
      */
     public WebElementInfo withVisibility(boolean isVisible) {
-        objectFactory.setElementVisibility(element, isVisible);
-        return this;
+      objectFactory.setElementVisibility(element, isVisible);
+      return this;
     }
 
     /**

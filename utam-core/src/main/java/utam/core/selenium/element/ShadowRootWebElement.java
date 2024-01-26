@@ -8,11 +8,10 @@
 
 package utam.core.selenium.element;
 
-import org.openqa.selenium.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.openqa.selenium.*;
 
 /**
  * COPY FROM SETI <br>
@@ -32,21 +31,16 @@ import java.util.Map;
 @SuppressWarnings("all")
 public class ShadowRootWebElement implements WebElement, WrapsElement, WrapsDriver {
 
-  /**
-   * the JavaScript snippet to query all elements for a selector in a shadow root
-   */
-  public static final String GET_SHADOW_ROOT_QUERY_SELECTOR_ALL = "return arguments[0].shadowRoot.querySelectorAll('%s')";
+  /** the JavaScript snippet to query all elements for a selector in a shadow root */
+  public static final String GET_SHADOW_ROOT_QUERY_SELECTOR_ALL =
+      "return arguments[0].shadowRoot.querySelectorAll('%s')";
 
-  /**
-   * the JavaScript snippet to query a single element for a selector in a shadow root
-   */
-  public static final String GET_SHADOW_ROOT_QUERY_SELECTOR = "return arguments[0].shadowRoot.querySelector('%s')";
+  /** the JavaScript snippet to query a single element for a selector in a shadow root */
+  public static final String GET_SHADOW_ROOT_QUERY_SELECTOR =
+      "return arguments[0].shadowRoot.querySelector('%s')";
 
-  /**
-   * the JavaScript snippet to detect the presence of a shadow root
-   */
+  /** the JavaScript snippet to detect the presence of a shadow root */
   public static final String SHADOW_ROOT_DETECTION_SCRIPT_FRAGMENT = "arguments[0].shadowRoot;";
-
 
   // The host element of the shadowRoot. Needed to execute queries off of.
   private final WebElement rootElement;
@@ -223,8 +217,9 @@ public class ShadowRootWebElement implements WebElement, WrapsElement, WrapsDriv
   @Override
   public WebElement findElement(By by) {
     String selector = getSelectorString(by);
-    Object obj = executor.executeScript(
-        String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, selector), rootElement);
+    Object obj =
+        executor.executeScript(
+            String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, selector), rootElement);
     if (obj == null) {
       throw new NoSuchElementException("Unable to locate element: " + by.toString());
     }

@@ -30,10 +30,11 @@ import utam.core.declarative.translator.TranslatorSourceConfig;
 import utam.core.declarative.translator.TranslatorTargetConfig;
 import utam.core.declarative.translator.UnitTestRunner;
 
-/**
- * A translator generation command callable via command line or programmatically
- */
-@Command(name = "generatePageObjects", mixinStandardHelpOptions = true, description = "A command to generate UTAM Page Objects")
+/** A translator generation command callable via command line or programmatically */
+@Command(
+    name = "generatePageObjects",
+    mixinStandardHelpOptions = true,
+    description = "A command to generate UTAM Page Objects")
 public class TranslatorGenerationCommand implements Callable<Integer> {
 
   static final int CONFIG_ERR = ExitCode.USAGE;
@@ -41,63 +42,87 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
   static final String MISSING_INPUT =
       "You must specify an input directory with the --inputDirectory argument or a list of files";
   static final String TOO_MANY_INPUTS =
-      "You cannot specify both an input directory with the --inputDirectory argument and a list of files";
+      "You cannot specify both an input directory with the --inputDirectory argument and a list of"
+          + " files";
   private static final String INVALID_FILE_LIST =
-      "You cannot specify both an input directory in the compiler configuration file and a list of files";
+      "You cannot specify both an input directory in the compiler configuration file and a list of"
+          + " files";
   static final String INVALID_UNIT_TEST_CONFIG =
       "You cannot specify a unit test runner without a destination directory for unit tests";
   private static final String ROOT_DIRECTORY_MISSING = "Root directory is not configured";
   static final String OUTPUT_DIRECTORY_MISSING = "Output directory is not configured";
   static final String PACKAGE_CONFIG_MISSING = "Packages mapping is not configured";
   static final String REDUNDANT_CLI_ARGS = "If JSON file is set, all other arguments are ignored";
-  static final String ERR_COMPILER_CONFIG_NEEDS_ROOT = "To resolve configuration paths, set compilerRoot";
+  static final String ERR_COMPILER_CONFIG_NEEDS_ROOT =
+      "To resolve configuration paths, set compilerRoot";
 
-  @Option(names = {"-f", "-config", "--config"},
-      description = "JSON file with configuration. "
-          + "Path should be relative to the current module. "
-          + "When set, all other command line parameters will be ignored!")
+  @Option(
+      names = {"-f", "-config", "--config"},
+      description =
+          "JSON file with configuration. "
+              + "Path should be relative to the current module. "
+              + "When set, all other command line parameters will be ignored!")
   File jsonConfig;
 
-  @Option(names = {"-c", "-compilerRoot", "--compilerRoot"},
+  @Option(
+      names = {"-c", "-compilerRoot", "--compilerRoot"},
       description = "Root folder for compiler to resolve relative paths")
   File compilerRoot;
 
-  @Option(names = {"-o", "-outputDirectory", "--outputDirectory"},
+  @Option(
+      names = {"-o", "-outputDirectory", "--outputDirectory"},
       description = "Output directory to which generated Page Object files will be written.")
   File outputDirectory;
 
-  @Option(names = {"-m", "-packageMappingFile", "--packageMappingFile"},
+  @Option(
+      names = {"-m", "-packageMappingFile", "--packageMappingFile"},
       description = "File containing mapping between directories and package names.")
   File packageMappingFile;
 
-  @Option(names = {"-r", "-unitTestRunner", "--unitTestRunner"},
-      description = "Unit test runner to use for generated unit tests for Page Objects. Valid values: ${COMPLETION-CANDIDATES} (default: ${DEFAULT-VALUE})")
+  @Option(
+      names = {"-r", "-unitTestRunner", "--unitTestRunner"},
+      description =
+          "Unit test runner to use for generated unit tests for Page Objects. Valid values:"
+              + " ${COMPLETION-CANDIDATES} (default: ${DEFAULT-VALUE})")
   UnitTestRunner testRunner;
 
-  @Option(names = {"-i", "-inputDirectory", "--inputDirectory"},
-      description = "Input directory to be recursively scanned for UTAM declarative Page Object description files. Cannot be used with an explicit file list.")
+  @Option(
+      names = {"-i", "-inputDirectory", "--inputDirectory"},
+      description =
+          "Input directory to be recursively scanned for UTAM declarative Page Object description"
+              + " files. Cannot be used with an explicit file list.")
   File inputDirectory;
 
-  @Parameters(description = "Explicit list of UTAM declarative Page Object description files to generate. Cannot be used with the --inputDirectory option.")
+  @Parameters(
+      description =
+          "Explicit list of UTAM declarative Page Object description files to generate. Cannot be"
+              + " used with the --inputDirectory option.")
   List<File> inputFiles;
 
-  @Option(names = {"-p", "-profileDirectory", "--profileDirectory"},
+  @Option(
+      names = {"-p", "-profileDirectory", "--profileDirectory"},
       description = "Destination directory to which profile information will be written.")
   private File profileDirectory;
 
-  @Option(names = {"-d", "-profileDefinitionsFile", "--profileDefinitionsFile"},
+  @Option(
+      names = {"-d", "-profileDefinitionsFile", "--profileDefinitionsFile"},
       description = "File containing definitions of profile names and their valid values.")
   private File profileDefinitionsFile;
 
-  @Option(names = {"-u", "-unitTestDirectory", "--unitTestDirectory"},
+  @Option(
+      names = {"-u", "-unitTestDirectory", "--unitTestDirectory"},
       description = "Destination directory to which generated unit tests will be written.")
   private File unitTestDirectory;
 
-  @Option(names = {"-n", "-moduleName", "--moduleName"},
-      description = "Name of the current POs module, when set it's used as a prefix to profile property files.")
+  @Option(
+      names = {"-n", "-moduleName", "--moduleName"},
+      description =
+          "Name of the current POs module, when set it's used as a prefix to profile property"
+              + " files.")
   private String moduleName;
 
-  @Option(names = {"-v", "-versionName", "--versionName"},
+  @Option(
+      names = {"-v", "-versionName", "--versionName"},
       description = "Name of the current POs version, usually matches application version.")
   private String versionName;
 
@@ -164,7 +189,7 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
         return null;
       }
 
-      if(testRunner == null) {
+      if (testRunner == null) {
         testRunner = NONE;
       }
 
@@ -192,14 +217,14 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
         return null;
       }
 
-      TranslatorTargetConfig targetConfig = new DefaultTargetConfiguration(
-          compilerRoot.toString(),
-          outputDirectory.toString(),
-          profileDirectory == null ? "" : profileDirectory.toString(),
-          testRunner,
-          unitTestDirectoryPath,
-          null
-      );
+      TranslatorTargetConfig targetConfig =
+          new DefaultTargetConfiguration(
+              compilerRoot.toString(),
+              outputDirectory.toString(),
+              profileDirectory == null ? "" : profileDirectory.toString(),
+              testRunner,
+              unitTestDirectoryPath,
+              null);
 
       if (packageMappingFile == null) {
         thrownError = new UnsupportedOperationException(PACKAGE_CONFIG_MISSING);
@@ -207,14 +232,14 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
         return null;
       }
 
-      TranslatorSourceConfig sourceConfig = new DefaultSourceConfiguration(
-          getScannerConfig(packageMappingFile),
-          getScanner(inputDirectory, inputFiles));
+      TranslatorSourceConfig sourceConfig =
+          new DefaultSourceConfiguration(
+              getScannerConfig(packageMappingFile), getScanner(inputDirectory, inputFiles));
 
       // NOTE: Copyright cannot be set from the command line; you must
       // use a compiler config JSON settings file.
-      CompilerOutputOptions outputOptions = new CompilerOutputOptions(moduleName, versionName,
-          new ArrayList<>());
+      CompilerOutputOptions outputOptions =
+          new CompilerOutputOptions(moduleName, versionName, new ArrayList<>());
       return new DefaultTranslatorConfiguration(
           outputOptions,
           null,
@@ -240,7 +265,7 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
   public Integer call() {
     TranslatorConfig translatorConfig = getTranslationConfig();
     if (translatorConfig == null) {
-      return returnCode; //error during configuration, exit
+      return returnCode; // error during configuration, exit
     }
     try {
       TranslatorRunner translator = new DefaultTranslatorRunner(translatorConfig);
@@ -263,4 +288,3 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
     translator.writeDependenciesConfigs();
   }
 }
-

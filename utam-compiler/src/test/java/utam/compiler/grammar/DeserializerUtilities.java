@@ -41,7 +41,8 @@ public class DeserializerUtilities {
     this.type = pageObjectName;
     this.translatorConfig = getDefaultConfig();
     // profile is required for implementations POs
-    this.translatorConfig.getConfiguredProfiles()
+    this.translatorConfig
+        .getConfiguredProfiles()
         .add(new StringValueProfileConfig("profile", "test"));
   }
 
@@ -50,13 +51,13 @@ public class DeserializerUtilities {
   }
 
   static UtamCompilationError expectCompilerError(String json) {
-    return expectThrows(UtamCompilationError.class,
-        () -> new DeserializerUtilities().getResultFromString(json));
+    return expectThrows(
+        UtamCompilationError.class, () -> new DeserializerUtilities().getResultFromString(json));
   }
 
   static UtamCompilationError expectCompilerErrorFromFile(String fileName) {
-    return expectThrows(UtamCompilationError.class,
-        () -> new DeserializerUtilities().getContext(fileName));
+    return expectThrows(
+        UtamCompilationError.class, () -> new DeserializerUtilities().getContext(fileName));
   }
 
   TranslatorConfig getTranslatorConfig() {
@@ -79,7 +80,7 @@ public class DeserializerUtilities {
   public TranslationContext getContextWithPath(String fileName) {
     String testFileName = fileName + ".json";
     URL url = DeserializerUtilities.class.getClassLoader().getResource(testFileName);
-    if(url == null) {
+    if (url == null) {
       throw new AssertionError(String.format(" File %s does not exist!", testFileName));
     }
     String path = url.getFile();
@@ -159,5 +160,4 @@ public class DeserializerUtilities {
       return translationContext;
     }
   }
-
 }

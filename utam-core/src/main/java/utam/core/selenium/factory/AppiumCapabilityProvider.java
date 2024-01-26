@@ -24,7 +24,7 @@ public class AppiumCapabilityProvider {
    * set up an Appium capability for creating a new session
    *
    * @param capabilityName the name of Appium capability that try to setup
-   * @param value          the value of Appium capability configured by capabilityName
+   * @param value the value of Appium capability configured by capabilityName
    */
   public void setDesiredCapability(String capabilityName, Object value) {
     desiredCapabilities.setCapability(capabilityName, value);

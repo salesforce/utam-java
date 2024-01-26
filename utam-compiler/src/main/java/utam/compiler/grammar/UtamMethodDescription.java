@@ -34,10 +34,10 @@ public class UtamMethodDescription {
   /**
    * Initialize object
    *
-   * @param text          text describing what method does
-   * @param returnStr     describes meaning of the returned value. by default will be type of the
-   *                      returned value
-   * @param throwsStr     if method throws an exception, can add description for it
+   * @param text text describing what method does
+   * @param returnStr describes meaning of the returned value. by default will be type of the
+   *     returned value
+   * @param throwsStr if method throws an exception, can add description for it
    * @param deprecatedStr if page object is deprecated, text explains why
    */
   @JsonCreator
@@ -55,12 +55,12 @@ public class UtamMethodDescription {
   /**
    * Process/deserialize description node at the method or element level
    *
-   * @param node              Json node
+   * @param node Json node
    * @param validationContext element or method name with prefix
    * @return object with description
    */
-  static UtamMethodDescription processMethodDescriptionNode(JsonNode node,
-      String validationContext) {
+  static UtamMethodDescription processMethodDescriptionNode(
+      JsonNode node, String validationContext) {
     if (isEmptyNode(node)) {
       return new UtamEmptyMethodDescription();
     }
@@ -70,8 +70,8 @@ public class UtamMethodDescription {
       VALIDATION.validateNotNullOrEmptyString(node, parserContext, "text");
       return new UtamMethodDescription(Collections.singletonList(value), null, null, null);
     }
-    UtamMethodDescription object = readNode(node, UtamMethodDescription.class,
-        VALIDATION.getErrorMessage(700, parserContext));
+    UtamMethodDescription object =
+        readNode(node, UtamMethodDescription.class, VALIDATION.getErrorMessage(700, parserContext));
     VALIDATION.validateNotEmptyArray(node.get("text"), parserContext, "text");
     for (JsonNode textNode : node.get("text")) {
       VALIDATION.validateNotNullOrEmptyString(textNode, parserContext, "text");

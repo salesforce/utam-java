@@ -26,10 +26,9 @@ public class UtamCompilationError extends UtamError {
 
   private static final String JSON_SOURCE_SUBSTRING = "[Source:";
 
-  /**
-   * Default serial version ID for serializable object
-   */
+  /** Default serial version ID for serializable object */
   private static final long serialVersionUID = 1L;
+
   private final boolean hasJsonSource;
 
   /**
@@ -45,7 +44,7 @@ public class UtamCompilationError extends UtamError {
   /**
    * Instantiate, add JSON source to message
    *
-   * @param node    json node
+   * @param node json node
    * @param message original message
    */
   public UtamCompilationError(JsonNode node, String message) {
@@ -57,7 +56,7 @@ public class UtamCompilationError extends UtamError {
    * Initializes a new instance of the UtamCompilationError class
    *
    * @param message the message of the error
-   * @param e       the inner exception wrapped by the error
+   * @param e the inner exception wrapped by the error
    */
   public UtamCompilationError(String message, Throwable e) {
     super(message, e);
@@ -67,20 +66,23 @@ public class UtamCompilationError extends UtamError {
   /**
    * Transform error thrown by mapper
    *
-   * @param node         JSON source
-   * @param error        original exception
+   * @param node JSON source
+   * @param error original exception
    * @param errorMessage error message passed by processor, e.i. "error 500: incorrect format of
-   *                     matcher"
+   *     matcher"
    * @return exception object
    */
-  public static ErrorSupplier processMapperError(JsonNode node, Exception error,
-      String errorMessage) {
+  public static ErrorSupplier processMapperError(
+      JsonNode node, Exception error, String errorMessage) {
     String message;
     Throwable cause;
     // there could be error from child objects
     UtamCompilationError compilationError = unwrapCompilerError(error);
     if (compilationError != null) {
-      message = compilationError.hasJsonSource? compilationError.getMessage() : getErrorMessageWithJsonCode(node, compilationError.getMessage());
+      message =
+          compilationError.hasJsonSource
+              ? compilationError.getMessage()
+              : getErrorMessageWithJsonCode(node, compilationError.getMessage());
       cause = compilationError.getCause();
     } else {
       // merge original message with processor message
@@ -95,14 +97,13 @@ public class UtamCompilationError extends UtamError {
   /**
    * Transform error thrown by parser
    *
-   * @param parser         JSON source
-   * @param error          original exception
+   * @param parser JSON source
+   * @param error original exception
    * @param pageObjectName name of the page object to add as prefix
    * @return exception object
    */
-  public static ErrorSupplier processParserError(JsonParser parser,
-      Exception error,
-      String pageObjectName) {
+  public static ErrorSupplier processParserError(
+      JsonParser parser, Exception error, String pageObjectName) {
     String errorMessage;
     Throwable errorCause;
     boolean hasJsonSource;
@@ -115,8 +116,10 @@ public class UtamCompilationError extends UtamError {
     } else if (error instanceof JsonProcessingException) { // malformed JSON
       String errSplitMarker = "problem:";
       String message = error.getMessage();
-      int index = message.contains(errSplitMarker) ? message.indexOf(errSplitMarker)
-          + errSplitMarker.length() : 0;
+      int index =
+          message.contains(errSplitMarker)
+              ? message.indexOf(errSplitMarker) + errSplitMarker.length()
+              : 0;
       // empty string added because JS needs additional parameter for parser message
       errorMessage = VALIDATION.getErrorMessage(900, "") + message.substring(index);
       errorCause = error.getCause();
@@ -131,8 +134,10 @@ public class UtamCompilationError extends UtamError {
     String messageWithSource =
         hasJsonSource ? errorMessage : getErrorMessageWithJsonCode(parser, errorMessage);
     // add PO name prefix
-    String finalMessage = messageWithSource.contains(pageObjectName) ? messageWithSource
-        : String.format("page object '%s' \n%s", pageObjectName, messageWithSource);
+    String finalMessage =
+        messageWithSource.contains(pageObjectName)
+            ? messageWithSource
+            : String.format("page object '%s' \n%s", pageObjectName, messageWithSource);
     return new ErrorSupplier(errorCause, finalMessage);
   }
 
@@ -141,8 +146,8 @@ public class UtamCompilationError extends UtamError {
       return message;
     }
     JsonLocation location = parser.getCurrentLocation();
-    String prefix = String
-        .format("line: %d, column: %d", location.getLineNr(), location.getColumnNr());
+    String prefix =
+        String.format("line: %d, column: %d", location.getLineNr(), location.getColumnNr());
     String source = location.toString();
     return message + String.format("\nat %s %s", prefix, source);
   }

@@ -40,28 +40,33 @@ public class PageObjectContextTests {
   @Test
   public void testBeanWithoutDefaultImplThrows() {
     PageObjectContext context = new PageObjectContextImpl(new HashMap<>());
-    UtamError e = expectThrows(UtamError.class,
-        () -> context.getBean(PageObjectWithoutImplementation.class));
-    String message = String.format(ERR_GET_IMPL_BY_NAME, PageObjectWithoutImplementation.class.getName());
+    UtamError e =
+        expectThrows(UtamError.class, () -> context.getBean(PageObjectWithoutImplementation.class));
+    String message =
+        String.format(ERR_GET_IMPL_BY_NAME, PageObjectWithoutImplementation.class.getName());
     assertThat(e.getMessage(), is(equalTo(message)));
   }
 
   @Test
   public void testBeanCantBeConstructedThrows() {
-    PageObjectContext context = new PageObjectContextImpl(Collections
-        .singletonMap(PageObjectWithoutImplementation.class, PageObjectCantBeConstructed.class));
-    UtamError e = expectThrows(UtamError.class,
-        () -> context.getBean(PageObjectWithoutImplementation.class));
-    assertThat(e.getMessage(), is(equalTo(
-        String.format(ERR_GET_INSTANCE_BY_NAME, PageObjectWithoutImplementation.class.getName()))));
+    PageObjectContext context =
+        new PageObjectContextImpl(
+            Collections.singletonMap(
+                PageObjectWithoutImplementation.class, PageObjectCantBeConstructed.class));
+    UtamError e =
+        expectThrows(UtamError.class, () -> context.getBean(PageObjectWithoutImplementation.class));
+    assertThat(
+        e.getMessage(),
+        is(
+            equalTo(
+                String.format(
+                    ERR_GET_INSTANCE_BY_NAME, PageObjectWithoutImplementation.class.getName()))));
   }
 
-  interface PageObjectWithoutImplementation extends PageObject {
+  interface PageObjectWithoutImplementation extends PageObject {}
 
-  }
-
-  static class PageObjectCantBeConstructed extends BasePageObject implements
-      PageObjectWithoutImplementation {
+  static class PageObjectCantBeConstructed extends BasePageObject
+      implements PageObjectWithoutImplementation {
 
     private PageObjectCantBeConstructed(boolean is) {
       assert is;

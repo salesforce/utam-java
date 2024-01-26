@@ -41,15 +41,16 @@ public interface UtamBase {
   void waitForVisible();
 
   /**
-   * waits for element to become not present OR not displayed within timeout <br> Throws exception
-   * if element still present or visible after timeout. Note: this method throws an error if element
-   * was never present.
+   * waits for element to become not present OR not displayed within timeout <br>
+   * Throws exception if element still present or visible after timeout. Note: this method throws an
+   * error if element was never present.
    */
   void waitForInvisible();
 
   /**
-   * returns true if element is found AND displayed. <br> it's an immediate check, no waiting is
-   * involved. Note: this method throws an error if element was never present.
+   * returns true if element is found AND displayed. <br>
+   * it's an immediate check, no waiting is involved. Note: this method throws an error if element
+   * was never present.
    *
    * @return true if element is present and visible
    */
@@ -58,7 +59,7 @@ public interface UtamBase {
   /**
    * check if current element contains another element with the given selector
    *
-   * @param locator        value of the locator
+   * @param locator value of the locator
    * @param isExpandShadow if set to true, search inside shadow root
    * @return true if element found
    */
@@ -77,7 +78,7 @@ public interface UtamBase {
    * boolean true)
    *
    * @param condition condition to wait for
-   * @param <T>       return type
+   * @param <T> return type
    * @return result of the applied expectations
    */
   <T> T waitFor(Supplier<T> condition);
@@ -86,8 +87,8 @@ public interface UtamBase {
    * polling wait that repeatedly applies expectations until truthy value is return (not null or
    * boolean true)
    *
-   * @param condition    condition to wait for
-   * @param <T>          return type
+   * @param condition condition to wait for
+   * @param <T> return type
    * @param errorMessage message used in the thrown timeout exception
    * @return result of the applied expectations
    */

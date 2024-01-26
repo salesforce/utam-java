@@ -7,25 +7,24 @@
  */
 package utam.compiler.representation;
 
-import utam.compiler.grammar.UtamMethodDescription;
-import utam.compiler.helpers.ParameterUtils;
-import utam.compiler.representation.JavadocObject.MethodJavadoc;
-import utam.core.declarative.representation.MethodDeclaration;
-import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.declarative.representation.TypeProvider;
-import utam.compiler.helpers.ElementContext;
-import utam.compiler.helpers.MatcherType;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.wrapAsList;
 import static utam.compiler.representation.ElementMethod.getElementLocationCode;
 import static utam.compiler.representation.ElementMethod.getPredicateCode;
 import static utam.compiler.representation.ElementMethod.getScopeElementCode;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
+
+import java.util.ArrayList;
+import java.util.List;
+import utam.compiler.grammar.UtamMethodDescription;
+import utam.compiler.helpers.ElementContext;
+import utam.compiler.helpers.MatcherType;
+import utam.compiler.helpers.ParameterUtils;
+import utam.compiler.representation.JavadocObject.MethodJavadoc;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
 
 /**
  * generate code of getter method for custom element
@@ -37,6 +36,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
   /**
    * getter method that returns custom single element
+   *
    * @since 224
    */
   public static final class Single implements PageObjectMethod {
@@ -53,12 +53,12 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     /**
      * Initializes a new instance of the Single class
      *
-     * @param isPublic          a value indicating whether the method is public
-     * @param componentName     the name of the component
+     * @param isPublic a value indicating whether the method is public
+     * @param componentName the name of the component
      * @param locatorParameters the list of parameters of the method
-     * @param scopeElement      the scope element of the method
-     * @param returnType        the return type of the method
-     * @param description       method description in Json
+     * @param scopeElement the scope element of the method
+     * @param returnType the return type of the method
+     * @param description method description in Json
      */
     public Single(
         boolean isPublic,
@@ -70,17 +70,18 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       String scopeElementLine = getScopeElementCode(scopeElement);
       codeLines.add(scopeElementLine);
       String locationCode = getElementLocationCode(componentName, locatorParameters);
-      String statement = String.format("return custom(%s, %s).build(%s.class)",
-          scopeElement.getName(),
-          locationCode,
-          returnType.getSimpleName());
+      String statement =
+          String.format(
+              "return custom(%s, %s).build(%s.class)",
+              scopeElement.getName(), locationCode, returnType.getSimpleName());
       codeLines.add(statement);
       ParameterUtils.setImport(interfaceImports, returnType);
       ParameterUtils.setImport(classImports, returnType);
       ParameterUtils.setImport(classImports, BASIC_ELEMENT);
       this.isPublic = isPublic;
       this.methodName = getElementGetterMethodName(componentName, isPublic);
-      this.parametersTracker = new MethodParametersTracker(String.format("method '%s'", methodName));
+      this.parametersTracker =
+          new MethodParametersTracker(String.format("method '%s'", methodName));
       parametersTracker.setMethodParameters(scopeElement.getParameters());
       parametersTracker.setMethodParameters(locatorParameters);
       this.returnType = returnType;
@@ -100,11 +101,9 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     @Override
     public MethodDeclaration getDeclaration() {
       List<MethodParameter> parameters = parametersTracker.getMethodParameters();
-      JavadocObject javadoc = new MethodJavadoc(methodName,
-          returnType,
-          parameters,
-          description);
-      return new MethodDeclarationImpl(methodName, parameters, returnType, interfaceImports, javadoc);
+      JavadocObject javadoc = new MethodJavadoc(methodName, returnType, parameters, description);
+      return new MethodDeclarationImpl(
+          methodName, parameters, returnType, interfaceImports, javadoc);
     }
 
     @Override
@@ -115,6 +114,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
   /**
    * getter method that returns custom single element or list using filter
+   *
    * @since 224
    */
   public static class Filtered implements PageObjectMethod {
@@ -131,17 +131,18 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     /**
      * Initializes a new instance of the Filtered class
      *
-     * @param isPublic          a value indicating whether the method is public
-     * @param componentName     the name of the component
+     * @param isPublic a value indicating whether the method is public
+     * @param componentName the name of the component
      * @param locatorParameters the list of parameters of the method
-     * @param scopeElement      the scope element of the method
-     * @param returnType        the return type of the method
-     * @param applyMethod       the method to apply for the filter
-     * @param applyParameters   the list of parameters to apply for the filter
-     * @param matcherType       the type of matcher for the filter
+     * @param scopeElement the scope element of the method
+     * @param returnType the return type of the method
+     * @param applyMethod the method to apply for the filter
+     * @param applyParameters the list of parameters to apply for the filter
+     * @param matcherType the type of matcher for the filter
      * @param matcherParameters the list of parameters for the matcher
-     * @param isFindFirst       a value indicating whether the filter applies to only the first element found
-     * @param description       method description in Json
+     * @param isFindFirst a value indicating whether the filter applies to only the first element
+     *     found
+     * @param description method description in Json
      */
     public Filtered(
         boolean isPublic,
@@ -161,7 +162,8 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       ParameterUtils.setImport(classImports, BASIC_ELEMENT);
       this.isPublic = isPublic;
       this.methodName = getElementGetterMethodName(componentName, isPublic);
-      this.parametersTracker = new MethodParametersTracker(String.format("method '%s'", methodName));
+      this.parametersTracker =
+          new MethodParametersTracker(String.format("method '%s'", methodName));
       parametersTracker.setMethodParameters(scopeElement.getParameters());
       parametersTracker.setMethodParameters(locatorParameters);
       parametersTracker.setMethodParameters(applyParameters);
@@ -169,14 +171,17 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       String scopeElementLine = getScopeElementCode(scopeElement);
       codeLines.add(scopeElementLine);
       String locationCode = getElementLocationCode(componentName, locatorParameters);
-      String predicate = getPredicateCode(applyMethod, applyParameters, matcherType, matcherParameters);
-      String methodName = isFindFirst? "build" : "buildList";
-      String statement = String.format("return custom(%s, %s).%s(%s.class, %s)",
-          scopeElement.getName(),
-          locationCode,
-          methodName,
-          returnType.getSimpleName(),
-          predicate);
+      String predicate =
+          getPredicateCode(applyMethod, applyParameters, matcherType, matcherParameters);
+      String methodName = isFindFirst ? "build" : "buildList";
+      String statement =
+          String.format(
+              "return custom(%s, %s).%s(%s.class, %s)",
+              scopeElement.getName(),
+              locationCode,
+              methodName,
+              returnType.getSimpleName(),
+              predicate);
       codeLines.add(statement);
       this.description = description;
     }
@@ -194,11 +199,9 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     @Override
     public MethodDeclaration getDeclaration() {
       List<MethodParameter> parameters = parametersTracker.getMethodParameters();
-      JavadocObject javadoc = new MethodJavadoc(methodName,
-          returnType,
-          parameters,
-          description);
-      return new MethodDeclarationImpl(methodName, parameters, returnType, interfaceImports, javadoc);
+      JavadocObject javadoc = new MethodJavadoc(methodName, returnType, parameters, description);
+      return new MethodDeclarationImpl(
+          methodName, parameters, returnType, interfaceImports, javadoc);
     }
 
     @Override
@@ -209,6 +212,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
 
   /**
    * getter method that returns list of custom elements
+   *
    * @since 224
    */
   public static final class Multiple implements PageObjectMethod {
@@ -225,12 +229,12 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     /**
      * Initializes a new instance of the Multiple class
      *
-     * @param isPublic          a value indicating whether the method is public
-     * @param componentName     the name of the component
+     * @param isPublic a value indicating whether the method is public
+     * @param componentName the name of the component
      * @param locatorParameters the list of parameters of the method
-     * @param scopeElement      the scope element of the method
-     * @param returnType        the return type of the method
-     * @param description       method description in Json
+     * @param scopeElement the scope element of the method
+     * @param returnType the return type of the method
+     * @param description method description in Json
      */
     public Multiple(
         boolean isPublic,
@@ -246,14 +250,15 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       String scopeElementLine = getScopeElementCode(scopeElement);
       codeLines.add(scopeElementLine);
       String locationCode = getElementLocationCode(componentName, locatorParameters);
-      String statement = String.format("return custom(%s, %s).buildList(%s.class)",
-          scopeElement.getName(),
-          locationCode,
-          returnType.getSimpleName());
+      String statement =
+          String.format(
+              "return custom(%s, %s).buildList(%s.class)",
+              scopeElement.getName(), locationCode, returnType.getSimpleName());
       codeLines.add(statement);
       this.isPublic = isPublic;
       this.methodName = getElementGetterMethodName(componentName, isPublic);
-      this.parametersTracker = new MethodParametersTracker(String.format("method '%s'", methodName));
+      this.parametersTracker =
+          new MethodParametersTracker(String.format("method '%s'", methodName));
       parametersTracker.setMethodParameters(scopeElement.getParameters());
       parametersTracker.setMethodParameters(locatorParameters);
       this.description = description;
@@ -262,11 +267,9 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     @Override
     public MethodDeclarationImpl getDeclaration() {
       List<MethodParameter> parameters = parametersTracker.getMethodParameters();
-      JavadocObject javadoc = new MethodJavadoc(methodName,
-          returnType,
-          parameters,
-          description);
-      return new MethodDeclarationImpl(methodName, parameters, returnType, interfaceImports, javadoc);
+      JavadocObject javadoc = new MethodJavadoc(methodName, returnType, parameters, description);
+      return new MethodDeclarationImpl(
+          methodName, parameters, returnType, interfaceImports, javadoc);
     }
 
     @Override

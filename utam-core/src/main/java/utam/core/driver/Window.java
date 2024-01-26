@@ -17,22 +17,22 @@ import utam.core.selenium.element.Rect;
 public interface Window {
 
   /**
-   * Gets the rectangle containing the size and position of the window with the current command focus
+   * Gets the rectangle containing the size and position of the window with the current command
+   * focus
    *
    * @return Rectangle of the window
    */
   Rect getRect();
 
   /**
-   * Sets the rectangle containing the size and position of the window with the current command focus
+   * Sets the rectangle containing the size and position of the window with the current command
+   * focus
    *
    * @param rect the rectangle of the window
    */
   void setRect(Rect rect);
 
-  /**
-   * Closes the window with the current command focus
-   */
+  /** Closes the window with the current command focus */
   void close();
 
   /**

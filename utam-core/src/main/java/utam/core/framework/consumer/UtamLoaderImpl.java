@@ -47,8 +47,9 @@ public class UtamLoaderImpl implements UtamLoader {
 
   /**
    * Initializes a new instance of the UtamLoaderImpl class
+   *
    * @param loaderConfig the configuration object to configure the loader
-   * @param driver       a driver object to drive loaded Page Objects
+   * @param driver a driver object to drive loaded Page Objects
    */
   public UtamLoaderImpl(UtamLoaderConfig loaderConfig, Driver driver) {
     this.loaderConfig = loaderConfig;
@@ -60,8 +61,9 @@ public class UtamLoaderImpl implements UtamLoader {
 
   /**
    * Initializes a new instance of the UtamLoaderImpl class
+   *
    * @param loaderConfig the configuration object to configure the loader
-   * @param webDriver    a WebDriver object to drive loaded Page Objects
+   * @param webDriver a WebDriver object to drive loaded Page Objects
    */
   public UtamLoaderImpl(UtamLoaderConfig loaderConfig, WebDriver webDriver) {
     this.loaderConfig = loaderConfig;
@@ -130,13 +132,15 @@ public class UtamLoaderImpl implements UtamLoader {
 
   @Override
   @Deprecated
-  public <T extends PageObject> T create(Container externalScopeProvider, Class<T> utamPageObjectType, Locator utamPageObjectRoot) {
+  public <T extends PageObject> T create(
+      Container externalScopeProvider, Class<T> utamPageObjectType, Locator utamPageObjectRoot) {
     // todo - abstract selenium
     WebElement webElement = (WebElement) externalScopeProvider.getScope().get();
     // 1. create element wrapper for scope
     Element scope =
         driver instanceof MobileDriverAdapter
-            ? new MobileElementAdapter(webElement, driver) : new ElementAdapter(webElement, driver);
+            ? new MobileElementAdapter(webElement, driver)
+            : new ElementAdapter(webElement, driver);
     // 2. scope root inside wrapper
     Element element = scope.findElement(utamPageObjectRoot, false);
     T instance = factory.getPageContext().getBean(utamPageObjectType);

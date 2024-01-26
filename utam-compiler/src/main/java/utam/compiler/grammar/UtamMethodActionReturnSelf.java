@@ -36,14 +36,14 @@ class UtamMethodActionReturnSelf extends UtamMethodAction {
   }
 
   @Override
-  Statement getStatement(TranslationContext context, MethodContext methodContext,
-      StatementContext statementContext) {
+  Statement getStatement(
+      TranslationContext context, MethodContext methodContext, StatementContext statementContext) {
     throw new IllegalStateException("Compose statement is set without intermittent object");
   }
 
   @Override
-  ComposeMethodStatement getComposeAction(TranslationContext context,
-      MethodContext methodContext, StatementContext statementContext) {
+  ComposeMethodStatement getComposeAction(
+      TranslationContext context, MethodContext methodContext, StatementContext statementContext) {
     if (!statementContext.isLastStatement() && !statementContext.isLastPredicateStatement()) {
       String message = VALIDATION.getErrorMessage(608, methodContext.getName());
       throw new UtamCompilationError(message);

@@ -7,12 +7,12 @@
  */
 package utam.compiler.translator;
 
-import utam.core.declarative.translator.UnitTestRunner;
-import utam.compiler.grammar.DeserializerUtilities;
-import org.testng.annotations.Test;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+
+import org.testng.annotations.Test;
+import utam.compiler.grammar.DeserializerUtilities;
+import utam.core.declarative.translator.UnitTestRunner;
 
 public class UnitTestSerializerTests {
 
@@ -34,13 +34,15 @@ public class UnitTestSerializerTests {
 
   @Test
   public void testUnitTestRunnerJunit() {
-    assertThat(getUnitTestRunner(UnitTestRunner.JUNIT).toString(), containsString("org.junit.Test"));
+    assertThat(
+        getUnitTestRunner(UnitTestRunner.JUNIT).toString(), containsString("org.junit.Test"));
   }
 
   @Test
   public void testUnitTestRunnerTestNG() {
     assertThat(
-        getUnitTestRunner(UnitTestRunner.TESTNG).toString(), containsString("org.testng.annotations.Test"));
+        getUnitTestRunner(UnitTestRunner.TESTNG).toString(),
+        containsString("org.testng.annotations.Test"));
   }
 
   @Test
@@ -335,7 +337,8 @@ public class UnitTestSerializerTests {
     assertThat(
         unitTestCode,
         containsString(
-            "assertThat(testObject.getTestElementText(), is(equalTo(\"replaceWithValidExpectedValue\")));"));
+            "assertThat(testObject.getTestElementText(),"
+                + " is(equalTo(\"replaceWithValidExpectedValue\")));"));
     assertThat(unitTestCode, containsString(".withChild"));
     assertThat(unitTestCode, containsString("of the root element"));
   }
@@ -440,9 +443,8 @@ public class UnitTestSerializerTests {
     assertThat(serializer.getTestMethods(), hasSize(1));
     String unitTestCode = serializer.toString();
     assertThat(
-        unitTestCode,
-        containsString("assertThat(testObject.getTestElementText(), hasSize(-1));"));
-    assertThat(unitTestCode,containsString("assertThat(testObject.getTestElementText(),"));
+        unitTestCode, containsString("assertThat(testObject.getTestElementText(), hasSize(-1));"));
+    assertThat(unitTestCode, containsString("assertThat(testObject.getTestElementText(),"));
     assertThat(unitTestCode, containsString("\"replaceWithValidExpectedValueList\"));"));
     assertThat(unitTestCode, containsString(".withChild"));
     assertThat(unitTestCode, containsString("of the root element"));

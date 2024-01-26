@@ -55,18 +55,22 @@ public abstract class ContainerMethod implements PageObjectMethod {
       UtamMethodDescription methodDescription) {
     this.locatorVariableName = String.format("%sLocator", elementName);
     this.methodName = getElementGetterMethodName(elementName, isPublic);
-    this.parametersTracker = new MethodParametersTracker(
-        String.format("element '%s'", elementName));
+    this.parametersTracker =
+        new MethodParametersTracker(String.format("element '%s'", elementName));
     if (scopeElement != null) {
       parametersTracker.setMethodParameters(scopeElement.getParameters());
       String scopeElementLine = getScopeElementCode(scopeElement);
       codeLines.add(scopeElementLine);
     }
-    codeLines.add(String.format("%s %s = %s", SELECTOR.getSimpleName(), this.locatorVariableName,
-        selectorBuilderString));
+    codeLines.add(
+        String.format(
+            "%s %s = %s",
+            SELECTOR.getSimpleName(), this.locatorVariableName, selectorBuilderString));
     String scopeVariableName = scopeElement.getName();
-    codeLines.add(String.format("return this.container(%s, %s).%s",
-        scopeVariableName, isExpandScope, getContainerMethodInvocationString()));
+    codeLines.add(
+        String.format(
+            "return this.container(%s, %s).%s",
+            scopeVariableName, isExpandScope, getContainerMethodInvocationString()));
     this.isPublic = isPublic;
     this.description = methodDescription;
   }
@@ -83,28 +87,34 @@ public abstract class ContainerMethod implements PageObjectMethod {
     return codeLines;
   }
 
-  /**
-   * Represents a container method with a selector that returns a list
-   */
+  /** Represents a container method with a selector that returns a list */
   public static class WithSelectorReturnsList extends ContainerMethod {
 
     private final List<TypeProvider> classImports = new ArrayList<>();
 
-
     /**
      * Initializes a new instance of the WithSelectorReturnsList class
      *
-     * @param scopeElement      the scope element
-     * @param isExpandScope     a value indicating whether the method introspects into shadow roots
-     * @param elementName       the name of the element
-     * @param selectorContext   the context for the selector
-     * @param isPublic          a value indicating whether the method is public
+     * @param scopeElement the scope element
+     * @param isExpandScope a value indicating whether the method introspects into shadow roots
+     * @param elementName the name of the element
+     * @param selectorContext the context for the selector
+     * @param isPublic a value indicating whether the method is public
      * @param methodDescription the method description
      */
-    public WithSelectorReturnsList(ElementContext scopeElement, boolean isExpandScope,
-        String elementName, LocatorCodeGeneration selectorContext, boolean isPublic,
+    public WithSelectorReturnsList(
+        ElementContext scopeElement,
+        boolean isExpandScope,
+        String elementName,
+        LocatorCodeGeneration selectorContext,
+        boolean isPublic,
         UtamMethodDescription methodDescription) {
-      super(scopeElement, isExpandScope, elementName, isPublic, selectorContext.getBuilderString(),
+      super(
+          scopeElement,
+          isExpandScope,
+          elementName,
+          isPublic,
+          selectorContext.getBuilderString(),
           methodDescription);
       parametersTracker.setMethodParameters(selectorContext.getParameters());
       parametersTracker.setMethodParameter(PAGE_OBJECT_PARAMETER);
@@ -122,23 +132,19 @@ public abstract class ContainerMethod implements PageObjectMethod {
     @Override
     public MethodDeclaration getDeclaration() {
       List<MethodParameter> parameters = parametersTracker.getMethodParameters();
-      JavadocObject javadoc = new MethodJavadoc(methodName,
-          PAGE_OBJECT_RETURN_LIST,
-          parameters,
-          description);
+      JavadocObject javadoc =
+          new MethodJavadoc(methodName, PAGE_OBJECT_RETURN_LIST, parameters, description);
       return new MethodDeclarationImpl(methodName, parameters, PAGE_OBJECT_RETURN_LIST, javadoc);
     }
 
     @Override
     String getContainerMethodInvocationString() {
-      return String
-          .format("loadList(%s, %s)", PAGE_OBJECT_TYPE_PARAMETER_NAME, locatorVariableName);
+      return String.format(
+          "loadList(%s, %s)", PAGE_OBJECT_TYPE_PARAMETER_NAME, locatorVariableName);
     }
   }
 
-  /**
-   * Represents a container method with a selector
-   */
+  /** Represents a container method with a selector */
   public static class WithSelector extends ContainerMethod {
 
     private final List<TypeProvider> classImports = new ArrayList<>();
@@ -146,20 +152,26 @@ public abstract class ContainerMethod implements PageObjectMethod {
     /**
      * Initializes a new instance of the WithSelector class
      *
-     * @param scopeElement      the scope element
-     * @param isExpandScope     a value indicating whether the method introspects into shadow roots
-     * @param elementName       the name of the element
-     * @param selectorContext   the context for the selector
-     * @param isPublic          a value indicating whether the method is public
+     * @param scopeElement the scope element
+     * @param isExpandScope a value indicating whether the method introspects into shadow roots
+     * @param elementName the name of the element
+     * @param selectorContext the context for the selector
+     * @param isPublic a value indicating whether the method is public
      * @param methodDescription the method description
      */
-    public WithSelector(ElementContext scopeElement,
+    public WithSelector(
+        ElementContext scopeElement,
         boolean isExpandScope,
         String elementName,
         LocatorCodeGeneration selectorContext,
         boolean isPublic,
         UtamMethodDescription methodDescription) {
-      super(scopeElement, isExpandScope, elementName, isPublic, selectorContext.getBuilderString(),
+      super(
+          scopeElement,
+          isExpandScope,
+          elementName,
+          isPublic,
+          selectorContext.getBuilderString(),
           methodDescription);
       parametersTracker.setMethodParameters(selectorContext.getParameters());
       parametersTracker.setMethodParameter(PAGE_OBJECT_PARAMETER);
@@ -177,12 +189,9 @@ public abstract class ContainerMethod implements PageObjectMethod {
     @Override
     public MethodDeclaration getDeclaration() {
       List<MethodParameter> parameters = parametersTracker.getMethodParameters();
-      JavadocObject javadoc = new MethodJavadoc(methodName,
-          PAGE_OBJECT_RETURN,
-          parameters,
-          description);
-      return new MethodDeclarationImpl(methodName, parameters,
-          PAGE_OBJECT_RETURN, javadoc);
+      JavadocObject javadoc =
+          new MethodJavadoc(methodName, PAGE_OBJECT_RETURN, parameters, description);
+      return new MethodDeclarationImpl(methodName, parameters, PAGE_OBJECT_RETURN, javadoc);
     }
 
     @Override

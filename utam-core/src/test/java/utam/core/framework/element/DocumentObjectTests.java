@@ -21,10 +21,10 @@ import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.driver.Document;
+import utam.core.element.FrameElement;
 import utam.core.framework.base.BasePageObject;
 import utam.core.framework.base.PageMarker;
 import utam.core.framework.base.RootPageObject;
-import utam.core.element.FrameElement;
 import utam.core.framework.consumer.TestLoaderConfigPageObject;
 import utam.core.framework.consumer.UtamError;
 import utam.core.selenium.element.LocatorBy;
@@ -48,7 +48,8 @@ public class DocumentObjectTests {
   @Test
   public void testWaitForDocumentReady() {
     MockUtilities mock = new MockUtilities();
-    when(mock.getExecutorMock().executeScript(DocumentObject.DOM_READY_JAVASCRIPT)).thenReturn(true);
+    when(mock.getExecutorMock().executeScript(DocumentObject.DOM_READY_JAVASCRIPT))
+        .thenReturn(true);
     Document document = mock.getDocument();
     document.waitForDocumentReady();
   }

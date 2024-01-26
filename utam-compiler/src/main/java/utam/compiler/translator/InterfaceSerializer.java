@@ -35,6 +35,7 @@ public final class InterfaceSerializer {
 
   /**
    * Initializes a new instance of the InterfaceSerializer class
+   *
    * @param source the interface object to serialize
    */
   public InterfaceSerializer(PageObjectInterface source) {
@@ -64,7 +65,7 @@ public final class InterfaceSerializer {
   @Override
   public String toString() {
     List<String> out = new ArrayList<>();
-    if(!source.getCopyright().isEmpty()) {
+    if (!source.getCopyright().isEmpty()) {
       out.addAll(getWrappedJavadoc(source.getCopyright()));
     }
     out.add(getPackageName());
@@ -72,16 +73,18 @@ public final class InterfaceSerializer {
     out.addAll(getImports());
     out.add(NEW_LINE);
     out.addAll(getWrappedJavadoc(source.getDescription()));
-    if(source.isDeprecated()) {
+    if (source.isDeprecated()) {
       out.add(DEPRECATED_ANNOTATION.getAnnotationText());
     }
     out.add(getDeclaration());
     source.getDeclaredApi().forEach(declaration -> addMethodDeclaration(out, declaration));
-    source.getUnionTypes()
-        .forEach(unionType -> {
-          out.addAll(unionType.getDeclarationCode());
-          out.add(NEW_LINE);
-        });
+    source
+        .getUnionTypes()
+        .forEach(
+            unionType -> {
+              out.addAll(unionType.getDeclarationCode());
+              out.add(NEW_LINE);
+            });
     out.add("}");
     out.removeIf(String::isEmpty);
     return applyJavaFormatter(out);
@@ -96,9 +99,13 @@ public final class InterfaceSerializer {
     source.getDeclaredApi().stream()
         .flatMap(method -> method.getImports().stream())
         .forEach(importStr -> res.addAll(getImportStatements(importStr)));
-    source.getUnionTypes()
-        .forEach(unionType -> unionType.getExtendedTypes()
-            .forEach(type -> res.addAll(getImportStatements(type))));
+    source
+        .getUnionTypes()
+        .forEach(
+            unionType ->
+                unionType
+                    .getExtendedTypes()
+                    .forEach(type -> res.addAll(getImportStatements(type))));
     return res;
   }
 }

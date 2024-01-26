@@ -43,11 +43,9 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
    * Initializes a new instance of the PageObjectsFactoryImpl class
    *
    * @param pageObjectContext the Page Object context
-   * @param driver            the driver instance
+   * @param driver the driver instance
    */
-  public PageObjectsFactoryImpl(
-      PageObjectContext pageObjectContext,
-      Driver driver) {
+  public PageObjectsFactoryImpl(PageObjectContext pageObjectContext, Driver driver) {
     this.pageObjectContext = pageObjectContext;
     this.driver = driver;
     this.navigation = new NavigationImpl(this);
@@ -58,9 +56,9 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
    * Initializes a new instance of the PageObjectsFactoryImpl class
    *
    * @param utamLoaderConfig the loader configuration for the UTAM loader
-   * @param driver           the driver instance
+   * @param driver the driver instance
    */
- public PageObjectsFactoryImpl(UtamLoaderConfig utamLoaderConfig, Driver driver) {
+  public PageObjectsFactoryImpl(UtamLoaderConfig utamLoaderConfig, Driver driver) {
     this(utamLoaderConfig.getPageContext(), driver);
   }
 
@@ -73,8 +71,10 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
   public static Locator getRootLocator(RootPageObject pageObjectInstance) {
     Class<? extends RootPageObject> pageObjectClass = pageObjectInstance.getClass();
     if (!pageObjectClass.isAnnotationPresent(PageMarker.Find.class)) {
-      throw new UtamError(String.format("root selector is not set for the page object instance %s",
-          pageObjectClass.getName()));
+      throw new UtamError(
+          String.format(
+              "root selector is not set for the page object instance %s",
+              pageObjectClass.getName()));
     }
     return getRootLocatorFromAnnotation(
         pageObjectClass.getDeclaredAnnotation(PageMarker.Find.class));
@@ -94,8 +94,8 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
     PlatformType mobileContextType = PlatformType.from(pageObject.getClass());
     // only mobile driver implementation actually changes context
     if (instance instanceof RootPageObject) {
-    	// do context switching for only root POs as child POs are within the required context already
-    	getDriver().setPageContext(mobileContextType);
+      // do context switching for only root POs as child POs are within the required context already
+      getDriver().setPageContext(mobileContextType);
     }
   }
 
@@ -132,10 +132,11 @@ public class PageObjectsFactoryImpl implements PageObjectsFactory {
   }
 
   private static void bootstrapElements(BasePageObject instance) {
-    getFields(instance)
-        .stream()
-        .filter(f -> ElementLocation.class.isAssignableFrom(f.getType())
-            && f.getAnnotation(ElementMarker.Find.class) != null)
+    getFields(instance).stream()
+        .filter(
+            f ->
+                ElementLocation.class.isAssignableFrom(f.getType())
+                    && f.getAnnotation(ElementMarker.Find.class) != null)
         .forEach(
             f -> {
               ElementMarker.Find annotation = f.getDeclaredAnnotation(ElementMarker.Find.class);

@@ -42,9 +42,7 @@ public class FrameMethodTests {
     expected.addParameter(new MethodParameterInfo("scopeStr"));
     expected.addParameter(new MethodParameterInfo("frameStr"));
     expected.addImportedTypes(FRAME_ELEMENT.getFullName());
-    expected.addImpliedImportedTypes(
-        FRAME_ELEMENT.getFullName(),
-        BASIC_ELEMENT.getFullName());
+    expected.addImpliedImportedTypes(FRAME_ELEMENT.getFullName(), BASIC_ELEMENT.getFullName());
     expected.addCodeLine("BasicElement scope = this.getScopeElement(scopeStr)");
     expected.addCodeLine("return basic(scope, this.test.setParameters(frameStr)).buildFrame()");
     PageObjectValidationTestHelper.validateMethod(method, expected);
@@ -56,9 +54,7 @@ public class FrameMethodTests {
     PageObjectMethod method = getFrameGetter("framePrivate");
     MethodInfo expected = new MethodInfo(methodName, FRAME_ELEMENT).setNotPublic();
     expected.addImportedTypes(FRAME_ELEMENT.getFullName());
-    expected.addImpliedImportedTypes(
-        FRAME_ELEMENT.getFullName(),
-        BASIC_ELEMENT.getFullName());
+    expected.addImpliedImportedTypes(FRAME_ELEMENT.getFullName(), BASIC_ELEMENT.getFullName());
     expected.addCodeLine("BasicElement root = this.getRootElement()");
     expected.addCodeLine("return basic(root, this.test).buildFrame()");
     PageObjectValidationTestHelper.validateMethod(method, expected);

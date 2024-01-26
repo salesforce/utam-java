@@ -7,10 +7,10 @@
  */
 package utam.compiler.helpers;
 
-import org.testng.annotations.Test;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+
+import org.testng.annotations.Test;
 
 /**
  * Tests the default implementation and static members of the PrimitiveType enumerated type
@@ -53,7 +53,7 @@ public class PrimitiveTypeTests {
   public void testEmptyArrayMember() {
     assertThat(PrimitiveType.EMPTY_ARRAY, is(equalTo(PrimitiveType.EMPTY_ARRAY)));
   }
-  
+
   @Test
   public void testFromString() {
     assertThat(PrimitiveType.fromString("string"), is(equalTo(PrimitiveType.STRING)));

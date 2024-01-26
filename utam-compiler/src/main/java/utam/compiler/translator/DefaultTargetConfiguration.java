@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.translator.TranslatorTargetConfig;
 import utam.core.declarative.translator.UnitTestRunner;
@@ -39,13 +38,13 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
   /**
    * compiler output configuration
    *
-   * @param compilerRoot      root of the project
-   * @param targetPath        the root output directory where the generated Page Object source files
-   *                          will be written
+   * @param compilerRoot root of the project
+   * @param targetPath the root output directory where the generated Page Object source files will
+   *     be written
    * @param resourcesHomePath the output directory in which to write dependencies information
-   * @param unitTestRunner    the test runner to use when generating unit tests
+   * @param unitTestRunner the test runner to use when generating unit tests
    * @param unitTestDirectory the root output directory where generated unit tests for generated
-   *                          Page Objects will be written
+   *     Page Objects will be written
    */
   public DefaultTargetConfiguration(
       String compilerRoot,
@@ -69,22 +68,24 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
   /**
    * this constructor can be used for distribution repo where we do not generate unit tests
    *
-   * @param compilerRoot      root of the project
-   * @param targetPath        the root output directory where the generated Page Object source files
-   *                          will be written
+   * @param compilerRoot root of the project
+   * @param targetPath the root output directory where the generated Page Object source files will
+   *     be written
    * @param resourcesHomePath the output directory in which to write profile information
    */
-  public DefaultTargetConfiguration(String compilerRoot, String targetPath,
-      String resourcesHomePath) {
+  public DefaultTargetConfiguration(
+      String compilerRoot, String targetPath, String resourcesHomePath) {
     this(compilerRoot, targetPath, resourcesHomePath, null, null, null);
   }
 
   private static String getErrorsReportPath(String resourcesOutputDir, String errorsReportFile) {
-    if(errorsReportFile == null) {
+    if (errorsReportFile == null) {
       return null;
     }
-    String targetPath = resourcesOutputDir == null ? System.getProperty("user.dir") : resourcesOutputDir;
-    return targetPath.endsWith(File.separator) ? targetPath + errorsReportFile
+    String targetPath =
+        resourcesOutputDir == null ? System.getProperty("user.dir") : resourcesOutputDir;
+    return targetPath.endsWith(File.separator)
+        ? targetPath + errorsReportFile
         : targetPath + File.separator + errorsReportFile;
   }
 
@@ -116,9 +117,7 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
   }
 
   String getPageObjectClassPath(TypeProvider pageObjectType) {
-    return targetPath
-        + File.separator
-        + replaceWithPath(pageObjectType.getFullName()) + ".java";
+    return targetPath + File.separator + replaceWithPath(pageObjectType.getFullName()) + ".java";
   }
 
   @Override

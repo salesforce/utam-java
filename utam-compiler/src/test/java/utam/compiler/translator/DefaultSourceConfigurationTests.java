@@ -77,8 +77,10 @@ public class DefaultSourceConfigurationTests {
 
   @Test
   public void testRunWithDuplicatePageObjectsThrows() {
-    TranslatorConfig configuration = new TranslatorConfigWithProfile(new DuplicatePageObjects(),
-        new DefaultTargetConfiguration("", "", "", UnitTestRunner.NONE, null, null));
+    TranslatorConfig configuration =
+        new TranslatorConfigWithProfile(
+            new DuplicatePageObjects(),
+            new DefaultTargetConfiguration("", "", "", UnitTestRunner.NONE, null, null));
     DefaultTranslatorRunner translator = new DefaultTranslatorRunner(configuration);
     UtamError e = expectThrows(UtamError.class, translator::run);
     assertThat(
@@ -90,20 +92,18 @@ public class DefaultSourceConfigurationTests {
     final String PAGE_OBJECT = "error";
     UtamError e =
         expectThrows(
-            UtamError.class, () -> new DefaultSourceConfiguration() {
-            }.getSourcePath(PAGE_OBJECT));
+            UtamError.class, () -> new DefaultSourceConfiguration() {}.getSourcePath(PAGE_OBJECT));
     assertThat(e.getMessage(), containsString(String.format(ERR_MISSING_SOURCE_PATH, PAGE_OBJECT)));
   }
 
   @Test
   public void testRecursiveScan() {
     ScannerConfig scannerConfig = new ScannerConfig(Collections.singletonMap("package", ".*/one"));
-    RecursiveScanner scanner = new RecursiveScanner(
-        System.getProperty("user.dir") + "/src/test/resources/spec");
+    RecursiveScanner scanner =
+        new RecursiveScanner(System.getProperty("user.dir") + "/src/test/resources/spec");
     DefaultSourceConfiguration config = new DefaultSourceConfiguration(scannerConfig, scanner);
     config.recursiveScan();
-    assertThat(config.getSourcePath("package/pageObjects/first"),
-        is(CoreMatchers.notNullValue()));
+    assertThat(config.getSourcePath("package/pageObjects/first"), is(CoreMatchers.notNullValue()));
   }
 
   @Test
@@ -112,8 +112,9 @@ public class DefaultSourceConfigurationTests {
     RecursiveScanner scanner = new RecursiveScanner(null);
     DefaultSourceConfiguration config = new DefaultSourceConfiguration(scannerConfig, scanner);
     String pathString = "folder/one/test.utam.json".replace("/", File.separator);
-    Consumer<String> test = str -> config.preProcess("utam-one", Paths.get(str),
-        ".*/one/" + DEFAULT_JSON_FILE_MASK_REGEX);
+    Consumer<String> test =
+        str ->
+            config.preProcess("utam-one", Paths.get(str), ".*/one/" + DEFAULT_JSON_FILE_MASK_REGEX);
     test.accept(pathString);
     String expectedURI = "utam-one/pageObjects/test";
     assertThat(config.getPageObjects().iterator().next(), is(equalTo(expectedURI)));
@@ -128,15 +129,14 @@ public class DefaultSourceConfigurationTests {
     ScannerConfig scannerConfig = new ScannerConfig(new HashMap<>());
     RecursiveScanner scanner = new RecursiveScanner(null);
     DefaultSourceConfiguration config = new DefaultSourceConfiguration(scannerConfig, scanner);
-    UtamError e = expectThrows(UtamError.class,
-        () -> scanner.scan(config, "wrongPackage", "wrongMask"));
+    UtamError e =
+        expectThrows(UtamError.class, () -> scanner.scan(config, "wrongPackage", "wrongMask"));
     assertThat(e.getMessage(), is(equalTo(String.format(ERR_IO_DURING_SCAN, "null"))));
   }
 
   @Test
   public void testFileScanThrows() {
-    UtamError e = expectThrows(UtamError.class,
-        () -> new FilesScanner(null));
+    UtamError e = expectThrows(UtamError.class, () -> new FilesScanner(null));
     assertThat(e.getMessage(), is(equalTo(String.format(ERR_IO_DURING_SCAN, "null"))));
   }
 
@@ -147,25 +147,22 @@ public class DefaultSourceConfigurationTests {
         new File(getClass().getClassLoader().getResource("spec/one/first.utam.json").getFile()));
     FilesScanner filesScanner = new FilesScanner(filesToScan);
     ScannerConfig scannerConfig = new ScannerConfig(Collections.singletonMap("package", ".*/one"));
-    DefaultSourceConfiguration configuration = new DefaultSourceConfiguration(
-        scannerConfig, filesScanner);
+    DefaultSourceConfiguration configuration =
+        new DefaultSourceConfiguration(scannerConfig, filesScanner);
     configuration.recursiveScan();
-    assertThat(configuration.getSourcePath("package/pageObjects/first"),
-        is(CoreMatchers.notNullValue()));
+    assertThat(
+        configuration.getSourcePath("package/pageObjects/first"), is(CoreMatchers.notNullValue()));
   }
 
-  /**
-   * config with preset profile, used in tests
-   */
+  /** config with preset profile, used in tests */
   static class TranslatorConfigWithProfile extends DefaultTranslatorConfiguration {
 
     static final Profile TEST_PROFILE = new StringValueProfile("profile", "test");
-    static final ProfileConfiguration TEST_PROFILE_CONFIG = new StringValueProfileConfig(
-        TEST_PROFILE);
+    static final ProfileConfiguration TEST_PROFILE_CONFIG =
+        new StringValueProfileConfig(TEST_PROFILE);
 
     TranslatorConfigWithProfile(
-        TranslatorSourceConfig sourceConfig,
-        TranslatorTargetConfig targetConfig) {
+        TranslatorSourceConfig sourceConfig, TranslatorTargetConfig targetConfig) {
       super(sourceConfig, targetConfig);
       setConfiguredProfile(TEST_PROFILE_CONFIG);
     }
@@ -202,7 +199,7 @@ public class DefaultSourceConfigurationTests {
 
     @Override
     public String getSourcePath(String pageObjectURI) {
-      if(!pageObjectsJSONString.containsKey(pageObjectURI)) {
+      if (!pageObjectsJSONString.containsKey(pageObjectURI)) {
         return "";
       }
       return pageObjectsJSONString.get(pageObjectURI);
@@ -258,7 +255,6 @@ public class DefaultSourceConfigurationTests {
     }
 
     @Override
-    public void close() {
-    }
+    public void close() {}
   }
 }

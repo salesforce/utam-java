@@ -36,16 +36,17 @@ public class DefaultTranslatorConfigurationTests {
     TranslatorSourceConfig sourceConfig = new DefaultSourceConfigurationTests.Mock();
     TranslationTypesConfig typesConfig = new TranslationTypesConfigJava();
     ProfileConfiguration profileConfiguration = new StringValueProfileConfig("name", "value");
-    CompilerOutputOptions options = new CompilerOutputOptions("myModule",
-        "version", Collections.singletonList("copyright"));
-    TranslatorConfig config = new DefaultTranslatorConfiguration(
-        options,
-        null,
-        new CompilerErrors.Throws(),
-        typesConfig,
-        sourceConfig,
-        targetConfig,
-        Collections.singletonList(profileConfiguration));
+    CompilerOutputOptions options =
+        new CompilerOutputOptions("myModule", "version", Collections.singletonList("copyright"));
+    TranslatorConfig config =
+        new DefaultTranslatorConfiguration(
+            options,
+            null,
+            new CompilerErrors.Throws(),
+            typesConfig,
+            sourceConfig,
+            targetConfig,
+            Collections.singletonList(profileConfiguration));
     assertThat(config, is(notNullValue()));
     assertThat(config.getConfiguredTarget(), is(sameInstance(targetConfig)));
     assertThat(config.getConfiguredSource(), is(sameInstance(sourceConfig)));

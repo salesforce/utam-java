@@ -15,11 +15,10 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,9 +60,10 @@ public class JsonInjectionsConfig {
         for (URL resource : resources) {
           UtamLogger.info(String.format("Reading injections config file %s", filename));
           try (InputStream resourceStream = resource.openStream();
-               InputStreamReader resourceStreamReader = new InputStreamReader(resourceStream);
-               BufferedReader resourceReader = new BufferedReader(resourceStreamReader)) {
-            String resourceValue = resourceReader.lines().collect(Collectors.joining(System.lineSeparator()));
+              InputStreamReader resourceStreamReader = new InputStreamReader(resourceStream);
+              BufferedReader resourceReader = new BufferedReader(resourceStreamReader)) {
+            String resourceValue =
+                resourceReader.lines().collect(Collectors.joining(System.lineSeparator()));
             if (!resourceValue.isBlank()) {
               Mapping mapping = new ObjectMapper().readValue(resourceValue, Mapping.class);
               mapping.setInjectionsMapping(map);
@@ -72,7 +72,8 @@ public class JsonInjectionsConfig {
         }
       } else {
         // we can't throw here because of distribution plugin:
-        // transformer of distribution plugin combines modules and generates loader config assuming that injection config exists
+        // transformer of distribution plugin combines modules and generates loader config assuming
+        // that injection config exists
         UtamLogger.warning(String.format(ERR_CANT_FIND_CONFIG, filename));
       }
     } catch (IOException e) {
@@ -113,11 +114,11 @@ public class JsonInjectionsConfig {
         ProfileImplementations mappingProfile = mapping.get(profileName);
         for (String profileValue : mappingProfile.getProfileValues()) {
           String profileKey = new StringValueProfile(profileName, profileValue).getKey();
-          Map<Object, Object> map = mappingProfile.getPairs(profileValue)
-              .stream()
-              .collect(
-                  Collectors.toMap(ImplementationPair::getInterface,
-                      ImplementationPair::getImplementation));
+          Map<Object, Object> map =
+              mappingProfile.getPairs(profileValue).stream()
+                  .collect(
+                      Collectors.toMap(
+                          ImplementationPair::getInterface, ImplementationPair::getImplementation));
           ProfileContext profileContext = new DefaultProfileContext(map);
           // there could be more than one config for module with same name, then we need to merge
           if (injections.containsKey(profileKey)) {
@@ -148,18 +149,18 @@ public class JsonInjectionsConfig {
      * @return map as an object
      */
     public ProfileImplementations getImplementationsMap(String profileName) {
-      return mapping.containsKey(profileName) ? mapping.get(profileName)
+      return mapping.containsKey(profileName)
+          ? mapping.get(profileName)
           : new ProfileImplementations();
     }
 
     /**
      * for output compiler config: set injections for a given profile
      *
-     * @param profileName    name of the profile
+     * @param profileName name of the profile
      * @param mappingProfile injections map
      */
-    public void setImplementationsMap(String profileName,
-        ProfileImplementations mappingProfile) {
+    public void setImplementationsMap(String profileName, ProfileImplementations mappingProfile) {
       mapping.put(profileName, mappingProfile);
     }
 
@@ -205,7 +206,7 @@ public class JsonInjectionsConfig {
      * for output compiler config: for a given profile value, set pairs
      *
      * @param profileValue profile value
-     * @param pairs        implementation pairs
+     * @param pairs implementation pairs
      */
     public void setPairs(String profileValue, List<ImplementationPair> pairs) {
       if (mapping.containsKey(profileValue)) {
@@ -274,7 +275,7 @@ public class JsonInjectionsConfig {
     /**
      * custom deserializer to read injections config
      *
-     * @param jp                     parser
+     * @param jp parser
      * @param deserializationContext context
      * @return mapping object
      * @throws IOException if parsing fails
@@ -296,8 +297,7 @@ public class JsonInjectionsConfig {
           JsonNode pairsNode = valuesNode.get(profileValue);
           List<ImplementationPair> pairsList = new ArrayList<>();
           for (JsonNode pairNode : pairsNode) {
-            ImplementationPair pair = objectMapper
-                .treeToValue(pairNode, ImplementationPair.class);
+            ImplementationPair pair = objectMapper.treeToValue(pairNode, ImplementationPair.class);
             pairsList.add(pair);
           }
           if (!pairsList.isEmpty()) {

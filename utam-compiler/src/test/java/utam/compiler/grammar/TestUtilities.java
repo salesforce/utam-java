@@ -49,8 +49,8 @@ public class TestUtilities {
     return getJsonStringDeserializer(json, getDefaultConfig());
   }
 
-  public static JsonDeserializer getJsonStringDeserializer(String json,
-      TranslatorConfig translatorConfig) {
+  public static JsonDeserializer getJsonStringDeserializer(
+      String json, TranslatorConfig translatorConfig) {
     TranslationContext translationContext = new TestTranslationContext(translatorConfig);
     return new JsonDeserializer(translationContext, json);
   }
@@ -64,8 +64,13 @@ public class TestUtilities {
   public static DefaultTranslatorConfiguration getDefaultConfig() {
     TranslatorTargetConfig targetConfig = new DefaultTargetConfigurationTests.Mock();
     TranslatorSourceConfig sourceConfig = new DefaultSourceConfigurationTests.Mock();
-    return new DefaultTranslatorConfiguration(DEFAULT_COMPILER_OUTPUT_OPTIONS, null, new CompilerErrors.Throws(), sourceConfig,
-        targetConfig, new ArrayList<>());
+    return new DefaultTranslatorConfiguration(
+        DEFAULT_COMPILER_OUTPUT_OPTIONS,
+        null,
+        new CompilerErrors.Throws(),
+        sourceConfig,
+        targetConfig,
+        new ArrayList<>());
   }
 
   static class TestTranslationContext extends TranslationContext {

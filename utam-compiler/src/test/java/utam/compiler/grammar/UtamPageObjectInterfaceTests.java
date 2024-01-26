@@ -32,7 +32,8 @@ public class UtamPageObjectInterfaceTests {
 
   private static String getErrUnsupportedProperties(String property) {
     return String.format(
-        "error 8: interface: property \"%s\" is not supported, supported are: root, interface, methods, type, exposeRootElement",
+        "error 8: interface: property \"%s\" is not supported, supported are: root, interface,"
+            + " methods, type, exposeRootElement",
         property);
   }
 
@@ -41,12 +42,14 @@ public class UtamPageObjectInterfaceTests {
   }
 
   private static void expectError(String partialJson) {
-    new DeserializerUtilities().getResultFromString(String.format("{ %s \"interface\" : true }", partialJson));
+    new DeserializerUtilities()
+        .getResultFromString(String.format("{ %s \"interface\" : true }", partialJson));
   }
 
   @Test
   public void testAbstractWithNonNullElementsThrows() {
-    String partialJson = "\"elements\" : [{ \"name\" : \"name\", \"selector\" : {\"css\": \"css\"}}], ";
+    String partialJson =
+        "\"elements\" : [{ \"name\" : \"name\", \"selector\" : {\"css\": \"css\"}}], ";
     Exception e = expectThrows(UtamCompilationError.class, () -> expectError(partialJson));
     assertThat(e.getMessage(), containsString(getErrUnsupportedProperties("elements")));
   }
@@ -60,14 +63,14 @@ public class UtamPageObjectInterfaceTests {
 
   @Test
   public void testAbstractWithProfileThrows() {
-    String partialJson = "\"profile\": [\n"
-        + "    {\n"
-        + "      \"name\": \"value\"\n"
-        + "    }\n"
-        + "  ],";
+    String partialJson =
+        "\"profile\": [\n" + "    {\n" + "      \"name\": \"value\"\n" + "    }\n" + "  ],";
     Exception e = expectThrows(UtamCompilationError.class, () -> expectError(partialJson));
-    assertThat(e.getMessage(), containsString(
-        "error 805: \"profile\" can only be set for a page object that implements an interface, please add \"implements\" property"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 805: \"profile\" can only be set for a page object that implements an interface,"
+                + " please add \"implements\" property"));
   }
 
   @Test
@@ -79,7 +82,9 @@ public class UtamPageObjectInterfaceTests {
 
   @Test
   public void testAbstractWithShadowThrows() {
-    String partialJson = "\"shadow\" : { \"elements\" : [{ \"name\" : \"name\", \"selector\" : {\"css\": \"css\"}}] }, ";
+    String partialJson =
+        "\"shadow\" : { \"elements\" : [{ \"name\" : \"name\", \"selector\" : {\"css\": \"css\"}}]"
+            + " }, ";
     Exception e = expectThrows(UtamCompilationError.class, () -> expectError(partialJson));
     assertThat(e.getMessage(), containsString(getErrUnsupportedProperties("shadow")));
   }

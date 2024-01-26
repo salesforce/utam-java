@@ -50,9 +50,7 @@ class SarifConverter {
   private final Set<ReportingDescriptor> rulesDescription;
 
   SarifConverter(List<LintingRule> rules) {
-    rulesDescription = rules.stream()
-        .map(SarifConverter::buildRule)
-        .collect(Collectors.toSet());
+    rulesDescription = rules.stream().map(SarifConverter::buildRule).collect(Collectors.toSet());
   }
 
   private static ReportingDescriptor buildRule(LintingRule rule) {
@@ -74,20 +72,19 @@ class SarifConverter {
   }
 
   private static Result buildResult(LintingError error) {
-    ArtifactLocation artifactLocation = new ArtifactLocation()
-        .withUriBaseId(SARIF_BASE_URI)
-        .withIndex(0)
-        .withUri(error.getSourceFilePath());
+    ArtifactLocation artifactLocation =
+        new ArtifactLocation()
+            .withUriBaseId(SARIF_BASE_URI)
+            .withIndex(0)
+            .withUri(error.getSourceFilePath());
     int sourceCodeLine = error.getSourceLine();
-    PhysicalLocation physicalLocation = new PhysicalLocation()
-        .withArtifactLocation(artifactLocation);
-    if(sourceCodeLine > 0) {
+    PhysicalLocation physicalLocation =
+        new PhysicalLocation().withArtifactLocation(artifactLocation);
+    if (sourceCodeLine > 0) {
       physicalLocation.withRegion(new Region().withStartLine(sourceCodeLine));
     }
     Location location = new Location().withPhysicalLocation(physicalLocation);
-    Message message = new Message()
-        .withText(error.getMessage())
-        .withId(error.getId());
+    Message message = new Message().withText(error.getMessage()).withId(error.getId());
     Fix fix = new Fix().withDescription(new Message().withText(error.getFixSuggestion()));
     return new Result()
         .withLevel(convertViolationLevel(error.getLevel()))
@@ -99,14 +96,16 @@ class SarifConverter {
   }
 
   private static Set<Artifact> buildArtifactsLocations(LintingContext lintingContext) {
-    return lintingContext.getAllPageObjects()
-        .stream()
-        .map(po -> new Artifact()
-            .withDescription(new Message().withText("page object " + po.getName()))
-            .withLocation(new ArtifactLocation()
-                .withIndex(0)
-                .withUriBaseId(SARIF_BASE_URI)
-                .withUri(po.getJsonFilePath())))
+    return lintingContext.getAllPageObjects().stream()
+        .map(
+            po ->
+                new Artifact()
+                    .withDescription(new Message().withText("page object " + po.getName()))
+                    .withLocation(
+                        new ArtifactLocation()
+                            .withIndex(0)
+                            .withUriBaseId(SARIF_BASE_URI)
+                            .withUri(po.getJsonFilePath())))
         .collect(Collectors.toSet());
   }
 
@@ -114,22 +113,25 @@ class SarifConverter {
    * Convert linting errors to SARIF format
    *
    * @param lintingContext context with info about all page objects
-   * @param errors         list of found linting violations
+   * @param errors list of found linting violations
    * @return SARIF object that will be serialized to JSON
    */
   SarifSchema210 convert(LintingContext lintingContext, List<LintingError> errors) {
-    List<Result> results = errors.stream()
-        .map(SarifConverter::buildResult)
-        .collect(Collectors.toList());
+    List<Result> results =
+        errors.stream().map(SarifConverter::buildResult).collect(Collectors.toList());
     Set<Artifact> artifacts = buildArtifactsLocations(lintingContext);
-    Run run = new Run()
-        .withArtifacts(artifacts)
-        .withResults(results)
-        .withTool(new Tool().withDriver(new ToolComponent()
-            .withName(SARIF_NAME)
-            .withInformationUri(SARIF_INFORMATION_URI)
-            .withSemanticVersion(SARIF_SEMANTIC_VERSION.value())
-            .withRules(rulesDescription)));
+    Run run =
+        new Run()
+            .withArtifacts(artifacts)
+            .withResults(results)
+            .withTool(
+                new Tool()
+                    .withDriver(
+                        new ToolComponent()
+                            .withName(SARIF_NAME)
+                            .withInformationUri(SARIF_INFORMATION_URI)
+                            .withSemanticVersion(SARIF_SEMANTIC_VERSION.value())
+                            .withRules(rulesDescription)));
     return new SarifSchema210()
         .withVersion(SARIF_SEMANTIC_VERSION)
         .with$schema(SARIF_SCHEMA)

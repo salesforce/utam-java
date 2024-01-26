@@ -33,25 +33,32 @@ public final class MethodContext {
   private final List<ElementsUsageTracker> elementsUsageTrackers = new ArrayList<>();
   private final ReturnType methodReturnType;
   private final ParametersContext parametersContext;
-  // index of the current elements usage tracker, starting from 0 and incrementing as we get into a predicate
+  // index of the current elements usage tracker, starting from 0 and incrementing as we get into a
+  // predicate
   private int elementsUsageContextIndex = 0;
 
   /**
    * Initializes a new instance of the MethodContext class
    *
-   * @param methodName         the name of the method
+   * @param methodName the name of the method
    * @param declaredReturnType the declared return type of the method
-   * @param context            translation context
-   * @param isAbstract         true for interface methods
+   * @param context translation context
+   * @param isAbstract true for interface methods
    */
-  public MethodContext(String methodName, ReturnType declaredReturnType,
-      TranslationContext context, boolean isAbstract, boolean hasMethodLevelArgs) {
+  public MethodContext(
+      String methodName,
+      ReturnType declaredReturnType,
+      TranslationContext context,
+      boolean isAbstract,
+      boolean hasMethodLevelArgs) {
     this.methodName = methodName;
     this.methodReturnType = declaredReturnType;
     this.elementsUsageTrackers.add(new ElementsUsageTracker());
     String parserContext = String.format("method \"%s\"", methodName);
-    this.parametersContext = isAbstract? new AbstractParametersContext(parserContext, context, hasMethodLevelArgs)
-        : new MethodParametersContext(parserContext, context, hasMethodLevelArgs);
+    this.parametersContext =
+        isAbstract
+            ? new AbstractParametersContext(parserContext, context, hasMethodLevelArgs)
+            : new MethodParametersContext(parserContext, context, hasMethodLevelArgs);
   }
 
   /**
@@ -100,21 +107,16 @@ public final class MethodContext {
     return elementsUsageTrackers.get(elementsUsageContextIndex);
   }
 
-  /**
-   * enters predicate context to track used elements separately
-   */
+  /** enters predicate context to track used elements separately */
   public final void enterPredicateContext() {
     this.elementsUsageContextIndex = elementsUsageTrackers.size();
     this.elementsUsageTrackers.add(new ElementsUsageTracker());
   }
 
-  /**
-   * exits predicate context to track used elements separately
-   */
+  /** exits predicate context to track used elements separately */
   public final void exitPredicateContext() {
     this.elementsUsageContextIndex--;
   }
-
 
   /**
    * Tracker for elements used in compose methods. When same element is reused we want to store it
@@ -141,7 +143,7 @@ public final class MethodContext {
      * set element variable usage to track reusing of a same element
      *
      * @param elementVariable variable name for the element
-     * @param context         element
+     * @param context element
      */
     public void setElementUsage(String elementVariable, ElementContext context) {
       elementVariables.put(context.getName(), new SimpleEntry<>(elementVariable, context));

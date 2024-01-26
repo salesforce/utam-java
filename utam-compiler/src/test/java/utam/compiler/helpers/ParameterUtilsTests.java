@@ -50,7 +50,8 @@ public class ParameterUtilsTests {
   /** A Parameter.Literal object should be able to be created */
   @Test
   public void testPrimitiveLiteral() {
-    ParameterUtils.Regular param = new ParameterUtils.Literal("\"paramName\"", PrimitiveType.STRING);
+    ParameterUtils.Regular param =
+        new ParameterUtils.Literal("\"paramName\"", PrimitiveType.STRING);
     assertThat(param.getDeclaration(), is(emptyString()));
     assertThat(param.isLiteral(), is(equalTo(true)));
     assertThat(param.getValue(), is(equalTo("\"paramName\"")));
@@ -88,12 +89,11 @@ public class ParameterUtilsTests {
     TypeProvider provider = mock(TypeProvider.class);
     when(provider.getPackageName()).thenReturn(packageName);
     when(provider.getSimpleName()).thenReturn(simpleName);
-   
-    when(provider.getFullName()).thenReturn(
-        String.format("%s.%s", packageName, simpleName));
+
+    when(provider.getFullName()).thenReturn(String.format("%s.%s", packageName, simpleName));
     return provider;
   }
-  
+
   private static class MockMethodParameter extends ParameterUtils.Regular {
     MockMethodParameter(String value) {
       super(value, getTypeProvider());

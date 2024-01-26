@@ -60,7 +60,7 @@ public class LocatorUIAutomator extends LocatorBy {
     }
 
     public static String getSupportedMethods(boolean withScrollable) {
-      return (withScrollable? "scrollable, " : "") + SUPPORTED_UIAUTOMATOR_METHODS;
+      return (withScrollable ? "scrollable, " : "") + SUPPORTED_UIAUTOMATOR_METHODS;
     }
   }
 }

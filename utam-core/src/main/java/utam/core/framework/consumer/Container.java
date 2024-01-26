@@ -11,8 +11,8 @@ import java.util.function.Supplier;
 import org.openqa.selenium.SearchContext;
 
 /**
- * External page object that can contain a UTAM page object, compatibility mode only,
- * Selenium only. Example of usage: public MyPageObjectClass implements Container { // override
+ * External page object that can contain a UTAM page object, compatibility mode only, Selenium only.
+ * Example of usage: public MyPageObjectClass implements Container { // override
  * "getScopeSupplier()" }.
  *
  * @author elizaveta.ivanova

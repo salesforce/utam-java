@@ -13,8 +13,8 @@ import java.util.Set;
 import utam.core.framework.UtamCoreError;
 
 /**
- * JSON mapping for config of a UTAM Loader.
- * This class has to be public as it's used in RepositoryTransformer in distribution plugin.
+ * JSON mapping for config of a UTAM Loader. This class has to be public as it's used in
+ * RepositoryTransformer in distribution plugin.
  *
  * @author elizaveta.ivanova
  * @since 234
@@ -31,10 +31,9 @@ public class JsonLoaderConfig {
    * @param injectionConfigs list of injection configs files names
    */
   @JsonCreator
-  JsonLoaderConfig(
-      @JsonProperty(value = "injectionConfigs") Set<String> injectionConfigs) {
+  JsonLoaderConfig(@JsonProperty(value = "injectionConfigs") Set<String> injectionConfigs) {
     this.injectionConfigs = new HashSet<>();
-    if(injectionConfigs != null) {
+    if (injectionConfigs != null) {
       this.injectionConfigs.addAll(injectionConfigs);
     }
   }
@@ -50,10 +49,11 @@ public class JsonLoaderConfig {
   /**
    * Set injection config, used by RepositoryTransformer in distribution plugin
    *
-   * @param moduleName name of the module, full file name will be set using INJECTION_CONFIG_FILE_MASK
+   * @param moduleName name of the module, full file name will be set using
+   *     INJECTION_CONFIG_FILE_MASK
    */
   protected final void setInjectionConfigFile(String moduleName) {
-    if(moduleName != null) {
+    if (moduleName != null) {
       injectionConfigs.add(String.format(INJECTION_CONFIG_FILE_MASK, moduleName));
     }
   }
@@ -88,7 +88,7 @@ public class JsonLoaderConfig {
    * @author elizaveta.ivanova
    * @since 240
    */
-  static abstract class Deserializer {
+  abstract static class Deserializer {
 
     static final String ERR_READING_LOADER_CONFIG = "error while reading loader config ";
 
@@ -101,7 +101,6 @@ public class JsonLoaderConfig {
       mapper.enable(FAIL_ON_UNKNOWN_PROPERTIES);
       return mapper;
     }
-
   }
 
   /**

@@ -62,9 +62,7 @@ public abstract class ElementMarker {
     return new ElementLocation(getLocator(annotation), getFinderContext(annotation));
   }
 
-  /**
-   * Annotation marker for finding elements
-   */
+  /** Annotation marker for finding elements */
   @Target({ElementType.FIELD})
   @Retention(RetentionPolicy.RUNTIME)
   public @interface Find {

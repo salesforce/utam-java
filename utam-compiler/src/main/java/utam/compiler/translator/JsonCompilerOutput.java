@@ -52,11 +52,10 @@ class JsonCompilerOutput {
         String profileName = profile.getName();
         ProfileImplementations mappingProfile = mapping.getImplementationsMap(profileName);
         String profileValue = profile.getValue();
-        List<ImplementationPair> mappingPairs = configToWrite
-            .entrySet()
-            .stream()
-            .map(entry -> new ImplementationPair(entry.getKey(), entry.getValue()))
-            .collect(Collectors.toList());
+        List<ImplementationPair> mappingPairs =
+            configToWrite.entrySet().stream()
+                .map(entry -> new ImplementationPair(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
         mappingProfile.setPairs(profileValue, mappingPairs);
         mapping.setImplementationsMap(profileName, mappingProfile);
       }
@@ -73,14 +72,15 @@ class JsonCompilerOutput {
     SimpleModule module = new SimpleModule();
     module.addSerializer(Mapping.class, new Serializer());
     ObjectMapper mapper = new ObjectMapper();
-    DefaultPrettyPrinter formatter = new DefaultPrettyPrinter()
-        .withObjectIndenter(new DefaultIndenter("  ", "\n"))
-        .withArrayIndenter(new DefaultIndenter("  ", "\n"));
+    DefaultPrettyPrinter formatter =
+        new DefaultPrettyPrinter()
+            .withObjectIndenter(new DefaultIndenter("  ", "\n"))
+            .withArrayIndenter(new DefaultIndenter("  ", "\n"));
     mapper.registerModule(module).writer(formatter).writeValue(writer, mapping);
   }
 
   void writeConfigToFile(String configPath) {
-    if(mapping.isEmpty()) {
+    if (mapping.isEmpty()) {
       info("skip writing empty dependencies config " + configPath);
       return;
     }
@@ -100,7 +100,7 @@ class JsonCompilerOutput {
    * @return written config as a string
    */
   String writeConfigToString() {
-    if(mapping.isEmpty()) {
+    if (mapping.isEmpty()) {
       return "";
     }
     try {
@@ -123,8 +123,8 @@ class JsonCompilerOutput {
     /**
      * serializer implementation
      *
-     * @param value       mapping object
-     * @param output      output writer
+     * @param value mapping object
+     * @param output output writer
      * @param serializers provider
      * @throws IOException if write operation fail
      */

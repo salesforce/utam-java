@@ -18,11 +18,11 @@ import static utam.compiler.translator.TranslationUtilities.JAVADOC_CLOSE_LINE;
 import static utam.compiler.translator.TranslationUtilities.JAVADOC_LINE_PATTERN;
 import static utam.compiler.translator.TranslationUtilities.JAVADOC_OPEN_LINE;
 import static utam.compiler.translator.TranslationUtilities.applyJavaFormatter;
+import static utam.compiler.translator.TranslationUtilities.formatJavadoc;
 import static utam.compiler.translator.TranslationUtilities.getPackageDeclaration;
 import static utam.compiler.translator.TranslationUtilities.getStatement;
 import static utam.compiler.translator.TranslationUtilities.getWrappedJavadoc;
 import static utam.compiler.translator.TranslationUtilities.isImportableType;
-import static utam.compiler.translator.TranslationUtilities.formatJavadoc;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,9 +48,7 @@ public class TranslationUtilitiesTests {
     return new InterfaceSerializer(pageObject).toString();
   }
 
-  /**
-   * The format static method should format a list of statements
-   */
+  /** The format static method should format a list of statements */
   @Test
   public void testFormat() {
     assertThat(
@@ -58,17 +56,13 @@ public class TranslationUtilitiesTests {
         is(equalTo("class TestClass {}" + System.lineSeparator())));
   }
 
-  /**
-   * The format static method should return the proper value for a statement
-   */
+  /** The format static method should return the proper value for a statement */
   @Test
   public void testGetStatement() {
     assertThat(getStatement("String x"), is(equalTo("String x;")));
   }
 
-  /**
-   * The format static method should return the proper value for an empty statement
-   */
+  /** The format static method should return the proper value for an empty statement */
   @Test
   public void testGetStatementWithEmptyStatement() {
     assertThat(getStatement(""), is(emptyString()));
@@ -87,8 +81,7 @@ public class TranslationUtilitiesTests {
 
   @Test
   public void testGetImportString() {
-    TypeProvider classProvider =
-        new TypeUtilities.FromString("test.testPageObject");
+    TypeProvider classProvider = new TypeUtilities.FromString("test.testPageObject");
     assertThat(isImportableType(classProvider, "current.package"), is(true));
   }
 
@@ -148,11 +141,13 @@ public class TranslationUtilitiesTests {
   public void testGetWrappedJavadoc() {
     List<String> comments = Stream.of("one", "two").collect(Collectors.toList());
     List<String> wrapped = getWrappedJavadoc(comments);
-    assertThat(wrapped, containsInRelativeOrder(
-        JAVADOC_OPEN_LINE,
-        String.format(JAVADOC_LINE_PATTERN, "one"),
-        String.format(JAVADOC_LINE_PATTERN, "two"),
-        JAVADOC_CLOSE_LINE));
+    assertThat(
+        wrapped,
+        containsInRelativeOrder(
+            JAVADOC_OPEN_LINE,
+            String.format(JAVADOC_LINE_PATTERN, "one"),
+            String.format(JAVADOC_LINE_PATTERN, "two"),
+            JAVADOC_CLOSE_LINE));
   }
 
   @Test

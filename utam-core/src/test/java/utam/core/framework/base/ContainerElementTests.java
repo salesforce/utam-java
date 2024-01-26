@@ -45,12 +45,16 @@ public class ContainerElementTests {
     Element elementMock = mock.getElementAdapter();
     Locator locator = LocatorBy.byCss("css");
     // nothing found, throw if not nullable
-    expectThrows(NoSuchElementException.class,
-        () -> new ContainerElementImpl(mock.getFactory(), elementMock, false)
-            .load(TestLoad.class, locator));
-    expectThrows(NoSuchElementException.class,
-        () -> new ContainerElementImpl(mock.getFactory(), elementMock, true)
-            .loadList(TestLoad.class, locator));
+    expectThrows(
+        NoSuchElementException.class,
+        () ->
+            new ContainerElementImpl(mock.getFactory(), elementMock, false)
+                .load(TestLoad.class, locator));
+    expectThrows(
+        NoSuchElementException.class,
+        () ->
+            new ContainerElementImpl(mock.getFactory(), elementMock, true)
+                .loadList(TestLoad.class, locator));
   }
 
   @Test
@@ -58,13 +62,15 @@ public class ContainerElementTests {
     MockUtilities mock = new MockUtilities();
     Element elementMock = mock.getElementAdapter();
     ContainerElement element = new ContainerElementImpl(mock.getFactory(), elementMock, false);
-    when(mock.getWebElementMock().findElements(By.cssSelector("css"))).thenReturn(Collections.singletonList(mock.getWebElementMock()));
+    when(mock.getWebElementMock().findElements(By.cssSelector("css")))
+        .thenReturn(Collections.singletonList(mock.getWebElementMock()));
     TestLoad testLoad = element.load(TestLoad.class, "css");
     assertThat(testLoad.getRootLocator().getStringValue(), is(equalTo("css")));
     testLoad = element.load(TestLoad.class, LocatorBy.byCss("css"));
     assertThat(testLoad.getRootLocator().getStringValue(), is(equalTo("css")));
 
-    when(mock.getWebElementMock().findElements(By.cssSelector("css"))).thenReturn(Collections.singletonList(mock.getWebElementMock()));
+    when(mock.getWebElementMock().findElements(By.cssSelector("css")))
+        .thenReturn(Collections.singletonList(mock.getWebElementMock()));
     List<TestLoad> list = element.loadList(TestLoad.class, LocatorBy.byCss("css"));
     assertThat(list.get(0).getRootLocator().getStringValue(), is(equalTo("css")));
   }
@@ -87,22 +93,24 @@ public class ContainerElementTests {
     ContainerElement element = new ContainerElementImpl(mock.getFactory(), elementMock, false);
     CompatiblePageObject compatiblePageObjectInsideContainer = new CompatiblePageObject();
     element.setScope(compatiblePageObjectInsideContainer);
-    assertThat(compatiblePageObjectInsideContainer.getRoot(), is(sameInstance(mock.getWebElementMock())));
+    assertThat(
+        compatiblePageObjectInsideContainer.getRoot(), is(sameInstance(mock.getWebElementMock())));
   }
 
   @Test
   public void testNullScopeThrows() {
     MockUtilities mock = new MockUtilities();
-    NoSuchElementException e = expectThrows(NoSuchElementException.class,
-        () -> new ContainerElementImpl(mock.getFactory(), (Element) null, false));
+    NoSuchElementException e =
+        expectThrows(
+            NoSuchElementException.class,
+            () -> new ContainerElementImpl(mock.getFactory(), (Element) null, false));
     assertThat(e.getMessage(), containsString(NULL_SCOPE_ERR));
   }
 
   static final class TestLoad extends BasePageObject {
 
     // should be public for java reflection to work
-    public TestLoad() {
-    }
+    public TestLoad() {}
   }
 
   static final class CompatiblePageObject implements Contained {

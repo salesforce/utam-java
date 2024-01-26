@@ -34,39 +34,38 @@ public class ComposeMethod implements PageObjectMethod {
   private final TypeProvider returns;
   private final JavadocObject javadoc;
   private final boolean isPublic;
+
   /**
    * Initializes a new instance of the ComposeMethod class
    *
-   * @param methodName  the name of the method
-   * @param returnType  the return type of the method
-   * @param parameters  the list of parameters of the method
-   * @param statements  the list of statments of the method
+   * @param methodName the name of the method
+   * @param returnType the return type of the method
+   * @param parameters the list of parameters of the method
+   * @param statements the list of statments of the method
    * @param description method description in Json
    * @param isPublic method access modifier
    */
-  public ComposeMethod(String methodName,
-                       TypeProvider returnType,
-                       List<MethodParameter> parameters,
-                       List<ComposeMethodStatement> statements,
-                       UtamMethodDescription description,
-                       boolean isPublic) {
+  public ComposeMethod(
+      String methodName,
+      TypeProvider returnType,
+      List<MethodParameter> parameters,
+      List<ComposeMethodStatement> statements,
+      UtamMethodDescription description,
+      boolean isPublic) {
     this.name = methodName;
     this.returns = returnType;
     statements.forEach(
-            statement -> {
-              code.addAll(statement.getCodeLines());
-              ParameterUtils.setImports(imports, statement.getImports());
-              ParameterUtils.setImports(classImports, statement.getClassImports());
-            });
+        statement -> {
+          code.addAll(statement.getCodeLines());
+          ParameterUtils.setImports(imports, statement.getImports());
+          ParameterUtils.setImports(classImports, statement.getClassImports());
+        });
     this.parameters = new ArrayList<>(parameters);
     if (!returnType.isSameType(VOID)) {
       ParameterUtils.setImport(imports, returnType);
       ParameterUtils.setImport(classImports, returnType);
     }
-    this.javadoc = new MethodJavadoc(name,
-            returnType,
-            parameters,
-            description);
+    this.javadoc = new MethodJavadoc(name, returnType, parameters, description);
     this.isPublic = isPublic;
   }
 
@@ -89,5 +88,4 @@ public class ComposeMethod implements PageObjectMethod {
   public boolean isPublic() {
     return isPublic;
   }
-
 }

@@ -75,8 +75,8 @@ public enum ActionableActionType implements ActionType {
     if (parameterCount != expected) {
       String contextStr = String.format("%s action \"%s\"", parserContext, this.name());
       throw new UtamCompilationError(
-              VALIDATION.getErrorMessage(108, contextStr,
-                      String.valueOf(expected), String.valueOf(parameterCount)));
+          VALIDATION.getErrorMessage(
+              108, contextStr, String.valueOf(expected), String.valueOf(parameterCount)));
     }
     return new ArrayList<>();
   }

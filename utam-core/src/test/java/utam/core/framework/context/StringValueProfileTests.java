@@ -19,7 +19,7 @@ import org.testng.annotations.Test;
 import utam.core.framework.consumer.UtamError;
 
 public class StringValueProfileTests {
-  
+
   @Test
   public void testStringValueProfile() {
     StringValueProfile profile = new StringValueProfile("testName", "testValue");
@@ -30,47 +30,31 @@ public class StringValueProfileTests {
 
   @Test
   public void testStringValueProfileWithNullNameThrows() {
-    UtamError e = expectThrows(
-        UtamError.class,
-        () -> new StringValueProfile(null, "testValue"));
-    assertThat(
-        e.getMessage(),
-        containsString(ERR_NAME_REQUIRED));
+    UtamError e = expectThrows(UtamError.class, () -> new StringValueProfile(null, "testValue"));
+    assertThat(e.getMessage(), containsString(ERR_NAME_REQUIRED));
   }
-  
+
   @Test
   public void testStringValueProfileWithEmptyNameThrows() {
-    UtamError e = expectThrows(
-        UtamError.class,
-        () -> new StringValueProfile("", "testValue"));
-    assertThat(
-        e.getMessage(),
-        containsString(ERR_NAME_REQUIRED));
+    UtamError e = expectThrows(UtamError.class, () -> new StringValueProfile("", "testValue"));
+    assertThat(e.getMessage(), containsString(ERR_NAME_REQUIRED));
   }
-  
+
   @Test
   public void testStringValueProfileWithNullValueThrows() {
-    UtamError e = expectThrows(
-        UtamError.class,
-        () -> new StringValueProfile("testName", null));
-    assertThat(
-        e.getMessage(),
-        containsString(ERR_VALUE_REQUIRED));
+    UtamError e = expectThrows(UtamError.class, () -> new StringValueProfile("testName", null));
+    assertThat(e.getMessage(), containsString(ERR_VALUE_REQUIRED));
   }
-  
+
   @Test
   public void testStringValueProfileWithEmptyValueThrows() {
-    UtamError e = expectThrows(
-        UtamError.class,
-        () -> new StringValueProfile("testName", ""));
-    assertThat(
-        e.getMessage(), 
-        containsString(ERR_VALUE_REQUIRED));
+    UtamError e = expectThrows(UtamError.class, () -> new StringValueProfile("testName", ""));
+    assertThat(e.getMessage(), containsString(ERR_VALUE_REQUIRED));
   }
 
   @Test
   public void testStringValueProfileEquality() {
-    StringValueProfile profile = new StringValueProfile( "testName", "testValue");
+    StringValueProfile profile = new StringValueProfile("testName", "testValue");
     StringValueProfile anotherProfile = new StringValueProfile("testName", "testValue");
     assertThat(profile.equals(anotherProfile), is(equalTo(true)));
   }
@@ -78,7 +62,7 @@ public class StringValueProfileTests {
   @Test
   public void testStringValueProfileInequality() {
     StringValueProfile profile = new StringValueProfile("testName", "testValue");
-    StringValueProfile anotherProfile = new StringValueProfile( "testName", "unmatchedValue");
+    StringValueProfile anotherProfile = new StringValueProfile("testName", "unmatchedValue");
     assertThat(profile.equals(anotherProfile), is(equalTo(false)));
   }
 
@@ -87,5 +71,4 @@ public class StringValueProfileTests {
     StringValueProfile profile = new StringValueProfile("testName", "testValue");
     assertThat(profile.equals(new Object()), is(equalTo(false)));
   }
-
 }

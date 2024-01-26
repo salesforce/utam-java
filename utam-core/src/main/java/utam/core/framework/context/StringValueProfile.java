@@ -24,8 +24,9 @@ public class StringValueProfile implements Profile {
 
   /**
    * Initializes a new instance of the StringValueProfile class
+   *
    * @param profileName name of the profile
-   * @param value       value for the profile
+   * @param value value for the profile
    */
   public StringValueProfile(String profileName, String value) {
     if (profileName == null || profileName.isEmpty()) {
@@ -55,7 +56,7 @@ public class StringValueProfile implements Profile {
     return getKey().hashCode();
   }
 
-  @Override //without this can't use Profile as a key in map inside Runner
+  @Override // without this can't use Profile as a key in map inside Runner
   public boolean equals(Object obj) {
     if (obj instanceof Profile) {
       return ((Profile) obj).getKey().equals(this.getKey());

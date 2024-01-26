@@ -48,8 +48,8 @@ import utam.core.selenium.element.LocatorBy;
 public class UtamLoaderTests {
 
   private static UtamLoaderImpl getDefaultLoader(boolean isMobile) {
-    Driver driver = new MockUtilities(isMobile ? AppiumDriver.class : WebDriver.class)
-        .getDriverAdapter();
+    Driver driver =
+        new MockUtilities(isMobile ? AppiumDriver.class : WebDriver.class).getDriverAdapter();
     return new UtamLoaderImpl(getDefaultConfig(), driver);
   }
 
@@ -75,7 +75,8 @@ public class UtamLoaderTests {
   public void testCreateUtamFromContainer() {
     UtamLoader loader = getDefaultLoader();
     WebElement mockElement = mock(WebElement.class);
-    when(mockElement.findElements(By.cssSelector("root"))).thenReturn(Collections.singletonList(mockElement));
+    when(mockElement.findElements(By.cssSelector("root")))
+        .thenReturn(Collections.singletonList(mockElement));
     ContainerMock containerMock = new ContainerMock(() -> mockElement);
     TestLoaderConfigPageObject pageObjectMock =
         loader.create(containerMock, TestLoaderConfigPageObject.class, LocatorBy.byCss("root"));
@@ -85,7 +86,8 @@ public class UtamLoaderTests {
 
   @Test
   public void testDefaultConstructor() {
-    UtamLoaderImpl loader = new UtamLoaderImpl(getDefaultConfig(), new DriverAdapter(mock(WebDriver.class), null));
+    UtamLoaderImpl loader =
+        new UtamLoaderImpl(getDefaultConfig(), new DriverAdapter(mock(WebDriver.class), null));
     assertThat(loader.getDriver(), is(instanceOf(DriverAdapter.class)));
   }
 
@@ -180,7 +182,8 @@ public class UtamLoaderTests {
     UtamLoader loader = getDefaultLoader();
     Object returned = loader.waitFor(() -> true, "message");
     assertThat(returned, equalTo(true));
-    expectThrows(TimeoutException.class, () -> loader.waitFor(() -> false, "test", Duration.ofSeconds(1)));
+    expectThrows(
+        TimeoutException.class, () -> loader.waitFor(() -> false, "test", Duration.ofSeconds(1)));
   }
 
   private static class ContainerMock implements Container {

@@ -36,22 +36,22 @@ public class PageObjectLintingImpl implements PageObjectLinting {
   private final File fileScanner;
   private RootLinting rootContext;
 
-
   public PageObjectLintingImpl(String name, String pageObjectFilePath, TypeProvider type) {
     this.name = name;
     String dir = System.getProperty("user.dir");
     // file path should be relative to project root for SARIF
     // for unit tests path is dummy hence condition
     this.filePath =
-        pageObjectFilePath.contains(dir) ? pageObjectFilePath.substring(dir.length() + 1)
+        pageObjectFilePath.contains(dir)
+            ? pageObjectFilePath.substring(dir.length() + 1)
             : pageObjectFilePath;
     this.type = type.getFullName();
     this.fileScanner = pageObjectFilePath.contains(dir) ? new File(pageObjectFilePath) : null;
   }
 
   static boolean isCustomElement(ElementLinting element) {
-    return Stream
-        .of(Element.LINTING_BASIC_TYPE, Element.LINTING_CONTAINER_TYPE, Element.LINTING_FRAME_TYPE)
+    return Stream.of(
+            Element.LINTING_BASIC_TYPE, Element.LINTING_CONTAINER_TYPE, Element.LINTING_FRAME_TYPE)
         .noneMatch(type -> type.equals(element.getTypeFullName()));
   }
 
@@ -132,7 +132,8 @@ public class PageObjectLintingImpl implements PageObjectLinting {
     private final String filterApplyMethod;
     private final MatcherType filterMatcherType;
 
-    public ElementSelector(Locator locator, boolean isList, String filterApplyMethod, MatcherType filterMatcherType) {
+    public ElementSelector(
+        Locator locator, boolean isList, String filterApplyMethod, MatcherType filterMatcherType) {
       this.objectValue = locator.getValue();
       this.stringValue = locator.getStringValue();
       this.isList = isList;
@@ -232,12 +233,14 @@ public class PageObjectLintingImpl implements PageObjectLinting {
           if (first.filterApplyMethod == null && second.filterApplyMethod == null) {
             return true;
           }
-          if (first.filterApplyMethod != null && second.filterApplyMethod != null &&
-              first.filterApplyMethod.equals(second.filterApplyMethod)) {
+          if (first.filterApplyMethod != null
+              && second.filterApplyMethod != null
+              && first.filterApplyMethod.equals(second.filterApplyMethod)) {
             // if both have filters on same method, duplicates allowed
             // if matcher type is different
-            return first.filterMatcherType != null && second.filterMatcherType != null &&
-                first.filterMatcherType.equals(second.filterMatcherType);
+            return first.filterMatcherType != null
+                && second.filterMatcherType != null
+                && first.filterMatcherType.equals(second.filterMatcherType);
           }
         }
         return false;
@@ -314,7 +317,11 @@ public class PageObjectLintingImpl implements PageObjectLinting {
     private final Element element;
     private final Metadata metadata;
 
-    public Root(boolean hasRootDescription, boolean hasAuthor, ElementSelector selector, Metadata metadata) {
+    public Root(
+        boolean hasRootDescription,
+        boolean hasAuthor,
+        ElementSelector selector,
+        Metadata metadata) {
       this.hasRootDescription = hasRootDescription;
       this.hasAuthor = hasAuthor;
       this.element = selector == null ? null : new Element("root", null, selector, null);

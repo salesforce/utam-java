@@ -7,12 +7,12 @@
  */
 package utam.core.declarative.translator;
 
-import utam.core.framework.consumer.UtamError;
-import org.testng.annotations.Test;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.expectThrows;
+
+import org.testng.annotations.Test;
+import utam.core.framework.consumer.UtamError;
 
 public class UnitTestRunnerTests {
 

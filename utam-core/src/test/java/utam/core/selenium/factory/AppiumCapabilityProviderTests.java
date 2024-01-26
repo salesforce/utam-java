@@ -15,13 +15,12 @@ import org.testng.annotations.Test;
 
 /**
  * Tests for AppiumCapabilityProvider
+ *
  * @author qren
  * @since 230
  */
-public class AppiumCapabilityProviderTests { 
-  /**
-   * The setDesiredCapability method should set the target Appium capability to a string value
-   */
+public class AppiumCapabilityProviderTests {
+  /** The setDesiredCapability method should set the target Appium capability to a string value */
   @Test
   public void testSetDesiredCapabilityString() {
     AppiumCapabilityProvider appiumCapabilityProvider = new AppiumCapabilityProvider();
@@ -32,9 +31,7 @@ public class AppiumCapabilityProviderTests {
     assertThat(desiredCapabilities.getCapability(capabilityName), is(equalTo(capabilityValue)));
   }
 
-  /**
-   * The setDesiredCapability method should set the target Appium capability to a boolean value
-   */
+  /** The setDesiredCapability method should set the target Appium capability to a boolean value */
   @Test
   public void testSetDesiredCapabilityBoolean() {
     AppiumCapabilityProvider appiumCapabilityProvider = new AppiumCapabilityProvider();
@@ -44,9 +41,7 @@ public class AppiumCapabilityProviderTests {
     assertThat(desiredCapabilities.getCapability(capabilityName), is(equalTo(true)));
   }
 
-  /**
-   * The setDesiredCapability method should set the target Appium capability to a integer value
-   */
+  /** The setDesiredCapability method should set the target Appium capability to a integer value */
   @Test
   public void testSetDesiredCapabilityInteger() {
     AppiumCapabilityProvider appiumCapabilityProvider = new AppiumCapabilityProvider();

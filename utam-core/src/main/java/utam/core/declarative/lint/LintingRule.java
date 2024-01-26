@@ -20,7 +20,7 @@ public interface LintingRule {
   /**
    * Apply rule to a single page object after it's generated
    *
-   * @param errors     container to report errors
+   * @param errors container to report errors
    * @param pageObject page object
    */
   void validate(List<LintingError> errors, PageObjectLinting pageObject);
@@ -28,8 +28,8 @@ public interface LintingRule {
   /**
    * Apply rule to all page objects to cross check them
    *
-   * @param first   first page object (already linted)
-   * @param second  second page object (already linted)
+   * @param first first page object (already linted)
+   * @param second second page object (already linted)
    * @param context all page objects under linting
    */
   void validate(PageObjectLinting first, PageObjectLinting second, LintingContext context);
@@ -54,5 +54,4 @@ public interface LintingRule {
    * @return string to use for SARIF JSON
    */
   String getDescription();
-
 }

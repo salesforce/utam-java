@@ -15,9 +15,7 @@ package utam.core.framework.consumer;
  */
 public class UtamError extends RuntimeException {
 
-  /**
-   * Default serial version ID for serializable object
-   */
+  /** Default serial version ID for serializable object */
   private static final long serialVersionUID = 1L;
 
   /**
@@ -33,7 +31,7 @@ public class UtamError extends RuntimeException {
    * Initializes a new instance of the UtamError class
    *
    * @param message the error message
-   * @param cause   the underlying wrapped exception
+   * @param cause the underlying wrapped exception
    */
   public UtamError(String message, Throwable cause) {
     super(message, cause);

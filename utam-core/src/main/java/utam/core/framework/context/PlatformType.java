@@ -19,14 +19,10 @@ import utam.core.framework.base.PageMarker;
  */
 public enum PlatformType {
 
-  /**
-   * platform is the web
-   */
+  /** platform is the web */
   WEB,
 
-  /**
-   * platform is a native app
-   */
+  /** platform is a native app */
   NATIVE;
 
   /**

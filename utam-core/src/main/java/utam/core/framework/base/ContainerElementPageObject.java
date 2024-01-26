@@ -19,8 +19,8 @@ import utam.core.framework.consumer.ContainerElement;
  * @deprecated not supported outside Salesforce engineering teams
  */
 @Deprecated
-public final class ContainerElementPageObject extends ContainerElementImpl implements PageObject,
-    ContainerElement {
+public final class ContainerElementPageObject extends ContainerElementImpl
+    implements PageObject, ContainerElement {
 
   static final String ERR_UNSUPPORTED_METHOD =
       "method is not supported for a " + ContainerElementPageObject.class.getSimpleName();

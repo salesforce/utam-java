@@ -54,16 +54,16 @@ class MethodDeclarationImpl implements MethodDeclaration {
   }
 
   // used in tests
-  MethodDeclarationImpl(
-      List<MethodParameter> parameters,
-      TypeProvider returnType) {
-    this("test", parameters, returnType,
+  MethodDeclarationImpl(List<MethodParameter> parameters, TypeProvider returnType) {
+    this(
+        "test",
+        parameters,
+        returnType,
         new MethodJavadoc("test", returnType, parameters, new UtamEmptyMethodDescription()));
   }
 
   private static List<TypeProvider> buildImports(
-      TypeProvider returnType,
-      List<MethodParameter> methodParameters) {
+      TypeProvider returnType, List<MethodParameter> methodParameters) {
     List<TypeProvider> imports = new ArrayList<>();
     setDeclarationImports(imports, methodParameters);
     setImport(imports, returnType);

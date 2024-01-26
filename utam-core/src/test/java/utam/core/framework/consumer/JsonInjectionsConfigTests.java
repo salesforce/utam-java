@@ -37,36 +37,43 @@ public class JsonInjectionsConfigTests {
 
   @Test
   public void testMissingInjectionsJsonReturnsEmptyConfig() {
-    Collection<ProfileContext> emptyConfig = new JsonInjectionsConfig().readDependenciesConfig("notexisting.json").values();
+    Collection<ProfileContext> emptyConfig =
+        new JsonInjectionsConfig().readDependenciesConfig("notexisting.json").values();
     assertThat(emptyConfig, is(emptyIterable()));
   }
 
   @Test
   public void testWrongFormatThrows() {
-    UtamCoreError e = expectThrows(UtamCoreError.class,
-        () -> new JsonInjectionsConfig().readDependenciesConfig("config/wrongFormat.config.json"));
+    UtamCoreError e =
+        expectThrows(
+            UtamCoreError.class,
+            () ->
+                new JsonInjectionsConfig()
+                    .readDependenciesConfig("config/wrongFormat.config.json"));
     assertThat(e.getCause(), instanceOf(JsonParseException.class));
-    assertThat(e.getMessage(),
+    assertThat(
+        e.getMessage(),
         containsString(String.format(ERR_WHILE_READING_CONFIG, "config/wrongFormat.config.json")));
   }
 
   @Test
   public void testEmptyMapping() {
-    Map<String, ProfileContext> map = new JsonInjectionsConfig()
-        .readDependenciesConfig("config/emptyProfiles.config.json");
+    Map<String, ProfileContext> map =
+        new JsonInjectionsConfig().readDependenciesConfig("config/emptyProfiles.config.json");
     assertThat(map, is(anEmptyMap()));
   }
 
   @Test
   public void testEmptyConfigFile() {
-    Map<String, ProfileContext> map = new JsonInjectionsConfig()
-            .readDependenciesConfig("config/emptyFile.config.json");
+    Map<String, ProfileContext> map =
+        new JsonInjectionsConfig().readDependenciesConfig("config/emptyFile.config.json");
     assertThat(map, is(anEmptyMap()));
   }
 
   @Test
   public void testReloadingProfile() {
-    UtamLoaderConfig loaderConfig = new UtamLoaderConfigImpl("config/module1.config.json", "config/module2.config.json");
+    UtamLoaderConfig loaderConfig =
+        new UtamLoaderConfigImpl("config/module1.config.json", "config/module2.config.json");
     // read from module1.config.json
     loaderConfig.setProfile(new StringValueProfile("name", "value1"));
     PageObjectContext pageObjectContext = loaderConfig.getPageContext();
@@ -88,7 +95,8 @@ public class JsonInjectionsConfigTests {
 
   @Test
   public void testMergingTwoJsonConfigs() {
-    UtamLoaderConfig loaderConfig = new UtamLoaderConfigImpl("config/module1.config.json", "config/module2.config.json");
+    UtamLoaderConfig loaderConfig =
+        new UtamLoaderConfigImpl("config/module1.config.json", "config/module2.config.json");
     loaderConfig.setProfile(new StringValueProfile("name2", "value2"));
     PageObjectContext pageObjectContext = loaderConfig.getPageContext();
     // read from module1.config.json
@@ -101,7 +109,8 @@ public class JsonInjectionsConfigTests {
 
   @Test
   public void testMergingJsonAndPropertyConfigs() {
-    UtamLoaderConfig loaderConfig = new UtamLoaderConfigImpl("config/module1.config.json", "config/module2.config.json");
+    UtamLoaderConfig loaderConfig =
+        new UtamLoaderConfigImpl("config/module1.config.json", "config/module2.config.json");
     loaderConfig.setProfile(TestNonStringProfile.ONE);
     PageObjectContext pageObjectContext = loaderConfig.getPageContext();
     // read from module1.config.json
@@ -115,7 +124,8 @@ public class JsonInjectionsConfigTests {
 
   @Test
   public void testSwitchProfile() {
-    UtamLoaderConfig loaderConfig = new UtamLoaderConfigImpl("loaderconfig/test_one_module_loader_config.json");
+    UtamLoaderConfig loaderConfig =
+        new UtamLoaderConfigImpl("loaderconfig/test_one_module_loader_config.json");
     loaderConfig.setProfile(TestNonStringProfile.ONE);
     PageObject instance = loaderConfig.getPageContext().getBean(TestLoaderConfigDefault.class);
     assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
@@ -125,11 +135,10 @@ public class JsonInjectionsConfigTests {
     assertThat(instance, is(instanceOf(TestLoaderConfigPageObjectOverride.class)));
   }
 
-  /**
-   * enum profile can behave differently from string when used as a map key
-   */
+  /** enum profile can behave differently from string when used as a map key */
   enum TestNonStringProfile implements Profile {
-    ONE, TWO;
+    ONE,
+    TWO;
 
     @Override
     public String getName() {

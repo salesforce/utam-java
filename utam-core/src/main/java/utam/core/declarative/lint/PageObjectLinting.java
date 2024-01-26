@@ -37,7 +37,7 @@ public interface PageObjectLinting {
    * Find code line number for SARIF report
    *
    * @param context search context (can be element, method etc.)
-   * @param line    string to fund
+   * @param line string to fund
    * @return number of the line or 1 if no match
    */
   int findCodeLine(FileSearchContext context, String line);
@@ -116,7 +116,7 @@ public interface PageObjectLinting {
     /**
      * Search for the code line inside the file
      *
-     * @param file   page object JSON file
+     * @param file page object JSON file
      * @param string string to find with partial match
      * @return line number or 1 if no match found
      */

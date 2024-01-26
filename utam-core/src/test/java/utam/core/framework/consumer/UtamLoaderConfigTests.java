@@ -60,9 +60,11 @@ public class UtamLoaderConfigTests {
 
   @Test
   public void testCustomJSONConfigFromFile() {
-    File file = new File(Objects
-        .requireNonNull(this.getClass().getClassLoader().getResource(VALID_LOADER_CONFIG_PATH))
-        .getFile());
+    File file =
+        new File(
+            Objects.requireNonNull(
+                    this.getClass().getClassLoader().getResource(VALID_LOADER_CONFIG_PATH))
+                .getFile());
     UtamLoaderConfig config = new UtamLoaderConfigImpl(file);
     PageObject pageObject = config.getPageContext().getBean(TestLoaderConfigPageObject.class);
     assertThat(pageObject, is(instanceOf(TestLoaderConfigPageObjectProfile.class)));
@@ -88,10 +90,11 @@ public class UtamLoaderConfigTests {
 
   @Test
   public void testDefaultConfigMissingThrows() {
-    UtamLoaderConfig config = new UtamLoaderConfigImpl("loaderconfig/test_one_module_loader_config.json");
+    UtamLoaderConfig config =
+        new UtamLoaderConfigImpl("loaderconfig/test_one_module_loader_config.json");
     PageObjectContext context = config.getPageContext();
-    UtamError e = expectThrows(UtamError.class,
-        () -> context.getBean(TestLoaderConfigDefault.class));
+    UtamError e =
+        expectThrows(UtamError.class, () -> context.getBean(TestLoaderConfigDefault.class));
     String error = String.format(ERR_GET_IMPL_BY_NAME, TestLoaderConfigDefault.class.getName());
     assertThat(e.getMessage(), containsString(error));
   }

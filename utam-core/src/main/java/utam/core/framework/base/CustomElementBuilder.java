@@ -13,8 +13,8 @@ import static utam.core.framework.base.BasicElementBuilder.getUnwrappedElement;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import utam.core.element.Element;
 import utam.core.element.BasicElement;
+import utam.core.element.Element;
 import utam.core.framework.base.ElementLocation.ElementFound;
 
 /**
@@ -25,17 +25,20 @@ import utam.core.framework.base.ElementLocation.ElementFound;
  */
 public class CustomElementBuilder {
 
-  private static final String ERR_CANT_FIND_ELEMENT_WITH_FILTER = "can't find element [%s] that matches condition";
+  private static final String ERR_CANT_FIND_ELEMENT_WITH_FILTER =
+      "can't find element [%s] that matches condition";
 
   private final PageObjectsFactory factory;
   private final Element scope;
   private final ElementLocation elementLocation;
 
-  CustomElementBuilder(PageObjectsFactory factory, BasicElement scopeElement, ElementLocation elementLocation) {
+  CustomElementBuilder(
+      PageObjectsFactory factory, BasicElement scopeElement, ElementLocation elementLocation) {
     this(factory, getUnwrappedElement(scopeElement), elementLocation);
   }
 
-  CustomElementBuilder(PageObjectsFactory factory, Element scopeElement, ElementLocation elementLocation) {
+  CustomElementBuilder(
+      PageObjectsFactory factory, Element scopeElement, ElementLocation elementLocation) {
     this.factory = factory;
     this.scope = scopeElement;
     this.elementLocation = elementLocation;
@@ -48,7 +51,8 @@ public class CustomElementBuilder {
 
   private <T extends PageObject> T getBootstrappedInstance(Class<T> type, ElementFound foundRoot) {
     T poInstance = factory.getPageContext().getBean(type);
-    factory.bootstrap(poInstance, foundRoot.getFoundElement(), foundRoot.getLocatorWithParameters());
+    factory.bootstrap(
+        poInstance, foundRoot.getFoundElement(), foundRoot.getLocatorWithParameters());
     return poInstance;
   }
 
@@ -57,7 +61,7 @@ public class CustomElementBuilder {
    * error <br>
    *
    * @param type custom type
-   * @param <T>  custom generic type
+   * @param <T> custom generic type
    * @return instance of the Page Object of given type
    */
   public <T extends PageObject> T build(Class<T> type) {
@@ -73,10 +77,11 @@ public class CustomElementBuilder {
 
   /**
    * scope page object of the custom type, then find all and apply filter to find first match <br>
-   * if nothing found, throws an error <br> if no match for filter found, throws if not nullable
+   * if nothing found, throws an error <br>
+   * if no match for filter found, throws if not nullable
    *
-   * @param type   custom type
-   * @param <T>    custom generic type
+   * @param type custom type
+   * @param <T> custom generic type
    * @param filter filter to apply to the found instances
    * @return instance of the Page Object of given type
    */
@@ -96,7 +101,7 @@ public class CustomElementBuilder {
     }
 
     // if no match found and element is nullable - return null
-    if(elementLocation.findContext.isNullable()) {
+    if (elementLocation.findContext.isNullable()) {
       return null;
     }
     throw new NullPointerException(getFilteredElementNotFoundErr(type));
@@ -106,7 +111,7 @@ public class CustomElementBuilder {
    * scope page object of the custom type, then find all if nothing found, throws an error <br>
    *
    * @param type custom type
-   * @param <T>  custom generic type
+   * @param <T> custom generic type
    * @return all found instances of the Page Object of given type
    */
   public <T extends PageObject> List<T> buildList(Class<T> type) {
@@ -116,20 +121,22 @@ public class CustomElementBuilder {
       return null;
     }
     return elements.stream()
-        .map(el -> {
-          T poInstance = getBootstrappedInstance(type, el);
-          poInstance.load();
-          return poInstance;
-        })
+        .map(
+            el -> {
+              T poInstance = getBootstrappedInstance(type, el);
+              poInstance.load();
+              return poInstance;
+            })
         .collect(Collectors.toList());
   }
 
   /**
-   * scope page object of the custom type, then find all and apply filter<br> if nothing found,
-   * throws <br> if no match for filter found, throws if not nullable otherwise returns empty list
+   * scope page object of the custom type, then find all and apply filter<br>
+   * if nothing found, throws <br>
+   * if no match for filter found, throws if not nullable otherwise returns empty list
    *
-   * @param type   custom type
-   * @param <T>    custom generic type
+   * @param type custom type
+   * @param <T> custom generic type
    * @param filter filter to apply to the found instances
    * @return instance of the Page Object of given type
    */
@@ -141,8 +148,6 @@ public class CustomElementBuilder {
     if (found == null) {
       return null;
     }
-    return found.stream()
-        .filter(filter)
-        .collect(Collectors.toList());
+    return found.stream().filter(filter).collect(Collectors.toList());
   }
 }

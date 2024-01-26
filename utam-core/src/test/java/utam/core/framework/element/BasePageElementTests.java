@@ -47,7 +47,8 @@ public class BasePageElementTests {
   @Test
   public void testWaitForAbsence() {
     MockUtilities mock = new MockUtilities();
-    when(mock.getWebElementMock().isDisplayed()).thenThrow(StaleElementReferenceException.class)
+    when(mock.getWebElementMock().isDisplayed())
+        .thenThrow(StaleElementReferenceException.class)
         .thenReturn(true);
     mock.getUtamElement().waitForAbsence();
     assertThrows(TimeoutException.class, () -> mock.getUtamElement().waitForAbsence());
@@ -169,20 +170,22 @@ public class BasePageElementTests {
   @Test
   public void testScrollToTopWithElementAlignedToBottom() {
     MockUtilities mock = new MockUtilities();
-    when(((JavascriptExecutor) mock.getWebDriverMock()).executeScript(
-        contains(SCROLL_INTO_VIEW_JS),
-        refEq(mock.getWebElementMock()))).then((invocation) -> when(
-        ((WebElement) invocation.getArgument(1)).isDisplayed()).thenReturn(true));
+    when(((JavascriptExecutor) mock.getWebDriverMock())
+            .executeScript(contains(SCROLL_INTO_VIEW_JS), refEq(mock.getWebElementMock())))
+        .then(
+            (invocation) ->
+                when(((WebElement) invocation.getArgument(1)).isDisplayed()).thenReturn(true));
     mock.getUtamElement().scrollToTop();
   }
 
   @Test
   public void testScrollToTopWithElementAlignedToTop() {
     MockUtilities mock = new MockUtilities();
-    when(((JavascriptExecutor) mock.getWebDriverMock()).executeScript(
-        contains(SCROLL_TOP_VIA_JAVASCRIPT),
-        refEq(mock.getWebElementMock()))).then((invocation) -> when(
-        ((WebElement) invocation.getArgument(1)).isDisplayed()).thenReturn(true));
+    when(((JavascriptExecutor) mock.getWebDriverMock())
+            .executeScript(contains(SCROLL_TOP_VIA_JAVASCRIPT), refEq(mock.getWebElementMock())))
+        .then(
+            (invocation) ->
+                when(((WebElement) invocation.getArgument(1)).isDisplayed()).thenReturn(true));
     mock.getUtamElement().scrollToTop();
   }
 
@@ -257,15 +260,17 @@ public class BasePageElementTests {
   @Test
   public void testClickWithException() {
     MockUtilities mock = new MockUtilities();
-    doThrow(new JavascriptException(
-        "javascript error: Cannot read property 'defaultView' of undefined"))
-        .when(mock.getWebElementMock()).click();
+    doThrow(
+            new JavascriptException(
+                "javascript error: Cannot read property 'defaultView' of undefined"))
+        .when(mock.getWebElementMock())
+        .click();
     // fall back on javascript click
     mock.getUtamElement().click();
     String errMessage = "javascript error: unknown JS error";
     doThrow(new JavascriptException(errMessage)).when(mock.getWebElementMock()).click();
-    JavascriptException e = expectThrows(JavascriptException.class,
-        () -> mock.getUtamElement().click());
+    JavascriptException e =
+        expectThrows(JavascriptException.class, () -> mock.getUtamElement().click());
     assertThat(e.getMessage(), containsString(errMessage));
   }
 

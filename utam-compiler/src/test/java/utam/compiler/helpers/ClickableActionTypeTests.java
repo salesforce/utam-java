@@ -54,7 +54,8 @@ public class ClickableActionTypeTests {
 
     assertThat(parameterTypeStrings, containsInAnyOrder(parameterTypes.toArray()));
     assertThat(parameterTypeStrings, hasSize(parameterTypes.size()));
-    assertThat(action.getReturnType().getSimpleName(),
+    assertThat(
+        action.getReturnType().getSimpleName(),
         is(equalTo(ClickableActionTypeTests.VOID_TYPE_NAME)));
   }
 
@@ -69,9 +70,7 @@ public class ClickableActionTypeTests {
     consumer.accept(method.getName());
   }
 
-  /**
-   * The click member should return the proper value
-   */
+  /** The click member should return the proper value */
   @Test
   public void testClick() {
     validateAction(ClickableActionType.click, new ArrayList<>());
@@ -85,8 +84,7 @@ public class ClickableActionTypeTests {
             action -> {
               info(String.format("test element action '%s'", action));
               Class[] paramClasses = action.getParameterClasses();
-              Method method =
-                  getMethod(action.getElementClass(), action.name(), paramClasses);
+              Method method = getMethod(action.getElementClass(), action.name(), paramClasses);
               assertThat(
                   String.format(
                       "action '%s' returns '%s', method returns '%s'",
@@ -100,9 +98,9 @@ public class ClickableActionTypeTests {
                   String.format("number of actual parameters is %d", params.length),
                   params.length,
                   is(equalTo(method.getParameterCount())));
-               for (int i = 0; i < params.length; i++) {
-                 assertThat(params[i], is(equalTo(method.getParameterTypes()[i])));
-               }
+              for (int i = 0; i < params.length; i++) {
+                assertThat(params[i], is(equalTo(method.getParameterTypes()[i])));
+              }
             });
   }
 }

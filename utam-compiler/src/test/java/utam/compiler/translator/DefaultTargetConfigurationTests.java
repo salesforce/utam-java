@@ -124,21 +124,18 @@ public class DefaultTargetConfigurationTests {
   @Test
   public void testConstructor() {
     String currentDir = System.getProperty("user.dir");
-    DefaultTargetConfiguration targetConfig = new DefaultTargetConfiguration(
-        currentDir,
-        currentDir,
-        currentDir,
-        UnitTestRunner.JUNIT,
-        currentDir,
-            null
-    );
+    DefaultTargetConfiguration targetConfig =
+        new DefaultTargetConfiguration(
+            currentDir, currentDir, currentDir, UnitTestRunner.JUNIT, currentDir, null);
     assertThat(targetConfig.getUnitTestRunnerType(), is(equalTo(UnitTestRunner.JUNIT)));
     assertThat(targetConfig.getInjectionConfigRootFilePath(), is(equalTo(currentDir)));
     String typeName = "utam/MyPage";
     TypeProvider type = new FromString(typeName);
-    assertThat(targetConfig.getPageObjectClassPath(type),
+    assertThat(
+        targetConfig.getPageObjectClassPath(type),
         is(equalTo(currentDir + File.separator + "utam" + File.separator + "MyPage.java")));
-    assertThat(targetConfig.getPageObjectTestClassPath(type),
+    assertThat(
+        targetConfig.getPageObjectTestClassPath(type),
         is(equalTo(currentDir + File.separator + "utam" + File.separator + "MyPageTests.java")));
     assertThat(targetConfig.getLintReportPath(), is(equalTo(currentDir)));
   }
@@ -146,18 +143,17 @@ public class DefaultTargetConfigurationTests {
   @Test
   public void testConstructorForDistribution() {
     String currentDir = System.getProperty("user.dir");
-    DefaultTargetConfiguration targetConfig = new DefaultTargetConfiguration(
-        currentDir,
-        currentDir,
-        currentDir
-    );
+    DefaultTargetConfiguration targetConfig =
+        new DefaultTargetConfiguration(currentDir, currentDir, currentDir);
     assertThat(targetConfig.getUnitTestRunnerType(), is(equalTo(UnitTestRunner.NONE)));
     assertThat(targetConfig.getInjectionConfigRootFilePath(), is(equalTo(currentDir)));
     String typeName = "utam/MyPage";
     TypeProvider type = new FromString(typeName);
-    assertThat(targetConfig.getPageObjectClassPath(type),
+    assertThat(
+        targetConfig.getPageObjectClassPath(type),
         is(equalTo((currentDir + "/utam/MyPage.java").replace("/", File.separator))));
-    assertThat(targetConfig.getPageObjectTestClassPath(type),
+    assertThat(
+        targetConfig.getPageObjectTestClassPath(type),
         is(equalTo((currentDir + "/utam/MyPageTests.java").replace("/", File.separator))));
   }
 
@@ -271,12 +267,10 @@ public class DefaultTargetConfigurationTests {
     }
 
     @Override
-    public void flush() {
-    }
+    public void flush() {}
 
     @Override
-    public void close() {
-    }
+    public void close() {}
   }
 
   static class StringWriterMock extends Writer {
@@ -295,12 +289,10 @@ public class DefaultTargetConfigurationTests {
     }
 
     @Override
-    public void flush() {
-    }
+    public void flush() {}
 
     @Override
-    public void close() {
-    }
+    public void close() {}
   }
 
   private static class NullUnitTestWriter extends Mock {

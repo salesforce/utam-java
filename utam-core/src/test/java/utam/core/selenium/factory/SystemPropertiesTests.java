@@ -9,12 +9,13 @@ package utam.core.selenium.factory;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+
 import org.testng.annotations.Test;
 
-public class SystemPropertiesTests { 
+public class SystemPropertiesTests {
   /**
-   * The static setChromeDriverPath method should set the webdriver.chrome.driver system
-   * property to the proper value
+   * The static setChromeDriverPath method should set the webdriver.chrome.driver system property to
+   * the proper value
    */
   @Test
   public void testSetChromeDriverPath() {
@@ -24,17 +25,17 @@ public class SystemPropertiesTests {
     assertThat(
         System.getProperty(SystemProperties.CHROME_DRIVER_PATH),
         is(equalTo(userHome + SystemProperties.FILE_PATH_SEPARATOR + "chromedriver")));
-    
+
     // Test that subsequent calls to the same method succeed
     SystemProperties.setChromeDriverPath();
     assertThat(
         System.getProperty(SystemProperties.CHROME_DRIVER_PATH),
         is(equalTo(userHome + SystemProperties.FILE_PATH_SEPARATOR + "chromedriver")));
   }
-  
+
   /**
-   * The static setGeckoDriverPath method should set the webdriver.gecko.driver system
-   * property to the proper value
+   * The static setGeckoDriverPath method should set the webdriver.gecko.driver system property to
+   * the proper value
    */
   @Test
   public void testSetGeckoDriverPath() {
@@ -44,7 +45,7 @@ public class SystemPropertiesTests {
     assertThat(
         System.getProperty(SystemProperties.GECKO_DRIVER_PATH),
         is(equalTo(userHome + SystemProperties.FILE_PATH_SEPARATOR + "geckodriver")));
-    
+
     // Test that subsequent calls to the same method succeed
     SystemProperties.setGeckoDriverPath();
     assertThat(
@@ -53,9 +54,8 @@ public class SystemPropertiesTests {
   }
 
   /**
-   * The static setAndroidAppPath method should set the android.app system
-   * property to the proper value, and
-   * the static getAndroidAppPath method should return the proper value
+   * The static setAndroidAppPath method should set the android.app system property to the proper
+   * value, and the static getAndroidAppPath method should return the proper value
    */
   @Test
   public void testSetAndroidAppPath() {
@@ -73,8 +73,7 @@ public class SystemPropertiesTests {
   }
 
   /**
-   * The static setAppiumPath method should set the appium system
-   * property to the proper value, and
+   * The static setAppiumPath method should set the appium system property to the proper value, and
    * the static getAppiumPath method should return the proper value
    */
   @Test
@@ -84,7 +83,7 @@ public class SystemPropertiesTests {
     assertThat(
         System.getProperty(SystemProperties.APPIUM_PATH),
         is(equalTo(SystemProperties.getAppiumPath())));
-    
+
     // Test that subsequent calls to the same method succeed
     SystemProperties.setAppiumPath();
     assertThat(
@@ -93,9 +92,8 @@ public class SystemPropertiesTests {
   }
 
   /**
-   * The static setAppActivity method should set the app.activity system
-   * property to the proper value, and
-   * the static getAppActivity method should return the proper value
+   * The static setAppActivity method should set the app.activity system property to the proper
+   * value, and the static getAppActivity method should return the proper value
    */
   @Test
   public void testSetAppActivity() {
@@ -113,9 +111,8 @@ public class SystemPropertiesTests {
   }
 
   /**
-   * The static setAppBundleID method should set the app.bundleid system
-   * property to the proper value, and
-   * the static getAppBundleID method should return the proper value
+   * The static setAppBundleID method should set the app.bundleid system property to the proper
+   * value, and the static getAppBundleID method should return the proper value
    */
   @Test
   public void testSetAppBundleID() {
@@ -133,8 +130,7 @@ public class SystemPropertiesTests {
   }
 
   /**
-   * The static setIOSAppPath method should set the ios.app system
-   * property to the proper value, and
+   * The static setIOSAppPath method should set the ios.app system property to the proper value, and
    * the static getIOSAppPath method should return the proper value
    */
   @Test
@@ -153,9 +149,8 @@ public class SystemPropertiesTests {
   }
 
   /**
-   * The static setIOSDeviceName method should set the ios.device system
-   * property to the proper value, and
-   * the static getIOSDeviceName method should return the proper value
+   * The static setIOSDeviceName method should set the ios.device system property to the proper
+   * value, and the static getIOSDeviceName method should return the proper value
    */
   @Test
   public void testSetIOSDeviceName() {
@@ -173,8 +168,7 @@ public class SystemPropertiesTests {
   }
 
   /**
-   * The static setNodeJSPath method should set the nodejs system
-   * property to the proper value, and
+   * The static setNodeJSPath method should set the nodejs system property to the proper value, and
    * the static getNodeJSPath method should return the proper value
    */
   @Test
@@ -184,7 +178,7 @@ public class SystemPropertiesTests {
     assertThat(
         System.getProperty(SystemProperties.NODEJS_PATH),
         is(equalTo(SystemProperties.getNodeJSPath())));
-    
+
     // Test that subsequent calls to the same method succeed
     SystemProperties.setNodeJSPath();
     assertThat(

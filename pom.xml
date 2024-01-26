@@ -132,6 +132,7 @@
         <mockito.version>2.21.0</mockito.version>
         <hamcrest.version>2.2</hamcrest.version>
         <sarif.version>2.0</sarif.version>
+        <spotless.version>2.31.0</spotless.version>
     </properties>
 
     <scm>
@@ -280,6 +281,19 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
                     <version>${maven.exec.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>${spotless.version}</version>
+                    <configuration>
+                        <java>
+                            <googleJavaFormat>
+                                <version>1.19.1</version>
+                                <reflowLongStrings>true</reflowLongStrings>
+                            </googleJavaFormat>
+                        </java>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

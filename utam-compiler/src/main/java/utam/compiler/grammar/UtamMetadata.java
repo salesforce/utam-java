@@ -33,12 +33,14 @@ class UtamMetadata {
   UtamMetadata(JsonNode metadataNode) {
     // Turn the metadata properties from a JsonNode to a POJO map
     // with String keys and Object values.
-    this.metadataProperties = new ObjectMapper().convertValue(
-        metadataNode, new TypeReference<HashMap<String, Object>>() {});
+    this.metadataProperties =
+        new ObjectMapper()
+            .convertValue(metadataNode, new TypeReference<HashMap<String, Object>>() {});
   }
 
   /**
    * Gets the properties and values of the metadata object.
+   *
    * @return a map with string keys and object values representing the metadata object properties
    */
   public Map<String, Object> getMetadataProperties() {

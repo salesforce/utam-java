@@ -18,7 +18,8 @@ import utam.core.framework.consumer.UtamError;
  */
 public abstract class ImperativeProvider<T extends PageObject> implements ImperativeExtension<T> {
 
-  private static final String ERR_CANT_CREATE_UTILITY = "can't create instance of imperative utility %s";
+  private static final String ERR_CANT_CREATE_UTILITY =
+      "can't create instance of imperative utility %s";
   private T instance;
 
   /**
@@ -30,16 +31,14 @@ public abstract class ImperativeProvider<T extends PageObject> implements Impera
     this.instance = instance;
   }
 
-  /**
-   * Initializes a new instance of the ImperativeProvider class
-   */
+  /** Initializes a new instance of the ImperativeProvider class */
   protected ImperativeProvider() {}
 
   /**
    * Builds an imperative provider for the appropriate type
    *
    * @param type the class to instantiate as the imperative extensions class
-   * @param <T>  the type of the imperative extensions class
+   * @param <T> the type of the imperative extensions class
    * @return an instance of the class as an imperative provider
    */
   public static <T extends ImperativeProvider> T build(Class<T> type) {

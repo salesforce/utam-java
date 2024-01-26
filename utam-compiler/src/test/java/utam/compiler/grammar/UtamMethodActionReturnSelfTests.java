@@ -60,11 +60,12 @@ public class UtamMethodActionReturnSelfTests {
     TranslationContext context = getContext("predicateReturnSelf");
     PageObjectMethod method = context.getMethod(methodName);
     MethodInfo expected = getMethodInfo();
-    expected.addCodeLine("Test statement0 = this.waitFor(() -> {\n"
-        + "BasePageElement proot0 = this.getRootElement();\n"
-        + "proot0.getText();\n"
-        + "return this;\n"
-        + "})");
+    expected.addCodeLine(
+        "Test statement0 = this.waitFor(() -> {\n"
+            + "BasePageElement proot0 = this.getRootElement();\n"
+            + "proot0.getText();\n"
+            + "return this;\n"
+            + "})");
     expected.addCodeLine("return statement0");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
@@ -72,27 +73,38 @@ public class UtamMethodActionReturnSelfTests {
   @Test
   public void returnSelfRedundantAttributes() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("returnSelfError"));
-    assertThat(e.getMessage(), containsString("error 600: method \"test\" statement: incorrect compose statement format"));
+    assertThat(
+        e.getMessage(),
+        containsString("error 600: method \"test\" statement: incorrect compose statement format"));
   }
 
   @Test
   public void returnSelfNotLastStatementThrows() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("notLastStatement"));
-    assertThat(e.getMessage(), containsString("error 608: method \"test\" statement: "
-        + "\"returnSelf\" can only be invoked from the last statement"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 608: method \"test\" statement: "
+                + "\"returnSelf\" can only be invoked from the last statement"));
   }
 
   @Test
   public void returnSelfNotLastStatementPredicateThrows() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("notLastStatementPredicate"));
-    assertThat(e.getMessage(), containsString("error 608: method \"test\" statement: "
-        + "\"returnSelf\" can only be invoked from the last statement"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 608: method \"test\" statement: "
+                + "\"returnSelf\" can only be invoked from the last statement"));
   }
 
   @Test
   public void returnSelfNotLastStatementBeforeLoadThrows() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("notLastStatementBeforeLoad"));
-    assertThat(e.getMessage(), containsString("error 608: method \"load\" statement: "
-        + "\"returnSelf\" can only be invoked from the last statement"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 608: method \"load\" statement: "
+                + "\"returnSelf\" can only be invoked from the last statement"));
   }
 }

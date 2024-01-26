@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
-
 import org.testng.annotations.Test;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorSourceConfig;
@@ -54,14 +53,18 @@ public class TranslatorGenerationCommandTests {
     assertThat(config, is(not(nullValue())));
     TranslatorSourceConfig sourceConfig = config.getConfiguredSource();
     sourceConfig.recursiveScan();
-    Map<String, String> foundPageObjects = ((DefaultSourceConfiguration) sourceConfig)
-        .getSourcePath();
+    Map<String, String> foundPageObjects =
+        ((DefaultSourceConfiguration) sourceConfig).getSourcePath();
     assertThat(foundPageObjects.keySet(), hasSize(2));
-    assertThat(foundPageObjects.keySet(),
+    assertThat(
+        foundPageObjects.keySet(),
         containsInAnyOrder("utam-one/pageObjects/first", "utam-two/pageObjects/second"));
-    assertThat(foundPageObjects.values(), containsInAnyOrder(
-        (USER_ROOT + RESOURCES_PATH + "/spec/one/first.utam.json").replace("/", File.separator),
-        (USER_ROOT + RESOURCES_PATH + "/spec/two/second.utam.json").replace("/", File.separator)));
+    assertThat(
+        foundPageObjects.values(),
+        containsInAnyOrder(
+            (USER_ROOT + RESOURCES_PATH + "/spec/one/first.utam.json").replace("/", File.separator),
+            (USER_ROOT + RESOURCES_PATH + "/spec/two/second.utam.json")
+                .replace("/", File.separator)));
   }
 
   @Test
@@ -79,7 +82,8 @@ public class TranslatorGenerationCommandTests {
   @Test
   public void testJsonConfigWithInputFiles() {
     TranslatorGenerationCommand command = new TranslatorGenerationCommand();
-    command.jsonConfig = new File(USER_ROOT + RESOURCES_PATH + "/config/utam.nodirectory.config.json");
+    command.jsonConfig =
+        new File(USER_ROOT + RESOURCES_PATH + "/config/utam.nodirectory.config.json");
     command.compilerRoot = new File(USER_ROOT);
     command.inputFiles = Collections.singletonList(new File("test"));
     TranslatorConfig config = command.getTranslationConfig();
@@ -104,8 +108,8 @@ public class TranslatorGenerationCommandTests {
     command.jsonConfig = new File("error.config");
     assertThat(command.getTranslationConfig(), is(nullValue()));
     assertThat(command.returnCode, is(equalTo(CONFIG_ERR)));
-    assertThat(command.getThrownError().getMessage(),
-        containsString(ERR_COMPILER_CONFIG_NEEDS_ROOT));
+    assertThat(
+        command.getThrownError().getMessage(), containsString(ERR_COMPILER_CONFIG_NEEDS_ROOT));
     command.compilerRoot = new File(USER_ROOT);
     TranslatorConfig config = command.getTranslationConfig();
     assertThat(command.returnCode, is(equalTo(RUNTIME_ERR)));
@@ -155,8 +159,8 @@ public class TranslatorGenerationCommandTests {
     assertThat(config, is(not(nullValue())));
     TranslatorSourceConfig sourceConfig = config.getConfiguredSource();
     sourceConfig.recursiveScan();
-    Map<String, String> foundPageObjects = ((DefaultSourceConfiguration) sourceConfig)
-        .getSourcePath();
+    Map<String, String> foundPageObjects =
+        ((DefaultSourceConfiguration) sourceConfig).getSourcePath();
     assertThat(foundPageObjects.keySet(), hasSize(2));
   }
 }

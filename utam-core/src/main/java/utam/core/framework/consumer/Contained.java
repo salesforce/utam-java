@@ -24,6 +24,7 @@ public interface Contained {
 
   /**
    * used in ContainerElement.setScope(Contained externalObjectInsideContainer)
+   *
    * @param scopeSupplier supplier of the SearchContext from UTAM element root
    * @deprecated not supported outside Salesforce engineering teams
    */
@@ -32,6 +33,7 @@ public interface Contained {
 
   /**
    * used to set the root element of the Page Object
+   *
    * @param rootSupplier supplier of the SearchContext from UTAM element root
    * @deprecated legacy method, to be removed
    */

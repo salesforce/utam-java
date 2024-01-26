@@ -18,7 +18,6 @@ import static utam.compiler.helpers.TypeUtilities.ROOT_PAGE_OBJECT;
 import static utam.compiler.representation.PageObjectValidationTestHelper.validateMethod;
 
 import java.util.*;
-
 import org.testng.annotations.Test;
 import utam.compiler.JsonBuilderTestUtility;
 import utam.compiler.helpers.PrimitiveType;
@@ -41,8 +40,7 @@ public class UtamMethodActionApplyTests {
   private static final String CUSTOM_TYPE_IMPORT = "org.lwr.pageobjects.Custom";
 
   private static TranslationContext getContext(String json) {
-    return new DeserializerUtilities()
-        .getContext("compose/apply/" + json);
+    return new DeserializerUtilities().getContext("compose/apply/" + json);
   }
 
   @Test
@@ -182,7 +180,8 @@ public class UtamMethodActionApplyTests {
     expected.addCodeLine("List<BasicElement> test0 = this.getTestElement()");
     expected.addCodeLine("if (test0 == null) { return null; }");
     expected.addCodeLine(
-        "List<Boolean> statement0 = test0.stream().map(element -> element.isVisible()).collect(Collectors.toList())");
+        "List<Boolean> statement0 = test0.stream().map(element ->"
+            + " element.isVisible()).collect(Collectors.toList())");
     expected.addCodeLine("return statement0");
     validateMethod(actualMethod, expected);
   }
@@ -223,9 +222,11 @@ public class UtamMethodActionApplyTests {
     expected.addImpliedImportedTypes(LIST_IMPORT, CUSTOM_TYPE_IMPORT, COLLECTORS_IMPORT);
     expected.addCodeLine("List<Custom> custom0 = this.getCustomElement()");
     expected.addCodeLine(
-        "List<Custom> statement0 = custom0.stream().map(element -> element.method1()).collect(Collectors.toList())");
+        "List<Custom> statement0 = custom0.stream().map(element ->"
+            + " element.method1()).collect(Collectors.toList())");
     expected.addCodeLine(
-        "Object statement1 = statement0.stream().map(element -> element.method2()).collect(Collectors.toList())");
+        "Object statement1 = statement0.stream().map(element ->"
+            + " element.method2()).collect(Collectors.toList())");
     expected.addCodeLine("Boolean matcher1 = statement1 != null");
     expected.addCodeLine("return matcher1");
     validateMethod(method, expected);
@@ -237,8 +238,8 @@ public class UtamMethodActionApplyTests {
     PageObjectMethod method = context.getMethod(methodName);
     MethodInfo expected = new MethodInfo(methodName, "List<Item>");
     expected.addParameter(new MethodParameterInfo("rowIndex", PrimitiveType.NUMBER));
-    expected.addImpliedImportedTypes(LIST_IMPORT, "my.pageobject.Section", "my.pageobject.Row",
-        "my.pageobject.Item");
+    expected.addImpliedImportedTypes(
+        LIST_IMPORT, "my.pageobject.Section", "my.pageobject.Row", "my.pageobject.Item");
     expected.addImportedTypes(LIST_IMPORT, "my.pageobject.Item");
     expected.addCodeLine("Section statement0 = this.getContent(Section.class)");
     expected.addCodeLine("Row statement1 = statement0.getRow(rowIndex)");
@@ -251,16 +252,21 @@ public class UtamMethodActionApplyTests {
   @Test
   public void testWrongArgsBasicActionThrows() {
     Exception e = expectCompilerErrorFromFile("validate/apply/wrongArgType");
-    assertThat(e.getMessage(), containsString("error 109: method \"test\" arguments: " +
-            "argument \"str\" has incorrect type, expected \"BasicElement\", found \"String\""));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 109: method \"test\" arguments: argument \"str\" has incorrect type, expected"
+                + " \"BasicElement\", found \"String\""));
   }
 
   @Test
   public void testChainWithElementThrows() {
     Exception e = expectCompilerErrorFromFile("validate/apply/redundantElementForChain");
-    assertThat(e.getMessage(), containsString(
-        "error 606: method \"test\" statement: "
-            + "\"element\" property is redundant because statement is marked as a chain"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 606: method \"test\" statement: "
+                + "\"element\" property is redundant because statement is marked as a chain"));
   }
 
   @Test
@@ -333,7 +339,8 @@ public class UtamMethodActionApplyTests {
     String importPageObjectType = "my.lightning.Button";
     methodInfo.addImpliedImportedTypes(importPageObjectType);
     methodInfo.addCodeLine(
-        "Button statement0 = this.getDocument().enterFrameAndLoad(this.getMyFrameElement(), Button.class)");
+        "Button statement0 = this.getDocument().enterFrameAndLoad(this.getMyFrameElement(),"
+            + " Button.class)");
     methodInfo.addCodeLine("return statement0");
     validateMethod(method, methodInfo);
   }
@@ -342,16 +349,16 @@ public class UtamMethodActionApplyTests {
   public void testPageObjectTypeNonLiteralParameter() {
     TranslationContext context = getContext("frameNonLiteralArgs");
     PageObjectMethod method = context.getMethod(methodName);
-    assertThat(method.getDeclaration().getCodeLine(),
+    assertThat(
+        method.getDeclaration().getCodeLine(),
         is("<T extends RootPageObject> T test(FrameElement myFrame, Class<T> pageObject)"));
     MethodInfo methodInfo = new MethodInfo(methodName, "T");
     methodInfo.addParameter(new MethodParameterInfo("myFrame", "FrameElement"));
-    methodInfo
-        .addParameter(new MethodParameterInfo("pageObject", "Class<T>"));
+    methodInfo.addParameter(new MethodParameterInfo("pageObject", "Class<T>"));
     methodInfo.addImportedTypes(ROOT_PAGE_OBJECT.getFullName(), FRAME_ELEMENT.getFullName());
     methodInfo.addImpliedImportedTypes(ROOT_PAGE_OBJECT.getFullName(), FRAME_ELEMENT.getFullName());
-    methodInfo
-        .addCodeLine("T statement0 = this.getDocument().enterFrameAndLoad(myFrame, pageObject)");
+    methodInfo.addCodeLine(
+        "T statement0 = this.getDocument().enterFrameAndLoad(myFrame, pageObject)");
     methodInfo.addCodeLine("return statement0");
     validateMethod(method, methodInfo);
   }
@@ -362,10 +369,11 @@ public class UtamMethodActionApplyTests {
     PageObjectMethod method = context.getMethod(methodName);
     MethodInfo methodInfo = new MethodInfo(methodName);
     methodInfo.addParameter(new MethodParameterInfo("myFrame", "FrameElement"));
-    assertThat(method.getDeclaration().getCodeLine(),
+    assertThat(
+        method.getDeclaration().getCodeLine(),
         is("void test(FrameElement myFrame, Class<? extends RootPageObject> pageObject)"));
-    methodInfo
-        .addParameter(new MethodParameterInfo("pageObject", "Class<? extends RootPageObject>"));
+    methodInfo.addParameter(
+        new MethodParameterInfo("pageObject", "Class<? extends RootPageObject>"));
     methodInfo.addImportedTypes(ROOT_PAGE_OBJECT.getFullName(), FRAME_ELEMENT.getFullName());
     methodInfo.addImpliedImportedTypes(ROOT_PAGE_OBJECT.getFullName(), FRAME_ELEMENT.getFullName());
     methodInfo.addCodeLine("this.getDocument().enterFrameAndLoad(myFrame, pageObject)");
@@ -389,8 +397,8 @@ public class UtamMethodActionApplyTests {
     String importStr = "my.pageobject.Foo";
     TranslationContext context = getContext("customWithFilterFindFirst");
     PageObjectMethod method = context.getMethod(methodName);
-    assertThat(method.getDeclaration().getCodeLine(),
-        is("Foo test(String filterArg, String applyArg)"));
+    assertThat(
+        method.getDeclaration().getCodeLine(), is("Foo test(String filterArg, String applyArg)"));
     MethodInfo expected = new MethodInfo(methodName, "Foo");
     expected.addParameter(new MethodParameterInfo("filterArg"));
     expected.addParameter(new MethodParameterInfo("applyArg"));
@@ -402,9 +410,7 @@ public class UtamMethodActionApplyTests {
     validateMethod(method, expected);
   }
 
-  /**
-   * custom element has scope with parameters
-   */
+  /** custom element has scope with parameters */
   @Test
   public void testCustomElementWithParametrizedScope() {
     TranslationContext context = getContext("customElementNestedWithArg");
@@ -418,9 +424,7 @@ public class UtamMethodActionApplyTests {
     validateMethod(method, expected);
   }
 
-  /**
-   * basic element has scope with parameters and filter "findAll"
-   */
+  /** basic element has scope with parameters and filter "findAll" */
   @Test
   public void testBasicFilteredElementWithParametrizedScope() {
     TranslationContext context = getContext("basicElementScopeWithParameters");
@@ -430,7 +434,8 @@ public class UtamMethodActionApplyTests {
     expected.addParameter(new MethodParameterInfo("column"));
     expected.addCodeLine("List<BasicElement> element0 = this.getElementElement(row, column)");
     expected.addCodeLine(
-        "List<String> statement0 = element0.stream().map(element -> element.getText()).collect(Collectors.toList())");
+        "List<String> statement0 = element0.stream().map(element ->"
+            + " element.getText()).collect(Collectors.toList())");
     expected.addCodeLine("return statement0");
     validateMethod(method, expected);
   }
@@ -438,19 +443,24 @@ public class UtamMethodActionApplyTests {
   @Test
   public void incorrectComposeFormatMissingElementThrows() {
     JsonBuilderTestUtility test = new JsonBuilderTestUtility();
-    test.addRawString("methods",
-        "[{ \"name\" : \"test\", \"compose\" : [ {\"element\": \"error\", \"apply\": \"action\"} ]}]");
+    test.addRawString(
+        "methods",
+        "[{ \"name\" : \"test\", \"compose\" : [ {\"element\": \"error\", \"apply\": \"action\"}"
+            + " ]}]");
     Exception e = test.expectCompilerError();
-    assertThat(e.getMessage(), containsString(
-        "error 601: method \"test\" statement: "
-            + "unknown element with name \"error\" is referenced in a compose statement"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 601: method \"test\" statement: "
+                + "unknown element with name \"error\" is referenced in a compose statement"));
   }
 
   @Test
   public void testLiteralGetterArgument() {
-    PageObjectMethod method = new DeserializerUtilities()
-        .getContext("generated/args/literalGetterArg.utam")
-        .getMethod("testApply");
+    PageObjectMethod method =
+        new DeserializerUtilities()
+            .getContext("generated/args/literalGetterArg.utam")
+            .getMethod("testApply");
     MethodInfo expected = new MethodInfo("testApply", "void");
     expected.addCodeLine("SettingsPanelElement settingsPanel0 = this.getSettingsPanel()");
     expected.addCodeLine("settingsPanel0.click()");

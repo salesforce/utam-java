@@ -160,19 +160,20 @@ public class JsonDeserializerTests {
         new PageObjectValidationTestHelper.EntityNameInfo(
             IMPL_PACKAGE_NAME, IMPL_SIMPLE_NAME, IMPL_FULL_NAME);
     PageObjectValidationTestHelper.FieldInfo fieldInfo =
-        new PageObjectValidationTestHelper.FieldInfo(
-            "childElement");
+        new PageObjectValidationTestHelper.FieldInfo("childElement");
     fieldInfo.addAnnotations("@ElementMarker.Find(css = \".fakeSelector\")");
 
     PageObjectValidationTestHelper.MethodInfo rootElementMethod =
-            new PageObjectValidationTestHelper.MethodInfo("getRoot", "RootElement");
+        new PageObjectValidationTestHelper.MethodInfo("getRoot", "RootElement");
     rootElementMethod.addCodeLine("return getProxy(this.getRootElement(), RootElement.class)");
 
     PageObjectValidationTestHelper.MethodInfo childElementGetter =
         new PageObjectValidationTestHelper.MethodInfo(
             getElementGetterMethodName("childElement", false), "ChildElementElement");
     childElementGetter.addCodeLine("BasicElement root = this.getRoot()");
-    childElementGetter.addCodeLine("return basic(root, this.childElement).build(ChildElementElement.class, ChildElementElementImpl.class)");
+    childElementGetter.addCodeLine(
+        "return basic(root, this.childElement).build(ChildElementElement.class,"
+            + " ChildElementElementImpl.class)");
     childElementGetter.setNotPublic();
 
     PageObjectValidationTestHelper.MethodInfo composeMethod =
@@ -183,12 +184,15 @@ public class JsonDeserializerTests {
     PageObjectClass classObject = createRootNode(json).getImplementation();
     PageObjectInterface interfaceObject = classObject.getImplementedType();
     PageObjectValidationTestHelper.validateInterface(
-        interfaceObject, nameInfo, Stream.of(rootElementMethod, composeMethod).collect(Collectors.toList()));
+        interfaceObject,
+        nameInfo,
+        Stream.of(rootElementMethod, composeMethod).collect(Collectors.toList()));
     PageObjectValidationTestHelper.validateImplementation(
         classObject,
         nameImplInfo,
         Stream.of("@PageMarker.Find(css = \"rootSelector\")").collect(Collectors.toList()),
-        Stream.of(rootElementMethod, childElementGetter, composeMethod).collect(Collectors.toList()),
+        Stream.of(rootElementMethod, childElementGetter, composeMethod)
+            .collect(Collectors.toList()),
         Stream.of(fieldInfo).collect(Collectors.toList()));
     assertThat(interfaceObject, is(not(nullValue())));
   }
@@ -427,9 +431,7 @@ public class JsonDeserializerTests {
     String apiCode = node.getGeneratedCode();
     assertThat(apiCode, containsString("package utam.test.pageobjects.test"));
     assertThat(apiCode, containsString("import utam.core.framework.base.PageObject"));
-    assertThat(
-        apiCode,
-        containsString("public interface Test extends PageObject {}"));
+    assertThat(apiCode, containsString("public interface Test extends PageObject {}"));
   }
 
   /**

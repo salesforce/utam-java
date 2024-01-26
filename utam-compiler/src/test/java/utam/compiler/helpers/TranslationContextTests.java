@@ -32,12 +32,13 @@ public class TranslationContextTests {
 
   private static final String TEST_ELEMENT_NAME = "test";
 
-  private final TranslationContext context = new DeserializerUtilities()
-      .getContext("pageobjects/testContext");
+  private final TranslationContext context =
+      new DeserializerUtilities().getContext("pageobjects/testContext");
 
   @Test
   public void testGetClassType() {
-    assertThat(context.getClassType().getFullName(),
+    assertThat(
+        context.getClassType().getFullName(),
         is(equalTo("utam.test.pageobjects.test.impl.TestImpl")));
   }
 
@@ -65,28 +66,30 @@ public class TranslationContextTests {
   public void testGetInterfaceType() {
     TranslationContext context = getTestTranslationContext();
     context.setImplementedType("utam-test/pageObjects/test/testInterface");
-    assertThat(context.getSelfType().getFullName(),
+    assertThat(
+        context.getSelfType().getFullName(),
         is(equalTo("utam.test.pageobjects.test.TestInterface")));
   }
 
   @Test
   public void testGetSelfType() {
     TranslationContext context = getTestTranslationContext();
-    assertThat(context.getSelfType().getFullName(),
-        is(equalTo("utam.test.pageobjects.test.Test")));
+    assertThat(context.getSelfType().getFullName(), is(equalTo("utam.test.pageobjects.test.Test")));
   }
 
   @Test
   public void testGetType() {
     TranslationContext context = getTestTranslationContext();
-    assertThat(context.getType("utam-test/pageObjects/test/testType").getFullName(),
+    assertThat(
+        context.getType("utam-test/pageObjects/test/testType").getFullName(),
         is(equalTo("utam.test.pageobjects.test.TestType")));
   }
 
   @Test
   public void testGetUtilityType() {
     TranslationContext context = getTestTranslationContext();
-    assertThat(context.getUtilityType("utam-test/utils/test/test").getFullName(),
+    assertThat(
+        context.getUtilityType("utam-test/utils/test/test").getFullName(),
         is(equalTo("utam.test.utils.test.Test")));
   }
 
@@ -100,13 +103,17 @@ public class TranslationContextTests {
     context.setMethod(method);
     assertThat(context.getMethods(), hasSize(1));
     UtamError e = expectThrows(UtamError.class, () -> context.setMethod(method));
-    assertThat(e.getMessage(), containsString("error 504: method \"name\": method with the same name was already declared"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 504: method \"name\": method with the same name was already declared"));
   }
 
   @Test
   public void testGetRootElement() {
     TranslationContext context = getTestTranslationContext();
-    ElementContext defaultRoot = new ElementContext.Root(editable, null, editable, mock(PageObjectMethod.class));
+    ElementContext defaultRoot =
+        new ElementContext.Root(editable, null, editable, mock(PageObjectMethod.class));
     context.setElement(defaultRoot, null);
     assertThat(context.getRootElement().getName(), is(equalTo(ElementContext.ROOT_ELEMENT_NAME)));
   }

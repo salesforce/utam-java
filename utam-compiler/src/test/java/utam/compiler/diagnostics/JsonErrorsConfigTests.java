@@ -18,7 +18,6 @@ import static utam.compiler.diagnostics.JsonErrorsConfig.ERR_READING_ERROR_CONFI
 import static utam.compiler.diagnostics.JsonErrorsConfig.getErrorsConfig;
 
 import org.testng.annotations.Test;
-import utam.compiler.diagnostics.JsonErrorsConfig;
 
 /**
  * test configuration of error codes
@@ -38,8 +37,7 @@ public class JsonErrorsConfigTests {
   @Test
   public void testNotExistingCode() {
     JsonErrorsConfig config = getErrorsConfig();
-    Exception e = expectThrows(IllegalArgumentException.class,
-        () -> config.getErrorMessage(-100));
+    Exception e = expectThrows(IllegalArgumentException.class, () -> config.getErrorMessage(-100));
     assertThat(e.getMessage(), is(equalTo(String.format(ERR_CODE_NOT_CONFIGURED, -100))));
   }
 
@@ -53,7 +51,6 @@ public class JsonErrorsConfigTests {
   public void testIncorrectConfig() {
     String fileName = "config/test_wrong_error_config.json";
     Exception e = expectThrows(IllegalStateException.class, () -> getErrorsConfig(fileName));
-    assertThat(e.getMessage(),
-        containsString(String.format(ERR_READING_ERROR_CONFIG, fileName)));
+    assertThat(e.getMessage(), containsString(String.format(ERR_READING_ERROR_CONFIG, fileName)));
   }
 }

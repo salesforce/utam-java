@@ -55,8 +55,8 @@ public class JsonErrorsConfig {
     }
     ObjectMapper mapper = new ObjectMapper();
     try {
-      CollectionType javaType = mapper.getTypeFactory()
-          .constructCollectionType(List.class, ErrorDetails.class);
+      CollectionType javaType =
+          mapper.getTypeFactory().constructCollectionType(List.class, ErrorDetails.class);
       List<ErrorDetails> errors = mapper.readValue(config, javaType);
       JsonErrorsConfig jsonErrorsConfig = new JsonErrorsConfig();
       errors.forEach(
@@ -100,11 +100,10 @@ public class JsonErrorsConfig {
     return String.format("%s %s: %s", violationLevel.name(), code, message);
   }
 
-  /**
-   * error code can be one of 2 types
-   */
+  /** error code can be one of 2 types */
   enum ErrorCategory {
-    error, warning
+    error,
+    warning
   }
 
   /**
@@ -127,8 +126,7 @@ public class JsonErrorsConfig {
         @JsonProperty(value = "message", required = true) String message,
         @JsonProperty(value = "docs") String docs,
         @JsonProperty(value = "tip") String tip,
-        @JsonProperty(value = "category") ErrorCategory category
-    ) {
+        @JsonProperty(value = "category") ErrorCategory category) {
       this.message = message;
       this.docs = docs;
       this.errorCategory = category == null ? ErrorCategory.error : category;
@@ -148,8 +146,7 @@ public class JsonErrorsConfig {
         res = String.format(message, args);
       } catch (MissingFormatArgumentException e) {
         throw new MissingFormatArgumentException(
-            String.format("Incorrect args %s for message \"%s\"",
-                Arrays.toString(args), message));
+            String.format("Incorrect args %s for message \"%s\"", Arrays.toString(args), message));
       }
       if (docs != null) {
         res = res.concat(String.format("; \nsee documentation %s", docs));

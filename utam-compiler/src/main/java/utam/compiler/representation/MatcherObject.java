@@ -14,7 +14,6 @@ import static utam.compiler.helpers.TypeUtilities.VOID;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import utam.compiler.UtamCompilationError;
 import utam.compiler.helpers.MatcherType;
 import utam.compiler.helpers.PrimitiveType;
@@ -36,13 +35,12 @@ public class MatcherObject {
   /**
    * Initializes a new instance of the Matcher class
    *
-   * @param matcherType        the type of matcher to create
-   * @param matcherParameters  the list of parameters for the matcher
+   * @param matcherType the type of matcher to create
+   * @param matcherParameters the list of parameters for the matcher
    * @param errorContextString error context, one of element name or method name
    */
-  public MatcherObject(MatcherType matcherType,
-      List<MethodParameter> matcherParameters,
-      String errorContextString) {
+  public MatcherObject(
+      MatcherType matcherType, List<MethodParameter> matcherParameters, String errorContextString) {
     this.matcherType = matcherType;
     this.matcherParameters = matcherParameters;
     this.errorContextString = errorContextString;
@@ -81,7 +79,9 @@ public class MatcherObject {
    */
   public void checkMatcherOperand(TypeProvider operandType) {
     if (!isCompatibleMatcher(operandType)) {
-      String errorMsg = VALIDATION.getErrorMessage(1202,
+      String errorMsg =
+          VALIDATION.getErrorMessage(
+              1202,
               errorContextString,
               operandType.getSimpleName(),
               getCompatibleMatchers(operandType));
@@ -97,13 +97,15 @@ public class MatcherObject {
   }
 
   private static String getCompatibleMatchers(TypeProvider operandType) {
-    if(operandType.isSameType(VOID)) {
+    if (operandType.isSameType(VOID)) {
       return "none";
     }
-    if(operandType.isSameType(PrimitiveType.STRING)) {
-      return Stream.of(stringContains, stringEquals, notNull).map(Enum::name).collect(Collectors.joining(", "));
+    if (operandType.isSameType(PrimitiveType.STRING)) {
+      return Stream.of(stringContains, stringEquals, notNull)
+          .map(Enum::name)
+          .collect(Collectors.joining(", "));
     }
-    if(operandType.isSameType(PrimitiveType.BOOLEAN)) {
+    if (operandType.isSameType(PrimitiveType.BOOLEAN)) {
       return Stream.of(isTrue, isFalse, notNull).map(Enum::name).collect(Collectors.joining(", "));
     }
     return notNull.name();

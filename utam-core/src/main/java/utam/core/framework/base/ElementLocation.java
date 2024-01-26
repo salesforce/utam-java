@@ -31,7 +31,7 @@ public final class ElementLocation {
   }
 
   private Element transformScope(Element scope) {
-    if(scope == null || !findContext.isExpandScopeShadowRoot()) {
+    if (scope == null || !findContext.isExpandScopeShadowRoot()) {
       return scope;
     }
     return new ShadowRootElementAdapter(scope);
@@ -53,7 +53,7 @@ public final class ElementLocation {
     // can return null if element is nullable, otherwise throws
     Element foundElement = transformedScope.findElement(locator, findContext.isNullable());
     // null can be returned for nullable
-    return foundElement == null? null : new ElementFound(locator, foundElement);
+    return foundElement == null ? null : new ElementFound(locator, foundElement);
   }
 
   /**
@@ -72,13 +72,10 @@ public final class ElementLocation {
     // can return null if element is nullable, otherwise throws
     List<Element> foundList = transformedScope.findElements(locator, findContext.isNullable());
     // null only returned for nullable
-    if(foundList == null) {
+    if (foundList == null) {
       return null;
     }
-    return foundList
-        .stream()
-        .map(e -> new ElementFound(locator, e))
-        .collect(Collectors.toList());
+    return foundList.stream().map(e -> new ElementFound(locator, e)).collect(Collectors.toList());
   }
 
   /**

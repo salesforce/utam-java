@@ -45,9 +45,9 @@ public interface TranslatorTargetConfig {
   UnitTestRunner getUnitTestRunnerType();
 
   /**
-   * full path to the injection configuration files directory <br> translator will write into
-   * dependency configs <br> then Page Objects Provider will read from those to configure
-   * dependencies
+   * full path to the injection configuration files directory <br>
+   * translator will write into dependency configs <br>
+   * then Page Objects Provider will read from those to configure dependencies
    *
    * @return string with full path to resources folder with configs
    */

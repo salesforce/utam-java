@@ -7,25 +7,24 @@
  */
 package utam.compiler.translator;
 
-import utam.compiler.types.BasicElementInterface;
-import utam.core.declarative.translator.UnitTestRunner;
-import utam.compiler.helpers.PrimitiveType;
-import utam.compiler.helpers.TranslationContext;
-import utam.core.declarative.representation.MethodParameter;
-import utam.core.declarative.representation.PageObjectClass;
-import utam.core.declarative.representation.PageObjectMethod;
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.selenium.utilities.WebDriverSimulator;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 import static utam.compiler.helpers.TypeUtilities.isListType;
 import static utam.compiler.helpers.TypeUtilities.wrapAsList;
 import static utam.compiler.translator.TranslationUtilities.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import utam.compiler.helpers.PrimitiveType;
+import utam.compiler.helpers.TranslationContext;
+import utam.compiler.types.BasicElementInterface;
+import utam.core.declarative.representation.MethodParameter;
+import utam.core.declarative.representation.PageObjectClass;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.translator.UnitTestRunner;
+import utam.core.selenium.utilities.WebDriverSimulator;
 
 /**
  * Helper to generate implementation unit test for PO representation
@@ -74,24 +73,24 @@ public final class UnitTestSerializer {
     this.testRunner = testRunner;
     interfaceType = pageObject.getImplementedType().getInterfaceType();
     implementationType = pageObject.getClassType();
-    elementRegistrationStatements = translationContext
-        .getTestableElements()
-        .entrySet()
-        .stream()
-        .map(entry -> entry.getValue().getElementRegistration(entry.getKey()))
-        .flatMap(List::stream)
-        .collect(Collectors.toList());
-    testMethods = pageObject.getMethods().stream()
-        .filter(PageObjectMethod::isPublic)
-        .map(UnitTestSerializer::getTestMethod)
-        .collect(Collectors.toList());
+    elementRegistrationStatements =
+        translationContext.getTestableElements().entrySet().stream()
+            .map(entry -> entry.getValue().getElementRegistration(entry.getKey()))
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
+    testMethods =
+        pageObject.getMethods().stream()
+            .filter(PageObjectMethod::isPublic)
+            .map(UnitTestSerializer::getTestMethod)
+            .collect(Collectors.toList());
   }
 
   /**
    * Gets a list of the element registration statements for the generated unit test, removing any
    * comment statements from the list
+   *
    * @return a list of the element registration statements for the generated unit test, removing any
-   *         comment statements from the list
+   *     comment statements from the list
    */
   List<String> getElementRegistrationStatements() {
     return elementRegistrationStatements.stream()
@@ -101,6 +100,7 @@ public final class UnitTestSerializer {
 
   /**
    * Gets a list of test methods in the generated unit test
+   *
    * @return a list of test methods in the generated unit test
    */
   List<List<String>> getTestMethods() {
@@ -198,7 +198,7 @@ public final class UnitTestSerializer {
     if (returnType.isSameType(PrimitiveType.BOOLEAN)) {
       return ", is(equalTo(false))";
     }
-    if(BasicElementInterface.isBasicType(returnType)) {
+    if (BasicElementInterface.isBasicType(returnType)) {
       return ".isPresent(), is(equalTo(true))";
     }
     if (isListType(returnType)) {
@@ -276,13 +276,13 @@ public final class UnitTestSerializer {
   private List<String> getTestClassFields() {
     List<String> fields = new ArrayList<>();
     fields.add("//TODO: add root selector");
-    fields.add(String.format("private static final %s ROOT_SELECTOR = %s.byCss(\"\");", SELECTOR.getSimpleName(), SELECTOR.getSimpleName()));
+    fields.add(
+        String.format(
+            "private static final %s ROOT_SELECTOR = %s.byCss(\"\");",
+            SELECTOR.getSimpleName(), SELECTOR.getSimpleName()));
     fields.add(NEW_LINE);
     fields.add(String.format("private %s simulator;", WEB_DRIVER_SIMULATOR_CLASS.getSimpleName()));
-    fields.add(
-        "private "
-            + interfaceType.getSimpleName()
-            + " testObject;");
+    fields.add("private " + interfaceType.getSimpleName() + " testObject;");
     return fields;
   }
 
@@ -290,7 +290,10 @@ public final class UnitTestSerializer {
     List<String> content = new ArrayList<>();
     content.add("@BeforeClass");
     content.add("public void setupSimulator() {");
-    content.add(String.format("simulator = new %s(SalesforceSimulatorObjectFactory.class);", WEB_DRIVER_SIMULATOR_CLASS.getSimpleName()));
+    content.add(
+        String.format(
+            "simulator = new %s(SalesforceSimulatorObjectFactory.class);",
+            WEB_DRIVER_SIMULATOR_CLASS.getSimpleName()));
     content.add("simulator.registerElement(\"rootElement\", ROOT_SELECTOR.getStringValue());");
     return content;
   }
@@ -299,7 +302,8 @@ public final class UnitTestSerializer {
     String className = implementationType.getSimpleName();
     List<String> content = new ArrayList<>();
     content.add(
-        "UtamLoaderTestingContext loader = UtamLoaderTestingContext.getSimulatorLoader(simulator.getDriver());");
+        "UtamLoaderTestingContext loader ="
+            + " UtamLoaderTestingContext.getSimulatorLoader(simulator.getDriver());");
     content.add(String.format("testObject = loader.create(%s.class, ROOT_SELECTOR);", className));
     content.add("}");
     return content;

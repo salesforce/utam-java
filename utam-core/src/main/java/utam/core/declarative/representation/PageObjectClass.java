@@ -48,7 +48,8 @@ public interface PageObjectClass {
   TypeProvider getClassType();
 
   /**
-   * PO can extend from other PO class <br> by default extending BasePageObject
+   * PO can extend from other PO class <br>
+   * by default extending BasePageObject
    *
    * @return type to extend
    */

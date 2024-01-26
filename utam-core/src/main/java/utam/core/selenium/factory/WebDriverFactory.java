@@ -64,12 +64,13 @@ public class WebDriverFactory {
   /**
    * creates a DriverAdapter
    *
-   * @param webDriver    the WebDriver instance to wrap
+   * @param webDriver the WebDriver instance to wrap
    * @param driverConfig the configuration object to configure the driver adapter
    * @return the driver adapter
    */
   public static Driver getAdapter(WebDriver webDriver, DriverConfig driverConfig) {
-    return webDriver instanceof AppiumDriver ? new MobileDriverAdapter((AppiumDriver) webDriver, driverConfig)
+    return webDriver instanceof AppiumDriver
+        ? new MobileDriverAdapter((AppiumDriver) webDriver, driverConfig)
         : new DriverAdapter(webDriver, driverConfig);
   }
 
@@ -85,9 +86,9 @@ public class WebDriverFactory {
 
   /**
    * Creates a WebDriver instance
-   * 
-   * @param browserType         the type of browser for which to create the WebDriver instance
-   * @param service             the service to create the driver
+   *
+   * @param browserType the type of browser for which to create the WebDriver instance
+   * @param service the service to create the driver
    * @param desiredCapabilities the desired capabilities of the resulting WebDriver instance
    * @return the created WebDriver instance
    */
@@ -152,7 +153,7 @@ public class WebDriverFactory {
   private static DesiredCapabilities iOSOptions() {
     SystemProperties.setIOSDeviceName();
     SystemProperties.setIOSAppPath();
- 
+
     DesiredCapabilities caps = new DesiredCapabilities();
     caps.setPlatform(Platform.IOS);
     caps.setCapability(AppiumCustomCapabilityType.AUTOMATION_NAME, "XCUITest");
@@ -176,8 +177,8 @@ public class WebDriverFactory {
     return caps;
   }
 
-  private static AppiumDriver ios(AppiumDriverLocalService service,
-      AppiumCapabilityProvider desiredCapabilities) {
+  private static AppiumDriver ios(
+      AppiumDriverLocalService service, AppiumCapabilityProvider desiredCapabilities) {
     if (service == null) {
       throw new NullPointerException(ERR_APPIUM_LOCAL_SERVER);
     }
@@ -186,8 +187,8 @@ public class WebDriverFactory {
     return new IOSDriver(service, caps);
   }
 
-  private static AppiumDriver android(AppiumDriverLocalService service,
-      AppiumCapabilityProvider desiredCapabilities) {
+  private static AppiumDriver android(
+      AppiumDriverLocalService service, AppiumCapabilityProvider desiredCapabilities) {
     if (service == null) {
       throw new NullPointerException(ERR_APPIUM_LOCAL_SERVER);
     }

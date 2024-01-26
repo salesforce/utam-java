@@ -44,11 +44,12 @@ public abstract class ComposeMethodStatement {
 
   /**
    * Initializes aa new instance of the ComposeMethodStatement class
-   * @param operand            the operand of the statement
-   * @param operation          the operation of the statement
+   *
+   * @param operand the operand of the statement
+   * @param operation the operation of the statement
    * @param declaredReturnType the return type of the statement
-   * @param matcher            a matcher for the statement
-   * @param statementContext   the context of the statement
+   * @param matcher a matcher for the statement
+   * @param statementContext the context of the statement
    */
   ComposeMethodStatement(
       Operand operand,
@@ -110,7 +111,7 @@ public abstract class ComposeMethodStatement {
   }
 
   private boolean isUseVariable() {
-    if(!statementContext.isLastStatement()
+    if (!statementContext.isLastStatement()
         && !statementContext.isLastPredicateStatement()
         && !statementContext.isUsedAsChain()) {
       return false;
@@ -119,7 +120,7 @@ public abstract class ComposeMethodStatement {
   }
 
   private String getPredicateReturnStatement() {
-    if(actionReturnType.isSameType(VOID)) {
+    if (actionReturnType.isSameType(VOID)) {
       // last statement of predicate can't return void, has to return boolean or original type
       return ";\nreturn true";
     }
@@ -134,7 +135,8 @@ public abstract class ComposeMethodStatement {
     if (matcher != null) {
       return PrimitiveType.BOOLEAN;
     }
-    if (statementContext.isLastPredicateStatement() && MethodContext.isNullOrVoid(declaredReturnType)) {
+    if (statementContext.isLastPredicateStatement()
+        && MethodContext.isNullOrVoid(declaredReturnType)) {
       return VOID;
     }
     return declaredReturnType;
@@ -152,13 +154,14 @@ public abstract class ComposeMethodStatement {
   private void setParameters(Operation operation, Operand operand, MatcherObject matcher) {
     this.parameters.addAll(operand.getElementParameters());
     this.parameters.addAll(operation.getActionParameters());
-    if(matcher != null) {
+    if (matcher != null) {
       this.parameters.addAll(matcher.getParameters());
     }
   }
 
   /**
    * Gets the parameters of the statement
+   *
    * @return the list of parameters of the statement
    */
   public List<MethodParameter> getParameters() {
@@ -167,6 +170,7 @@ public abstract class ComposeMethodStatement {
 
   /**
    * Gets the return type of the statement
+   *
    * @return the return type of the statement
    */
   public TypeProvider getReturnType() {
@@ -175,6 +179,7 @@ public abstract class ComposeMethodStatement {
 
   /**
    * Gets the code lines of the statement
+   *
    * @return the list of code lines of the statement
    */
   public List<String> getCodeLines() {
@@ -183,6 +188,7 @@ public abstract class ComposeMethodStatement {
 
   /**
    * Gets the imports required by the statement
+   *
    * @return the list of imports required to be added to the interface definition by tne statement
    */
   public List<TypeProvider> getImports() {
@@ -191,7 +197,9 @@ public abstract class ComposeMethodStatement {
 
   /**
    * Gets the class imports required by the statement
-   * @return the list of imports required to be added to the implementation definition by tne statement
+   *
+   * @return the list of imports required to be added to the implementation definition by tne
+   *     statement
    */
   public List<TypeProvider> getClassImports() {
     return classImports;
@@ -203,47 +211,49 @@ public abstract class ComposeMethodStatement {
     if (!useVariable || isReturnVoid()) {
       return "";
     }
-    String returnTypeStr = matcherOperandType != null ? matcherOperandType.getSimpleName()
-        : getReturnType().getSimpleName();
+    String returnTypeStr =
+        matcherOperandType != null
+            ? matcherOperandType.getSimpleName()
+            : getReturnType().getSimpleName();
     return String.format("%s %s = ", returnTypeStr, statementContext.getVariableName());
   }
 
-  /**
-   * invokes method on a single operand
-   */
+  /** invokes method on a single operand */
   public static class Single extends ComposeMethodStatement {
 
     /**
      * Initializes aa new instance of the ComposeMethodStatement class for a single element
      *
-     * @param operand            the operand of the statement
-     * @param operation          the operation of the statement
-     * @param matcher            a matcher for the statement
-     * @param statementContext   the context of the statement
+     * @param operand the operand of the statement
+     * @param operation the operation of the statement
+     * @param matcher a matcher for the statement
+     * @param statementContext the context of the statement
      */
-    public Single(Operand operand, Operation operation, MatcherObject matcher, StatementContext statementContext) {
+    public Single(
+        Operand operand,
+        Operation operation,
+        MatcherObject matcher,
+        StatementContext statementContext) {
       super(operand, operation, operation.getReturnType(), matcher, statementContext);
     }
 
     @Override
     String getMethodCallString(boolean useVariable) {
-      String statementString = String
-          .format("%s.%s", operand.getOperandString(), operation.getInvocationString());
+      String statementString =
+          String.format("%s.%s", operand.getOperandString(), operation.getInvocationString());
       return getVariableAssignmentPrefix(useVariable) + statementString;
     }
   }
 
-  /**
-   * invokes method on list and returns void
-   */
+  /** invokes method on list and returns void */
   public static class ForEach extends ComposeMethodStatement {
 
     /**
      * Initializes aa new instance of the ComposeMethodStatement class to be executed on a list
      *
-     * @param operand            the operand of the statement
-     * @param operation          the operation of the statement
-     * @param statementContext   the context of the statement
+     * @param operand the operand of the statement
+     * @param operation the operation of the statement
+     * @param statementContext the context of the statement
      */
     public ForEach(Operand operand, Operation operation, StatementContext statementContext) {
       super(operand, operation, VOID, null, statementContext);
@@ -251,78 +261,78 @@ public abstract class ComposeMethodStatement {
 
     @Override
     String getMethodCallString(boolean useVariable) {
-      String statementString = String
-          .format("%s.forEach(element -> element.%s)", operand.getOperandString(),
-              operation.getInvocationString());
+      String statementString =
+          String.format(
+              "%s.forEach(element -> element.%s)",
+              operand.getOperandString(), operation.getInvocationString());
       return getVariableAssignmentPrefix(useVariable) + statementString;
     }
   }
 
-  /**
-   * invokes method on list and returns list
-   */
+  /** invokes method on list and returns list */
   public static final class MapEach extends ComposeMethodStatement {
 
     /**
      * Initializes aa new instance of the ComposeMethodStatement class to be executed on a list and
      * returning a list
      *
-     * @param operand            the operand of the statement
-     * @param operation          the operation of the statement
-     * @param matcher            a matcher for the statement
-     * @param statementContext   the context of the statement
+     * @param operand the operand of the statement
+     * @param operation the operation of the statement
+     * @param matcher a matcher for the statement
+     * @param statementContext the context of the statement
      */
-    public MapEach(Operand operand, Operation operation, MatcherObject matcher, StatementContext statementContext) {
+    public MapEach(
+        Operand operand,
+        Operation operation,
+        MatcherObject matcher,
+        StatementContext statementContext) {
       super(operand, operation, wrapAsList(operation.getReturnType()), matcher, statementContext);
       ParameterUtils.setImport(getClassImports(), COLLECTOR_IMPORT);
     }
 
     @Override
     String getMethodCallString(boolean useVariable) {
-      String statementString = String
-          .format("%s.stream().map(element -> element.%s).collect(Collectors.toList())",
-              operand.getOperandString(),
-              operation.getInvocationString());
-      return getVariableAssignmentPrefix(useVariable)
-          + statementString;
+      String statementString =
+          String.format(
+              "%s.stream().map(element -> element.%s).collect(Collectors.toList())",
+              operand.getOperandString(), operation.getInvocationString());
+      return getVariableAssignmentPrefix(useVariable) + statementString;
     }
   }
 
-  /**
-   * invokes method on list and returns list
-   */
+  /** invokes method on list and returns list */
   public static final class FlatMapEach extends ComposeMethodStatement {
 
     /**
      * Initializes aa new instance of the ComposeMethodStatement class to be executed on a list and
      * returning a list
      *
-     * @param operand            the operand of the statement
-     * @param operation          the operation of the statement
-     * @param matcher            a matcher for the statement
-     * @param statementContext   the context of the statement
+     * @param operand the operand of the statement
+     * @param operation the operation of the statement
+     * @param matcher a matcher for the statement
+     * @param statementContext the context of the statement
      */
-    public FlatMapEach(Operand operand, Operation operation, MatcherObject matcher, StatementContext statementContext) {
+    public FlatMapEach(
+        Operand operand,
+        Operation operation,
+        MatcherObject matcher,
+        StatementContext statementContext) {
       super(operand, operation, wrapAsList(operation.getReturnType()), matcher, statementContext);
       ParameterUtils.setImport(getClassImports(), COLLECTOR_IMPORT);
     }
 
     @Override
     String getMethodCallString(boolean useVariable) {
-      String statementString = String
-          .format(
+      String statementString =
+          String.format(
               "%s.stream().flatMap(element -> element.%s.stream()).collect(Collectors.toList())",
-              operand.getOperandString(),
-              operation.getInvocationString());
-      return getVariableAssignmentPrefix(useVariable)
-          + statementString;
+              operand.getOperandString(), operation.getInvocationString());
+      return getVariableAssignmentPrefix(useVariable) + statementString;
     }
   }
 
-  /**
-   * information about element action is applied to
-   */
-  public static abstract class Operand {
+  /** information about element action is applied to */
+  public abstract static class Operand {
 
     /**
      * Gets the element parameters
@@ -367,10 +377,8 @@ public abstract class ComposeMethodStatement {
     protected abstract String getOperandString();
   }
 
-  /**
-   * information about applied action
-   */
-  public static abstract class Operation {
+  /** information about applied action */
+  public abstract static class Operation {
 
     /**
      * Gets the action parameters
@@ -412,13 +420,12 @@ public abstract class ComposeMethodStatement {
     protected abstract String getInvocationString();
   }
 
-  /**
-   * "apply" : "returnSelf" statement
-   */
+  /** "apply" : "returnSelf" statement */
   public static class ReturnSelf extends ComposeMethodStatement {
 
     /**
      * Initializes a new instance of the ReturnSelf class, a statement that returns the PageObject
+     *
      * @param returnType the return type of the Page Object
      */
     public ReturnSelf(TypeProvider returnType) {

@@ -71,8 +71,11 @@ class UtamInterfaceMethod extends UtamMethod {
     if (returnTypeNode.isArray()) {
       for (JsonNode valueNode : returnTypeNode) {
         if (!valueNode.isTextual() || !isBasicType(valueNode.textValue())) {
-          String unsupportedArrayValueErr = VALIDATION.getErrorMessage(115,
-                  String.format("abstract method \"%s\" return type", name), nodeToString(returnTypeNode));
+          String unsupportedArrayValueErr =
+              VALIDATION.getErrorMessage(
+                  115,
+                  String.format("abstract method \"%s\" return type", name),
+                  nodeToString(returnTypeNode));
           throw new UtamCompilationError(returnTypeNode, unsupportedArrayValueErr);
         }
       }
@@ -88,8 +91,10 @@ class UtamInterfaceMethod extends UtamMethod {
     if (isReturnsBasicType) {
       String structure = String.format("abstract method \"%s\" return type", name);
       String[] basicUnionType = processBasicTypeNode(returnTypeNode, structure);
-      if(basicUnionType == null) {
-        throw new UtamCompilationError(returnTypeNode, VALIDATION.getErrorMessage(115, structure, nodeToString(returnTypeNode)));
+      if (basicUnionType == null) {
+        throw new UtamCompilationError(
+            returnTypeNode,
+            VALIDATION.getErrorMessage(115, structure, nodeToString(returnTypeNode)));
       }
       TypeProvider unionReturnType = asBasicOrUnionType(name, basicUnionType, false);
       returnTypeObject = new AbstractMethodBasicReturnType(unionReturnType, isReturnList);
@@ -97,12 +102,13 @@ class UtamInterfaceMethod extends UtamMethod {
       returnTypeObject = new AbstractMethodReturnType(returnTypeNode, isReturnList, name);
     }
     TypeProvider methodReturnType = returnTypeObject.getReturnTypeOrDefault(context, VOID);
-    MethodContext methodContext = new MethodContext(name, returnTypeObject, context, true, hasMethodLevelArgs());
+    MethodContext methodContext =
+        new MethodContext(name, returnTypeObject, context, true, hasMethodLevelArgs());
     ParametersContext parametersContext = methodContext.getParametersContext();
     setMethodLevelParameters(context, methodContext);
     List<MethodParameter> parameters = parametersContext.getParameters();
-    return isReturnsBasicType ? new AbstractBasicElementGetter(name, parameters, methodReturnType,
-        description)
+    return isReturnsBasicType
+        ? new AbstractBasicElementGetter(name, parameters, methodReturnType, description)
         : new InterfaceMethod(name, methodReturnType, parameters, description);
   }
 }

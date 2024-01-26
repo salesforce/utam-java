@@ -11,8 +11,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -49,13 +47,12 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   /**
    * Initializes a new instance of the translator configuration class
    *
-   * @param outputOptions        compiler output options
+   * @param outputOptions compiler output options
    * @param lintingConfiguration configured lint rules
-   * @param typesConfig          types provider config
-   * @param sourceConfig         configuration to scan for page object sources
-   * @param targetConfig         information about output folders for page objects, configs and unit
-   *                             tests
-   * @param profileDefinitions   list of known profiles and their values
+   * @param typesConfig types provider config
+   * @param sourceConfig configuration to scan for page object sources
+   * @param targetConfig information about output folders for page objects, configs and unit tests
+   * @param profileDefinitions list of known profiles and their values
    */
   DefaultTranslatorConfiguration(
       CompilerOutputOptions outputOptions,
@@ -79,12 +76,11 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
   /**
    * Initializes a new instance of the translator configuration class
    *
-   * @param outputOptions        compiler output options
+   * @param outputOptions compiler output options
    * @param lintingConfiguration configured lint rules
-   * @param sourceConfig         configuration to scan for page object sources
-   * @param targetConfig         information about output folders for page objects, configs and unit
-   *                             tests
-   * @param profileDefinitions   list of known profiles and their values
+   * @param sourceConfig configuration to scan for page object sources
+   * @param targetConfig information about output folders for page objects, configs and unit tests
+   * @param profileDefinitions list of known profiles and their values
    */
   public DefaultTranslatorConfiguration(
       CompilerOutputOptions outputOptions,
@@ -93,19 +89,22 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig,
       List<ProfileConfiguration> profileDefinitions) {
-    this(outputOptions, lintingConfiguration, errorsConfig, new TranslationTypesConfigJava(),
+    this(
+        outputOptions,
+        lintingConfiguration,
+        errorsConfig,
+        new TranslationTypesConfigJava(),
         sourceConfig,
-        targetConfig, profileDefinitions);
+        targetConfig,
+        profileDefinitions);
   }
-
 
   /**
    * Initializes a new instance of the translator configuration class
    *
-   * @param outputOptions      compiler output options
-   * @param sourceConfig       configuration to scan for page object sources
-   * @param targetConfig       information about output folders for page objects, configs and unit
-   *                           tests
+   * @param outputOptions compiler output options
+   * @param sourceConfig configuration to scan for page object sources
+   * @param targetConfig information about output folders for page objects, configs and unit tests
    * @param profileDefinitions list of known profiles and their values
    */
   public DefaultTranslatorConfiguration(
@@ -113,11 +112,15 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
       TranslatorSourceConfig sourceConfig,
       TranslatorTargetConfig targetConfig,
       List<ProfileConfiguration> profileDefinitions) {
-    this(outputOptions, null, new CompilerErrors.Throws(), new TranslationTypesConfigJava(),
-        sourceConfig, targetConfig,
+    this(
+        outputOptions,
+        null,
+        new CompilerErrors.Throws(),
+        new TranslationTypesConfigJava(),
+        sourceConfig,
+        targetConfig,
         profileDefinitions);
   }
-
 
   /**
    * Initializes a new instance of the translator configuration class, only used in unit tests
@@ -127,9 +130,11 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
    */
   // used in tests
   DefaultTranslatorConfiguration(
-      TranslatorSourceConfig sourceConfig,
-      TranslatorTargetConfig targetConfig) {
-    this(CompilerOutputOptions.DEFAULT_COMPILER_OUTPUT_OPTIONS, sourceConfig, targetConfig,
+      TranslatorSourceConfig sourceConfig, TranslatorTargetConfig targetConfig) {
+    this(
+        CompilerOutputOptions.DEFAULT_COMPILER_OUTPUT_OPTIONS,
+        sourceConfig,
+        targetConfig,
         new ArrayList<>());
   }
 
@@ -137,9 +142,8 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
    * get scanner based on input directory or files public because used in downstream projects
    *
    * @param inputDirectory the root input directory to be recursively searched for the *.utam.json
-   *                       Page Object description files
-   * @param inputFiles     the list of the *.utam.json Page Object description files to be
-   *                       generated
+   *     Page Object description files
+   * @param inputFiles the list of the *.utam.json Page Object description files to be generated
    * @return instance of a source configuration
    */
   public static RecursiveScanner getScanner(File inputDirectory, List<File> inputFiles) {
@@ -162,10 +166,11 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
     InputStream packageInput = new FileInputStream(packageMapFile.toString());
     Properties packageProperties = new Properties();
     packageProperties.load(packageInput);
-    return new ScannerConfig(packageProperties.entrySet().stream()
-        .collect(Collectors.toMap(
-            entry -> entry.getKey().toString(),
-            entry -> entry.getValue().toString())));
+    return new ScannerConfig(
+        packageProperties.entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    entry -> entry.getKey().toString(), entry -> entry.getValue().toString())));
   }
 
   /**
@@ -185,8 +190,10 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
     Properties packageProperties = new Properties();
     packageProperties.load(packageInput);
     return packageProperties.entrySet().stream()
-        .map(entry -> new StringValueProfileConfig(entry.getKey().toString(),
-            entry.getValue().toString().split(",")))
+        .map(
+            entry ->
+                new StringValueProfileConfig(
+                    entry.getKey().toString(), entry.getValue().toString().split(",")))
         .collect(Collectors.toList());
   }
 
@@ -253,24 +260,21 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
    */
   public static class CompilerOutputOptions {
 
-    /**
-     * used in utam-core-util in consumer, so should be public
-     */
-    public static final CompilerOutputOptions DEFAULT_COMPILER_OUTPUT_OPTIONS = new CompilerOutputOptions(
-        "", "",
-        new ArrayList<>());
+    /** used in utam-core-util in consumer, so should be public */
+    public static final CompilerOutputOptions DEFAULT_COMPILER_OUTPUT_OPTIONS =
+        new CompilerOutputOptions("", "", new ArrayList<>());
 
     final String moduleName;
     final String pageObjectsVersion;
     final List<String> configuredCopyright;
 
     /**
-     * @param moduleName          name of the module with page object sources
-     * @param pageObjectsVersion  version of page objects to add to javadoc
+     * @param moduleName name of the module with page object sources
+     * @param pageObjectsVersion version of page objects to add to javadoc
      * @param configuredCopyright copyright lines from compiler config
      */
-    public CompilerOutputOptions(String moduleName, String pageObjectsVersion,
-        List<String> configuredCopyright) {
+    public CompilerOutputOptions(
+        String moduleName, String pageObjectsVersion, List<String> configuredCopyright) {
       this.moduleName = moduleName;
       this.pageObjectsVersion = pageObjectsVersion;
       this.configuredCopyright = configuredCopyright;

@@ -22,23 +22,16 @@ import utam.core.declarative.representation.AnnotationProvider;
  */
 public class ElementFieldTests {
 
-  /**
-   * An ElementField object should be able to be created
-   */
+  /** An ElementField object should be able to be created */
   @Test
   public void testElementFieldCreation() {
     FieldInfo info = new FieldInfo("fakeElementName");
 
-    ElementField field =
-        new ElementField(
-            "fakeElementName",
-            EMPTY_ANNOTATION);
+    ElementField field = new ElementField("fakeElementName", EMPTY_ANNOTATION);
     info.validateField(field);
   }
 
-  /**
-   * An ElementField object should be able to be created with annotations
-   */
+  /** An ElementField object should be able to be created with annotations */
   @Test
   public void testElementFieldCreationWithAnnotations() {
     FieldInfo info = new FieldInfo("fakeElementName");
@@ -46,10 +39,7 @@ public class ElementFieldTests {
     AnnotationProvider annotation = mock(AnnotationProvider.class);
     when(annotation.getAnnotationText()).thenReturn("inShadow");
 
-    ElementField field =
-        new ElementField(
-            "fakeElementName",
-            annotation);
+    ElementField field = new ElementField("fakeElementName", annotation);
     info.validateField(field);
   }
 }

@@ -15,7 +15,6 @@ package utam.core.declarative.errors;
  */
 public interface CompilerErrorsConfig {
 
-
   /**
    * Return true if runner should stop at first error
    *

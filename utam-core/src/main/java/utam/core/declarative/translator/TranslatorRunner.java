@@ -20,9 +20,9 @@ import utam.core.declarative.lint.LintingError;
 public interface TranslatorRunner {
 
   /**
-   * first scan all contexts and create generation order based on dependencies <br> generation order
-   * is list of Page Object names<br> then for each PO from list de-serialize and create
-   * representation of interface and class <br>
+   * first scan all contexts and create generation order based on dependencies <br>
+   * generation order is list of Page Object names<br>
+   * then for each PO from list de-serialize and create representation of interface and class <br>
    *
    * @return RunnerOutput information for analysing results
    */

@@ -28,7 +28,7 @@ public interface ActionType {
   /**
    * list of expected parameters types
    *
-   * @param parserContext  parser context to validate parameters
+   * @param parserContext parser context to validate parameters
    * @param parameterCount number of expected parameters
    * @return list of expected types
    */

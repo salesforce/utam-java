@@ -32,7 +32,7 @@ public class MobileElementAdapter extends ElementAdapter {
   /**
    * Initializes a new instance of the MobileElementAdapter class
    *
-   * @param element       the underlying element to wrap
+   * @param element the underlying element to wrap
    * @param driverAdapter the driver used to drive this element
    */
   public MobileElementAdapter(WebElement element, Driver driverAdapter) {
@@ -43,12 +43,11 @@ public class MobileElementAdapter extends ElementAdapter {
   public void flick(int xOffset, int yOffset) {
     AppiumDriver appiumDriver = MobileDriverAdapter.getAppiumDriver(driverAdapter);
     Rectangle rect = getWebElement().getRect();
-    Point nativeStartPoint = rect.getPoint().moveBy(
-        rect.getWidth() / 2,
-        rect.getHeight() / 2
-    );
+    Point nativeStartPoint = rect.getPoint().moveBy(rect.getWidth() / 2, rect.getHeight() / 2);
     Point nativeEndPoint = nativeStartPoint.moveBy(xOffset, yOffset);
-    Point[] movement = MobileDriverUtils.getFlickCoordinates((MobileDriverAdapter) driverAdapter, nativeStartPoint, nativeEndPoint);
+    Point[] movement =
+        MobileDriverUtils.getFlickCoordinates(
+            (MobileDriverAdapter) driverAdapter, nativeStartPoint, nativeEndPoint);
     driverAdapter.setPageContextToNative();
     Point start = movement[0];
     Point end = movement[1];

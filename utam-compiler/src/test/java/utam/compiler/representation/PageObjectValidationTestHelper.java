@@ -57,8 +57,7 @@ public class PageObjectValidationTestHelper {
     assertThat(
         "interface " + nameInfo.fullName, type.getFullName(), is(equalTo(nameInfo.fullName)));
 
-    List<MethodDeclaration> actualDeclarations =
-            new ArrayList<>(interfaceObject.getDeclaredApi());
+    List<MethodDeclaration> actualDeclarations = new ArrayList<>(interfaceObject.getDeclaredApi());
     assertThat(actualDeclarations, hasSize(methods.size()));
     for (int i = 0; i < actualDeclarations.size(); i++) {
       MethodInfo methodInfo = methods.get(i);
@@ -100,8 +99,7 @@ public class PageObjectValidationTestHelper {
 
     validateAnnotationList(classObject.getClassAnnotations(), annotations);
 
-    List<PageObjectMethod> actualMethods =
-            new ArrayList<>(classObject.getMethods());
+    List<PageObjectMethod> actualMethods = new ArrayList<>(classObject.getMethods());
     validateMethods(
         "implementation class " + nameInfo.fullName + " methods", actualMethods, methods);
 
@@ -140,18 +138,18 @@ public class PageObjectValidationTestHelper {
    */
   public static void validateMethod(PageObjectMethod method, MethodInfo info) {
     validateDeclaration(method.getDeclaration(), info);
-    assertThat(String.format("method is %s", (method.isPublic() ? "public" : "private")),
-        method.isPublic(), is(equalTo(info.getIsPublic())));
+    assertThat(
+        String.format("method is %s", (method.isPublic() ? "public" : "private")),
+        method.isPublic(),
+        is(equalTo(info.getIsPublic())));
     assertThat(
         "method " + info.name + " code lines", method.getCodeLines(), is(equalTo(info.codeLines)));
     if (info.importedTypes.size() > 0 || info.impliedImportedTypes.size() > 0) {
       Set<String> actualImports = getAllImports(method.getClassImports());
-      String imports = actualImports.isEmpty()? "empty" : String.join(", ", actualImports);
+      String imports = actualImports.isEmpty() ? "empty" : String.join(", ", actualImports);
       String assertionStr = String.format("method '%s' class imports are: %s", info.name, imports);
       assertThat(
-          assertionStr,
-          actualImports,
-          containsInAnyOrder(info.impliedImportedTypes.toArray()));
+          assertionStr, actualImports, containsInAnyOrder(info.impliedImportedTypes.toArray()));
     }
   }
 
@@ -203,12 +201,11 @@ public class PageObjectValidationTestHelper {
     // If the user has decided to validate the imports of a declaration, we will do that here.
     if (expected.importedTypes.size() > 0) {
       Set<String> actualImports = getAllImports(actual.getImports());
-      String imports = actualImports.isEmpty()? "empty" : String.join(", ", actualImports);
-      String assertionStr = String.format("method '%s' interface imports are: %s", actual.getName(), imports);
+      String imports = actualImports.isEmpty() ? "empty" : String.join(", ", actualImports);
+      String assertionStr =
+          String.format("method '%s' interface imports are: %s", actual.getName(), imports);
       assertThat(
-          assertionStr,
-          actualImports,
-          is(containsInAnyOrder(expected.importedTypes.toArray())));
+          assertionStr, actualImports, is(containsInAnyOrder(expected.importedTypes.toArray())));
     }
   }
 
@@ -231,10 +228,11 @@ public class PageObjectValidationTestHelper {
 
   private static Set<String> getAllImports(List<TypeProvider> imports) {
     Set<String> res = new HashSet<>();
-    imports.forEach(i -> {
-      res.add(i.getFullName());
-      i.getImportableTypes().forEach(t -> res.add(t.getFullName()));
-    });
+    imports.forEach(
+        i -> {
+          res.add(i.getFullName());
+          i.getImportableTypes().forEach(t -> res.add(t.getFullName()));
+        });
     return res;
   }
 
@@ -329,7 +327,7 @@ public class PageObjectValidationTestHelper {
      *
      * @param importedTypes the full names of the types to be imported into the class by the method
      */
-    public void addImportedTypes(String...importedTypes) {
+    public void addImportedTypes(String... importedTypes) {
       this.importedTypes.addAll(Arrays.asList(importedTypes));
     }
 
@@ -408,12 +406,11 @@ public class PageObjectValidationTestHelper {
      * @param fieldObject the PageElementField object to validate
      */
     public void validateField(PageClassField fieldObject) {
+      assertThat("field " + name + ": name", fieldObject.getName(), is(equalTo(name)));
       assertThat(
-              "field " + name + ": name", fieldObject.getName(), is(equalTo(name)));
-      assertThat(
-              "field " + name + ": type name",
-              fieldObject.getType().getSimpleName(),
-              is(equalTo(typeName)));
+          "field " + name + ": type name",
+          fieldObject.getType().getSimpleName(),
+          is(equalTo(typeName)));
       validateAnnotationList(fieldObject.getAnnotations(), annotationValues);
     }
   }

@@ -32,19 +32,19 @@ public class PageObjectContextImpl implements PageObjectContext {
   /**
    * Initializes a new instance of the PageObjectContextImpl class
    *
-   * @param activeBeans  the active beans in the Page Object
+   * @param activeBeans the active beans in the Page Object
    * @param defaultBeans beans for default profile
    */
   public PageObjectContextImpl(
       Map<Class<? extends PageObject>, Class> activeBeans,
-      Map<Class<? extends PageObject>, Class> defaultBeans
-  ) {
+      Map<Class<? extends PageObject>, Class> defaultBeans) {
     this.activeBeans = activeBeans;
     this.defaultBeans = defaultBeans;
   }
 
   /**
-   * Initializes a new instance of the PageObjectContextImpl class, left for compatibility with older versions
+   * Initializes a new instance of the PageObjectContextImpl class, left for compatibility with
+   * older versions
    *
    * @param activeBeans the active beans in the Page Object
    */
@@ -55,7 +55,7 @@ public class PageObjectContextImpl implements PageObjectContext {
   /**
    * build default impl name (with prefix Impl) and try to find proper class
    *
-   * @param interfaceName         name of the interface
+   * @param interfaceName name of the interface
    * @return the class
    */
   private static Class getDefaultImplementation(String interfaceName) {
@@ -86,7 +86,7 @@ public class PageObjectContextImpl implements PageObjectContext {
       implementingClass = type;
     } else if (activeBeans.containsKey(type)) {
       implementingClass = activeBeans.get(type);
-    } else if(defaultBeans.containsKey(type)) {
+    } else if (defaultBeans.containsKey(type)) {
       implementingClass = defaultBeans.get(type);
     } else {
       implementingClass = getDefaultImplementation(type.getName());

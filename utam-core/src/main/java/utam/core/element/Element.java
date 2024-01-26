@@ -20,7 +20,7 @@ public interface Element {
   /**
    * find and element with a given locator inside current element
    *
-   * @param by         locator
+   * @param by locator
    * @param isNullable boolean, true if element can be absent
    * @return instance of the found element or null for nullable
    */
@@ -29,7 +29,7 @@ public interface Element {
   /**
    * find all elements with a given locator inside current element
    *
-   * @param by         locator
+   * @param by locator
    * @param isNullable boolean, true if element can be absent
    * @return list of found elements or empty list for nullable
    */
@@ -64,30 +64,23 @@ public interface Element {
    */
   boolean isExisting();
 
-  /**
-   * clear text inside the element, usually for an input box
-   */
+  /** clear text inside the element, usually for an input box */
   void clear();
 
-  /**
-   * click on the element
-   */
+  /** click on the element */
   void click();
 
-  /**
-   * perform a secondary-button click on the element
-   */
+  /** perform a secondary-button click on the element */
   void rightClick();
 
   /**
    * click and hold the element
+   *
    * @param holdDurationSec the duration in seconds for which to hold.
    */
   void clickAndHold(int holdDurationSec);
 
-  /**
-   * double-click on the element
-   */
+  /** double-click on the element */
   void doubleClick();
 
   /**
@@ -135,9 +128,7 @@ public interface Element {
    */
   void scrollIntoView(ScrollOptions options);
 
-  /**
-   * move cursor to the element
-   */
+  /** move cursor to the element */
   void moveTo();
 
   /**
@@ -147,14 +138,10 @@ public interface Element {
    */
   boolean hasFocus();
 
-  /**
-   * blur the element
-   */
+  /** blur the element */
   void blur();
 
-  /**
-   * focus on the element
-   */
+  /** focus on the element */
   void focus();
 
   /**
@@ -169,7 +156,7 @@ public interface Element {
    * drag and drop an element to the target location
    *
    * @param options location where to drop as element or coordinates offset and optional hold
-   *                duration
+   *     duration
    */
   void dragAndDrop(DragAndDropOptions options);
 
@@ -180,23 +167,15 @@ public interface Element {
    */
   ElementRectangle getRect();
 
-  /**
-   * types of scroll action
-   */
+  /** types of scroll action */
   enum ScrollOptions {
-    /**
-     * scroll element to the top of the viewport
-     */
+    /** scroll element to the top of the viewport */
     TOP,
-    /**
-     * scroll element to the center of the viewport
-     */
+    /** scroll element to the center of the viewport */
     CENTER
   }
 
-  /**
-   * Return type for the method that gets element size
-   */
+  /** Return type for the method that gets element size */
   interface ElementRectangle {
 
     /**
