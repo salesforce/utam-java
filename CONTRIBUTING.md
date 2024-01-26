@@ -83,10 +83,12 @@ Configure your editor to use our lint and code style rules to speed up the code 
 
 ### Code Style
 
-UTAM Java uses the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html).
-Format settings definition files for importing into IDEs are available for
-[Eclipse](https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml)
-and [IntelliJ IDEA](https://github.com/google/styleguide/blob/gh-pages/intellij-java-google-style.xml).
+This project uses the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html) to format `.java` files.
+It is a highly opinionated style and we don't deviate from it.
+
+These styles rules are enforced by Spotless during the Maven `validate` step. If you'd like to run them manually, `mvn spotless:check` and `mvn spotless:apply`.
+
+There may be plugins for your IDE that can help verify these rules are applied correctly, but they can't be set up automatically and consistently across environments.
 
 ## Git Workflow
 

@@ -141,6 +141,37 @@
                     </arguments>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.version}</version>
+                <configuration>
+                    <java>
+                        <!-- Ignore the generated Java files by explicitly including our files. -->
+                        <!-- While we use Spotless at compile time, that config is different than our project config. -->
+                        <includes>
+                            <include>src/main/**/*.java</include>
+                            <include>src/test/java/utam/**/*.java</include>
+                        </includes>
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>check spotless after clean to fail CI builds if a change sneaks in. (locally, just run 'mvn validate' to fix)</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>apply spotless during (local) maven builds</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>apply</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
