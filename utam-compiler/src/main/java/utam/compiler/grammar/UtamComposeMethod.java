@@ -40,6 +40,7 @@ class UtamComposeMethod extends UtamMethod {
 
   private final List<UtamMethodAction> composeList;
   private final boolean isPublic;
+
   @JsonCreator
   UtamComposeMethod(
       @JsonProperty(value = "name", required = true) String name,
@@ -54,12 +55,15 @@ class UtamComposeMethod extends UtamMethod {
   /**
    * Constructor used to build waitForElement method
    *
-   * @param name        name of the method
+   * @param name name of the method
    * @param description description of the method
-   * @param compose     statements
+   * @param compose statements
    */
-  UtamComposeMethod(String name, UtamMethodDescription description,
-      List<UtamMethodAction> compose, boolean isPublic) {
+  UtamComposeMethod(
+      String name,
+      UtamMethodDescription description,
+      List<UtamMethodAction> compose,
+      boolean isPublic) {
     super(name, description);
     this.composeList = compose;
     this.isPublic = isPublic;
@@ -68,12 +72,14 @@ class UtamComposeMethod extends UtamMethod {
   /**
    * process compose method nodes
    *
-   * @param methodName   name of the method
+   * @param methodName name of the method
    * @param composeNodes json nodes
    * @return list of statements
    */
   static List<UtamMethodAction> processComposeNodes(String methodName, JsonNode composeNodes) {
-    List<UtamMethodAction> res = VALIDATION.validateNotEmptyArray(composeNodes, String.format("method \"%s\"", methodName), "compose");
+    List<UtamMethodAction> res =
+        VALIDATION.validateNotEmptyArray(
+            composeNodes, String.format("method \"%s\"", methodName), "compose");
     for (JsonNode composeNode : composeNodes) {
       UtamMethodAction action = processComposeStatementNode(methodName, composeNode);
       res.add(action);
@@ -81,9 +87,10 @@ class UtamComposeMethod extends UtamMethod {
     return res;
   }
 
-  private static UtamMethodAction processComposeStatementNode(String methodName,
-      JsonNode composeNode) {
-    VALIDATION.validateNotNullObject(composeNode, String.format("method \"%s\"", methodName), "compose statement");
+  private static UtamMethodAction processComposeStatementNode(
+      String methodName, JsonNode composeNode) {
+    VALIDATION.validateNotNullObject(
+        composeNode, String.format("method \"%s\"", methodName), "compose statement");
     JsonNode applyNode = composeNode.get("apply");
     JsonNode applyExternalNode = composeNode.get("applyExternal");
     JsonNode elementNode = composeNode.get("element");
@@ -94,7 +101,8 @@ class UtamComposeMethod extends UtamMethod {
       if (elementName == null) {
         throw new UtamCompilationError(composeNode, VALIDATION.getErrorMessage(609, methodName));
       }
-      return readNode(composeNode, UtamMethodActionGetter.class, VALIDATION.getErrorMessage(600, methodName));
+      return readNode(
+          composeNode, UtamMethodActionGetter.class, VALIDATION.getErrorMessage(600, methodName));
     }
     if (apply != null && applyExternal != null) {
       throw new UtamCompilationError(composeNode, VALIDATION.getErrorMessage(610, methodName));
@@ -118,29 +126,30 @@ class UtamComposeMethod extends UtamMethod {
   /**
    * get compose statements from compose statements
    *
-   * @param context       translation context
+   * @param context translation context
    * @param methodContext method context
-   * @param compose       compose statements
+   * @param compose compose statements
    * @return list of processed statements
    */
   static List<ComposeMethodStatement> getComposeStatements(
-      TranslationContext context,
-      MethodContext methodContext,
-      List<UtamMethodAction> compose) {
+      TranslationContext context, MethodContext methodContext, List<UtamMethodAction> compose) {
     List<ComposeMethodStatement> statements = new ArrayList<>();
     String name = methodContext.getName();
     TypeProvider previousStatementReturn = null;
     for (int i = 0; i < compose.size(); i++) {
       UtamMethodAction statementDeclaration = compose.get(i);
-      StatementContext statementContext = new StatementContext(
-          previousStatementReturn,
-          i,
-          isUsedAsChain(compose, i),
-          i == compose.size() - 1 ? StatementType.LAST_STATEMENT : StatementType.REGULAR_STATEMENT,
-          statementDeclaration.getDeclaredReturnType(name));
+      StatementContext statementContext =
+          new StatementContext(
+              previousStatementReturn,
+              i,
+              isUsedAsChain(compose, i),
+              i == compose.size() - 1
+                  ? StatementType.LAST_STATEMENT
+                  : StatementType.REGULAR_STATEMENT,
+              statementDeclaration.getDeclaredReturnType(name));
       statementDeclaration.checkBeforeLoadElements(methodContext);
-      ComposeMethodStatement statement = statementDeclaration
-          .getComposeAction(context, methodContext, statementContext);
+      ComposeMethodStatement statement =
+          statementDeclaration.getComposeAction(context, methodContext, statementContext);
       previousStatementReturn = statement.getReturnType();
       statements.add(statement);
     }
@@ -151,7 +160,7 @@ class UtamComposeMethod extends UtamMethod {
    * check if statement with a given index is a chain
    *
    * @param compose statements
-   * @param index   index of the current statement
+   * @param index index of the current statement
    * @return boolean
    */
   static boolean isUsedAsChain(List<UtamMethodAction> compose, int index) {
@@ -164,22 +173,18 @@ class UtamComposeMethod extends UtamMethod {
   @Override
   final PageObjectMethod getMethod(TranslationContext context) {
     // return type at method level is not supported, so infer from last statement
-    ReturnType lastStatementReturn = composeList.get(composeList.size()-1).getDeclaredReturnType(name);
-    MethodContext methodContext = new MethodContext(name, lastStatementReturn, context,false, hasMethodLevelArgs());
+    ReturnType lastStatementReturn =
+        composeList.get(composeList.size() - 1).getDeclaredReturnType(name);
+    MethodContext methodContext =
+        new MethodContext(name, lastStatementReturn, context, false, hasMethodLevelArgs());
     ParametersContext parametersContext = methodContext.getParametersContext();
     setMethodLevelParameters(context, methodContext);
-    List<ComposeMethodStatement> statements = getComposeStatements(context, methodContext,
-        composeList);
+    List<ComposeMethodStatement> statements =
+        getComposeStatements(context, methodContext, composeList);
     List<MethodParameter> parameters = parametersContext.getParameters();
     ComposeMethodStatement lastStatement = statements.get(statements.size() - 1);
     TypeProvider lastStatementReturnType = lastStatement.getReturnType();
     return new ComposeMethod(
-        name,
-        lastStatementReturnType,
-        parameters,
-        statements,
-        description,
-        isPublic
-    );
+        name, lastStatementReturnType, parameters, statements, description, isPublic);
   }
 }

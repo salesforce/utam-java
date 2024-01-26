@@ -42,9 +42,9 @@ abstract class LintingRuleImpl implements LintingRule {
 
   private LintingRuleImpl(String ruleId, LintRuleOverride override) {
     LintingRuleObject configuredRule = getConfiguredRule(ruleId);
-    this.violationLevel = override == null? configuredRule.violation : override.violationLevel;
+    this.violationLevel = override == null ? configuredRule.violation : override.violationLevel;
     this.errorCode = configuredRule.errorCode;
-    this.exceptions = override == null? new HashSet<>() : override.exceptions;
+    this.exceptions = override == null ? new HashSet<>() : override.exceptions;
     this.name = configuredRule.name;
     this.description = configuredRule.description;
     this.ruleId = ruleId;
@@ -54,8 +54,8 @@ abstract class LintingRuleImpl implements LintingRule {
   @Override
   public String toString() {
     String output = String.format("Rule %s: %s", ruleId, violationLevel.name());
-    String exceptions = this.exceptions.isEmpty()? "" : ", exceptions: " + String
-        .join(", ", this.exceptions);
+    String exceptions =
+        this.exceptions.isEmpty() ? "" : ", exceptions: " + String.join(", ", this.exceptions);
     return output + exceptions;
   }
 
@@ -67,28 +67,23 @@ abstract class LintingRuleImpl implements LintingRule {
   /**
    * Create linting error for a rule violation
    *
-   * @param context       page object under linting
-   * @param lineNumber    number of the line with violation
+   * @param context page object under linting
+   * @param lineNumber number of the line with violation
    * @param fixSuggestion string with suggestion how to fix an error
-   * @param args          parameters for error message
+   * @param args parameters for error message
    */
-  final LintingError getError(PageObjectLinting context, int lineNumber,
-      String fixSuggestion, String... args) {
+  final LintingError getError(
+      PageObjectLinting context, int lineNumber, String fixSuggestion, String... args) {
     String errMessage = VALIDATION.getLintingMessage(violationLevel, errorCode, args);
-    return new LintingErrorImpl(ruleId, violationLevel, fixSuggestion, context, lineNumber,
-        errorCode,
-        errMessage);
+    return new LintingErrorImpl(
+        ruleId, violationLevel, fixSuggestion, context, lineNumber, errorCode, errMessage);
   }
 
   @Override
-  public void validate(List<LintingError> errors, PageObjectLinting pageObject) {
-  }
+  public void validate(List<LintingError> errors, PageObjectLinting pageObject) {}
 
   @Override
-  public void validate(PageObjectLinting first, PageObjectLinting second, LintingContext context) {
-
-  }
-
+  public void validate(PageObjectLinting first, PageObjectLinting second, LintingContext context) {}
 
   @Override
   public String getId() {
@@ -105,9 +100,7 @@ abstract class LintingRuleImpl implements LintingRule {
     return description;
   }
 
-  /**
-   * Implementation for search context
-   */
+  /** Implementation for search context */
   private static class FileSearchContextImpl implements FileSearchContext {
 
     private final String[] context;
@@ -146,16 +139,15 @@ abstract class LintingRuleImpl implements LintingRule {
   }
 
   /**
-   * Check for unique selectors inside same file. Note: list element can have
-   * same selector
+   * Check for unique selectors inside same file. Note: list element can have same selector
    *
    * @author elizaveta.ivanova
    * @since 242
    */
   static class UniqueSelectorInsidePageObject extends LintingRuleImpl {
 
-    private static final FileSearchContext SEARCH_CONTEXT = new FileSearchContextImpl(
-        new String[]{"elements"});
+    private static final FileSearchContext SEARCH_CONTEXT =
+        new FileSearchContextImpl(new String[] {"elements"});
 
     UniqueSelectorInsidePageObject(LintRuleOverride override) {
       super("ULR01", override);
@@ -170,12 +162,14 @@ abstract class LintingRuleImpl implements LintingRule {
           for (int j = i + 1; j < elements.size(); j++) {
             ElementLinting second = elements.get(j);
             if (first.isSameScope(second) && first.isSameLocator(second)) {
-              errors.add(getError(pageObject,
-                  pageObject.findCodeLine(SEARCH_CONTEXT, second.getName()),
-                  String.format(this.help, first.getName(), second.getName()),
-                  first.getLocator(),
-                  second.getName(),
-                  first.getName()));
+              errors.add(
+                  getError(
+                      pageObject,
+                      pageObject.findCodeLine(SEARCH_CONTEXT, second.getName()),
+                      String.format(this.help, first.getName(), second.getName()),
+                      first.getLocator(),
+                      second.getName(),
+                      first.getName()));
             }
           }
         }
@@ -190,8 +184,8 @@ abstract class LintingRuleImpl implements LintingRule {
    * @since 242
    */
   static class RequiredRootDescription extends LintingRuleImpl {
-    private static final FileSearchContext SEARCH_CONTEXT = new FileSearchContextImpl(
-        new String[0]);
+    private static final FileSearchContext SEARCH_CONTEXT =
+        new FileSearchContextImpl(new String[0]);
 
     RequiredRootDescription(LintRuleOverride override) {
       super("ULR02", override);
@@ -200,7 +194,8 @@ abstract class LintingRuleImpl implements LintingRule {
     @Override
     public void validate(List<LintingError> errors, PageObjectLinting pageObject) {
       if (isEnabled(pageObject) && !pageObject.getRootContext().hasDescription()) {
-        errors.add(getError(pageObject, pageObject.findCodeLine(SEARCH_CONTEXT, ROOT_LINE), this.help));
+        errors.add(
+            getError(pageObject, pageObject.findCodeLine(SEARCH_CONTEXT, ROOT_LINE), this.help));
       }
     }
   }
@@ -212,19 +207,21 @@ abstract class LintingRuleImpl implements LintingRule {
    * @since 242
    */
   static class RequiredAuthor extends LintingRuleImpl {
-    private static final FileSearchContext SEARCH_CONTEXT = new FileSearchContextImpl(
-        new String[0]);
+    private static final FileSearchContext SEARCH_CONTEXT =
+        new FileSearchContextImpl(new String[0]);
+
     RequiredAuthor(LintRuleOverride override) {
       super("ULR03", override);
     }
 
     @Override
     public void validate(List<LintingError> errors, PageObjectLinting pageObject) {
-      if (isEnabled(pageObject) && pageObject.getRootContext().hasDescription()
-          && !pageObject.getRootContext()
-          .hasAuthor()) {
-        errors.add(getError(pageObject,
-            pageObject.findCodeLine(SEARCH_CONTEXT, "description"), this.help));
+      if (isEnabled(pageObject)
+          && pageObject.getRootContext().hasDescription()
+          && !pageObject.getRootContext().hasAuthor()) {
+        errors.add(
+            getError(
+                pageObject, pageObject.findCodeLine(SEARCH_CONTEXT, "description"), this.help));
       }
     }
   }
@@ -236,8 +233,8 @@ abstract class LintingRuleImpl implements LintingRule {
    * @since 248
    */
   static class RequiredMetadata extends LintingRuleImpl {
-    private static final FileSearchContext SEARCH_CONTEXT = new FileSearchContextImpl(
-        new String[0]);
+    private static final FileSearchContext SEARCH_CONTEXT =
+        new FileSearchContextImpl(new String[0]);
     private static final String MISSING_METADATA_PROPERTY_ERROR =
         "add a property named \"%s\" to the metadata object in the page object";
     private static final String INVALID_METADATA_PROPERTY_VALUE =
@@ -249,16 +246,18 @@ abstract class LintingRuleImpl implements LintingRule {
     RequiredMetadata(LintRuleOverride override) {
       super("ULR09", override);
       this.requiredProperties =
-          override == null || override.additionalConfig == null ? null :
-              (List<Object>)override.additionalConfig.getAdditionalConfigValue("requiredProperties");
+          override == null || override.additionalConfig == null
+              ? null
+              : (List<Object>)
+                  override.additionalConfig.getAdditionalConfigValue("requiredProperties");
     }
 
     @Override
     public void validate(List<LintingError> errors, PageObjectLinting pageObject) {
       if (isEnabled(pageObject)) {
         if (!pageObject.getRootContext().hasMetadata()) {
-          errors.add(getError(pageObject,
-              pageObject.findCodeLine(SEARCH_CONTEXT, ROOT_LINE), this.help));
+          errors.add(
+              getError(pageObject, pageObject.findCodeLine(SEARCH_CONTEXT, ROOT_LINE), this.help));
         } else {
           if (requiredProperties != null) {
             MetadataLinting metadataLinting = pageObject.getRootContext().getMetadata();
@@ -266,25 +265,33 @@ abstract class LintingRuleImpl implements LintingRule {
               Map<String, Object> requiredProperty = (Map<String, Object>) propertyObject;
               String propertyName = requiredProperty.get("name").toString();
               if (!metadataLinting.hasMetadataProperty(propertyName)) {
-                errors.add(getError(pageObject,
-                    pageObject.findCodeLine(SEARCH_CONTEXT, ROOT_LINE),
-                    String.format(MISSING_METADATA_PROPERTY_ERROR, propertyName)));
+                errors.add(
+                    getError(
+                        pageObject,
+                        pageObject.findCodeLine(SEARCH_CONTEXT, ROOT_LINE),
+                        String.format(MISSING_METADATA_PROPERTY_ERROR, propertyName)));
               } else {
-                String propertyValue = metadataLinting.getMetadataPropertyValue(propertyName)
-                    .toString();
+                String propertyValue =
+                    metadataLinting.getMetadataPropertyValue(propertyName).toString();
                 if (requiredProperty.containsKey("values")) {
                   List<String> validValues = (List<String>) requiredProperty.get("values");
                   if (!validValues.contains(propertyValue)) {
-                    errors.add(getError(pageObject,
-                        pageObject.findCodeLine(SEARCH_CONTEXT, ROOT_LINE),
-                        String.format(INVALID_METADATA_PROPERTY_VALUE, propertyName,
-                            String.join(", ", validValues))));
+                    errors.add(
+                        getError(
+                            pageObject,
+                            pageObject.findCodeLine(SEARCH_CONTEXT, ROOT_LINE),
+                            String.format(
+                                INVALID_METADATA_PROPERTY_VALUE,
+                                propertyName,
+                                String.join(", ", validValues))));
                   }
                 } else {
                   if (propertyValue.isBlank() || propertyValue.isEmpty()) {
-                    errors.add(getError(pageObject,
-                        pageObject.findCodeLine(SEARCH_CONTEXT, ROOT_LINE),
-                        String.format(EMPTY_METADATA_PROPERTY_VALUE, propertyName)));
+                    errors.add(
+                        getError(
+                            pageObject,
+                            pageObject.findCodeLine(SEARCH_CONTEXT, ROOT_LINE),
+                            String.format(EMPTY_METADATA_PROPERTY_VALUE, propertyName)));
                   }
                 }
               }
@@ -302,8 +309,8 @@ abstract class LintingRuleImpl implements LintingRule {
    * @since 242
    */
   static class RequiredMethodDescription extends LintingRuleImpl {
-    private static final FileSearchContext SEARCH_CONTEXT = new FileSearchContextImpl(
-        new String[]{"methods"});
+    private static final FileSearchContext SEARCH_CONTEXT =
+        new FileSearchContextImpl(new String[] {"methods"});
 
     RequiredMethodDescription(LintRuleOverride override) {
       super("ULR04", override);
@@ -314,10 +321,12 @@ abstract class LintingRuleImpl implements LintingRule {
       if (isEnabled(pageObject)) {
         for (MethodLinting method : pageObject.getMethods()) {
           if (!method.hasDescription()) {
-            errors.add(getError(pageObject,
-                pageObject.findCodeLine(SEARCH_CONTEXT, method.getName()),
-                String.format(this.help, method.getName()),
-                method.getName()));
+            errors.add(
+                getError(
+                    pageObject,
+                    pageObject.findCodeLine(SEARCH_CONTEXT, method.getName()),
+                    String.format(this.help, method.getName()),
+                    method.getName()));
           }
         }
       }
@@ -339,11 +348,14 @@ abstract class LintingRuleImpl implements LintingRule {
     public void validate(List<LintingError> errors, PageObjectLinting pageObject) {
       if (isEnabled(pageObject)) {
         for (String elementName : pageObject.getShadowBoundaries()) {
-          FileSearchContext context = new FileSearchContextImpl(
-              new String[]{"elements", elementName});
-          errors.add(getError(pageObject,
-              pageObject.findCodeLine(context, "shadow"),
-              String.format(this.help, elementName), elementName));
+          FileSearchContext context =
+              new FileSearchContextImpl(new String[] {"elements", elementName});
+          errors.add(
+              getError(
+                  pageObject,
+                  pageObject.findCodeLine(context, "shadow"),
+                  String.format(this.help, elementName),
+                  elementName));
         }
       }
     }
@@ -357,29 +369,37 @@ abstract class LintingRuleImpl implements LintingRule {
    */
   static class UniqueRootSelector extends LintingRuleImpl {
 
-    private static final FileSearchContext SEARCH_CONTEXT = new FileSearchContextImpl(
-        new String[0]);
+    private static final FileSearchContext SEARCH_CONTEXT =
+        new FileSearchContextImpl(new String[0]);
 
     UniqueRootSelector(LintRuleOverride override) {
       super("ULR06", override);
     }
 
     private boolean isSameRoot(PageObjectLinting first, PageObjectLinting second) {
-      if(first.getRootContext().isRoot() && second.getRootContext().isRoot()) {
-        return first.getRootContext().getRootElement().isSameLocator(second.getRootContext()
-            .getRootElement());
+      if (first.getRootContext().isRoot() && second.getRootContext().isRoot()) {
+        return first
+            .getRootContext()
+            .getRootElement()
+            .isSameLocator(second.getRootContext().getRootElement());
       }
       return false;
     }
+
     @Override
-    public void validate(PageObjectLinting first, PageObjectLinting second,
-        LintingContext context) {
+    public void validate(
+        PageObjectLinting first, PageObjectLinting second, LintingContext context) {
       if (isEnabled(first) && isEnabled(second) && isSameRoot(first, second)) {
         String locator = first.getRootContext().getRootElement().getLocator();
-        context.getErrors().add(getError(first,
-            first.findCodeLine(SEARCH_CONTEXT, "selector"),
-            String.format(this.help, first.getName(), second.getName()),
-            locator, second.getName()));
+        context
+            .getErrors()
+            .add(
+                getError(
+                    first,
+                    first.findCodeLine(SEARCH_CONTEXT, "selector"),
+                    String.format(this.help, first.getName(), second.getName()),
+                    locator,
+                    second.getName()));
       }
     }
   }
@@ -391,33 +411,38 @@ abstract class LintingRuleImpl implements LintingRule {
    * @since 242
    */
   static class RootSelectorExistsForElement extends LintingRuleImpl {
-    private static final FileSearchContext SEARCH_CONTEXT = new FileSearchContextImpl(
-        new String[]{"elements"});
+    private static final FileSearchContext SEARCH_CONTEXT =
+        new FileSearchContextImpl(new String[] {"elements"});
 
     RootSelectorExistsForElement(LintRuleOverride override) {
       super("ULR07", override);
     }
 
     private static boolean isRootDuplicateLocator(PageObjectLinting first, ElementLinting element) {
-      if(first.getTypeFullName().equals(element.getTypeFullName())) {
+      if (first.getTypeFullName().equals(element.getTypeFullName())) {
         // if element is same type as page object
         return false;
       }
       return first.getRootContext().getRootElement().isSameLocator(element);
     }
+
     @Override
-    public void validate(PageObjectLinting first, PageObjectLinting second,
-        LintingContext context) {
+    public void validate(
+        PageObjectLinting first, PageObjectLinting second, LintingContext context) {
       if (isEnabled(first) && isEnabled(second) && first.getRootContext().isRoot()) {
         String existingPageObjectType = first.getTypeFullName();
-        for(ElementLinting element : second.getElements()) {
-          if(isRootDuplicateLocator(first, element)) {
+        for (ElementLinting element : second.getElements()) {
+          if (isRootDuplicateLocator(first, element)) {
             String violatedElementName = element.getName();
-            context.getErrors().add(getError(second,
-                second.findCodeLine(SEARCH_CONTEXT, violatedElementName),
-                String.format(this.help, violatedElementName, existingPageObjectType),
-                violatedElementName,
-                existingPageObjectType));
+            context
+                .getErrors()
+                .add(
+                    getError(
+                        second,
+                        second.findCodeLine(SEARCH_CONTEXT, violatedElementName),
+                        String.format(this.help, violatedElementName, existingPageObjectType),
+                        violatedElementName,
+                        existingPageObjectType));
           }
         }
       }
@@ -449,20 +474,23 @@ abstract class LintingRuleImpl implements LintingRule {
    */
   static class ElementsWithDifferentTypes extends LintingRuleImpl {
 
-    private static final FileSearchContext SEARCH_CONTEXT = new FileSearchContextImpl(
-        new String[]{"elements"});
+    private static final FileSearchContext SEARCH_CONTEXT =
+        new FileSearchContextImpl(new String[] {"elements"});
 
     ElementsWithDifferentTypes(LintRuleOverride override) {
       super("ULR08", override);
     }
 
-    private static boolean isSameCustomLocatorButDifferentTypes(ElementLinting first,
-        ElementLinting second) {
+    private static boolean isSameCustomLocatorButDifferentTypes(
+        ElementLinting first, ElementLinting second) {
       // if element is same type, locator is irrelevant, could be duplicate or not
-      if (!isCustomLocator(first) || !isCustomLocator(second) || first.getTypeFullName().equals(second.getTypeFullName())) {
+      if (!isCustomLocator(first)
+          || !isCustomLocator(second)
+          || first.getTypeFullName().equals(second.getTypeFullName())) {
         return false;
       }
-      return first.isSameLocator(second) && (isCustomElement(first) || isCustomElement(second))
+      return first.isSameLocator(second)
+          && (isCustomElement(first) || isCustomElement(second))
           && !first.getTypeFullName().equals(second.getTypeFullName());
     }
 
@@ -471,8 +499,8 @@ abstract class LintingRuleImpl implements LintingRule {
     }
 
     @Override
-    public void validate(PageObjectLinting first, PageObjectLinting second,
-        LintingContext context) {
+    public void validate(
+        PageObjectLinting first, PageObjectLinting second, LintingContext context) {
       if (isEnabled(first) && isEnabled(second)) {
         for (ElementLinting firstElement : first.getElements()) {
           if (isCustomLocator(firstElement)) { // for custom tags only
@@ -481,15 +509,19 @@ abstract class LintingRuleImpl implements LintingRule {
             for (ElementLinting secondElement : second.getElements()) {
               if (isSameCustomLocatorButDifferentTypes(firstElement, secondElement)) {
                 String secondElementName = secondElement.getName();
-                context.getErrors().add(getError(second,
-                    second.findCodeLine(SEARCH_CONTEXT, secondElementName),
-                    String.format(this.help, secondElementName, firstElementName,
-                        second.getName()),
-                    firstElementLocator,
-                    secondElementName,
-                    firstElementName,
-                    second.getName(),
-                    secondElement.getTypeFullName()));
+                context
+                    .getErrors()
+                    .add(
+                        getError(
+                            second,
+                            second.findCodeLine(SEARCH_CONTEXT, secondElementName),
+                            String.format(
+                                this.help, secondElementName, firstElementName, second.getName()),
+                            firstElementLocator,
+                            secondElementName,
+                            firstElementName,
+                            second.getName(),
+                            secondElement.getTypeFullName()));
               }
             }
           }

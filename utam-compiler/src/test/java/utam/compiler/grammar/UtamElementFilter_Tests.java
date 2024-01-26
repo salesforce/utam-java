@@ -42,43 +42,56 @@ public class UtamElementFilter_Tests {
   @Test
   public void testBasicElementFilterWithoutMatcherThrows() {
     Exception e = expectCompilerErrorFromFile("validate/filter/basicFilterNoMatcher");
-    assertThat(e.getMessage(), containsString(
-        "error 300: element \"test\" filter: incorrect format of element filter"));
+    assertThat(
+        e.getMessage(),
+        containsString("error 300: element \"test\" filter: incorrect format of element filter"));
   }
 
   @Test
   public void testBasicElementWrongMethodInFilterThrows() {
     Exception e = expectCompilerErrorFromFile("validate/filter/basicFilterWrongMethod");
-    assertThat(e.getMessage(), containsString(
-        "error 301: element \"test\" filter: unknown action \"wrong\" for basic element"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 301: element \"test\" filter: unknown action \"wrong\" for basic element"));
   }
 
   @Test
   public void testBasicElementUnsupportedMethodInFilterThrows() {
     Exception e = expectCompilerErrorFromFile("validate/filter/basicFilterUnsupportedMethod");
-    assertThat(e.getMessage(), containsString(
-            "error 303: element \"test\" filter: unsupported action \"click\" for type \"Touchable\""));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 303: element \"test\" filter: unsupported action \"click\" for type"
+                + " \"Touchable\""));
   }
 
   @Test
   public void testCustomElementGetTextFilterWithWrongArgThrows() {
     Exception e = expectCompilerErrorFromFile("validate/filter/customWrongMatcherArg");
-    assertThat(e.getMessage(), containsString(
-        "error 108: element \"test\" filter matcher arguments: expected number of arguments is 0, found 1"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 108: element \"test\" filter matcher arguments: expected number of arguments is"
+                + " 0, found 1"));
   }
 
   @Test
   public void testCustomFilterNonListThrows() {
     Exception e = expectCompilerErrorFromFile("validate/custom_element/filterForNonList");
-    assertThat(e.getMessage(), containsString(
-        "error 302: element \"test\" filter: filter can only be set for list"));
+    assertThat(
+        e.getMessage(),
+        containsString("error 302: element \"test\" filter: filter can only be set for list"));
   }
 
   @Test
   public void testDuplicateArgsNamesThrows() {
     Exception e = expectCompilerErrorFromFile("validate/filter/basicFilterDuplicateArgs");
-    assertThat(e.getMessage(),
-        containsString("error 107: element \"element\" arguments: argument with name \"arg1\" is already declared"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 107: element \"element\" arguments: argument with name \"arg1\" is already"
+                + " declared"));
   }
 
   @Test
@@ -91,15 +104,20 @@ public class UtamElementFilter_Tests {
     expected.addImpliedImportedTypes(BASIC_ELEMENT_TYPE);
     assertThat(method.getDeclaration().getImports(), Matchers.is(emptyIterable()));
     expected.addCodeLine("BasicElement root = this.getRootElement()");
-    expected.addCodeLine("return basic(root, this.test).build(TestElement.class, "
-        + "TestElementImpl.class, elm -> text.equals(elm.getText()))");
+    expected.addCodeLine(
+        "return basic(root, this.test).build(TestElement.class, "
+            + "TestElementImpl.class, elm -> text.equals(elm.getText()))");
     PageObjectValidationTestHelper.validateMethod(method, expected);
     String unionClass = context.getClassUnionTypes().get(0).getDeclarationCode().get(0);
-    assertThat(unionClass, Matchers.is(Matchers.equalTo(
-        "public static class TestElementImpl extends BasePageElement implements TestElement {}")));
-    String unionType = context.getInterfaceUnionTypes().get(0).getDeclarationCode()
-        .get(0);
-    assertThat(unionType,
+    assertThat(
+        unionClass,
+        Matchers.is(
+            Matchers.equalTo(
+                "public static class TestElementImpl extends BasePageElement implements TestElement"
+                    + " {}")));
+    String unionType = context.getInterfaceUnionTypes().get(0).getDeclarationCode().get(0);
+    assertThat(
+        unionType,
         Matchers.is(Matchers.equalTo("interface TestElement extends Editable, Clickable {}")));
   }
 
@@ -109,13 +127,15 @@ public class UtamElementFilter_Tests {
     Result result = new DeserializerUtilities().getResultFromFile("filter/basicFilterPublic");
     TranslationContext context = result.getContext();
     PageObjectMethod method = context.getElement(ELEMENT_NAME).getElementMethod();
-    assertThat(method.getDeclaration().getCodeLine(), is("List<BasicElement> getTest(String text)"));
+    assertThat(
+        method.getDeclaration().getCodeLine(), is("List<BasicElement> getTest(String text)"));
     expected.addParameter(new MethodParameterInfo("text"));
     expected.addImportedTypes(LIST_TYPE, BASIC_ELEMENT_TYPE);
     expected.addImpliedImportedTypes(LIST_TYPE, BASIC_ELEMENT_TYPE_IMPL, BASIC_ELEMENT_TYPE);
     expected.addCodeLine("BasicElement root = this.getRootElement()");
     expected.addCodeLine(
-        "return basic(root, this.test).buildList(BasicElement.class, BasePageElement.class, elm -> text.equals(elm.getText()))");
+        "return basic(root, this.test).buildList(BasicElement.class, BasePageElement.class, elm ->"
+            + " text.equals(elm.getText()))");
     PageObjectValidationTestHelper.validateMethod(method, expected);
     assertThat(context.getInterfaceUnionTypes(), is(emptyIterable()));
     assertThat(context.getClassUnionTypes(), is(emptyIterable()));
@@ -125,9 +145,10 @@ public class UtamElementFilter_Tests {
   public void testNullableListWithFilter() {
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "BasicElement");
     expected.addCodeLine("BasicElement root = this.getRootElement()");
-    expected.addCodeLine("return basic(root, this.test)"
-        + ".build(BasicElement.class, BasePageElement.class, "
-        + "elm -> Boolean.TRUE.equals(elm.isVisible()))");
+    expected.addCodeLine(
+        "return basic(root, this.test)"
+            + ".build(BasicElement.class, BasePageElement.class, "
+            + "elm -> Boolean.TRUE.equals(elm.isVisible()))");
     Result result = new DeserializerUtilities().getResultFromFile("filter/basicElementFilter");
     TranslationContext context = result.getContext();
     PageObjectMethod method = context.getElement(ELEMENT_NAME).getElementMethod();
@@ -136,8 +157,8 @@ public class UtamElementFilter_Tests {
 
   @Test
   public void testFilterByGetAttribute() {
-    TranslationContext context = new DeserializerUtilities()
-        .getContext("filter/basicFilterGetAttribute");
+    TranslationContext context =
+        new DeserializerUtilities().getContext("filter/basicFilterGetAttribute");
     PageObjectMethod method = context.getMethod(ELEMENT_METHOD_NAME);
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "List<BasicElement>");
     expected.addParameter(new MethodParameterInfo("scopeArg"));
@@ -146,16 +167,16 @@ public class UtamElementFilter_Tests {
     expected.addParameter(new MethodParameterInfo("matcherArg"));
     expected.addCodeLine("BasicElement scope = this.getScopeElement(scopeArg)");
     expected.addCodeLines(
-        "return basic(scope, this.test.setParameters(selectorArg))"
-            + ".buildList(BasicElement.class, BasePageElement.class, "
-            + "elm -> (elm.getAttribute(applyArg)!= null && elm.getAttribute(applyArg).contains(matcherArg)))");
+        "return basic(scope, this.test.setParameters(selectorArg)).buildList(BasicElement.class,"
+            + " BasePageElement.class, elm -> (elm.getAttribute(applyArg)!= null &&"
+            + " elm.getAttribute(applyArg).contains(matcherArg)))");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 
   @Test
   public void testFilterByGetCssPropertyValue() {
-    TranslationContext context = new DeserializerUtilities()
-            .getContext("filter/basicFilterGetCssPropertyValue");
+    TranslationContext context =
+        new DeserializerUtilities().getContext("filter/basicFilterGetCssPropertyValue");
     PageObjectMethod method = context.getMethod(ELEMENT_METHOD_NAME);
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "List<BasicElement>");
     expected.addParameter(new MethodParameterInfo("scopeArg"));
@@ -164,23 +185,24 @@ public class UtamElementFilter_Tests {
     expected.addParameter(new MethodParameterInfo("matcherArg"));
     expected.addCodeLine("BasicElement scope = this.getScopeElement(scopeArg)");
     expected.addCodeLines(
-            "return basic(scope, this.test.setParameters(selectorArg))"
-                    + ".buildList(BasicElement.class, BasePageElement.class, "
-                    + "elm -> (elm.getCssPropertyValue(applyArg)!= null && elm.getCssPropertyValue(applyArg).contains(matcherArg)))");
+        "return basic(scope, this.test.setParameters(selectorArg)).buildList(BasicElement.class,"
+            + " BasePageElement.class, elm -> (elm.getCssPropertyValue(applyArg)!= null &&"
+            + " elm.getCssPropertyValue(applyArg).contains(matcherArg)))");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 
   @Test
   public void testFilterByIsVisibleFalseFindFirst() {
-    TranslationContext context = new DeserializerUtilities()
-        .getContext("filter/basicFilterIsVisible");
+    TranslationContext context =
+        new DeserializerUtilities().getContext("filter/basicFilterIsVisible");
     PageObjectMethod method = context.getMethod(ELEMENT_METHOD_NAME);
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "TestElement");
     expected.addParameter(new MethodParameterInfo("scopeArg"));
     expected.addParameter(new MethodParameterInfo("selectorArg"));
     expected.addCodeLine("BasicElement scope = this.getScopeElement(scopeArg)");
-    expected.addCodeLines("return basic(scope, this.test.setParameters(selectorArg))."
-        + "build(TestElement.class, TestElementImpl.class, elm -> Boolean.FALSE.equals(elm.isVisible()))");
+    expected.addCodeLines(
+        "return basic(scope, this.test.setParameters(selectorArg)).build(TestElement.class,"
+            + " TestElementImpl.class, elm -> Boolean.FALSE.equals(elm.isVisible()))");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 }

@@ -29,7 +29,7 @@ public class StringValueProfileConfig implements ProfileConfiguration {
    * Initializes a new instance of the StringValueProfileConfig class
    *
    * @param profileName the name of the profile
-   * @param values      the list of values making up the profile
+   * @param values the list of values making up the profile
    */
   public StringValueProfileConfig(String profileName, String[] values) {
     this.jsonKey = profileName;
@@ -39,21 +39,21 @@ public class StringValueProfileConfig implements ProfileConfiguration {
   /**
    * Initializes a new instance of the StringValueProfileConfig class
    *
-   * @param name     the name of the profile
+   * @param name the name of the profile
    * @param profiles the list of profiles
    */
-  public StringValueProfileConfig(String name, Profile...profiles) {
+  public StringValueProfileConfig(String name, Profile... profiles) {
     this(name, Stream.of(profiles).map(Profile::getValue).toArray(String[]::new));
   }
 
   /**
    * Initializes a new instance of the StringValueProfileConfig class, only used in unit tests
    *
-   * @param name  the name of the profile
+   * @param name the name of the profile
    * @param value the value making up the profile
    */
   public StringValueProfileConfig(String name, String value) {
-    this(name, new String[] { value } );
+    this(name, new String[] {value});
   }
 
   /**
@@ -72,7 +72,7 @@ public class StringValueProfileConfig implements ProfileConfiguration {
 
   @Override
   public Profile getFromString(String value) {
-    if(!this.values.contains(value)) {
+    if (!this.values.contains(value)) {
       // error should be handled by caller because of different context
       return null;
     }
@@ -84,12 +84,15 @@ public class StringValueProfileConfig implements ProfileConfiguration {
     return values;
   }
 
-  @Override //for tests
+  @Override // for tests
   public boolean equals(Object obj) {
-    if(obj instanceof StringValueProfileConfig) {
+    if (obj instanceof StringValueProfileConfig) {
       return ((StringValueProfileConfig) obj).jsonKey.equals(jsonKey)
-          && ((StringValueProfileConfig) obj).getSupportedValues().size() == getSupportedValues().size()
-          && ((StringValueProfileConfig) obj).getSupportedValues().containsAll(getSupportedValues());
+          && ((StringValueProfileConfig) obj).getSupportedValues().size()
+              == getSupportedValues().size()
+          && ((StringValueProfileConfig) obj)
+              .getSupportedValues()
+              .containsAll(getSupportedValues());
     }
     return false;
   }

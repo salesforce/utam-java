@@ -62,11 +62,12 @@ public class UtamPageObjectBeforeLoadTests {
   public void testBeforeLoadWaitDocumentUrlWithMatcher() {
     TranslationContext context = getContext("waitForUrlWithMatcher");
     MethodInfo methodInfo = getExpectedMethod();
-    methodInfo.addCodeLine("this.waitFor(() -> {\n"
-        + "String pstatement0 = this.getDocument().getUrl();\n"
-        + "Boolean pmatcher0 = (pstatement0!= null && pstatement0.contains(\"home\"));\n"
-        + "return pmatcher0;\n"
-        + "})");
+    methodInfo.addCodeLine(
+        "this.waitFor(() -> {\n"
+            + "String pstatement0 = this.getDocument().getUrl();\n"
+            + "Boolean pmatcher0 = (pstatement0!= null && pstatement0.contains(\"home\"));\n"
+            + "return pmatcher0;\n"
+            + "})");
     methodInfo.addCodeLine("this.getDocument().waitForDocumentReady()");
     methodInfo.addCodeLine("return this");
     PageObjectMethod method = context.getMethod(METHOD_NAME);
@@ -77,11 +78,12 @@ public class UtamPageObjectBeforeLoadTests {
   public void testBeforeLoadWait() {
     TranslationContext context = getContext("waitForRootPresence");
     MethodInfo methodInfo = getExpectedMethod();
-    methodInfo.addCodeLine("Boolean statement0 = this.waitFor(() -> {\n"
-        + "BasePageElement proot0 = this.getRootElement();\n"
-        + "Boolean pstatement0 = proot0.isPresent();\n"
-        + "return pstatement0;\n"
-        + "}, \"message\")");
+    methodInfo.addCodeLine(
+        "Boolean statement0 = this.waitFor(() -> {\n"
+            + "BasePageElement proot0 = this.getRootElement();\n"
+            + "Boolean pstatement0 = proot0.isPresent();\n"
+            + "return pstatement0;\n"
+            + "}, \"message\")");
     methodInfo.addCodeLine("return statement0");
     PageObjectValidationTestHelper.validateMethod(context.getMethod(METHOD_NAME), methodInfo);
   }
@@ -90,11 +92,12 @@ public class UtamPageObjectBeforeLoadTests {
   public void testWaitForRootPresenceReturnsSelf() {
     TranslationContext context = getContext("waitForRootReturnsSelf");
     MethodInfo methodInfo = getExpectedMethod();
-    methodInfo.addCodeLine("this.waitFor(() -> {\n"
-        + "BasePageElement proot0 = this.getRootElement();\n"
-        + "Boolean pstatement0 = proot0.isPresent();\n"
-        + "return pstatement0;\n"
-        + "})");
+    methodInfo.addCodeLine(
+        "this.waitFor(() -> {\n"
+            + "BasePageElement proot0 = this.getRootElement();\n"
+            + "Boolean pstatement0 = proot0.isPresent();\n"
+            + "return pstatement0;\n"
+            + "})");
     methodInfo.addCodeLine("return this");
     PageObjectValidationTestHelper.validateMethod(context.getMethod(METHOD_NAME), methodInfo);
   }
@@ -102,21 +105,27 @@ public class UtamPageObjectBeforeLoadTests {
   @Test
   public void testCantHaveArgs() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("withArgs"));
-    assertThat(e.getMessage(),
-        containsString("error 904: method \"beforeLoad\" cannot have parameters"));
+    assertThat(
+        e.getMessage(), containsString("error 904: method \"beforeLoad\" cannot have parameters"));
   }
 
   @Test
   public void testUnallowedElement() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("wrongElement"));
-    assertThat(e.getMessage(), containsString(
-        "error 607: method \"beforeLoad\" statement: only \"document\" or \"root\" elements are allowed"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 607: method \"beforeLoad\" statement: only \"document\" or \"root\" elements are"
+                + " allowed"));
   }
 
   @Test
   public void testUnallowedElementInsidePredicate() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("wrongPredicateElement"));
-    assertThat(e.getMessage(), containsString(
-        "error 607: method \"beforeLoad\" statement: only \"document\" or \"root\" elements are allowed"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 607: method \"beforeLoad\" statement: only \"document\" or \"root\" elements are"
+                + " allowed"));
   }
 }

@@ -33,44 +33,54 @@ public class ReturnTypeTests {
   }
 
   private static void test(String jsonFile, String expectedError) {
-    UtamError e = expectThrows(UtamCompilationError.class,
-        () -> test("validate/return/" + jsonFile));
+    UtamError e =
+        expectThrows(UtamCompilationError.class, () -> test("validate/return/" + jsonFile));
     assertThat(e.getMessage(), containsString(expectedError));
   }
 
   @Test
   public void testReturnThrowsForObject() {
-    test("returnObject",
-        "error 10: method \"test\": property \"returnType\" should be a non empty string, instead found object");
+    test(
+        "returnObject",
+        "error 10: method \"test\": property \"returnType\" should be a non empty string, instead"
+            + " found object");
   }
 
   @Test
   public void testReturnAllRedundant() {
-    test("returnAllRedundant",
-        "error 603: method \"test\" statement: \"returnAll\" property can't be set without setting return type in a compose statement");
+    test(
+        "returnAllRedundant",
+        "error 603: method \"test\" statement: \"returnAll\" property can't be set without setting"
+            + " return type in a compose statement");
   }
 
   @Test
   public void testReturnStringUnsupported() {
-    test("returnIncorrectString",
-        "error 602: method \"test\" statement: return type \"container\" is not supported in a compose statement");
+    test(
+        "returnIncorrectString",
+        "error 602: method \"test\" statement: return type \"container\" is not supported in a"
+            + " compose statement");
   }
 
   @Test
   public void testReturnAllRedundantForMethodThrows() {
-    test("returnMethodAllRedundant",
-        "error 402: abstract method \"test\": \"returnAll\" property can't be set without setting return type");
+    test(
+        "returnMethodAllRedundant",
+        "error 402: abstract method \"test\": \"returnAll\" property can't be set without setting"
+            + " return type");
   }
 
   @Test
   public void testReturnTypeNotAllowedThrows() {
-    test("returnTypeMethodNotAllowed",
+    test(
+        "returnTypeMethodNotAllowed",
         "error 500: method \"test\": incorrect format of compose method");
   }
 
   @Test
   public void testReturnStringUnsupportedForMethodThrows() {
-    test("returnMethodIncorrectString",
+    test(
+        "returnMethodIncorrectString",
         "error 403: abstract method \"test\": return type \"container\" is not supported");
   }
 
@@ -90,7 +100,9 @@ public class ReturnTypeTests {
   public void testContainerWithNonLiteralReturn() {
     PageObjectMethod method = test("compose/return/containerNonLiteralReturn");
     MethodInfo expected = new MethodInfo(METHOD_NAME, "T");
-    assertThat(method.getDeclaration().getCodeLine(), is("<T extends PageObject> T test(Class<T> param1)"));
+    assertThat(
+        method.getDeclaration().getCodeLine(),
+        is("<T extends PageObject> T test(Class<T> param1)"));
     expected.addParameter(new MethodParameterInfo("param1", "Class<T>"));
     expected.addImpliedImportedTypes(PAGE_OBJECT.getFullName());
     expected.addImportedTypes(PAGE_OBJECT.getFullName());
@@ -103,7 +115,9 @@ public class ReturnTypeTests {
   public void testReturnNonLiteralPageObjectList() {
     PageObjectMethod method = test("compose/return/containerNonLiteralReturnList");
     MethodInfo expected = new MethodInfo(METHOD_NAME, "List<T>");
-    assertThat(method.getDeclaration().getCodeLine(), is("<T extends PageObject> List<T> test(Class<T> param1)"));
+    assertThat(
+        method.getDeclaration().getCodeLine(),
+        is("<T extends PageObject> List<T> test(Class<T> param1)"));
     expected.addParameter(new MethodParameterInfo("param1", "Class<T>"));
     expected.addImpliedImportedTypes(PAGE_OBJECT.getFullName(), List.class.getName());
     expected.addImportedTypes(PAGE_OBJECT.getFullName(), List.class.getName());
@@ -127,15 +141,19 @@ public class ReturnTypeTests {
   @Test
   public void testContainerListShouldThrowWithoutReturnAll() {
     // container element has "returnAll" and its invocation return type does not say "returnAll"
-    test("containerListThrows", "error 613: method \"test\" statement: "
-        + "incorrect return type; expected \"List<T>\", provided is \"Foo\"");
+    test(
+        "containerListThrows",
+        "error 613: method \"test\" statement: "
+            + "incorrect return type; expected \"List<T>\", provided is \"Foo\"");
   }
 
   @Test
   public void testContainerWrongBoundTypeShouldThrow() {
     // container is invoked and has "returnType" : "string" instead page object
-    test("containerWrongBoundTypeThrows", "error 613: method \"test\" statement: "
-        + "incorrect return type; expected \"List<T>\", provided is \"List<String>\"");
+    test(
+        "containerWrongBoundTypeThrows",
+        "error 613: method \"test\" statement: "
+            + "incorrect return type; expected \"List<T>\", provided is \"List<String>\"");
   }
 
   @Test
@@ -154,7 +172,8 @@ public class ReturnTypeTests {
   public void testReturnRootPageObjectList() {
     PageObjectMethod method = test("compose/return/returnRootPageObjectList");
     MethodInfo expected = new MethodInfo(METHOD_NAME, "List<T>");
-    assertThat(method.getDeclaration().getCodeLine(), is("<T extends RootPageObject> List<T> test()"));
+    assertThat(
+        method.getDeclaration().getCodeLine(), is("<T extends RootPageObject> List<T> test()"));
     expected.addImpliedImportedTypes(ROOT_PAGE_OBJECT.getFullName(), List.class.getName());
     expected.addImportedTypes(ROOT_PAGE_OBJECT.getFullName(), List.class.getName());
     expected.addCodeLine("List<T> statement0 = this.myPrivateMethod()");
@@ -167,12 +186,13 @@ public class ReturnTypeTests {
     PageObjectMethod method = test("compose/return/namesCollisionReturnsList");
     MethodInfo expected = new MethodInfo(METHOD_NAME, "List<my2.pack.Foo>");
     assertThat(method.getDeclaration().getCodeLine(), is("List<my2.pack.Foo> test()"));
-    expected.addImpliedImportedTypes("my1.pack.Foo", List.class.getName(), TypeUtilities.COLLECTOR_IMPORT.getFullName());
+    expected.addImpliedImportedTypes(
+        "my1.pack.Foo", List.class.getName(), TypeUtilities.COLLECTOR_IMPORT.getFullName());
     expected.addImportedTypes(List.class.getName());
     expected.addCodeLine("List<Foo> statement0 = this.myPrivateMethod()");
     expected.addCodeLine(
-        "List<my2.pack.Foo> statement1 = statement0.stream().flatMap(element -> element.myPrivateMethod()"
-            + ".stream()).collect(Collectors.toList())");
+        "List<my2.pack.Foo> statement1 = statement0.stream().flatMap(element ->"
+            + " element.myPrivateMethod().stream()).collect(Collectors.toList())");
     expected.addCodeLine("return statement1");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
@@ -181,7 +201,9 @@ public class ReturnTypeTests {
   public void testAbstractMethodReturnsPageObject() {
     PageObjectMethod method = test("compose/return/abstract/returnPageObject");
     MethodInfo expected = new MethodInfo(METHOD_NAME, "T");
-    assertThat(method.getDeclaration().getCodeLine(), is("<T extends PageObject> T test(Class<T> nonLiteral)"));
+    assertThat(
+        method.getDeclaration().getCodeLine(),
+        is("<T extends PageObject> T test(Class<T> nonLiteral)"));
     expected.addParameter(new MethodParameterInfo("nonLiteral", "Class<T>"));
     expected.addImportedTypes(PageObject.class.getName());
     PageObjectValidationTestHelper.validateDeclaration(method.getDeclaration(), expected);
@@ -207,7 +229,8 @@ public class ReturnTypeTests {
 
   @Test
   public void testAbstractNamesCollisions() {
-    TranslationContext context = new DeserializerUtilities().getContext("compose/return/abstract/namesCollision");
+    TranslationContext context =
+        new DeserializerUtilities().getContext("compose/return/abstract/namesCollision");
     PageObjectMethod method1 = context.getMethod("test1");
     MethodInfo expected1 = new MethodInfo("test1", "Name");
     assertThat(method1.getDeclaration().getCodeLine(), is("Name test1()"));

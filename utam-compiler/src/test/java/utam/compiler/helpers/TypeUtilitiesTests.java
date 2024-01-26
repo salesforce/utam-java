@@ -35,7 +35,8 @@ import utam.core.selenium.element.LocatorBy;
  */
 public class TypeUtilitiesTests {
 
-  private static final TypeProvider FAKE_TYPE_FROM_STRING = new TypeUtilities.FromString("test.FakeType");
+  private static final TypeProvider FAKE_TYPE_FROM_STRING =
+      new TypeUtilities.FromString("test.FakeType");
 
   @Test
   public void testActionableGetTypeMethod() {
@@ -85,7 +86,9 @@ public class TypeUtilitiesTests {
   /** The FromString.equals method should return false with an object that is not a TypeProvider */
   @Test
   public void testFromStringEqualsWithDifferentObjectTypes() {
-    assertThat(FAKE_TYPE_FROM_STRING.isSameType(new TypeUtilities.FromClass(Class.class)), is(equalTo(false)));
+    assertThat(
+        FAKE_TYPE_FROM_STRING.isSameType(new TypeUtilities.FromClass(Class.class)),
+        is(equalTo(false)));
   }
 
   @Test

@@ -17,29 +17,21 @@ import utam.core.declarative.representation.TypeProvider;
  */
 @SuppressWarnings("rawtypes")
 public enum PrimitiveType implements TypeProvider {
-  /**
-   * A string type
-   */
+  /** A string type */
   STRING(String.class, "String", "string"),
 
-  /**
-   * Aa numeric type
-   */
+  /** Aa numeric type */
   NUMBER(Integer.class, "Integer", "number"),
 
-  /**
-   * A boolean type
-   */
+  /** A boolean type */
   BOOLEAN(Boolean.class, "Boolean", "boolean");
 
-  /**
-   * An empty array of primitive types
-   */
+  /** An empty array of primitive types */
   public static final PrimitiveType[] EMPTY_ARRAY = new PrimitiveType[0];
+
   private final Class type; // used in tests
   private final String typeName;
   private final String typeFromJson;
-
 
   PrimitiveType(Class type, String typeName, String typeFromJson) {
     this.type = type;
@@ -49,6 +41,7 @@ public enum PrimitiveType implements TypeProvider {
 
   /**
    * Creates a primitive type from a string
+   *
    * @param typeString the string describing to create
    * @return the type described by the string
    */
@@ -63,11 +56,12 @@ public enum PrimitiveType implements TypeProvider {
 
   /**
    * Gets a value indicating whether the JSON string represents a primitive type
+   *
    * @param jsonString the JSON string to evaluate
    * @return true if the JSON string represents a primitive type; otherwise false
    */
   public static boolean isPrimitiveType(String jsonString) {
-    if(jsonString == null) {
+    if (jsonString == null) {
       return false;
     }
     for (PrimitiveType primitive : PrimitiveType.values()) {

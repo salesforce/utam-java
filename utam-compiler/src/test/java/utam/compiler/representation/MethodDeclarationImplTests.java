@@ -31,16 +31,14 @@ import utam.core.declarative.representation.TypeProvider;
  */
 public class MethodDeclarationImplTests {
 
-  private static final TypeProvider TEST_RETURN_TYPE = new TypeUtilities.FromString("test.ReturnType");
+  private static final TypeProvider TEST_RETURN_TYPE =
+      new TypeUtilities.FromString("test.ReturnType");
 
   /** A MethodDeclaration object should be able to be constructed without parameters */
   @Test
   public void testMethodDeclarationCreation() {
     TypeProvider returnType = TEST_RETURN_TYPE;
-    MethodDeclarationImpl declaration =
-        new MethodDeclarationImpl(
-            new ArrayList<>(),
-            returnType);
+    MethodDeclarationImpl declaration = new MethodDeclarationImpl(new ArrayList<>(), returnType);
     assertThat(declaration.getName(), is(equalTo("test")));
     assertThat(declaration.getReturnType(), is(equalTo(returnType)));
     assertThat(declaration.getParameters(), hasSize(0));
@@ -54,10 +52,7 @@ public class MethodDeclarationImplTests {
     TypeProvider returnType = TEST_RETURN_TYPE;
     List<MethodParameter> parameters = Collections.singletonList(param1);
 
-    MethodDeclarationImpl declaration =
-        new MethodDeclarationImpl(
-            parameters,
-            returnType);
+    MethodDeclarationImpl declaration = new MethodDeclarationImpl(parameters, returnType);
     assertThat(declaration.getReturnType(), is(equalTo(returnType)));
     assertThat(declaration.getParameters(), is(equalTo(parameters)));
     assertThat(declaration.getImports(), is(equalTo(Collections.singletonList(returnType))));
@@ -72,15 +67,11 @@ public class MethodDeclarationImplTests {
     TypeProvider returnType = TEST_RETURN_TYPE;
     List<MethodParameter> parameters = Arrays.asList(param1, param2);
 
-    MethodDeclarationImpl declaration =
-        new MethodDeclarationImpl(
-            parameters,
-            returnType);
+    MethodDeclarationImpl declaration = new MethodDeclarationImpl(parameters, returnType);
     assertThat(declaration.getReturnType(), is(equalTo(returnType)));
     assertThat(declaration.getParameters(), is(equalTo(parameters)));
     assertThat(declaration.getImports(), is(containsInAnyOrder(returnType)));
     assertThat(
-        declaration.getCodeLine(),
-        is(equalTo("ReturnType test(String param1, String param2)")));
+        declaration.getCodeLine(), is(equalTo("ReturnType test(String param1, String param2)")));
   }
 }

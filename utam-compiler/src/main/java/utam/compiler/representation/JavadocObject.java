@@ -25,7 +25,7 @@ import utam.core.declarative.representation.TypeProvider;
  */
 public abstract class JavadocObject {
 
-  public final static String VERSION_TAG = "@version";
+  public static final String VERSION_TAG = "@version";
 
   private final List<String> javadoc;
   private final boolean isDeprecated;
@@ -58,13 +58,21 @@ public abstract class JavadocObject {
    */
   public static class MethodJavadoc extends JavadocObject {
 
-    MethodJavadoc(String methodName,
+    MethodJavadoc(
+        String methodName,
         TypeProvider returnType,
         List<MethodParameter> parameters,
         UtamMethodDescription description) {
-      super(buildMethodJavadoc(methodName, returnType, parameters, description.getText(),
-          description.getReturnStr(), description.getThrowsStr(),
-          description.getDeprecatedStr()), description.getDeprecatedStr() != null);
+      super(
+          buildMethodJavadoc(
+              methodName,
+              returnType,
+              parameters,
+              description.getText(),
+              description.getReturnStr(),
+              description.getThrowsStr(),
+              description.getDeprecatedStr()),
+          description.getDeprecatedStr() != null);
     }
 
     private static List<String> buildMethodJavadoc(
@@ -84,18 +92,19 @@ public abstract class JavadocObject {
       if (returnStr != null) {
         javadoc.add(String.format("@return %s", returnStr));
       } else if (!returnType.isSameType(VOID)) {
-        javadoc
-            .add(String.format("@return %s", returnType.getSimpleName()));
+        javadoc.add(String.format("@return %s", returnType.getSimpleName()));
       }
       parameters.stream()
           .filter(p -> !p.isLiteral())
-          .forEach(parameter -> {
-            final String parameterDescription =
-                parameter.getDescription() == null ? parameter.getType().getSimpleName()
-                    : parameter.getDescription();
-            javadoc
-                .add(String.format("@param %s %s", parameter.getValue(), parameterDescription));
-          });
+          .forEach(
+              parameter -> {
+                final String parameterDescription =
+                    parameter.getDescription() == null
+                        ? parameter.getType().getSimpleName()
+                        : parameter.getDescription();
+                javadoc.add(
+                    String.format("@param %s %s", parameter.getValue(), parameterDescription));
+              });
       if (throwsStr != null) {
         javadoc.add(String.format("@throws %s", throwsStr));
       }
@@ -114,14 +123,13 @@ public abstract class JavadocObject {
    */
   public static class PageObjectJavadoc extends JavadocObject {
 
-    public PageObjectJavadoc(TranslationContext context, List<String> text, String author,
-        String deprecated) {
+    public PageObjectJavadoc(
+        TranslationContext context, List<String> text, String author, String deprecated) {
       super(buildPageObjectJavadoc(context, text, author, deprecated), deprecated != null);
     }
 
-    private static List<String> buildPageObjectJavadoc(TranslationContext context,
-        List<String> text, String author,
-        String deprecated) {
+    private static List<String> buildPageObjectJavadoc(
+        TranslationContext context, List<String> text, String author, String deprecated) {
       String version = context.getConfiguredVersion();
       // On Windows, sourceFileRelativePath may contain backslashes ("\"), which will
       // be misinterpreted in Javadoc comments by the Java source code formatter.

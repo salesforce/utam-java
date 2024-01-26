@@ -39,6 +39,7 @@ public final class ClassSerializer {
 
   /**
    * Initializes a new instance of the ClassSerializer class
+   *
    * @param pageObject the Page Object class to serialize
    */
   public ClassSerializer(PageObjectClass pageObject) {
@@ -57,7 +58,9 @@ public final class ClassSerializer {
     if (method.getDeclaration().isDeprecated()) {
       out.add(AnnotationUtils.DEPRECATED_ANNOTATION.getAnnotationText());
     }
-    out.add(String.format("%sfinal %s {", (method.isPublic()? "public " : ""), declaration.getCodeLine()));
+    out.add(
+        String.format(
+            "%sfinal %s {", (method.isPublic() ? "public " : ""), declaration.getCodeLine()));
     for (int i = 0; i < method.getCodeLines().size(); i++) {
       out.add(getStatement(method.getCodeLines().get(i)));
     }
@@ -87,7 +90,7 @@ public final class ClassSerializer {
   @Override
   public String toString() {
     List<String> out = new ArrayList<>();
-    if(!source.getCopyright().isEmpty()) {
+    if (!source.getCopyright().isEmpty()) {
       out.addAll(getWrappedJavadoc(source.getCopyright()));
     }
     out.add(getPackageName());
@@ -105,15 +108,17 @@ public final class ClassSerializer {
     getClassFields().forEach(out::addAll);
     out.add(NEW_LINE);
     out.add(NEW_LINE);
-    source.getMethods()
-        .stream()
-        .flatMap(method -> getMethodDeclaration(method).stream()).forEach(out::add);
+    source.getMethods().stream()
+        .flatMap(method -> getMethodDeclaration(method).stream())
+        .forEach(out::add);
     out.add(NEW_LINE);
-    source.getUnionTypes()
-        .forEach(unionType -> {
-          out.addAll(unionType.getDeclarationCode());
-          out.add(NEW_LINE);
-        });
+    source
+        .getUnionTypes()
+        .forEach(
+            unionType -> {
+              out.addAll(unionType.getDeclarationCode());
+              out.add(NEW_LINE);
+            });
     out.add(NEW_LINE);
     out.add("}");
     return applyJavaFormatter(out);
@@ -145,10 +150,17 @@ public final class ClassSerializer {
         .forEach(a -> res.addAll(getImportStatements(a)));
     source
         .getMethods()
-        .forEach(m -> m.getClassImports().forEach(importStr -> res.addAll(getImportStatements(importStr))));
+        .forEach(
+            m ->
+                m.getClassImports()
+                    .forEach(importStr -> res.addAll(getImportStatements(importStr))));
     source
         .getUnionTypes()
-        .forEach(unionType -> unionType.getExtendedTypes().forEach(type -> res.addAll(getImportStatements(type))));
+        .forEach(
+            unionType ->
+                unionType
+                    .getExtendedTypes()
+                    .forEach(type -> res.addAll(getImportStatements(type))));
     return res;
   }
 

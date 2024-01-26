@@ -48,8 +48,7 @@ public class EditableActionTypeTests {
     }
   }
 
-  private static void validateAction(
-      ActionType action, List<String> parameterTypes) {
+  private static void validateAction(ActionType action, List<String> parameterTypes) {
     Set<String> parameterTypeStrings =
         action.getParametersTypes("test", parameterTypes.size()).stream()
             .map(TypeProvider::getSimpleName)
@@ -58,7 +57,8 @@ public class EditableActionTypeTests {
 
     assertThat(parameterTypeStrings, containsInAnyOrder(parameterTypes.toArray()));
     assertThat(parameterTypeStrings, hasSize(parameterTypes.size()));
-    assertThat(action.getReturnType().getSimpleName(),
+    assertThat(
+        action.getReturnType().getSimpleName(),
         is(equalTo(EditableActionTypeTests.VOID_TYPE_NAME)));
   }
 
@@ -73,32 +73,22 @@ public class EditableActionTypeTests {
     consumer.accept(method.getName());
   }
 
-  /**
-   * The clear member should return the proper value
-   */
+  /** The clear member should return the proper value */
   @Test
   public void testClear() {
     validateAction(EditableActionType.clear, new ArrayList<>());
   }
 
-  /**
-   * The clearAndType member should return the proper value
-   */
+  /** The clearAndType member should return the proper value */
   @Test
   public void testClearAndType() {
-    validateAction(
-        EditableActionType.clearAndType,
-        Collections.singletonList("String"));
+    validateAction(EditableActionType.clearAndType, Collections.singletonList("String"));
   }
 
-  /**
-   * The setText member should return the proper value
-   */
+  /** The setText member should return the proper value */
   @Test
   public void testSetText() {
-    validateAction(
-        EditableActionType.setText,
-        Collections.singletonList(STRING_TYPE_NAME));
+    validateAction(EditableActionType.setText, Collections.singletonList(STRING_TYPE_NAME));
   }
 
   @Test

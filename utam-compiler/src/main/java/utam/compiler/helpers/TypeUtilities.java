@@ -31,152 +31,111 @@ import utam.core.selenium.element.LocatorBy;
 @SuppressWarnings("rawtypes")
 public final class TypeUtilities {
 
-  /**
-   * Used to import the java.util.stream.Collectors class for compose statements
-   */
+  /** Used to import the java.util.stream.Collectors class for compose statements */
   public static final TypeProvider COLLECTOR_IMPORT = new TypeUtilities.FromClass(Collectors.class);
 
-  /**
-   * A type provider for the PageObject class
-   */
-  public static final TypeProvider PAGE_OBJECT = new TypeUtilities.FromClass(PageObject.class) {
-    @Override
-    public boolean isSameType(TypeProvider anotherType) {
-      // for literal page object it's still same type
-      return isCustomType(anotherType) || super.isSameType(anotherType);
-    }
-  };
+  /** A type provider for the PageObject class */
+  public static final TypeProvider PAGE_OBJECT =
+      new TypeUtilities.FromClass(PageObject.class) {
+        @Override
+        public boolean isSameType(TypeProvider anotherType) {
+          // for literal page object it's still same type
+          return isCustomType(anotherType) || super.isSameType(anotherType);
+        }
+      };
 
-  /**
-   * A type provider for the BasePageObject class
-   */
+  /** A type provider for the BasePageObject class */
   public static final TypeProvider BASE_PAGE_OBJECT_CLASS =
       new TypeUtilities.FromClass(BasePageObject.class);
 
-  /**
-   * A type provider for the RootPageObject class
-   */
+  /** A type provider for the RootPageObject class */
   public static final TypeProvider ROOT_PAGE_OBJECT =
       new TypeUtilities.FromClass(RootPageObject.class);
 
-  /**
-   * A type provider for the BaseRootPageObject class
-   */
+  /** A type provider for the BaseRootPageObject class */
   public static final TypeProvider BASE_ROOT_PAGE_OBJECT_CLASS =
       new TypeUtilities.FromClass(BaseRootPageObject.class);
 
-  /**
-   * A type provider for void
-   */
+  /** A type provider for void */
   public static final TypeProvider VOID = new UnimportableType("void");
 
-  /**
-   * A type provider an argument reference
-   */
+  /** A type provider an argument reference */
   public static final TypeProvider PARAMETER_REFERENCE = new UnimportableType("argumentReference");
 
-  /**
-   * A type provider for the ContainerElement class
-   */
+  /** A type provider for the ContainerElement class */
   public static final TypeProvider CONTAINER_ELEMENT =
       new TypeUtilities.FromClass(ContainerElement.class);
 
-  /**
-   * A type provider for the LocatorBy class
-   */
+  /** A type provider for the LocatorBy class */
   public static final TypeProvider SELECTOR = new FromClass(LocatorBy.class);
 
-  /**
-   * A type provider for the ElementLocation class
-   */
+  /** A type provider for the ElementLocation class */
   public static final TypeProvider ELEMENT_FIELD = new FromClass(ElementLocation.class);
 
-  /**
-   * A type provider for the BasicElement class
-   */
+  /** A type provider for the BasicElement class */
   public static final TypeProvider BASIC_ELEMENT = new FromClass(BasicElement.class);
 
-  /**
-   * The type name for a frame element
-   */
+  /** The type name for a frame element */
   public static final String FRAME_ELEMENT_TYPE_NAME = "frame";
 
-  /**
-   * A type name for a container element
-   */
+  /** A type name for a container element */
   public static final String CONTAINER_ELEMENT_TYPE_NAME = "container";
 
-  /**
-   * A type name for a page object - can be parameter type or return type
-   */
+  /** A type name for a page object - can be parameter type or return type */
   public static final String PAGE_OBJECT_TYPE_NAME = "pageObject";
 
-  /**
-   * A type name for a root page object - can be parameter type or return type
-   */
+  /** A type name for a root page object - can be parameter type or return type */
   public static final String ROOT_PAGE_OBJECT_TYPE_NAME = "rootPageObject";
 
-  /**
-   * PageObject type for parameter. Used for non-literal arg with "type" : "pageObject"
-   */
-  public static final TypeProvider T_PAGE_OBJECT_TYPE_PARAMETER = new TBoundedPageObjectType(
-      PAGE_OBJECT);
+  /** PageObject type for parameter. Used for non-literal arg with "type" : "pageObject" */
+  public static final TypeProvider T_PAGE_OBJECT_TYPE_PARAMETER =
+      new TBoundedPageObjectType(PAGE_OBJECT);
 
   /**
    * PageObject type for parameter. Used for non-literal arg with "type" : "pageObject" if it's not
    * returned from method
    */
-  public static final TypeProvider W_PAGE_OBJECT_TYPE_PARAMETER = new WBoundedPageObjectType(
-      PAGE_OBJECT);
+  public static final TypeProvider W_PAGE_OBJECT_TYPE_PARAMETER =
+      new WBoundedPageObjectType(PAGE_OBJECT);
 
   /**
    * RootPageObject type for parameter. Used for non-literal arg with "type" : "rootPageObject" if
    * it's not returned from method
    */
-  public static final TypeProvider W_ROOT_PAGE_OBJECT_TYPE_PARAMETER = new WBoundedPageObjectType(
-      ROOT_PAGE_OBJECT);
+  public static final TypeProvider W_ROOT_PAGE_OBJECT_TYPE_PARAMETER =
+      new WBoundedPageObjectType(ROOT_PAGE_OBJECT);
 
-  /**
-   * Bounded Page Object. Used as return type in container method or returned from compose.
-   */
-  public static final TypeProvider PAGE_OBJECT_RETURN = new TBoundedPageObject(PAGE_OBJECT) {
-    @Override
-    public boolean isSameType(TypeProvider anotherType) {
-      // for literal page object it's still same type
-      return isCustomType(anotherType) || super.isSameType(anotherType);
-    }
-  };
+  /** Bounded Page Object. Used as return type in container method or returned from compose. */
+  public static final TypeProvider PAGE_OBJECT_RETURN =
+      new TBoundedPageObject(PAGE_OBJECT) {
+        @Override
+        public boolean isSameType(TypeProvider anotherType) {
+          // for literal page object it's still same type
+          return isCustomType(anotherType) || super.isSameType(anotherType);
+        }
+      };
 
-  /**
-   * List of bounded Root Page Objects. Used as return type in container method.
-   */
+  /** List of bounded Root Page Objects. Used as return type in container method. */
   public static final TypeProvider PAGE_OBJECT_RETURN_LIST = new TBoundedList(PAGE_OBJECT);
-  /**
-   * A type provider for the BasicPageElement class
-   */
+
+  /** A type provider for the BasicPageElement class */
   public static final TypeProvider BASIC_ELEMENT_IMPL_CLASS = new FromClass(BasePageElement.class);
-  /**
-   * A type provider representing a frame element
-   */
+
+  /** A type provider representing a frame element */
   public static final TypeProvider FRAME_ELEMENT = new FromClass(FrameElement.class);
-  /**
-   * Bounded Root Page Object. Used as return type in container method or returned from compose.
-   */
+
+  /** Bounded Root Page Object. Used as return type in container method or returned from compose. */
   static final TypeProvider ROOT_PAGE_OBJECT_RETURN = new TBoundedPageObject(ROOT_PAGE_OBJECT);
-  /**
-   * List of bounded Root Page Objects. Used as return type in container method.
-   */
+
+  /** List of bounded Root Page Objects. Used as return type in container method. */
   static final TypeProvider ROOT_PAGE_OBJECT_RETURN_LIST = new TBoundedList(ROOT_PAGE_OBJECT);
-  /**
-   * Expected type for notNull matcher
-   */
+
+  /** Expected type for notNull matcher */
   public static final TypeProvider JAVA_OBJECT_TYPE = new UnimportableType("Object");
 
-  /**
-   * RootPageObject type for parameter. Used for non-literal arg with "type" : "rootPageObject"
-   */
-  private static final TypeProvider T_ROOT_PAGE_OBJECT_TYPE_PARAMETER = new TBoundedPageObjectType(
-      ROOT_PAGE_OBJECT);
+  /** RootPageObject type for parameter. Used for non-literal arg with "type" : "rootPageObject" */
+  private static final TypeProvider T_ROOT_PAGE_OBJECT_TYPE_PARAMETER =
+      new TBoundedPageObjectType(ROOT_PAGE_OBJECT);
 
   static Class getClassFromFullName(TypeProvider type) {
     String fullName = type.getFullName();
@@ -258,9 +217,7 @@ public final class TypeUtilities {
     return W_ROOT_PAGE_OBJECT_TYPE_PARAMETER; // with wildcard
   }
 
-  /**
-   * Creates a type provider from a Class object
-   */
+  /** Creates a type provider from a Class object */
   public static class FromClass implements TypeProvider {
 
     final Class clazz;
@@ -297,9 +254,7 @@ public final class TypeUtilities {
     }
   }
 
-  /**
-   * Creates a type provider from a string
-   */
+  /** Creates a type provider from a string */
   public static class FromString implements TypeProvider {
 
     private final String name;
@@ -335,9 +290,7 @@ public final class TypeUtilities {
     }
   }
 
-  /**
-   * Creates a type provider for a virtual type that does not require an import statement
-   */
+  /** Creates a type provider for a virtual type that does not require an import statement */
   public static class UnimportableType extends FromString {
 
     /**
@@ -355,9 +308,7 @@ public final class TypeUtilities {
     }
   }
 
-  /**
-   * Type for a list of objects, accepts object type as a parameter
-   */
+  /** Type for a list of objects, accepts object type as a parameter */
   private static class BoundedList extends BoundedType {
 
     private static final TypeProvider LIST_IMPORT = new TypeUtilities.FromClass(List.class);
@@ -374,9 +325,7 @@ public final class TypeUtilities {
     }
   }
 
-  /**
-   * Type for List of page objects whose types were passed as parameters
-   */
+  /** Type for List of page objects whose types were passed as parameters */
   static final class TBoundedList extends BoundedList {
 
     TBoundedList(TypeProvider boundType) {
@@ -394,10 +343,8 @@ public final class TypeUtilities {
     }
   }
 
-  /**
-   * type to support "List of entities" or "Class of entities"
-   */
-  private static abstract class BoundedType extends FromString {
+  /** type to support "List of entities" or "Class of entities" */
+  private abstract static class BoundedType extends FromString {
 
     final TypeProvider boundType;
     private final Class wrapperClass;
@@ -406,7 +353,7 @@ public final class TypeUtilities {
      * create instance of bounded type
      *
      * @param wrapperClass can be Class.class or List.class
-     * @param boundType    bounded type, can be page object type, custom type or primitive
+     * @param boundType bounded type, can be page object type, custom type or primitive
      */
     BoundedType(Class wrapperClass, TypeProvider boundType) {
       super(wrapperClass.getName());
@@ -472,9 +419,7 @@ public final class TypeUtilities {
     }
   }
 
-  /**
-   * type used as a return type from container or compose method
-   */
+  /** type used as a return type from container or compose method */
   static class TBoundedPageObject extends BoundedType {
 
     TBoundedPageObject(TypeProvider boundType) {

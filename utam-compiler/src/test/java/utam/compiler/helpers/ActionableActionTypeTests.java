@@ -45,16 +45,20 @@ public class ActionableActionTypeTests {
       return clazz.getDeclaredMethod(methodName, parameters);
     } catch (NoSuchMethodException e) {
       // some methods are declared in parent interface
-      Class parent = clazz.getInterfaces().length > 0? clazz.getInterfaces()[0] : null;
+      Class parent = clazz.getInterfaces().length > 0 ? clazz.getInterfaces()[0] : null;
       try {
         return parent.getDeclaredMethod(methodName, parameters);
       } catch (Exception eParent) {
         throw new AssertionError(
-            String.format("method '%s' with parameters {%s} not found in class %s or its parent %s",
+            String.format(
+                "method '%s' with parameters {%s} not found in class %s or its parent %s",
                 methodName,
-                Stream.of(parameters).filter(Objects::nonNull).map(Class::getSimpleName)
+                Stream.of(parameters)
+                    .filter(Objects::nonNull)
+                    .map(Class::getSimpleName)
                     .collect(Collectors.joining(",")),
-                clazz.getName(), parent.getName()));
+                clazz.getName(),
+                parent.getName()));
       }
     }
   }
@@ -141,7 +145,9 @@ public class ActionableActionTypeTests {
               assertThat(
                   String.format(
                       "action '%s' returns '%s', method returns '%s'",
-                      action, action.getReturnType().getSimpleName(), method.getReturnType().getName()),
+                      action,
+                      action.getReturnType().getSimpleName(),
+                      method.getReturnType().getName()),
                   sameType(action.getReturnType(), method.getReturnType()),
                   is(true));
               Class[] params = action.getParameterClasses();
@@ -159,13 +165,16 @@ public class ActionableActionTypeTests {
   public void testGetActionFromStringForActionable() {
     final ActionType waitForAbsence = BasicElementActionType.waitForAbsence;
     ElementContext elementContext = getElementContext(BasicElementInterface.actionable);
-    assertThat(getActionType(waitForAbsence.getApplyString(), elementContext),
+    assertThat(
+        getActionType(waitForAbsence.getApplyString(), elementContext),
         is(equalTo(waitForAbsence)));
     elementContext = getElementContext(BasicElementInterface.actionable);
-    assertThat(getActionType(getClassAttribute.getApplyString(), elementContext),
+    assertThat(
+        getActionType(getClassAttribute.getApplyString(), elementContext),
         is(equalTo(getClassAttribute)));
     elementContext = getElementContext(BasicElementInterface.clickable);
-    assertThat(getActionType(waitForAbsence.getApplyString(), elementContext),
+    assertThat(
+        getActionType(waitForAbsence.getApplyString(), elementContext),
         is(equalTo(waitForAbsence)));
   }
 
@@ -173,23 +182,20 @@ public class ActionableActionTypeTests {
   public void testGetActionFromStringForClickable() {
     final ActionType ACTION = ClickableActionType.click;
     ElementContext elementContext = getElementContext(BasicElementInterface.clickable);
-    assertThat(getActionType(ACTION.getApplyString(), elementContext),
-        is(equalTo(ACTION)));
+    assertThat(getActionType(ACTION.getApplyString(), elementContext), is(equalTo(ACTION)));
   }
 
   @Test
   public void testGetActionFromStringForEditable() {
     final ActionType ACTION = EditableActionType.clear;
     ElementContext elementContext = getElementContext(BasicElementInterface.editable);
-    assertThat(getActionType(ACTION.getApplyString(), elementContext),
-        is(equalTo(ACTION)));
+    assertThat(getActionType(ACTION.getApplyString(), elementContext), is(equalTo(ACTION)));
   }
 
   @Test
   public void testGetActionFromStringForTouchable() {
     final ActionType ACTION = TouchableActionType.flick;
     ElementContext elementContext = getElementContext(BasicElementInterface.touchable);
-    assertThat(getActionType(ACTION.getApplyString(), elementContext),
-        is(equalTo(ACTION)));
+    assertThat(getActionType(ACTION.getApplyString(), elementContext), is(equalTo(ACTION)));
   }
 }

@@ -7,13 +7,14 @@
  */
 package utam.compiler.helpers;
 
+import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import static utam.compiler.helpers.ElementContext.ROOT_ELEMENT_NAME;
-
 /**
  * helper class with information for unit test serializer
+ *
  * @author elizaveta.ivanova
  * @since 232
  */
@@ -31,10 +32,12 @@ public class ElementUnitTestHelper {
 
   /**
    * Initializes a new instance of the ElementUnitTestHelper class
-   * @param selector              the selector to use
-   * @param parentElementName     the name of the parent element
-   * @param isExpandsParentShadow a value indicating whether to look in the parent element's shadow root
-   * @param isList                a value indicating whether the element is a list
+   *
+   * @param selector the selector to use
+   * @param parentElementName the name of the parent element
+   * @param isExpandsParentShadow a value indicating whether to look in the parent element's shadow
+   *     root
+   * @param isList a value indicating whether the element is a list
    */
   public ElementUnitTestHelper(
       String selector, String parentElementName, boolean isExpandsParentShadow, boolean isList) {
@@ -46,6 +49,7 @@ public class ElementUnitTestHelper {
 
   /**
    * Gets the element registration
+   *
    * @param elementName the name of the element
    * @return a list of the element registration for logging purposes
    */

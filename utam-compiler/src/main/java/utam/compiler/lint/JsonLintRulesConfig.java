@@ -23,7 +23,8 @@ import java.util.Set;
 import utam.core.declarative.lint.LintingError.ViolationLevel;
 
 /**
- * Reads configured default linting rules from JSON file in resources (rules.config.json), same as in utam-js
+ * Reads configured default linting rules from JSON file in resources (rules.config.json), same as
+ * in utam-js
  *
  * @author elizaveta.ivanova
  * @since 246
@@ -32,14 +33,16 @@ class JsonLintRulesConfig {
 
   private static final String RULES_CONFIG = "rules.config.json";
   static final String ERR_FINDING_LINT_RULES_CONFIG = "can't find lint rules config '%s'";
-  static final String ERR_READING_LINT_RULES_CONFIG = "error while reading lint rules codes config '%s': ";
+  static final String ERR_READING_LINT_RULES_CONFIG =
+      "error while reading lint rules codes config '%s': ";
   static final String ERR_LINT_RULE_NOT_CONFIGURED = "error code %s is not configured";
-  private static final Map<String, LintingRuleObject> CONFIGURED_LINT_RULES = getConfiguredLintRules();
+  private static final Map<String, LintingRuleObject> CONFIGURED_LINT_RULES =
+      getConfiguredLintRules();
 
   private final Map<String, LintingRuleObject> lintingRulesMap = new HashMap<>();
 
   static LintingRuleObject getConfiguredRule(String ruleId) {
-    if(!CONFIGURED_LINT_RULES.containsKey(ruleId)) {
+    if (!CONFIGURED_LINT_RULES.containsKey(ruleId)) {
       throw new IllegalArgumentException(String.format(ERR_LINT_RULE_NOT_CONFIGURED, ruleId));
     }
     return CONFIGURED_LINT_RULES.get(ruleId);
@@ -48,19 +51,20 @@ class JsonLintRulesConfig {
   static Map<String, LintingRuleObject> getConfiguredLintRules() {
     URL configPath = JsonLintRulesConfig.class.getClassLoader().getResource(RULES_CONFIG);
     if (configPath == null) {
-      throw new IllegalArgumentException(String.format(ERR_FINDING_LINT_RULES_CONFIG, RULES_CONFIG));
+      throw new IllegalArgumentException(
+          String.format(ERR_FINDING_LINT_RULES_CONFIG, RULES_CONFIG));
     }
     ObjectMapper mapper = new ObjectMapper();
     try {
-      CollectionType javaType = mapper.getTypeFactory()
-          .constructCollectionType(List.class, LintingRuleObject.class);
+      CollectionType javaType =
+          mapper.getTypeFactory().constructCollectionType(List.class, LintingRuleObject.class);
       List<LintingRuleObject> errors = mapper.readValue(configPath, javaType);
       JsonLintRulesConfig config = new JsonLintRulesConfig();
-      errors.forEach(
-          rule -> config.lintingRulesMap.put(rule.ruleId, rule));
+      errors.forEach(rule -> config.lintingRulesMap.put(rule.ruleId, rule));
       return config.lintingRulesMap;
     } catch (Exception e) {
-      throw new IllegalStateException(String.format(ERR_READING_LINT_RULES_CONFIG, RULES_CONFIG), e);
+      throw new IllegalStateException(
+          String.format(ERR_READING_LINT_RULES_CONFIG, RULES_CONFIG), e);
     }
   }
 
@@ -93,6 +97,7 @@ class JsonLintRulesConfig {
     final Set<String> exceptions;
     final ViolationLevel violationLevel;
     final AdditionalLintRuleOverrideConfigValues additionalConfig;
+
     @JsonCreator
     LintRuleOverride(
         @JsonProperty(value = "violation") ViolationLevel violationLevel,
@@ -101,7 +106,9 @@ class JsonLintRulesConfig {
       this.exceptions = Objects.requireNonNullElse(exceptions, new HashSet<>());
       this.violationLevel = Objects.requireNonNullElse(violationLevel, ViolationLevel.warning);
       this.additionalConfig =
-          additionalConfig != null ? new AdditionalLintRuleOverrideConfigValues(additionalConfig) : null;
+          additionalConfig != null
+              ? new AdditionalLintRuleOverrideConfigValues(additionalConfig)
+              : null;
     }
   }
 
@@ -109,8 +116,8 @@ class JsonLintRulesConfig {
     final Map<String, Object> additionalConfigValues;
 
     AdditionalLintRuleOverrideConfigValues(JsonNode node) {
-      this.additionalConfigValues = new ObjectMapper().convertValue(node,
-          new TypeReference<HashMap<String, Object>>() {});
+      this.additionalConfigValues =
+          new ObjectMapper().convertValue(node, new TypeReference<HashMap<String, Object>>() {});
     }
 
     Object getAdditionalConfigValue(String configValueName) {

@@ -17,9 +17,7 @@ import utam.core.framework.consumer.UtamError;
  */
 class UtamLintingError extends UtamError {
 
-  /**
-   * Default serial version ID for serializable object
-   */
+  /** Default serial version ID for serializable object */
   private static final long serialVersionUID = 1L;
 
   /**

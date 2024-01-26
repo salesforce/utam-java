@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.UtamCompilationError.ErrorSupplier;
-import utam.compiler.representation.JavadocObject;
 import utam.compiler.helpers.TranslationContext;
+import utam.compiler.representation.JavadocObject;
 import utam.compiler.translator.ClassSerializer;
 import utam.compiler.translator.InterfaceSerializer;
 import utam.compiler.translator.UnitTestSerializer;
@@ -54,8 +54,8 @@ import utam.core.framework.context.Profile;
  * @author elizaveta.ivanova
  * @since 228
  */
-public final class JsonDeserializer extends
-    com.fasterxml.jackson.databind.JsonDeserializer<UtamPageObject> {
+public final class JsonDeserializer
+    extends com.fasterxml.jackson.databind.JsonDeserializer<UtamPageObject> {
 
   private final UtamPageObject utamPageObject;
   private final TranslationContext context;
@@ -63,7 +63,7 @@ public final class JsonDeserializer extends
   /**
    * Initializes a new instance of the JsonDeserializer class
    *
-   * @param jsonString         the JSON string with content of the Page Object
+   * @param jsonString the JSON string with content of the Page Object
    * @param translationContext context of the Page Object
    */
   public JsonDeserializer(TranslationContext translationContext, String jsonString) {
@@ -90,16 +90,16 @@ public final class JsonDeserializer extends
   }
 
   /**
-   * Simple parser to deserialize json node.
-   * Called from constructor so does not have access to context.
+   * Simple parser to deserialize json node. Called from constructor so does not have access to
+   * context.
    *
    * @param node node to deserialize
    * @param type type to deserialize
-   * @param <T>  generic type parameter
+   * @param <T> generic type parameter
    * @return de-serialized object
    */
   static <T> T readNode(JsonNode node, Class<T> type, String errorMessage) {
-    if(isEmptyNode(node)) {
+    if (isEmptyNode(node)) {
       return null;
     }
     ObjectMapper mapper = getObjectMapperWithSettings();
@@ -107,7 +107,7 @@ public final class JsonDeserializer extends
       return mapper.readValue(node.toString(), type);
     } catch (Exception e) {
       ErrorSupplier error = processMapperError(node, e, errorMessage);
-      if(error.getCause() == null) {
+      if (error.getCause() == null) {
         throw new UtamCompilationError(error.getMessage());
       }
       throw new UtamCompilationError(error.getMessage(), error.getCause());
@@ -144,7 +144,7 @@ public final class JsonDeserializer extends
    * @return the Page Object declaration
    */
   public PageObjectDeclaration getObject() {
-    if(utamPageObject == null) {
+    if (utamPageObject == null) {
       // if we collect errors from all objects, need to proceed without writing anything
       return null;
     }
@@ -162,7 +162,8 @@ public final class JsonDeserializer extends
   }
 
   /**
-   * Return node value as a string for error messages. "toPrettyString()" can add extra quotes, so remove them
+   * Return node value as a string for error messages. "toPrettyString()" can add extra quotes, so
+   * remove them
    *
    * @param node json node
    * @return string representation

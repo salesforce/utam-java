@@ -27,10 +27,9 @@ import utam.core.declarative.representation.TypeProvider;
  */
 public abstract class ReturnType {
 
-  /**
-   * Instance of the void return type. Used for beforeLoad MethodContext and in tests
-   */
+  /** Instance of the void return type. Used for beforeLoad MethodContext and in tests */
   public static final ReturnType RETURN_VOID = new ReturnType() {};
+
   final boolean isReturnList;
   private final JsonNode returnTypeJsonNode;
   final String returnTypeString;
@@ -39,9 +38,9 @@ public abstract class ReturnType {
   /**
    * Create a new instance of the ReturnType class
    *
-   * @param typeNode     the JSON node of the type
+   * @param typeNode the JSON node of the type
    * @param isReturnList a value indicating whether the return type is a list
-   * @param methodName   method name with return type
+   * @param methodName method name with return type
    */
   ReturnType(JsonNode typeNode, Boolean isReturnList, String methodName) {
     this.returnTypeJsonNode = typeNode;
@@ -49,7 +48,9 @@ public abstract class ReturnType {
     this.methodName = methodName;
     if (!isEmptyNode(returnTypeJsonNode)) {
       String validationContext = String.format("method \"%s\"", methodName);
-      this.returnTypeString = VALIDATION.validateNotNullOrEmptyString(returnTypeJsonNode, validationContext, "returnType");
+      this.returnTypeString =
+          VALIDATION.validateNotNullOrEmptyString(
+              returnTypeJsonNode, validationContext, "returnType");
     } else {
       this.returnTypeString = null;
     }
@@ -59,7 +60,7 @@ public abstract class ReturnType {
    * Instance of ReturnType for abstract method that returns basic type
    *
    * @param basicReturnType basic type
-   * @param isReturnList    boolean to return list
+   * @param isReturnList boolean to return list
    */
   ReturnType(TypeProvider basicReturnType, Boolean isReturnList) {
     this.returnTypeJsonNode = null;
@@ -68,9 +69,7 @@ public abstract class ReturnType {
     this.methodName = null;
   }
 
-  /**
-   * Instance of void return type
-   */
+  /** Instance of void return type */
   private ReturnType() {
     this.returnTypeJsonNode = null;
     this.returnTypeString = null;
@@ -84,8 +83,8 @@ public abstract class ReturnType {
    * @return boolean
    */
   final boolean isReturnAllRedundant() {
-    return Boolean.TRUE.equals(isReturnList) && (returnTypeString == null || "void"
-        .equals(returnTypeString));
+    return Boolean.TRUE.equals(isReturnList)
+        && (returnTypeString == null || "void".equals(returnTypeString));
   }
 
   /**
@@ -142,14 +141,14 @@ public abstract class ReturnType {
   }
 
   String getUnsupportedReturnTypeErr() {
-    //for VOID or Basic return types this error never happens, otherwise overridden
+    // for VOID or Basic return types this error never happens, otherwise overridden
     return "";
   }
 
   /**
    * Gets the return type or a default value
    *
-   * @param context     the translation context
+   * @param context the translation context
    * @param defaultType the default type to return if none is set
    * @return the return type if defined; otherwise return the default type
    */
@@ -179,9 +178,9 @@ public abstract class ReturnType {
     /**
      * Initializes a new instance of the ReturnType class
      *
-     * @param typeNode     the JSON node of the type
+     * @param typeNode the JSON node of the type
      * @param isReturnList a value indicating whether the return type is a list
-     * @param methodName   the method name
+     * @param methodName the method name
      */
     public AbstractMethodReturnType(JsonNode typeNode, Boolean isReturnList, String methodName) {
       super(typeNode, isReturnList, methodName);
@@ -210,7 +209,7 @@ public abstract class ReturnType {
     /**
      * this constructor is used for return type of an abstract method when it returns basic type
      *
-     * @param returnType   return type (basic union type in this case)
+     * @param returnType return type (basic union type in this case)
      * @param isReturnList true if return type should be wrapped as a list
      */
     public AbstractMethodBasicReturnType(TypeProvider returnType, Boolean isReturnList) {
@@ -235,9 +234,9 @@ public abstract class ReturnType {
     /**
      * Initializes a new instance of the ReturnType class
      *
-     * @param typeNode     the JSON node of the type
+     * @param typeNode the JSON node of the type
      * @param isReturnList a value indicating whether the return type is a list
-     * @param methodName   the method name
+     * @param methodName the method name
      */
     public StatementReturnType(JsonNode typeNode, Boolean isReturnList, String methodName) {
       super(typeNode, isReturnList, methodName);

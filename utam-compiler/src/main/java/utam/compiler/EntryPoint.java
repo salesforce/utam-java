@@ -7,12 +7,10 @@
  */
 package utam.compiler;
 
-import utam.compiler.translator.TranslatorGenerationCommand;
 import picocli.CommandLine;
+import utam.compiler.translator.TranslatorGenerationCommand;
 
-/**
- * The entry point for the compiler when invoked programmatically
- */
+/** The entry point for the compiler when invoked programmatically */
 public class EntryPoint {
 
   /**
@@ -23,9 +21,7 @@ public class EntryPoint {
    */
   public static void main(String[] args) throws Exception {
     TranslatorGenerationCommand command = new TranslatorGenerationCommand();
-    int exitCode = new CommandLine(command)
-        .setCaseInsensitiveEnumValuesAllowed(true)
-        .execute(args);
+    int exitCode = new CommandLine(command).setCaseInsensitiveEnumValuesAllowed(true).execute(args);
     if (exitCode != CommandLine.ExitCode.OK) {
       throw command.getThrownError();
     }

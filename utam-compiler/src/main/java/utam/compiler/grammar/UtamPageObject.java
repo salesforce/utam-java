@@ -63,13 +63,10 @@ import utam.core.framework.context.PlatformType;
 final class UtamPageObject {
 
   static final String BEFORE_LOAD_METHOD_NAME = "load";
-  private static final TypeProvider PUBLIC_DEFAULT_ROOT_ELEMENT_TYPE = new FromClass(
-      BasicElement.class);
-  private static final String INTERFACE_PROPERTIES = String.join(", ", "root",
-      "interface",
-      "methods",
-      "type",
-      "exposeRootElement");
+  private static final TypeProvider PUBLIC_DEFAULT_ROOT_ELEMENT_TYPE =
+      new FromClass(BasicElement.class);
+  private static final String INTERFACE_PROPERTIES =
+      String.join(", ", "root", "interface", "methods", "type", "exposeRootElement");
   final String implementsType;
   final boolean isAbstract;
   final Locator rootLocator;
@@ -94,7 +91,8 @@ final class UtamPageObject {
       @JsonProperty(value = "profile") JsonNode profilesNode,
       // to expose root element
       @JsonProperty(value = "type", defaultValue = "[]") JsonNode typeNode,
-      @JsonProperty(value = "exposeRootElement", defaultValue = "false") boolean isExposeRootElement,
+      @JsonProperty(value = "exposeRootElement", defaultValue = "false")
+          boolean isExposeRootElement,
       // root selector
       @JsonProperty(value = "root", defaultValue = "false") boolean isRootPageObject,
       @JsonProperty(value = "selector") JsonNode selectorNode,
@@ -123,12 +121,16 @@ final class UtamPageObject {
     this.exposeRootElement = isExposeRootElement;
     String rootElementTypeStructure = "root element type";
     this.type = processBasicTypeNode(typeNode, rootElementTypeStructure);
-    if(this.type == null) {
-      throw new UtamCompilationError(typeNode, VALIDATION.getErrorMessage(115, rootElementTypeStructure, nodeToString(typeNode)));
+    if (this.type == null) {
+      throw new UtamCompilationError(
+          typeNode,
+          VALIDATION.getErrorMessage(115, rootElementTypeStructure, nodeToString(typeNode)));
     }
     this.beforeLoadNode = beforeLoadNode;
-    this.beforeLoad = isEmptyNode(beforeLoadNode) ? new ArrayList<>()
-        : processComposeNodes(BEFORE_LOAD_METHOD_NAME, beforeLoadNode);
+    this.beforeLoad =
+        isEmptyNode(beforeLoadNode)
+            ? new ArrayList<>()
+            : processComposeNodes(BEFORE_LOAD_METHOD_NAME, beforeLoadNode);
     this.rootLocator = processRootSelectorNode(selectorNode);
     this.description = processRootDescriptionNode(descriptionNode);
     this.metadata = processMetadataNode(metadata);
@@ -136,20 +138,20 @@ final class UtamPageObject {
 
   private void validateAbstract() {
     String validationContext = "interface";
-    VALIDATION.validateUnsupportedProperty(rootLocator, validationContext, "selector",
-        INTERFACE_PROPERTIES);
-    VALIDATION
-        .validateUnsupportedProperty(platform, validationContext, "platform", INTERFACE_PROPERTIES);
-    VALIDATION
-        .validateUnsupportedProperty(profile, validationContext, "profile", INTERFACE_PROPERTIES);
-    VALIDATION.validateUnsupportedProperty(implementsType, validationContext, "implements",
-        INTERFACE_PROPERTIES);
-    VALIDATION.validateUnsupportedProperty(beforeLoad, validationContext, "beforeLoad",
-        INTERFACE_PROPERTIES);
-    VALIDATION
-        .validateUnsupportedProperty(shadow, validationContext, "shadow", INTERFACE_PROPERTIES);
-    VALIDATION
-        .validateUnsupportedProperty(elements, validationContext, "elements", INTERFACE_PROPERTIES);
+    VALIDATION.validateUnsupportedProperty(
+        rootLocator, validationContext, "selector", INTERFACE_PROPERTIES);
+    VALIDATION.validateUnsupportedProperty(
+        platform, validationContext, "platform", INTERFACE_PROPERTIES);
+    VALIDATION.validateUnsupportedProperty(
+        profile, validationContext, "profile", INTERFACE_PROPERTIES);
+    VALIDATION.validateUnsupportedProperty(
+        implementsType, validationContext, "implements", INTERFACE_PROPERTIES);
+    VALIDATION.validateUnsupportedProperty(
+        beforeLoad, validationContext, "beforeLoad", INTERFACE_PROPERTIES);
+    VALIDATION.validateUnsupportedProperty(
+        shadow, validationContext, "shadow", INTERFACE_PROPERTIES);
+    VALIDATION.validateUnsupportedProperty(
+        elements, validationContext, "elements", INTERFACE_PROPERTIES);
   }
 
   private void validateRegular(TranslationContext context) {
@@ -205,18 +207,20 @@ final class UtamPageObject {
       context.setMethod(setBeforeLoadMethod(context));
     }
     // set linting information
-    methods.forEach(declared -> {
-      PageObjectMethod method = declared.getMethod(context);
-      context.getLintingObject()
-          .setMethod(new Method(method.getDeclaration().getName(), declared.hasDescription()));
-      context.setMethod(method);
-    });
+    methods.forEach(
+        declared -> {
+          PageObjectMethod method = declared.getMethod(context);
+          context
+              .getLintingObject()
+              .setMethod(new Method(method.getDeclaration().getName(), declared.hasDescription()));
+          context.setMethod(method);
+        });
   }
 
   /**
    * depending on root element settings, add root getter and union type
    *
-   * @param context     translation context
+   * @param context translation context
    * @param rootLocator locator of the root element
    * @return root element context
    */
@@ -226,7 +230,8 @@ final class UtamPageObject {
     final PageObjectMethod rootElementMethod;
     // if type is not set and element should be public - add public getter that returns basic type
     // if type is set - add new type and public or private getter
-    // if type is not set and root element is not exposed - use protected method BasePageObject.getRootElement
+    // if type is not set and root element is not exposed - use protected method
+    // BasePageObject.getRootElement
     if (type.length > 0) {
       elementType = asBasicOrUnionType(ROOT_ELEMENT_NAME, type, false);
       UnionType unionType = (UnionType) elementType;
@@ -236,29 +241,31 @@ final class UtamPageObject {
     } else {
       elementType = exposeRootElement ? PUBLIC_DEFAULT_ROOT_ELEMENT_TYPE : BASIC_ELEMENT_IMPL_CLASS;
       rootElementMethod =
-          exposeRootElement ? new PublicDefaultType(elementType)
+          exposeRootElement
+              ? new PublicDefaultType(elementType)
               : new ProtectedDefaultType(elementType);
       if (exposeRootElement) { // for default not exposed root - no need to add method
         context.setMethod(rootElementMethod);
       }
     }
-    ElementContext rootElement = new ElementContext.Root(interfaceType, rootLocator, elementType,
-        rootElementMethod);
+    ElementContext rootElement =
+        new ElementContext.Root(interfaceType, rootLocator, elementType, rootElementMethod);
     context.setElement(rootElement, null);
-    ElementSelector rootSelector = rootLocator != null ?
-        new ElementSelector(rootLocator, false, null, null) :
-        null;
-    Metadata metadataLinting = this.metadata != null ? new Metadata(this.metadata.getMetadataProperties()) : null;
-    RootLinting rootLintingContext = new Root(!description.isEmpty(), description.hasAuthor(), rootSelector, metadataLinting);
+    ElementSelector rootSelector =
+        rootLocator != null ? new ElementSelector(rootLocator, false, null, null) : null;
+    Metadata metadataLinting =
+        this.metadata != null ? new Metadata(this.metadata.getMetadataProperties()) : null;
+    RootLinting rootLintingContext =
+        new Root(!description.isEmpty(), description.hasAuthor(), rootSelector, metadataLinting);
     context.getLintingObject().setRootContext(rootLintingContext);
     return rootElement;
   }
 
   private PageObjectMethod setBeforeLoadMethod(TranslationContext context) {
-    MethodContext methodContext = new MethodContext(BEFORE_LOAD_METHOD_NAME, RETURN_VOID, context,
-        false, false);
-    List<ComposeMethodStatement> statements = getComposeStatements(context, methodContext,
-        beforeLoad);
+    MethodContext methodContext =
+        new MethodContext(BEFORE_LOAD_METHOD_NAME, RETURN_VOID, context, false, false);
+    List<ComposeMethodStatement> statements =
+        getComposeStatements(context, methodContext, beforeLoad);
     List<MethodParameter> methodParameters = methodContext.getParametersContext().getParameters();
     if (!methodParameters.isEmpty()) {
       throw new UtamCompilationError(beforeLoadNode, VALIDATION.getErrorMessage(904));

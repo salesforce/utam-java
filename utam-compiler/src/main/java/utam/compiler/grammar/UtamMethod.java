@@ -39,13 +39,15 @@ abstract class UtamMethod {
     VALIDATION.validateNotEmptyString(name, "method", "name");
     String parserContext = String.format("method \"%s\"", name);
     this.description = processMethodDescriptionNode(descriptionNode, parserContext);
-    this.arguments = processArgsNode(argsNode, parserContext, UtamArgument.ArgsValidationMode.LITERAL_NOT_ALLOWED);
+    this.arguments =
+        processArgsNode(
+            argsNode, parserContext, UtamArgument.ArgsValidationMode.LITERAL_NOT_ALLOWED);
   }
 
   /**
    * Constructor is used to add custom compose method, for example waitForElement
    *
-   * @param name        name of the method
+   * @param name name of the method
    * @param description description text
    */
   UtamMethod(String name, UtamMethodDescription description) {
@@ -58,12 +60,12 @@ abstract class UtamMethod {
    * process json node "methods"
    *
    * @param methodsNode json node
-   * @param isAbstract  true if page object is an interface
+   * @param isAbstract true if page object is an interface
    * @return list of declared methods
    */
   static List<UtamMethod> processMethodsNode(JsonNode methodsNode, boolean isAbstract) {
-    List<UtamMethod> methods = VALIDATION
-        .validateOptionalNotEmptyArray(methodsNode, "page object root", "methods");
+    List<UtamMethod> methods =
+        VALIDATION.validateOptionalNotEmptyArray(methodsNode, "page object root", "methods");
     if (isEmptyNode(methodsNode)) {
       return methods;
     }
@@ -71,10 +73,10 @@ abstract class UtamMethod {
         isAbstract ? UtamInterfaceMethod.class : UtamComposeMethod.class;
     Integer errCode = isAbstract ? 400 : 500;
     for (JsonNode methodNode : methodsNode) {
-      String name = VALIDATION
-          .validateNotNullOrEmptyString(methodNode.get("name"), "method", "name");
-      UtamMethod method = readNode(methodNode, methodType,
-          VALIDATION.getErrorMessage(errCode, name));
+      String name =
+          VALIDATION.validateNotNullOrEmptyString(methodNode.get("name"), "method", "name");
+      UtamMethod method =
+          readNode(methodNode, methodType, VALIDATION.getErrorMessage(errCode, name));
       methods.add(method);
     }
     return methods;
@@ -103,9 +105,10 @@ abstract class UtamMethod {
 
   final void setMethodLevelParameters(TranslationContext context, MethodContext methodContext) {
     ParametersContext parametersContext = methodContext.getParametersContext();
-    arguments.forEach(arg -> {
-      MethodParameter parameter = arg.asParameter(context, methodContext, parametersContext);
-      parametersContext.setParameter(parameter);
-    });
+    arguments.forEach(
+        arg -> {
+          MethodParameter parameter = arg.asParameter(context, methodContext, parametersContext);
+          parametersContext.setParameter(parameter);
+        });
   }
 }

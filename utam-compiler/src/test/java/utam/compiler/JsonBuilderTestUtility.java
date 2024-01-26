@@ -24,14 +24,14 @@ public class JsonBuilderTestUtility {
   private String json = "{";
 
   private String getJsonString() {
-    if(!json.endsWith("}")) {
+    if (!json.endsWith("}")) {
       json = json.concat("}");
     }
     return json;
   }
 
   public JsonBuilderTestUtility addString(String propertyName, String value) {
-    if(json.length() > 1) {
+    if (json.length() > 1) {
       json = json.concat(", ");
     }
     json = json.concat(String.format("\"%s\" : \"%s\"", propertyName, value));
@@ -39,7 +39,7 @@ public class JsonBuilderTestUtility {
   }
 
   public JsonBuilderTestUtility addRawString(String propertyName, String value) {
-    if(json.length() > 1) {
+    if (json.length() > 1) {
       json = json.concat(", ");
     }
     json = json.concat(String.format("\"%s\" : %s", propertyName, value));

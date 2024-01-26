@@ -54,8 +54,8 @@ public class ElementContextTests {
 
   private static final String ELEMENT_NAME = "fakeElementName";
   private static final Locator SELECTOR_VALUE = getCssSelector(".fakeSelector");
-  private static final TypeProvider DUMMY_TYPE = new TypeUtilities.FromString(
-      "test.FakeElementType");
+  private static final TypeProvider DUMMY_TYPE =
+      new TypeUtilities.FromString("test.FakeElementType");
   private static final TypeProvider BASIC_ELEMENT_TYPE = actionable;
 
   private static ElementContext.Basic getSingleElementContext() {
@@ -76,10 +76,14 @@ public class ElementContextTests {
   @Test
   public void testBasicElementListWithParameters() {
     MethodParameter parameter = new Regular("arg", PrimitiveType.STRING);
-    ElementContext context = new BasicReturnsAll(null,
-        "name",
-        BASIC_ELEMENT_TYPE,
-        SELECTOR_VALUE, Collections.singletonList(parameter), true);
+    ElementContext context =
+        new BasicReturnsAll(
+            null,
+            "name",
+            BASIC_ELEMENT_TYPE,
+            SELECTOR_VALUE,
+            Collections.singletonList(parameter),
+            true);
     assertThat(context.getElementNodeType(), is(ElementType.BASIC));
     assertThat(context.isNullable(), is(true));
     assertThat(context.getParameters(), is(hasSize(1)));
@@ -100,8 +104,14 @@ public class ElementContextTests {
   @Test
   public void testCustomListElementWithParameters() {
     MethodParameter parameter = new Regular("arg", PrimitiveType.STRING);
-    ElementContext context = new CustomReturnsAll(null, ELEMENT_NAME, DUMMY_TYPE,
-        SELECTOR_VALUE, Collections.singletonList(parameter), true);
+    ElementContext context =
+        new CustomReturnsAll(
+            null,
+            ELEMENT_NAME,
+            DUMMY_TYPE,
+            SELECTOR_VALUE,
+            Collections.singletonList(parameter),
+            true);
     assertThat(context.getElementNodeType(), is(ElementType.CUSTOM));
     assertThat(context.isNullable(), is(true));
     assertThat(context.getName(), is(equalTo(ELEMENT_NAME)));
@@ -122,8 +132,8 @@ public class ElementContextTests {
     ElementContext elementContext = getSingleElementContext();
     TranslationContext context = getTestTranslationContext();
     elementContext.setElementMethod(method, context);
-    assertThrows(NullPointerException.class,
-        () -> elementContext.setElementMethod(method, context));
+    assertThrows(
+        NullPointerException.class, () -> elementContext.setElementMethod(method, context));
   }
 
   @Test
@@ -172,12 +182,13 @@ public class ElementContextTests {
 
   @Test
   public void testRootElement() {
-    ElementContext.Root context = new Root(TEST_PAGE_OBJECT, getCssSelector("css"), actionable,
-        mock(PageObjectMethod.class));
+    ElementContext.Root context =
+        new Root(TEST_PAGE_OBJECT, getCssSelector("css"), actionable, mock(PageObjectMethod.class));
     assertThat(context.getName(), is(equalTo(ROOT_ELEMENT_NAME)));
     assertThat(context.getElementNodeType(), is(ElementType.ROOT));
     assertThat(context.isNullable(), is(false));
-    assertThat(context.getEnclosingPageObjectType().getFullName(),
+    assertThat(
+        context.getEnclosingPageObjectType().getFullName(),
         is(equalTo(TEST_PAGE_OBJECT.getFullName())));
     assertThat(context.getType().getFullName(), is(equalTo(actionable.getFullName())));
     assertThat(context.getParameters(), is(hasSize(0)));
@@ -186,11 +197,13 @@ public class ElementContextTests {
 
   @Test
   public void testFrameElement() {
-    LocatorCodeGeneration locatorHelper = new LocatorCodeGeneration(SelectorType.css,
-        LocatorBy.byCss("css[%d]"),
-        Collections.singletonList(new Regular("arg1", PrimitiveType.NUMBER)));
-    ElementContext.Frame context = new ElementContext.Frame(getSingleElementContext(),
-        ELEMENT_NAME, locatorHelper);
+    LocatorCodeGeneration locatorHelper =
+        new LocatorCodeGeneration(
+            SelectorType.css,
+            LocatorBy.byCss("css[%d]"),
+            Collections.singletonList(new Regular("arg1", PrimitiveType.NUMBER)));
+    ElementContext.Frame context =
+        new ElementContext.Frame(getSingleElementContext(), ELEMENT_NAME, locatorHelper);
     assertThat(context.getName(), is(equalTo(ELEMENT_NAME)));
     assertThat(context.getElementNodeType(), is(ElementType.FRAME));
     assertThat(context.isNullable(), is(false));

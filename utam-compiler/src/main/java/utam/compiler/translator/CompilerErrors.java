@@ -7,18 +7,17 @@
  */
 package utam.compiler.translator;
 
-import java.util.stream.Collectors;
-import utam.core.declarative.errors.CompilerErrorsConfig;
-import utam.core.declarative.errors.CompilerErrorsContext;
-import utam.core.declarative.errors.CompilerErrorsContext.CompilerError;
-import utam.core.framework.UtamLogger;
+import static utam.compiler.translator.DefaultTargetConfiguration.getWriterWithDir;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-
-import static utam.compiler.translator.DefaultTargetConfiguration.getWriterWithDir;
+import java.util.stream.Collectors;
+import utam.core.declarative.errors.CompilerErrorsConfig;
+import utam.core.declarative.errors.CompilerErrorsContext;
+import utam.core.declarative.errors.CompilerErrorsContext.CompilerError;
+import utam.core.framework.UtamLogger;
 
 /**
  * Class with possible configurations and contexts for compiler errors
@@ -28,7 +27,7 @@ import static utam.compiler.translator.DefaultTargetConfiguration.getWriterWithD
  */
 public abstract class CompilerErrors {
 
-  final static String ERR_REPORT_FILE = "utam.errors.txt";
+  static final String ERR_REPORT_FILE = "utam.errors.txt";
 
   /**
    * By default, compiler should throw an error for the first incorrect page object
@@ -74,10 +73,10 @@ public abstract class CompilerErrors {
       if (!errors.isEmpty()) {
         UtamLogger.info(
             String.format("Writing compiler errors report to %s", absoluteErrorsReportPath));
-        String report = errors
-            .stream()
-            .map(err -> String.format("____________________________\n%s", err.toString()))
-            .collect(Collectors.joining("\n"));
+        String report =
+            errors.stream()
+                .map(err -> String.format("____________________________\n%s", err.toString()))
+                .collect(Collectors.joining("\n"));
         UtamLogger.error(report);
         Writer writer;
         try {
@@ -99,9 +98,7 @@ public abstract class CompilerErrors {
    * @author elizaveta.ivanova
    * @since 244
    */
-  static class Inactive implements CompilerErrorsContext {
-
-  }
+  static class Inactive implements CompilerErrorsContext {}
 
   /**
    * If combining errors is configured, runner collects all errors

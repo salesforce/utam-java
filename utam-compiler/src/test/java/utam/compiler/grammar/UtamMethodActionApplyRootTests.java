@@ -38,8 +38,7 @@ public class UtamMethodActionApplyRootTests {
   private static final String ROOT_METHOD_NAME = "getRoot";
 
   private static Result getResult(String json) {
-    return new DeserializerUtilities()
-        .getResultFromFile("compose/root/" + json);
+    return new DeserializerUtilities().getResultFromFile("compose/root/" + json);
   }
 
   private static PageObjectMethod getRootMethod(Result result) {
@@ -59,7 +58,9 @@ public class UtamMethodActionApplyRootTests {
     expected.addImpliedImportedTypes(BasePageElement.class.getName());
     expected.addCodeLine("BasePageElement root0 = this.getRootElement()");
     expected.addCodeLine(
-        "Boolean statement0 = root0.containsElement(LocatorBy.byCss(String.format(\".foo[title='%s']\", title)))");
+        "Boolean statement0 ="
+            + " root0.containsElement(LocatorBy.byCss(String.format(\".foo[title='%s']\","
+            + " title)))");
     expected.addCodeLine("return statement0");
     expected.addParameter(new MethodParameterInfo("title"));
     PageObjectValidationTestHelper.validateMethod(actualMethod, expected);
@@ -86,26 +87,30 @@ public class UtamMethodActionApplyRootTests {
 
   @Test
   public void testPublicRootNoTypeClickThrows() {
-    UtamError e = expectThrows(UtamError.class,
-        () -> getResult("publicRootWrongAction"));
-    assertThat(e.getMessage(),
-        containsString("error 612: method \"test\" statement: unknown method \"click\" for basic element"));
+    UtamError e = expectThrows(UtamError.class, () -> getResult("publicRootWrongAction"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 612: method \"test\" statement: unknown method \"click\" for basic element"));
   }
 
   @Test
   public void testPrivateRootWrongTypeClickThrows() {
-    UtamError e = expectThrows(UtamError.class,
-        () -> getResult("privateRootWrongAction"));
-    assertThat(e.getMessage(),
-        containsString("error 617: method \"test\" statement: unsupported action \"click\" for type \"Editable\""));
+    UtamError e = expectThrows(UtamError.class, () -> getResult("privateRootWrongAction"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 617: method \"test\" statement: unsupported action \"click\" for type"
+                + " \"Editable\""));
   }
 
   @Test
   public void testPrivateRootUnknownActionThrows() {
-    UtamError e = expectThrows(UtamError.class,
-            () -> getResult("privateRootUnknownAction"));
-    assertThat(e.getMessage(),
-            containsString("error 612: method \"test\" statement: unknown method \"test\" for basic element"));
+    UtamError e = expectThrows(UtamError.class, () -> getResult("privateRootUnknownAction"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 612: method \"test\" statement: unknown method \"test\" for basic element"));
   }
 
   @Test
@@ -150,20 +155,23 @@ public class UtamMethodActionApplyRootTests {
   @Test
   public void incorrectComposeFormatThrows() {
     JsonBuilderTestUtility test = new JsonBuilderTestUtility();
-    test.addRawString("methods",
+    test.addRawString(
+        "methods",
         "[{ \"name\" : \"test\", \"compose\" : [ {\"element\": \"root\", \"apply\": []} ]}]");
     Exception e = test.expectCompilerError();
-    assertThat(e.getMessage(), containsString(
-        "error 600: method \"test\" statement: incorrect compose statement format"));
+    assertThat(
+        e.getMessage(),
+        containsString("error 600: method \"test\" statement: incorrect compose statement format"));
   }
 
   @Test
   public void incorrectComposeNotObjectFormatThrows() {
     JsonBuilderTestUtility test = new JsonBuilderTestUtility();
-    test.addRawString("methods",
-        "[{ \"name\" : \"test\", \"compose\" : [ true ]}]");
+    test.addRawString("methods", "[{ \"name\" : \"test\", \"compose\" : [ true ]}]");
     Exception e = test.expectCompilerError();
-    assertThat(e.getMessage(), containsString(
-        "error 13: method \"test\": compose statement should be a non-empty object"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 13: method \"test\": compose statement should be a non-empty object"));
   }
 }

@@ -33,15 +33,13 @@ public class UtamMethodDescriptionTests {
   }
 
   private static MethodDeclaration getMethodDeclaration(String jsonFile, String methodName) {
-    return new DeserializerUtilities().getContext(jsonFile)
-        .getMethod(methodName)
-        .getDeclaration();
+    return new DeserializerUtilities().getContext(jsonFile).getMethod(methodName).getDeclaration();
   }
 
   @Test
   public void testDescriptionStringForComposeMethod() {
-    List<String> description = getMethodDescription("generated/comments/verboseString.utam",
-        "myPublicMethod");
+    List<String> description =
+        getMethodDescription("generated/comments/verboseString.utam", "myPublicMethod");
     assertThat(description, hasSize(3));
     assertThat(description.get(0), containsString("public method description"));
     assertThat(description.get(1), containsString("@return String"));
@@ -50,8 +48,8 @@ public class UtamMethodDescriptionTests {
 
   @Test
   public void testDescriptionStringForInterfaceComposeMethod() {
-    List<String> description = getMethodDescription("generated/comments/verboseInterface.utam",
-        "myPublicMethod");
+    List<String> description =
+        getMethodDescription("generated/comments/verboseInterface.utam", "myPublicMethod");
     assertThat(description, hasSize(3));
     assertThat(description.get(0), containsString("public method description"));
     assertThat(description.get(1), containsString("@return String"));
@@ -60,19 +58,19 @@ public class UtamMethodDescriptionTests {
 
   @Test
   public void testDescriptionStringForCustomElementMethod() {
-    List<String> description = getMethodDescription("generated/comments/verboseString.utam",
-        "getCustomPublic");
+    List<String> description =
+        getMethodDescription("generated/comments/verboseString.utam", "getCustomPublic");
     assertThat(description, hasSize(3));
     assertThat(description.get(0), containsString("description"));
     assertThat(description.get(1), containsString("@return VerboseObject"));
-    assertThat(description.get(2),
-        containsString("@param selectorArg selector parameter description"));
+    assertThat(
+        description.get(2), containsString("@param selectorArg selector parameter description"));
   }
 
   @Test
   public void testDescriptionStringForBasicElementMethod() {
-    List<String> description = getMethodDescription("generated/comments/verboseString.utam",
-        "getBasicPrivateElement");
+    List<String> description =
+        getMethodDescription("generated/comments/verboseString.utam", "getBasicPrivateElement");
     assertThat(description, hasSize(3));
     assertThat(description.get(0), containsString("description"));
     assertThat(description.get(1), containsString("@return BasicElement"));
@@ -81,8 +79,8 @@ public class UtamMethodDescriptionTests {
 
   @Test
   public void testDescriptionStringForContainerMethod() {
-    List<String> description = getMethodDescription("generated/comments/verboseString.utam",
-        "getContainerElement");
+    List<String> description =
+        getMethodDescription("generated/comments/verboseString.utam", "getContainerElement");
     assertThat(description, hasSize(3));
     assertThat(description.get(0), containsString("description"));
     assertThat(description.get(1), containsString("@return T"));
@@ -91,8 +89,8 @@ public class UtamMethodDescriptionTests {
 
   @Test
   public void testDescriptionObjectForComposeMethod() {
-    List<String> description = getMethodDescription("generated/comments/verboseObject.utam",
-        "myPublicMethod");
+    List<String> description =
+        getMethodDescription("generated/comments/verboseObject.utam", "myPublicMethod");
     assertThat(description, hasSize(5));
     assertThat(description.get(0), containsString("one"));
     assertThat(description.get(1), containsString("two"));
@@ -103,36 +101,36 @@ public class UtamMethodDescriptionTests {
 
   @Test
   public void testDescriptionObjectForCustomGetter() {
-    MethodDeclaration declaration = getMethodDeclaration("generated/comments/verboseObject.utam",
-        "getCustomPublic");
+    MethodDeclaration declaration =
+        getMethodDeclaration("generated/comments/verboseObject.utam", "getCustomPublic");
     assertThat(declaration.isDeprecated(), equalTo(true));
     List<String> description = declaration.getDescription();
     assertThat(description, hasSize(5));
     assertThat(description.get(0), containsString("description"));
     assertThat(description.get(1), containsString("@return return something"));
-    assertThat(description.get(2),
-        containsString("@param selectorArg selector parameter description"));
+    assertThat(
+        description.get(2), containsString("@param selectorArg selector parameter description"));
     assertThat(description.get(3), containsString("@throws NullPointerException when"));
     assertThat(description.get(4), containsString("@deprecated this element is outdated"));
   }
 
   @Test
   public void testDescriptionObjectForContainer() {
-    List<String> description = getMethodDescription("generated/comments/verboseObject.utam",
-        "getContainer");
+    List<String> description =
+        getMethodDescription("generated/comments/verboseObject.utam", "getContainer");
     assertThat(description, hasSize(5));
     assertThat(description.get(0), containsString("description"));
     assertThat(description.get(1), containsString("@return return something"));
-    assertThat(description.get(2),
-        containsString("@param selectorArg selector parameter description"));
+    assertThat(
+        description.get(2), containsString("@param selectorArg selector parameter description"));
     assertThat(description.get(3), containsString("@param pageObjectType Class<T>"));
     assertThat(description.get(4), containsString("@throws NullPointerException when"));
   }
 
   @Test
   public void testDescriptionForArgsReference() {
-    List<String> description = getMethodDescription("generated/comments/verboseObject.utam",
-        "myArgsReference");
+    List<String> description =
+        getMethodDescription("generated/comments/verboseObject.utam", "myArgsReference");
     assertThat(description, hasSize(3));
     assertThat(description.get(0), containsString("method myArgsReference"));
     assertThat(description.get(1), containsString("@return String"));
@@ -145,72 +143,102 @@ public class UtamMethodDescriptionTests {
     testUtility.addRawString("interface", "true");
     testUtility.addRawString("methods", "[{\"name\": \"test\", \"description\": true}]");
     UtamError e = expectThrows(UtamError.class, testUtility::getDeserializedJson);
-    assertThat(e.getMessage(),
-        containsString("error 700: method \"test\" description: format of the description is incorrect"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 700: method \"test\" description: format of the description is incorrect"));
   }
 
   @Test
   public void testFormatIsNotStringOrObjectForElementThrows() {
     JsonBuilderTestUtility test = new JsonBuilderTestUtility();
-    test.addRawString("elements",
+    test.addRawString(
+        "elements",
         "[{\"name\": \"test\", \"description\": true, \"selector\": {\"css\": \"css\"}}]");
     Exception e = test.expectCompilerError();
-    assertThat(e.getMessage(),
-        containsString("error 700: element \"test\" description: format of the description is incorrect"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 700: element \"test\" description: format of the description is incorrect"));
   }
 
   @Test
   public void testDescriptionObjectForInterface() {
-    MethodDeclaration declaration = getMethodDeclaration("generated/comments/verboseInterface.utam",
-        "getCustomPublic");
+    MethodDeclaration declaration =
+        getMethodDeclaration("generated/comments/verboseInterface.utam", "getCustomPublic");
     assertThat(declaration.isDeprecated(), equalTo(true));
     List<String> description = declaration.getDescription();
     assertThat(description, hasSize(5));
     assertThat(description.get(0), containsString("description"));
     assertThat(description.get(1), containsString("@return return something"));
-    assertThat(description.get(2),
-        containsString("@param selectorArg selector parameter description"));
+    assertThat(
+        description.get(2), containsString("@param selectorArg selector parameter description"));
     assertThat(description.get(3), containsString("@throws NullPointerException when"));
     assertThat(description.get(4), containsString("@deprecated this element is outdated"));
   }
 
   @Test
   public void testDescriptionTextEmptyStringThrows() {
-    Exception e = expectThrows(UtamCompilationError.class, () -> getMethodDeclaration("validate/method_comments/empty_text",
-        "test"));
-    assertThat(e.getMessage(),
-        containsString("error 10: method \"test\" description: property \"text\" should be a non empty string, instead found empty"));
+    Exception e =
+        expectThrows(
+            UtamCompilationError.class,
+            () -> getMethodDeclaration("validate/method_comments/empty_text", "test"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 10: method \"test\" description: property \"text\" should be a non empty string,"
+                + " instead found empty"));
   }
 
   @Test
   public void testDescriptionEmptyTextArrayThrows() {
-    Exception e = expectThrows(UtamCompilationError.class, () -> getMethodDeclaration("validate/method_comments/empty_text_array",
-        "test"));
-    assertThat(e.getMessage(),
-        containsString("error 12: method \"test\" description: property \"text\" should be a non-empty array"));
+    Exception e =
+        expectThrows(
+            UtamCompilationError.class,
+            () -> getMethodDeclaration("validate/method_comments/empty_text_array", "test"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 12: method \"test\" description: property \"text\" should be a non-empty"
+                + " array"));
   }
 
   @Test
   public void testDescriptionEmptyStringThrows() {
-    Exception e = expectThrows(UtamCompilationError.class, () -> getMethodDeclaration("validate/method_comments/empty_string",
-        "test"));
-    assertThat(e.getMessage(),
-        containsString("error 10: element \"test\" description: property \"text\" should be a non empty string, instead found empty"));
+    Exception e =
+        expectThrows(
+            UtamCompilationError.class,
+            () -> getMethodDeclaration("validate/method_comments/empty_string", "test"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 10: element \"test\" description: property \"text\" should be a non empty"
+                + " string, instead found empty"));
   }
 
   @Test
   public void testEmptyReturnThrows() {
-    Exception e = expectThrows(UtamCompilationError.class, () -> getMethodDeclaration("validate/method_comments/empty_return",
-        "test"));
-    assertThat(e.getMessage(),
-        containsString("error 10: method \"test\" description: property \"return\" should be a non empty string, instead found empty"));
+    Exception e =
+        expectThrows(
+            UtamCompilationError.class,
+            () -> getMethodDeclaration("validate/method_comments/empty_return", "test"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 10: method \"test\" description: property \"return\" should be a non empty"
+                + " string, instead found empty"));
   }
 
   @Test
   public void testEmptyThrowsThrows() {
-    Exception e = expectThrows(UtamCompilationError.class, () -> getMethodDeclaration("validate/method_comments/empty_throws",
-        "test"));
-    assertThat(e.getMessage(),
-        containsString("error 10: element \"test\" description: property \"throws\" should be a non empty string, instead found number"));
+    Exception e =
+        expectThrows(
+            UtamCompilationError.class,
+            () -> getMethodDeclaration("validate/method_comments/empty_throws", "test"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 10: element \"test\" description: property \"throws\" should be a non empty"
+                + " string, instead found number"));
   }
 }

@@ -34,9 +34,7 @@ public enum EditableActionType implements ActionType {
    * throws exception if fails
    */
   clearAndType(PrimitiveType.STRING),
-  /**
-   * press keyboard key
-   */
+  /** press keyboard key */
   press(PrimitiveType.STRING),
   /**
    * Apply WebElement.sendKeys from Selenium - "simulate typing into an element, which may set its *
@@ -58,7 +56,9 @@ public enum EditableActionType implements ActionType {
   }
 
   Class[] getParameterClasses() { // used in unit tests
-    return Stream.of(actionParameters).map(TypeUtilities::getClassFromFullName).toArray(Class[]::new);
+    return Stream.of(actionParameters)
+        .map(TypeUtilities::getClassFromFullName)
+        .toArray(Class[]::new);
   }
 
   Class getElementClass() {
@@ -75,8 +75,9 @@ public enum EditableActionType implements ActionType {
     int expected = actionParameters.length;
     if (actionParameters.length != parameterCount) {
       String contextStr = String.format("%s action \"%s\"", parserContext, this.name());
-      throw new UtamCompilationError(VALIDATION.getErrorMessage(108, contextStr,
-          String.valueOf(expected), String.valueOf(parameterCount)));
+      throw new UtamCompilationError(
+          VALIDATION.getErrorMessage(
+              108, contextStr, String.valueOf(expected), String.valueOf(parameterCount)));
     }
     return Stream.of(actionParameters).collect(Collectors.toList());
   }

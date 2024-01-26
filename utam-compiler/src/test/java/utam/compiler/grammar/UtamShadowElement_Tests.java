@@ -26,28 +26,36 @@ public class UtamShadowElement_Tests {
     JsonBuilderTestUtility test = new JsonBuilderTestUtility();
     test.addRawString("shadow", "{} ");
     Exception e = test.expectCompilerError();
-    assertThat(e.getMessage(), containsString(
-        "error 12: root shadow: property \"elements\" should be a non-empty array"));
+    assertThat(
+        e.getMessage(),
+        containsString("error 12: root shadow: property \"elements\" should be a non-empty array"));
   }
 
   @Test
   public void testNestedShadowMissingElements() {
     Exception e = expectCompilerErrorFromFile("validate/shadow/nestedElementsMissing");
-    assertThat(e.getMessage(), containsString(
-        "error 12: element \"parent\" shadow: property \"elements\" should be a non-empty array"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 12: element \"parent\" shadow: property \"elements\" should be a non-empty"
+                + " array"));
   }
 
   @Test
   public void testIncorrectElementInsideShadowThrows() {
     Exception e = expectCompilerErrorFromFile("validate/shadow/incorrectElement");
-    assertThat(e.getMessage(), containsString(
-        "error 1100: root shadow: incorrect format of elements inside shadow"));
+    assertThat(
+        e.getMessage(),
+        containsString("error 1100: root shadow: incorrect format of elements inside shadow"));
   }
 
   @Test
   public void testNestedShadowElementsEmptyArray() {
     Exception e = expectCompilerErrorFromFile("validate/shadow/nestedElementsNotArray");
-    assertThat(e.getMessage(), containsString(
-        "error 12: element \"parent\" shadow: property \"elements\" should be a non-empty array"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 12: element \"parent\" shadow: property \"elements\" should be a non-empty"
+                + " array"));
   }
 }

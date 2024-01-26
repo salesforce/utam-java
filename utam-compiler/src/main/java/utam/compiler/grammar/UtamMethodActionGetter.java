@@ -53,8 +53,8 @@ class UtamMethodActionGetter extends UtamMethodAction {
   }
 
   @Override
-  Statement getStatement(TranslationContext context, MethodContext methodContext,
-      StatementContext statementContext) {
+  Statement getStatement(
+      TranslationContext context, MethodContext methodContext, StatementContext statementContext) {
     String parserContext = String.format("method \"%s\"", methodContext.getName());
     VALIDATION.validateNotEmptyString(elementName, parserContext, "element");
     if (isChain) {
@@ -78,20 +78,21 @@ class UtamMethodActionGetter extends UtamMethodAction {
    */
   class ForeignElementStatement extends Statement {
 
-    ForeignElementStatement(TranslationContext context,
-        MethodContext methodContext, StatementContext statementContext) {
+    ForeignElementStatement(
+        TranslationContext context,
+        MethodContext methodContext,
+        StatementContext statementContext) {
       super(context, methodContext, statementContext);
     }
 
     private List<MethodParameter> getParameters() {
       String parserContext = String.format("method \"%s\"", methodContext.getName());
-      ParametersContext parametersContext = new StatementParametersContext(parserContext,
-          context,
-          methodContext);
+      ParametersContext parametersContext =
+          new StatementParametersContext(parserContext, context, methodContext);
       ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
-      List<UtamArgument> arguments = provider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
-      arguments
-          .stream()
+      List<UtamArgument> arguments =
+          provider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
+      arguments.stream()
           .map(arg -> arg.asParameter(context, methodContext, parametersContext))
           .forEach(parametersContext::setParameter);
       return parametersContext.getParameters();
@@ -101,8 +102,9 @@ class UtamMethodActionGetter extends UtamMethodAction {
     ApplyOperation getApplyOperation() {
       String getterMethodName = getElementGetterMethodName(elementName, true);
       List<MethodParameter> parameters = getParameters();
-      TypeProvider returnType = statementContext
-          .getDeclaredReturnOrDefault(context, methodContext.getDeclaredReturnType(), null);
+      TypeProvider returnType =
+          statementContext.getDeclaredReturnOrDefault(
+              context, methodContext.getDeclaredReturnType(), null);
       if (returnType == null) {
         throw new UtamCompilationError(
             VALIDATION.getErrorMessage(605, methodContext.getName(), elementName));
@@ -110,8 +112,8 @@ class UtamMethodActionGetter extends UtamMethodAction {
       // matcher parameters should be set after action parameters
       MatcherObject matcher = matcherProvider.apply(context, methodContext);
       ActionType action = new CustomActionType(getterMethodName, returnType);
-      return new ApplyOperation(action, hasMatcher ? PrimitiveType.BOOLEAN : returnType, parameters,
-          matcher);
+      return new ApplyOperation(
+          action, hasMatcher ? PrimitiveType.BOOLEAN : returnType, parameters, matcher);
     }
 
     @Override
@@ -131,7 +133,8 @@ class UtamMethodActionGetter extends UtamMethodAction {
 
     private final ElementContext elementContext;
 
-    SelfElementStatement(TranslationContext context,
+    SelfElementStatement(
+        TranslationContext context,
         MethodContext methodContext,
         StatementContext statementContext,
         ElementContext elementContext) {
@@ -142,21 +145,21 @@ class UtamMethodActionGetter extends UtamMethodAction {
     private List<MethodParameter> getParameters() {
       String parserContext = String.format("method \"%s\"", methodContext.getName());
       ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
-      List<UtamArgument> arguments = provider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
-      List<MethodParameter> getterNonLiteralParameters = elementContext.getGetterNonLiteralParameters();
-      ParametersContext parametersContext = new StatementParametersContext(parserContext,
-          context,
-          methodContext);
+      List<UtamArgument> arguments =
+          provider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
+      List<MethodParameter> getterNonLiteralParameters =
+          elementContext.getGetterNonLiteralParameters();
+      ParametersContext parametersContext =
+          new StatementParametersContext(parserContext, context, methodContext);
       List<MethodParameter> parameters;
       if (!arguments.isEmpty()) {
-        arguments
-            .stream()
+        arguments.stream()
             .map(arg -> arg.asParameter(context, methodContext, parametersContext))
             .forEach(parametersContext::setParameter);
-        List<TypeProvider> expectedElementArgsTypes = getterNonLiteralParameters
-            .stream()
-            .map(MethodParameter::getType)
-            .collect(Collectors.toList());
+        List<TypeProvider> expectedElementArgsTypes =
+            getterNonLiteralParameters.stream()
+                .map(MethodParameter::getType)
+                .collect(Collectors.toList());
         parameters = parametersContext.getParameters(expectedElementArgsTypes);
       } else if (methodContext.getElementUsageTracker().isReusedElement(elementName)) {
         parameters = getterNonLiteralParameters;
@@ -173,16 +176,18 @@ class UtamMethodActionGetter extends UtamMethodAction {
       context.setMethodUsage(elementContext.getElementGetterName());
       String methodName = methodContext.getName();
       MethodDeclaration elementGetter = elementContext.getElementMethod().getDeclaration();
-      TypeProvider returnType = statementContext.hasDeclaredReturn() ? statementContext
-          .getDeclaredStatementReturnOrNull(context) : elementGetter.getReturnType();
+      TypeProvider returnType =
+          statementContext.hasDeclaredReturn()
+              ? statementContext.getDeclaredStatementReturnOrNull(context)
+              : elementGetter.getReturnType();
       if (statementContext.hasDeclaredReturn()) {
         // if "returnType" is set, check it matches getter return type or matcher
         TypeProvider expectedType =
             hasMatcher ? PrimitiveType.BOOLEAN : elementGetter.getReturnType();
         if (!expectedType.isSameType(returnType)) {
-          String errorMsg = VALIDATION.getErrorMessage(613, methodName,
-              expectedType.getSimpleName(),
-              returnType.getSimpleName());
+          String errorMsg =
+              VALIDATION.getErrorMessage(
+                  613, methodName, expectedType.getSimpleName(), returnType.getSimpleName());
           throw new UtamCompilationError(errorMsg);
         }
       }
@@ -194,10 +199,11 @@ class UtamMethodActionGetter extends UtamMethodAction {
       }
       ActionType action = new CustomActionType(elementGetter.getName(), returnType);
       // should be after all other lines!
-      methodContext.getElementUsageTracker()
+      methodContext
+          .getElementUsageTracker()
           .setElementUsage(statementContext.getVariableName(), elementContext);
-      return new ApplyOperation(action, hasMatcher ? PrimitiveType.BOOLEAN : returnType, parameters,
-          matcher);
+      return new ApplyOperation(
+          action, hasMatcher ? PrimitiveType.BOOLEAN : returnType, parameters, matcher);
     }
 
     @Override

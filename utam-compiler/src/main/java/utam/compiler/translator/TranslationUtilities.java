@@ -7,7 +7,6 @@
  */
 package utam.compiler.translator;
 
-
 import com.google.googlejavaformat.java.Formatter;
 import com.google.googlejavaformat.java.FormatterException;
 import java.util.ArrayList;
@@ -67,8 +66,7 @@ public class TranslationUtilities {
   }
 
   static Set<String> getImportStrings(TypeProvider typeToImport, String currentPackage) {
-    return typeToImport.getImportableTypes()
-        .stream()
+    return typeToImport.getImportableTypes().stream()
         .filter(type -> isImportableType(type, currentPackage))
         .map(type -> getStatement(String.format("import %s", type.getFullName())))
         .collect(Collectors.toSet());
@@ -107,9 +105,13 @@ public class TranslationUtilities {
     try {
       return new Formatter().formatSource(code);
     } catch (FormatterException e) {
-      throw new UtamRunnerError(String.format("Generated Java code can't be formatted, error: \"%s\".\n"
-          + "Copy code to IDE to see the issue, most common issue is invalid element name that can't be made into Java variable.\n\n%s",
-          e.getMessage(), code));
+      throw new UtamRunnerError(
+          String.format(
+              "Generated Java code can't be formatted, error: \"%s\".\n"
+                  + "Copy code to IDE to see the issue, most common issue is invalid element name"
+                  + " that can't be made into Java variable.\n\n"
+                  + "%s",
+              e.getMessage(), code));
     }
   }
 
@@ -121,7 +123,7 @@ public class TranslationUtilities {
    * Gets the name of an element getter method
    *
    * @param elementName the name of the element
-   * @param isPublic    a value indicating whether the element is public
+   * @param isPublic a value indicating whether the element is public
    * @return the name of the element getter method
    */
   public static String getElementGetterMethodName(String elementName, boolean isPublic) {

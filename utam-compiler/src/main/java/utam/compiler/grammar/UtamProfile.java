@@ -37,7 +37,7 @@ final class UtamProfile {
    * instance of the profile
    *
    * @param profileName name of the profile
-   * @param values      profile values
+   * @param values profile values
    */
   private UtamProfile(String profileName, Set<String> values) {
     this.profileName = profileName;
@@ -45,21 +45,22 @@ final class UtamProfile {
   }
 
   static List<UtamProfile> processProfileNodes(JsonNode profilesNode) {
-    List<UtamProfile> profiles = VALIDATION.validateOptionalNotEmptyArray(profilesNode, "page object root", "profile");
-    if(isEmptyNode(profilesNode)) {
+    List<UtamProfile> profiles =
+        VALIDATION.validateOptionalNotEmptyArray(profilesNode, "page object root", "profile");
+    if (isEmptyNode(profilesNode)) {
       return profiles;
     }
     Set<String> profilesNames = new HashSet<>();
     for (JsonNode node : profilesNode) {
       Iterator<String> iterator = node.fieldNames();
-      if(!iterator.hasNext()) {
+      if (!iterator.hasNext()) {
         throw new UtamCompilationError(profilesNode, VALIDATION.getErrorMessage(800));
       }
       String profileName = iterator.next();
       if (profilesNames.contains(profileName)) {
         throw new UtamCompilationError(profilesNode, VALIDATION.getErrorMessage(801, profileName));
       }
-      if(iterator.hasNext()) { // more fields?
+      if (iterator.hasNext()) { // more fields?
         throw new UtamCompilationError(profilesNode, VALIDATION.getErrorMessage(800));
       }
       profilesNames.add(profileName);
@@ -71,7 +72,7 @@ final class UtamProfile {
   /**
    * instance of the profile
    *
-   * @param node        profiles node
+   * @param node profiles node
    * @param profileName name of the profile
    * @return instance of UtamProfile
    */
@@ -79,13 +80,14 @@ final class UtamProfile {
     Set<String> values = new HashSet<>();
     JsonNode valuesNode = node.get(profileName);
     if (valuesNode.isArray()) {
-      VALIDATION.validateNotEmptyArray(valuesNode, String.format("profile \"%s\"", profileName), "values");
+      VALIDATION.validateNotEmptyArray(
+          valuesNode, String.format("profile \"%s\"", profileName), "values");
       VALIDATION.validateArrayOfStrings(valuesNode, String.format("profile \"%s\"", profileName));
       for (JsonNode valueNode : valuesNode) {
         String profileValue = valueNode.textValue();
         if (values.contains(profileValue)) {
-          throw new UtamCompilationError(valueNode,
-              VALIDATION.getErrorMessage(802, profileName, profileValue));
+          throw new UtamCompilationError(
+              valueNode, VALIDATION.getErrorMessage(802, profileName, profileValue));
         }
         values.add(profileValue);
       }
@@ -93,8 +95,7 @@ final class UtamProfile {
       String profileValue = valuesNode.textValue();
       values.add(profileValue);
     } else {
-      throw new UtamCompilationError(valuesNode,
-          VALIDATION.getErrorMessage(806, profileName));
+      throw new UtamCompilationError(valuesNode, VALIDATION.getErrorMessage(806, profileName));
     }
     return new UtamProfile(profileName, values);
   }
@@ -111,17 +112,20 @@ final class UtamProfile {
     if (configuration == null) {
       throw new UtamCompilationError(VALIDATION.getErrorMessage(804, profileName));
     }
-    values.forEach(profileValue -> {
-      Profile profile = configuration.getFromString(profileValue);
-      if (profile == null) {
-        throw new UtamCompilationError(VALIDATION.getErrorMessage(803, profileName, profileValue));
-      }
-      profiles.add(profile);
-    });
+    values.forEach(
+        profileValue -> {
+          Profile profile = configuration.getFromString(profileValue);
+          if (profile == null) {
+            throw new UtamCompilationError(
+                VALIDATION.getErrorMessage(803, profileName, profileValue));
+          }
+          profiles.add(profile);
+        });
     return profiles;
   }
 
-  static List<Profile> getConfiguredProfiles(List<UtamProfile> profiles, TranslationContext context) {
+  static List<Profile> getConfiguredProfiles(
+      List<UtamProfile> profiles, TranslationContext context) {
     List<Profile> res = new ArrayList<>();
     for (UtamProfile profile : profiles) {
       res.addAll(profile.getProfiles(context));

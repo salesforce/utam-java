@@ -23,46 +23,35 @@ public class StringValueProfileConfigTests {
 
   @Test
   public void testStringValueProfileConfig() {
-    assertThat(
-        new StringValueProfileConfig("testName", "testValue"),
-        is(not(nullValue())));
+    assertThat(new StringValueProfileConfig("testName", "testValue"), is(not(nullValue())));
   }
 
   @Test
   public void testStringValueProfileConfigFromProfiles() {
     Profile profile = new StringValueProfile("testName", "testValue");
-    assertThat(
-        new StringValueProfileConfig("name", profile),
-        is(not(nullValue())));
+    assertThat(new StringValueProfileConfig("name", profile), is(not(nullValue())));
   }
 
   @Test
   public void testGetFromString() {
-    ProfileConfiguration config = new StringValueProfileConfig(
-        "testName", new String[]{"testValue", "anotherTestValue"});
+    ProfileConfiguration config =
+        new StringValueProfileConfig("testName", new String[] {"testValue", "anotherTestValue"});
     Profile profile = config.getFromString("testValue");
-    assertThat(
-        profile.getName(),
-        is(equalTo("testName")));
-    assertThat(
-        profile.getValue(),
-        is(equalTo("testValue")));
+    assertThat(profile.getName(), is(equalTo("testName")));
+    assertThat(profile.getValue(), is(equalTo("testValue")));
   }
 
   @Test
   public void testGetPropertyKey() {
-    ProfileConfiguration config = new StringValueProfileConfig(
-        "testName", "testValue");
+    ProfileConfiguration config = new StringValueProfileConfig("testName", "testValue");
     assertThat(config.getPropertyKey(), is(equalTo("testName")));
   }
 
   @Test
   public void testGetSupportedValues() {
-    ProfileConfiguration config = new StringValueProfileConfig(
-        "testName", new String[] {"testValue", "anotherTestValue"});
-    assertThat(
-        config.getSupportedValues(),
-        containsInAnyOrder("testValue", "anotherTestValue"));
+    ProfileConfiguration config =
+        new StringValueProfileConfig("testName", new String[] {"testValue", "anotherTestValue"});
+    assertThat(config.getSupportedValues(), containsInAnyOrder("testValue", "anotherTestValue"));
   }
 
   @Test

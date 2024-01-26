@@ -38,8 +38,10 @@ public class UtamMethodActionGetterTests {
   private static final String COLLECTOR_IMPORT_STR = COLLECTOR_IMPORT.getFullName();
 
   private static void testThrows(String jsonFile, String expectedError) {
-    UtamError e = expectThrows(UtamError.class,
-        () -> new DeserializerUtilities().getContext("validate/getter/" + jsonFile));
+    UtamError e =
+        expectThrows(
+            UtamError.class,
+            () -> new DeserializerUtilities().getContext("validate/getter/" + jsonFile));
     assertThat(e.getMessage(), containsString(expectedError));
   }
 
@@ -49,46 +51,57 @@ public class UtamMethodActionGetterTests {
 
   @Test
   public void unknownElementNameThrows() {
-    testThrows("unknownElementName",
-        "error 601: method \"test\" statement: unknown element with name \"test\" is referenced in a compose statement");
+    testThrows(
+        "unknownElementName",
+        "error 601: method \"test\" statement: unknown element with name \"test\" is referenced in"
+            + " a compose statement");
   }
 
   @Test
   public void incorrectMatcherThrows() {
-    String error = "error 1202: method \"test\" statement matcher: " +
-            "applied method returns type \"BasicElement\", " +
-            "which is only compatible with the following matchers - notNull";
+    String error =
+        "error 1202: method \"test\" statement matcher: "
+            + "applied method returns type \"BasicElement\", "
+            + "which is only compatible with the following matchers - notNull";
     testThrows("incorrectMatcherType", error);
   }
 
   @Test
   public void redundantArgsThrows() {
-    testThrows("redundantArgs",
+    testThrows(
+        "redundantArgs",
         "error 108: method \"test\" arguments: expected number of arguments is 0, found 1");
   }
 
   @Test
   public void testIncorrectStatementReturn() {
-    String expectedError = "error 613: method \"test\" statement: incorrect return type; expected \"ElementElement\", provided is \"String\"";
+    String expectedError =
+        "error 613: method \"test\" statement: incorrect return type; expected \"ElementElement\","
+            + " provided is \"String\"";
     testThrows("incorrectStatementReturn", expectedError);
   }
 
   @Test
   public void testFirstChainStatement() {
-    String expectedError = "error 616: method \"test\" statement: first statement can't be marked as chain";
+    String expectedError =
+        "error 616: method \"test\" statement: first statement can't be marked as chain";
     testThrows("firstChain", expectedError);
   }
 
   @Test
   public void testChainCantBeApplied() {
-    String expectedError = "error 614: method \"test\" statement: to use chain, previous statement should return custom type, but it returns \"BasicElement\"";
+    String expectedError =
+        "error 614: method \"test\" statement: to use chain, previous statement should return"
+            + " custom type, but it returns \"BasicElement\"";
     testThrows("chainNotAllowed", expectedError);
   }
 
   @Test
   public void testChainNeedsReturn() {
-    testThrows("chainNeedsReturn",
-        "error 605: method \"test\" statement: can't infer return type for \"element\", please provide a \"returnType\"");
+    testThrows(
+        "chainNeedsReturn",
+        "error 605: method \"test\" statement: can't infer return type for \"element\", please"
+            + " provide a \"returnType\"");
   }
 
   @Test
@@ -228,7 +241,8 @@ public class UtamMethodActionGetterTests {
     TranslationContext context = getContext("chainReturnAll");
     PageObjectMethod method = context.getMethod(methodName);
     MethodInfo expected = new MethodInfo(methodName, "List<FooGrandChild>");
-    expected.addImpliedImportedTypes(LIST_IMPORT,
+    expected.addImpliedImportedTypes(
+        LIST_IMPORT,
         COLLECTOR_IMPORT_STR,
         CUSTOM_TYPE_IMPORT,
         "my.pageobject.FooChild",
@@ -236,9 +250,11 @@ public class UtamMethodActionGetterTests {
     expected.addImportedTypes(LIST_IMPORT, "my.pageobject.FooGrandChild");
     expected.addCodeLine("List<Foo> statement0 = this.getListElement()");
     expected.addCodeLine(
-        "List<FooChild> statement1 = statement0.stream().flatMap(element -> element.getChild().stream()).collect(Collectors.toList())");
+        "List<FooChild> statement1 = statement0.stream().flatMap(element ->"
+            + " element.getChild().stream()).collect(Collectors.toList())");
     expected.addCodeLine(
-        "List<FooGrandChild> statement2 = statement1.stream().map(element -> element.getGrandChild()).collect(Collectors.toList())");
+        "List<FooGrandChild> statement2 = statement1.stream().map(element ->"
+            + " element.getGrandChild()).collect(Collectors.toList())");
     expected.addCodeLine("return statement2");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
@@ -273,7 +289,8 @@ public class UtamMethodActionGetterTests {
     PageObjectMethod method2 = context.getMethod("test2");
     MethodInfo expected2 = new MethodInfo("test2", "my2.pageobject.Foo");
     validateMethodEmptyImports(method2);
-    expected2.addCodeLine("my2.pageobject.Foo statement0 = this.getContentElement(my2.pageobject.Foo.class)");
+    expected2.addCodeLine(
+        "my2.pageobject.Foo statement0 = this.getContentElement(my2.pageobject.Foo.class)");
     expected2.addCodeLine("return statement0");
     PageObjectValidationTestHelper.validateMethod(method2, expected2);
   }
@@ -300,7 +317,8 @@ public class UtamMethodActionGetterTests {
     expected.addParameter(new MethodParameterInfo("elementArg"));
     expected.addCodeLine("List<Foo> statement0 = this.getSections(elementArg)");
     expected.addCodeLine(
-        "List<Foo> statement1 = statement0.stream().flatMap(element -> element.getRows(elementArg).stream()).collect(Collectors.toList())");
+        "List<Foo> statement1 = statement0.stream().flatMap(element ->"
+            + " element.getRows(elementArg).stream()).collect(Collectors.toList())");
     expected.addCodeLine("return statement1");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
@@ -312,10 +330,11 @@ public class UtamMethodActionGetterTests {
     MethodInfo expected = new MethodInfo(methodName);
     expected.addParameter(new MethodParameterInfo("elementArg", "Integer"));
     expected.addParameter(new MethodParameterInfo("anotherArg", "Integer"));
-    expected.addCodeLine("this.waitFor(() -> {\n"
-        + "RecordLayoutSection pstatement0 = this.getOneElement(elementArg);\n"
-        + "return pstatement0;\n"
-        + "})");
+    expected.addCodeLine(
+        "this.waitFor(() -> {\n"
+            + "RecordLayoutSection pstatement0 = this.getOneElement(elementArg);\n"
+            + "return pstatement0;\n"
+            + "})");
     expected.addCodeLine("RecordLayoutSection statement1 = this.getOneElement(elementArg)");
     expected.addCodeLine("statement1.something(anotherArg)");
     PageObjectValidationTestHelper.validateMethod(method, expected);
@@ -323,9 +342,10 @@ public class UtamMethodActionGetterTests {
 
   @Test
   public void testLiteralGetterArgument() {
-    PageObjectMethod method = new DeserializerUtilities()
-        .getContext("generated/args/literalGetterArg.utam")
-        .getMethod("testGetter");
+    PageObjectMethod method =
+        new DeserializerUtilities()
+            .getContext("generated/args/literalGetterArg.utam")
+            .getMethod("testGetter");
     MethodInfo expected = new MethodInfo("testGetter", "SettingsPanelElement");
     expected.addCodeLine("SettingsPanelElement statement0 = this.getSettingsPanel()");
     expected.addCodeLine("return statement0");
@@ -333,7 +353,7 @@ public class UtamMethodActionGetterTests {
   }
 
   @Test
-  public void testContainerGetterWithoutArgs(){
+  public void testContainerGetterWithoutArgs() {
     String methodName = "composeContainer";
     PageObjectMethod method = getContext("containerCompose").getMethod(methodName);
     MethodInfo expected = new MethodInfo(methodName, "T");

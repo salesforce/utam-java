@@ -38,7 +38,7 @@ public abstract class ParametersContext {
    * construct an instance of parameters context
    *
    * @param contextString parser context
-   * @param context       translation context
+   * @param context translation context
    */
   ParametersContext(String contextString, TranslationContext context) {
     this.contextString = contextString;
@@ -70,11 +70,11 @@ public abstract class ParametersContext {
    * @return list of parameters
    */
   public List<MethodParameter> getParameters(List<TypeProvider> expectedTypes) {
-    List<MethodParameter> parameters = this.getParameters()
-        .stream()
-        // replace argumentReferences before validation
-        .map(this::getUnwrappedParameter)
-        .collect(Collectors.toList());
+    List<MethodParameter> parameters =
+        this.getParameters().stream()
+            // replace argumentReferences before validation
+            .map(this::getUnwrappedParameter)
+            .collect(Collectors.toList());
     if (expectedTypes != null) {
       checkParametersCount(parameters, expectedTypes);
       for (int i = 0; i < parameters.size(); i++) {
@@ -87,12 +87,13 @@ public abstract class ParametersContext {
   /**
    * validate nested parameters against expected types
    *
-   * @param parameters    list of parameters
+   * @param parameters list of parameters
    * @param expectedTypes expected types
    */
-  public void setNestedParameters(List<MethodParameter> parameters,
-      List<TypeProvider> expectedTypes) {
-    ParametersContext validationOfTypes = new StatementParametersContext(contextString, context, null);
+  public void setNestedParameters(
+      List<MethodParameter> parameters, List<TypeProvider> expectedTypes) {
+    ParametersContext validationOfTypes =
+        new StatementParametersContext(contextString, context, null);
     parameters.forEach(validationOfTypes::setParameter);
     validationOfTypes.getParameters(expectedTypes);
   }
@@ -106,18 +107,18 @@ public abstract class ParametersContext {
   /**
    * check that parameters number match expected
    *
-   * @param parameters    values to check
+   * @param parameters values to check
    * @param expectedTypes expected types
    */
   private void checkParametersCount(
-      List<MethodParameter> parameters,
-      List<TypeProvider> expectedTypes) {
+      List<MethodParameter> parameters, List<TypeProvider> expectedTypes) {
     if (expectedTypes != null) {
       int expectedCount = expectedTypes.size();
       int actualCount = parameters.size();
       if (expectedCount != actualCount) {
-        String message = VALIDATION.getErrorMessage(108, contextString, String.valueOf(expectedCount),
-                String.valueOf(actualCount));
+        String message =
+            VALIDATION.getErrorMessage(
+                108, contextString, String.valueOf(expectedCount), String.valueOf(actualCount));
         throw new UtamCompilationError(message);
       }
     }
@@ -143,15 +144,15 @@ public abstract class ParametersContext {
    * check that parameter type match
    *
    * @param parameter value to check
-   * @param expected  expected type
+   * @param expected expected type
    */
   final void checkParameterType(MethodParameter parameter, TypeProvider expected) {
     if (!isExpectedType(parameter, expected)) {
       String expectedType = expected.getSimpleName();
       String actualType = parameter.getType().getSimpleName();
       String parameterValue = parameter.getValue();
-      String message = VALIDATION
-          .getErrorMessage(109, contextString, parameterValue, expectedType, actualType);
+      String message =
+          VALIDATION.getErrorMessage(109, contextString, parameterValue, expectedType, actualType);
       throw new UtamCompilationError(message);
     }
   }
@@ -168,9 +169,10 @@ public abstract class ParametersContext {
      * construct an instance of parameters context
      *
      * @param contextString parser context
-     * @param context       translation context
+     * @param context translation context
      */
-    AbstractParametersContext(String contextString, TranslationContext context, boolean hasMethodLevelArgs) {
+    AbstractParametersContext(
+        String contextString, TranslationContext context, boolean hasMethodLevelArgs) {
       super(contextString, context, hasMethodLevelArgs);
     }
 
@@ -178,7 +180,6 @@ public abstract class ParametersContext {
     public List<MethodParameter> getParameters() {
       return declaredMethodParams.stream().map(Entry::getValue).collect(Collectors.toList());
     }
-
   }
 
   /**
@@ -192,8 +193,8 @@ public abstract class ParametersContext {
     final List<Entry<Boolean, MethodParameter>> declaredMethodParams = new ArrayList<>();
     private final boolean hasMethodLevelArgs;
 
-
-    MethodParametersContext(String contextString, TranslationContext context, boolean hasMethodLevelArgs) {
+    MethodParametersContext(
+        String contextString, TranslationContext context, boolean hasMethodLevelArgs) {
       super(contextString, context);
       this.hasMethodLevelArgs = hasMethodLevelArgs;
     }
@@ -270,14 +271,18 @@ public abstract class ParametersContext {
      * @return list of parameters
      */
     public List<MethodParameter> getParameters() {
-      return declaredMethodParams.stream().map(p -> {
-        // check that each parameter was used in statements
-        if (!p.getKey()) {
-          String message = VALIDATION.getErrorMessage(503, contextString, p.getValue().getValue());
-          throw new UtamCompilationError(message);
-        }
-        return p.getValue();
-      }).collect(Collectors.toList());
+      return declaredMethodParams.stream()
+          .map(
+              p -> {
+                // check that each parameter was used in statements
+                if (!p.getKey()) {
+                  String message =
+                      VALIDATION.getErrorMessage(503, contextString, p.getValue().getValue());
+                  throw new UtamCompilationError(message);
+                }
+                return p.getValue();
+              })
+          .collect(Collectors.toList());
     }
   }
 
@@ -297,12 +302,10 @@ public abstract class ParametersContext {
      *
      * @param methodContext method context
      * @param contextString parser context
-     * @param context       translation context
+     * @param context translation context
      */
     public StatementParametersContext(
-        String contextString,
-        TranslationContext context,
-        MethodContext methodContext) {
+        String contextString, TranslationContext context, MethodContext methodContext) {
       super(contextString, context);
       this.methodParameters = methodContext == null ? null : methodContext.getParametersContext();
     }
@@ -364,7 +367,7 @@ public abstract class ParametersContext {
           nestedParameters.setParameter(nestedParameter);
         }
       }
-      if (!parameter.isLiteral()) { //check unique name and set to method level
+      if (!parameter.isLiteral()) { // check unique name and set to method level
         if (methodParameters != null) {
           methodParameters.registerParameter(parameter);
         }
@@ -372,6 +375,5 @@ public abstract class ParametersContext {
       }
       statementsParameters.add(parameter);
     }
-
   }
 }

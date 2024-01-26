@@ -50,13 +50,13 @@ public class BasicElementUnionType extends FromString implements UnionType {
   /**
    * if extended interfaces are set, create union type, otherwise return basic
    *
-   * @param elementName      name of the element will be used to build type name
-   * @param interfaceTypes   extended types, can be empty
+   * @param elementName name of the element will be used to build type name
+   * @param interfaceTypes extended types, can be empty
    * @param isPublicImplOnly for impl only POs type name has GET prefix
    * @return union type or basic element type
    */
-  public static TypeProvider asBasicOrUnionType(String elementName, String[] interfaceTypes,
-      boolean isPublicImplOnly) {
+  public static TypeProvider asBasicOrUnionType(
+      String elementName, String[] interfaceTypes, boolean isPublicImplOnly) {
     if (interfaceTypes == null || interfaceTypes.length == 0) {
       return BASIC_ELEMENT;
     }
@@ -79,7 +79,7 @@ public class BasicElementUnionType extends FromString implements UnionType {
       return (UnionType) type;
     }
     TypeProvider boundType = type.getBoundType();
-    if(boundType != null) {
+    if (boundType != null) {
       return asUnionTypeOrNull(boundType);
     }
     return null;
@@ -92,8 +92,8 @@ public class BasicElementUnionType extends FromString implements UnionType {
 
   @Override
   public List<String> getDeclarationCode() {
-    String extended = extendedTypes.stream().map(TypeProvider::getSimpleName)
-        .collect(Collectors.joining(", "));
+    String extended =
+        extendedTypes.stream().map(TypeProvider::getSimpleName).collect(Collectors.joining(", "));
     String code = String.format("interface %s extends %s {}", getSimpleName(), extended);
     return Collections.singletonList(code);
   }

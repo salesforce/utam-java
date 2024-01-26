@@ -54,8 +54,8 @@ class UtamMethodActionUtility extends UtamMethodAction {
   }
 
   @Override
-  Statement getStatement(TranslationContext context, MethodContext methodContext,
-      StatementContext statementContext) {
+  Statement getStatement(
+      TranslationContext context, MethodContext methodContext, StatementContext statementContext) {
     throw new IllegalStateException("Compose statement is set without intermittent object");
   }
 
@@ -65,8 +65,8 @@ class UtamMethodActionUtility extends UtamMethodAction {
    * property through `applyExternal.getMethodName()`
    */
   @Override
-  ComposeMethodStatement getComposeAction(TranslationContext context, MethodContext methodContext,
-      StatementContext statementContext) {
+  ComposeMethodStatement getComposeAction(
+      TranslationContext context, MethodContext methodContext, StatementContext statementContext) {
     chainValidations(statementContext, methodContext.getName());
     String parserContext = String.format("method \"%s\"", methodContext.getName());
     VALIDATION.validateRequiredProperty(applyExternal, parserContext, "applyExternal");
@@ -74,21 +74,21 @@ class UtamMethodActionUtility extends UtamMethodAction {
     Operand operand = new UtilityOperand(utilityType);
     List<MethodParameter> parameters = applyExternal.getParameters(context, methodContext);
     ReturnType returnTypeObject = getDeclaredReturnType(methodContext.getName());
-    TypeProvider defaultReturnType = statementContext.isLastStatement() ?
-        methodContext.getDeclaredReturnType().getReturnTypeOrDefault(context, VOID) : VOID;
-    TypeProvider statementReturnType = returnTypeObject
-        .getReturnTypeOrDefault(context, defaultReturnType);
+    TypeProvider defaultReturnType =
+        statementContext.isLastStatement()
+            ? methodContext.getDeclaredReturnType().getReturnTypeOrDefault(context, VOID)
+            : VOID;
+    TypeProvider statementReturnType =
+        returnTypeObject.getReturnTypeOrDefault(context, defaultReturnType);
     ActionType action = new CustomActionType(applyExternal.getMethodName(), statementReturnType);
-    TypeProvider returnType = statementContext
-        .getDeclaredReturnOrDefault(context, methodContext.getDeclaredReturnType(),
-            action.getReturnType());
+    TypeProvider returnType =
+        statementContext.getDeclaredReturnOrDefault(
+            context, methodContext.getDeclaredReturnType(), action.getReturnType());
     Operation operation = new UtilityOperation(action, returnType, parameters);
     return new UtilityStatement(operand, operation, statementContext);
   }
 
-  /**
-   * Information about an imperative extension class
-   */
+  /** Information about an imperative extension class */
   static class UtilityOperand extends ConstOperand {
 
     private final TypeProvider type;
@@ -109,18 +109,16 @@ class UtamMethodActionUtility extends UtamMethodAction {
     }
   }
 
-  /**
-   * information about applied action on imperative extension
-   */
+  /** information about applied action on imperative extension */
   static class UtilityOperation extends ApplyOperation {
 
     /**
-     * @param action           method to invoke
-     * @param returnType       returnType from action
+     * @param action method to invoke
+     * @param returnType returnType from action
      * @param actionParameters parameters for method invocation
      */
-    UtilityOperation(ActionType action, TypeProvider returnType,
-        List<MethodParameter> actionParameters) {
+    UtilityOperation(
+        ActionType action, TypeProvider returnType, List<MethodParameter> actionParameters) {
       super(action, returnType, actionParameters, null);
     }
 
@@ -134,7 +132,8 @@ class UtamMethodActionUtility extends UtamMethodAction {
     protected String getInvocationString() {
       String parametersValues = getParametersValuesString(getActionParameters());
       String separator = parametersValues.length() > 0 ? ", " : "";
-      return String.format("%s(new %s(this)%s%s)",
+      return String.format(
+          "%s(new %s(this)%s%s)",
           getAction().getApplyString(),
           UtamUtilitiesContext.class.getSimpleName(),
           separator,
@@ -142,15 +141,12 @@ class UtamMethodActionUtility extends UtamMethodAction {
     }
   }
 
-  /**
-   * Represent a Compose Statement for an Imperative Extension
-   */
+  /** Represent a Compose Statement for an Imperative Extension */
   static class UtilityStatement extends Single {
 
     /**
-     * @param operand          represents the imperative extension class
-     * @param operation        represents the static method being called on the imperative
-     *                         extension
+     * @param operand represents the imperative extension class
+     * @param operation represents the static method being called on the imperative extension
      * @param statementContext statement context
      */
     UtilityStatement(Operand operand, Operation operation, StatementContext statementContext) {

@@ -43,19 +43,22 @@ public class FrameMethod implements PageObjectMethod {
   /**
    * Initializes a new instance of the FrameMethod class
    *
-   * @param element           the element
-   * @param isPublic          a value indicating whether the element is public
+   * @param element the element
+   * @param isPublic a value indicating whether the element is public
    * @param locatorParameters the list of parameters to use in locating the element
-   * @param description       the description of the method
+   * @param description the description of the method
    */
-  public FrameMethod(ElementContext element, boolean isPublic,
-      List<MethodParameter> locatorParameters, UtamMethodDescription description) {
+  public FrameMethod(
+      ElementContext element,
+      boolean isPublic,
+      List<MethodParameter> locatorParameters,
+      UtamMethodDescription description) {
     methodCode.add(getScopeElementCode(element.getScopeElement()));
     String scopeVariableName = element.getScopeElement().getName();
     String locationWithParameters = getElementLocationCode(element.getName(), locatorParameters);
-    methodCode.add(String.format("return basic(%s, %s).buildFrame()",
-        scopeVariableName,
-        locationWithParameters));
+    methodCode.add(
+        String.format(
+            "return basic(%s, %s).buildFrame()", scopeVariableName, locationWithParameters));
     this.methodName = getElementGetterMethodName(element.getName(), isPublic);
     this.parameters = element.getParameters();
     this.isPublic = isPublic;
@@ -64,14 +67,9 @@ public class FrameMethod implements PageObjectMethod {
 
   @Override
   public MethodDeclaration getDeclaration() {
-    List<TypeProvider> imports = Stream.of(FRAME_ELEMENT)
-        .collect(Collectors.toList());
-    JavadocObject javadoc = new MethodJavadoc(methodName,
-        FRAME_ELEMENT,
-        parameters,
-        description);
-    return new MethodDeclarationImpl(methodName, parameters, FRAME_ELEMENT, imports,
-        javadoc);
+    List<TypeProvider> imports = Stream.of(FRAME_ELEMENT).collect(Collectors.toList());
+    JavadocObject javadoc = new MethodJavadoc(methodName, FRAME_ELEMENT, parameters, description);
+    return new MethodDeclarationImpl(methodName, parameters, FRAME_ELEMENT, imports, javadoc);
   }
 
   @Override

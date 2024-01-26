@@ -23,8 +23,10 @@ import utam.core.framework.consumer.UtamError;
 public class UtamMethodTests {
 
   private static void test(String jsonFile, String expectedError) {
-    UtamError e = expectThrows(UtamError.class,
-        () -> new DeserializerUtilities().getContext("validate/compose/" + jsonFile));
+    UtamError e =
+        expectThrows(
+            UtamError.class,
+            () -> new DeserializerUtilities().getContext("validate/compose/" + jsonFile));
     assertThat(e.getMessage(), containsString(expectedError));
   }
 
@@ -35,18 +37,23 @@ public class UtamMethodTests {
   @Test
   public void testGetAbstractMethodWithComposeThrows() {
     Exception e = expectCompilerErrorFromFile("interface/nonEmptyMethod");
-    assertThat(e.getMessage(),
+    assertThat(
+        e.getMessage(),
         containsString("error 400: method \"test\": incorrect format of abstract method"));
   }
 
   @Test
   public void testComposeEmptyStatementsThrows() {
-    test("emptyCompose", "error 12: method \"test\": property \"compose\" should be a non-empty array");
+    test(
+        "emptyCompose",
+        "error 12: method \"test\": property \"compose\" should be a non-empty array");
   }
 
   @Test
   public void testComposeNullStatementsThrows() {
-    test("nullCompose", "error 12: method \"test\": property \"compose\" should be a non-empty array");
+    test(
+        "nullCompose",
+        "error 12: method \"test\": property \"compose\" should be a non-empty array");
   }
 
   @Test
@@ -55,14 +62,19 @@ public class UtamMethodTests {
     test.addRawString("interface", "true");
     test.addRawString("methods", "[{\"name\":\"test\", \"returnType\":[\"wrong\"]}]");
     Exception e = test.expectCompilerError();
-    assertThat(e.getMessage(),
-        containsString("error 115: abstract method \"test\" return type: basic type \"[ \"wrong\" ]\" is not supported, " +
-                "valid values are: actionable, clickable, draggable, editable, touchable"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 115: abstract method \"test\" return type: basic type \"[ \"wrong\" ]\" is not"
+                + " supported, valid values are: actionable, clickable, draggable, editable,"
+                + " touchable"));
   }
 
   @Test
   public void testComposeArgReferenceParameter() {
-    test("argReferenceParam",
-            "error 501: method \"test\" arguments: parameter \"arg1\" at method level can't have type \"argumentReference\"");
+    test(
+        "argReferenceParam",
+        "error 501: method \"test\" arguments: parameter \"arg1\" at method level can't have type"
+            + " \"argumentReference\"");
   }
 }

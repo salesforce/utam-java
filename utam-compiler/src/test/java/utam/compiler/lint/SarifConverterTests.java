@@ -52,8 +52,7 @@ public class SarifConverterTests {
     assertThat(location, notNullValue());
     assertThat(location.getUriBaseId(), equalTo(SARIF_BASE_URI));
     assertThat(location.getIndex(), equalTo(0));
-    assertThat(location.getUri(),
-        equalTo("src/test/resources/lint/sarif/test.utam.json"));
+    assertThat(location.getUri(), equalTo("src/test/resources/lint/sarif/test.utam.json"));
   }
 
   @BeforeClass
@@ -61,8 +60,8 @@ public class SarifConverterTests {
     getRunner("sarif").run();
     String outputFile = System.getProperty("user.dir") + "/src/test/resources/lint/sarif.json";
     File file = new File(outputFile);
-    assertThat(String.format("linting SARIF output %s is missing", outputFile), file.exists(),
-        is(true));
+    assertThat(
+        String.format("linting SARIF output %s is missing", outputFile), file.exists(), is(true));
     Reader reader = new FileReader(file);
     sarifObject = new ObjectMapper().readValue(reader, SarifSchema210.class);
   }
@@ -96,11 +95,16 @@ public class SarifConverterTests {
 
     // rule properties
     String ruleId = "ULR03";
-    ReportingDescriptor rule = toolComponent.getRules().stream()
-        .filter(r -> r.getId().equals(ruleId)).findAny().orElse(null);
+    ReportingDescriptor rule =
+        toolComponent.getRules().stream()
+            .filter(r -> r.getId().equals(ruleId))
+            .findAny()
+            .orElse(null);
     assertThat(rule, notNullValue());
     assertThat(rule.getName(), equalTo("Required author"));
-    assertThat(rule.getShortDescription().getText(), equalTo("Check description at the root level has an author"));
+    assertThat(
+        rule.getShortDescription().getText(),
+        equalTo("Check description at the root level has an author"));
 
     // results
     assertThat(run.getResults(), hasSize(2));
@@ -115,10 +119,13 @@ public class SarifConverterTests {
     assertThat(result.getLevel(), equalTo(Level.WARNING));
     assertThat(result.getKind(), equalTo(Kind.FAIL));
     assertThat(result.getMessage().getId(), equalTo("2005"));
-    assertThat(result.getMessage().getText(), equalTo("warning 2005: property \"author\" is missing in the root description"));
+    assertThat(
+        result.getMessage().getText(),
+        equalTo("warning 2005: property \"author\" is missing in the root description"));
     assertThat(result.getFixes(), hasSize(1));
     Fix fix = result.getFixes().iterator().next();
-    assertThat(fix.getDescription().getText(), equalTo("add \"author\" property to the root description"));
+    assertThat(
+        fix.getDescription().getText(), equalTo("add \"author\" property to the root description"));
 
     // source location
     assertThat(result.getLocations(), hasSize(1));
@@ -128,5 +135,4 @@ public class SarifConverterTests {
     assertThat(physicalLocation.getRegion(), notNullValue());
     assertThat(physicalLocation.getRegion().getStartLine(), equalTo(6));
   }
-
 }

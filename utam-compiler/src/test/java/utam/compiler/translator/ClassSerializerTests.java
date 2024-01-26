@@ -7,21 +7,20 @@
  */
 package utam.compiler.translator;
 
-import utam.core.declarative.representation.MethodDeclaration;
-import utam.core.declarative.representation.PageObjectClass;
-import utam.core.declarative.representation.PageObjectMethod;
-import org.testng.annotations.Test;
-
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import utam.core.framework.base.ElementLocation;
-
-import static utam.compiler.grammar.TestUtilities.getJsonStringDeserializer;
-import static utam.compiler.helpers.TypeUtilities.VOID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static utam.compiler.grammar.TestUtilities.getJsonStringDeserializer;
+import static utam.compiler.helpers.TypeUtilities.VOID;
+
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.testng.annotations.Test;
+import utam.core.declarative.representation.MethodDeclaration;
+import utam.core.declarative.representation.PageObjectClass;
+import utam.core.declarative.representation.PageObjectMethod;
+import utam.core.framework.base.ElementLocation;
 
 public class ClassSerializerTests {
 

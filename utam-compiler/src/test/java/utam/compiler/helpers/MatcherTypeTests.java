@@ -50,11 +50,9 @@ public class MatcherTypeTests {
   @Test
   public void stringEqualsTest() {
     MatcherType matcherType = MatcherType.stringEquals;
-    List<MethodParameter> paramTypes = Collections.singletonList(
-        new Regular("text", PrimitiveType.STRING));
-    assertThat(
-        matcherType.getCode(ACTUAL_VALUE, paramTypes),
-        is(equalTo("text.equals(test)")));
+    List<MethodParameter> paramTypes =
+        Collections.singletonList(new Regular("text", PrimitiveType.STRING));
+    assertThat(matcherType.getCode(ACTUAL_VALUE, paramTypes), is(equalTo("text.equals(test)")));
     assertThat(matcherType.getOperandType().isSameType(PrimitiveType.STRING), is(true));
     List<TypeProvider> parameterTypes = matcherType.getExpectedParametersTypes();
     assertThat(parameterTypes, hasSize(1));
@@ -64,8 +62,8 @@ public class MatcherTypeTests {
   @Test
   public void stringContainsTest() {
     MatcherType matcherType = MatcherType.stringContains;
-    List<MethodParameter> paramTypes = Collections.singletonList(
-        new Regular("text", PrimitiveType.STRING));
+    List<MethodParameter> paramTypes =
+        Collections.singletonList(new Regular("text", PrimitiveType.STRING));
     assertThat(
         matcherType.getCode(ACTUAL_VALUE, paramTypes),
         is(equalTo("(test!= null && test.contains(text))")));
@@ -78,8 +76,7 @@ public class MatcherTypeTests {
   @Test
   public void notNullTest() {
     MatcherType matcherType = MatcherType.notNull;
-    assertThat(
-        matcherType.getCode(ACTUAL_VALUE, EMPTY_PARAMETERS), is(equalTo("test != null")));
+    assertThat(matcherType.getCode(ACTUAL_VALUE, EMPTY_PARAMETERS), is(equalTo("test != null")));
     assertThat(matcherType.getOperandType().isSameType(JAVA_OBJECT_TYPE), is(true));
     assertThat(matcherType.getExpectedParametersTypes(), hasSize(0));
   }

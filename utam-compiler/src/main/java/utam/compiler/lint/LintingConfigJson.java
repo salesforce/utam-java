@@ -47,28 +47,28 @@ import utam.core.framework.UtamLogger;
  */
 public class LintingConfigJson implements LintingConfig {
 
-  /**
-   * default name for output sarif report
-   */
+  /** default name for output sarif report */
   private static final String DEFAULT_SARIF_OUTPUT_FILE = "utam-lint.sarif";
+
   /**
    * default configuration when config is empty, public because used from different package by
    * runner
    */
-  public static final LintingConfig DEFAULT_LINTING_CONFIG = new LintingConfigJson(
-      false,
-      false,
-      DEFAULT_SARIF_OUTPUT_FILE,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null
-  );
+  public static final LintingConfig DEFAULT_LINTING_CONFIG =
+      new LintingConfigJson(
+          false,
+          false,
+          DEFAULT_SARIF_OUTPUT_FILE,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null);
+
   private final List<LintingRuleImpl> localRules = new ArrayList<>();
   private final List<LintingRuleImpl> globalRules = new ArrayList<>();
   private final boolean isInterruptCompilation;
@@ -85,7 +85,8 @@ public class LintingConfigJson implements LintingConfig {
       @JsonProperty(value = "requiredRootDescription") LintRuleOverride requiredRootDescription,
       @JsonProperty(value = "requiredAuthor") LintRuleOverride requiredAuthor,
       @JsonProperty(value = "requiredMethodDescription") LintRuleOverride requiredMethodDescription,
-      @JsonProperty(value = "requiredSingleShadowRoot") LintRuleOverride singleShadowBoundaryAllowed,
+      @JsonProperty(value = "requiredSingleShadowRoot")
+          LintRuleOverride singleShadowBoundaryAllowed,
       @JsonProperty(value = "duplicateRootSelectors") LintRuleOverride uniqueRootSelectors,
       @JsonProperty(value = "elementCantHaveRootSelector") LintRuleOverride rootSelectorExists,
       @JsonProperty(value = "duplicateCustomSelectors") LintRuleOverride customWrongType,
@@ -119,10 +120,10 @@ public class LintingConfigJson implements LintingConfig {
 
   @Override
   public String toString() {
-    String output = localRules.stream()
-        .map(LintingRuleImpl::toString).collect(Collectors.joining("\n"));
-    String outputGlobal = globalRules.stream()
-        .map(LintingRuleImpl::toString).collect(Collectors.joining("\n"));
+    String output =
+        localRules.stream().map(LintingRuleImpl::toString).collect(Collectors.joining("\n"));
+    String outputGlobal =
+        globalRules.stream().map(LintingRuleImpl::toString).collect(Collectors.joining("\n"));
     return String.format("\n%s\n%s", output, outputGlobal);
   }
 
@@ -133,7 +134,7 @@ public class LintingConfigJson implements LintingConfig {
 
   @Override
   public void lint(LintingContext context, PageObjectLinting pageObjectContext) {
-    if(!isDisabled) {
+    if (!isDisabled) {
       for (LintingRuleImpl rule : localRules) {
         if (rule.isEnabled(pageObjectContext)) {
           rule.validate(context.getErrors(), pageObjectContext);
@@ -145,7 +146,7 @@ public class LintingConfigJson implements LintingConfig {
 
   @Override
   public void finish(LintingContext context) {
-    if(!isDisabled) {
+    if (!isDisabled) {
       List<PageObjectLinting> all = context.getAllPageObjects();
       for (int i = 0; i < all.size(); i++) {
         PageObjectLinting first = all.get(i);
@@ -166,9 +167,10 @@ public class LintingConfigJson implements LintingConfig {
       try {
         Writer writer = getWriterWithDir(reportFilePath);
         ObjectMapper mapper = new ObjectMapper();
-        DefaultPrettyPrinter formatter = new DefaultPrettyPrinter()
-            .withObjectIndenter(new DefaultIndenter("  ", "\n"))
-            .withArrayIndenter(new DefaultIndenter("  ", "\n"));
+        DefaultPrettyPrinter formatter =
+            new DefaultPrettyPrinter()
+                .withObjectIndenter(new DefaultIndenter("  ", "\n"))
+                .withArrayIndenter(new DefaultIndenter("  ", "\n"));
         SarifSchema210 sarifSchema210 = sarifConverter.convert(context, context.getErrors());
         UtamLogger.info(String.format("Write results of linting to %s", reportFilePath));
         mapper.writer(formatter).writeValue(writer, sarifSchema210);
@@ -176,18 +178,20 @@ public class LintingConfigJson implements LintingConfig {
         String err = String.format("error creating linting log %s", reportFilePath);
         throw new IllegalStateException(err, e);
       }
-      boolean hasErrors = context.getErrors().stream().anyMatch(lintingError -> lintingError.getLevel().equals(
-          ViolationLevel.error));
-      if(hasErrors && isInterruptCompilation) {
-        throw new UtamLintingError("UTAM linting failed, please check SARIF report " + this.lintingOutputFile);
+      boolean hasErrors =
+          context.getErrors().stream()
+              .anyMatch(lintingError -> lintingError.getLevel().equals(ViolationLevel.error));
+      if (hasErrors && isInterruptCompilation) {
+        throw new UtamLintingError(
+            "UTAM linting failed, please check SARIF report " + this.lintingOutputFile);
       }
     }
   }
 
   private String getSarifFilePath(String compilerRoot) {
     String targetPath = compilerRoot == null ? System.getProperty("user.dir") : compilerRoot;
-    return
-        targetPath.endsWith(File.separator) ? targetPath + lintingOutputFile
-            : targetPath + File.separator + lintingOutputFile;
+    return targetPath.endsWith(File.separator)
+        ? targetPath + lintingOutputFile
+        : targetPath + File.separator + lintingOutputFile;
   }
 }

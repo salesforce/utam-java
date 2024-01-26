@@ -9,7 +9,6 @@ package utam.compiler.translator;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -30,7 +29,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -56,24 +54,30 @@ public class JsonCompilerConfigTests {
 
   private static JsonCompilerConfig getTestConfig() throws IOException {
     return new JsonCompilerConfig(
-        new File(JsonCompilerConfig.class.getClassLoader().getResource("config/utam.config.json").getFile()),
+        new File(
+            JsonCompilerConfig.class
+                .getClassLoader()
+                .getResource("config/utam.config.json")
+                .getFile()),
         new File(System.getProperty("user.dir")),
         null);
   }
 
   private static Module getTestModule() {
-    return new Module("name",
-          null,
-          null,
-          "pageObjectsDirectory",
-          null,
-          null,
-          null,
-          null,
-          new ArrayList<>(),
-          new ArrayList<>(),
-          new ArrayList<>(),
-          null, null);
+    return new Module(
+        "name",
+        null,
+        null,
+        "pageObjectsDirectory",
+        null,
+        null,
+        null,
+        null,
+        new ArrayList<>(),
+        new ArrayList<>(),
+        new ArrayList<>(),
+        null,
+        null);
   }
 
   @Test
@@ -90,7 +94,7 @@ public class JsonCompilerConfigTests {
     assertThat(module.getPageObjectFileMaskRegex(), is(equalTo("(.*)\\.utam\\.json$")));
     assertThat(module.getName(), is(equalTo("myModule")));
 
-    Map<String,String> namespaces = module.getPackagesMapping();
+    Map<String, String> namespaces = module.getPackagesMapping();
     assertThat(namespaces.keySet(), hasSize(2));
     Namespace namespace = module.namespaces.get(0);
     assertThat(namespace.getTypeMatch(), is(equalTo("utam-one")));
@@ -113,7 +117,8 @@ public class JsonCompilerConfigTests {
 
     TranslatorTargetConfig targetConfig = module.getTargetConfig("path");
     assertThat(targetConfig.getUnitTestRunnerType(), is(equalTo(UnitTestRunner.JUNIT)));
-    assertThat(targetConfig.getInjectionConfigRootFilePath(), is(equalTo("path/src/test/resources")));
+    assertThat(
+        targetConfig.getInjectionConfigRootFilePath(), is(equalTo("path/src/test/resources")));
   }
 
   @Test
@@ -123,8 +128,8 @@ public class JsonCompilerConfigTests {
     sourceConfig.recursiveScan();
     Collection<String> scannerResults = sourceConfig.getPageObjects();
     assertThat(scannerResults, hasSize(2));
-    assertThat(scannerResults,
-        hasItems("utam-one/pageObjects/first", "utam-two/pageObjects/second"));
+    assertThat(
+        scannerResults, hasItems("utam-one/pageObjects/first", "utam-two/pageObjects/second"));
   }
 
   @Test
@@ -145,18 +150,17 @@ public class JsonCompilerConfigTests {
     List<File> inputFiles = new ArrayList<>();
     inputFiles.add(new File("foo.utam.json"));
     UtamError e = expectThrows(UtamError.class, () -> module.getSourceConfig("", inputFiles));
-    assertThat(e.getMessage(),
-        is(equalTo(ERR_FILES_WITHOUT_NAMESPACE)));
+    assertThat(e.getMessage(), is(equalTo(ERR_FILES_WITHOUT_NAMESPACE)));
   }
 
   @Test
   public void testNonDefaultModuleProperties() {
     Module module = getTestModule();
     module.namespaces.add(new Namespace("utam-package", "*/package"));
-    module.getRawProfiles().add(new Profile("name", new String[]{"values"}));
+    module.getRawProfiles().add(new Profile("name", new String[] {"values"}));
     assertThat(module.getPageObjectFileMaskRegex(), is(equalTo("(.*)\\.utam\\.json$")));
-    assertThat(module.getConfiguredProfiles(),
-        hasItems(new StringValueProfileConfig("name", "values")));
+    assertThat(
+        module.getConfiguredProfiles(), hasItems(new StringValueProfileConfig("name", "values")));
     assertThat(module.getPackagesMapping().keySet(), hasItems("utam-package"));
     assertThat(module.getPackagesMapping().values(), hasItems("*/package"));
     module.getTargetConfig("");
@@ -165,8 +169,10 @@ public class JsonCompilerConfigTests {
   @Test
   public void testNonExistingFile() {
     File wrongFile = new File("error");
-    IOException e = expectThrows(IOException.class, () -> new JsonCompilerConfig(wrongFile, wrongFile, null));
-    assertThat(e.getMessage(),
+    IOException e =
+        expectThrows(IOException.class, () -> new JsonCompilerConfig(wrongFile, wrongFile, null));
+    assertThat(
+        e.getMessage(),
         is(CoreMatchers.equalTo(String.format(ERR_READING_COMPILER_CONFIG, "error"))));
   }
 
@@ -179,21 +185,22 @@ public class JsonCompilerConfigTests {
     assertThat(module.getPackagesMapping().keySet(), hasItems("utam-package"));
     module.namespaces.add(new Namespace("utam-package", "*/package2"));
     UtamError e = expectThrows(UtamError.class, module::getPackagesMapping);
-    assertThat(e.getMessage(),
+    assertThat(
+        e.getMessage(),
         is(equalTo(String.format(ERR_DUPLICATE_MAPPING, "utam-package", "*/package1"))));
   }
 
   @Test
   public void testDuplicateProfiles() {
     Module module = getTestModule();
-    Profile profile = new Profile("name", new String[]{"value"});
+    Profile profile = new Profile("name", new String[] {"value"});
     module.getRawProfiles().add(profile);
     module.getRawProfiles().add(profile);
     assertThat("duplicate should be ignored", module.getConfiguredProfiles(), hasSize(1));
-    module.getRawProfiles().add(new Profile("name", new String[]{"differentValue"}));
+    module.getRawProfiles().add(new Profile("name", new String[] {"differentValue"}));
     UtamError e = expectThrows(UtamError.class, module::getConfiguredProfiles);
-    assertThat(e.getMessage(),
-        is(equalTo(String.format(ERR_DUPLICATE_PROFILE_DIFF_VALUES, "name"))));
+    assertThat(
+        e.getMessage(), is(equalTo(String.format(ERR_DUPLICATE_PROFILE_DIFF_VALUES, "name"))));
   }
 
   @Test
@@ -202,20 +209,24 @@ public class JsonCompilerConfigTests {
     final String PROFILE_VALUE_1 = "profileValue1";
     final String PROFILE_VALUE_2 = "profileValue2";
 
-    final String PROFILE_JSON = String.format("{\n"
-            + "  \"name\": \"%s\",\n"
-            + "  \"values\": [\n"
-            + "    \"%s\",\n"
-            + "    \"%s\"\n"
-            + "  ]\n"
-            + "}",
-        PROFILE_NAME,
-        PROFILE_VALUE_1,
-        PROFILE_VALUE_2);
-    ProfileConfiguration profileConfiguration = new ObjectMapper()
-        .readValue(PROFILE_JSON, Profile.class).getProfileConfiguration();
-    assertThat(profileConfiguration,
-        is(equalTo(new StringValueProfileConfig(PROFILE_NAME, new String[]{PROFILE_VALUE_1, PROFILE_VALUE_2}))));
+    final String PROFILE_JSON =
+        String.format(
+            "{\n"
+                + "  \"name\": \"%s\",\n"
+                + "  \"values\": [\n"
+                + "    \"%s\",\n"
+                + "    \"%s\"\n"
+                + "  ]\n"
+                + "}",
+            PROFILE_NAME, PROFILE_VALUE_1, PROFILE_VALUE_2);
+    ProfileConfiguration profileConfiguration =
+        new ObjectMapper().readValue(PROFILE_JSON, Profile.class).getProfileConfiguration();
+    assertThat(
+        profileConfiguration,
+        is(
+            equalTo(
+                new StringValueProfileConfig(
+                    PROFILE_NAME, new String[] {PROFILE_VALUE_1, PROFILE_VALUE_2}))));
   }
 
   @Test
@@ -223,17 +234,22 @@ public class JsonCompilerConfigTests {
     Profile profile = new Profile("platform", new String[] {"ios"});
     Module module = getTestModule();
     module.setUniqueProfiles(List.of(profile));
-    UtamError e = expectThrows(UtamError.class, () -> module.setUniqueProfiles(List.of(profile, profile)));
-    assertThat(e.getMessage(),
-        is(equalTo(String.format(ERR_DUPLICATE_PROFILE, "platform"))));
+    UtamError e =
+        expectThrows(UtamError.class, () -> module.setUniqueProfiles(List.of(profile, profile)));
+    assertThat(e.getMessage(), is(equalTo(String.format(ERR_DUPLICATE_PROFILE, "platform"))));
   }
 
   @Test
   public void testMissingFields() throws IOException {
-    JsonCompilerConfig config = new JsonCompilerConfig(
-        new File(JsonCompilerConfig.class.getClassLoader().getResource("config/nofields.json").getFile()),
-        new File(System.getProperty("user.dir")),
-        null);
+    JsonCompilerConfig config =
+        new JsonCompilerConfig(
+            new File(
+                JsonCompilerConfig.class
+                    .getClassLoader()
+                    .getResource("config/nofields.json")
+                    .getFile()),
+            new File(System.getProperty("user.dir")),
+            null);
     assertThat(config.getModuleName(), is(emptyString()));
     assertThat(config.getVersion(), is(emptyString()));
     assertThat(config.getCopyright(), is(empty()));
@@ -247,7 +263,7 @@ public class JsonCompilerConfigTests {
     assertThat(module.getPageObjectFileMaskRegex(), is(equalTo("(.*)\\.utam\\.json$")));
     assertThat(module.getName(), is(emptyString()));
 
-    Map<String,String> namespaces = module.getPackagesMapping();
+    Map<String, String> namespaces = module.getPackagesMapping();
     assertThat(namespaces.keySet(), is(empty()));
 
     List<Profile> profiles = module.getRawProfiles();

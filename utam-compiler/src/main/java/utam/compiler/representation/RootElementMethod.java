@@ -7,7 +7,6 @@
  */
 package utam.compiler.representation;
 
-
 import static utam.compiler.types.BasicElementUnionType.asUnionTypeOrNull;
 
 import java.util.ArrayList;
@@ -31,8 +30,8 @@ import utam.core.declarative.representation.UnionType;
 public class RootElementMethod {
 
   // this method must exist in BasePageObject
-  private final static String BASE_METHOD_NAME = "getRootElement";
-  private final static String PUBLIC_METHOD_NAME = "getRoot";
+  private static final String BASE_METHOD_NAME = "getRootElement";
+  private static final String PUBLIC_METHOD_NAME = "getRoot";
 
   /**
    * Protected getter for root element of default type
@@ -96,12 +95,7 @@ public class RootElementMethod {
     public MethodDeclaration getDeclaration() {
       List<MethodParameter> parameters = new ArrayList<>();
       JavadocObject javadoc = new EmptyJavadoc();
-      return new MethodDeclarationImpl(
-          methodName,
-          parameters,
-          returnType,
-          imports,
-          javadoc);
+      return new MethodDeclarationImpl(methodName, parameters, returnType, imports, javadoc);
     }
 
     @Override
@@ -122,7 +116,8 @@ public class RootElementMethod {
    */
   public static class PublicCustomType extends BasicElementGetterMethod {
 
-    static final String PROXY_CODE_LINE_TEMPLATE = "return getProxy(this.getRootElement(), %s.class)";
+    static final String PROXY_CODE_LINE_TEMPLATE =
+        "return getProxy(this.getRootElement(), %s.class)";
     private final List<TypeProvider> imports = new ArrayList<>();
     private final List<TypeProvider> classImports = new ArrayList<>();
 
@@ -141,12 +136,7 @@ public class RootElementMethod {
     public MethodDeclaration getDeclaration() {
       List<MethodParameter> parameters = new ArrayList<>();
       JavadocObject javadoc = new EmptyJavadoc();
-      return new MethodDeclarationImpl(
-          methodName,
-          parameters,
-          returnType,
-          imports,
-          javadoc);
+      return new MethodDeclarationImpl(methodName, parameters, returnType, imports, javadoc);
     }
 
     @Override
@@ -186,11 +176,7 @@ public class RootElementMethod {
     public MethodDeclaration getDeclaration() {
       List<MethodParameter> parameters = new ArrayList<>();
       JavadocObject javadoc = new EmptyJavadoc();
-      return new MethodDeclarationImpl(
-          methodName,
-          parameters,
-          this.returnType,
-          javadoc);
+      return new MethodDeclarationImpl(methodName, parameters, this.returnType, javadoc);
     }
 
     @Override
@@ -201,8 +187,8 @@ public class RootElementMethod {
     @Override
     public List<String> getCodeLines() {
       String type = this.returnType.getSimpleName();
-      return Collections
-          .singletonList(String.format(PublicCustomType.PROXY_CODE_LINE_TEMPLATE, type));
+      return Collections.singletonList(
+          String.format(PublicCustomType.PROXY_CODE_LINE_TEMPLATE, type));
     }
 
     @Override

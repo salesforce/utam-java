@@ -34,11 +34,11 @@ public class JsonCompilerOutputTests {
   private static final String USER_ROOT = System.getProperty("user.dir");
 
   static TranslatorConfig getConfig() throws IOException {
-    JsonCompilerConfig jsonConfig = new JsonCompilerConfig(
-        new File(USER_ROOT + "/src/test/resources/compiler/" + "test.compiler.json"),
-        new File(USER_ROOT),
-        null
-    );
+    JsonCompilerConfig jsonConfig =
+        new JsonCompilerConfig(
+            new File(USER_ROOT + "/src/test/resources/compiler/" + "test.compiler.json"),
+            new File(USER_ROOT),
+            null);
     return jsonConfig.getTranslatorConfig();
   }
 
@@ -55,9 +55,10 @@ public class JsonCompilerOutputTests {
     // platform-specific line endings ("\r\n"). Normalize the line endings by removing
     // carriage return ("\r") characters, since this method is only used for verification
     // in unit tests.
-    return new String(Files.readAllBytes(
-        new File(USER_ROOT + "/src/test/resources/" + compilerOutputFile)
-            .toPath())).replace("\r", "");
+    return new String(
+            Files.readAllBytes(
+                new File(USER_ROOT + "/src/test/resources/" + compilerOutputFile).toPath()))
+        .replace("\r", "");
   }
 
   @Test

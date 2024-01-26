@@ -10,13 +10,12 @@ package utam.compiler.helpers;
 import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
-import utam.compiler.UtamCompilationError;
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.element.Clickable;
-
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import utam.compiler.UtamCompilationError;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.element.Clickable;
 
 /**
  * this enum links element actions with translator code <br>
@@ -45,8 +44,7 @@ public enum ClickableActionType implements ActionType {
   rightClick(),
 
   /**
-   * click and hold on the element for the specified number of seconds
-   * using Actions class <br>
+   * click and hold on the element for the specified number of seconds using Actions class <br>
    * throws exception if fails
    */
   clickAndHold(PrimitiveType.NUMBER);
@@ -67,7 +65,7 @@ public enum ClickableActionType implements ActionType {
       // Using TypeUtilities.getClassFromFullName will return "java.lang.Integer"
       // as the class name, which is not what we want. We want the primitive,
       // not the boxed Integer class, so we will hand-code that here.
-      return new Class[] { int.class };
+      return new Class[] {int.class};
     }
     return new Class[0];
   }
@@ -87,8 +85,9 @@ public enum ClickableActionType implements ActionType {
     int expected = actionParameters.length;
     String contextStr = String.format("%s action \"%s\"", parserContext, this.name());
     if (actionParameters.length != parameterCount) {
-      throw new UtamCompilationError(VALIDATION.getErrorMessage(108, contextStr,
-              String.valueOf(expected), String.valueOf(parameterCount)));
+      throw new UtamCompilationError(
+          VALIDATION.getErrorMessage(
+              108, contextStr, String.valueOf(expected), String.valueOf(parameterCount)));
     }
     return Stream.of(actionParameters).collect(Collectors.toList());
   }

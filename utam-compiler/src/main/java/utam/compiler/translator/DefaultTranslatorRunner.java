@@ -16,7 +16,6 @@ import com.google.common.io.CharStreams;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -25,8 +24,8 @@ import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.JsonDeserializer;
 import utam.compiler.helpers.TranslationContext;
 import utam.core.declarative.errors.CompilerErrorsContext;
-import utam.core.declarative.lint.LintingContext;
 import utam.core.declarative.lint.LintingConfig;
+import utam.core.declarative.lint.LintingContext;
 import utam.core.declarative.representation.PageObjectClass;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.PageObjectInterface;
@@ -51,7 +50,8 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
   static final String DUPLICATE_PAGE_OBJECT_NAME = "declaration '%s' already generated";
   static final String DUPLICATE_IMPL_WITH_PROFILE_ERR =
       "can't set dependency as '%s' for type '%s', it was already set as '%s' for profile %s";
-  static final String ERR_MODULE_NAME_NOT_CONFIGURED = "module name is not configured, can't write dependencies config file";
+  static final String ERR_MODULE_NAME_NOT_CONFIGURED =
+      "module name is not configured, can't write dependencies config file";
   private static final String ERR_PROFILE_PATH_DOES_NOT_EXIST =
       "can't write profiles output, profile path '%s' does not exist and cannot be created";
   private final TranslatorConfig translatorConfig;
@@ -76,8 +76,8 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     profileDependenciesMapping.put(DEFAULT_PROFILE, new HashMap<>());
   }
 
-  private static String getStringFromReader(TranslatorSourceConfig translatorSourceConfig,
-      String pageObjectURI) {
+  private static String getStringFromReader(
+      TranslatorSourceConfig translatorSourceConfig, String pageObjectURI) {
     try {
       return CharStreams.toString(translatorSourceConfig.getDeclarationReader(pageObjectURI));
     } catch (IOException e) {
@@ -117,7 +117,8 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
                 pageObjectInterface.getInterfaceType().getFullName()));
       }
       if (!object.isInterfaceOnly()) {
-        write(object.getImplementation().getClassType(),
+        write(
+            object.getImplementation().getClassType(),
             object.getImplementation().getGeneratedCode());
         filesCounter++;
         if (writeUnitTest(object.getImplementation())) {
@@ -127,8 +128,9 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       counter++;
     }
     info(
-        String.format("generated %d files for %d page objects, took %d msec", filesCounter, counter,
-            System.currentTimeMillis() - timer));
+        String.format(
+            "generated %d files for %d page objects, took %d msec",
+            filesCounter, counter, System.currentTimeMillis() - timer));
   }
 
   /**
@@ -152,8 +154,9 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     if (writer != null) {
       try {
         info(String.format("generating unit test for %s", typeProvider.getFullName()));
-        writer.write(impl.getGeneratedUnitTestCode(
-            translatorConfig.getConfiguredTarget().getUnitTestRunnerType()));
+        writer.write(
+            impl.getGeneratedUnitTestCode(
+                translatorConfig.getConfiguredTarget().getUnitTestRunnerType()));
         writer.flush();
       } catch (IOException e) {
         throw new RuntimeException(e);
@@ -192,9 +195,9 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
         break;
       }
       info(String.format("de-serialize Page Object %s", pageObjectURI));
-      TranslationContext translationContext = new TranslationContext(pageObjectURI,
-          sourceConfig.getSourcePath(pageObjectURI),
-          translatorConfig);
+      TranslationContext translationContext =
+          new TranslationContext(
+              pageObjectURI, sourceConfig.getSourcePath(pageObjectURI), translatorConfig);
       String jsonSource = getStringFromReader(sourceConfig, pageObjectURI);
       JsonDeserializer deserializer = new JsonDeserializer(translationContext, jsonSource);
       PageObjectDeclaration object = deserializer.getObject();
@@ -208,10 +211,12 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     }
     linting.finish(lintingContext);
     linting.writeReport(lintingContext, translatorConfig.getConfiguredTarget().getLintReportPath());
-    info(String.format("generated %d page objects, took %d msec", counter,
-        System.currentTimeMillis() - timer));
+    info(
+        String.format(
+            "generated %d page objects, took %d msec",
+            counter, System.currentTimeMillis() - timer));
     String compilationErrors = translatorConfig.getErrorsConfig().report(errorsContext);
-    if(compilationErrors != null) {
+    if (compilationErrors != null) {
       throw new UtamCompilationError(compilationErrors);
     }
     return lintingContext::getErrors;
@@ -288,11 +293,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       String implType = profileDependenciesMapping.get(profile).get(typeName);
       throw new UtamRunnerError(
           String.format(
-              DUPLICATE_IMPL_WITH_PROFILE_ERR,
-              classTypeName,
-              typeName,
-              implType,
-              profileValue));
+              DUPLICATE_IMPL_WITH_PROFILE_ERR, classTypeName, typeName, implType, profileValue));
     }
     profileDependenciesMapping.get(profile).put(typeName, classTypeName);
   }

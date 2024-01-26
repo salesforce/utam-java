@@ -57,15 +57,18 @@ public class ContainerMethodTests {
     expected.addParameter(new MethodParameterInfo("selectorArg"));
     expected.addParameter(FIRST_CONTAINER_PARAMETER);
     expected.addImportedTypes(PAGE_OBJECT.getFullName());
-    expected.addImpliedImportedTypes(PAGE_OBJECT.getFullName(), BASIC_ELEMENT.getFullName(),
-        SELECTOR.getFullName());
+    expected.addImpliedImportedTypes(
+        PAGE_OBJECT.getFullName(), BASIC_ELEMENT.getFullName(), SELECTOR.getFullName());
     expected.addCodeLine("BasicElement scope = this.getScopeElement(scopeArg)");
     expected.addCodeLine(
         "LocatorBy testLocator = LocatorBy.byCss(String.format(\".css%s\", selectorArg))");
     expected.addCodeLine("return this.container(scope, true).load(pageObjectType, testLocator)");
     PageObjectValidationTestHelper.validateMethod(method, expected);
-    assertThat(method.getDeclaration().getCodeLine(),
-        is("<T extends PageObject> T getTest(String scopeArg, String selectorArg, Class<T> pageObjectType)"));
+    assertThat(
+        method.getDeclaration().getCodeLine(),
+        is(
+            "<T extends PageObject> T getTest(String scopeArg, String selectorArg, Class<T>"
+                + " pageObjectType)"));
   }
 
   @Test
@@ -76,10 +79,13 @@ public class ContainerMethodTests {
     expected.addParameter(new MethodParameterInfo("scopeArg"));
     expected.addParameter(FIRST_CONTAINER_PARAMETER);
     expected.addCodeLine("BasicElement scope = this.getScopeElement(scopeArg)");
-    expected.addCodeLine(String.format("LocatorBy testLocator = LocatorBy.byCss(\"%s\")", DEFAULT_CONTAINER_SELECTOR_CSS));
+    expected.addCodeLine(
+        String.format(
+            "LocatorBy testLocator = LocatorBy.byCss(\"%s\")", DEFAULT_CONTAINER_SELECTOR_CSS));
     expected.addCodeLine("return this.container(scope, false).load(pageObjectType, testLocator)");
     PageObjectValidationTestHelper.validateMethod(method, expected);
-    assertThat(method.getDeclaration().getCodeLine(),
+    assertThat(
+        method.getDeclaration().getCodeLine(),
         is("<T extends PageObject> T getTest(String scopeArg, Class<T> pageObjectType)"));
   }
 
@@ -92,15 +98,21 @@ public class ContainerMethodTests {
     expected.addParameter(new MethodParameterInfo("selectorArg"));
     expected.addParameter(FIRST_CONTAINER_PARAMETER);
     expected.addImportedTypes(PAGE_OBJECT.getFullName(), List.class.getName());
-    expected.addImpliedImportedTypes(PAGE_OBJECT.getFullName(), List.class.getName(),
-        BASIC_ELEMENT.getFullName(), SELECTOR.getFullName());
+    expected.addImpliedImportedTypes(
+        PAGE_OBJECT.getFullName(),
+        List.class.getName(),
+        BASIC_ELEMENT.getFullName(),
+        SELECTOR.getFullName());
     expected.addCodeLine("BasicElement scope = this.getScopeElement(scopeArg)");
     expected.addCodeLine(
         "LocatorBy testLocator = LocatorBy.byCss(String.format(\".css%s\", selectorArg))");
-    expected
-        .addCodeLine("return this.container(scope, false).loadList(pageObjectType, testLocator)");
+    expected.addCodeLine(
+        "return this.container(scope, false).loadList(pageObjectType, testLocator)");
     PageObjectValidationTestHelper.validateMethod(method, expected);
-    assertThat(method.getDeclaration().getCodeLine(),
-        is("<T extends PageObject> List<T> getTest(String scopeArg, String selectorArg, Class<T> pageObjectType)"));
+    assertThat(
+        method.getDeclaration().getCodeLine(),
+        is(
+            "<T extends PageObject> List<T> getTest(String scopeArg, String selectorArg, Class<T>"
+                + " pageObjectType)"));
   }
 }

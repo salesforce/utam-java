@@ -49,8 +49,8 @@ public class ElementMethodTests {
   private static final String LIST_TYPE = List.class.getName();
 
   private static BasicElementGetterMethod getElementMethod(TranslationContext context) {
-    return (BasicElementGetterMethod) Objects.requireNonNull(context.getElement(ELEMENT_NAME))
-        .getElementMethod();
+    return (BasicElementGetterMethod)
+        Objects.requireNonNull(context.getElement(ELEMENT_NAME)).getElementMethod();
   }
 
   @Test
@@ -93,14 +93,14 @@ public class ElementMethodTests {
 
   @Test
   public void testElementNodeWithNestedElements() {
-    DeserializerUtilities.Result res = new DeserializerUtilities()
-        .getResultFromFile("element/nestedElements");
+    DeserializerUtilities.Result res =
+        new DeserializerUtilities().getResultFromFile("element/nestedElements");
     TranslationContext context = res.getContext();
     ElementContext one = context.getElement("one");
     assertThat(one.getType().getFullName(), is(BASIC_ELEMENT_TYPE));
     ElementContext nested = context.getElement("nestedCustom");
-    assertThat(nested.getType().getSimpleName(),
-        CoreMatchers.is(CoreMatchers.equalTo("ComponentType")));
+    assertThat(
+        nested.getType().getSimpleName(), CoreMatchers.is(CoreMatchers.equalTo("ComponentType")));
     ElementContext nestedInShadow = context.getElement("nestedInsideShadow");
     assertThat(nestedInShadow.getType().getFullName(), is(BASIC_ELEMENT_TYPE));
 
@@ -112,22 +112,26 @@ public class ElementMethodTests {
   @Test
   public void testBasicPrivateElementUnionTypeInImplOnly() {
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME_PRIVATE, "TestElement");
-    Result result = new DeserializerUtilities()
-        .getResultFromFile("element/basicElementTypesImplOnly");
+    Result result =
+        new DeserializerUtilities().getResultFromFile("element/basicElementTypesImplOnly");
     TranslationContext context = result.getContext();
     BasicElementGetterMethod method = getElementMethod(context);
     expected.addCodeLine("BasicElement root = this.getRootElement()");
-    expected
-        .addCodeLine(
-            "return basic(root, this.test).build(TestElement.class, TestElementImpl.class)");
+    expected.addCodeLine(
+        "return basic(root, this.test).build(TestElement.class, TestElementImpl.class)");
     expected.setNotPublic();
     PageObjectValidationTestHelper.validateMethod(method, expected);
     List<UnionType> unionTypes = context.getClassUnionTypes();
     assertThat(unionTypes, hasSize(2));
-    assertThat(unionTypes.get(0).getDeclarationCode().get(0),
+    assertThat(
+        unionTypes.get(0).getDeclarationCode().get(0),
         is(equalTo("interface TestElement extends Actionable {}")));
-    assertThat(unionTypes.get(1).getDeclarationCode().get(0), is(equalTo(
-        "public static class TestElementImpl extends BasePageElement implements TestElement {}")));
+    assertThat(
+        unionTypes.get(1).getDeclarationCode().get(0),
+        is(
+            equalTo(
+                "public static class TestElementImpl extends BasePageElement implements TestElement"
+                    + " {}")));
 
     assertThat(context.getFields(), hasSize(1));
     FieldInfo createdFieldInfo = new FieldInfo(ELEMENT_NAME);
@@ -138,19 +142,24 @@ public class ElementMethodTests {
   @Test
   public void testBasicPublicElementUnionTypeInImplOnly() {
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "GetTestElement");
-    Result result = new DeserializerUtilities()
-        .getResultFromFile("element/publicElementTypesImplOnly");
+    Result result =
+        new DeserializerUtilities().getResultFromFile("element/publicElementTypesImplOnly");
     TranslationContext context = result.getContext();
     BasicElementGetterMethod method = getElementMethod(context);
     expected.addCodeLine("BasicElement root = this.getRootElement()");
     expected.addCodeLine(
-        "return basic(root, this.test.setParameters(arg)).build(GetTestElement.class, GetTestElementImpl.class)");
+        "return basic(root, this.test.setParameters(arg)).build(GetTestElement.class,"
+            + " GetTestElementImpl.class)");
     expected.addParameter(new MethodParameterInfo("arg"));
     PageObjectValidationTestHelper.validateMethod(method, expected);
     List<UnionType> unionTypes = context.getClassUnionTypes();
     assertThat(unionTypes, hasSize(1));
-    assertThat(unionTypes.get(0).getDeclarationCode().get(0), is(equalTo(
-        "public static class GetTestElementImpl extends BasePageElement implements GetTestElement {}")));
+    assertThat(
+        unionTypes.get(0).getDeclarationCode().get(0),
+        is(
+            equalTo(
+                "public static class GetTestElementImpl extends BasePageElement implements"
+                    + " GetTestElement {}")));
   }
 
   @Test
@@ -179,8 +188,9 @@ public class ElementMethodTests {
     assertThat(method.getClassUnionType(), is(nullValue()));
     assertThat(method.getInterfaceUnionType(), is(nullValue()));
     expected.addCodeLine("BasicElement root = this.getRootElement()");
-    expected.addCodeLine("return basic(root, this.test.setParameters(arg))"
-        + ".buildList(BasicElement.class, BasePageElement.class)");
+    expected.addCodeLine(
+        "return basic(root, this.test.setParameters(arg))"
+            + ".buildList(BasicElement.class, BasePageElement.class)");
     expected.addImportedTypes(LIST_TYPE, BASIC_ELEMENT_TYPE);
     expected.addImpliedImportedTypes(LIST_TYPE, BASIC_ELEMENT_TYPE_IMPL, BASIC_ELEMENT_TYPE);
     expected.addParameter(new MethodParameterInfo("arg"));
@@ -201,8 +211,12 @@ public class ElementMethodTests {
     expected.setNotPublic();
     PageObjectValidationTestHelper.validateMethod(method, expected);
     String unionClass = method.getClassUnionType().getDeclarationCode().get(0);
-    assertThat(unionClass, is(equalTo(
-        "public static class TestElementImpl extends BasePageElement implements TestElement {}")));
+    assertThat(
+        unionClass,
+        is(
+            equalTo(
+                "public static class TestElementImpl extends BasePageElement implements TestElement"
+                    + " {}")));
     String unionType = method.getInterfaceUnionType().getDeclarationCode().get(0);
     assertThat(unionType, is(equalTo("interface TestElement extends Actionable {}")));
   }
@@ -220,8 +234,12 @@ public class ElementMethodTests {
         "return basic(root, this.test).buildList(TestElement.class, TestElementImpl.class)");
     PageObjectValidationTestHelper.validateMethod(method, expected);
     String unionClass = method.getClassUnionType().getDeclarationCode().get(0);
-    assertThat(unionClass, is(equalTo(
-        "public static class TestElementImpl extends BasePageElement implements TestElement {}")));
+    assertThat(
+        unionClass,
+        is(
+            equalTo(
+                "public static class TestElementImpl extends BasePageElement implements TestElement"
+                    + " {}")));
     String unionType = method.getInterfaceUnionType().getDeclarationCode().get(0);
     assertThat(unionType, is(equalTo("interface TestElement extends Editable, Clickable {}")));
   }
@@ -232,8 +250,8 @@ public class ElementMethodTests {
     expected.addCodeLine("BasicElement parent = this.getParentElement()");
     expected.addCodeLine(
         "return basic(parent, this.test).buildList(BasicElement.class, BasePageElement.class)");
-    Result result = new DeserializerUtilities()
-        .getResultFromFile("element/basicElementNullableList");
+    Result result =
+        new DeserializerUtilities().getResultFromFile("element/basicElementNullableList");
     TranslationContext context = result.getContext();
     assertThat(context.getFields(), hasSize(2));
     PageObjectValidationTestHelper.FieldInfo fieldInfo =
@@ -250,8 +268,8 @@ public class ElementMethodTests {
     expected.addCodeLine("BasicElement root = this.getRootElement()");
     expected.addCodeLine(
         "return basic(root, this.test).build(BasicElement.class, BasePageElement.class)");
-    Result result = new DeserializerUtilities()
-        .getResultFromFile("element/basicElementNullableSingle");
+    Result result =
+        new DeserializerUtilities().getResultFromFile("element/basicElementNullableSingle");
     TranslationContext context = result.getContext();
     BasicElementGetterMethod method = getElementMethod(context);
     PageObjectValidationTestHelper.validateMethod(method, expected);
@@ -259,8 +277,8 @@ public class ElementMethodTests {
 
   @Test
   public void testFilterByGetAttribute() {
-    TranslationContext context = new DeserializerUtilities()
-        .getContext("filter/basicFilterGetAttribute");
+    TranslationContext context =
+        new DeserializerUtilities().getContext("filter/basicFilterGetAttribute");
     PageObjectMethod method = context.getMethod(ELEMENT_METHOD_NAME);
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "List<BasicElement>");
     expected.addParameter(new MethodParameterInfo("scopeArg"));
@@ -269,16 +287,16 @@ public class ElementMethodTests {
     expected.addParameter(new MethodParameterInfo("matcherArg"));
     expected.addCodeLine("BasicElement scope = this.getScopeElement(scopeArg)");
     expected.addCodeLines(
-        "return basic(scope, this.test.setParameters(selectorArg))"
-            + ".buildList(BasicElement.class, BasePageElement.class, "
-            + "elm -> (elm.getAttribute(applyArg)!= null && elm.getAttribute(applyArg).contains(matcherArg)))");
+        "return basic(scope, this.test.setParameters(selectorArg)).buildList(BasicElement.class,"
+            + " BasePageElement.class, elm -> (elm.getAttribute(applyArg)!= null &&"
+            + " elm.getAttribute(applyArg).contains(matcherArg)))");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 
   @Test
   public void testFilterByGetCssPropertyValue() {
-    TranslationContext context = new DeserializerUtilities()
-        .getContext("filter/basicFilterGetCssPropertyValue");
+    TranslationContext context =
+        new DeserializerUtilities().getContext("filter/basicFilterGetCssPropertyValue");
     PageObjectMethod method = context.getMethod(ELEMENT_METHOD_NAME);
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "List<BasicElement>");
     expected.addParameter(new MethodParameterInfo("scopeArg"));
@@ -287,42 +305,44 @@ public class ElementMethodTests {
     expected.addParameter(new MethodParameterInfo("matcherArg"));
     expected.addCodeLine("BasicElement scope = this.getScopeElement(scopeArg)");
     expected.addCodeLines(
-        "return basic(scope, this.test.setParameters(selectorArg))"
-            + ".buildList(BasicElement.class, BasePageElement.class, "
-            + "elm -> (elm.getCssPropertyValue(applyArg)!= null && elm.getCssPropertyValue(applyArg).contains(matcherArg)))");
+        "return basic(scope, this.test.setParameters(selectorArg)).buildList(BasicElement.class,"
+            + " BasePageElement.class, elm -> (elm.getCssPropertyValue(applyArg)!= null &&"
+            + " elm.getCssPropertyValue(applyArg).contains(matcherArg)))");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 
   @Test
   public void testFilterByIsVisibleFalseFindFirst() {
-    TranslationContext context = new DeserializerUtilities()
-        .getContext("filter/basicFilterIsVisible");
+    TranslationContext context =
+        new DeserializerUtilities().getContext("filter/basicFilterIsVisible");
     PageObjectMethod method = context.getMethod(ELEMENT_METHOD_NAME);
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "TestElement");
     expected.addParameter(new MethodParameterInfo("scopeArg"));
     expected.addParameter(new MethodParameterInfo("selectorArg"));
     expected.addCodeLine("BasicElement scope = this.getScopeElement(scopeArg)");
-    expected.addCodeLines("return basic(scope, this.test.setParameters(selectorArg))."
-        + "build(TestElement.class, TestElementImpl.class, elm -> Boolean.FALSE.equals(elm.isVisible()))");
+    expected.addCodeLines(
+        "return basic(scope, this.test.setParameters(selectorArg)).build(TestElement.class,"
+            + " TestElementImpl.class, elm -> Boolean.FALSE.equals(elm.isVisible()))");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 
   @Test
   public void testFilterWithContainsElementSelectorArgument() {
-    TranslationContext context = new DeserializerUtilities()
-        .getContext("filter/customWithFilterContainsElement");
+    TranslationContext context =
+        new DeserializerUtilities().getContext("filter/customWithFilterContainsElement");
     PageObjectMethod method = context.getMethod(ELEMENT_METHOD_NAME);
-    assertThat(method.getDeclaration().getCodeLine(),
-        is(equalTo("BasicElement getTest(String value)")));
+    assertThat(
+        method.getDeclaration().getCodeLine(), is(equalTo("BasicElement getTest(String value)")));
     MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "BasicElement");
     expected.addParameter(new MethodParameterInfo("value", "String"));
     expected.addParameter(
-        new MethodParameterInfo("LocatorBy.byCss(String.format(\"input[value='%s']\", value))",
-            "LocatorBy"));
+        new MethodParameterInfo(
+            "LocatorBy.byCss(String.format(\"input[value='%s']\", value))", "LocatorBy"));
     expected.addCodeLine("BasicElement root = this.getRootElement()");
-    expected.addCodeLine("return basic(root, this.test)."
-        + "build(BasicElement.class, BasePageElement.class, "
-        + "elm -> Boolean.TRUE.equals(elm.containsElement(LocatorBy.byCss(String.format(\"input[value='%s']\", value)))))");
+    expected.addCodeLine(
+        "return basic(root, this.test).build(BasicElement.class, BasePageElement.class, elm ->"
+            + " Boolean.TRUE.equals(elm.containsElement(LocatorBy.byCss(String.format(\"input[value='%s']\","
+            + " value)))))");
     expected.addImportedTypes("utam.core.element.BasicElement");
     expected.addImpliedImportedTypes("utam.core.element.BasicElement");
     expected.addImpliedImportedTypes("utam.core.framework.element.BasePageElement");

@@ -30,29 +30,19 @@ import utam.core.element.Touchable;
  * @since 234
  */
 public enum BasicElementInterface implements TypeProvider {
-  /**
-   * An actionable element
-   */
+  /** An actionable element */
   actionable(Actionable.class),
 
-  /**
-   * A clickable element
-   */
+  /** A clickable element */
   clickable(Clickable.class),
 
-  /**
-   * A draggable element
-   */
+  /** A draggable element */
   draggable(Draggable.class),
 
-  /**
-   * An editable element
-   */
+  /** An editable element */
   editable(Editable.class),
 
-  /**
-   * A touchable element
-   */
+  /** A touchable element */
   touchable(Touchable.class);
 
   private final Class type;
@@ -72,6 +62,7 @@ public enum BasicElementInterface implements TypeProvider {
 
   /**
    * Gets a value indicating whether the element is a basic element type
+   *
    * @param type the type of the element
    * @return true if the element is a basic type; otherwise, false
    */
@@ -91,28 +82,31 @@ public enum BasicElementInterface implements TypeProvider {
    * process Json node with basic types, applicable to root or basic elements
    *
    * @param typeNode Json node
-   * @param structure  element or method return type
+   * @param structure element or method return type
    * @return string array with basic types or empty array
    */
   public static String[] processBasicTypeNode(JsonNode typeNode, String structure) {
     if (typeNode == null || typeNode.isNull()) {
-      return new String[]{};
+      return new String[] {};
     }
     if (typeNode.isTextual() && isBasicType(typeNode.textValue())) {
-      return new String[]{typeNode.textValue()};
+      return new String[] {typeNode.textValue()};
     }
     if (typeNode.isArray()) {
       List<String> values = new ArrayList<>();
       for (JsonNode valueNode : typeNode) {
         if (!valueNode.isTextual()) {
-          throw new UtamCompilationError(valueNode, VALIDATION.getErrorMessage(115, structure, nodeToString(valueNode)));
+          throw new UtamCompilationError(
+              valueNode, VALIDATION.getErrorMessage(115, structure, nodeToString(valueNode)));
         }
         String valueStr = valueNode.textValue();
         if (!isBasicType(valueStr)) {
-          throw new UtamCompilationError(typeNode, VALIDATION.getErrorMessage(115, structure, valueStr));
+          throw new UtamCompilationError(
+              typeNode, VALIDATION.getErrorMessage(115, structure, valueStr));
         }
-        if(values.contains(valueStr)) {
-          throw new UtamCompilationError(typeNode, VALIDATION.getErrorMessage(116, structure, valueStr));
+        if (values.contains(valueStr)) {
+          throw new UtamCompilationError(
+              typeNode, VALIDATION.getErrorMessage(116, structure, valueStr));
         }
         values.add(valueStr);
       }

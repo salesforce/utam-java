@@ -34,7 +34,7 @@ class UtamShadowElement {
   /**
    * process shadow boundary node
    *
-   * @param shadowNode    node
+   * @param shadowNode node
    * @param parserContext parser context
    * @return list of elements inside shadow
    */
@@ -43,7 +43,7 @@ class UtamShadowElement {
       return null;
     }
     VALIDATION.validateNotEmptyArray(shadowNode.get("elements"), parserContext, "elements");
-    return readNode(shadowNode, UtamShadowElement.class,
-        VALIDATION.getErrorMessage(1100, parserContext));
+    return readNode(
+        shadowNode, UtamShadowElement.class, VALIDATION.getErrorMessage(1100, parserContext));
   }
 }

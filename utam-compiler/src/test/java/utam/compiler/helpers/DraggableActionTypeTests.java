@@ -52,11 +52,13 @@ public class DraggableActionTypeTests {
     assertThat(parameters.get(0).isSameType(BASIC_ELEMENT), is(true));
     assertThat(parameters.get(1).isSameType(PrimitiveType.NUMBER), is(true));
 
-    RuntimeException e = expectThrows(RuntimeException.class,
-        () -> action.getParametersTypes("test", 0));
-    assertThat(e.getMessage(),
-        containsString("error 108: test action \"dragAndDrop\" arguments: " +
-                    "expected number of arguments is (check documentation), found 0"));
+    RuntimeException e =
+        expectThrows(RuntimeException.class, () -> action.getParametersTypes("test", 0));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 108: test action \"dragAndDrop\" arguments: "
+                + "expected number of arguments is (check documentation), found 0"));
   }
 
   @Test

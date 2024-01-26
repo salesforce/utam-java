@@ -28,8 +28,7 @@ import utam.core.declarative.representation.PageObjectMethod;
 public class UtamElementWaitTests {
 
   PageObjectMethod getMethod(String jsonFile, String methodName) {
-    return new DeserializerUtilities().getContext(jsonFile)
-        .getMethod(methodName);
+    return new DeserializerUtilities().getContext(jsonFile).getMethod(methodName);
   }
 
   @Test
@@ -37,10 +36,11 @@ public class UtamElementWaitTests {
     String methodName = "waitForBasicPrivateElement";
     PageObjectMethod method = getMethod("generated/wait/waitForBasicElement.utam", methodName);
     MethodInfo expected = new MethodInfo(methodName, "BasicPrivateElementElement");
-    expected.addCodeLine("BasicPrivateElementElement statement0 = this.waitFor(() -> {\n"
-        + "BasicPrivateElementElement pstatement0 = this.getBasicPrivateElementElement();\n"
-        + "return pstatement0;\n"
-        + "})");
+    expected.addCodeLine(
+        "BasicPrivateElementElement statement0 = this.waitFor(() -> {\n"
+            + "BasicPrivateElementElement pstatement0 = this.getBasicPrivateElementElement();\n"
+            + "return pstatement0;\n"
+            + "})");
     expected.addCodeLine("return statement0");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
@@ -50,10 +50,11 @@ public class UtamElementWaitTests {
     String methodName = "waitForBasicPublicElement";
     PageObjectMethod method = getMethod("generated/wait/waitForBasicElement.utam", methodName);
     MethodInfo expected = new MethodInfo(methodName, "BasicElement");
-    expected.addCodeLine("BasicElement statement0 = this.waitFor(() -> {\n"
-        + "BasicElement pstatement0 = this.getBasicPublicElement(selectorArg);\n"
-        + "return pstatement0;\n"
-        + "})");
+    expected.addCodeLine(
+        "BasicElement statement0 = this.waitFor(() -> {\n"
+            + "BasicElement pstatement0 = this.getBasicPublicElement(selectorArg);\n"
+            + "return pstatement0;\n"
+            + "})");
     expected.addCodeLine("return statement0");
     expected.addParameter(new MethodParameterInfo("selectorArg"));
     PageObjectValidationTestHelper.validateMethod(method, expected);
@@ -64,10 +65,12 @@ public class UtamElementWaitTests {
     String methodName = "waitForCustomElementWithFilter";
     PageObjectMethod method = getMethod("generated/wait/waitForElement.utam", methodName);
     MethodInfo expected = new MethodInfo(methodName, "List<WaitForBasicElement>");
-    expected.addCodeLine("List<WaitForBasicElement> statement0 = this.waitFor(() -> {\n"
-        + "List<WaitForBasicElement> pstatement0 = this.getCustomElementWithFilterElement(matcherArg);\n"
-        + "return pstatement0;\n"
-        + "})");
+    expected.addCodeLine(
+        "List<WaitForBasicElement> statement0 = this.waitFor(() -> {\n"
+            + "List<WaitForBasicElement> pstatement0 ="
+            + " this.getCustomElementWithFilterElement(matcherArg);\n"
+            + "return pstatement0;\n"
+            + "})");
     expected.addCodeLine("return statement0");
     expected.addParameter(new MethodParameterInfo("matcherArg"));
     PageObjectValidationTestHelper.validateMethod(method, expected);
@@ -78,10 +81,11 @@ public class UtamElementWaitTests {
     String methodName = "waitForFrameElement";
     PageObjectMethod method = getMethod("generated/wait/waitForElement.utam", methodName);
     MethodInfo expected = new MethodInfo(methodName, "FrameElement");
-    expected.addCodeLine("FrameElement statement0 = this.waitFor(() -> {\n"
-        + "FrameElement pstatement0 = this.getFrameElementElement();\n"
-        + "return pstatement0;\n"
-        + "})");
+    expected.addCodeLine(
+        "FrameElement statement0 = this.waitFor(() -> {\n"
+            + "FrameElement pstatement0 = this.getFrameElementElement();\n"
+            + "return pstatement0;\n"
+            + "})");
     expected.addCodeLine("return statement0");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
@@ -94,21 +98,25 @@ public class UtamElementWaitTests {
     expected.addParameter(new MethodParameterInfo("pageObjectType", "Class<T>"));
     expected.addImportedTypes(PAGE_OBJECT.getFullName());
     expected.addImpliedImportedTypes(PAGE_OBJECT.getFullName());
-    expected.addCodeLine("T statement0 = this.waitFor(() -> {\n"
-        + "T pstatement0 = this.getContainerElement(pageObjectType);\n"
-        + "return pstatement0;\n"
-        + "})");
+    expected.addCodeLine(
+        "T statement0 = this.waitFor(() -> {\n"
+            + "T pstatement0 = this.getContainerElement(pageObjectType);\n"
+            + "return pstatement0;\n"
+            + "})");
     expected.addCodeLine("return statement0");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 
   @Test
   public void testWaitNotBoolean() {
-    Exception e = expectThrows(
-        UtamCompilationError.class,
-        () -> getMethod("validate/basic_element/waitWrongType", "test"));
-    assertThat(e.getMessage(),
-        containsString("error 200: root elements: incorrect format of elements \n"
-            + "Cannot deserialize value of type `java.lang.Boolean` from String \"string\""));
+    Exception e =
+        expectThrows(
+            UtamCompilationError.class,
+            () -> getMethod("validate/basic_element/waitWrongType", "test"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 200: root elements: incorrect format of elements \n"
+                + "Cannot deserialize value of type `java.lang.Boolean` from String \"string\""));
   }
 }

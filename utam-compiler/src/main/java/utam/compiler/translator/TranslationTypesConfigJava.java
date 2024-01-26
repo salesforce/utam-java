@@ -9,14 +9,13 @@ package utam.compiler.translator;
 
 import static utam.core.framework.consumer.PageObjectContextImpl.getDefaultImplType;
 
-import utam.compiler.helpers.TypeUtilities.FromString;
-import utam.compiler.helpers.TypeUtilities.PageObjectType;
-import utam.core.declarative.translator.TranslationTypesConfig;
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.framework.consumer.UtamError;
-
 import java.util.Arrays;
 import java.util.regex.Pattern;
+import utam.compiler.helpers.TypeUtilities.FromString;
+import utam.compiler.helpers.TypeUtilities.PageObjectType;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.declarative.translator.TranslationTypesConfig;
+import utam.core.framework.consumer.UtamError;
 
 /**
  * @author elizaveta.ivanova
@@ -25,7 +24,8 @@ import java.util.regex.Pattern;
 public class TranslationTypesConfigJava implements TranslationTypesConfig {
 
   private static final String INCORRECT_PAGE_OBJECT_OR_UTILITY_TYPE =
-      "type should have format '<namespace>/<pageobjects or utils>/[< optional subPackage>/]<name>', actual was '%s'";
+      "type should have format '<namespace>/<pageobjects or utils>/[< optional"
+          + " subPackage>/]<name>', actual was '%s'";
 
   // public because used in tests
   static String getWrongTypeError(String pageObjectURI) {
@@ -41,7 +41,7 @@ public class TranslationTypesConfigJava implements TranslationTypesConfig {
     // usually /pageObjects or /utils, but no longer enforced
     String secondPackageName = str[1].toLowerCase();
     String[] relativePath = Arrays.copyOfRange(str, 2, str.length);
-    for(int i = 0; i < relativePath.length; i++) {
+    for (int i = 0; i < relativePath.length; i++) {
       if (i == relativePath.length - 1) {
         relativePath[i] = capitalizeFirstLetter(relativePath[i]);
       } else {

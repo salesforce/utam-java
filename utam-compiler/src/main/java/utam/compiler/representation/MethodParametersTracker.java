@@ -7,14 +7,14 @@
  */
 package utam.compiler.representation;
 
+import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import utam.compiler.UtamCompilationError;
 import utam.core.declarative.representation.MethodParameter;
-
-import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 
 /**
  * track duplicate method parameters
@@ -38,10 +38,11 @@ public class MethodParametersTracker {
   }
 
   void setMethodParameter(MethodParameter parameter) {
-    if(!parameter.isLiteral()) {
+    if (!parameter.isLiteral()) {
       String parameterName = parameter.getValue();
-      if(parameterNames.contains(parameterName)) {
-        throw new UtamCompilationError(VALIDATION.getErrorMessage(107, methodContext, parameterName));
+      if (parameterNames.contains(parameterName)) {
+        throw new UtamCompilationError(
+            VALIDATION.getErrorMessage(107, methodContext, parameterName));
       }
       parameterNames.add(parameterName);
     }

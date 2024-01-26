@@ -9,14 +9,13 @@ package utam.compiler.helpers;
 
 import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
 
-import utam.compiler.UtamCompilationError;
-import utam.core.declarative.representation.TypeProvider;
-import utam.core.element.Touchable;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import utam.compiler.UtamCompilationError;
+import utam.core.declarative.representation.TypeProvider;
+import utam.core.element.Touchable;
 
 /**
  * this enum links mobile touch actions with translator code <br>
@@ -57,7 +56,8 @@ public enum TouchableActionType implements ActionType {
     List<Class> paramTypeList = new ArrayList<>();
     Stream.of(actionParameters)
         .map(TypeUtilities::getClassFromFullName)
-        .forEach(clazz -> {
+        .forEach(
+            clazz -> {
               // Map to argument type in Touchable interface
               // flick method takes int primitives as arguments
               if (clazz.getTypeName().contains("Integer")) {
@@ -74,8 +74,8 @@ public enum TouchableActionType implements ActionType {
     if (actionParameters.length != parameterCount) {
       String contextStr = String.format("%s action \"%s\"", parserContext, this.name());
       throw new UtamCompilationError(
-              VALIDATION.getErrorMessage(108, contextStr,
-                      String.valueOf(expected), String.valueOf(parameterCount)));
+          VALIDATION.getErrorMessage(
+              108, contextStr, String.valueOf(expected), String.valueOf(parameterCount)));
     }
     return Stream.of(actionParameters).collect(Collectors.toList());
   }

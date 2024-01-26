@@ -26,10 +26,9 @@ import utam.core.selenium.appium.LocatorUIAutomator;
  */
 public final class AnnotationUtils {
 
-  /**
-   * A provider for an empty annotation
-   */
+  /** A provider for an empty annotation */
   public static final AnnotationProvider EMPTY_ANNOTATION = () -> "";
+
   private static final TypeProvider MARKER_CLASS = new TypeUtilities.FromClass(PageMarker.class);
   private static final List<TypeProvider> MARKER_CLASS_LIST =
       Stream.of(MARKER_CLASS).collect(Collectors.toList());
@@ -37,12 +36,14 @@ public final class AnnotationUtils {
   private static final List<TypeProvider> SELECTOR_CLASS_LIST =
       Stream.of(new TypeUtilities.FromClass(ElementMarker.class)).collect(Collectors.toList());
   private static final String MARKER_CLASS_STRING = PageMarker.class.getSimpleName();
-  private static final List<TypeProvider> PLATFORM_ANNOTATION_IMPORTS = Stream.of(
-      new TypeUtilities.FromClass(PlatformType.class), MARKER_CLASS).collect(Collectors.toList());
+  private static final List<TypeProvider> PLATFORM_ANNOTATION_IMPORTS =
+      Stream.of(new TypeUtilities.FromClass(PlatformType.class), MARKER_CLASS)
+          .collect(Collectors.toList());
   public static final AnnotationProvider DEPRECATED_ANNOTATION = () -> "@Deprecated";
 
   /**
    * Gets the provider for the annotation for a given locator
+   *
    * @param selector the locator object containing the mechanism for selecting the element
    * @return the provider for creating the annotation for selecting the element
    */
@@ -73,13 +74,13 @@ public final class AnnotationUtils {
   /**
    * build annotation for an element declaration
    *
-   * @param locator    element locator
-   * @param isExpand   boolean indicator to expand a shadow root of the scope element
+   * @param locator element locator
+   * @param isExpand boolean indicator to expand a shadow root of the scope element
    * @param isNullable boolean nullable indicator
    * @return annotation provider instance
    */
-  public static AnnotationProvider getFindAnnotation(Locator locator, boolean isExpand,
-      boolean isNullable) {
+  public static AnnotationProvider getFindAnnotation(
+      Locator locator, boolean isExpand, boolean isNullable) {
     StringBuilder res =
         new StringBuilder(
             String.format(
@@ -100,6 +101,7 @@ public final class AnnotationUtils {
 
   /**
    * Gets the annotation provider for the page platform
+   *
    * @param platformType platform in JSON file
    * @return the object providing the annotation for the given platform
    */

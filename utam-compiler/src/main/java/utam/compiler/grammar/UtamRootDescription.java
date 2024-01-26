@@ -35,8 +35,8 @@ class UtamRootDescription {
   /**
    * Initialize object
    *
-   * @param text       text of the page object description
-   * @param author     name of the team or person who owns a page object, by default UTAM
+   * @param text text of the page object description
+   * @param author name of the team or person who owns a page object, by default UTAM
    * @param deprecated if page object is deprecated, text explains why
    */
   @JsonCreator
@@ -115,5 +115,4 @@ class UtamRootDescription {
       return true;
     }
   }
-
 }

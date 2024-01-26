@@ -53,7 +53,7 @@ final class UtamElementFilter {
   /**
    * process node
    *
-   * @param node        json node
+   * @param node json node
    * @param elementName element for context
    * @return object of selector
    */
@@ -61,23 +61,29 @@ final class UtamElementFilter {
     return readNode(node, UtamElementFilter.class, VALIDATION.getErrorMessage(300, elementName));
   }
 
-  MatcherObject setElementFilter(TranslationContext context, TypeProvider elementType, String elementName, boolean isBasicElement) {
+  MatcherObject setElementFilter(
+      TranslationContext context,
+      TypeProvider elementType,
+      String elementName,
+      boolean isBasicElement) {
     String parserContext = String.format("element '%s' filter", elementName);
     VALIDATION.validateNotEmptyString(this.applyMethod, parserContext, "apply");
     ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
-    ParametersContext parametersContext = new StatementParametersContext(parserContext, context, null);
-    List<UtamArgument> arguments = provider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
-    arguments
-        .stream()
+    ParametersContext parametersContext =
+        new StatementParametersContext(parserContext, context, null);
+    List<UtamArgument> arguments =
+        provider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
+    arguments.stream()
         .map(arg -> arg.asParameter(context, null, parametersContext))
         .forEach(parametersContext::setParameter);
     VALIDATION.validateNotNullObject(matcherNode, parserContext, "matcher");
-    MatcherObject matcher = new ElementFilterMatcherProvider(matcherNode, elementName).getMatcherObject(context);
+    MatcherObject matcher =
+        new ElementFilterMatcherProvider(matcherNode, elementName).getMatcherObject(context);
     if (isBasicElement) {
       ActionType actionType = getActionType(this.applyMethod, elementType, elementName, null);
       matcher.checkMatcherOperand(actionType.getReturnType());
-      List<TypeProvider> expectedArgsTypes = actionType
-          .getParametersTypes(parserContext, arguments.size());
+      List<TypeProvider> expectedArgsTypes =
+          actionType.getParametersTypes(parserContext, arguments.size());
       this.applyMethodParameters = parametersContext.getParameters(expectedArgsTypes);
     } else {
       this.applyMethodParameters = parametersContext.getParameters();

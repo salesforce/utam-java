@@ -63,9 +63,7 @@ public class AnnotationUtilsTests {
         AnnotationUtils.getFindAnnotation(getCssSelector(".fakeSelector"), true, false);
     assertThat(
         provider.getAnnotationText(),
-        is(
-            equalTo(
-                "@ElementMarker.Find(css = \".fakeSelector\", expand = true)")));
+        is(equalTo("@ElementMarker.Find(css = \".fakeSelector\", expand = true)")));
     assertThat(getImportedTypes(provider), containsInAnyOrder(ELEMENT_MARKER_ANNOTATION_CLASS));
   }
 
@@ -85,13 +83,10 @@ public class AnnotationUtilsTests {
   @Test
   public void testGetFindAnnotationAccessId() {
     Locator selector = LocatorBy.byAccessibilityId("fakeSelector");
-    AnnotationProvider provider =
-        AnnotationUtils.getFindAnnotation(selector,true, false);
+    AnnotationProvider provider = AnnotationUtils.getFindAnnotation(selector, true, false);
     assertThat(
         provider.getAnnotationText(),
-        is(
-            equalTo(
-                "@ElementMarker.Find(accessid = \"fakeSelector\", expand = true)")));
+        is(equalTo("@ElementMarker.Find(accessid = \"fakeSelector\", expand = true)")));
     assertThat(getImportedTypes(provider), containsInAnyOrder(ELEMENT_MARKER_ANNOTATION_CLASS));
   }
 
@@ -99,13 +94,10 @@ public class AnnotationUtilsTests {
   @Test
   public void testGetFindAnnotationClassChain() {
     Locator selector = LocatorBy.byClassChain("fakeSelector");
-    AnnotationProvider provider =
-        AnnotationUtils.getFindAnnotation(selector, true, false);
+    AnnotationProvider provider = AnnotationUtils.getFindAnnotation(selector, true, false);
     assertThat(
         provider.getAnnotationText(),
-        is(
-            equalTo(
-                "@ElementMarker.Find(classchain = \"fakeSelector\", expand = true)")));
+        is(equalTo("@ElementMarker.Find(classchain = \"fakeSelector\", expand = true)")));
     assertThat(getImportedTypes(provider), containsInAnyOrder(ELEMENT_MARKER_ANNOTATION_CLASS));
   }
 
@@ -113,13 +105,13 @@ public class AnnotationUtilsTests {
   @Test
   public void testGetFindAnnotationUIAutomator() {
     Locator selector = LocatorBy.byUiAutomator("new UiSelector().checked(true)");
-    AnnotationProvider provider =
-        AnnotationUtils.getFindAnnotation(selector, true, false);
+    AnnotationProvider provider = AnnotationUtils.getFindAnnotation(selector, true, false);
     assertThat(
         provider.getAnnotationText(),
         is(
             equalTo(
-                "@ElementMarker.Find(uiautomator = \"new UiSelector().checked(true)\", expand = true)")));
+                "@ElementMarker.Find(uiautomator = \"new UiSelector().checked(true)\", expand ="
+                    + " true)")));
     assertThat(getImportedTypes(provider), containsInAnyOrder(ELEMENT_MARKER_ANNOTATION_CLASS));
   }
 
@@ -127,8 +119,7 @@ public class AnnotationUtilsTests {
   @Test
   public void testGetFindAnnotationWithEmptyElement() {
     AnnotationProvider provider =
-        AnnotationUtils.getFindAnnotation(
-            getCssSelector(".fakeSelector"), true, false);
+        AnnotationUtils.getFindAnnotation(getCssSelector(".fakeSelector"), true, false);
     assertThat(
         provider.getAnnotationText(),
         is(equalTo("@ElementMarker.Find(css = \".fakeSelector\", expand = true)")));
@@ -141,8 +132,7 @@ public class AnnotationUtilsTests {
     AnnotationProvider provider =
         AnnotationUtils.getFindAnnotation(getCssSelector(".fakeSelector"), false, false);
     assertThat(
-        provider.getAnnotationText(),
-        is(equalTo("@ElementMarker.Find(css = \".fakeSelector\")")));
+        provider.getAnnotationText(), is(equalTo("@ElementMarker.Find(css = \".fakeSelector\")")));
     assertThat(getImportedTypes(provider), containsInAnyOrder(ELEMENT_MARKER_ANNOTATION_CLASS));
   }
 
@@ -156,8 +146,7 @@ public class AnnotationUtilsTests {
   @Test
   public void testGetPagePlatformAnnotiationWithNative() {
     assertThat(
-        AnnotationUtils.getPagePlatformAnnotation(PlatformType.NATIVE)
-            .getAnnotationText(),
+        AnnotationUtils.getPagePlatformAnnotation(PlatformType.NATIVE).getAnnotationText(),
         is(equalTo("@PageMarker.Switch(PlatformType.NATIVE)")));
   }
 

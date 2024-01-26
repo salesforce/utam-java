@@ -37,18 +37,29 @@ public class UtamRootSelectorTests {
   @Test
   public void testMissingSelectorThrows() {
     String json = "{ \"root\" : true, \"selector\" : {}}";
-    RuntimeException e = expectThrows(
-        UtamCompilationError.class,  () -> new DeserializerUtilities().getResultFromString(json));
-    assertThat(e.getMessage(), containsString("error 1002: element \"root\" selector: "
-        + "one of \"css\", \"accessid\", \"uiautomator\" or \"classchain\" should be set"));
+    RuntimeException e =
+        expectThrows(
+            UtamCompilationError.class,
+            () -> new DeserializerUtilities().getResultFromString(json));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 1002: element \"root\" selector: "
+                + "one of \"css\", \"accessid\", \"uiautomator\" or \"classchain\" should be set"));
   }
 
   @Test
   public void testRedundantSelectorThrows() {
-    String json = "{ \"root\" : true, \"selector\" : { \"css\": \"css\", \"accessid\": \"accessid\"}}";
-    RuntimeException e = expectThrows(
-        UtamCompilationError.class,  () -> new DeserializerUtilities().getResultFromString(json));
-    assertThat(e.getMessage(), containsString("error 1003: element \"root\" selector: " +
-            "only one of \"css\", \"accessid\", \"uiautomator\" or \"classchain\" can be set"));
+    String json =
+        "{ \"root\" : true, \"selector\" : { \"css\": \"css\", \"accessid\": \"accessid\"}}";
+    RuntimeException e =
+        expectThrows(
+            UtamCompilationError.class,
+            () -> new DeserializerUtilities().getResultFromString(json));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 1003: element \"root\" selector: only one of \"css\", \"accessid\","
+                + " \"uiautomator\" or \"classchain\" can be set"));
   }
 }

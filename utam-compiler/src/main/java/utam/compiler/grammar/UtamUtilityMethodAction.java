@@ -40,9 +40,8 @@ class UtamUtilityMethodAction {
    * compiled.
    *
    * @param externalClassPath class path of the imperative extension
-   * @param methodName        name of the static method declared in the class that needs to be run
-   * @param argsNode          arguments that needs to be passed to the method specified in
-   *                          methodName
+   * @param methodName name of the static method declared in the class that needs to be run
+   * @param argsNode arguments that needs to be passed to the method specified in methodName
    */
   @JsonCreator
   UtamUtilityMethodAction(
@@ -57,7 +56,7 @@ class UtamUtilityMethodAction {
   /**
    * get declared parameters from utility invocation
    *
-   * @param context       translation context
+   * @param context translation context
    * @param methodContext method context
    * @return list of parameters
    */
@@ -65,11 +64,12 @@ class UtamUtilityMethodAction {
     String parserContext = String.format("method \"%s\"", methodContext.getName());
     VALIDATION.validateNotEmptyString(methodName, parserContext, "name");
     VALIDATION.validateNotEmptyString(externalClassPath, parserContext, "type");
-    ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
+    ParametersContext parametersContext =
+        new StatementParametersContext(parserContext, context, methodContext);
     ArgumentsProvider argumentsProvider = new ArgumentsProvider(argsNode, parserContext);
-    List<UtamArgument> arguments = argumentsProvider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
-    arguments
-        .stream()
+    List<UtamArgument> arguments =
+        argumentsProvider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
+    arguments.stream()
         .map(arg -> arg.asParameter(context, methodContext, parametersContext))
         .forEach(parametersContext::setParameter);
     return parametersContext.getParameters();

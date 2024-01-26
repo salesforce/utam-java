@@ -34,9 +34,9 @@ public class StatementContext {
    * Initializes a new instance of the StatementContext class
    *
    * @param previousStatementReturn the return type of the previous statement
-   * @param statementIndex          the index of this statement
-   * @param isUsedAsChain           a value indicating if this statement is used as a chain
-   * @param statementType           the type of statement
+   * @param statementIndex the index of this statement
+   * @param isUsedAsChain a value indicating if this statement is used as a chain
+   * @param statementType the type of statement
    * @param declaredStatementReturn the declared statement return type
    */
   public StatementContext(
@@ -148,14 +148,13 @@ public class StatementContext {
   /**
    * Gets the declared return type of the statement, or a default value
    *
-   * @param context              the translation context
+   * @param context the translation context
    * @param declaredMethodReturn the declared method return type
-   * @param defaultReturnType    the default return type
+   * @param defaultReturnType the default return type
    * @return the declared return type of the statement if one is declared; otherwise null
    */
-  public TypeProvider getDeclaredReturnOrDefault(TranslationContext context,
-      ReturnType declaredMethodReturn,
-      TypeProvider defaultReturnType) {
+  public TypeProvider getDeclaredReturnOrDefault(
+      TranslationContext context, ReturnType declaredMethodReturn, TypeProvider defaultReturnType) {
     TypeProvider declaredStatementReturn = this.declaredStatementReturn.getReturnType(context);
     if (declaredStatementReturn != null) {
       return declaredStatementReturn;
@@ -199,8 +198,7 @@ public class StatementContext {
    * @return true if the statement is a flat map; otherwise, false
    */
   public boolean isFlatMap() {
-    return isListType(previousStatementReturn)
-        && this.declaredStatementReturn.isReturnAllSet();
+    return isListType(previousStatementReturn) && this.declaredStatementReturn.isReturnAllSet();
   }
 
   /**
@@ -212,28 +210,18 @@ public class StatementContext {
     return isUsedAsChain;
   }
 
-  /**
-   * The types of statements
-   */
+  /** The types of statements */
   public enum StatementType {
-    /**
-     * a regular statement in a method
-     */
+    /** a regular statement in a method */
     REGULAR_STATEMENT,
 
-    /**
-     * the last statement in a method
-     */
+    /** the last statement in a method */
     LAST_STATEMENT,
 
-    /**
-     * a statement in a predicate
-     */
+    /** a statement in a predicate */
     PREDICATE_STATEMENT,
 
-    /**
-     * the last statement of a predicate
-     */
+    /** the last statement of a predicate */
     PREDICATE_LAST_STATEMENT
   }
 }

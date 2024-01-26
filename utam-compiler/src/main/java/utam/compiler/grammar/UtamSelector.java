@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.UtamMethodAction.ArgumentsProvider;
 import utam.compiler.helpers.LocatorCodeGeneration;
@@ -58,9 +57,9 @@ class UtamSelector extends UtamRootSelector {
   /**
    * Initializes a new instance of the UtamSelector class, only used in unit tests
    *
-   * @param css         the CSS selector
-   * @param accessid    the mobile accessibility ID
-   * @param classchain  the iOS class chain
+   * @param css the CSS selector
+   * @param accessid the mobile accessibility ID
+   * @param classchain the iOS class chain
    * @param uiautomator the Android UI automator ID
    */
   UtamSelector(String css, String accessid, String classchain, String uiautomator) {
@@ -79,24 +78,24 @@ class UtamSelector extends UtamRootSelector {
   /**
    * process node
    *
-   * @param node        json node
+   * @param node json node
    * @param elementName element for context
    * @return object of selector
    */
   static UtamSelector processSelectorNode(JsonNode node, String elementName) {
     String parserContext = String.format("element \"%s\"", elementName);
-    UtamSelector selector = readNode(node, UtamSelector.class, VALIDATION.getErrorMessage(1000, parserContext));
-    if(selector != null) {
+    UtamSelector selector =
+        readNode(node, UtamSelector.class, VALIDATION.getErrorMessage(1000, parserContext));
+    if (selector != null) {
       selector.validateSelector(node, parserContext);
     }
     return selector;
   }
 
-
   /**
    * parse selector string to find parameters %s or %d
    *
-   * @param selectorStr  selector string
+   * @param selectorStr selector string
    * @param parserContext can be element or method
    * @return list of types of selector args
    */
@@ -112,7 +111,8 @@ class UtamSelector extends UtamRootSelector {
         selectorStr = selectorStr.replaceFirst(SELECTOR_STRING_PARAMETER, "");
       } else {
         String selectorParameter = selectorStr.substring(index, index + 2);
-        throw new UtamCompilationError(VALIDATION.getErrorMessage(110, parserContext + " selector", selectorParameter));
+        throw new UtamCompilationError(
+            VALIDATION.getErrorMessage(110, parserContext + " selector", selectorParameter));
       }
     }
     return res;
@@ -122,12 +122,12 @@ class UtamSelector extends UtamRootSelector {
    * get instance of code generation helper. helper needs context to process args.
    *
    * @param parserContext structure that has selector
-   * @param context       instance of context
+   * @param context instance of context
    * @param methodContext selector can be used as an argument, then we need method context
    * @return helper instance
    */
-  LocatorCodeGeneration getArgCodeGenerationHelper(String parserContext,
-      MethodContext methodContext, TranslationContext context) {
+  LocatorCodeGeneration getArgCodeGenerationHelper(
+      String parserContext, MethodContext methodContext, TranslationContext context) {
     return setCodeGenerationHelper(parserContext, context, methodContext);
   }
 
@@ -135,26 +135,30 @@ class UtamSelector extends UtamRootSelector {
    * get instance of selector code generation helper for an element
    *
    * @param elementName name of the element with selector
-   * @param context     instance of context
+   * @param context instance of context
    * @return helper instance
    */
-  LocatorCodeGeneration getElementCodeGenerationHelper(String elementName,
-      TranslationContext context) {
+  LocatorCodeGeneration getElementCodeGenerationHelper(
+      String elementName, TranslationContext context) {
     return setCodeGenerationHelper(String.format("element \"%s\"", elementName), context, null);
   }
 
-  private LocatorCodeGeneration setCodeGenerationHelper(String selectorHolder, TranslationContext context, MethodContext methodContext) {
+  private LocatorCodeGeneration setCodeGenerationHelper(
+      String selectorHolder, TranslationContext context, MethodContext methodContext) {
     if (this.locatorContext == null) {
-      String parserContext = String
-          .format("%s selector \"%s\"", selectorHolder, getLocator().getStringValue());
-      List<TypeProvider> expectedArgsTypes = getParametersTypes(getLocator().getStringValue(), selectorHolder);
+      String parserContext =
+          String.format("%s selector \"%s\"", selectorHolder, getLocator().getStringValue());
+      List<TypeProvider> expectedArgsTypes =
+          getParametersTypes(getLocator().getStringValue(), selectorHolder);
       ArgumentsProvider provider = new ArgumentsProvider(argsNode, parserContext);
-      ParametersContext parametersContext = new StatementParametersContext(parserContext, context, methodContext);
-      List<UtamArgument> arguments = provider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
-      List<MethodParameter> parameters = arguments
-          .stream()
-          .map(arg -> arg.asParameter(context, methodContext, parametersContext))
-          .collect(Collectors.toList());
+      ParametersContext parametersContext =
+          new StatementParametersContext(parserContext, context, methodContext);
+      List<UtamArgument> arguments =
+          provider.getArguments(UtamArgument.ArgsValidationMode.LITERAL_ALLOWED);
+      List<MethodParameter> parameters =
+          arguments.stream()
+              .map(arg -> arg.asParameter(context, methodContext, parametersContext))
+              .collect(Collectors.toList());
       parametersContext.setNestedParameters(parameters, expectedArgsTypes);
       this.locatorContext = new LocatorCodeGeneration(getSelectorType(), getLocator(), parameters);
     }

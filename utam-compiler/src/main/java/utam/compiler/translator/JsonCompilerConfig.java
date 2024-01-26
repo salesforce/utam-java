@@ -58,12 +58,14 @@ public class JsonCompilerConfig {
 
   /**
    * Initializes a new instance of the JsonCompilerConfig class
-   * @param configFile   the configuration file
+   *
+   * @param configFile the configuration file
    * @param compilerRoot the root directory for the compiler
-   * @param fileList     the explicit list of Page Object files for compilation
+   * @param fileList the explicit list of Page Object files for compilation
    * @throws IOException thrown if there is an exception during the execution
    */
-  public JsonCompilerConfig(File configFile, File compilerRoot, List<File> fileList) throws IOException {
+  public JsonCompilerConfig(File configFile, File compilerRoot, List<File> fileList)
+      throws IOException {
     try {
       ObjectMapper mapper = new ObjectMapper();
       mapper.enable(ALLOW_COMMENTS);
@@ -84,18 +86,22 @@ public class JsonCompilerConfig {
   }
 
   private static String getConfigLoggerMessage(String optionName, Object optionValue) {
-    String value = optionValue == null ? "null" : (optionValue.toString().isEmpty()? "empty string" : optionValue.toString());
+    String value =
+        optionValue == null
+            ? "null"
+            : (optionValue.toString().isEmpty() ? "empty string" : optionValue.toString());
     return String.format("Compiler config: %s is set to %s", optionName, value);
   }
 
   /**
    * Gets a value indicating whether the list source files to compile is valid
+   *
    * @return true if a root directory for recursive scanning is specified, or a list of input files
-   * is specified, but not both.
+   *     is specified, but not both.
    */
   public boolean isValidSourceFileSpecification() {
-    return moduleConfig.pageObjectsRootDirectory != null && inputFiles.isEmpty() ||
-        moduleConfig.pageObjectsRootDirectory == null && !inputFiles.isEmpty();
+    return moduleConfig.pageObjectsRootDirectory != null && inputFiles.isEmpty()
+        || moduleConfig.pageObjectsRootDirectory == null && !inputFiles.isEmpty();
   }
 
   /**
@@ -127,11 +133,12 @@ public class JsonCompilerConfig {
 
   CompilerErrorsConfig getErrorsConfig(TranslatorTargetConfig targetConfig) {
     String absolutePath = targetConfig.getErrorsReportPath();
-    return absolutePath == null? new CompilerErrors.Throws() : new Report(absolutePath);
+    return absolutePath == null ? new CompilerErrors.Throws() : new Report(absolutePath);
   }
 
   /**
    * Gets the module name
+   *
    * @return the name of the module
    */
   public String getModuleName() {
@@ -175,11 +182,13 @@ public class JsonCompilerConfig {
     TranslatorTargetConfig targetConfig = getTargetConfig();
     List<ProfileConfiguration> profiles = getConfiguredProfiles();
     CompilerErrorsConfig errorsConfig = getErrorsConfig(targetConfig);
-    return new DefaultTranslatorConfiguration(moduleConfig.outputOptions,
+    return new DefaultTranslatorConfiguration(
+        moduleConfig.outputOptions,
         moduleConfig.lintingConfiguration,
         errorsConfig,
         sourceConfig,
-        targetConfig, profiles);
+        targetConfig,
+        profiles);
   }
 
   /**
@@ -209,24 +218,21 @@ public class JsonCompilerConfig {
     /**
      * Initializes a new instance of the Module class. Instantiated via JSON deserialization.
      *
-     * @param moduleName               the arbitrary name of the module in the source repository
-     * @param pageObjectsVersion       optional name of the version for JavaDoc
-     * @param filesMaskRegex           used by scanner to distinguish JSON with page objects
+     * @param moduleName the arbitrary name of the module in the source repository
+     * @param pageObjectsVersion optional name of the version for JavaDoc
+     * @param filesMaskRegex used by scanner to distinguish JSON with page objects
      * @param pageObjectsRootDirectory the directory in the source repository in which to
-     *                                 recursively search for UTAM Page Object declarative
-     *                                 description files
-     * @param pageObjectsOutputDir     target root folder for generated Page Objects
-     * @param resourcesOutputDir       target folder for generated resources like profiles
-     *                                 configurations
-     * @param unitTestDirectory        target root folder for generated unit tests
-     * @param unitTestRunner           type of the unit tests runner for unit tests generation,
-     *                                 default is NONE, can also be "testng" or "junit"
-     * @param namespaces               an array of Namespace objects describing the namespaces
-     *                                 within the module
-     * @param profiles                 an array of Profile objects representing the profiles used in
-     *                                 JSON files of the module
-     * @param copyright                lines for copyright header
-     * @param lintingConfiguration     configured linting
+     *     recursively search for UTAM Page Object declarative description files
+     * @param pageObjectsOutputDir target root folder for generated Page Objects
+     * @param resourcesOutputDir target folder for generated resources like profiles configurations
+     * @param unitTestDirectory target root folder for generated unit tests
+     * @param unitTestRunner type of the unit tests runner for unit tests generation, default is
+     *     NONE, can also be "testng" or "junit"
+     * @param namespaces an array of Namespace objects describing the namespaces within the module
+     * @param profiles an array of Profile objects representing the profiles used in JSON files of
+     *     the module
+     * @param copyright lines for copyright header
+     * @param lintingConfiguration configured linting
      */
     @JsonCreator
     public Module(
@@ -237,17 +243,18 @@ public class JsonCompilerConfig {
         @JsonProperty(value = "pageObjectsOutputDir", required = true) String pageObjectsOutputDir,
         @JsonProperty(value = "resourcesOutputDir", required = true) String resourcesOutputDir,
         @JsonProperty(value = "unitTestsOutputDir") final String unitTestDirectory,
-        @JsonProperty(value = "unitTestsRunner", defaultValue = "NONE") UnitTestRunner unitTestRunner,
+        @JsonProperty(value = "unitTestsRunner", defaultValue = "NONE")
+            UnitTestRunner unitTestRunner,
         @JsonProperty(value = "namespaces") List<Namespace> namespaces,
         @JsonProperty(value = "profiles") List<Profile> profiles,
         @JsonProperty(value = "copyright") List<String> copyright,
         @JsonProperty(value = "lint") LintingConfigJson lintingConfiguration,
-        @JsonProperty(value = "interruptCompilerOnError") Boolean isErrorsReportFile
-    ) {
+        @JsonProperty(value = "interruptCompilerOnError") Boolean isErrorsReportFile) {
       this.pageObjectsRootDirectory = pageObjectsRootDirectory;
       info(getConfigLoggerMessage("pageObjectsRootDir", pageObjectsRootDirectory));
 
-      this.pageObjectFileMaskRegex = Objects.requireNonNullElse(filesMaskRegex, DEFAULT_JSON_FILE_MASK_REGEX);
+      this.pageObjectFileMaskRegex =
+          Objects.requireNonNullElse(filesMaskRegex, DEFAULT_JSON_FILE_MASK_REGEX);
       info(getConfigLoggerMessage("pageObjectsFilesMask", pageObjectFileMaskRegex));
 
       this.pageObjectsOutputDir = pageObjectsOutputDir;
@@ -263,37 +270,40 @@ public class JsonCompilerConfig {
       info(getConfigLoggerMessage("unitTestRunner", unitTestRunner));
 
       this.namespaces.addAll(Objects.requireNonNullElse(namespaces, new ArrayList<>()));
-      String namespacesString = this.namespaces.stream().map(n -> n.typePrefix)
-          .collect(Collectors.joining(", "));
+      String namespacesString =
+          this.namespaces.stream().map(n -> n.typePrefix).collect(Collectors.joining(", "));
       info(getConfigLoggerMessage("namespaces", "[ " + namespacesString + " ]"));
 
       setUniqueProfiles(profiles);
-      String profilesString = this.profiles.stream().map(p -> p.name)
-          .collect(Collectors.joining(", "));
+      String profilesString =
+          this.profiles.stream().map(p -> p.name).collect(Collectors.joining(", "));
       info(getConfigLoggerMessage("profiles", "[ " + profilesString + " ]"));
 
-      this.outputOptions = new CompilerOutputOptions(
-          Objects.requireNonNullElse(moduleName, ""),
-          Objects.requireNonNullElse(pageObjectsVersion, ""),
-          Objects.requireNonNullElse(copyright, new ArrayList<>()));
+      this.outputOptions =
+          new CompilerOutputOptions(
+              Objects.requireNonNullElse(moduleName, ""),
+              Objects.requireNonNullElse(pageObjectsVersion, ""),
+              Objects.requireNonNullElse(copyright, new ArrayList<>()));
       this.lintingConfiguration = LintingConfigJson.getLintingConfig(lintingConfiguration);
       info(getConfigLoggerMessage("lint configuration", this.lintingConfiguration.toString()));
-      this.compilerErrorsFile = Boolean.FALSE == isErrorsReportFile? CompilerErrors.ERR_REPORT_FILE : null;
+      this.compilerErrorsFile =
+          Boolean.FALSE == isErrorsReportFile ? CompilerErrors.ERR_REPORT_FILE : null;
       info(getConfigLoggerMessage("errorsReportFile", this.compilerErrorsFile));
     }
 
     void setUniqueProfiles(List<Profile> profiles) {
-      if(profiles == null || profiles.isEmpty()) {
+      if (profiles == null || profiles.isEmpty()) {
         return;
       }
       // check duplicates
       Set<String> configuredProfiles = new HashSet<>();
-      profiles.forEach(profile -> {
-        if (configuredProfiles.contains(profile.name)) {
-          throw new UtamCompilationError(String.format(ERR_DUPLICATE_PROFILE, profile.name));
-        }
-        configuredProfiles.add(profile.name);
-      });
+      profiles.forEach(
+          profile -> {
+            if (configuredProfiles.contains(profile.name)) {
+              throw new UtamCompilationError(String.format(ERR_DUPLICATE_PROFILE, profile.name));
+            }
+            configuredProfiles.add(profile.name);
+          });
       this.profiles.addAll(profiles);
     }
 
@@ -304,19 +314,21 @@ public class JsonCompilerConfig {
      * @param inputFiles the explicit list of files to compile, if specified
      * @return the translator source configuration
      */
-    public TranslatorSourceConfig getSourceConfig(String compilerRootFolderName, List<File> inputFiles) {
-      if(namespaces.isEmpty()) {
+    public TranslatorSourceConfig getSourceConfig(
+        String compilerRootFolderName, List<File> inputFiles) {
+      if (namespaces.isEmpty()) {
         if (inputFiles != null && !inputFiles.isEmpty()) {
           throw new UtamCompilationError(ERR_FILES_WITHOUT_NAMESPACE);
         }
-        return new SourceWithoutPackages(compilerRootFolderName + pageObjectsRootDirectory, pageObjectFileMaskRegex);
+        return new SourceWithoutPackages(
+            compilerRootFolderName + pageObjectsRootDirectory, pageObjectFileMaskRegex);
       }
-      RecursiveScanner scanner = inputFiles != null && !inputFiles.isEmpty()
-          ? new FilesScanner(inputFiles)
-          : new RecursiveScanner(compilerRootFolderName + pageObjectsRootDirectory);
+      RecursiveScanner scanner =
+          inputFiles != null && !inputFiles.isEmpty()
+              ? new FilesScanner(inputFiles)
+              : new RecursiveScanner(compilerRootFolderName + pageObjectsRootDirectory);
       return new DefaultSourceConfiguration(
-          new ScannerConfig(pageObjectFileMaskRegex, getPackagesMapping()),
-          scanner);
+          new ScannerConfig(pageObjectFileMaskRegex, getPackagesMapping()), scanner);
     }
 
     /**
@@ -360,7 +372,7 @@ public class JsonCompilerConfig {
      * Object declarative description files
      *
      * @return the directory in the source repository in which to recursively search for UTAM Page
-     * Object declarative description files
+     *     Object declarative description files
      */
     public String getPageObjectsRootDirectory() {
       return pageObjectsRootDirectory;
@@ -440,14 +452,15 @@ public class JsonCompilerConfig {
    */
   public static class Profile {
 
-    static final String ERR_DUPLICATE_PROFILE_DIFF_VALUES = "Profile '%s' is already configured with different values";
+    static final String ERR_DUPLICATE_PROFILE_DIFF_VALUES =
+        "Profile '%s' is already configured with different values";
     private final String name;
     private final String[] values;
 
     /**
      * Initializes a new instance of the Profile class. Instantiated via JSON deserialization.
      *
-     * @param name   the name of the profile
+     * @param name the name of the profile
      * @param values the values of the profile
      */
     @JsonCreator
@@ -496,7 +509,8 @@ public class JsonCompilerConfig {
    */
   public static class Namespace {
 
-    static final String ERR_DUPLICATE_MAPPING = "Namespace config: value for '%s' is already configured as '%s'";
+    static final String ERR_DUPLICATE_MAPPING =
+        "Namespace config: value for '%s' is already configured as '%s'";
 
     private final String typePrefix;
     private final String pathMatchRegex;
@@ -504,9 +518,9 @@ public class JsonCompilerConfig {
     /**
      * Initializes a new instance of the Namespace class. Instantiated via JSON deserialization.
      *
-     * @param typePrefix     type prefix
+     * @param typePrefix type prefix
      * @param pathMatchRegex the mapped name used by the UTAM compiler to generate packages for the
-     *                       generated Page Object source code
+     *     generated Page Object source code
      */
     @JsonCreator
     public Namespace(
@@ -521,7 +535,7 @@ public class JsonCompilerConfig {
      * Object source code. public because used in distribution JSON config
      *
      * @return the mapped name used by the UTAM compiler to generate packages for the generated Page
-     * Object source code
+     *     Object source code
      */
     public String getTypeMatch() {
       return typePrefix;

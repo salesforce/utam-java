@@ -26,7 +26,11 @@ public abstract class BasicElementGetterMethod implements PageObjectMethod {
   final MethodParametersTracker parametersTracker;
   final UtamMethodDescription description;
 
-  BasicElementGetterMethod(String methodName, boolean isPublic, TypeProvider returnType, UtamMethodDescription description) {
+  BasicElementGetterMethod(
+      String methodName,
+      boolean isPublic,
+      TypeProvider returnType,
+      UtamMethodDescription description) {
     this.methodName = methodName;
     this.returnType = returnType;
     this.isPublic = isPublic;
