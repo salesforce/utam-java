@@ -143,8 +143,8 @@ public class TranslationContext {
     TypeProvider type = translationTypesConfig.getInterfaceType(typeStr);
     if (customTypesMap.containsKey(type.getSimpleName())) {
       TypeProvider alreadyDeclared = customTypesMap.get(type.getSimpleName());
-      // if simple name is same, but full is not - resolve collision by using full
-      // name instead of short name
+      // if simple name is same, but full is not - resolve collision by using full name instead
+      // short name
       // this allows to avoid importing class with simple names twice
       if (!alreadyDeclared.getFullName().equals(type.getFullName())) {
         type = new PageObjectWithNamesCollisionType(type);
@@ -192,10 +192,8 @@ public class TranslationContext {
       throw new UtamCompilationError(
           VALIDATION.getErrorMessage(504, method.getDeclaration().getName()));
     }
-
     // no duplicates - add method
     methodNames.add(method.getDeclaration().getName());
-
     if (method instanceof BasicElementGetterMethod) {
       elementGetters.add((BasicElementGetterMethod) method);
     } else {
