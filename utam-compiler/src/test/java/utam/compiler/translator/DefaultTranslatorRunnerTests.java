@@ -41,14 +41,12 @@ import org.testng.annotations.Test;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.DeserializerUtilities;
 import utam.compiler.grammar.TestUtilities;
-import utam.compiler.helpers.TranslationContext;
 import utam.compiler.helpers.TypeUtilities.FromString;
 import utam.compiler.translator.DefaultSourceConfigurationTests.TranslatorConfigWithProfile;
 import utam.core.declarative.lint.LintingConfig;
 import utam.core.declarative.representation.PageObjectClass;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.PageObjectInterface;
-import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorRunner;
@@ -438,16 +436,16 @@ public class DefaultTranslatorRunnerTests {
   }
 
   @Test
-  public void testWaitForNameCollisionPrivatePasses() {
-    TranslationContext context =
-        new DeserializerUtilities().getContext("validate/wait/waitForNameCollisionPrivate");
-
-    PageObjectMethod publicWaitForTest = context.getMethods().get(1);
-    PageObjectMethod privateWaitForTest = context.getMethods().get(2);
-
+  public void testWaitForNameCollisionPrivateThrows() {
+    UtamCompilationError e =
+        expectThrows(
+            UtamCompilationError.class,
+            () ->
+                new DeserializerUtilities()
+                    .getContext("validate/wait/waitForNameCollisionPrivate"));
     assertThat(
-        publicWaitForTest.getDeclaration().getName(),
-        equalTo(privateWaitForTest.getDeclaration().getName()));
-    assertThat(publicWaitForTest.isPublic(), equalTo(!privateWaitForTest.isPublic()));
+        e.getMessage(),
+        containsString(
+            "error 504: method \"waitForTest\": method with the same name was already declared"));
   }
 }

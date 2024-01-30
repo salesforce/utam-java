@@ -58,6 +58,7 @@ class UtamComposeMethod extends UtamMethod {
    * @param name name of the method
    * @param description description of the method
    * @param compose statements
+   * @param isPublic if the method is public
    */
   UtamComposeMethod(
       String name,
