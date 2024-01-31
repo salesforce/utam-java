@@ -153,6 +153,7 @@ public class UtamElementLoadTests {
     MethodInfo expectedBeforeLoad = new MethodInfo(BEFORE_LOAD_METHOD_NAME, "Object");
     expectedBeforeLoad.addCodeLine("this.waitForFrameElement()");
     expectedBeforeLoad.addCodeLine("return this");
+    PageObjectValidationTestHelper.validateMethod(beforeLoadMethod, expectedBeforeLoad);
   }
 
   @Test
@@ -175,6 +176,7 @@ public class UtamElementLoadTests {
     MethodInfo expectedBeforeLoad = new MethodInfo(BEFORE_LOAD_METHOD_NAME, "Object");
     expectedBeforeLoad.addCodeLine("this.waitForBasicElement()");
     expectedBeforeLoad.addCodeLine("return this");
+    PageObjectValidationTestHelper.validateMethod(beforeLoadMethod, expectedBeforeLoad);
   }
 
   @Test
