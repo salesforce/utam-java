@@ -56,15 +56,17 @@ public final class InterfaceSerializer {
   private void addMethodDeclaration(List<String> out, MethodDeclaration declaration) {
     // The interface extends the PageObject interface, which already has a load
     // method, so we don't need to add a load method to the generated interface.
-    if (!declaration.getName().equals(BEFORE_LOAD_METHOD_NAME)) {
-      out.add(NEW_LINE);
-      out.addAll(getWrappedJavadoc(declaration.getDescription()));
-      if (declaration.isDeprecated()) {
-        out.add(DEPRECATED_ANNOTATION.getAnnotationText());
-      }
-      out.add(NEW_LINE);
-      out.add(getStatement(declaration.getCodeLine()));
+    if (declaration.getName().equals(BEFORE_LOAD_METHOD_NAME)) {
+      return;
     }
+
+    out.add(NEW_LINE);
+    out.addAll(getWrappedJavadoc(declaration.getDescription()));
+    if (declaration.isDeprecated()) {
+      out.add(DEPRECATED_ANNOTATION.getAnnotationText());
+    }
+    out.add(NEW_LINE);
+    out.add(getStatement(declaration.getCodeLine()));
   }
 
   @Override
