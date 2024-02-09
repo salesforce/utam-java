@@ -60,9 +60,9 @@ import utam.core.framework.context.PlatformType;
  * @author elizaveta.ivanova
  * @since 228
  */
-final class UtamPageObject {
+public final class UtamPageObject {
 
-  static final String BEFORE_LOAD_METHOD_NAME = "load";
+  public static final String BEFORE_LOAD_METHOD_NAME = "load";
   private static final TypeProvider PUBLIC_DEFAULT_ROOT_ELEMENT_TYPE =
       new FromClass(BasicElement.class);
   private static final String INTERFACE_PROPERTIES =
