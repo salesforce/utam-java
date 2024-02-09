@@ -7,6 +7,7 @@
  */
 package utam.compiler.translator;
 
+import static utam.compiler.grammar.UtamPageObject.BEFORE_LOAD_METHOD_NAME;
 import static utam.compiler.helpers.AnnotationUtils.DEPRECATED_ANNOTATION;
 import static utam.compiler.translator.TranslationUtilities.NEW_LINE;
 import static utam.compiler.translator.TranslationUtilities.applyJavaFormatter;
@@ -53,6 +54,12 @@ public final class InterfaceSerializer {
   }
 
   private void addMethodDeclaration(List<String> out, MethodDeclaration declaration) {
+    // The interface extends the PageObject interface, which already has a load
+    // method, so we don't need to add a load method to the generated interface.
+    if (declaration.getName().equals(BEFORE_LOAD_METHOD_NAME)) {
+      return;
+    }
+
     out.add(NEW_LINE);
     out.addAll(getWrappedJavadoc(declaration.getDescription()));
     if (declaration.isDeprecated()) {
