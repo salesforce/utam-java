@@ -78,6 +78,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
    *
    * @param outputOptions compiler output options
    * @param lintingConfiguration configured lint rules
+   * @param errorsConfig configuration to handle compiler errors
    * @param sourceConfig configuration to scan for page object sources
    * @param targetConfig information about output folders for page objects, configs and unit tests
    * @param profileDefinitions list of known profiles and their values

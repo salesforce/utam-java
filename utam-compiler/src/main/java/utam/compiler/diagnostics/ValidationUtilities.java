@@ -10,7 +10,6 @@ package utam.compiler.diagnostics;
 import static utam.compiler.diagnostics.JsonErrorsConfig.getErrorsConfig;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.ArrayList;
 import java.util.List;
 import utam.compiler.UtamCompilationError;
 import utam.core.declarative.lint.LintingError.ViolationLevel;
@@ -139,8 +138,8 @@ public class ValidationUtilities {
   /**
    * Validate that array is not null or empty
    *
-   * @param arrayNode    JSON node
-   * @param prefix       validation context
+   * @param arrayNode JSON node
+   * @param prefix validation context
    * @param propertyName name of the JSON property
    */
   public void validateNotEmptyArray(JsonNode arrayNode, String prefix, String propertyName) {

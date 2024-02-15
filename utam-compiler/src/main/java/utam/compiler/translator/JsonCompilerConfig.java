@@ -233,6 +233,8 @@ public class JsonCompilerConfig {
      *     the module
      * @param copyright lines for copyright header
      * @param lintingConfiguration configured linting
+     * @param isErrorsReportFile boolean flag to write compiler errors into a file vs. interrupt
+     *     with exception
      */
     @JsonCreator
     public Module(

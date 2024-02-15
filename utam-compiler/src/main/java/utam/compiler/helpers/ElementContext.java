@@ -382,6 +382,7 @@ public abstract class ElementContext {
      * @param enclosingPageObjectType the type of the enclosing Page Object
      * @param selector the selector for the element
      * @param rootType the type of the root element
+     * @param rootElementMethod element method to register
      */
     public Root(
         TypeProvider enclosingPageObjectType,
