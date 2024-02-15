@@ -55,7 +55,7 @@ public class InterfaceMethod extends MethodDeclarationImpl implements PageObject
   }
 
   @Override
-  public MethodDeclarationImpl getDeclaration() {
+  public MethodDeclaration getDeclaration() {
     return this;
   }
 

@@ -175,14 +175,14 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
 
   private TranslatorConfig setConfigFromCommandLineArgs() {
     try {
-      if (inputDirectory == null && (inputFiles == null || inputFiles.size() == 0)) {
+      if (inputDirectory == null && (inputFiles == null || inputFiles.isEmpty())) {
         // Must specify either an input directory or a list of files
         thrownError = new UnsupportedOperationException(MISSING_INPUT);
         returnCode = CONFIG_ERR;
         return null;
       }
 
-      if (inputDirectory != null && inputFiles != null && inputFiles.size() > 0) {
+      if (inputDirectory != null && inputFiles != null && !inputFiles.isEmpty()) {
         // Cannot specify both input directory and list of files.
         thrownError = new UnsupportedOperationException(TOO_MANY_INPUTS);
         returnCode = CONFIG_ERR;

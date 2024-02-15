@@ -148,7 +148,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
    * @return instance of a source configuration
    */
   public static RecursiveScanner getScanner(File inputDirectory, List<File> inputFiles) {
-    if (inputFiles != null && inputFiles.size() > 0) {
+    if (inputFiles != null && !inputFiles.isEmpty()) {
       return new FilesScanner(inputFiles);
     } else {
       return new RecursiveScanner(inputDirectory.toString());

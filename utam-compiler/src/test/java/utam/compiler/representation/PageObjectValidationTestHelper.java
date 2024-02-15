@@ -144,7 +144,7 @@ public class PageObjectValidationTestHelper {
         is(equalTo(info.getIsPublic())));
     assertThat(
         "method " + info.name + " code lines", method.getCodeLines(), is(equalTo(info.codeLines)));
-    if (info.importedTypes.size() > 0 || info.impliedImportedTypes.size() > 0) {
+    if (!info.importedTypes.isEmpty() || !info.impliedImportedTypes.isEmpty()) {
       Set<String> actualImports = getAllImports(method.getClassImports());
       String imports = actualImports.isEmpty() ? "empty" : String.join(", ", actualImports);
       String assertionStr = String.format("method '%s' class imports are: %s", info.name, imports);
@@ -199,7 +199,7 @@ public class PageObjectValidationTestHelper {
     }
 
     // If the user has decided to validate the imports of a declaration, we will do that here.
-    if (expected.importedTypes.size() > 0) {
+    if (!expected.importedTypes.isEmpty()) {
       Set<String> actualImports = getAllImports(actual.getImports());
       String imports = actualImports.isEmpty() ? "empty" : String.join(", ", actualImports);
       String assertionStr =

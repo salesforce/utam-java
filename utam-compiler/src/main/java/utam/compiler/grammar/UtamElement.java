@@ -212,7 +212,7 @@ public final class UtamElement {
         Collections.singletonList(new UtamMethodActionWaitForElement(name, isLoad()));
 
     // Wait methods are public
-    Boolean isPublic = isWait();
+    boolean isPublic = isWait();
 
     return new UtamComposeMethod(methodName, description, compose, isPublic);
   }
@@ -385,7 +385,7 @@ public final class UtamElement {
         throw new UtamCompilationError(VALIDATION.getErrorMessage(302, name));
       }
       boolean isReturnsList = selector.isReturnAll() && (filter == null || !filter.isFindFirst());
-      if (isReturnsList && (elements.size() > 0 || shadow != null)) {
+      if (isReturnsList && (!elements.isEmpty() || shadow != null)) {
         throw new UtamCompilationError(VALIDATION.getErrorMessage(203, name));
       }
     }

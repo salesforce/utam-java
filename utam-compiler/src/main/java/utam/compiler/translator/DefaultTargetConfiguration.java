@@ -90,7 +90,6 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
         : targetPath + File.separator + errorsReportFile;
   }
 
-  @SuppressWarnings("UnstableApiUsage")
   public static FileWriter getWriterWithDir(String fullPath) throws IOException {
     try {
       return new FileWriter(fullPath);

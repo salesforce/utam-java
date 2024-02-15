@@ -104,11 +104,11 @@ public class WebDriverSimulator {
    * @author james.evans
    */
   public class WebElementInfo {
-    private String name;
-    private String selector;
+    private final String name;
+    private final String selector;
     private String parentElementName;
     private boolean isInShadowDOM;
-    private WebElement element;
+    private final WebElement element;
     private boolean isFocused;
 
     /**

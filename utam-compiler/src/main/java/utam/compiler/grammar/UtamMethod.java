@@ -83,7 +83,7 @@ abstract class UtamMethod {
   }
 
   final boolean hasMethodLevelArgs() {
-    return arguments.size() > 0;
+    return !arguments.isEmpty();
   }
 
   /**

@@ -214,13 +214,12 @@ class UtamMethodActionWaitFor extends UtamMethodAction {
         StatementContext statementContext) {
       // validation is performed here as args are not available at the time of construction
       if (isNoArgsAllowed
-          && (context
-                  .getElement(this.elementName)
-                  .getElementMethod()
-                  .getDeclaration()
-                  .getParameters()
-                  .size()
-              > 0)) {
+          && (!context
+              .getElement(this.elementName)
+              .getElementMethod()
+              .getDeclaration()
+              .getParameters()
+              .isEmpty())) {
         String message = VALIDATION.getErrorMessage(206, this.elementName);
         throw new UtamCompilationError(message);
       }

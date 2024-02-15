@@ -146,7 +146,7 @@ public class ValidationUtilities {
     if (arrayNode == null || arrayNode.isNull()) {
       throw new UtamCompilationError(arrayNode, getEmptyArrayError(prefix, propertyName));
     }
-    if (!arrayNode.isArray() || arrayNode.size() == 0) {
+    if (!arrayNode.isArray() || arrayNode.isEmpty()) {
       throw new UtamCompilationError(arrayNode, getEmptyArrayError(prefix, propertyName));
     }
   }
@@ -163,7 +163,7 @@ public class ValidationUtilities {
     if (arrayNode == null || arrayNode.isNull()) {
       return;
     }
-    if (!arrayNode.isArray() || arrayNode.size() == 0) {
+    if (!arrayNode.isArray() || arrayNode.isEmpty()) {
       throw new UtamCompilationError(arrayNode, getEmptyArrayError(prefix, propertyName));
     }
   }
@@ -250,7 +250,7 @@ public class ValidationUtilities {
    */
   public void validateUnsupportedProperty(
       List<?> list, String prefix, String propertyName, String supported) {
-    if (list != null && list.size() > 0) {
+    if (list != null && !list.isEmpty()) {
       throw new UtamCompilationError(getErrorMessage(8, prefix, propertyName, supported));
     }
   }
