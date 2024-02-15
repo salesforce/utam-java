@@ -1,0 +1,22 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "selector": {
+        "css": "test"
+      },
+      "wait": true,
+      "public": true
+    }
+  ],
+  "methods": [
+    {
+      "name": "waitForTest",
+      "compose": [
+        {
+          "element": "test"
+        }
+      ]
+    }
+  ]
+}

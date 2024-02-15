@@ -175,10 +175,6 @@ public final class UtamElement {
     return isLoad() || isWait();
   }
 
-  private boolean isPrivateWait() {
-    return isLoad() && !isWait();
-  }
-
   /**
    * Some functionality in compiler can lead to adjusting JSON itself, for example "wait"
    *
@@ -213,7 +209,11 @@ public final class UtamElement {
             null);
     List<UtamMethodAction> compose =
         Collections.singletonList(new UtamMethodActionWaitForElement(name, isLoad()));
-    return new UtamComposeMethod(methodName, description, compose, !isPrivateWait());
+
+    // Wait methods are public
+    Boolean isPublic = isWait();
+
+    return new UtamComposeMethod(methodName, description, compose, isPublic);
   }
 
   /**

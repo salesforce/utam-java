@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hamcrest.Matchers;
 import org.testng.annotations.Test;
+import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.DeserializerUtilities;
 import utam.compiler.grammar.TestUtilities;
 import utam.compiler.helpers.TypeUtilities.FromString;
@@ -419,5 +420,32 @@ public class DefaultTranslatorRunnerTests {
         e.getMessage(),
         containsString(
             "@ElementMarker.Find(css = \"css\")\n" + "private ElementLocation test-error;"));
+  }
+
+  @Test
+  public void testWaitForNameCollisionPublicThrows() {
+    UtamCompilationError e =
+        expectThrows(
+            UtamCompilationError.class,
+            () ->
+                new DeserializerUtilities().getContext("validate/wait/waitForNameCollisionPublic"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 504: method \"waitForTest\": method with the same name was already declared"));
+  }
+
+  @Test
+  public void testWaitForNameCollisionPrivateThrows() {
+    UtamCompilationError e =
+        expectThrows(
+            UtamCompilationError.class,
+            () ->
+                new DeserializerUtilities()
+                    .getContext("validate/wait/waitForNameCollisionPrivate"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 504: method \"waitForTest\": method with the same name was already declared"));
   }
 }
