@@ -78,9 +78,9 @@ class UtamComposeMethod extends UtamMethod {
    * @return list of statements
    */
   static List<UtamMethodAction> processComposeNodes(String methodName, JsonNode composeNodes) {
-    List<UtamMethodAction> res =
-        VALIDATION.validateNotEmptyArray(
-            composeNodes, String.format("method \"%s\"", methodName), "compose");
+    VALIDATION.validateNotEmptyArray(
+        composeNodes, String.format("method \"%s\"", methodName), "compose");
+    List<UtamMethodAction> res = new ArrayList<>();
     for (JsonNode composeNode : composeNodes) {
       UtamMethodAction action = processComposeStatementNode(methodName, composeNode);
       res.add(action);

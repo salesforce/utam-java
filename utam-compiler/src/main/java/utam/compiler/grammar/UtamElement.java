@@ -29,6 +29,7 @@ import static utam.compiler.types.BasicElementUnionType.asBasicOrUnionType;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import utam.compiler.UtamCompilationError;
@@ -120,8 +121,8 @@ public final class UtamElement {
    * @return list of parsed elements
    */
   static List<UtamElement> processElementsNode(JsonNode elementsNode, String parserContext) {
-    List<UtamElement> elements =
-        VALIDATION.validateOptionalNotEmptyArray(elementsNode, parserContext, "elements");
+    List<UtamElement> elements = new ArrayList<>();
+    VALIDATION.validateOptionalNotEmptyArray(elementsNode, parserContext, "elements");
     if (isEmptyNode(elementsNode)) {
       return elements;
     }

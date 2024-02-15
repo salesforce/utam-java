@@ -64,8 +64,8 @@ abstract class UtamMethod {
    * @return list of declared methods
    */
   static List<UtamMethod> processMethodsNode(JsonNode methodsNode, boolean isAbstract) {
-    List<UtamMethod> methods =
-        VALIDATION.validateOptionalNotEmptyArray(methodsNode, "page object root", "methods");
+    List<UtamMethod> methods = new ArrayList<>();
+    VALIDATION.validateOptionalNotEmptyArray(methodsNode, "page object root", "methods");
     if (isEmptyNode(methodsNode)) {
       return methods;
     }
