@@ -210,8 +210,8 @@ public final class UtamElement {
     List<UtamMethodAction> compose =
         Collections.singletonList(new UtamMethodActionWaitForElement(name, isLoad()));
 
-    // q: why does this determine the public nature?
-    Boolean isPublic = !isLoad() || isWait();
+    // Wait methods are public
+    Boolean isPublic = isWait();
 
     return new UtamComposeMethod(methodName, description, compose, isPublic);
   }
