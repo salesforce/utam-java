@@ -45,6 +45,7 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
    * @param unitTestRunner the test runner to use when generating unit tests
    * @param unitTestDirectory the root output directory where generated unit tests for generated
    *     Page Objects will be written
+   * @param compilerErrorsFile name of the file to write compilation errors if configured
    */
   public DefaultTargetConfiguration(
       String compilerRoot,
@@ -89,7 +90,6 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
         : targetPath + File.separator + errorsReportFile;
   }
 
-  @SuppressWarnings("UnstableApiUsage")
   public static FileWriter getWriterWithDir(String fullPath) throws IOException {
     try {
       return new FileWriter(fullPath);

@@ -14,6 +14,7 @@ import java.util.List;
 import utam.compiler.grammar.UtamMethodDescription;
 import utam.compiler.helpers.ParameterUtils;
 import utam.compiler.representation.JavadocObject.MethodJavadoc;
+import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
@@ -70,7 +71,7 @@ public class ComposeMethod implements PageObjectMethod {
   }
 
   @Override
-  public MethodDeclarationImpl getDeclaration() {
+  public MethodDeclaration getDeclaration() {
     return new MethodDeclarationImpl(name, parameters, returns, imports, javadoc);
   }
 

@@ -108,8 +108,8 @@ abstract class UtamArgument {
    */
   static List<UtamArgument> processArgsNode(
       JsonNode argsNode, String parserContext, ArgsValidationMode literalArgsValidationMode) {
-    List<UtamArgument> args =
-        VALIDATION.validateOptionalNotEmptyArray(argsNode, parserContext, "args");
+    List<UtamArgument> args = new ArrayList<>();
+    VALIDATION.validateOptionalNotEmptyArray(argsNode, parserContext, "args");
     if (isEmptyNode(argsNode)) {
       return args;
     }

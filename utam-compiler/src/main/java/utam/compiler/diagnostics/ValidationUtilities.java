@@ -10,7 +10,6 @@ package utam.compiler.diagnostics;
 import static utam.compiler.diagnostics.JsonErrorsConfig.getErrorsConfig;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.ArrayList;
 import java.util.List;
 import utam.compiler.UtamCompilationError;
 import utam.core.declarative.lint.LintingError.ViolationLevel;
@@ -52,6 +51,7 @@ public class ValidationUtilities {
   /**
    * Get linting message with the given code
    *
+   * @param violationLevel type of the violation
    * @param code error code
    * @param args optional args
    * @return error message
@@ -70,6 +70,7 @@ public class ValidationUtilities {
    * @param node JSON node
    * @param prefix validation context
    * @param propertyName name of the JSON property
+   * @return JSON node text value as string
    */
   public String validateNotNullOrEmptyString(JsonNode node, String prefix, String propertyName) {
     if (node == null || node.isNull()) {
@@ -98,6 +99,7 @@ public class ValidationUtilities {
    * @param node JSON node for error
    * @param prefix validation context
    * @param propertyName name of the JSON property
+   * @return JSON node text value as string
    */
   public String validateNotEmptyString(JsonNode node, String prefix, String propertyName) {
     if (node == null || node.isNull()) {
@@ -140,14 +142,13 @@ public class ValidationUtilities {
    * @param prefix validation context
    * @param propertyName name of the JSON property
    */
-  public <T> List<T> validateNotEmptyArray(JsonNode arrayNode, String prefix, String propertyName) {
+  public void validateNotEmptyArray(JsonNode arrayNode, String prefix, String propertyName) {
     if (arrayNode == null || arrayNode.isNull()) {
       throw new UtamCompilationError(arrayNode, getEmptyArrayError(prefix, propertyName));
     }
-    if (!arrayNode.isArray() || arrayNode.size() == 0) {
+    if (!arrayNode.isArray() || arrayNode.isEmpty()) {
       throw new UtamCompilationError(arrayNode, getEmptyArrayError(prefix, propertyName));
     }
-    return new ArrayList<>();
   }
 
   /**
@@ -156,17 +157,15 @@ public class ValidationUtilities {
    * @param arrayNode JSON node
    * @param prefix validation context
    * @param propertyName name of the JSON property
-   * @return empty list
    */
-  public <T> List<T> validateOptionalNotEmptyArray(
+  public void validateOptionalNotEmptyArray(
       JsonNode arrayNode, String prefix, String propertyName) {
     if (arrayNode == null || arrayNode.isNull()) {
-      return new ArrayList<>();
+      return;
     }
-    if (!arrayNode.isArray() || arrayNode.size() == 0) {
+    if (!arrayNode.isArray() || arrayNode.isEmpty()) {
       throw new UtamCompilationError(arrayNode, getEmptyArrayError(prefix, propertyName));
     }
-    return new ArrayList<>();
   }
 
   /**
@@ -249,9 +248,9 @@ public class ValidationUtilities {
    * @param propertyName name of the JSON property
    * @param supported supported values
    */
-  public <T> void validateUnsupportedProperty(
-      List<T> list, String prefix, String propertyName, String supported) {
-    if (list != null && list.size() > 0) {
+  public void validateUnsupportedProperty(
+      List<?> list, String prefix, String propertyName, String supported) {
+    if (list != null && !list.isEmpty()) {
       throw new UtamCompilationError(getErrorMessage(8, prefix, propertyName, supported));
     }
   }

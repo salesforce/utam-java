@@ -44,6 +44,7 @@ public final class MethodContext {
    * @param declaredReturnType the declared return type of the method
    * @param context translation context
    * @param isAbstract true for interface methods
+   * @param hasMethodLevelArgs indicates if method has args declared by user
    */
   public MethodContext(
       String methodName,

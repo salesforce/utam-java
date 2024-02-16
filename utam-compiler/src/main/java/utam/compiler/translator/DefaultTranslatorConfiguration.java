@@ -78,6 +78,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
    *
    * @param outputOptions compiler output options
    * @param lintingConfiguration configured lint rules
+   * @param errorsConfig configuration to handle compiler errors
    * @param sourceConfig configuration to scan for page object sources
    * @param targetConfig information about output folders for page objects, configs and unit tests
    * @param profileDefinitions list of known profiles and their values
@@ -147,7 +148,7 @@ public class DefaultTranslatorConfiguration implements TranslatorConfig {
    * @return instance of a source configuration
    */
   public static RecursiveScanner getScanner(File inputDirectory, List<File> inputFiles) {
-    if (inputFiles != null && inputFiles.size() > 0) {
+    if (inputFiles != null && !inputFiles.isEmpty()) {
       return new FilesScanner(inputFiles);
     } else {
       return new RecursiveScanner(inputDirectory.toString());

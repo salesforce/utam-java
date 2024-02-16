@@ -29,6 +29,7 @@ import static utam.compiler.types.BasicElementUnionType.asBasicOrUnionType;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import utam.compiler.UtamCompilationError;
@@ -120,8 +121,8 @@ public final class UtamElement {
    * @return list of parsed elements
    */
   static List<UtamElement> processElementsNode(JsonNode elementsNode, String parserContext) {
-    List<UtamElement> elements =
-        VALIDATION.validateOptionalNotEmptyArray(elementsNode, parserContext, "elements");
+    List<UtamElement> elements = new ArrayList<>();
+    VALIDATION.validateOptionalNotEmptyArray(elementsNode, parserContext, "elements");
     if (isEmptyNode(elementsNode)) {
       return elements;
     }
@@ -211,7 +212,7 @@ public final class UtamElement {
         Collections.singletonList(new UtamMethodActionWaitForElement(name, isLoad()));
 
     // Wait methods are public
-    Boolean isPublic = isWait();
+    boolean isPublic = isWait();
 
     return new UtamComposeMethod(methodName, description, compose, isPublic);
   }
@@ -384,7 +385,7 @@ public final class UtamElement {
         throw new UtamCompilationError(VALIDATION.getErrorMessage(302, name));
       }
       boolean isReturnsList = selector.isReturnAll() && (filter == null || !filter.isFindFirst());
-      if (isReturnsList && (elements.size() > 0 || shadow != null)) {
+      if (isReturnsList && (!elements.isEmpty() || shadow != null)) {
         throw new UtamCompilationError(VALIDATION.getErrorMessage(203, name));
       }
     }

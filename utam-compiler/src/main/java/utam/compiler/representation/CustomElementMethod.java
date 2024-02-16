@@ -265,7 +265,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     }
 
     @Override
-    public MethodDeclarationImpl getDeclaration() {
+    public MethodDeclaration getDeclaration() {
       List<MethodParameter> parameters = parametersTracker.getMethodParameters();
       JavadocObject javadoc = new MethodJavadoc(methodName, returnType, parameters, description);
       return new MethodDeclarationImpl(
@@ -273,7 +273,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
     }
 
     @Override
-    public final List<TypeProvider> getClassImports() {
+    public List<TypeProvider> getClassImports() {
       return this.classImports;
     }
 

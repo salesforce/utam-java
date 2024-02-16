@@ -10,10 +10,10 @@ import org.openqa.selenium.Point;
  */
 public class Rect {
 
-  private int xPosition;
-  private int yPosition;
-  private int rectWidth;
-  private int rectHeight;
+  private final int xPosition;
+  private final int yPosition;
+  private final int rectWidth;
+  private final int rectHeight;
 
   public Rect(Point windowPoint, Dimension windowSize) {
     this.xPosition = windowPoint.getX();

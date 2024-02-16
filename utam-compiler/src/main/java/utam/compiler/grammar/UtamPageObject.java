@@ -105,7 +105,7 @@ public final class UtamPageObject {
       @JsonProperty("metadata") JsonNode metadata) {
     this.implementsType = implementsType;
     this.profile = processProfileNodes(profilesNode);
-    if (implementsType == null && profile.size() > 0) {
+    if (implementsType == null && !profile.isEmpty()) {
       throw new UtamCompilationError(profilesNode, VALIDATION.getErrorMessage(805));
     }
     this.isAbstract = isAbstract;

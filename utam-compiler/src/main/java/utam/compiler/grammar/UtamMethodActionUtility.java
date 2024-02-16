@@ -131,7 +131,7 @@ class UtamMethodActionUtility extends UtamMethodAction {
     @Override
     protected String getInvocationString() {
       String parametersValues = getParametersValuesString(getActionParameters());
-      String separator = parametersValues.length() > 0 ? ", " : "";
+      String separator = !parametersValues.isEmpty() ? ", " : "";
       return String.format(
           "%s(new %s(this)%s%s)",
           getAction().getApplyString(),

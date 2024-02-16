@@ -94,7 +94,7 @@ public class TestObjectFactory extends WebDriverSimulatorObjectFactory {
                 .collect(Collectors.toList());
         when(elementInfo.getElement().findElements(By.cssSelector(selector)))
             .thenReturn(childElements);
-        if (childElements.size() > 0) {
+        if (!childElements.isEmpty()) {
           when(elementInfo.getElement().findElement(By.cssSelector(selector)))
               .thenReturn(childElements.get(0));
         }
@@ -110,7 +110,7 @@ public class TestObjectFactory extends WebDriverSimulatorObjectFactory {
         when(((JavascriptExecutor) driver)
                 .executeScript(contains(finderScriptAll), refEq(elementInfo.getElement())))
             .thenReturn(shadowChildElements);
-        if (shadowChildElements.size() > 0) {
+        if (!shadowChildElements.isEmpty()) {
           String finderScript =
               String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, selector.replace("'", "\\'"));
           when(((JavascriptExecutor) driver)

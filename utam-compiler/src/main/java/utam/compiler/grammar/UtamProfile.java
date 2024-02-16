@@ -45,8 +45,8 @@ final class UtamProfile {
   }
 
   static List<UtamProfile> processProfileNodes(JsonNode profilesNode) {
-    List<UtamProfile> profiles =
-        VALIDATION.validateOptionalNotEmptyArray(profilesNode, "page object root", "profile");
+    List<UtamProfile> profiles = new ArrayList<>();
+    VALIDATION.validateOptionalNotEmptyArray(profilesNode, "page object root", "profile");
     if (isEmptyNode(profilesNode)) {
       return profiles;
     }
