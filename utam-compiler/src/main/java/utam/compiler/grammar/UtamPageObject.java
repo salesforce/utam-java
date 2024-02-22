@@ -172,9 +172,9 @@ public final class UtamPageObject {
    */
   void preProcess() {
     if (shadow != null) {
-      shadow.elements.forEach(utamElement -> utamElement.preProcessElement(this));
+      shadow.elements.forEach(utamElement -> utamElement.preProcessElement(this, methods));
     }
-    elements.forEach(utamElement -> utamElement.preProcessElement(this));
+    elements.forEach(utamElement -> utamElement.preProcessElement(this, methods));
   }
 
   /**
