@@ -180,28 +180,36 @@ public final class UtamElement {
    * Some functionality in compiler can lead to adjusting JSON itself, for example "wait"
    *
    * @param pageObject de-serialized page object
+   * @param methods The list of methods parsed from the JSON, used to detect name collisions
    */
-  void preProcessElement(UtamPageObject pageObject) {
+  void preProcessElement(UtamPageObject pageObject, List<UtamMethod> methods) {
     if (isWaitOrLoad()) {
-      UtamComposeMethod composeMethod = buildWaitForComposeMethod();
+      UtamComposeMethod composeMethod = buildWaitForComposeMethod(methods);
       pageObject.setComposeMethod(composeMethod);
       if (isLoad()) {
         pageObject.getBeforeLoad().add(buildApplyForLoad(composeMethod.name));
       }
     }
     if (shadow != null) {
-      shadow.elements.forEach(utamElement -> utamElement.preProcessElement(pageObject));
+      shadow.elements.forEach(utamElement -> utamElement.preProcessElement(pageObject, methods));
     }
-    elements.forEach(utamElement -> utamElement.preProcessElement(pageObject));
+    elements.forEach(utamElement -> utamElement.preProcessElement(pageObject, methods));
   }
 
   /**
    * Build compose method to wait for the element
    *
+   * @param methods The list of methods parsed from the JSON, used to detect name collisions
    * @return UtamComposeMethod object
    */
-  private UtamComposeMethod buildWaitForComposeMethod() {
+  private UtamComposeMethod buildWaitForComposeMethod(List<UtamMethod> methods) {
     String methodName = "waitFor" + name.substring(0, 1).toUpperCase() + name.substring(1);
+
+    // Check if the newly generated name will cause a name collision and throw an error
+    if (methods.stream().anyMatch(m -> m.name.equals(methodName))) {
+      throw new UtamCompilationError(VALIDATION.getErrorMessage(505, methodName, name));
+    }
+
     UtamMethodDescription description =
         new UtamMethodDescription(
             Collections.singletonList(String.format("method that waits for element \"%s\"", name)),

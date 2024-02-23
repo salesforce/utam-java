@@ -432,7 +432,8 @@ public class DefaultTranslatorRunnerTests {
     assertThat(
         e.getMessage(),
         containsString(
-            "error 504: method \"waitForTest\": method with the same name was already declared"));
+            "error 505: method \"waitForTest\": the given method name would duplicate the name of a"
+                + " generated helper function for element \"test\""));
   }
 
   @Test
@@ -446,6 +447,7 @@ public class DefaultTranslatorRunnerTests {
     assertThat(
         e.getMessage(),
         containsString(
-            "error 504: method \"waitForTest\": method with the same name was already declared"));
+            "error 505: method \"waitForTest\": the given method name would duplicate the name of a"
+                + " generated helper function for element \"test\""));
   }
 }

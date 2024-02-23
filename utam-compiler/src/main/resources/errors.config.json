@@ -185,6 +185,10 @@
     "message": "method \"%s\": method with the same name was already declared"
   },
   {
+    "code": 505,
+    "message": "method \"%s\": the given method name would duplicate the name of a generated helper function for element \"%s\""
+  },
+  {
     "code": 600,
     "message": "method \"%s\" statement: incorrect compose statement format",
     "docs": "https://utam.dev/grammar/spec#compose-method"

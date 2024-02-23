@@ -118,8 +118,14 @@ public final class JsonDeserializer
   public UtamPageObject deserialize(JsonParser parser, DeserializationContext ctxt) {
     try {
       ObjectMapper mapper = getObjectMapperWithSettings();
+
+      // Maps the incoming JSON to a class, directly without processing
       UtamPageObject utamPageObject = mapper.readValue(parser, UtamPageObject.class);
+
+      // Touch up the JSON, adjusting things like names for `waitFor`, etc.
       utamPageObject.preProcess();
+
+      // Compile the page object now that is has been corrected
       utamPageObject.compile(this.context);
       return utamPageObject;
     } catch (Exception e) {
