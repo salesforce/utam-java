@@ -30,4 +30,4 @@ utam-compiler/src/test/java/errors/**
 **/*.config.json
 **/*sarif*
 **/utam.errors.txt
-
+**/pageObjectManifest.json

@@ -22,8 +22,11 @@ import static utam.compiler.grammar.TestUtilities.TEST_URI;
 import static utam.compiler.grammar.TestUtilities.getJsonStringDeserializer;
 import static utam.compiler.lint.LintingConfigJson.DEFAULT_LINTING_CONFIG;
 import static utam.compiler.translator.DefaultSourceConfigurationTests.TranslatorConfigWithProfile.TEST_PROFILE;
+import static utam.compiler.translator.DefaultTargetConfigurationTests.IMPL_ONLY_PAGE_OBJECT_URI;
+import static utam.compiler.translator.DefaultTargetConfigurationTests.INTERFACE_ONLY_PAGE_OBJECT_URI;
 import static utam.compiler.translator.DefaultTargetConfigurationTests.PAGE_OBJECT_IMPL_CLASS_NAME;
 import static utam.compiler.translator.DefaultTargetConfigurationTests.PAGE_OBJECT_INTERFACE_CLASS_NAME;
+import static utam.compiler.translator.DefaultTargetConfigurationTests.PAGE_OBJECT_URI;
 import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_IMPL_WITH_PROFILE_ERR;
 import static utam.compiler.translator.DefaultTranslatorRunner.DUPLICATE_PAGE_OBJECT_NAME;
 import static utam.compiler.translator.DefaultTranslatorRunner.ERR_MODULE_NAME_NOT_CONFIGURED;
@@ -102,14 +105,17 @@ public class DefaultTranslatorRunnerTests {
     TranslatorRunner translator = new DefaultTranslatorRunner(translatorConfig);
     translator.run();
     translator.write();
-    assertThat(targetConfig.writers.keySet(), hasSize(4));
+    assertThat(targetConfig.writers.keySet(), hasSize(7));
     assertThat(
         targetConfig.writers.keySet(),
         containsInAnyOrder(
             PAGE_OBJECT_INTERFACE_CLASS_NAME,
             PAGE_OBJECT_IMPL_CLASS_NAME,
             INTERFACE_ONLY_CLASS_NAME,
-            IMPL_ONLY_CLASS_NAME));
+            IMPL_ONLY_CLASS_NAME,
+            PAGE_OBJECT_URI,
+            INTERFACE_ONLY_PAGE_OBJECT_URI,
+            IMPL_ONLY_PAGE_OBJECT_URI));
     assertThat(
         targetConfig.writers.get(PAGE_OBJECT_INTERFACE_CLASS_NAME).toString(),
         containsString("public interface TestPageObject extends PageObject"));
@@ -126,6 +132,13 @@ public class DefaultTranslatorRunnerTests {
         containsString(
             "public final class TestImplObjectImpl extends BasePageObject implements"
                 + " TestAbstractObject"));
+    assertThat(targetConfig.writers.get(PAGE_OBJECT_URI).toString(), equalTo("{}"));
+    assertThat(
+        targetConfig.writers.get(INTERFACE_ONLY_PAGE_OBJECT_URI).toString(),
+        containsString("\"interface\" : true"));
+    assertThat(
+        targetConfig.writers.get(IMPL_ONLY_PAGE_OBJECT_URI).toString(),
+        containsString("\"implements\": \"utam-test/pageObjects/test/testAbstractObject\""));
   }
 
   @Test
@@ -138,7 +151,7 @@ public class DefaultTranslatorRunnerTests {
     TranslatorRunner translator = new DefaultTranslatorRunner(translatorConfig);
     translator.run();
     translator.write();
-    assertThat(targetConfig.writers.keySet(), hasSize(6));
+    assertThat(targetConfig.writers.keySet(), hasSize(9));
     assertThat(
         targetConfig.writers.keySet(),
         containsInAnyOrder(
@@ -147,7 +160,10 @@ public class DefaultTranslatorRunnerTests {
             PAGE_OBJECT_IMPL_CLASS_NAME + "Tests",
             INTERFACE_ONLY_CLASS_NAME,
             IMPL_ONLY_CLASS_NAME,
-            IMPL_ONLY_CLASS_NAME + "Tests"));
+            IMPL_ONLY_CLASS_NAME + "Tests",
+            PAGE_OBJECT_URI,
+            INTERFACE_ONLY_PAGE_OBJECT_URI,
+            IMPL_ONLY_PAGE_OBJECT_URI));
     assertThat(
         targetConfig.writers.get(PAGE_OBJECT_INTERFACE_CLASS_NAME).toString(),
         containsString("public interface TestPageObject extends PageObject"));
@@ -164,6 +180,13 @@ public class DefaultTranslatorRunnerTests {
         containsString(
             "public final class TestImplObjectImpl extends BasePageObject implements"
                 + " TestAbstractObject"));
+    assertThat(targetConfig.writers.get(PAGE_OBJECT_URI).toString(), equalTo("{}"));
+    assertThat(
+        targetConfig.writers.get(INTERFACE_ONLY_PAGE_OBJECT_URI).toString(),
+        containsString("\"interface\" : true"));
+    assertThat(
+        targetConfig.writers.get(IMPL_ONLY_PAGE_OBJECT_URI).toString(),
+        containsString("\"implements\": \"utam-test/pageObjects/test/testAbstractObject\""));
     assertThat(
         targetConfig.writers.get(PAGE_OBJECT_IMPL_CLASS_NAME + "Tests").toString(),
         containsString("org.junit.Test"));
@@ -182,7 +205,7 @@ public class DefaultTranslatorRunnerTests {
     TranslatorRunner translator = new DefaultTranslatorRunner(translatorConfig);
     translator.run();
     translator.write();
-    assertThat(targetConfig.writers.keySet(), hasSize(6));
+    assertThat(targetConfig.writers.keySet(), hasSize(9));
     assertThat(
         targetConfig.writers.keySet(),
         containsInAnyOrder(
@@ -191,7 +214,10 @@ public class DefaultTranslatorRunnerTests {
             PAGE_OBJECT_IMPL_CLASS_NAME + "Tests",
             INTERFACE_ONLY_CLASS_NAME,
             IMPL_ONLY_CLASS_NAME,
-            IMPL_ONLY_CLASS_NAME + "Tests"));
+            IMPL_ONLY_CLASS_NAME + "Tests",
+            PAGE_OBJECT_URI,
+            INTERFACE_ONLY_PAGE_OBJECT_URI,
+            IMPL_ONLY_PAGE_OBJECT_URI));
     assertThat(
         targetConfig.writers.get(PAGE_OBJECT_INTERFACE_CLASS_NAME).toString(),
         containsString("public interface TestPageObject extends PageObject"));
@@ -208,6 +234,13 @@ public class DefaultTranslatorRunnerTests {
         containsString(
             "public final class TestImplObjectImpl extends BasePageObject implements"
                 + " TestAbstractObject"));
+    assertThat(targetConfig.writers.get(PAGE_OBJECT_URI).toString(), equalTo("{}"));
+    assertThat(
+        targetConfig.writers.get(INTERFACE_ONLY_PAGE_OBJECT_URI).toString(),
+        containsString("\"interface\" : true"));
+    assertThat(
+        targetConfig.writers.get(IMPL_ONLY_PAGE_OBJECT_URI).toString(),
+        containsString("\"implements\": \"utam-test/pageObjects/test/testAbstractObject\""));
     assertThat(
         targetConfig.writers.get(PAGE_OBJECT_IMPL_CLASS_NAME + "Tests").toString(),
         containsString("org.testng.annotations.Test"));

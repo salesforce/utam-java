@@ -56,6 +56,8 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       "can't write profiles output, profile path '%s' does not exist and cannot be created";
   private final TranslatorConfig translatorConfig;
   private final Map<String, PageObjectDeclaration> generated = new HashMap<>();
+  private final Map<String, String> jsonSources = new HashMap<>();
+  private final Manifest manifest = new Manifest();
   private final Map<Profile, Map<String, String>> profileDependenciesMapping = new HashMap<>();
   // max number of POs to generate for generator performance measurements
   private int maxPageObjectsCounter = Integer.MAX_VALUE;
@@ -107,6 +109,10 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       }
       PageObjectDeclaration object = getGeneratedObject(name);
       PageObjectInterface pageObjectInterface = object.getInterface();
+      String pageObjectJsonSource = jsonSources.get(name);
+      if (writePageObjectJsonSource(name, pageObjectJsonSource)) {
+        filesCounter++;
+      }
       if (object.isClassWithInterface()) {
         write(pageObjectInterface.getInterfaceType(), pageObjectInterface.getGeneratedCode());
         filesCounter++;
@@ -131,6 +137,24 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
         String.format(
             "generated %d files for %d page objects, took %d msec",
             filesCounter, counter, System.currentTimeMillis() - timer));
+  }
+
+  private boolean writePageObjectJsonSource(String name, String pageObjectJsonSource)
+      throws IOException {
+    Writer writer = getTargetConfig().getResourceWriter(name);
+    // Legitimate case for writer == null is that the runner configuration
+    // wants to write JSON source files, but skip files that already exist.
+    if (writer != null) {
+      try {
+        info(String.format("writing JSON source for %s", name));
+        writer.write(pageObjectJsonSource);
+        writer.flush();
+        return true;
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return false;
   }
 
   /**
@@ -186,6 +210,7 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     int counter = 0;
     long timer = System.currentTimeMillis();
     TranslatorSourceConfig sourceConfig = translatorConfig.getConfiguredSource();
+    TranslatorTargetConfig targetConfig = getTargetConfig();
     LintingConfig linting = translatorConfig.getLintingConfig();
     sourceConfig.recursiveScan();
     LintingContext lintingContext = linting.start();
@@ -202,6 +227,8 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       JsonDeserializer deserializer = new JsonDeserializer(translationContext, jsonSource);
       PageObjectDeclaration object = deserializer.getObject();
       if (object != null) {
+        jsonSources.put(pageObjectURI, jsonSource);
+        manifest.addWrittenResource(targetConfig.getJsonResourcePathForUri(pageObjectURI));
         setPageObject(pageObjectURI, object);
         linting.lint(lintingContext, translationContext.getLintingObject());
       } else {
@@ -252,6 +279,29 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     String configPath = buildDependenciesConfigPath(moduleName);
     JsonCompilerOutput output = getCompilerOutput();
     output.writeConfigToFile(configPath);
+  }
+
+  /**
+   * build string with manifest path
+   *
+   * @return full path
+   */
+  final String buildManifestPath() {
+    String resourcesRootPath = getTargetConfig().getInjectionConfigRootFilePath();
+    if (resourcesRootPath == null || resourcesRootPath.isEmpty()) {
+      throw new UtamRunnerError(ERR_PROFILE_PATH_NOT_CONFIGURED);
+    }
+    File resourcesRoot = new File(resourcesRootPath);
+    if (!resourcesRoot.exists() && !resourcesRoot.mkdirs()) {
+      throw new UtamRunnerError(String.format(ERR_PROFILE_PATH_DOES_NOT_EXIST, resourcesRoot));
+    }
+    return resourcesRoot + File.separator + "pageObjectManifest.json";
+  }
+
+  @Override
+  public void writeManifest() {
+    String manifestPath = buildManifestPath();
+    manifest.writeToPath(manifestPath);
   }
 
   // separate method to trigger from tests

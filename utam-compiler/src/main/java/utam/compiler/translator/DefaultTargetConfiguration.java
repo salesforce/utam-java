@@ -145,6 +145,17 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
   }
 
   @Override
+  public Writer getResourceWriter(String pageObjectUri) throws IOException {
+    String fullPath = resourcesHomePath + File.separator + getJsonResourcePathForUri(pageObjectUri);
+    if (new File(fullPath).exists()) {
+      // Important: If the path exists, we do not want to overwrite existing
+      // JSON source files.
+      return null;
+    }
+    return getWriterWithDir(fullPath);
+  }
+
+  @Override
   public UnitTestRunner getUnitTestRunnerType() {
     return unitTestRunner;
   }
