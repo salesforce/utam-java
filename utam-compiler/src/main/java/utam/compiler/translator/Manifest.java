@@ -16,10 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Writes manifest of generated files
- *
- */
+/** Writes manifest of generated files */
 public class Manifest {
   private final List<String> resourcePaths = new ArrayList<>();
 

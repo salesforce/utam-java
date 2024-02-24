@@ -81,6 +81,7 @@ public interface TranslatorTargetConfig {
 
   /**
    * Get path of a JSON file in the resources of the archive corresponding to a Page Object URI
+   *
    * @param pageObjectUri the URI for which to get the path
    * @return the path to the JSON file in the resources of the archive corresponding to the URI
    */
