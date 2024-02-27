@@ -16,7 +16,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** Writes manifest of generated files
+/**
+ * Writes manifest of generated files
  *
  * @author james.evans
  * @since 250
