@@ -271,6 +271,7 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
       TranslatorRunner translator = new DefaultTranslatorRunner(translatorConfig);
       translator.run();
       translator.write();
+      translator.writeManifest();
       translator.writeDependenciesConfigs();
       returnCode = CommandLine.ExitCode.OK;
     } catch (IOException e) {

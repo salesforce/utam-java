@@ -43,6 +43,12 @@ public interface TranslatorRunner {
   void writeDependenciesConfigs();
 
   /**
+   * Write manifest file that contains path information about all PO JSON files included in the
+   * compiled artifact
+   */
+  void writeManifest();
+
+  /**
    * Container for runner output information
    *
    * @author elizaveta.ivanova

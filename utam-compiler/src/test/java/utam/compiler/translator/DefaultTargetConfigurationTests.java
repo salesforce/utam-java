@@ -39,6 +39,10 @@ public class DefaultTargetConfigurationTests {
       "utam.test.pageobjects.test.TestPageObject";
   static final String PAGE_OBJECT_IMPL_CLASS_NAME =
       "utam.test.pageobjects.test.impl.TestPageObjectImpl";
+  static final String PAGE_OBJECT_URI = "utam-test/pageObjects/test/testPageObject";
+  static final String INTERFACE_ONLY_PAGE_OBJECT_URI =
+      "utam-test/pageObjects/test/testAbstractObject";
+  static final String IMPL_ONLY_PAGE_OBJECT_URI = "utam-test/pageObjects/test/testImplObject";
   private static final String FAKE_IO_EXCEPTION_MESSAGE = "throwing fake IO exception";
 
   @Test
@@ -73,14 +77,17 @@ public class DefaultTargetConfigurationTests {
     TranslatorRunner translator = configuration.getRunner();
     translator.run();
     translator.write();
-    assertThat(configuration.writers.keySet(), hasSize(4));
+    assertThat(configuration.writers.keySet(), hasSize(7));
     assertThat(
         configuration.writers.keySet(),
         containsInAnyOrder(
             PAGE_OBJECT_INTERFACE_CLASS_NAME,
             PAGE_OBJECT_IMPL_CLASS_NAME,
             INTERFACE_ONLY_CLASS_NAME,
-            IMPL_ONLY_CLASS_NAME));
+            IMPL_ONLY_CLASS_NAME,
+            PAGE_OBJECT_URI,
+            INTERFACE_ONLY_PAGE_OBJECT_URI,
+            IMPL_ONLY_PAGE_OBJECT_URI));
   }
 
   @Test
@@ -90,14 +97,17 @@ public class DefaultTargetConfigurationTests {
     TranslatorRunner translator = new DefaultTranslatorRunner(translatorConfig);
     translator.run();
     translator.write();
-    assertThat(configuration.writers.keySet(), hasSize(4));
+    assertThat(configuration.writers.keySet(), hasSize(7));
     assertThat(
         configuration.writers.keySet(),
         containsInAnyOrder(
             PAGE_OBJECT_INTERFACE_CLASS_NAME,
             PAGE_OBJECT_IMPL_CLASS_NAME,
             INTERFACE_ONLY_CLASS_NAME,
-            IMPL_ONLY_CLASS_NAME));
+            IMPL_ONLY_CLASS_NAME,
+            PAGE_OBJECT_URI,
+            INTERFACE_ONLY_PAGE_OBJECT_URI,
+            IMPL_ONLY_PAGE_OBJECT_URI));
   }
 
   @Test
@@ -106,14 +116,17 @@ public class DefaultTargetConfigurationTests {
     TranslatorRunner translator = configuration.getRunner();
     translator.run();
     translator.write();
-    assertThat(configuration.writers.keySet(), hasSize(4));
+    assertThat(configuration.writers.keySet(), hasSize(7));
     assertThat(
         configuration.writers.keySet(),
         containsInAnyOrder(
             PAGE_OBJECT_INTERFACE_CLASS_NAME,
             PAGE_OBJECT_IMPL_CLASS_NAME,
             INTERFACE_ONLY_CLASS_NAME,
-            IMPL_ONLY_CLASS_NAME));
+            IMPL_ONLY_CLASS_NAME,
+            PAGE_OBJECT_URI,
+            INTERFACE_ONLY_PAGE_OBJECT_URI,
+            IMPL_ONLY_PAGE_OBJECT_URI));
   }
 
   @Test
@@ -191,6 +204,13 @@ public class DefaultTargetConfigurationTests {
       Writer poWriter = new StringWriterMock();
       writers.put(typeProvider.getFullName(), poWriter);
       return poWriter;
+    }
+
+    @Override
+    public Writer getResourceWriter(String pageObjectUri) {
+      Writer resourceWriter = new StringWriterMock();
+      writers.put(pageObjectUri, resourceWriter);
+      return resourceWriter;
     }
 
     @Override
