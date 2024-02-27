@@ -16,8 +16,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** Writes manifest of generated files */
+/** Writes manifest of generated files
+ *
+ * @author james.evans
+ * @since 250
+ */
 public class Manifest {
+  private static final String ERR_CREATING_MANIFEST_TEMPLATE = "error creating manifest %s";
   private final List<String> resourcePaths = new ArrayList<>();
 
   /**
@@ -41,7 +46,7 @@ public class Manifest {
       Writer writer = new FileWriter(manifestPath);
       writeManifest(writer);
     } catch (IOException e) {
-      String err = String.format("error creating manifest %s", manifestPath);
+      String err = String.format(ERR_CREATING_MANIFEST_TEMPLATE, manifestPath);
       throw new UtamRunnerError(err, e);
     }
   }
@@ -57,6 +62,12 @@ public class Manifest {
     mapper.registerModule(module).writer(formatter).writeValue(writer, this);
   }
 
+  /**
+   * custom serializer to write manifest JSON object as a file
+   *
+   * @author james.evans
+   * @since 250
+   */
   private static class Serializer extends JsonSerializer<Manifest> {
 
     @Override

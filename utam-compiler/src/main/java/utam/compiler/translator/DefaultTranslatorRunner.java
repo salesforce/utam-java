@@ -54,6 +54,9 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
       "module name is not configured, can't write dependencies config file";
   private static final String ERR_PROFILE_PATH_DOES_NOT_EXIST =
       "can't write profiles output, profile path '%s' does not exist and cannot be created";
+  private static final String ERR_MANIFEST_PATH_DOES_NOT_EXIST =
+      "can't write manifest output, manifest path '%s' does not exist and cannot be created";
+  private static final String PAGE_OBJECT_MANIFEST_FILE_NAME = "pageObjectManifest.json";
   private final TranslatorConfig translatorConfig;
   private final Map<String, PageObjectDeclaration> generated = new HashMap<>();
   private final Map<String, String> jsonSources = new HashMap<>();
@@ -293,9 +296,9 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     }
     File resourcesRoot = new File(resourcesRootPath);
     if (!resourcesRoot.exists() && !resourcesRoot.mkdirs()) {
-      throw new UtamRunnerError(String.format(ERR_PROFILE_PATH_DOES_NOT_EXIST, resourcesRoot));
+      throw new UtamRunnerError(String.format(ERR_MANIFEST_PATH_DOES_NOT_EXIST, resourcesRoot));
     }
-    return resourcesRoot + File.separator + "pageObjectManifest.json";
+    return resourcesRoot + File.separator + PAGE_OBJECT_MANIFEST_FILE_NAME;
   }
 
   @Override

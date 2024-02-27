@@ -44,7 +44,7 @@ public interface TranslatorRunner {
 
   /**
    * Write manifest file that contains path information about all PO JSON files included in the
-   * archive
+   * compiled artifact
    */
   void writeManifest();
 
