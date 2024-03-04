@@ -61,11 +61,13 @@ public class WebDriverFactoryTests {
     final String DEVICE_SCREEN_DENSITY_VALUE_PHONE = "480";
 
     IOSDriver iosDriver = mock(IOSDriver.class);
-    when(iosDriver.getSessionDetail("device")).thenReturn("iphone");
+    DesiredCapabilities desiredCaps = new DesiredCapabilities();
+    desiredCaps.setCapability(DEVICE_SCREEN_SIZE_NAME, DEVICE_SCREEN_SIZE_VALUE_PHONE);
+    when(iosDriver.getCapabilities()).thenReturn(desiredCaps);
     assertThat(getAdapterForTest(iosDriver), instanceOf(MobileDriverAdapter.class));
 
     AndroidDriver androidDriver = mock(AndroidDriver.class);
-    DesiredCapabilities desiredCaps = new DesiredCapabilities();
+    desiredCaps = new DesiredCapabilities();
     desiredCaps.setCapability(DEVICE_SCREEN_SIZE_NAME, DEVICE_SCREEN_SIZE_VALUE_PHONE);
     desiredCaps.setCapability(DEVICE_SCREEN_DENSITY_NAME, DEVICE_SCREEN_DENSITY_VALUE_PHONE);
     when(androidDriver.getCapabilities()).thenReturn(desiredCaps);

@@ -8,13 +8,17 @@
 package utam.core.selenium.appium;
 
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.TouchAction;
-import io.appium.java_client.touch.WaitOptions;
-import io.appium.java_client.touch.offset.PointOption;
 import java.time.Duration;
+import java.util.List;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Pause;
+import org.openqa.selenium.interactions.PointerInput;
+import org.openqa.selenium.interactions.PointerInput.Kind;
+import org.openqa.selenium.interactions.PointerInput.MouseButton;
+import org.openqa.selenium.interactions.PointerInput.Origin;
+import org.openqa.selenium.interactions.Sequence;
 import utam.core.driver.Driver;
 import utam.core.element.Element;
 import utam.core.selenium.element.ElementAdapter;
@@ -52,12 +56,17 @@ public class MobileElementAdapter extends ElementAdapter {
     Point start = movement[0];
     Point end = movement[1];
     // simulate flick using touch control
-    new TouchAction(appiumDriver)
-        .press(PointOption.point(start.getX(), start.getY()))
-        .waitAction(WaitOptions.waitOptions(DEFAULT_FLICK_ACTION_WAIT_MILLISECONDS))
-        .moveTo(PointOption.point(end.getX(), end.getY()))
-        .release()
-        .perform();
+    PointerInput finger = new PointerInput(Kind.TOUCH, "finger");
+    Sequence flickSequence = new Sequence(finger, 0);
+    flickSequence.addAction(
+        finger.createPointerMove(
+            Duration.ofMillis(0), Origin.viewport(), start.getX(), start.getY()));
+    flickSequence.addAction(finger.createPointerDown(MouseButton.LEFT.asArg()));
+    flickSequence.addAction(new Pause(finger, DEFAULT_FLICK_ACTION_WAIT_MILLISECONDS));
+    flickSequence.addAction(
+        finger.createPointerMove(Duration.ofMillis(10), Origin.viewport(), end.getX(), end.getY()));
+    flickSequence.addAction(finger.createPointerUp(MouseButton.LEFT.asArg()));
+    appiumDriver.perform(List.of(flickSequence));
   }
 
   @Override
