@@ -32,6 +32,7 @@ import utam.core.selenium.element.ElementAdapter;
 public class MobileElementAdapter extends ElementAdapter {
 
   private static final Duration DEFAULT_FLICK_ACTION_WAIT_MILLISECONDS = Duration.ofMillis(500);
+  private static final Duration DEFAULT_FLICK_ACTION_MOVEMENT_DURATION = Duration.ofMillis(50);
 
   /**
    * Initializes a new instance of the MobileElementAdapter class
@@ -60,11 +61,12 @@ public class MobileElementAdapter extends ElementAdapter {
     Sequence flickSequence = new Sequence(finger, 0);
     flickSequence.addAction(
         finger.createPointerMove(
-            Duration.ofMillis(0), Origin.viewport(), start.getX(), start.getY()));
+            java.time.Duration.ZERO, Origin.viewport(), start.getX(), start.getY()));
     flickSequence.addAction(finger.createPointerDown(MouseButton.LEFT.asArg()));
     flickSequence.addAction(new Pause(finger, DEFAULT_FLICK_ACTION_WAIT_MILLISECONDS));
     flickSequence.addAction(
-        finger.createPointerMove(Duration.ofMillis(10), Origin.viewport(), end.getX(), end.getY()));
+        finger.createPointerMove(
+            DEFAULT_FLICK_ACTION_MOVEMENT_DURATION, Origin.viewport(), end.getX(), end.getY()));
     flickSequence.addAction(finger.createPointerUp(MouseButton.LEFT.asArg()));
     appiumDriver.perform(List.of(flickSequence));
   }
