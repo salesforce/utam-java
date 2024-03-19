@@ -7,7 +7,6 @@
  */
 package utam.core.framework.element;
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -19,7 +18,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
-import static org.testng.Assert.expectThrows;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_INTO_VIEW_JS;
 import static utam.core.selenium.element.ElementAdapter.SCROLL_TOP_VIA_JAVASCRIPT;
 
@@ -267,11 +265,8 @@ public class BasePageElementTests {
         .click();
     // fall back on javascript click
     mock.getUtamElement().click();
-    String errMessage = "javascript error: unknown JS error";
-    doThrow(new JavascriptException(errMessage)).when(mock.getWebElementMock()).click();
-    JavascriptException e =
-        expectThrows(JavascriptException.class, () -> mock.getUtamElement().click());
-    assertThat(e.getMessage(), containsString(errMessage));
+    // fallback regardless of the message, aligns with JavaScript
+    mock.getUtamElement().click();
   }
 
   @Test
