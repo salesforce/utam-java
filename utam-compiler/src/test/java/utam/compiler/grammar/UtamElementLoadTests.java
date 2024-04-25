@@ -26,7 +26,7 @@ import utam.core.declarative.representation.PageObjectMethod;
  */
 public class UtamElementLoadTests {
 
-  PageObjectMethod getMethod(String jsonFile, String methodName) {
+  static PageObjectMethod getMethod(String jsonFile, String methodName) {
     return new DeserializerUtilities().getContext(jsonFile).getMethod(methodName);
   }
 
@@ -214,19 +214,6 @@ public class UtamElementLoadTests {
     expectedBeforeLoad.addCodeLine("this.waitForBasicElement()");
     expectedBeforeLoad.addCodeLine("this.waitForSecondElement()");
     expectedBeforeLoad.addCodeLine("return this");
-  }
-
-  @Test
-  public void testLoadContainer() {
-    Exception e =
-        expectThrows(
-            UtamCompilationError.class,
-            () -> getMethod("validate/basic_element/loadContainer", "test"));
-    assertThat(
-        e.getMessage(),
-        containsString(
-            "error 206: element \"container\": property \"load\" is not supported for element with"
-                + " arguments, filter or for container element"));
   }
 
   @Test

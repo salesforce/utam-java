@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import utam.compiler.UtamCompilationError;
 import utam.compiler.grammar.UtamMethodActionWaitFor.UtamMethodActionWaitForElement;
+import utam.compiler.grammar.UtamMethodDescription.UtamEmptyMethodDescription;
 import utam.compiler.helpers.ElementContext;
 import utam.compiler.helpers.ElementUnitTestHelper;
 import utam.compiler.helpers.LocatorCodeGeneration;
@@ -63,7 +64,7 @@ import utam.core.element.Locator;
  * @author elizaveta.ivanova
  * @since 228
  */
-public final class UtamElement {
+public class UtamElement {
 
   /** The default CSS selector for a container */
   public static final String DEFAULT_CONTAINER_SELECTOR_CSS = ":scope > *:first-child";
@@ -73,17 +74,18 @@ public final class UtamElement {
   private static final String FRAME_SUPPORTED_PROPERTIES =
       String.join(", ", "name", "public", "selector", "type");
 
-  private final String name;
-  private final UtamShadowElement shadow;
-  private final List<UtamElement> elements;
-  private final Boolean isNullable;
-  private final Traversal traversal;
-  private final UtamMethodDescription description;
-  private final Boolean isPublic;
-  private final UtamElementFilter filter;
-  private UtamSelector selector;
-  private final Boolean isWait;
-  private final Boolean isLoad;
+  // class fields are not final or private because of ability to construct from an existing element
+  String name;
+  UtamShadowElement shadow;
+  List<UtamElement> elements;
+  Boolean isNullable;
+  Traversal traversal;
+  UtamMethodDescription description;
+  Boolean isPublic;
+  UtamElementFilter filter;
+  UtamSelector selector;
+  Boolean isWait;
+  Boolean isLoad;
 
   @JsonCreator
   UtamElement(
@@ -111,6 +113,15 @@ public final class UtamElement {
     this.description = processMethodDescriptionNode(descriptionNode, validationContext);
     this.isWait = isWait;
     this.isLoad = isLoad;
+  }
+
+  /**
+   * This constructor is invoked to create element to scope content of container or custom elements
+   *
+   * @param name name of the scope element
+   */
+  UtamElement(String name) {
+    this.name = name;
   }
 
   /**
@@ -160,7 +171,7 @@ public final class UtamElement {
     return Boolean.TRUE.equals(isPublic);
   }
 
-  private boolean isNullable() {
+  boolean isNullable() {
     return Boolean.TRUE.equals(isNullable);
   }
 
@@ -237,8 +248,7 @@ public final class UtamElement {
 
   void traverse(
       TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
-    ElementContext nextScope =
-        traversal.traverse(context, scopeElement, isExpandScopeShadowRoot)[0];
+    ElementContext nextScope = traversal.traverse(context, scopeElement, isExpandScopeShadowRoot);
     for (UtamElement element : elements) {
       element.traverse(context, nextScope, false);
     }
@@ -249,6 +259,71 @@ public final class UtamElement {
       for (UtamElement element : shadow.elements) {
         element.traverse(context, nextScope, true);
       }
+    }
+  }
+
+  /** Validate that filter can only be set for list Reused in multiple Traversal classes */
+  void validateFilterWithReturnAll() {
+    if (filter != null && !selector.isReturnAll()) {
+      throw new UtamCompilationError(VALIDATION.getErrorMessage(302, name));
+    }
+  }
+
+  /** Validate that list can't have nested elements Reused in multiple Traversal classes */
+  void validateNestedList() {
+    boolean isReturnsList =
+        selector != null && selector.isReturnAll() && (filter == null || !filter.isFindFirst());
+    if (isReturnsList && (!elements.isEmpty() || shadow != null)) {
+      throw new UtamCompilationError(VALIDATION.getErrorMessage(203, name));
+    }
+  }
+
+  /** Build field with selector Reused in multiple Traversal classes */
+  <T> ElementField buildElementField(Locator<T> locator, boolean isExpandScopeShadowRoot) {
+    return new ElementField(
+        this.name, getFindAnnotation(locator, isExpandScopeShadowRoot, this.isNullable()));
+  }
+
+  /**
+   * Helper class that allows to build additional element to be used as a scope
+   *
+   * @author elizaveta.ivanova
+   * @since 252
+   */
+  class ScopeUtamElement extends UtamElement {
+
+    private final ElementField elementField;
+
+    /**
+     * This constructor is invoked to create element to scope content of container or custom
+     * elements
+     *
+     * @param name name of the scope element
+     * @param originalElement original element
+     * @param elementField for custom element reuse already declared locator field
+     */
+    ScopeUtamElement(String name, UtamElement originalElement, ElementField elementField) {
+      super(name);
+      this.filter = originalElement.filter;
+      this.selector = originalElement.selector;
+      this.shadow = originalElement.shadow;
+      this.elements = originalElement.elements;
+      this.traversal = new Basic(new String[] {});
+      this.description = new UtamEmptyMethodDescription();
+      this.isWait = null;
+      this.isLoad = null;
+      this.isPublic = null;
+      this.isNullable = null;
+      this.elementField = elementField;
+    }
+
+    @Override
+    <T> ElementField buildElementField(Locator<T> locator, boolean isExpandScopeShadowRoot) {
+      if (elementField != null) {
+        return elementField;
+      }
+      return new ElementField(
+          this.name, getFindAnnotation(locator, isExpandScopeShadowRoot, this.isNullable()));
     }
   }
 
@@ -265,28 +340,50 @@ public final class UtamElement {
     }
 
     // traverse and return next scope
-    // if next scope is null, second element is self
-    // returning both for testing purposes
-    abstract ElementContext[] traverse(
+    abstract ElementContext traverse(
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot);
   }
 
-  class Custom extends Traversal {
+  /**
+   * Abstraction of traversal class that generates additional element with basic type. This class is
+   * used by Container or Custom elements to create Basic scope element.
+   *
+   * @since 252
+   * @author elizaveta.ivanova
+   */
+  abstract class ScopeElement extends Traversal {
+
+    ScopeElement(String type) {
+      super(type);
+    }
+
+    boolean hasNestedElements() {
+      return !elements.isEmpty() || shadow != null;
+    }
+
+    ElementContext asBasicScope(
+        TranslationContext context,
+        ElementContext scope,
+        boolean isExpandScopeShadowRoot,
+        ElementField elementField) {
+      UtamElement asBasicScope =
+          new ScopeUtamElement(name + "Scope", UtamElement.this, elementField);
+      return asBasicScope.traversal.traverse(context, scope, isExpandScopeShadowRoot);
+    }
+  }
+
+  class Custom extends ScopeElement {
 
     private Custom(String type) {
       super(type);
       String validationContext = String.format("element \"%s\"", name);
       VALIDATION.validateRequiredProperty(selector, validationContext, "selector");
-      if (filter != null && !selector.isReturnAll()) {
-        throw new UtamCompilationError(VALIDATION.getErrorMessage(302, name));
-      }
-      if (shadow != null || !elements.isEmpty()) {
-        throw new UtamCompilationError(VALIDATION.getErrorMessage(205, name));
-      }
+      validateFilterWithReturnAll();
+      validateNestedList();
     }
 
     @Override
-    final ElementContext[] traverse(
+    final ElementContext traverse(
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
       boolean isReturnList = selector.isReturnAll() && (filter == null || !filter.isFindFirst());
       LocatorCodeGeneration selectorContext =
@@ -303,7 +400,7 @@ public final class UtamElement {
       }
       Locator locator = selectorContext.getLocator();
       // set element
-      ElementContext component =
+      ElementContext elementContext =
           isReturnList
               ? new ElementContext.CustomReturnsAll(
                   scopeElement,
@@ -353,11 +450,10 @@ public final class UtamElement {
                 elementType,
                 description);
       }
-      ElementField field =
-          new ElementField(name, getFindAnnotation(locator, isExpandScopeShadowRoot, isNullable()));
-      context.setElement(component, field);
+      ElementField field = buildElementField(locator, isExpandScopeShadowRoot);
+      context.setElement(elementContext, field);
       context.setMethod(method);
-      component.setElementMethod(method, context);
+      elementContext.setElementMethod(method, context);
       context.setTestableElement(
           name,
           new ElementUnitTestHelper(
@@ -379,7 +475,10 @@ public final class UtamElement {
               new ElementScope(scopeElement.getName(), isExpandScopeShadowRoot));
       context.getLintingObject().setElement(lintingContext);
       context.getLintingObject().setMethod(new Method(method.getDeclaration().getName(), true));
-      return new ElementContext[] {null, component};
+      if (hasNestedElements()) {
+        return asBasicScope(context, scopeElement, isExpandScopeShadowRoot, field);
+      }
+      return elementContext;
     }
   }
 
@@ -389,17 +488,12 @@ public final class UtamElement {
       super(type);
       String validationContext = String.format("element \"%s\"", name);
       VALIDATION.validateRequiredProperty(selector, validationContext, "selector");
-      if (filter != null && !selector.isReturnAll()) {
-        throw new UtamCompilationError(VALIDATION.getErrorMessage(302, name));
-      }
-      boolean isReturnsList = selector.isReturnAll() && (filter == null || !filter.isFindFirst());
-      if (isReturnsList && (!elements.isEmpty() || shadow != null)) {
-        throw new UtamCompilationError(VALIDATION.getErrorMessage(203, name));
-      }
+      validateFilterWithReturnAll();
+      validateNestedList();
     }
 
     @Override
-    final ElementContext[] traverse(
+    final ElementContext traverse(
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
       String parserContext = String.format("element \"%s\"", name);
       boolean isPublicImplementationOnlyElement =
@@ -410,11 +504,6 @@ public final class UtamElement {
       Locator locator = selectorContext.getLocator();
       MethodParametersTracker addedParameters = new MethodParametersTracker(parserContext);
       addedParameters.setMethodParameters(selectorContext.getParameters());
-      ElementField field =
-          new ElementField(
-              name,
-              getFindAnnotation(
-                  selectorContext.getLocator(), isExpandScopeShadowRoot, isNullable()));
       MatcherObject filterMatcher = null;
       if (filter != null) {
         filterMatcher = filter.setElementFilter(context, elementType, name, true);
@@ -438,6 +527,8 @@ public final class UtamElement {
                   locator,
                   addedParameters.getMethodParameters(),
                   isNullable());
+      ElementField field = buildElementField(selectorContext.getLocator(), isExpandScopeShadowRoot);
+      context.setElement(elementContext, field);
       final PageObjectMethod method;
       final TypeProvider implType =
           elementType instanceof UnionType
@@ -448,6 +539,7 @@ public final class UtamElement {
             new ElementMethod.Filtered(
                 scopeElement,
                 name,
+                context.getFieldName(name),
                 elementType,
                 implType,
                 selectorContext.getParameters(),
@@ -461,13 +553,22 @@ public final class UtamElement {
       } else if (isList) {
         method =
             new ElementMethod.Multiple(
-                elementContext, selectorContext.getParameters(), isPublic(), implType, description);
+                elementContext,
+                context.getFieldName(name),
+                selectorContext.getParameters(),
+                isPublic(),
+                implType,
+                description);
       } else {
         method =
             new ElementMethod.Single(
-                elementContext, selectorContext.getParameters(), isPublic(), implType, description);
+                elementContext,
+                context.getFieldName(name),
+                selectorContext.getParameters(),
+                isPublic(),
+                implType,
+                description);
       }
-      context.setElement(elementContext, field);
       context.setMethod(method);
       elementContext.setElementMethod(method, context);
       context.setTestableElement(
@@ -491,11 +592,11 @@ public final class UtamElement {
               new ElementScope(scopeElement.getName(), isExpandScopeShadowRoot));
       context.getLintingObject().setElement(lintingContext);
       context.getLintingObject().setMethod(new Method(method.getDeclaration().getName(), true));
-      return new ElementContext[] {elementContext};
+      return elementContext;
     }
   }
 
-  class Container extends Traversal {
+  class Container extends ScopeElement {
 
     private Container() {
       super(CONTAINER_ELEMENT_TYPE_NAME);
@@ -503,9 +604,7 @@ public final class UtamElement {
       if (selector == null) {
         selector = new UtamSelector(DEFAULT_CONTAINER_SELECTOR_CSS, null, null, null, false, null);
       }
-      if (shadow != null || !elements.isEmpty()) {
-        throw new UtamCompilationError(VALIDATION.getErrorMessage(205, name));
-      }
+      validateNestedList();
       VALIDATION.validateUnsupportedProperty(
           filter, validationContext, "filter", CONTAINER_SUPPORTED_PROPERTIES);
       VALIDATION.validateUnsupportedProperty(
@@ -513,7 +612,7 @@ public final class UtamElement {
     }
 
     @Override
-    ElementContext[] traverse(
+    ElementContext traverse(
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
       LocatorCodeGeneration locator = selector.getElementCodeGenerationHelper(name, context);
       ElementContext elementContext = new ElementContext.Container(scopeElement, name);
@@ -540,7 +639,10 @@ public final class UtamElement {
               new ElementScope(scopeElement.getName(), isExpandScopeShadowRoot));
       context.getLintingObject().setElement(lintingContext);
       context.getLintingObject().setMethod(new Method(method.getDeclaration().getName(), true));
-      return new ElementContext[] {null, elementContext};
+      if (hasNestedElements()) {
+        return asBasicScope(context, scopeElement, isExpandScopeShadowRoot, null);
+      }
+      return elementContext;
     }
   }
 
@@ -563,12 +665,10 @@ public final class UtamElement {
     }
 
     @Override
-    ElementContext[] traverse(
+    ElementContext traverse(
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
       LocatorCodeGeneration locator = selector.getElementCodeGenerationHelper(name, context);
-      ElementField field =
-          new ElementField(
-              name, getFindAnnotation(locator.getLocator(), isExpandScopeShadowRoot, isNullable()));
+      ElementField field = buildElementField(locator.getLocator(), isExpandScopeShadowRoot);
       ElementContext elementContext = new ElementContext.Frame(scopeElement, name, locator);
       PageObjectMethod method =
           new FrameMethod(elementContext, isPublic(), locator.getParameters(), description);
@@ -585,7 +685,7 @@ public final class UtamElement {
               new ElementScope(scopeElement.getName(), isExpandScopeShadowRoot));
       context.getLintingObject().setElement(lintingContext);
       context.getLintingObject().setMethod(new Method(method.getDeclaration().getName(), true));
-      return new ElementContext[] {elementContext};
+      return elementContext;
     }
   }
 }

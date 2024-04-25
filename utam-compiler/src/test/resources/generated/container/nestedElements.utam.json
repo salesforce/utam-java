@@ -1,0 +1,43 @@
+{
+  "description" : {
+    "text" : [
+      "verify that container with nested elements can be compiled"
+    ]
+  },
+  "elements" : [
+    {
+      "name": "rootContainer",
+      "type": "container",
+      "public": true,
+      "selector": {
+        "css": "slot"
+      },
+      "elements" : [
+        {
+          "public": true,
+          "name" : "nestedBasic",
+          "selector" : {
+            "css" : ".nestedBasic"
+          }
+        },
+        {
+          "name": "nestedContainer",
+          "public": true,
+          "type": "container",
+          "selector": {
+            "css": ".nestedContainer"
+          }
+        },
+        {
+          "name": "nestedCustom",
+          "public": true,
+          "type": "generated-basic/pageObjects/testBasicTypes",
+          "selector": {
+            "css": ".nestedCustom",
+            "returnAll": true
+          }
+        }
+      ]
+    }
+  ]
+}

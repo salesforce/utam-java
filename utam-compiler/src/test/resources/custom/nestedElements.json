@@ -1,0 +1,39 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "customRoot",
+        "type": "my/custom/component",
+        "selector": {
+          "css": ".custom"
+        },
+        "public": true,
+        "shadow": {
+          "elements": [
+            {
+              "name": "nestedBasic",
+              "public": true,
+              "selector": {
+                "css": ".nestedBasic"
+              }
+            },
+            {
+              "name": "nestedContainer",
+              "public": true,
+              "type": "container"
+            },
+            {
+              "name": "nestedCustom",
+              "public": true,
+              "type": "my/custom/component",
+              "selector": {
+                "css": ".nestedCustom",
+                "returnAll": true
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

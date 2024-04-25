@@ -125,7 +125,7 @@ public final class JsonDeserializer
       // Touch up the JSON, adjusting things like names for `waitFor`, etc.
       utamPageObject.preProcess();
 
-      // Compile the page object now that is has been corrected
+      // Compile the page object now that it has been corrected
       utamPageObject.compile(this.context);
       return utamPageObject;
     } catch (Exception e) {

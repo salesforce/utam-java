@@ -1,0 +1,70 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "customRoot",
+        "type": "generated-basic/pageObjects/testBasicTypes",
+        "selector": {
+          "css": ".custom"
+        },
+        "public": true,
+        "shadow": {
+          "elements": [
+            {
+              "name": "nestedBasic",
+              "public": true,
+              "selector": {
+                "css": ".nestedBasic"
+              }
+            },
+            {
+              "name": "nestedContainer",
+              "public": true,
+              "type": "container"
+            },
+            {
+              "name": "nestedCustomList",
+              "public": true,
+              "type": "generated-basic/pageObjects/testBasicTypes",
+              "selector": {
+                "css": ".nestedCustom",
+                "returnAll": true
+              }
+            },
+            {
+              "name": "nestedCustomWithFilter",
+              "public": true,
+              "type": "generated-basic/pageObjects/testBasicTypes",
+              "selector": {
+                "css": ".nestedCustom",
+                "returnAll": true
+              },
+              "filter": {
+                "apply": "getText",
+                "findFirst": true,
+                "matcher": {
+                  "type": "stringContains",
+                  "args": [
+                    {
+                      "name": "itemText",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "elements": [
+                {
+                  "name": "nestedBasicInsideFilter",
+                  "public": true,
+                  "selector": {
+                    "css": ".nestedBasic"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

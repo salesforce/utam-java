@@ -51,7 +51,7 @@ import utam.core.declarative.translator.TranslatorConfig;
  * @since 228
  */
 public class TranslationContext {
-  private final List<PageClassField> pageObjectFields = new ArrayList<>();
+  private final Map<String, PageClassField> pageObjectFields = new HashMap<>();
   private final List<PageObjectMethod> pageObjectMethods = new ArrayList<>();
   private final List<BasicElementGetterMethod> elementGetters = new ArrayList<>();
   private final Set<String> methodNames = new HashSet<>();
@@ -177,7 +177,7 @@ public class TranslationContext {
     }
     elementContextMap.put(element.getName(), element);
     if (field != null) {
-      pageObjectFields.add(field);
+      pageObjectFields.put(element.getName(), field);
     }
   }
 
@@ -251,7 +251,27 @@ public class TranslationContext {
    * @return the list of fields defined in the Page Object
    */
   public List<PageClassField> getFields() {
-    return pageObjectFields;
+    Set<String> uniqueFieldNames = new HashSet<>();
+    List<PageClassField> fields = new ArrayList<>();
+    // return only unique fields
+    // for fantom scope element same field can be reused
+    for (PageClassField field : pageObjectFields.values()) {
+      if (!uniqueFieldNames.contains(field.getName())) {
+        fields.add(field);
+      }
+      uniqueFieldNames.add(field.getName());
+    }
+    return fields;
+  }
+
+  /**
+   * Get locator field name by element name
+   *
+   * @param elementName name of the element
+   * @return string with field name
+   */
+  public String getFieldName(String elementName) {
+    return pageObjectFields.get(elementName).getName();
   }
 
   /**

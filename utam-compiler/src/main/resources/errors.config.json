@@ -122,7 +122,7 @@
   },
   {
     "code": 205,
-    "message": "element \"%s\": only basic element can have nested elements or shadow root"
+    "message": "element \"%s\": only basic, custom or container element can have nested elements or shadow root"
   },
   {
     "code": 206,

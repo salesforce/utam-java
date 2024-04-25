@@ -13,6 +13,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static utam.compiler.grammar.TestUtilities.findField;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT_IMPL_CLASS;
 import static utam.compiler.representation.ElementMethod.DOCUMENT_GETTER;
@@ -88,7 +89,7 @@ public class ElementMethodTests {
     assertThat(context.getFields(), hasSize(1));
     FieldInfo createdFieldInfo = new FieldInfo(ELEMENT_NAME);
     createdFieldInfo.addAnnotations("@ElementMarker.Find(css = \".css\")");
-    createdFieldInfo.validateField(context.getFields().get(0));
+    createdFieldInfo.validateField(findField(context, ELEMENT_NAME));
   }
 
   @Test
@@ -136,7 +137,7 @@ public class ElementMethodTests {
     assertThat(context.getFields(), hasSize(1));
     FieldInfo createdFieldInfo = new FieldInfo(ELEMENT_NAME);
     createdFieldInfo.addAnnotations("@ElementMarker.Find(css = \".css\")");
-    createdFieldInfo.validateField(context.getFields().get(0));
+    createdFieldInfo.validateField(findField(context, ELEMENT_NAME));
   }
 
   @Test
@@ -257,7 +258,7 @@ public class ElementMethodTests {
     PageObjectValidationTestHelper.FieldInfo fieldInfo =
         new PageObjectValidationTestHelper.FieldInfo(ELEMENT_NAME);
     fieldInfo.addAnnotations("@ElementMarker.Find(css = \".css\", nullable = true)");
-    fieldInfo.validateField(context.getFields().get(1));
+    fieldInfo.validateField(findField(context, ELEMENT_NAME));
     BasicElementGetterMethod method = getElementMethod(context);
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }

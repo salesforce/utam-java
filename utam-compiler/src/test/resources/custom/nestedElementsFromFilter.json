@@ -1,0 +1,37 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "customRootWithFilter",
+        "public": true,
+        "type": "generated-basic/pageObjects/testBasicTypes",
+        "selector": {
+          "css": ".nestedCustom",
+          "returnAll": true
+        },
+        "filter": {
+          "apply": "getText",
+          "findFirst": true,
+          "matcher": {
+            "type": "stringContains",
+            "args": [
+              {
+                "name": "itemText",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "elements": [
+          {
+            "name": "nestedBasicInsideFilter",
+            "public": true,
+            "selector": {
+              "css": ".nestedBasic"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

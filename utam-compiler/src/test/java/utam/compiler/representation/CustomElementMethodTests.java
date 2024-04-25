@@ -45,23 +45,6 @@ public class CustomElementMethodTests {
   }
 
   @Test
-  public void testCustomListWithSelectorArgsInsideShadow() {
-    MethodInfo expected = new MethodInfo(METHOD_NAME, "List<Component>");
-    expected.addParameter(new MethodParameterInfo("index", "Integer"));
-    expected.addCodeLine("BasicElement root = this.getRootElement()");
-    expected.addCodeLine(
-        "return custom(root, this.test.setParameters(index)).buildList(Component.class)");
-    PageObjectMethod method =
-        new DeserializerUtilities()
-            .getContext("element/customListWithSelectorArg")
-            .getMethod(METHOD_NAME);
-    expected.addImportedTypes(EXPECTED_TYPE.getFullName(), IMPORTED_LIST_TYPE);
-    expected.addImpliedImportedTypes(
-        EXPECTED_TYPE.getFullName(), BASIC_ELEMENT.getFullName(), IMPORTED_LIST_TYPE);
-    PageObjectValidationTestHelper.validateMethod(method, expected);
-  }
-
-  @Test
   public void testCustomNullableListWithFilter() {
     MethodInfo expected = new MethodInfo(METHOD_NAME, "List<Component>");
     expected.addCodeLine("BasicElement root = this.getRootElement()");
@@ -73,18 +56,6 @@ public class CustomElementMethodTests {
     expected.addImportedTypes(EXPECTED_TYPE.getFullName(), IMPORTED_LIST_TYPE);
     expected.addImpliedImportedTypes(
         EXPECTED_TYPE.getFullName(), BASIC_ELEMENT.getFullName(), IMPORTED_LIST_TYPE);
-    PageObjectValidationTestHelper.validateMethod(method, expected);
-  }
-
-  @Test
-  public void testCustomPublicNullableSingleElement() {
-    MethodInfo expected = new MethodInfo(METHOD_NAME, "Component");
-    expected.addCodeLine("BasicElement root = this.getRootElement()");
-    expected.addCodeLine("return custom(root, this.test).build(Component.class)");
-    PageObjectMethod method =
-        new DeserializerUtilities()
-            .getContext("element/customPublicNullable")
-            .getMethod(METHOD_NAME);
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
 

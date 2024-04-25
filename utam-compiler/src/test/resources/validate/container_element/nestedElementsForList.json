@@ -1,0 +1,23 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "type": "container",
+      "selector": {
+        "css": "slot",
+        "returnAll": true
+      },
+      "shadow" : {
+        "elements": [
+          {
+            "name" : "nested",
+            "selector" : {
+              "css" : "nested"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+

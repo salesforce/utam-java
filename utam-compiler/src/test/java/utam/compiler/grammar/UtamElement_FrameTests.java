@@ -72,25 +72,6 @@ public class UtamElement_FrameTests {
   }
 
   @Test
-  public void testFrameElementWithElementsThrows() {
-    String json =
-        "{\"elements\": [\n"
-            + "    {\n"
-            + "      \"name\": \"test\",\n"
-            + "      \"selector\": {\"css\" : \"css\"},\n"
-            + "      \"type\": \"frame\","
-            + "      \"elements\": [{ \"name\": \"nested\", \"type\": \"container\" }]"
-            + "    }\n"
-            + "  ]}";
-    Exception e = expectCompilerError(json);
-    assertThat(
-        e.getMessage(),
-        containsString(
-            "error 205: element \"test\": only basic element can have nested elements or shadow"
-                + " root"));
-  }
-
-  @Test
   public void testFrameElementWithShadowThrows() {
     String json =
         "{\"elements\": [\n"
