@@ -55,17 +55,7 @@ public class LintingConfigJson implements LintingConfig {
    */
   public static final LintingConfig DEFAULT_LINTING_CONFIG =
       new LintingConfigJson(
-          false,
-          false,
-          DEFAULT_SARIF_OUTPUT_FILE,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null);
+          false, false, DEFAULT_SARIF_OUTPUT_FILE, null, null, null, null, null, null, null, null);
 
   private final List<LintingRuleImpl> localRules = new ArrayList<>();
   private final List<LintingRuleImpl> globalRules = new ArrayList<>();
