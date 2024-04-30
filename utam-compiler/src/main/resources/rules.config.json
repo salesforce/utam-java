@@ -32,14 +32,6 @@
         "violation": "warning"
     },
     {
-        "ruleId": "ULR05",
-        "errorCode": 2004,
-        "name": "Single shadowRoot",
-        "description": "Check only one shadowRoot present at the component root",
-        "help": "remove \"shadow\" under element \"%s\" and create separate page object for its content",
-        "violation": "warning"
-    },
-    {
         "ruleId": "ULR06",
         "errorCode": 3001,
         "name": "Unique root selector",

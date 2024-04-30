@@ -334,34 +334,6 @@ abstract class LintingRuleImpl implements LintingRule {
   }
 
   /**
-   * Check for single shadow boundary at the root level
-   *
-   * @author elizaveta.ivanova
-   * @since 242
-   */
-  static class SingleShadowBoundaryAllowed extends LintingRuleImpl {
-    SingleShadowBoundaryAllowed(LintRuleOverride override) {
-      super("ULR05", override);
-    }
-
-    @Override
-    public void validate(List<LintingError> errors, PageObjectLinting pageObject) {
-      if (isEnabled(pageObject)) {
-        for (String elementName : pageObject.getShadowBoundaries()) {
-          FileSearchContext context =
-              new FileSearchContextImpl(new String[] {"elements", elementName});
-          errors.add(
-              getError(
-                  pageObject,
-                  pageObject.findCodeLine(context, "shadow"),
-                  String.format(this.help, elementName),
-                  elementName));
-        }
-      }
-    }
-  }
-
-  /**
    * Root selector should be unique across all POs
    *
    * @author elizaveta.ivanova

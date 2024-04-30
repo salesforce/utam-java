@@ -16,9 +16,6 @@
     "requiredMethodDescription": {
       "violation": "disabled"
     },
-    "requiredSingleShadowRoot": {
-      "violation": "disabled"
-    },
     "duplicateRootSelectors": {
       "violation" : "disabled"
     },

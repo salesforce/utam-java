@@ -374,10 +374,6 @@
     "message": "method \"%s\" does not have description"
   },
   {
-    "code": 2004,
-    "message": "only root shadow boundary is allowed, please create another page object for the element \"%s\""
-  },
-  {
     "code": 2005,
     "message": "property \"author\" is missing in the root description"
   },
