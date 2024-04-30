@@ -73,7 +73,7 @@ public class LintingRuleTests {
   @Test
   public void testDuplicateSelectorsInsideOneFile() {
     List<LintingError> errors = test("lint/rules/defaultConfig");
-    assertThat(errors, hasSize(5));
+    assertThat(errors, hasSize(4));
     LintingError error = errors.get(0);
     assertThat(
         error.getFullMessage(),
@@ -135,7 +135,7 @@ public class LintingRuleTests {
   @Test
   public void testRequiredDescription() {
     List<LintingError> errors = test("lint/rules/defaultConfig");
-    assertThat(errors, hasSize(5));
+    assertThat(errors, hasSize(4));
     LintingError error = errors.get(2);
     assertThat(
         error.getFullMessage(),
@@ -158,21 +158,6 @@ public class LintingRuleTests {
         error.getFixSuggestion(),
         equalTo("add \"description\" property to the method \"nodescription\""));
     assertThat(error.getSourceLine(), equalTo(47));
-    error = errors.get(4);
-    assertThat(
-        error.getFullMessage(),
-        equalTo(
-            "lint rule ULR05 failure in page object test/lint/rules/defaultConfig: warning 2004:"
-                + " only root shadow boundary is allowed, please create another page object for the"
-                + " element \"three\"; remove \"shadow\" under element \"three\" and create"
-                + " separate page object for its content"));
-    assertThat(error.getRuleId(), equalTo("ULR05"));
-    assertThat(
-        error.getFixSuggestion(),
-        equalTo(
-            "remove \"shadow\" under element \"three\" and create separate page object for its"
-                + " content"));
-    assertThat(error.getSourceLine(), equalTo(25));
   }
 
   @Test
@@ -194,27 +179,6 @@ public class LintingRuleTests {
                 + "add \"author\" property to the root description"));
     assertThat(error.getRuleId(), equalTo("ULR03"));
     assertThat(error.getSourceLine(), equalTo(2));
-  }
-
-  @Test
-  public void testShadowBoundaryRule() {
-    List<LintingError> errors = test("lint/rules/defaultConfig");
-    assertThat(errors, hasSize(5));
-    LintingError error = errors.get(4);
-    assertThat(
-        error.getFullMessage(),
-        equalTo(
-            "lint rule ULR05 failure in page object test/lint/rules/defaultConfig: warning 2004:"
-                + " only root shadow boundary is allowed, please create another page object for the"
-                + " element \"three\"; remove \"shadow\" under element \"three\" and create"
-                + " separate page object for its content"));
-    assertThat(error.getRuleId(), equalTo("ULR05"));
-    assertThat(
-        error.getFixSuggestion(),
-        equalTo(
-            "remove \"shadow\" under element \"three\" and create separate page object for its"
-                + " content"));
-    assertThat(error.getSourceLine(), equalTo(25));
   }
 
   @Test

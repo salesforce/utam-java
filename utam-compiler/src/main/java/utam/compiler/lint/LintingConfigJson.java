@@ -29,7 +29,6 @@ import utam.compiler.lint.LintingRuleImpl.RequiredMetadata;
 import utam.compiler.lint.LintingRuleImpl.RequiredMethodDescription;
 import utam.compiler.lint.LintingRuleImpl.RequiredRootDescription;
 import utam.compiler.lint.LintingRuleImpl.RootSelectorExistsForElement;
-import utam.compiler.lint.LintingRuleImpl.SingleShadowBoundaryAllowed;
 import utam.compiler.lint.LintingRuleImpl.UniqueRootSelector;
 import utam.compiler.lint.LintingRuleImpl.UniqueSelectorInsidePageObject;
 import utam.core.declarative.lint.LintingConfig;
@@ -66,7 +65,6 @@ public class LintingConfigJson implements LintingConfig {
           null,
           null,
           null,
-          null,
           null);
 
   private final List<LintingRuleImpl> localRules = new ArrayList<>();
@@ -85,8 +83,6 @@ public class LintingConfigJson implements LintingConfig {
       @JsonProperty(value = "requiredRootDescription") LintRuleOverride requiredRootDescription,
       @JsonProperty(value = "requiredAuthor") LintRuleOverride requiredAuthor,
       @JsonProperty(value = "requiredMethodDescription") LintRuleOverride requiredMethodDescription,
-      @JsonProperty(value = "requiredSingleShadowRoot")
-          LintRuleOverride singleShadowBoundaryAllowed,
       @JsonProperty(value = "duplicateRootSelectors") LintRuleOverride uniqueRootSelectors,
       @JsonProperty(value = "elementCantHaveRootSelector") LintRuleOverride rootSelectorExists,
       @JsonProperty(value = "duplicateCustomSelectors") LintRuleOverride customWrongType,
@@ -98,7 +94,6 @@ public class LintingConfigJson implements LintingConfig {
     localRules.add(new RequiredRootDescription(requiredRootDescription));
     localRules.add(new RequiredAuthor(requiredAuthor));
     localRules.add(new RequiredMethodDescription(requiredMethodDescription));
-    localRules.add(new SingleShadowBoundaryAllowed(singleShadowBoundaryAllowed));
     localRules.add(new RequiredMetadata(requiredMetadata));
     globalRules.add(new UniqueRootSelector(uniqueRootSelectors));
     globalRules.add(new RootSelectorExistsForElement(rootSelectorExists));
