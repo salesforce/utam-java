@@ -1,0 +1,21 @@
+{
+  "elements" : [
+    {
+      "name" : "test",
+      "type" : "frame",
+      "selector" : {
+        "css" : "iframe"
+      },
+      "shadow" : {
+        "elements" : [
+          {
+            "name" : "nested",
+            "selector" : {
+              "css" : "css"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

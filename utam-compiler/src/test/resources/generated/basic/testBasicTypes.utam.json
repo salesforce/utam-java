@@ -63,5 +63,16 @@
         "css": ".css"
       }
     }
+  ],
+  "methods" : [
+    {
+      "name" : "getText",
+      "compose" : [
+        {
+          "element" : "root",
+          "apply" : "getText"
+        }
+      ]
+    }
   ]
 }

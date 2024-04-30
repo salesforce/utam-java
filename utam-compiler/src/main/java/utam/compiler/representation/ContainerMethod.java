@@ -37,7 +37,7 @@ import utam.core.declarative.representation.TypeProvider;
 public abstract class ContainerMethod implements PageObjectMethod {
 
   private static final String PAGE_OBJECT_TYPE_PARAMETER_NAME = "pageObjectType";
-  static final MethodParameter PAGE_OBJECT_PARAMETER =
+  public static final MethodParameter PAGE_OBJECT_PARAMETER =
       new Regular(PAGE_OBJECT_TYPE_PARAMETER_NAME, T_PAGE_OBJECT_TYPE_PARAMETER);
   final String methodName;
   final MethodParametersTracker parametersTracker;

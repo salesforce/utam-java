@@ -1,0 +1,33 @@
+{
+  "elements": [
+    {
+      "name": "test",
+      "type": "container",
+      "public": true,
+      "selector": {
+        "css": "slot"
+      },
+      "shadow" : {
+        "elements": [
+          {
+            "name" : "nested",
+            "public": true,
+            "selector" : {
+              "css" : "nested"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "methods" : [
+    {
+      "name" : "getTestScopeElement",
+      "compose" : [
+        {
+          "apply" : "load"
+        }
+      ]
+    }
+  ]
+}

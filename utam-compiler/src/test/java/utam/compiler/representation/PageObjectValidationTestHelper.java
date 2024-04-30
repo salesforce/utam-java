@@ -13,6 +13,7 @@ import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static utam.compiler.helpers.TypeUtilities.VOID;
 
 import java.util.ArrayList;
@@ -406,6 +407,7 @@ public class PageObjectValidationTestHelper {
      * @param fieldObject the PageElementField object to validate
      */
     public void validateField(PageClassField fieldObject) {
+      assertThat(fieldObject, is(notNullValue()));
       assertThat("field " + name + ": name", fieldObject.getName(), is(equalTo(name)));
       assertThat(
           "field " + name + ": type name",

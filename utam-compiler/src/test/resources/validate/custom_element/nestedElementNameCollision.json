@@ -1,0 +1,23 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "customRoot",
+        "public": true,
+        "type": "generated-basic/pageObjects/testBasicTypes",
+        "selector": {
+          "css": ".customRoot"
+        },
+        "elements": [
+          {
+            "name": "customRootScopeElement",
+            "public": true,
+            "selector": {
+              "css": ".duplicateGetterName"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

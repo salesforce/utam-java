@@ -1,0 +1,38 @@
+{
+  "elements" : [
+    {
+      "name": "rootContainer",
+      "type": "container",
+      "public": true,
+      "selector": {
+        "css": "slot"
+      },
+      "elements" : [
+        {
+          "name" : "nestedBasic",
+          "public": true,
+          "selector" : {
+            "css" : ".nestedBasic"
+          }
+        },
+        {
+          "name": "nestedContainer",
+          "public": true,
+          "type": "container",
+          "selector": {
+            "css": ".nestedContainer"
+          }
+        },
+        {
+          "name": "nestedCustom",
+          "public": true,
+          "type": "my/custom/component",
+          "selector": {
+            "css": ".nestedCustom",
+            "returnAll": true
+          }
+        }
+      ]
+    }
+  ]
+}

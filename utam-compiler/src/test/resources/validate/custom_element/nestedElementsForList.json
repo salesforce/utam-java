@@ -4,13 +4,14 @@
       "name": "test",
       "type": "my/page/type",
       "selector": {
-        "css": "css1"
+        "css": "css",
+        "returnAll": true
       },
-      "elements" : [
+      "elements": [
         {
-          "name": "nested",
-          "selector": {
-            "css": "css2"
+          "name" : "nested",
+          "selector" : {
+            "css" : "nested"
           }
         }
       ]

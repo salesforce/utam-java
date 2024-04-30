@@ -16,6 +16,7 @@ import utam.compiler.translator.DefaultSourceConfigurationTests;
 import utam.compiler.translator.DefaultTargetConfigurationTests;
 import utam.compiler.translator.DefaultTranslatorConfiguration;
 import utam.compiler.translator.TranslationTypesConfigJava;
+import utam.core.declarative.representation.PageClassField;
 import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.translator.TranslationTypesConfig;
@@ -82,5 +83,21 @@ public class TestUtilities {
     TestTranslationContext(String name, TranslatorConfig translatorConfiguration) {
       super(name, name, translatorConfiguration);
     }
+  }
+
+  /**
+   * Utility to find declared field with a given name
+   *
+   * @param context translation context
+   * @param fieldName name of the field
+   * @return field object
+   * @throws AssertionError if field is not found
+   */
+  public static PageClassField findField(TranslationContext context, String fieldName) {
+    return context.getFields().stream()
+        .filter(f -> f.getName().equals(fieldName))
+        .findAny()
+        .orElseThrow(
+            () -> new AssertionError(String.format("Can't find field with name '%s'!", fieldName)));
   }
 }

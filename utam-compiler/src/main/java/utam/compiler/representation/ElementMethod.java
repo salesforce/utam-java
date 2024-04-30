@@ -103,7 +103,7 @@ public abstract class ElementMethod {
       };
 
   static String getScopeElementCode(ElementContext scopeElement) {
-    String methodName = scopeElement.getElementMethod().getDeclaration().getName();
+    String methodName = scopeElement.getElementGetterName();
     String scopeVariableName = scopeElement.getName();
     String parameters = ParameterUtils.getParametersValuesString(scopeElement.getParameters());
     return String.format(
@@ -122,6 +122,7 @@ public abstract class ElementMethod {
 
   private static List<String> getElementMethodCode(
       ElementContext element,
+      String elementFieldName,
       List<MethodParameter> locatorParameters,
       TypeProvider implClass,
       boolean isList) {
@@ -132,7 +133,7 @@ public abstract class ElementMethod {
         String.format(
             "return basic(%s, %s).%s(%s.class, %s.class)",
             scopeVariableName,
-            getElementLocationCode(element.getName(), locatorParameters),
+            getElementLocationCode(elementFieldName, locatorParameters),
             isList ? "buildList" : "build",
             element.getType().getSimpleName(),
             implClass.getSimpleName()));
@@ -173,6 +174,7 @@ public abstract class ElementMethod {
      * Initializes a new instance of the Single class
      *
      * @param element the element to get
+     * @param elementFieldName name of the class field assigned to the element
      * @param locatorParameters the list of parameters for the locator of the element
      * @param isPublic a value indicating whether the element is public
      * @param implType the type provider for the implementation type
@@ -180,6 +182,7 @@ public abstract class ElementMethod {
      */
     public Single(
         ElementContext element,
+        String elementFieldName,
         List<MethodParameter> locatorParameters,
         boolean isPublic,
         TypeProvider implType,
@@ -189,7 +192,8 @@ public abstract class ElementMethod {
           isPublic,
           element.getGetterReturnType(),
           description);
-      this.methodCode = getElementMethodCode(element, locatorParameters, implType, false);
+      this.methodCode =
+          getElementMethodCode(element, elementFieldName, locatorParameters, implType, false);
       this.parametersTracker.setMethodParameters(element.getParameters());
       setInterfaceImports(imports, returnType);
       setClassImports(classImports, returnType, implType);
@@ -237,6 +241,7 @@ public abstract class ElementMethod {
      * Initializes a new instance of the Multiple class
      *
      * @param element the element to get
+     * @param elementFieldName name of the class field assigned to the element
      * @param locatorParameters the list of parameters for the locator of the element
      * @param isPublic a value indicating whether the element is public
      * @param implType the type provider for the implementation type
@@ -244,12 +249,14 @@ public abstract class ElementMethod {
      */
     public Multiple(
         ElementContext element,
+        String elementFieldName,
         List<MethodParameter> locatorParameters,
         boolean isPublic,
         TypeProvider implType,
         UtamMethodDescription description) {
       super(getElementGetterMethodName(element.getName(), isPublic), isPublic, null, description);
-      this.methodCode = getElementMethodCode(element, locatorParameters, implType, true);
+      this.methodCode =
+          getElementMethodCode(element, elementFieldName, locatorParameters, implType, true);
       this.parametersTracker.setMethodParameters(element.getParameters());
       this.listReturnType = element.getGetterReturnType();
       setInterfaceImports(imports, listReturnType);
@@ -299,6 +306,7 @@ public abstract class ElementMethod {
      *
      * @param scopeElement the context of the scope element
      * @param elementName the name of the element
+     * @param elementFieldName name of the class field assigned to the element
      * @param elementType the element type
      * @param implType the type provider for the implementation type
      * @param locatorParameters the list of parameters for the locator of the element
@@ -314,6 +322,7 @@ public abstract class ElementMethod {
     public Filtered(
         ElementContext scopeElement,
         String elementName,
+        String elementFieldName,
         TypeProvider elementType,
         TypeProvider implType,
         List<MethodParameter> locatorParameters,
@@ -340,7 +349,7 @@ public abstract class ElementMethod {
           getPredicateCode(applyMethod, applyParameters, matcherType, matcherParameters);
       code.add(getScopeElementCode(scopeElement));
       String scopeVariableName = scopeElement.getName();
-      String locationCode = getElementLocationCode(elementName, locatorParameters);
+      String locationCode = getElementLocationCode(elementFieldName, locatorParameters);
       code.add(
           String.format(
               "return basic(%s, %s).%s(%s.class, %s.class, %s)",

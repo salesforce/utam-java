@@ -137,6 +137,9 @@ public final class TypeUtilities {
   private static final TypeProvider T_ROOT_PAGE_OBJECT_TYPE_PARAMETER =
       new TBoundedPageObjectType(ROOT_PAGE_OBJECT);
 
+  /** Type for Lists */
+  public static final TypeProvider LIST_TYPE = new TypeUtilities.FromClass(List.class);
+
   static Class getClassFromFullName(TypeProvider type) {
     String fullName = type.getFullName();
     try {
@@ -311,8 +314,6 @@ public final class TypeUtilities {
   /** Type for a list of objects, accepts object type as a parameter */
   private static class BoundedList extends BoundedType {
 
-    private static final TypeProvider LIST_IMPORT = new TypeUtilities.FromClass(List.class);
-
     BoundedList(TypeProvider boundType) {
       super(List.class, boundType);
     }
@@ -320,7 +321,7 @@ public final class TypeUtilities {
     @Override
     public List<TypeProvider> getImportableTypes() {
       List<TypeProvider> typesToImport = new ArrayList<>(boundType.getImportableTypes());
-      typesToImport.add(LIST_IMPORT);
+      typesToImport.add(LIST_TYPE);
       return typesToImport;
     }
   }

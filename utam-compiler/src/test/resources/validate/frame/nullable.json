@@ -1,0 +1,12 @@
+{
+  "elements" : [
+    {
+      "name" : "test",
+      "type" : "frame",
+      "selector" : {
+        "css" : "iframe"
+      },
+      "nullable" : true
+    }
+  ]
+}
