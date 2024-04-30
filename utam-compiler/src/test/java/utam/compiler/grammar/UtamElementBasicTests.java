@@ -21,7 +21,7 @@ import utam.core.framework.consumer.UtamError;
  *
  * @since 238
  */
-public class UtamElement_BasicTests {
+public class UtamElementBasicTests {
 
   private static void getContext(String fileName) {
     new DeserializerUtilities().getContext("validate/basic_element/" + fileName);
