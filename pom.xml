@@ -12,7 +12,7 @@
     <groupId>com.salesforce.utam</groupId>
     <artifactId>utam-java</artifactId>
     <packaging>pom</packaging>
-    <version>4.0.0-alpha-2-SNAPSHOT</version>
+    <version>3.0.1-SNAPSHOT</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Java project for generating and using UTAM Page Objects</description>
     <url>http://github.com/salesforce/utam-java</url>
@@ -121,8 +121,8 @@
         <maven.surefire.plugin.version>3.2.2</maven.surefire.plugin.version>
         <maven.exec.plugin.version>3.1.1</maven.exec.plugin.version>
 
-        <selenium.version>4.10.0</selenium.version>
-        <appium.version>8.5.0</appium.version>
+        <selenium.version>3.141.59</selenium.version>
+        <appium.version>7.6.0</appium.version>
         <slf4j.version>2.0.9</slf4j.version>
         <jackson.version>2.16.0</jackson.version>
         <google.java.format.version>1.19.1</google.java.format.version>

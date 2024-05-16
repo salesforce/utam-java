@@ -10,7 +10,6 @@ package utam.core.selenium.appium;
 import static utam.core.framework.UtamLogger.warning;
 
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.remote.SupportsContextSwitching;
 import java.util.Set;
 import java.util.function.Supplier;
 import org.openqa.selenium.By;
@@ -62,7 +61,7 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
 
   final Boolean isWebViewAvailable() {
     AppiumDriver appiumDriver = getAppiumDriver();
-    Set<String> contextHandles = ((SupportsContextSwitching) appiumDriver).getContextHandles();
+    Set<String> contextHandles = appiumDriver.getContextHandles();
     return contextHandles.stream()
         .anyMatch(handle -> handle.contains(WEBVIEW_CONTEXT_HANDLE_PREFIX));
   }
@@ -75,13 +74,12 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
       // from the return of getContextHandles. This is Android unique.
       setPageContextToNative();
     }
-    Set<String> contextHandles = ((SupportsContextSwitching) appiumDriver).getContextHandles();
+    Set<String> contextHandles = appiumDriver.getContextHandles();
     for (String contextHandle : contextHandles) {
       if (!contextHandle.equals(NATIVE_CONTEXT_HANDLE)) {
         AppiumDriver newDriver;
         try {
-          newDriver =
-              (AppiumDriver) ((SupportsContextSwitching) appiumDriver).context(contextHandle);
+          newDriver = (AppiumDriver) appiumDriver.context(contextHandle);
         } catch (WebDriverException e) {
           warning(
               String.format(
@@ -143,7 +141,7 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
 
   @Override
   public String getPageContext() {
-    return ((SupportsContextSwitching) getAppiumDriver()).getContext();
+    return getAppiumDriver().getContext();
   }
 
   final WebElement getWebViewElement() {

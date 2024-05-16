@@ -12,7 +12,6 @@ import static utam.core.framework.context.MobilePlatformType.fromDriver;
 import static utam.core.selenium.appium.MobileDriverAdapter.NATIVE_CONTEXT_HANDLE;
 
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.remote.SupportsContextSwitching;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
@@ -159,12 +158,12 @@ public abstract class MobileDriverUtils {
 
   static void setContextToNative(AppiumDriver driver) {
     if (!isNative(driver)) {
-      ((SupportsContextSwitching) driver).context(NATIVE_CONTEXT_HANDLE);
+      driver.context(NATIVE_CONTEXT_HANDLE);
     }
   }
 
   static boolean isNative(AppiumDriver driver) {
-    return NATIVE_CONTEXT_HANDLE.equals(((SupportsContextSwitching) driver).getContext());
+    return NATIVE_CONTEXT_HANDLE.equals(driver.getContext());
   }
 
   /**
