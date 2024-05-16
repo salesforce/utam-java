@@ -12,7 +12,7 @@
     <groupId>com.salesforce.utam</groupId>
     <artifactId>utam-java</artifactId>
     <packaging>pom</packaging>
-    <version>3.0.1</version>
+    <version>3.0.2-SNAPSHOT</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Java project for generating and using UTAM Page Objects</description>
     <url>http://github.com/salesforce/utam-java</url>
@@ -139,7 +139,7 @@
         <connection>scm:git:https://github.com/salesforce/utam-java.git</connection>
         <developerConnection>scm:git:git@github.com:salesforce/utam-java.git</developerConnection>
         <url>https://github.com/salesforce/utam-java</url>
-        <tag>3.0.1</tag>
+        <tag>1.1.6</tag>
     </scm>
 
     <licenses>
