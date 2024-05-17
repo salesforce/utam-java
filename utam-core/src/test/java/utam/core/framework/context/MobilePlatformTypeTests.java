@@ -48,11 +48,13 @@ public class MobilePlatformTypeTests {
     final String DEVICE_SCREEN_DENSITY_VALUE_PHONE = "480";
 
     AppiumDriver driver = mock(IOSDriver.class);
-    when(driver.getSessionDetail("device")).thenReturn("iphone");
+    DesiredCapabilities desiredCaps = new DesiredCapabilities();
+    desiredCaps.setCapability(DEVICE_NAME_NAME, DEVICE_NAME_VALUE_IPHONE);
+    when(driver.getCapabilities()).thenReturn(desiredCaps);
     assertThat(fromDriver(driver), is(IOS_PHONE));
 
     driver = mock(AndroidDriver.class);
-    DesiredCapabilities desiredCaps = new DesiredCapabilities();
+    desiredCaps = new DesiredCapabilities();
     desiredCaps.setCapability(DEVICE_SCREEN_SIZE_NAME, DEVICE_SCREEN_SIZE_VALUE_TABLET);
     desiredCaps.setCapability(DEVICE_SCREEN_DENSITY_NAME, DEVICE_SCREEN_DENSITY_VALUE_TABLET);
     when(driver.getCapabilities()).thenReturn(desiredCaps);
@@ -67,7 +69,7 @@ public class MobilePlatformTypeTests {
     desiredCaps = new DesiredCapabilities();
     desiredCaps.setPlatform(Platform.MAC);
     when(driver.getCapabilities()).thenReturn(desiredCaps);
-    when(driver.getSessionDetail("device")).thenReturn("iPad");
+    desiredCaps.setCapability(DEVICE_NAME_NAME, DEVICE_NAME_VALUE_IPAD);
     assertThat(fromDriver(driver), is(IOS_TABLET));
     desiredCaps.setPlatform(Platform.LINUX);
     desiredCaps.setCapability(DEVICE_SCREEN_SIZE_NAME, DEVICE_SCREEN_SIZE_VALUE_PHONE);

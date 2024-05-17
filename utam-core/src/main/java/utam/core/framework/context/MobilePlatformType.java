@@ -82,7 +82,7 @@ public enum MobilePlatformType implements Profile {
       if (((AppiumDriver) driver).getCapabilities() == null) {
         return WEB;
       }
-      Platform platform = ((AppiumDriver) driver).getCapabilities().getPlatform();
+      Platform platform = ((AppiumDriver) driver).getCapabilities().getPlatformName();
       if (platform == Platform.LINUX) {
         return isTablet(driver) ? ANDROID_TABLET : ANDROID_PHONE;
       }
@@ -104,10 +104,8 @@ public enum MobilePlatformType implements Profile {
   }
 
   private static boolean isIPad(WebDriver driver) {
-    // Use below code for Appium 8.x
-    // Capabilities caps = ((AppiumDriver) driver).getCapabilities();
-    // Object deviceObject = caps.getCapability("deviceName");
-    Object deviceObject = ((AppiumDriver) driver).getSessionDetail("device");
+    Capabilities caps = ((AppiumDriver) driver).getCapabilities();
+    Object deviceObject = caps.getCapability("deviceName");
     if (deviceObject != null) {
       return deviceObject.toString().toLowerCase().contains("ipad");
     }
