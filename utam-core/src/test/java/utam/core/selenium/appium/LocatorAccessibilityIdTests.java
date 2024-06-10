@@ -10,7 +10,7 @@ package utam.core.selenium.appium;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-import io.appium.java_client.MobileBy;
+import io.appium.java_client.AppiumBy;
 import org.testng.annotations.Test;
 
 /**
@@ -25,7 +25,7 @@ public class LocatorAccessibilityIdTests {
   public void testCreation() {
     String selector = "selectorString";
     LocatorAccessibilityId locator = new LocatorAccessibilityId(selector);
-    assertThat(locator.getValue(), is(equalTo(MobileBy.AccessibilityId(selector))));
+    assertThat(locator.getValue(), is(equalTo(AppiumBy.accessibilityId(selector))));
     assertThat(locator.getStringValue(), is(equalTo(selector)));
     assertThat(locator.getCopy(selector), is(equalTo(locator)));
     assertThat(locator.setParameters("parameters"), is(sameInstance(locator)));
