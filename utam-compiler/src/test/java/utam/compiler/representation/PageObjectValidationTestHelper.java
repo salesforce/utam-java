@@ -146,11 +146,11 @@ public class PageObjectValidationTestHelper {
     assertThat(
         "method " + info.name + " code lines", method.getCodeLines(), is(equalTo(info.codeLines)));
     if (!info.importedTypes.isEmpty() || !info.impliedImportedTypes.isEmpty()) {
-      Set<String> actualImports = getAllImports(method.getClassImports());
-      String imports = actualImports.isEmpty() ? "empty" : String.join(", ", actualImports);
-      String assertionStr = String.format("method '%s' class imports are: %s", info.name, imports);
+      Set<String> actualClassImports = getAllImports(method.getClassImports());
+      String actualClassImportsStr = actualClassImports.isEmpty() ? "empty" : String.join(", ", actualClassImports);
+      String assertionStr = String.format("method '%s' class actual imports are: [%s]", info.name, actualClassImportsStr);
       assertThat(
-          assertionStr, actualImports, containsInAnyOrder(info.impliedImportedTypes.toArray()));
+          assertionStr, actualClassImports, containsInAnyOrder(info.impliedImportedTypes.toArray()));
     }
   }
 

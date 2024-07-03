@@ -330,7 +330,7 @@ public class ElementMethodTests {
   @Test
   public void testFilterWithContainsElementSelectorArgument() {
     TranslationContext context =
-        new DeserializerUtilities().getContext("filter/customWithFilterContainsElement");
+        new DeserializerUtilities().getContext("filter/basicWithFilterContainsElement");
     PageObjectMethod method = context.getMethod(ELEMENT_METHOD_NAME);
     assertThat(
         method.getDeclaration().getCodeLine(), is(equalTo("BasicElement getTest(String value)")));

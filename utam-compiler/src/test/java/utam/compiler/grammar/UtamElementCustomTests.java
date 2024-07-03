@@ -72,21 +72,6 @@ public class UtamElementCustomTests {
   }
 
   @Test
-  public void testListCantHaveNestedElements() {
-    UtamCompilationError e =
-        expectThrows(
-            UtamCompilationError.class,
-            () ->
-                new DeserializerUtilities()
-                    .getContext(VALIDATION_DATA_ROOT + "nestedElementsForList"));
-    assertThat(
-        e.getMessage(),
-        containsString(
-            "error 203: element \"test\": element marked as a list cannot have nested elements or"
-                + " shadow root"));
-  }
-
-  @Test
   public void testNestedElementsNamesCollision() {
     UtamCompilationError e =
         expectThrows(

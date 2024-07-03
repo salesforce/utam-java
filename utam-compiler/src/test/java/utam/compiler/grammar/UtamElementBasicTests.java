@@ -60,16 +60,6 @@ public class UtamElementBasicTests {
   }
 
   @Test
-  public void testElementWithListCantHaveNestedElements() {
-    UtamError e = expectThrows(UtamError.class, () -> getContext("listWithNestedElements"));
-    assertThat(
-        e.getMessage(),
-        containsString(
-            "error 203: element \"test\": element marked as a list cannot have nested elements or"
-                + " shadow root"));
-  }
-
-  @Test
   public void testElementNodeWithInvalidArrayElementTypeThrows() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("wrongBasicTypeArray"));
     assertThat(

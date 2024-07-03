@@ -7,6 +7,7 @@
  */
 package utam.compiler.helpers;
 
+import static utam.compiler.helpers.PrimitiveType.NUMBER;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.wrapAsList;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import utam.compiler.helpers.ParameterUtils.Regular;
 import utam.compiler.representation.ElementMethod;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
@@ -237,6 +239,15 @@ public abstract class ElementContext {
     return getElementMethod().getDeclaration().getName();
   }
 
+  /**
+   * If present, return index parameter for nested elements
+   *
+   * @return null or parameter if present
+   */
+  public MethodParameter getIndexParameter() {
+    return null;
+  }
+
   /** The node types of elements */
   public enum ElementType {
     /** A basic element */
@@ -302,6 +313,7 @@ public abstract class ElementContext {
   /** Represents a list of basic elements (on of actionable group) */
   public static class BasicReturnsAll extends Basic {
 
+    private final MethodParameter indexParameter;
     /**
      * Initializes a new instance of the BasicReturnsAll class
      *
@@ -320,6 +332,12 @@ public abstract class ElementContext {
         List<MethodParameter> parameters,
         boolean isNullable) {
       super(scopeContext, name, elementType, selector, parameters, isNullable);
+      this.indexParameter = new Regular("", NUMBER, "index of parent element" );
+    }
+
+    @Override
+    public MethodParameter getIndexParameter() {
+      return indexParameter;
     }
 
     @Override

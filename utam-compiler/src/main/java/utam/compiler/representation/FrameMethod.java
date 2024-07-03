@@ -10,7 +10,7 @@ package utam.compiler.representation;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
 import static utam.compiler.representation.ElementMethod.getElementLocationCode;
-import static utam.compiler.representation.ElementMethod.getScopeElementCode;
+import static utam.compiler.representation.ElementMethod.setupScopeElement;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
 import java.util.ArrayList;
@@ -36,9 +36,11 @@ public class FrameMethod implements PageObjectMethod {
 
   private final String methodName;
   private final List<String> methodCode = new ArrayList<>();
-  private final List<MethodParameter> parameters;
+  private final MethodParametersTracker parametersTracker;
   private final boolean isPublic;
   private final UtamMethodDescription description;
+  private final List<TypeProvider> imports = Stream.of(FRAME_ELEMENT).collect(Collectors.toList());
+  private final List<TypeProvider> classImports = Stream.of(FRAME_ELEMENT, BASIC_ELEMENT).collect(Collectors.toList());
 
   /**
    * Initializes a new instance of the FrameMethod class
@@ -53,23 +55,26 @@ public class FrameMethod implements PageObjectMethod {
       boolean isPublic,
       List<MethodParameter> locatorParameters,
       UtamMethodDescription description) {
-    methodCode.add(getScopeElementCode(element.getScopeElement()));
+    this.parametersTracker =
+      new MethodParametersTracker(String.format("element '%s'", element.getName()));
+    methodCode.addAll(setupScopeElement(element.getScopeElement(), parametersTracker, classImports));
+    parametersTracker.setMethodParameters(locatorParameters);
     String scopeVariableName = element.getScopeElement().getName();
     String locationWithParameters = getElementLocationCode(element.getName(), locatorParameters);
     methodCode.add(
         String.format(
             "return basic(%s, %s).buildFrame()", scopeVariableName, locationWithParameters));
     this.methodName = getElementGetterMethodName(element.getName(), isPublic);
-    this.parameters = element.getParameters();
     this.isPublic = isPublic;
     this.description = description;
+    ParameterUtils.setImport(classImports, BASIC_ELEMENT);
   }
 
   @Override
   public MethodDeclaration getDeclaration() {
-    List<TypeProvider> imports = Stream.of(FRAME_ELEMENT).collect(Collectors.toList());
-    JavadocObject javadoc = new MethodJavadoc(methodName, FRAME_ELEMENT, parameters, description);
-    return new MethodDeclarationImpl(methodName, parameters, FRAME_ELEMENT, imports, javadoc);
+    List<MethodParameter> methodParameters = parametersTracker.getMethodParameters();
+    JavadocObject javadoc = new MethodJavadoc(methodName, FRAME_ELEMENT, methodParameters, description);
+    return new MethodDeclarationImpl(methodName, methodParameters, FRAME_ELEMENT, imports, javadoc);
   }
 
   @Override
@@ -79,10 +84,7 @@ public class FrameMethod implements PageObjectMethod {
 
   @Override
   public List<TypeProvider> getClassImports() {
-    List<TypeProvider> imports = new ArrayList<>();
-    ParameterUtils.setImports(imports, getDeclaration().getImports());
-    ParameterUtils.setImport(imports, BASIC_ELEMENT);
-    return imports;
+    return classImports;
   }
 
   @Override

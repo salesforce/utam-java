@@ -9,6 +9,7 @@ package utam.compiler.representation;
 
 import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
+import static utam.compiler.helpers.TypeUtilities.LIST_TYPE;
 import static utam.compiler.helpers.TypeUtilities.wrapAsList;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 import static utam.compiler.types.BasicElementUnionType.asUnionTypeOrNull;
@@ -102,12 +103,38 @@ public abstract class ElementMethod {
         }
       };
 
-  static String getScopeElementCode(ElementContext scopeElement) {
+  /**
+   *
+   * @param scopeElement
+   * @param parametersTracker
+   * @param classImports
+   * @return generated code
+   */
+  static List<String> setupScopeElement(ElementContext scopeElement, MethodParametersTracker parametersTracker, List<TypeProvider> classImports) {
+    if(scopeElement == null) {
+      // seems could be the case for container
+      return new ArrayList<>();
+    }
     String methodName = scopeElement.getElementGetterName();
     String scopeVariableName = scopeElement.getName();
+    parametersTracker.setMethodParameters(scopeElement.getParameters());
     String parameters = ParameterUtils.getParametersValuesString(scopeElement.getParameters());
-    return String.format(
-        "BasicElement %s = this.%s(%s)", scopeVariableName, methodName, parameters);
+    List<String> res = new ArrayList<>();
+    if(scopeElement.getIndexParameter() != null) {
+      res.add(String.format(
+        "List<BasicElement> %ss = this.%s(%s)", scopeVariableName, methodName, parameters));
+      String indexArgName = scopeElement.getIndexParameter().getValue();
+      res.add(String.format("if( %ss.size() < %s-1 ) {", scopeVariableName, indexArgName));
+      res.add("throw new RuntimeException(\"Can't find scope element with given index!\")");
+      res.add("}");
+      res.add(String.format("BasicElement %s = %ss.get(%s)", scopeVariableName, scopeVariableName, indexArgName));
+      ParameterUtils.setImport(classImports, LIST_TYPE);
+      parametersTracker.setMethodParameter(scopeElement.getIndexParameter());
+    } else {
+      res.add(String.format(
+        "BasicElement %s = this.%s(%s)", scopeVariableName, methodName, parameters));
+    }
+    return res;
   }
 
   static String getElementLocationCode(
@@ -125,9 +152,11 @@ public abstract class ElementMethod {
       String elementFieldName,
       List<MethodParameter> locatorParameters,
       TypeProvider implClass,
-      boolean isList) {
+      boolean isList,
+      MethodParametersTracker parametersTracker,
+      List<TypeProvider> classImports) {
     List<String> code = new ArrayList<>();
-    code.add(getScopeElementCode(element.getScopeElement()));
+    code.addAll(setupScopeElement(element.getScopeElement(), parametersTracker, classImports));
     String scopeVariableName = element.getScopeElement().getName();
     code.add(
         String.format(
@@ -193,7 +222,7 @@ public abstract class ElementMethod {
           element.getGetterReturnType(),
           description);
       this.methodCode =
-          getElementMethodCode(element, elementFieldName, locatorParameters, implType, false);
+          getElementMethodCode(element, elementFieldName, locatorParameters, implType, false, parametersTracker, classImports);
       this.parametersTracker.setMethodParameters(element.getParameters());
       setInterfaceImports(imports, returnType);
       setClassImports(classImports, returnType, implType);
@@ -256,7 +285,7 @@ public abstract class ElementMethod {
         UtamMethodDescription description) {
       super(getElementGetterMethodName(element.getName(), isPublic), isPublic, null, description);
       this.methodCode =
-          getElementMethodCode(element, elementFieldName, locatorParameters, implType, true);
+          getElementMethodCode(element, elementFieldName, locatorParameters, implType, true, parametersTracker, classImports);
       this.parametersTracker.setMethodParameters(element.getParameters());
       this.listReturnType = element.getGetterReturnType();
       setInterfaceImports(imports, listReturnType);
@@ -338,16 +367,16 @@ public abstract class ElementMethod {
           isPublic,
           isFindFirstMatch ? elementType : wrapAsList(elementType),
           description);
-      parametersTracker.setMethodParameters(scopeElement.getParameters());
-      parametersTracker.setMethodParameters(locatorParameters);
-      parametersTracker.setMethodParameters(applyParameters);
-      parametersTracker.setMethodParameters(matcherParameters);
       setInterfaceImports(imports, returnType);
       setClassImports(classImports, returnType, implType);
       setFilterParameterClassImports();
       String predicateCode =
           getPredicateCode(applyMethod, applyParameters, matcherType, matcherParameters);
-      code.add(getScopeElementCode(scopeElement));
+      code.addAll(setupScopeElement(scopeElement, parametersTracker, classImports));
+      // must be after scope parameters
+      parametersTracker.setMethodParameters(locatorParameters);
+      parametersTracker.setMethodParameters(applyParameters);
+      parametersTracker.setMethodParameters(matcherParameters);
       String scopeVariableName = scopeElement.getName();
       String locationCode = getElementLocationCode(elementFieldName, locatorParameters);
       code.add(
