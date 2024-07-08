@@ -52,6 +52,11 @@ public class UtamMethodDescription {
     this.deprecatedStr = deprecatedStr;
   }
 
+  /**
+   * Initialize simple version of method description
+   *
+   * @param text text describing what method does
+   */
   public UtamMethodDescription(String text) {
     this(List.of(text), null, null, null);
   }

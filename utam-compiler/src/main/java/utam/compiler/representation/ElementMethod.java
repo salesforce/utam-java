@@ -103,9 +103,11 @@ public abstract class ElementMethod {
       };
 
   /**
-   * @param scopeElement
-   * @param parametersTracker
-   * @return generated code
+   * Set parameters for scope element and generate code line
+   *
+   * @param scopeElement scope element
+   * @param parametersTracker methods parameter tracker
+   * @return generated code line
    */
   static String setupScopeElement(
       ElementContext scopeElement, MethodParametersTracker parametersTracker) {

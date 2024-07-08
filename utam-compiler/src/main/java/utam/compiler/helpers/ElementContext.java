@@ -151,7 +151,7 @@ public abstract class ElementContext {
   }
 
   /**
-   * Parameters for nested elements can include index element Same parameters can't be used inside
+   * Parameters for nested elements can include index element. Same parameters can't be used inside
    * compose methods
    *
    * @return the list of parameters for a nested element getter
@@ -216,6 +216,11 @@ public abstract class ElementContext {
     return this.elementGetter;
   }
 
+  /**
+   * Get method to invoke in skope, for list it's index
+   *
+   * @return method to be used as scope
+   */
   public PageObjectMethod getElementScopeMethod() {
     return this.elementGetter;
   }
@@ -338,7 +343,7 @@ public abstract class ElementContext {
   /** Represents a list of basic elements (on of actionable group) */
   public static class BasicReturnsAll extends Basic {
 
-    // for lists scope getter is different
+    /** For lists scope getter is different */
     private PageObjectMethod elementIndexGetter;
 
     /**
