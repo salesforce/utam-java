@@ -52,6 +52,10 @@ public class UtamMethodDescription {
     this.deprecatedStr = deprecatedStr;
   }
 
+  public UtamMethodDescription(String text) {
+    this(List.of(text), null, null, null);
+  }
+
   /**
    * Process/deserialize description node at the method or element level
    *

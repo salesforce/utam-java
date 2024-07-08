@@ -70,8 +70,8 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       this.isPublic = isPublic;
       this.methodName = getElementGetterMethodName(componentName, isPublic);
       this.parametersTracker =
-        new MethodParametersTracker(String.format("method '%s'", methodName));
-      codeLines.addAll(setupScopeElement(scopeElement, parametersTracker, classImports));
+          new MethodParametersTracker(String.format("method '%s'", methodName));
+      codeLines.add(setupScopeElement(scopeElement, parametersTracker));
       String locationCode = getElementLocationCode(componentName, locatorParameters);
       String statement =
           String.format(
@@ -162,7 +162,7 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       this.methodName = getElementGetterMethodName(componentName, isPublic);
       this.parametersTracker =
           new MethodParametersTracker(String.format("method '%s'", methodName));
-      codeLines.addAll(setupScopeElement(scopeElement, parametersTracker, classImports));
+      codeLines.add(setupScopeElement(scopeElement, parametersTracker));
       // must be after scope parameters
       parametersTracker.setMethodParameters(locatorParameters);
       parametersTracker.setMethodParameters(applyParameters);
@@ -246,8 +246,8 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       ParameterUtils.setImport(classImports, BASIC_ELEMENT);
       this.methodName = getElementGetterMethodName(componentName, isPublic);
       this.parametersTracker =
-        new MethodParametersTracker(String.format("method '%s'", methodName));
-      codeLines.addAll(setupScopeElement(scopeElement, parametersTracker, classImports));
+          new MethodParametersTracker(String.format("method '%s'", methodName));
+      codeLines.add(setupScopeElement(scopeElement, parametersTracker));
       String locationCode = getElementLocationCode(componentName, locatorParameters);
       String statement =
           String.format(

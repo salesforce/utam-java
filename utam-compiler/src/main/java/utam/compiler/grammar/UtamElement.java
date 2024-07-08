@@ -281,7 +281,7 @@ public class UtamElement {
    * @author elizaveta.ivanova
    * @since 252
    */
-  class ScopeUtamElement extends UtamElement {
+  static class ScopeUtamElement extends UtamElement {
 
     private final ElementField elementField;
 
@@ -357,7 +357,9 @@ public class UtamElement {
     }
 
     boolean isReturnList() {
-      return selector != null && selector.isReturnAll() && (filter == null || !filter.isFindFirst());
+      return selector != null
+          && selector.isReturnAll()
+          && (filter == null || !filter.isFindFirst());
     }
 
     ElementContext asBasicScope(
@@ -568,6 +570,7 @@ public class UtamElement {
       }
       context.setMethod(method);
       elementContext.setElementMethod(method, context);
+      elementContext.setIndexMethod(hasNestedElements(), context);
       context.setTestableElement(
           name,
           new ElementUnitTestHelper(

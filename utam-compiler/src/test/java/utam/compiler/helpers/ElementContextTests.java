@@ -28,7 +28,6 @@ import static utam.compiler.types.BasicElementInterface.actionable;
 
 import java.util.Collections;
 import org.testng.annotations.Test;
-import utam.compiler.helpers.ElementContext.BasicReturnsAll;
 import utam.compiler.helpers.ElementContext.Container;
 import utam.compiler.helpers.ElementContext.Custom;
 import utam.compiler.helpers.ElementContext.CustomReturnsAll;
@@ -71,23 +70,6 @@ public class ElementContextTests {
     assertThat(context.getType(), is(equalTo(BASIC_ELEMENT_TYPE)));
     assertThat(context.getParameters(), is(hasSize(0)));
     assertThat(context.getSelector(), is(equalTo(SELECTOR_VALUE)));
-  }
-
-  @Test
-  public void testBasicElementListWithParameters() {
-    MethodParameter parameter = new Regular("arg", PrimitiveType.STRING);
-    ElementContext context =
-        new BasicReturnsAll(
-            null,
-            "name",
-            BASIC_ELEMENT_TYPE,
-            SELECTOR_VALUE,
-            Collections.singletonList(parameter),
-            true);
-    assertThat(context.getElementNodeType(), is(ElementType.BASIC));
-    assertThat(context.isNullable(), is(true));
-    assertThat(context.getParameters(), is(hasSize(1)));
-    assertThat(context.getParameters().get(0), is(equalTo(parameter)));
   }
 
   @Test

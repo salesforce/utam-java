@@ -132,6 +132,7 @@ public final class JsonDeserializer
       this.context.processError(parser, e);
       // if we collect errors from all objects, need to proceed without writing anything
       return null;
+      // throw new RuntimeException(e);
     }
   }
 

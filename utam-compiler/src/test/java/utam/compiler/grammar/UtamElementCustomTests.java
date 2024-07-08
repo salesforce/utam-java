@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.findField;
+import static utam.compiler.helpers.PrimitiveType.NUMBER;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT_IMPL_CLASS;
 import static utam.compiler.helpers.TypeUtilities.LIST_TYPE;
@@ -221,5 +222,21 @@ public class UtamElementCustomTests {
             + " this.nestedBasicInsideFilter).build(BasicElement.class, BasePageElement.class)");
     actualMethod = context.getElement(NESTED_ELEMENT_NAME).getElementMethod();
     validateMethod(actualMethod, expectedGetter);
+  }
+
+  @Test
+  public void testElementNestedInsideList() {
+    TranslationContext context =
+        new DeserializerUtilities().getContext("nestedlist/nestedCustomList");
+    final String ELEMENT_METHOD_NAME = "getNestedBasic";
+    PageObjectMethod nestedGetter = context.getMethod(ELEMENT_METHOD_NAME);
+    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, BASIC_ELEMENT.getSimpleName());
+    expected.addParameter(new MethodParameterInfo("_customScopeIndex", NUMBER.getSimpleName()));
+    expected.addCodeLine(
+        "BasicElement customScope = this._index_getCustomScopeElement(_customScopeIndex)");
+    expected.addCodeLine(
+        "return basic(customScope, this.nestedBasic).build(BasicElement.class,"
+            + " BasePageElement.class)");
+    PageObjectValidationTestHelper.validateMethod(nestedGetter, expected);
   }
 }

@@ -64,6 +64,39 @@
             }
           ]
         }
+      },
+      {
+        "name": "custom",
+        "type": "generated-basic/pageObjects/testBasicTypes",
+        "selector": {
+          "css": ".custom",
+          "returnAll": true
+        },
+        "public": true,
+        "shadow": {
+          "elements": [
+            {
+              "name": "nestedBasicInsideList",
+              "public": true,
+              "selector": {
+                "css": ".nestedBasic"
+              }
+            },
+            {
+              "name": "nestedContainerInsideList",
+              "public": true,
+              "type": "container"
+            },
+            {
+              "name": "nestedCustomInsideList",
+              "public": true,
+              "type": "generated-basic/pageObjects/testBasicTypes",
+              "selector": {
+                "css": ".nestedCustom"
+              }
+            }
+          ]
+        }
       }
     ]
   }

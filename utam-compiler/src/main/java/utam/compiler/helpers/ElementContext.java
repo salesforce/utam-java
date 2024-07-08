@@ -7,17 +7,25 @@
  */
 package utam.compiler.helpers;
 
+import static utam.compiler.helpers.ParameterUtils.getParametersValuesString;
 import static utam.compiler.helpers.PrimitiveType.NUMBER;
+import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.FRAME_ELEMENT;
+import static utam.compiler.helpers.TypeUtilities.LIST_TYPE;
 import static utam.compiler.helpers.TypeUtilities.wrapAsList;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import utam.compiler.grammar.UtamMethodDescription;
 import utam.compiler.helpers.ParameterUtils.Regular;
 import utam.compiler.representation.ElementMethod;
+import utam.compiler.representation.JavadocObject;
+import utam.compiler.representation.JavadocObject.MethodJavadoc;
+import utam.compiler.representation.MethodDeclarationImpl;
+import utam.core.declarative.representation.MethodDeclaration;
 import utam.core.declarative.representation.MethodParameter;
 import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.declarative.representation.TypeProvider;
@@ -46,6 +54,8 @@ public abstract class ElementContext {
   private final Locator selector;
   // parameters from scope + from element itself
   private final List<MethodParameter> parameters = new ArrayList<>();
+  // parameters to be used for scoping inside list, including index
+  private final List<MethodParameter> parametersForNested = new ArrayList<>();
   private final String name;
   private final TypeProvider type;
   private final boolean isNullable;
@@ -77,9 +87,11 @@ public abstract class ElementContext {
     this.type = type;
     this.selector = selector;
     if (scopeContext != null) {
-      this.parameters.addAll(scopeContext.parameters);
+      this.parameters.addAll(scopeContext.getParametersForNestedElements());
+      this.parametersForNested.addAll(scopeContext.getParametersForNestedElements());
     }
     this.parameters.addAll(parameters);
+    this.parametersForNested.addAll(parameters);
     this.isNullable = isNullable;
     this.scopeElement = scopeContext;
   }
@@ -139,6 +151,16 @@ public abstract class ElementContext {
   }
 
   /**
+   * Parameters for nested elements can include index element Same parameters can't be used inside
+   * compose methods
+   *
+   * @return the list of parameters for a nested element getter
+   */
+  public final List<MethodParameter> getParametersForNestedElements() {
+    return parametersForNested;
+  }
+
+  /**
    * Getter can have literal parameter that is HARDCODED in the element. When we invoke getter it
    * should not be used
    *
@@ -148,6 +170,10 @@ public abstract class ElementContext {
     return getElementMethod().getDeclaration().getParameters().stream()
         .filter(parameter -> !parameter.isLiteral())
         .collect(Collectors.toList());
+  }
+
+  public void setIndexMethod(boolean hasNestedElements, TranslationContext context) {
+    // does nothing except for basic list
   }
 
   /**
@@ -190,6 +216,10 @@ public abstract class ElementContext {
     return this.elementGetter;
   }
 
+  public PageObjectMethod getElementScopeMethod() {
+    return this.elementGetter;
+  }
+
   /**
    * Register element getter method, throw NPE if method already exists
    *
@@ -204,8 +234,8 @@ public abstract class ElementContext {
   }
 
   /**
-   * Traverse scope elements and for each scope element in hierarchy set that it's used by it's
-   * child getter. Private methods that are not public and not marked as "used" will not be added to
+   * Traverse scope elements and for each scope element in hierarchy set that it's used by its child
+   * getter. Private methods that are not public and not marked as "used" will not be added to
    * generation
    *
    * @param context translation context
@@ -213,7 +243,11 @@ public abstract class ElementContext {
   private void setUsageOfScopeElement(TranslationContext context) {
     ElementContext scopeElement = this.getScopeElement();
     while (scopeElement != null) {
-      context.setMethodUsage(scopeElement.getElementGetterName());
+      // index getter uses regular getter, so both should be registered
+      String getterName = scopeElement.getElementGetterName();
+      String indexGetterName = scopeElement.getElementScopeMethod().getDeclaration().getName();
+      context.setMethodUsage(getterName);
+      context.setMethodUsage(indexGetterName);
       scopeElement = scopeElement.getScopeElement();
     }
   }
@@ -237,15 +271,6 @@ public abstract class ElementContext {
    */
   public String getElementGetterName() {
     return getElementMethod().getDeclaration().getName();
-  }
-
-  /**
-   * If present, return index parameter for nested elements
-   *
-   * @return null or parameter if present
-   */
-  public MethodParameter getIndexParameter() {
-    return null;
   }
 
   /** The node types of elements */
@@ -313,7 +338,9 @@ public abstract class ElementContext {
   /** Represents a list of basic elements (on of actionable group) */
   public static class BasicReturnsAll extends Basic {
 
-    private final MethodParameter indexParameter;
+    // for lists scope getter is different
+    private PageObjectMethod elementIndexGetter;
+
     /**
      * Initializes a new instance of the BasicReturnsAll class
      *
@@ -332,17 +359,86 @@ public abstract class ElementContext {
         List<MethodParameter> parameters,
         boolean isNullable) {
       super(scopeContext, name, elementType, selector, parameters, isNullable);
-      this.indexParameter = new Regular("", NUMBER, "index of parent element" );
-    }
-
-    @Override
-    public MethodParameter getIndexParameter() {
-      return indexParameter;
     }
 
     @Override
     public TypeProvider getGetterReturnType() {
       return wrapAsList(getType());
+    }
+
+    @Override
+    public PageObjectMethod getElementScopeMethod() {
+      if (this.elementIndexGetter != null) {
+        return this.elementIndexGetter;
+      }
+      return super.getElementScopeMethod();
+    }
+
+    @Override
+    public void setIndexMethod(boolean hasNestedElements, TranslationContext context) {
+      if (hasNestedElements) {
+        MethodParameter indexParameter =
+            new Regular(String.format("_%sIndex", getName()), NUMBER, "index of parent element");
+        this.getParametersForNestedElements().add(indexParameter);
+        this.elementIndexGetter = buildIndexMethod(indexParameter);
+        context.setMethod(this.elementIndexGetter);
+      }
+    }
+
+    private PageObjectMethod buildIndexMethod(MethodParameter indexParameter) {
+      String methodName = String.format("_index_%s", getElementGetterName());
+      List<MethodParameter> parameters = new ArrayList<>(getParameters());
+      parameters.add(indexParameter);
+      String scopeVariableName = getName();
+      JavadocObject javadoc =
+          new MethodJavadoc(
+              methodName,
+              BASIC_ELEMENT,
+              parameters,
+              new UtamMethodDescription(
+                  String.format("Get Nth element for \"%s\" list of elements", getName())));
+      // imports can be empty
+      MethodDeclaration declaration =
+          new MethodDeclarationImpl(
+              methodName, parameters, BASIC_ELEMENT, new ArrayList<>(), javadoc);
+      return new PageObjectMethod() {
+        @Override
+        public MethodDeclaration getDeclaration() {
+          return declaration;
+        }
+
+        @Override
+        public List<String> getCodeLines() {
+          List<String> res = new ArrayList<>();
+          res.add(
+              String.format(
+                  "List<%s> %s = this.%s(%s)",
+                  BASIC_ELEMENT.getSimpleName(),
+                  scopeVariableName,
+                  getElementGetterName(),
+                  getParametersValuesString(getParameters())));
+          res.add(
+              String.format(
+                  "if (%s.size() < %s-1) {", scopeVariableName, indexParameter.getValue()));
+          res.add(
+              String.format(
+                  "throw new RuntimeException(\"Can't find scope element '%s' with given index!\")",
+                  getName()));
+          res.add("}");
+          res.add(String.format("return %s.get(%s)", scopeVariableName, indexParameter.getValue()));
+          return res;
+        }
+
+        @Override
+        public List<TypeProvider> getClassImports() {
+          return List.of(BASIC_ELEMENT, LIST_TYPE);
+        }
+
+        @Override
+        public boolean isPublic() {
+          return false;
+        }
+      };
     }
   }
 

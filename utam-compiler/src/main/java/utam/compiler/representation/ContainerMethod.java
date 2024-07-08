@@ -58,7 +58,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
     this.methodName = getElementGetterMethodName(elementName, isPublic);
     this.parametersTracker =
         new MethodParametersTracker(String.format("element '%s'", elementName));
-    codeLines.addAll(setupScopeElement(scopeElement, parametersTracker, classImports));
+    codeLines.add(setupScopeElement(scopeElement, parametersTracker));
     codeLines.add(
         String.format(
             "%s %s = %s",

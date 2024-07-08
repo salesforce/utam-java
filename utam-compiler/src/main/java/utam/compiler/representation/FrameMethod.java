@@ -40,7 +40,8 @@ public class FrameMethod implements PageObjectMethod {
   private final boolean isPublic;
   private final UtamMethodDescription description;
   private final List<TypeProvider> imports = Stream.of(FRAME_ELEMENT).collect(Collectors.toList());
-  private final List<TypeProvider> classImports = Stream.of(FRAME_ELEMENT, BASIC_ELEMENT).collect(Collectors.toList());
+  private final List<TypeProvider> classImports =
+      Stream.of(FRAME_ELEMENT, BASIC_ELEMENT).collect(Collectors.toList());
 
   /**
    * Initializes a new instance of the FrameMethod class
@@ -56,8 +57,8 @@ public class FrameMethod implements PageObjectMethod {
       List<MethodParameter> locatorParameters,
       UtamMethodDescription description) {
     this.parametersTracker =
-      new MethodParametersTracker(String.format("element '%s'", element.getName()));
-    methodCode.addAll(setupScopeElement(element.getScopeElement(), parametersTracker, classImports));
+        new MethodParametersTracker(String.format("element '%s'", element.getName()));
+    methodCode.add(setupScopeElement(element.getScopeElement(), parametersTracker));
     parametersTracker.setMethodParameters(locatorParameters);
     String scopeVariableName = element.getScopeElement().getName();
     String locationWithParameters = getElementLocationCode(element.getName(), locatorParameters);
@@ -73,7 +74,8 @@ public class FrameMethod implements PageObjectMethod {
   @Override
   public MethodDeclaration getDeclaration() {
     List<MethodParameter> methodParameters = parametersTracker.getMethodParameters();
-    JavadocObject javadoc = new MethodJavadoc(methodName, FRAME_ELEMENT, methodParameters, description);
+    JavadocObject javadoc =
+        new MethodJavadoc(methodName, FRAME_ELEMENT, methodParameters, description);
     return new MethodDeclarationImpl(methodName, methodParameters, FRAME_ELEMENT, imports, javadoc);
   }
 
