@@ -10,10 +10,18 @@ package utam.compiler.grammar;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.testng.Assert.expectThrows;
+import static utam.compiler.helpers.PrimitiveType.NUMBER;
+import static utam.compiler.helpers.PrimitiveType.STRING;
+import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 
 import org.testng.annotations.Test;
 import utam.compiler.JsonBuilderTestUtility;
 import utam.compiler.UtamCompilationError;
+import utam.compiler.helpers.TranslationContext;
+import utam.compiler.representation.PageObjectValidationTestHelper;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodInfo;
+import utam.compiler.representation.PageObjectValidationTestHelper.MethodParameterInfo;
+import utam.core.declarative.representation.PageObjectMethod;
 import utam.core.framework.consumer.UtamError;
 
 /**
@@ -57,16 +65,6 @@ public class UtamElementBasicTests {
         containsString(
             "error 12: element \"test\" elements: property \"elements\" should be a non-empty"
                 + " array"));
-  }
-
-  @Test
-  public void testElementWithListCantHaveNestedElements() {
-    UtamError e = expectThrows(UtamError.class, () -> getContext("listWithNestedElements"));
-    assertThat(
-        e.getMessage(),
-        containsString(
-            "error 203: element \"test\": element marked as a list cannot have nested elements or"
-                + " shadow root"));
   }
 
   @Test
@@ -117,5 +115,71 @@ public class UtamElementBasicTests {
         e.getMessage(),
         containsString(
             "error 202: element \"navigation\": element with same name was already declared"));
+  }
+
+  @Test
+  public void testGeneratedCodeOfIndexedGetter() {
+    TranslationContext context =
+        new DeserializerUtilities().getContext("nestedlist/nestedInsideList");
+    final String ELEMENT_METHOD_NAME = "_index_getBasicListElement";
+    PageObjectMethod nestedGetter = context.getMethod(ELEMENT_METHOD_NAME);
+    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, BASIC_ELEMENT.getSimpleName());
+    expected.setNotPublic();
+    expected.addParameter(new MethodParameterInfo("_basicListIndex", NUMBER.getSimpleName()));
+    expected.addCodeLine("List<BasicElement> basicList = this.getBasicListElement()");
+    expected.addCodeLine("if (basicList.size() < _basicListIndex-1) {");
+    expected.addCodeLine(
+        "throw new RuntimeException(\"Can't find scope element 'basicList' with given index!\")");
+    expected.addCodeLine("}");
+    expected.addCodeLine("return basicList.get(_basicListIndex)");
+    PageObjectValidationTestHelper.validateMethod(nestedGetter, expected);
+  }
+
+  @Test
+  public void testElementNestedInsideList() {
+    TranslationContext context =
+        new DeserializerUtilities().getContext("nestedlist/nestedInsideList");
+    final String ELEMENT_METHOD_NAME = "getNestedBasic";
+    PageObjectMethod nestedGetter = context.getMethod(ELEMENT_METHOD_NAME);
+    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, BASIC_ELEMENT.getSimpleName());
+    expected.addParameter(new MethodParameterInfo("_basicListIndex", NUMBER.getSimpleName()));
+    expected.addCodeLine(
+        "BasicElement basicList = this._index_getBasicListElement(_basicListIndex)");
+    expected.addCodeLine(
+        "return basic(basicList, this.nestedBasic).build(BasicElement.class,"
+            + " BasePageElement.class)");
+    PageObjectValidationTestHelper.validateMethod(nestedGetter, expected);
+  }
+
+  @Test
+  public void testElementNestedInsideListUsedInMethod() {
+    TranslationContext context =
+        new DeserializerUtilities().getContext("nestedlist/nestedInsideList");
+    final String ELEMENT_METHOD_NAME = "testNestedBasic";
+    PageObjectMethod nestedGetter = context.getMethod(ELEMENT_METHOD_NAME);
+    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, STRING.getSimpleName());
+    expected.addParameter(new MethodParameterInfo("_basicListIndex", NUMBER.getSimpleName()));
+    expected.addCodeLine("BasicElement nestedBasic0 = this.getNestedBasic(_basicListIndex)");
+    expected.addCodeLine("String statement0 = nestedBasic0.getText()");
+    expected.addCodeLine("return statement0");
+    PageObjectValidationTestHelper.validateMethod(nestedGetter, expected);
+  }
+
+  @Test
+  public void testElementDoubleNestedInsideLists() {
+    TranslationContext context =
+        new DeserializerUtilities().getContext("nestedlist/nestedInsideList");
+    final String ELEMENT_METHOD_NAME = "getDoubleNestedBasic";
+    PageObjectMethod nestedGetter = context.getMethod(ELEMENT_METHOD_NAME);
+    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, BASIC_ELEMENT.getSimpleName());
+    expected.addParameter(new MethodParameterInfo("_basicListIndex", NUMBER.getSimpleName()));
+    expected.addParameter(new MethodParameterInfo("_nestedBasicListIndex", NUMBER.getSimpleName()));
+    expected.addCodeLine(
+        "BasicElement nestedBasicList = this._index_getNestedBasicListElement(_basicListIndex,"
+            + " _nestedBasicListIndex)");
+    expected.addCodeLine(
+        "return basic(nestedBasicList, this.doubleNestedBasic).build(BasicElement.class,"
+            + " BasePageElement.class)");
+    PageObjectValidationTestHelper.validateMethod(nestedGetter, expected);
   }
 }

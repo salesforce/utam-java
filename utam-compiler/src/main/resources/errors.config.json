@@ -113,10 +113,6 @@
     "message": "element \"%s\": element with same name was already declared"
   },
   {
-    "code": 203,
-    "message": "element \"%s\": element marked as a list cannot have nested elements or shadow root"
-  },
-  {
     "code": 204,
     "message": "element \"%s\": frame selector cannot have \"returnAll\" set to true"
   },

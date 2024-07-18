@@ -1,0 +1,47 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "basicListWithFilter",
+        "public": true,
+        "selector": {
+          "css": ".basicListWithFilter[label='%s']",
+          "returnAll": true,
+          "args": [
+            {
+              "name": "selectorArg",
+              "type": "string"
+            }
+          ]
+        },
+        "filter": {
+          "apply": "getText",
+          "findFirst": false,
+          "matcher": {
+            "type": "notNull"
+          }
+        },
+        "elements": [
+          {
+            "name": "nestedBasic",
+            "selector": {
+              "css": ".nestedBasic"
+            },
+            "public": true
+          }
+        ]
+      }
+    ]
+  },
+  "methods": [
+    {
+      "name": "testNestedBasic",
+      "compose": [
+        {
+          "element": "nestedBasic",
+          "apply": "getText"
+        }
+      ]
+    }
+  ]
+}

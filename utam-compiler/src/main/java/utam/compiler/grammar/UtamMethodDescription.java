@@ -53,6 +53,15 @@ public class UtamMethodDescription {
   }
 
   /**
+   * Initialize simple version of method description
+   *
+   * @param text text describing what method does
+   */
+  public UtamMethodDescription(String text) {
+    this(List.of(text), null, null, null);
+  }
+
+  /**
    * Process/deserialize description node at the method or element level
    *
    * @param node Json node

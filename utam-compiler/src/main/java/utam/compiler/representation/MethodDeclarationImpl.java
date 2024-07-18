@@ -24,7 +24,7 @@ import utam.core.declarative.representation.TypeProvider;
  *
  * @since 230
  */
-class MethodDeclarationImpl implements MethodDeclaration {
+public class MethodDeclarationImpl implements MethodDeclaration {
 
   private final String methodName;
   private final List<TypeProvider> imports;
@@ -32,7 +32,7 @@ class MethodDeclarationImpl implements MethodDeclaration {
   private final TypeProvider returnType;
   private final JavadocObject javadoc;
 
-  MethodDeclarationImpl(
+  public MethodDeclarationImpl(
       String methodName,
       List<MethodParameter> parameters,
       TypeProvider returnType,

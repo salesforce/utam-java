@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.is;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.grammar.TestUtilities.findField;
 import static utam.compiler.grammar.UtamElement.DEFAULT_CONTAINER_SELECTOR_CSS;
+import static utam.compiler.helpers.PrimitiveType.NUMBER;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT_IMPL_CLASS;
 import static utam.compiler.helpers.TypeUtilities.CONTAINER_ELEMENT;
@@ -62,21 +63,6 @@ public class UtamElementContainerTests {
 
   private static TranslationContext compileNestedElements() {
     return new DeserializerUtilities().getContext("container/nestedElements");
-  }
-
-  @Test
-  public void testListCantHaveNestedElements() {
-    UtamCompilationError e =
-        expectThrows(
-            UtamCompilationError.class,
-            () ->
-                new DeserializerUtilities()
-                    .getContext(VALIDATION_DATA_ROOT + "nestedElementsForList"));
-    assertThat(
-        e.getMessage(),
-        containsString(
-            "error 203: element \"test\": element marked as a list cannot have nested elements or"
-                + " shadow root"));
   }
 
   @Test
@@ -263,5 +249,23 @@ public class UtamElementContainerTests {
     expectedGetter.addImpliedImportedTypes(
         PAGE_OBJECT.getFullName(), SELECTOR.getFullName(), BASIC_ELEMENT.getFullName());
     validateMethod(nestedCustomList.getElementMethod(), expectedGetter);
+  }
+
+  @Test
+  public void testElementNestedInsideList() {
+    TranslationContext context =
+        new DeserializerUtilities().getContext("nestedlist/nestedContainerList");
+    final String ELEMENT_METHOD_NAME = "getNestedBasic";
+    PageObjectMethod nestedGetter = context.getMethod(ELEMENT_METHOD_NAME);
+    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, BASIC_ELEMENT.getSimpleName());
+    expected.addParameter(
+        new MethodParameterInfo("_containerListScopeIndex", NUMBER.getSimpleName()));
+    expected.addCodeLine(
+        "BasicElement containerListScope ="
+            + " this._index_getContainerListScopeElement(_containerListScopeIndex)");
+    expected.addCodeLine(
+        "return basic(containerListScope, this.nestedBasic).build(BasicElement.class,"
+            + " BasePageElement.class)");
+    PageObjectValidationTestHelper.validateMethod(nestedGetter, expected);
   }
 }

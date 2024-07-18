@@ -1,0 +1,39 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "custom",
+        "type": "utam-test/pageObjects/component",
+        "selector": {
+          "css": ".custom",
+          "returnAll": true
+        },
+        "public": true,
+        "shadow": {
+          "elements": [
+            {
+              "name": "nestedBasic",
+              "public": true,
+              "selector": {
+                "css": ".nestedBasic"
+              }
+            },
+            {
+              "name": "nestedContainer",
+              "public": true,
+              "type": "container"
+            },
+            {
+              "name": "nestedCustom",
+              "public": true,
+              "type": "utam-test/pageObjects/component",
+              "selector": {
+                "css": ".nestedCustom"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

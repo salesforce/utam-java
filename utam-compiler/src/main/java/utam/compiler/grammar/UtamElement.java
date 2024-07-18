@@ -269,15 +269,6 @@ public class UtamElement {
     }
   }
 
-  /** Validate that list can't have nested elements Reused in multiple Traversal classes */
-  void validateNestedList() {
-    boolean isReturnsList =
-        selector != null && selector.isReturnAll() && (filter == null || !filter.isFindFirst());
-    if (isReturnsList && (!elements.isEmpty() || shadow != null)) {
-      throw new UtamCompilationError(VALIDATION.getErrorMessage(203, name));
-    }
-  }
-
   /** Build field with selector Reused in multiple Traversal classes */
   <T> ElementField buildElementField(Locator<T> locator, boolean isExpandScopeShadowRoot) {
     return new ElementField(
@@ -290,7 +281,7 @@ public class UtamElement {
    * @author elizaveta.ivanova
    * @since 252
    */
-  class ScopeUtamElement extends UtamElement {
+  static class ScopeUtamElement extends UtamElement {
 
     private final ElementField elementField;
 
@@ -357,8 +348,18 @@ public class UtamElement {
       super(type);
     }
 
+    ScopeElement(String type[]) {
+      super(type);
+    }
+
     boolean hasNestedElements() {
       return !elements.isEmpty() || shadow != null;
+    }
+
+    boolean isReturnList() {
+      return selector != null
+          && selector.isReturnAll()
+          && (filter == null || !filter.isFindFirst());
     }
 
     ElementContext asBasicScope(
@@ -379,13 +380,12 @@ public class UtamElement {
       String validationContext = String.format("element \"%s\"", name);
       VALIDATION.validateRequiredProperty(selector, validationContext, "selector");
       validateFilterWithReturnAll();
-      validateNestedList();
     }
 
     @Override
     final ElementContext traverse(
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
-      boolean isReturnList = selector.isReturnAll() && (filter == null || !filter.isFindFirst());
+      boolean isReturnList = isReturnList();
       LocatorCodeGeneration selectorContext =
           selector.getElementCodeGenerationHelper(name, context);
       MethodParametersTracker parameters =
@@ -482,14 +482,13 @@ public class UtamElement {
     }
   }
 
-  class Basic extends Traversal {
+  class Basic extends ScopeElement {
 
     private Basic(String[] type) {
       super(type);
       String validationContext = String.format("element \"%s\"", name);
       VALIDATION.validateRequiredProperty(selector, validationContext, "selector");
       validateFilterWithReturnAll();
-      validateNestedList();
     }
 
     @Override
@@ -510,9 +509,9 @@ public class UtamElement {
         addedParameters.setMethodParameters(filter.getApplyMethodParameters());
         addedParameters.setMethodParameters(filter.getMatcherParameters());
       }
-      boolean isList = selector.isReturnAll() && (filter == null || !filter.isFindFirst());
+      boolean isReturnList = isReturnList();
       ElementContext elementContext =
-          isList
+          isReturnList
               ? new ElementContext.BasicReturnsAll(
                   scopeElement,
                   name,
@@ -550,7 +549,7 @@ public class UtamElement {
                 filter.getMatcherParameters(),
                 filter.isFindFirst(),
                 description);
-      } else if (isList) {
+      } else if (isReturnList) {
         method =
             new ElementMethod.Multiple(
                 elementContext,
@@ -571,13 +570,14 @@ public class UtamElement {
       }
       context.setMethod(method);
       elementContext.setElementMethod(method, context);
+      elementContext.setIndexMethod(hasNestedElements(), context);
       context.setTestableElement(
           name,
           new ElementUnitTestHelper(
               locator.getStringValue(),
               scopeElement == null ? null : scopeElement.getName(),
               isExpandScopeShadowRoot,
-              isList));
+              isReturnList));
       ElementSelector lintingSelector =
           new ElementSelector(
               locator,
@@ -604,7 +604,6 @@ public class UtamElement {
       if (selector == null) {
         selector = new UtamSelector(DEFAULT_CONTAINER_SELECTOR_CSS, null, null, null, false, null);
       }
-      validateNestedList();
       VALIDATION.validateUnsupportedProperty(
           filter, validationContext, "filter", CONTAINER_SUPPORTED_PROPERTIES);
       VALIDATION.validateUnsupportedProperty(

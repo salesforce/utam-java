@@ -12,6 +12,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyIterable;
 import static utam.compiler.grammar.DeserializerUtilities.expectCompilerErrorFromFile;
+import static utam.compiler.helpers.PrimitiveType.NUMBER;
+import static utam.compiler.helpers.PrimitiveType.STRING;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT_IMPL_CLASS;
 
@@ -31,7 +33,7 @@ import utam.core.declarative.representation.PageObjectMethod;
  * @author elizaveta.ivanova
  * @since 232
  */
-public class UtamElementFilter_Tests {
+public class UtamElementFilterTests {
 
   private static final String ELEMENT_NAME = "test";
   private static final String ELEMENT_METHOD_NAME = "getTest";
@@ -204,5 +206,46 @@ public class UtamElementFilter_Tests {
         "return basic(scope, this.test.setParameters(selectorArg)).build(TestElement.class,"
             + " TestElementImpl.class, elm -> Boolean.FALSE.equals(elm.isVisible()))");
     PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
+
+  @Test
+  public void testElementNestedInsideFilteredList() {
+    TranslationContext context =
+        new DeserializerUtilities().getContext("nestedlist/nestedFilteredBasicList");
+    final String ELEMENT_METHOD_NAME = "getNestedBasic";
+    PageObjectMethod nestedGetter = context.getMethod(ELEMENT_METHOD_NAME);
+    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, BASIC_ELEMENT.getSimpleName());
+    expected.addParameter(new MethodParameterInfo("selectorArg", STRING.getSimpleName()));
+    expected.addParameter(
+        new MethodParameterInfo("_basicListWithFilterIndex", NUMBER.getSimpleName()));
+    expected.addCodeLine(
+        "BasicElement basicListWithFilter = this._index_getBasicListWithFilter(selectorArg,"
+            + " _basicListWithFilterIndex)");
+    expected.addCodeLine(
+        "return basic(basicListWithFilter, this.nestedBasic).build(BasicElement.class,"
+            + " BasePageElement.class)");
+    PageObjectValidationTestHelper.validateMethod(nestedGetter, expected);
+  }
+
+  @Test
+  public void testIndexedMethodForElementWithFilter() {
+    TranslationContext context =
+        new DeserializerUtilities().getContext("nestedlist/nestedFilteredBasicList");
+    final String ELEMENT_METHOD_NAME = "_index_getBasicListWithFilter";
+    PageObjectMethod nestedGetter = context.getMethod(ELEMENT_METHOD_NAME);
+    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, BASIC_ELEMENT.getSimpleName());
+    expected.setNotPublic();
+    expected.addParameter(new MethodParameterInfo("selectorArg", STRING.getSimpleName()));
+    expected.addParameter(
+        new MethodParameterInfo("_basicListWithFilterIndex", NUMBER.getSimpleName()));
+    expected.addCodeLine(
+        "List<BasicElement> basicListWithFilter = this.getBasicListWithFilter(selectorArg)");
+    expected.addCodeLine("if (basicListWithFilter.size() < _basicListWithFilterIndex-1) {");
+    expected.addCodeLine(
+        "throw new RuntimeException(\"Can't find scope element 'basicListWithFilter' with given"
+            + " index!\")");
+    expected.addCodeLine("}");
+    expected.addCodeLine("return basicListWithFilter.get(_basicListWithFilterIndex)");
+    PageObjectValidationTestHelper.validateMethod(nestedGetter, expected);
   }
 }

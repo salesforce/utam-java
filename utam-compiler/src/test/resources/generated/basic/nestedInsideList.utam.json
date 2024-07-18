@@ -1,0 +1,67 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "basicList",
+        "selector": {
+          "css": ".basicList",
+          "returnAll": true
+        },
+        "elements": [
+          {
+            "name": "nestedBasic",
+            "selector": {
+              "css": ".nestedBasic"
+            },
+            "public": true
+          },
+          {
+            "name": "nestedBasicList",
+            "selector": {
+              "css": ".nestedBasicList",
+              "returnAll": true
+            },
+            "elements": [
+              {
+                "name": "doubleNestedBasic",
+                "selector": {
+                  "css": ".doubleNestedBasic"
+                },
+                "public": true
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "methods": [
+    {
+      "name": "testBasicList",
+      "compose": [
+        {
+          "element": "basicList",
+          "apply": "getText"
+        }
+      ]
+    },
+    {
+      "name": "testNestedBasic",
+      "compose": [
+        {
+          "element": "nestedBasic",
+          "apply": "getText"
+        }
+      ]
+    },
+    {
+      "name": "testDoubleNestedBasic",
+      "compose": [
+        {
+          "element": "doubleNestedBasic",
+          "apply": "getText"
+        }
+      ]
+    }
+  ]
+}
