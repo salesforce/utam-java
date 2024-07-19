@@ -19,7 +19,7 @@ import utam.compiler.JsonBuilderTestUtility;
  *
  * @author james.evans
  */
-public class UtamShadowElement_Tests {
+public class UtamShadowElementTests {
 
   @Test
   public void testShadowElementsMissingThrows() {

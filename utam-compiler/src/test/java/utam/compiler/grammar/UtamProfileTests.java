@@ -31,7 +31,7 @@ import utam.core.framework.context.StringValueProfile;
  * @author elizaveta.ivanova
  * @since 228
  */
-public class UtamProfile_Tests {
+public class UtamProfileTests {
 
   @Test
   public void testGetPageObjectProfilesWithNullProfile() {
