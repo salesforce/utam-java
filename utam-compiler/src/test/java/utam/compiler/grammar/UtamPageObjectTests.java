@@ -35,7 +35,7 @@ import utam.core.framework.consumer.UtamError;
  *
  * @author james.evans
  */
-public class UtamPageObject_Tests {
+public class UtamPageObjectTests {
 
   private final String PARSER_ERROR_PREFIX = "error 900: incorrect format of the page object";
 

@@ -1,0 +1,7 @@
+{
+  "selector": {
+    "css": "css",
+    "returnAll": true
+  },
+  "root": true
+}

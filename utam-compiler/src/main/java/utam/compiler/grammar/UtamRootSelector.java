@@ -80,8 +80,8 @@ class UtamRootSelector {
       return null;
     }
     String parserContext = String.format("element \"%s\"", ROOT_ELEMENT_NAME);
-    UtamSelector selector =
-        readNode(node, UtamSelector.class, VALIDATION.getErrorMessage(1000, parserContext));
+    UtamRootSelector selector =
+        readNode(node, UtamRootSelector.class, VALIDATION.getErrorMessage(1000, parserContext));
     selector.validateSelector(node, parserContext);
     return selector.getLocator();
   }

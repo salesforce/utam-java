@@ -14,7 +14,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.expectThrows;
-import static utam.compiler.grammar.DeserializerUtilities.expectCompilerErrorFromFile;
 import static utam.compiler.grammar.TestUtilities.getTestTranslationContext;
 
 import java.util.List;
@@ -37,6 +36,12 @@ public class UtamSelectorTests {
     return selector
         .getElementCodeGenerationHelper("test", getTestTranslationContext())
         .getBuilderString();
+  }
+
+  private static UtamCompilationError expectCompilerErrorFromFile(String fileName) {
+    String fullName = String.format("validate/selector/%s", fileName);
+    return expectThrows(
+        UtamCompilationError.class, () -> new DeserializerUtilities().getContext(fullName));
   }
 
   @Test
@@ -84,7 +89,7 @@ public class UtamSelectorTests {
 
   @Test
   public void testWrongArgTypeProvided() {
-    Exception e = expectCompilerErrorFromFile("selector/selectorWrongArgs");
+    Exception e = expectCompilerErrorFromFile("selectorWrongArgs");
     assertThat(
         e.getMessage(),
         containsString(
@@ -94,7 +99,7 @@ public class UtamSelectorTests {
 
   @Test
   public void testArgsWithDuplicateNamesThrows() {
-    Exception e = expectCompilerErrorFromFile("selector/selectorSameArgs");
+    Exception e = expectCompilerErrorFromFile("selectorSameArgs");
     assertThat(
         e.getMessage(),
         containsString(
@@ -124,7 +129,7 @@ public class UtamSelectorTests {
 
   @Test
   public void testInvalidSelectorFormatThrows() {
-    Exception e = expectCompilerErrorFromFile("selector/wrongFormat");
+    Exception e = expectCompilerErrorFromFile("wrongFormat");
     assertThat(
         e.getMessage(),
         containsString("error 1000: element \"test\": format of selector is incorrect"));
@@ -132,7 +137,7 @@ public class UtamSelectorTests {
 
   @Test
   public void testInvalidUiAutomatorThrows() {
-    Exception e = expectCompilerErrorFromFile("selector/selectorUIAutomator");
+    Exception e = expectCompilerErrorFromFile("selectorUIAutomator");
     assertThat(
         e.getMessage(),
         containsString(
@@ -144,7 +149,7 @@ public class UtamSelectorTests {
 
   @Test
   public void testInvalidUiAutomatorRootThrows() {
-    Exception e = expectCompilerErrorFromFile("selector/selectorUIAutomatorRoot");
+    Exception e = expectCompilerErrorFromFile("selectorUIAutomatorRoot");
     assertThat(
         e.getMessage(),
         containsString(
@@ -156,7 +161,7 @@ public class UtamSelectorTests {
 
   @Test
   public void testInvalidUiAutomatorScrollableThrows() {
-    Exception e = expectCompilerErrorFromFile("selector/selectorUIAutomatorScrollable");
+    Exception e = expectCompilerErrorFromFile("selectorUIAutomatorScrollable");
     assertThat(
         e.getMessage(),
         containsString(
@@ -168,7 +173,7 @@ public class UtamSelectorTests {
 
   @Test
   public void testInvalidUiAutomatorScrollableRootThrows() {
-    Exception e = expectCompilerErrorFromFile("selector/selectorUIAutomatorScrollableRoot");
+    Exception e = expectCompilerErrorFromFile("selectorUIAutomatorScrollableRoot");
     assertThat(
         e.getMessage(),
         containsString(
@@ -180,7 +185,7 @@ public class UtamSelectorTests {
 
   @Test
   public void testInvalidChainOperatorThrows() {
-    Exception e = expectCompilerErrorFromFile("selector/selectorChainOperator");
+    Exception e = expectCompilerErrorFromFile("selectorChainOperator");
     assertThat(
         e.getMessage(),
         containsString(
@@ -191,11 +196,20 @@ public class UtamSelectorTests {
 
   @Test
   public void testInvalidChainQuoteRootThrows() {
-    Exception e = expectCompilerErrorFromFile("selector/selectorChainQuotesRoot");
+    Exception e = expectCompilerErrorFromFile("selectorChainQuotesRoot");
     assertThat(
         e.getMessage(),
         containsString(
             "error 1005: element \"root\" selector \"\"label == 'something'\"\": "
                 + "for class chain only one of supported quotes can be set, supported are $,`"));
+  }
+
+  @Test
+  public void testReturnAllAtRootThrows() {
+    Exception e = expectCompilerErrorFromFile("selectorReturnAllRoot");
+    assertThat(
+        e.getMessage(),
+        containsString("error 1000: element \"root\": format of selector is incorrect"));
+    assertThat(e.getMessage(), containsString("Unrecognized field \"returnAll\""));
   }
 }
