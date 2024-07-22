@@ -1,0 +1,53 @@
+{
+  "methods": [
+    {
+      "name": "test",
+      "args": [
+        {
+          "name": "argName",
+          "type": "number"
+        }
+      ],
+      "compose": [
+        {
+          "element": "one"
+        },
+        {
+          "element": "two",
+          "args": [
+            {
+              "name": "argName",
+              "type": "number"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "elements" : [
+    {
+      "name": "one",
+      "selector": {
+        "css": "[index='%d']",
+        "args": [
+          {
+            "name": "argName",
+            "type": "number"
+          }
+        ]
+      }
+    },
+    {
+      "name": "two",
+      "selector": {
+        "css": "[index='%d'] lightning-input",
+        "args": [
+          {
+            "name": "argName",
+            "type": "number"
+          }
+        ]
+      }
+    }
+  ]
+}

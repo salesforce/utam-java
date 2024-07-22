@@ -40,6 +40,14 @@ public class UtamArgumentTests {
     test.getDeserializedJson();
   }
 
+  private static String testErrorThrown(String fileName) {
+    Exception e =
+        expectThrows(
+            UtamCompilationError.class,
+            () -> new DeserializerUtilities().getContext("validate/args/" + fileName));
+    return e.getMessage();
+  }
+
   @Test
   public void testDuplicateNamesThrows() {
     String json =
@@ -307,34 +315,25 @@ public class UtamArgumentTests {
 
   @Test
   public void testAbstractLiteralArgThrows() {
-    RuntimeException e =
-        expectThrows(
-            UtamCompilationError.class,
-            () -> new DeserializerUtilities().getContext("validate/args/abstractLiteralArg"));
+    String error = testErrorThrown("abstractLiteralArg");
     assertThat(
-        e.getMessage(),
+        error,
         containsString("error 105: method \"test\" arguments: literal arguments are not allowed"));
   }
 
   @Test
   public void testComposeMethodLiteralArgThrows() {
-    RuntimeException e =
-        expectThrows(
-            UtamCompilationError.class,
-            () -> new DeserializerUtilities().getContext("validate/args/methodLiteralArg"));
+    String error = testErrorThrown("methodLiteralArg");
     assertThat(
-        e.getMessage(),
+        error,
         containsString("error 105: method \"test\" arguments: literal arguments are not allowed"));
   }
 
   @Test
   public void testNameAndValueThrows() {
-    RuntimeException e =
-        expectThrows(
-            UtamCompilationError.class,
-            () -> new DeserializerUtilities().getContext("validate/args/redundantNameValue"));
+    String error = testErrorThrown("redundantNameValue");
     assertThat(
-        e.getMessage(),
+        error,
         containsString(
             "error 111: method \"test\" arguments: either \"name\" or \"value\" is supported for an"
                 + " argument"));
@@ -342,24 +341,18 @@ public class UtamArgumentTests {
 
   @Test
   public void testMissingTypeThrows() {
-    RuntimeException e =
-        expectThrows(
-            UtamCompilationError.class,
-            () -> new DeserializerUtilities().getContext("validate/args/missingType"));
+    String error = testErrorThrown("missingType");
     assertThat(
-        e.getMessage(),
+        error,
         containsString(
             "error 112: method \"test\" arguments: \"type\" is required for an argument \"name\""));
   }
 
   @Test
   public void testMissingNameAndValueThrows() {
-    RuntimeException e =
-        expectThrows(
-            UtamCompilationError.class,
-            () -> new DeserializerUtilities().getContext("validate/args/missingNameValue"));
+    String error = testErrorThrown("missingNameValue");
     assertThat(
-        e.getMessage(),
+        error,
         containsString(
             "error 113: method \"test\" arguments: either \"name\" or \"value\" is required for an"
                 + " argument"));
@@ -367,14 +360,30 @@ public class UtamArgumentTests {
 
   @Test
   public void testDescriptionInFunctionThrows() {
-    RuntimeException e =
-        expectThrows(
-            UtamCompilationError.class,
-            () -> new DeserializerUtilities().getContext("validate/args/descriptionInFunctionArg"));
+    String error = testErrorThrown("descriptionInFunctionArg");
     assertThat(
-        e.getMessage(),
+        error,
         containsString(
             "error 114: method \"test\" arguments: property \"description\" is not supported for"
                 + " literal or function argument"));
+  }
+
+  @Test
+  public void testDuplicateElementArgsThrows() {
+    String error = testErrorThrown("duplicateElementsArgs");
+    assertThat(
+        error,
+        containsString(
+            "error 107: method \"test\" arguments: argument with name \"argName\" is already"
+                + " declared"));
+  }
+
+  @Test
+  public void testDuplicateElementArgsViaReference() {
+    PageObjectMethod actual =
+        new DeserializerUtilities()
+            .getContext("compose/args/duplicateElementsArgs")
+            .getMethod("test");
+    assertThat(actual.getDeclaration().getCodeLine(), is("BasicElement test(Integer argName)"));
   }
 }
