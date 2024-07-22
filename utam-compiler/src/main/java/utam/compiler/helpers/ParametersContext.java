@@ -251,8 +251,8 @@ public abstract class ParametersContext {
           Entry<Boolean, MethodParameter> alreadyDeclared = declaredMethodParams.get(i);
           MethodParameter parameter = alreadyDeclared.getValue();
           if (parameter.getValue().equals(parameterName)) {
-            // if parameter from method level already used, and it's not arg reference, throw an
-            // error
+            // if parameter from method level already used, and it's not arg reference
+            // then throw an error
             if (alreadyDeclared.getKey() && !isArgReference(p)) {
               throw new UtamCompilationError(
                   VALIDATION.getErrorMessage(107, contextString, parameterName));
