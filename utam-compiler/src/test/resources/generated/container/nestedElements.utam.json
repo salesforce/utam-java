@@ -38,6 +38,24 @@
           }
         }
       ]
+    },
+    {
+      "name": "containerList",
+      "type": "container",
+      "public": true,
+      "selector": {
+        "css": ".containerList",
+        "returnAll": true
+      },
+      "elements": [
+        {
+          "name": "nestedBasicInsideList",
+          "selector": {
+            "css": ".nestedBasic"
+          },
+          "public": true
+        }
+      ]
     }
   ]
 }

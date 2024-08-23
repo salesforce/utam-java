@@ -1,0 +1,35 @@
+{
+  "shadow": {
+    "elements": [
+      {
+        "name": "containerList",
+        "type": "container",
+        "public": true,
+        "selector": {
+          "css": ".containerList",
+          "returnAll": true
+        },
+        "elements": [
+          {
+            "name": "nestedBasic",
+            "selector": {
+              "css": ".nestedBasic"
+            },
+            "public": true
+          }
+        ]
+      }
+    ]
+  },
+  "methods": [
+    {
+      "name": "testNestedBasic",
+      "compose": [
+        {
+          "element": "nestedBasic",
+          "apply": "getText"
+        }
+      ]
+    }
+  ]
+}

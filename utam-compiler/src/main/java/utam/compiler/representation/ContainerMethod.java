@@ -12,7 +12,7 @@ import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT_RETURN;
 import static utam.compiler.helpers.TypeUtilities.PAGE_OBJECT_RETURN_LIST;
 import static utam.compiler.helpers.TypeUtilities.SELECTOR;
 import static utam.compiler.helpers.TypeUtilities.T_PAGE_OBJECT_TYPE_PARAMETER;
-import static utam.compiler.representation.ElementMethod.getScopeElementCode;
+import static utam.compiler.representation.ElementMethod.setupScopeElement;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
 import java.util.ArrayList;
@@ -45,6 +45,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
   final UtamMethodDescription description;
   private final List<String> codeLines = new ArrayList<>();
   private final boolean isPublic;
+  final List<TypeProvider> classImports = new ArrayList<>();
 
   ContainerMethod(
       ElementContext scopeElement,
@@ -57,11 +58,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
     this.methodName = getElementGetterMethodName(elementName, isPublic);
     this.parametersTracker =
         new MethodParametersTracker(String.format("element '%s'", elementName));
-    if (scopeElement != null) {
-      parametersTracker.setMethodParameters(scopeElement.getParameters());
-      String scopeElementLine = getScopeElementCode(scopeElement);
-      codeLines.add(scopeElementLine);
-    }
+    codeLines.add(setupScopeElement(scopeElement, parametersTracker));
     codeLines.add(
         String.format(
             "%s %s = %s",
@@ -87,10 +84,13 @@ public abstract class ContainerMethod implements PageObjectMethod {
     return codeLines;
   }
 
+  @Override
+  public List<TypeProvider> getClassImports() {
+    return classImports;
+  }
+
   /** Represents a container method with a selector that returns a list */
   public static class WithSelectorReturnsList extends ContainerMethod {
-
-    private final List<TypeProvider> classImports = new ArrayList<>();
 
     /**
      * Initializes a new instance of the WithSelectorReturnsList class
@@ -125,11 +125,6 @@ public abstract class ContainerMethod implements PageObjectMethod {
     }
 
     @Override
-    public List<TypeProvider> getClassImports() {
-      return classImports;
-    }
-
-    @Override
     public MethodDeclaration getDeclaration() {
       List<MethodParameter> parameters = parametersTracker.getMethodParameters();
       JavadocObject javadoc =
@@ -146,8 +141,6 @@ public abstract class ContainerMethod implements PageObjectMethod {
 
   /** Represents a container method with a selector */
   public static class WithSelector extends ContainerMethod {
-
-    private final List<TypeProvider> classImports = new ArrayList<>();
 
     /**
      * Initializes a new instance of the WithSelector class
@@ -179,11 +172,6 @@ public abstract class ContainerMethod implements PageObjectMethod {
       // because of method that builds selector
       ParameterUtils.setImport(classImports, SELECTOR);
       ParameterUtils.setImports(classImports, getDeclaration().getImports());
-    }
-
-    @Override
-    public List<TypeProvider> getClassImports() {
-      return classImports;
     }
 
     @Override

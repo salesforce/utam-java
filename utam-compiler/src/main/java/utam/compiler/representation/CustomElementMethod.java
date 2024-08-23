@@ -11,7 +11,7 @@ import static utam.compiler.helpers.TypeUtilities.BASIC_ELEMENT;
 import static utam.compiler.helpers.TypeUtilities.wrapAsList;
 import static utam.compiler.representation.ElementMethod.getElementLocationCode;
 import static utam.compiler.representation.ElementMethod.getPredicateCode;
-import static utam.compiler.representation.ElementMethod.getScopeElementCode;
+import static utam.compiler.representation.ElementMethod.setupScopeElement;
 import static utam.compiler.translator.TranslationUtilities.getElementGetterMethodName;
 
 import java.util.ArrayList;
@@ -67,8 +67,11 @@ public abstract class CustomElementMethod implements PageObjectMethod {
         ElementContext scopeElement,
         TypeProvider returnType,
         UtamMethodDescription description) {
-      String scopeElementLine = getScopeElementCode(scopeElement);
-      codeLines.add(scopeElementLine);
+      this.isPublic = isPublic;
+      this.methodName = getElementGetterMethodName(componentName, isPublic);
+      this.parametersTracker =
+          new MethodParametersTracker(String.format("method '%s'", methodName));
+      codeLines.add(setupScopeElement(scopeElement, parametersTracker));
       String locationCode = getElementLocationCode(componentName, locatorParameters);
       String statement =
           String.format(
@@ -78,11 +81,6 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       ParameterUtils.setImport(interfaceImports, returnType);
       ParameterUtils.setImport(classImports, returnType);
       ParameterUtils.setImport(classImports, BASIC_ELEMENT);
-      this.isPublic = isPublic;
-      this.methodName = getElementGetterMethodName(componentName, isPublic);
-      this.parametersTracker =
-          new MethodParametersTracker(String.format("method '%s'", methodName));
-      parametersTracker.setMethodParameters(scopeElement.getParameters());
       parametersTracker.setMethodParameters(locatorParameters);
       this.returnType = returnType;
       this.description = description;
@@ -164,12 +162,11 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       this.methodName = getElementGetterMethodName(componentName, isPublic);
       this.parametersTracker =
           new MethodParametersTracker(String.format("method '%s'", methodName));
-      parametersTracker.setMethodParameters(scopeElement.getParameters());
+      codeLines.add(setupScopeElement(scopeElement, parametersTracker));
+      // must be after scope parameters
       parametersTracker.setMethodParameters(locatorParameters);
       parametersTracker.setMethodParameters(applyParameters);
       parametersTracker.setMethodParameters(matcherParameters);
-      String scopeElementLine = getScopeElementCode(scopeElement);
-      codeLines.add(scopeElementLine);
       String locationCode = getElementLocationCode(componentName, locatorParameters);
       String predicate =
           getPredicateCode(applyMethod, applyParameters, matcherType, matcherParameters);
@@ -247,8 +244,10 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       ParameterUtils.setImport(interfaceImports, this.returnType);
       ParameterUtils.setImport(classImports, this.returnType);
       ParameterUtils.setImport(classImports, BASIC_ELEMENT);
-      String scopeElementLine = getScopeElementCode(scopeElement);
-      codeLines.add(scopeElementLine);
+      this.methodName = getElementGetterMethodName(componentName, isPublic);
+      this.parametersTracker =
+          new MethodParametersTracker(String.format("method '%s'", methodName));
+      codeLines.add(setupScopeElement(scopeElement, parametersTracker));
       String locationCode = getElementLocationCode(componentName, locatorParameters);
       String statement =
           String.format(
@@ -256,10 +255,6 @@ public abstract class CustomElementMethod implements PageObjectMethod {
               scopeElement.getName(), locationCode, returnType.getSimpleName());
       codeLines.add(statement);
       this.isPublic = isPublic;
-      this.methodName = getElementGetterMethodName(componentName, isPublic);
-      this.parametersTracker =
-          new MethodParametersTracker(String.format("method '%s'", methodName));
-      parametersTracker.setMethodParameters(scopeElement.getParameters());
       parametersTracker.setMethodParameters(locatorParameters);
       this.description = description;
     }

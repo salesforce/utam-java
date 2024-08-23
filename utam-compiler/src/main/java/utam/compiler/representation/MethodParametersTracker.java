@@ -37,7 +37,7 @@ public class MethodParametersTracker {
     this.methodContext = methodContext;
   }
 
-  void setMethodParameter(MethodParameter parameter) {
+  public void setMethodParameter(MethodParameter parameter) {
     if (!parameter.isLiteral()) {
       String parameterName = parameter.getValue();
       if (parameterNames.contains(parameterName)) {

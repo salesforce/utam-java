@@ -27,7 +27,7 @@ public class FrameMethodTests {
   private static final String ELEMENT_NAME = "test";
 
   private static PageObjectMethod getFrameGetter(String fileName) {
-    TranslationContext context = new DeserializerUtilities().getContext("element/" + fileName);
+    TranslationContext context = new DeserializerUtilities().getContext("frame/" + fileName);
     ElementContext element = context.getElement(ELEMENT_NAME);
     PageObjectMethod method = element.getElementMethod();
     assertThat(element.getType().getFullName(), is(Matchers.equalTo(FRAME_ELEMENT.getFullName())));

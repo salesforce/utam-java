@@ -58,7 +58,7 @@ public abstract class JavadocObject {
    */
   public static class MethodJavadoc extends JavadocObject {
 
-    MethodJavadoc(
+    public MethodJavadoc(
         String methodName,
         TypeProvider returnType,
         List<MethodParameter> parameters,

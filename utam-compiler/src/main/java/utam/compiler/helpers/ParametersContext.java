@@ -102,7 +102,7 @@ public abstract class ParametersContext {
 
   abstract MethodParameter getUnwrappedParameter(MethodParameter parameter);
 
-  abstract void registerParameter(MethodParameter parameter);
+  abstract void registerMethodLevelParameter(MethodParameter parameter);
 
   /**
    * check that parameters number match expected
@@ -242,15 +242,21 @@ public abstract class ParametersContext {
     }
 
     @Override
-    void registerParameter(MethodParameter p) {
+    void registerMethodLevelParameter(MethodParameter p) {
       // parameter is never null or literal!
       String parameterName = p.getValue();
       if (hasMethodLevelArgs) {
         // check name and type
         for (int i = 0; i < declaredMethodParams.size(); i++) {
           Entry<Boolean, MethodParameter> alreadyDeclared = declaredMethodParams.get(i);
-          if (alreadyDeclared.getValue().getValue().equals(parameterName)) {
-            MethodParameter parameter = alreadyDeclared.getValue();
+          MethodParameter parameter = alreadyDeclared.getValue();
+          if (parameter.getValue().equals(parameterName)) {
+            // if parameter from method level already used, and it's not arg reference
+            // then throw an error
+            if (alreadyDeclared.getKey() && !isArgReference(p)) {
+              throw new UtamCompilationError(
+                  VALIDATION.getErrorMessage(107, contextString, parameterName));
+            }
             declaredMethodParams.set(i, new SimpleEntry<>(true, parameter));
             // if same parameter declared at method level - check same type
             checkParameterType(p, parameter.getType());
@@ -326,7 +332,7 @@ public abstract class ParametersContext {
     }
 
     @Override
-    void registerParameter(MethodParameter parameter) {
+    void registerMethodLevelParameter(MethodParameter parameter) {
       throw new IllegalStateException("Unsupported for statement level");
     }
 
@@ -369,7 +375,7 @@ public abstract class ParametersContext {
       }
       if (!parameter.isLiteral()) { // check unique name and set to method level
         if (methodParameters != null) {
-          methodParameters.registerParameter(parameter);
+          methodParameters.registerMethodLevelParameter(parameter);
         }
         setParameterUniqueName(parameter);
       }
