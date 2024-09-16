@@ -67,7 +67,7 @@ public class MobilePlatformTypeTests {
     driver = mock(AppiumDriver.class);
     assertThat(fromDriver(driver), is(WEB));
     desiredCaps = new DesiredCapabilities();
-    desiredCaps.setPlatform(Platform.MAC);
+    desiredCaps.setPlatform(Platform.IOS);
     when(driver.getCapabilities()).thenReturn(desiredCaps);
     desiredCaps.setCapability(DEVICE_NAME_NAME, DEVICE_NAME_VALUE_IPAD);
     assertThat(fromDriver(driver), is(IOS_TABLET));
@@ -82,6 +82,10 @@ public class MobilePlatformTypeTests {
     assertThat(fromDriver(driver), is(ANDROID_TABLET));
     desiredCaps = new DesiredCapabilities();
     desiredCaps.setPlatform(Platform.WINDOWS);
+    when(driver.getCapabilities()).thenReturn(desiredCaps);
+    assertThat(fromDriver(driver), is(WEB));
+    desiredCaps = new DesiredCapabilities();
+    desiredCaps.setPlatform(Platform.MAC);
     when(driver.getCapabilities()).thenReturn(desiredCaps);
     assertThat(fromDriver(driver), is(WEB));
   }

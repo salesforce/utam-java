@@ -86,7 +86,7 @@ public enum MobilePlatformType implements Profile {
       if (platform == Platform.LINUX) {
         return isTablet(driver) ? ANDROID_TABLET : ANDROID_PHONE;
       }
-      if (platform == Platform.MAC) {
+      if (platform == Platform.IOS) {
         return isIPad(driver) ? IOS_TABLET : IOS_PHONE;
       }
     }
