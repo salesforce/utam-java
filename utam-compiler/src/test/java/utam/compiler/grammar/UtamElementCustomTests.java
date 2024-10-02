@@ -178,7 +178,7 @@ public class UtamElementCustomTests {
     expectedGetter.addCodeLine(
         "LocatorBy nestedContainerLocator = LocatorBy.byCss(\":scope > *:first-child\")");
     expectedGetter.addCodeLine(
-        "return this.container(customRootScope, true).load(pageObjectType,"
+        "return this.container(customRootScope).expandShadowRoot(true).build().load(pageObjectType,"
             + " nestedContainerLocator)");
     expectedGetter.addImportedTypes(PAGE_OBJECT.getFullName());
     expectedGetter.addImpliedImportedTypes(

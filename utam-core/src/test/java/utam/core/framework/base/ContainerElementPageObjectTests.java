@@ -35,7 +35,8 @@ public class ContainerElementPageObjectTests {
   private static ContainerElementPageObject getMockPageObject() {
     MockUtilities mock = new MockUtilities();
     ContainerElementImpl containerElement =
-        new ContainerElementImpl(mock.getFactory(), mock.getElementAdapter(), false);
+        new ContainerElementImpl(mock.getFactory(), mock.getElementAdapter());
+    containerElement.build();
     return new ContainerElementPageObject(containerElement);
   }
 
@@ -157,7 +158,9 @@ public class ContainerElementPageObjectTests {
 
     final <T extends PageObject> T getContainerContent(
         Class<T> pageObjectType, boolean isExpandShadowRoot) {
-      return this.container(this.getRootElement(), isExpandShadowRoot)
+      return this.container(this.getRootElement())
+          .expandShadowRoot(isExpandShadowRoot)
+          .build()
           .load(pageObjectType, LocatorBy.byCss(CONTAINER_CSS));
     }
   }

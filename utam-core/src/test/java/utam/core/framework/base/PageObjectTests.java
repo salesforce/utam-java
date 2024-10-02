@@ -11,6 +11,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 import static utam.core.element.FindContext.Type.EXISTING;
@@ -20,6 +21,7 @@ import org.testng.annotations.Test;
 import utam.core.MockUtilities;
 import utam.core.driver.Document;
 import utam.core.driver.Navigation;
+import utam.core.framework.consumer.ContainerElement;
 import utam.core.framework.element.BasePageElement;
 import utam.core.selenium.element.LocatorBy;
 
@@ -81,9 +83,15 @@ public class PageObjectTests {
   @Test
   public void testInContainerMethod() {
     TestPageImpl testPage = new TestPageImpl();
-    assertThat(
-        testPage.container(testPage.getRootElement(), false),
-        is(instanceOf(ContainerElementImpl.class)));
+    ContainerElement element = testPage.container(testPage.getRootElement());
+    assertThat(element, is(instanceOf(ContainerElementImpl.class)));
+    assertThat(((ContainerElementImpl) element).findContext, nullValue());
+    element.expandShadowRoot(true);
+    element.nullable(true);
+    assertThat(((ContainerElementImpl) element).isNullable, is(true));
+    assertThat(((ContainerElementImpl) element).isExpandShadowRoot, is(true));
+    element.build();
+    assertThat(((ContainerElementImpl) element).findContext, notNullValue());
   }
 
   static class TestPageImpl extends BasePageObject {

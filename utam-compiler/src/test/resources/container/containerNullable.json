@@ -1,0 +1,24 @@
+{
+  "elements" : [
+    {
+      "name": "publicNullableList",
+      "type": "container",
+      "public": true,
+      "nullable": true,
+      "selector": {
+        "css": ".container",
+        "returnAll": true
+      }
+    }
+  ],
+  "shadow": {
+    "elements": [
+      {
+        "name": "publicNullable",
+        "type": "container",
+        "public": true,
+        "nullable": true
+      }
+    ]
+  }
+}

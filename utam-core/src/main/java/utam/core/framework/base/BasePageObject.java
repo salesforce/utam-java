@@ -148,15 +148,13 @@ public abstract class BasePageObject extends UtamBaseImpl implements PageObject 
   }
 
   /**
-   * scopes custom element in certain location
+   * scopes container element in certain location
    *
    * @param scopeElement scope element (can be root)
-   * @param isExpandShadowRoot expand flag
-   * @return builder
+   * @return builder for container element
    */
-  protected final ContainerElement container(
-      BasicElement scopeElement, boolean isExpandShadowRoot) {
-    return new ContainerElementImpl(getFactory(), scopeElement, isExpandShadowRoot);
+  protected final ContainerElement container(BasicElement scopeElement) {
+    return new ContainerElementImpl(getFactory(), scopeElement);
   }
 
   /**

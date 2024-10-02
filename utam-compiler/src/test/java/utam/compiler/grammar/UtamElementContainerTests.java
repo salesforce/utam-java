@@ -53,12 +53,16 @@ public class UtamElementContainerTests {
 
   private static final String ELEMENT_NAME = "test";
 
-  private static PageObjectMethod getContainerMethod(String fileName) {
-    final String methodName = getElementGetterMethodName(ELEMENT_NAME, true);
+  private static PageObjectMethod getContainerMethod(String fileName, String elementName) {
+    final String methodName = getElementGetterMethodName(elementName, true);
     TranslationContext context = new DeserializerUtilities().getContext("container/" + fileName);
-    ElementContext element = context.getElement(ELEMENT_NAME);
+    ElementContext element = context.getElement(elementName);
     assertThat(element.getType().isSameType(CONTAINER_ELEMENT), CoreMatchers.is(true));
     return context.getMethod(methodName);
+  }
+
+  private static PageObjectMethod getContainerMethod(String fileName) {
+    return getContainerMethod(fileName, ELEMENT_NAME);
   }
 
   private static TranslationContext compileNestedElements() {
@@ -123,7 +127,9 @@ public class UtamElementContainerTests {
     expected.addCodeLine("BasicElement scope = this.getScopeElement(scopeArg)");
     expected.addCodeLine(
         "LocatorBy testLocator = LocatorBy.byCss(String.format(\".css%s\", selectorArg))");
-    expected.addCodeLine("return this.container(scope, true).load(pageObjectType, testLocator)");
+    expected.addCodeLine(
+        "return this.container(scope).expandShadowRoot(true).build().load(pageObjectType,"
+            + " testLocator)");
     PageObjectValidationTestHelper.validateMethod(method, expected);
     assertThat(
         method.getDeclaration().getCodeLine(),
@@ -143,7 +149,7 @@ public class UtamElementContainerTests {
     expected.addCodeLine(
         String.format(
             "LocatorBy testLocator = LocatorBy.byCss(\"%s\")", DEFAULT_CONTAINER_SELECTOR_CSS));
-    expected.addCodeLine("return this.container(scope, false).load(pageObjectType, testLocator)");
+    expected.addCodeLine("return this.container(scope).build().load(pageObjectType, testLocator)");
     PageObjectValidationTestHelper.validateMethod(method, expected);
     assertThat(
         method.getDeclaration().getCodeLine(),
@@ -169,7 +175,7 @@ public class UtamElementContainerTests {
     expected.addCodeLine(
         "LocatorBy testLocator = LocatorBy.byCss(String.format(\".css%s\", selectorArg))");
     expected.addCodeLine(
-        "return this.container(scope, false).loadList(pageObjectType, testLocator)");
+        "return this.container(scope).build().loadList(pageObjectType, testLocator)");
     PageObjectValidationTestHelper.validateMethod(method, expected);
     assertThat(
         method.getDeclaration().getCodeLine(),
@@ -243,7 +249,7 @@ public class UtamElementContainerTests {
     expectedGetter.addCodeLine(
         "LocatorBy nestedContainerLocator = LocatorBy.byCss(\".nestedContainer\")");
     expectedGetter.addCodeLine(
-        "return this.container(rootContainerScope, false).load(pageObjectType,"
+        "return this.container(rootContainerScope).build().load(pageObjectType,"
             + " nestedContainerLocator)");
     expectedGetter.addImportedTypes(PAGE_OBJECT.getFullName());
     expectedGetter.addImpliedImportedTypes(
@@ -267,5 +273,37 @@ public class UtamElementContainerTests {
         "return basic(containerListScope, this.nestedBasic).build(BasicElement.class,"
             + " BasePageElement.class)");
     PageObjectValidationTestHelper.validateMethod(nestedGetter, expected);
+  }
+
+  @Test
+  public void testNullableContainerElement() {
+    PageObjectMethod method = getContainerMethod("containerNullable", "publicNullable");
+    MethodInfo expectedGetter = new MethodInfo("getPublicNullable", "T");
+    expectedGetter.addParameter(new MethodParameterInfo("pageObjectType", "Class<T>"));
+    expectedGetter.addCodeLine("BasicElement root = this.getRootElement()");
+    expectedGetter.addCodeLine(
+        "LocatorBy publicNullableLocator = LocatorBy.byCss(\":scope > *:first-child\")");
+    expectedGetter.addCodeLine(
+        "return"
+            + " this.container(root).expandShadowRoot(true).nullable(true).build().load(pageObjectType,"
+            + " publicNullableLocator)");
+    expectedGetter.addImportedTypes(PAGE_OBJECT.getFullName());
+    expectedGetter.addImpliedImportedTypes(
+        PAGE_OBJECT.getFullName(), SELECTOR.getFullName(), BASIC_ELEMENT.getFullName());
+    validateMethod(method, expectedGetter);
+  }
+
+  @Test
+  public void testNullableContainerList() {
+    PageObjectMethod method = getContainerMethod("containerNullable", "publicNullableList");
+    MethodInfo expectedGetter = new MethodInfo("getPublicNullableList", "List<T>");
+    expectedGetter.addParameter(new MethodParameterInfo("pageObjectType", "Class<T>"));
+    expectedGetter.addCodeLine("BasicElement root = this.getRootElement()");
+    expectedGetter.addCodeLine(
+        "LocatorBy publicNullableListLocator = LocatorBy.byCss(\".container\")");
+    expectedGetter.addCodeLine(
+        "return this.container(root).nullable(true).build().loadList(pageObjectType,"
+            + " publicNullableListLocator)");
+    validateMethod(method, expectedGetter);
   }
 }

@@ -44,6 +44,7 @@ import utam.compiler.lint.PageObjectLintingImpl.ElementScope;
 import utam.compiler.lint.PageObjectLintingImpl.ElementSelector;
 import utam.compiler.lint.PageObjectLintingImpl.Method;
 import utam.compiler.representation.ContainerMethod;
+import utam.compiler.representation.ContainerMethod.ElementOptions;
 import utam.compiler.representation.CustomElementMethod;
 import utam.compiler.representation.ElementField;
 import utam.compiler.representation.ElementMethod;
@@ -606,8 +607,6 @@ public class UtamElement {
       }
       VALIDATION.validateUnsupportedProperty(
           filter, validationContext, "filter", CONTAINER_SUPPORTED_PROPERTIES);
-      VALIDATION.validateUnsupportedProperty(
-          isNullable, validationContext, "nullable", CONTAINER_SUPPORTED_PROPERTIES);
     }
 
     @Override
@@ -615,15 +614,15 @@ public class UtamElement {
         TranslationContext context, ElementContext scopeElement, boolean isExpandScopeShadowRoot) {
       LocatorCodeGeneration locator = selector.getElementCodeGenerationHelper(name, context);
       ElementContext elementContext = new ElementContext.Container(scopeElement, name);
+      ElementOptions options = new ElementOptions(isPublic, isNullable, isExpandScopeShadowRoot);
       PageObjectMethod method;
       if (selector.isReturnAll()) {
         method =
             new ContainerMethod.WithSelectorReturnsList(
-                scopeElement, isExpandScopeShadowRoot, name, locator, isPublic(), description);
+                scopeElement, name, locator, description, options);
       } else {
         method =
-            new ContainerMethod.WithSelector(
-                scopeElement, isExpandScopeShadowRoot, name, locator, isPublic(), description);
+            new ContainerMethod.WithSelector(scopeElement, name, locator, description, options);
       }
       elementContext.setElementMethod(method, context);
       context.setElement(elementContext, null);
