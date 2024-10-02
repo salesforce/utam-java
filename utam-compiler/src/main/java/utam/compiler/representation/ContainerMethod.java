@@ -44,18 +44,17 @@ public abstract class ContainerMethod implements PageObjectMethod {
   final String locatorVariableName;
   final UtamMethodDescription description;
   private final List<String> codeLines = new ArrayList<>();
-  private final boolean isPublic;
   final List<TypeProvider> classImports = new ArrayList<>();
+  private final boolean isPublic;
 
   ContainerMethod(
       ElementContext scopeElement,
-      boolean isExpandScope,
       String elementName,
-      boolean isPublic,
       String selectorBuilderString,
-      UtamMethodDescription methodDescription) {
+      UtamMethodDescription methodDescription,
+      ElementOptions options) {
     this.locatorVariableName = String.format("%sLocator", elementName);
-    this.methodName = getElementGetterMethodName(elementName, isPublic);
+    this.methodName = getElementGetterMethodName(elementName, options.isPublic);
     this.parametersTracker =
         new MethodParametersTracker(String.format("element '%s'", elementName));
     codeLines.add(setupScopeElement(scopeElement, parametersTracker));
@@ -64,12 +63,22 @@ public abstract class ContainerMethod implements PageObjectMethod {
             "%s %s = %s",
             SELECTOR.getSimpleName(), this.locatorVariableName, selectorBuilderString));
     String scopeVariableName = scopeElement.getName();
-    codeLines.add(
-        String.format(
-            "return this.container(%s, %s).%s",
-            scopeVariableName, isExpandScope, getContainerMethodInvocationString()));
-    this.isPublic = isPublic;
+    codeLines.add(buildInvocationString(options, scopeVariableName));
+    this.isPublic = options.isPublic;
     this.description = methodDescription;
+  }
+
+  private String buildInvocationString(ElementOptions options, String scopeVariableName) {
+    StringBuilder code = new StringBuilder();
+    code.append(String.format("return this.container(%s)", scopeVariableName));
+    if (options.isExpandShadowRoot) {
+      code.append(".expandShadowRoot(true)");
+    }
+    if (options.isNullable) {
+      code.append(".nullable(true)");
+    }
+    code.append(String.format(".build().%s", getContainerMethodInvocationString()));
+    return code.toString();
   }
 
   abstract String getContainerMethodInvocationString();
@@ -96,26 +105,23 @@ public abstract class ContainerMethod implements PageObjectMethod {
      * Initializes a new instance of the WithSelectorReturnsList class
      *
      * @param scopeElement the scope element
-     * @param isExpandScope a value indicating whether the method introspects into shadow roots
      * @param elementName the name of the element
      * @param selectorContext the context for the selector
-     * @param isPublic a value indicating whether the method is public
      * @param methodDescription the method description
+     * @param options options of container element
      */
     public WithSelectorReturnsList(
         ElementContext scopeElement,
-        boolean isExpandScope,
         String elementName,
         LocatorCodeGeneration selectorContext,
-        boolean isPublic,
-        UtamMethodDescription methodDescription) {
+        UtamMethodDescription methodDescription,
+        ElementOptions options) {
       super(
           scopeElement,
-          isExpandScope,
           elementName,
-          isPublic,
           selectorContext.getBuilderString(),
-          methodDescription);
+          methodDescription,
+          options);
       parametersTracker.setMethodParameters(selectorContext.getParameters());
       parametersTracker.setMethodParameter(PAGE_OBJECT_PARAMETER);
       ParameterUtils.setImport(classImports, BASIC_ELEMENT);
@@ -134,6 +140,7 @@ public abstract class ContainerMethod implements PageObjectMethod {
 
     @Override
     String getContainerMethodInvocationString() {
+
       return String.format(
           "loadList(%s, %s)", PAGE_OBJECT_TYPE_PARAMETER_NAME, locatorVariableName);
     }
@@ -146,26 +153,23 @@ public abstract class ContainerMethod implements PageObjectMethod {
      * Initializes a new instance of the WithSelector class
      *
      * @param scopeElement the scope element
-     * @param isExpandScope a value indicating whether the method introspects into shadow roots
      * @param elementName the name of the element
      * @param selectorContext the context for the selector
-     * @param isPublic a value indicating whether the method is public
      * @param methodDescription the method description
+     * @param options options of container element
      */
     public WithSelector(
         ElementContext scopeElement,
-        boolean isExpandScope,
         String elementName,
         LocatorCodeGeneration selectorContext,
-        boolean isPublic,
-        UtamMethodDescription methodDescription) {
+        UtamMethodDescription methodDescription,
+        ElementOptions options) {
       super(
           scopeElement,
-          isExpandScope,
           elementName,
-          isPublic,
           selectorContext.getBuilderString(),
-          methodDescription);
+          methodDescription,
+          options);
       parametersTracker.setMethodParameters(selectorContext.getParameters());
       parametersTracker.setMethodParameter(PAGE_OBJECT_PARAMETER);
       ParameterUtils.setImport(classImports, BASIC_ELEMENT);
@@ -185,6 +189,19 @@ public abstract class ContainerMethod implements PageObjectMethod {
     @Override
     String getContainerMethodInvocationString() {
       return String.format("load(%s, %s)", PAGE_OBJECT_TYPE_PARAMETER_NAME, locatorVariableName);
+    }
+  }
+
+  public static class ElementOptions {
+
+    final boolean isPublic;
+    final boolean isNullable;
+    final boolean isExpandShadowRoot;
+
+    public ElementOptions(Boolean isPublic, Boolean isNullable, Boolean isExpandShadowRoot) {
+      this.isPublic = Boolean.TRUE == isPublic;
+      this.isNullable = Boolean.TRUE == isNullable;
+      this.isExpandShadowRoot = Boolean.TRUE == isExpandShadowRoot;
     }
   }
 }

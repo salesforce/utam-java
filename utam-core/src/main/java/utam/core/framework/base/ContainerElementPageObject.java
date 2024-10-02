@@ -28,10 +28,14 @@ public final class ContainerElementPageObject extends ContainerElementImpl
   /**
    * Initializes a new instance of the ContainerElementPageObject class
    *
-   * @param container the ContainerElement used for scope in integration with external Page Objects
+   * @param containerElement the ContainerElement used for scope in integration with external Page
+   *     Objects
    */
-  ContainerElementPageObject(ContainerElementImpl container) {
-    super(container);
+  ContainerElementPageObject(ContainerElementImpl containerElement) {
+    super(containerElement.factory, containerElement.containerScope);
+    this.nullable(containerElement.findContext.isNullable());
+    this.expandShadowRoot(containerElement.findContext.isExpandScopeShadowRoot());
+    this.build();
   }
 
   /**

@@ -1,0 +1,35 @@
+{
+  "elements": [
+    {
+      "name": "publicNullable",
+      "type": "container",
+      "public": true,
+      "nullable": true
+    },
+    {
+      "name": "publicNullableList",
+      "type": "container",
+      "public": true,
+      "nullable": true,
+      "selector": {
+        "css": ".container",
+        "returnAll": true
+      }
+    },
+    {
+      "name": "privateNullable",
+      "type": "container",
+      "nullable": true
+    }
+  ],
+  "methods" : [
+    {
+      "name" : "getPrivateNullableContainer",
+      "compose" : [
+        {
+          "element" : "privateNullable"
+        }
+      ]
+    }
+  ]
+}

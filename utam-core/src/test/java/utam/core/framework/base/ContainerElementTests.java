@@ -48,20 +48,16 @@ public class ContainerElementTests {
     expectThrows(
         NoSuchElementException.class,
         () ->
-            new ContainerElementImpl(mock.getFactory(), elementMock, false)
+            new ContainerElementImpl(mock.getFactory(), elementMock)
+                .build()
                 .load(TestLoad.class, locator));
-    expectThrows(
-        NoSuchElementException.class,
-        () ->
-            new ContainerElementImpl(mock.getFactory(), elementMock, true)
-                .loadList(TestLoad.class, locator));
   }
 
   @Test
   public void testCreateWithElementFound() {
     MockUtilities mock = new MockUtilities();
     Element elementMock = mock.getElementAdapter();
-    ContainerElement element = new ContainerElementImpl(mock.getFactory(), elementMock, false);
+    ContainerElement element = new ContainerElementImpl(mock.getFactory(), elementMock).build();
     when(mock.getWebElementMock().findElements(By.cssSelector("css")))
         .thenReturn(Collections.singletonList(mock.getWebElementMock()));
     TestLoad testLoad = element.load(TestLoad.class, "css");
@@ -79,7 +75,8 @@ public class ContainerElementTests {
   public void testCreateWithElementFoundInShadow() {
     MockUtilities mock = new MockUtilities();
     Element elementMock = mock.getElementAdapter();
-    ContainerElement element = new ContainerElementImpl(mock.getFactory(), elementMock, true);
+    ContainerElement element =
+        new ContainerElementImpl(mock.getFactory(), elementMock).expandShadowRoot(true).build();
     mock.setShadowMock(mock.getWebElementMock(), "css");
     TestLoad testLoad = element.load(TestLoad.class, LocatorBy.byCss("css"));
     // driver > element >> By.cssSelector: css
@@ -90,7 +87,7 @@ public class ContainerElementTests {
   public void testSetScope() {
     MockUtilities mock = new MockUtilities();
     Element elementMock = mock.getElementAdapter();
-    ContainerElement element = new ContainerElementImpl(mock.getFactory(), elementMock, false);
+    ContainerElement element = new ContainerElementImpl(mock.getFactory(), elementMock);
     CompatiblePageObject compatiblePageObjectInsideContainer = new CompatiblePageObject();
     element.setScope(compatiblePageObjectInsideContainer);
     assertThat(
@@ -103,7 +100,7 @@ public class ContainerElementTests {
     NoSuchElementException e =
         expectThrows(
             NoSuchElementException.class,
-            () -> new ContainerElementImpl(mock.getFactory(), (Element) null, false));
+            () -> new ContainerElementImpl(mock.getFactory(), (Element) null));
     assertThat(e.getMessage(), containsString(NULL_SCOPE_ERR));
   }
 

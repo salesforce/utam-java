@@ -23,21 +23,44 @@ public interface ContainerElement {
    * Load UTAM Page object using current element as scope
    *
    * @param utamPageObjectType type to load
-   * @param injectRootLocator inject root into created page object instance
+   * @param injectedRoot injected root locator into created page object instance
    * @param <T> UTAM page object type
    * @return UTAM page object instance
    */
-  <T extends PageObject> T load(Class<T> utamPageObjectType, Locator injectRootLocator);
+  <T extends PageObject> T load(Class<T> utamPageObjectType, Locator injectedRoot);
 
   /**
    * Load list of UTAM Page object using current element as a scope
    *
    * @param utamPageObjectType type to load
-   * @param injectRootLocator inject root into created page object instance
+   * @param injectedRoot injected root locator into created page object instance
    * @param <T> UTAM page object type
    * @return UTAM page object instance
    */
-  <T extends PageObject> List<T> loadList(Class<T> utamPageObjectType, Locator injectRootLocator);
+  <T extends PageObject> List<T> loadList(Class<T> utamPageObjectType, Locator injectedRoot);
+
+  /**
+   * Set parameter to expand shadow root
+   *
+   * @param isExpand value
+   * @return instance of self
+   */
+  ContainerElement expandShadowRoot(boolean isExpand);
+
+  /**
+   * Set nullable parameter
+   *
+   * @param isNullable value
+   * @return instance of self
+   */
+  ContainerElement nullable(boolean isNullable);
+
+  /**
+   * Build search context after all parameters were set
+   *
+   * @return instance of self
+   */
+  ContainerElement build();
 
   /**
    * Inject container element as a root into external non-UTAM page object that should be scoped
