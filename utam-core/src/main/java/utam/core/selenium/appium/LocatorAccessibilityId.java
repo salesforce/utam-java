@@ -7,7 +7,7 @@
  */
 package utam.core.selenium.appium;
 
-import io.appium.java_client.MobileBy;
+import io.appium.java_client.AppiumBy;
 import org.openqa.selenium.By;
 import utam.core.selenium.element.LocatorBy;
 
@@ -29,7 +29,7 @@ public class LocatorAccessibilityId extends LocatorBy {
 
   @Override
   public By getValue() {
-    return MobileBy.AccessibilityId(stringValue);
+    return AppiumBy.accessibilityId(stringValue);
   }
 
   @Override
