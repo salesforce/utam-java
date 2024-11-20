@@ -26,6 +26,7 @@ import static utam.core.selenium.appium.MobileDriverAdapter.NATIVE_CONTEXT_HANDL
 import static utam.core.selenium.appium.MobileDriverAdapter.WEBVIEW_CONTEXT_HANDLE_PREFIX;
 
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.remote.SupportsContextSwitching;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -65,14 +66,14 @@ public class MobileDriverAdapterTests {
   @Test
   public void testIsNative() {
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
-    when(mock.getAppiumDriverMock().getContext()).thenReturn(NATIVE_CONTEXT_HANDLE);
+    when(mock.getContextSwitcherMock().getContext()).thenReturn(NATIVE_CONTEXT_HANDLE);
     assertThat(mock.getDriverAdapter().isNativeContext(), is(true));
   }
 
   @Test
   public void testGetContext() {
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
-    when(mock.getAppiumDriverMock().getContext()).thenReturn(NATIVE_CONTEXT_HANDLE);
+    when(mock.getContextSwitcherMock().getContext()).thenReturn(NATIVE_CONTEXT_HANDLE);
     mock.getDriverAdapter().getPageContext();
   }
 
@@ -81,7 +82,7 @@ public class MobileDriverAdapterTests {
   public void testSwitchToNative() {
     ContextTracker tracker = new ContextTracker(WEBVIEW_CONTEXT_HANDLE_PREFIX + "_1");
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
-    AppiumDriver driver = mock.getAppiumDriverMock();
+    SupportsContextSwitching driver = mock.getContextSwitcherMock();
     when(driver.context(anyString()))
         .then(
             (arg) -> {
@@ -103,9 +104,9 @@ public class MobileDriverAdapterTests {
     ContextTracker tracker = new ContextTracker(NATIVE_CONTEXT_HANDLE);
 
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
-    AppiumDriver driver = mock.getAppiumDriverMock();
+    SupportsContextSwitching driver = mock.getContextSwitcherMock();
     MobileDriverAdapter provider = mock.getMobileDriverAdapter();
-    when(driver.getContext()).thenReturn(tracker.currentContext);
+    when(mock.getContextSwitcherMock().getContext()).thenReturn(tracker.currentContext);
     provider.setPageContextToNative();
 
     verify(driver, times(0)).context(anyString());
@@ -126,11 +127,12 @@ public class MobileDriverAdapterTests {
 
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
     AppiumDriver driver = mock.getAppiumDriverMock();
+    SupportsContextSwitching contextSwitcher = mock.getContextSwitcherMock();
     MobileDriverAdapter provider = mock.getMobileDriverAdapter();
-    when(driver.getContextHandles()).thenReturn(contextHandles);
-    when(driver.getContext()).thenReturn(NATIVE_CONTEXT_HANDLE);
+    when(contextSwitcher.getContextHandles()).thenReturn(contextHandles);
+    when(contextSwitcher.getContext()).thenReturn(NATIVE_CONTEXT_HANDLE);
     when(driver.getTitle()).thenReturn(DEFAULT_WEBVIEW_TITLE);
-    when(driver.context(testWebViewHandle)).thenReturn(driver);
+    when(contextSwitcher.context(testWebViewHandle)).thenReturn(driver);
     mock.setMobilePlatform(Platform.LINUX);
     TimeoutException e =
         expectThrows(
@@ -147,19 +149,20 @@ public class MobileDriverAdapterTests {
     ContextTracker tracker = new ContextTracker(NATIVE_CONTEXT_HANDLE);
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
     AppiumDriver driver = mock.getAppiumDriverMock();
+    SupportsContextSwitching contextSwitcher = mock.getContextSwitcherMock();
     MobileDriverAdapter provider = mock.getMobileDriverAdapter();
-    when(driver.getContextHandles()).thenReturn(contextHandles);
+    when(contextSwitcher.getContextHandles()).thenReturn(contextHandles);
     when(driver.getTitle()).thenReturn(DEFAULT_WEBVIEW_TITLE);
-    when(driver.context(anyString()))
+    when(contextSwitcher.context(anyString()))
         .then(
             (arg) -> {
               tracker.currentContext = arg.getArgument(0);
               return driver;
             });
-    when(driver.getContext()).thenReturn(tracker.currentContext);
+    when(contextSwitcher.getContext()).thenReturn(tracker.currentContext);
     provider.setPageContextToWebView(DEFAULT_WEBVIEW_TITLE);
 
-    verify(driver, times(1)).context(testWebViewHandle);
+    verify(contextSwitcher, times(1)).context(testWebViewHandle);
     assertThat(provider.getAppiumDriver(), is(sameInstance(driver)));
     assertThat(tracker.currentContext, is(equalTo(testWebViewHandle)));
   }
@@ -176,20 +179,21 @@ public class MobileDriverAdapterTests {
 
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
     AppiumDriver driver = mock.getAppiumDriverMock();
+    SupportsContextSwitching contextSwitcher = mock.getContextSwitcherMock();
     MobileDriverAdapter provider = mock.getMobileDriverAdapter();
-    when(driver.getContextHandles()).thenReturn(contextHandles);
+    when(contextSwitcher.getContextHandles()).thenReturn(contextHandles);
     when(driver.getTitle()).thenReturn(DEFAULT_WEBVIEW_TITLE);
-    when(driver.context(anyString()))
+    when(contextSwitcher.context(anyString()))
         .then(
             (arg) -> {
               tracker.currentContext = arg.getArgument(0);
               return driver;
             });
-    when(driver.getContext()).thenReturn(tracker.currentContext);
+    when(contextSwitcher.getContext()).thenReturn(tracker.currentContext);
 
     provider.setPageContextToWebView(DEFAULT_WEBVIEW_TITLE);
-    verify(driver, times(2)).getContextHandles();
-    verify(driver, times(2)).context(anyString());
+    verify(contextSwitcher, times(2)).getContextHandles();
+    verify(contextSwitcher, times(2)).context(anyString());
     assertThat(provider.getAppiumDriver(), is(sameInstance(driver)));
     assertThat(tracker.currentContext, is(equalTo(testWebViewHandle)));
   }
@@ -203,19 +207,20 @@ public class MobileDriverAdapterTests {
     ContextTracker tracker = new ContextTracker(NATIVE_CONTEXT_HANDLE);
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
     AppiumDriver driver = mock.getAppiumDriverMock();
+    SupportsContextSwitching contextSwitcher = mock.getContextSwitcherMock();
     MobileDriverAdapter provider = mock.getMobileDriverAdapter();
-    when(driver.getContextHandles()).thenReturn(contextHandles);
+    when(contextSwitcher.getContextHandles()).thenReturn(contextHandles);
     when(driver.getTitle()).thenReturn(DEFAULT_APP_CONTEXT_TITLE);
-    when(driver.context(anyString()))
+    when(contextSwitcher.context(anyString()))
         .then(
             (arg) -> {
               tracker.currentContext = arg.getArgument(0);
               return driver;
             });
-    when(driver.getContext()).thenReturn(tracker.currentContext);
+    when(contextSwitcher.getContext()).thenReturn(tracker.currentContext);
     mock.setMobilePlatform(Platform.LINUX);
     provider.setPageContextToWebView(DEFAULT_APP_CONTEXT_TITLE);
-    verify(driver, times(1)).context(testWebViewHandle);
+    verify(contextSwitcher, times(1)).context(testWebViewHandle);
     assertThat(provider.getAppiumDriver(), is(sameInstance(driver)));
     assertThat(tracker.currentContext, is(equalTo(testWebViewHandle)));
   }
@@ -235,7 +240,7 @@ public class MobileDriverAdapterTests {
   @Test
   public void testIsAnyWebViewContextAvailableWithNoWebView() {
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
-    AppiumDriver driver = (AppiumDriver) mock.getWebDriverMock();
+    SupportsContextSwitching driver = mock.getContextSwitcherMock();
     MobileDriverAdapter provider = (MobileDriverAdapter) mock.getDriverAdapter();
     Set<String> contextHandles = new HashSet<>(Collections.singletonList(NATIVE_CONTEXT_HANDLE));
     when(driver.getContextHandles()).thenReturn(contextHandles);
@@ -249,6 +254,7 @@ public class MobileDriverAdapterTests {
   public void testIsAnyWebViewContextAvailable() {
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
     AppiumDriver driver = (AppiumDriver) mock.getWebDriverMock();
+    SupportsContextSwitching contextSwitcher = mock.getContextSwitcherMock();
     MobileDriverAdapter provider = (MobileDriverAdapter) mock.getDriverAdapter();
 
     Set<String> contextHandles =
@@ -257,7 +263,7 @@ public class MobileDriverAdapterTests {
                 MobileDriverAdapter.NATIVE_CONTEXT_HANDLE,
                 MobileDriverAdapter.WEBVIEW_CONTEXT_HANDLE_PREFIX + "_1"));
 
-    when(driver.getContextHandles()).thenReturn(contextHandles);
+    when(contextSwitcher.getContextHandles()).thenReturn(contextHandles);
     boolean res = provider.waitFor(provider::isWebViewAvailable);
     assertThat(res, is(equalTo(true)));
   }
@@ -268,6 +274,7 @@ public class MobileDriverAdapterTests {
     ContextTracker tracker = new ContextTracker();
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
     AppiumDriver driver = (AppiumDriver) mock.getWebDriverMock();
+    SupportsContextSwitching contextSwitcher = mock.getContextSwitcherMock();
     MobileDriverAdapter driverAdapter = (MobileDriverAdapter) mock.getDriverAdapter();
 
     String testWebViewHandle = MobileDriverAdapter.WEBVIEW_CONTEXT_HANDLE_PREFIX + "_1";
@@ -276,15 +283,15 @@ public class MobileDriverAdapterTests {
         new HashSet<>(Arrays.asList(NATIVE_CONTEXT_HANDLE, testWebViewHandle));
 
     String testWebViewTitle = "Test Application";
-    when(driver.getContextHandles()).thenReturn(contextHandles);
+    when(contextSwitcher.getContextHandles()).thenReturn(contextHandles);
     when(driver.getTitle()).thenReturn(testWebViewTitle);
-    when(driver.context(anyString()))
+    when(contextSwitcher.context(anyString()))
         .then(
             (arg) -> {
               tracker.currentContext = arg.getArgument(0);
               return driver;
             });
-    when(driver.getContext()).thenReturn(tracker.currentContext);
+    when(contextSwitcher.getContext()).thenReturn(tracker.currentContext);
     AppiumDriver sdriver =
         driverAdapter.waitFor(() -> driverAdapter.switchToWebView(testWebViewTitle));
     assertThat(driver, is(sameInstance(sdriver)));
@@ -304,11 +311,12 @@ public class MobileDriverAdapterTests {
 
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
     AppiumDriver driver = mock.getAppiumDriverMock();
+    SupportsContextSwitching contextSwitcher = mock.getContextSwitcherMock();
 
-    when(driver.getContextHandles()).thenReturn(contextHandles);
-    when(driver.getContext()).thenReturn(MobileDriverAdapter.NATIVE_CONTEXT_HANDLE);
+    when(contextSwitcher.getContextHandles()).thenReturn(contextHandles);
+    when(contextSwitcher.getContext()).thenReturn(MobileDriverAdapter.NATIVE_CONTEXT_HANDLE);
     when(driver.getTitle()).thenReturn("Test Application");
-    when(driver.context(testWebViewHandle)).thenReturn(driver);
+    when(contextSwitcher.context(testWebViewHandle)).thenReturn(driver);
     MobileDriverAdapter adapter = mock.getMobileDriverAdapter();
     TimeoutException e =
         expectThrows(
@@ -327,6 +335,7 @@ public class MobileDriverAdapterTests {
 
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
     AppiumDriver driver = mock.getAppiumDriverMock();
+    SupportsContextSwitching contextSwitcher = mock.getContextSwitcherMock();
 
     String testWebViewHandle = MobileDriverAdapter.WEBVIEW_CONTEXT_HANDLE_PREFIX + "_1";
     String testWebViewHandle2 = MobileDriverAdapter.WEBVIEW_CONTEXT_HANDLE_PREFIX + "_2";
@@ -337,16 +346,16 @@ public class MobileDriverAdapterTests {
                 MobileDriverAdapter.NATIVE_CONTEXT_HANDLE, testWebViewHandle, testWebViewHandle2));
 
     String testWebViewTitle = "Test Application";
-    when(driver.getPlatformName()).thenReturn("ios");
-    when(driver.getContextHandles()).thenReturn(contextHandles);
-    when(driver.context(anyString()))
+    when(driver.getCapabilities().getPlatformName()).thenReturn(Platform.IOS);
+    when(contextSwitcher.getContextHandles()).thenReturn(contextHandles);
+    when(contextSwitcher.context(anyString()))
         .then(
             (arg) -> {
               tracker.currentContext = arg.getArgument(0);
               return driver;
             });
     when(driver.getTitle()).thenReturn("").thenReturn(testWebViewTitle);
-    when(driver.getContext()).thenReturn(tracker.currentContext);
+    when(contextSwitcher.getContext()).thenReturn(tracker.currentContext);
     MobileDriverAdapter adapter = mock.getMobileDriverAdapter();
     assertThat(
         adapter.waitFor(() -> adapter.switchToWebView(testWebViewTitle)), is(sameInstance(driver)));
@@ -364,6 +373,7 @@ public class MobileDriverAdapterTests {
 
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
     AppiumDriver driver = mock.getAppiumDriverMock();
+    SupportsContextSwitching contextSwitcher = mock.getContextSwitcherMock();
     TargetLocator mockLocator = mock(TargetLocator.class);
 
     String testWebViewHandle = MobileDriverAdapter.WEBVIEW_CONTEXT_HANDLE_PREFIX + "_1";
@@ -378,9 +388,9 @@ public class MobileDriverAdapterTests {
                 MobileDriverAdapter.NATIVE_CONTEXT_HANDLE, testWindowHandle, testWindowHandle2));
 
     String testWebViewTitle = "Test Application";
-    when(driver.getPlatformName()).thenReturn("android");
-    when(driver.getContextHandles()).thenReturn(contextHandles);
-    when(driver.context(anyString()))
+    when(driver.getCapabilities().getPlatformName()).thenReturn(Platform.ANDROID);
+    when(contextSwitcher.getContextHandles()).thenReturn(contextHandles);
+    when(contextSwitcher.context(anyString()))
         .then(
             (arg) -> {
               contextTracker.currentContext = arg.getArgument(0);
@@ -395,7 +405,7 @@ public class MobileDriverAdapterTests {
             });
     when(driver.getWindowHandles()).thenReturn(windowHandles);
     when(driver.getTitle()).thenReturn("").thenReturn(testWebViewTitle);
-    when(driver.getContext()).thenReturn(contextTracker.currentContext);
+    when(contextSwitcher.getContext()).thenReturn(contextTracker.currentContext);
     mock.setMobilePlatform(Platform.LINUX);
     MobileDriverAdapter adapter = mock.getMobileDriverAdapter();
     assertThat(
@@ -408,13 +418,14 @@ public class MobileDriverAdapterTests {
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
     ContextTracker tracker = new ContextTracker(WEBVIEW_CONTEXT_HANDLE_PREFIX + "_1");
     AppiumDriver driver = mock.getAppiumDriverMock();
-    when(driver.context(anyString()))
+    SupportsContextSwitching contextSwitcher = mock.getContextSwitcherMock();
+    when(contextSwitcher.context(anyString()))
         .then(
             (arg) -> {
               tracker.currentContext = arg.getArgument(0);
               return driver;
             });
-    when(driver.getContext()).thenReturn(tracker.currentContext);
+    when(contextSwitcher.getContext()).thenReturn(tracker.currentContext);
     mock.getDriverAdapter().setPageContext(PlatformType.NATIVE);
   }
 

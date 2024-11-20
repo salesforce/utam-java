@@ -32,7 +32,7 @@ public class MobileElementAdapterTests {
     when(mock.getWebElementMock().getSize()).thenReturn(new Dimension(10, 20));
     String title = "title";
     when(mock.getAppiumDriverMock().getTitle()).thenReturn(title);
-    when(mock.getAppiumDriverMock().getContext()).thenReturn(title);
+    when(mock.getContextSwitcherMock().getContext()).thenReturn(title);
     mock.getElementAdapter().flick(1, 1);
   }
 
@@ -45,7 +45,7 @@ public class MobileElementAdapterTests {
     when(mock.getWebElementMock().getSize()).thenReturn(new Dimension(10, 20));
     String title = "title";
     when(mock.getAppiumDriverMock().getTitle()).thenReturn(title);
-    when(mock.getAppiumDriverMock().getContext()).thenReturn(title);
+    when(mock.getContextSwitcherMock().getContext()).thenReturn(title);
     mock.getElementAdapter().flick(1, 1);
   }
 }

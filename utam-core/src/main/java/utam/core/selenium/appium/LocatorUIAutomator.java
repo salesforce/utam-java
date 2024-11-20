@@ -1,6 +1,6 @@
 package utam.core.selenium.appium;
 
-import io.appium.java_client.MobileBy;
+import io.appium.java_client.AppiumBy;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.openqa.selenium.By;
@@ -34,7 +34,7 @@ public class LocatorUIAutomator extends LocatorBy {
 
   @Override
   public By getValue() {
-    return MobileBy.AndroidUIAutomator(this.stringValue);
+    return AppiumBy.androidUIAutomator(this.stringValue);
   }
 
   public enum Method {

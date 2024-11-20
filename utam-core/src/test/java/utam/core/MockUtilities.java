@@ -17,7 +17,11 @@ import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QU
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
+import io.appium.java_client.remote.SupportsContextSwitching;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Platform;
@@ -26,6 +30,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsDriver;
+import org.openqa.selenium.interactions.Interactive;
 import utam.core.driver.Document;
 import utam.core.driver.Driver;
 import utam.core.driver.Navigation;
@@ -63,10 +68,16 @@ public class MockUtilities {
   private final WebDriver.Window windowMock;
 
   public MockUtilities(Class<? extends WebDriver> driverType) {
+    List<Class> additionalInterfaces =
+        new ArrayList<>(
+            Arrays.asList(JavascriptExecutor.class, SearchContext.class, Interactive.class));
+    if (driverType == AppiumDriver.class
+        || Arrays.asList(driverType.getInterfaces()).contains(SupportsContextSwitching.class)) {
+      additionalInterfaces.add(SupportsContextSwitching.class);
+    }
     webDriverMock =
         mock(
-            driverType,
-            withSettings().extraInterfaces(JavascriptExecutor.class, SearchContext.class));
+            driverType, withSettings().extraInterfaces(additionalInterfaces.toArray(new Class[0])));
     ;
     webElementMock = mock(WebElement.class, withSettings().extraInterfaces(WrapsDriver.class));
     when(((WrapsDriver) webElementMock).getWrappedDriver()).thenReturn(webDriverMock);
@@ -122,11 +133,11 @@ public class MockUtilities {
   public void setMobilePlatform(Platform platform) {
     AppiumDriver driver = (AppiumDriver) webDriverMock;
     Capabilities capabilities = mock(Capabilities.class);
-    when(capabilities.getPlatform()).thenReturn(platform);
+    when(capabilities.getPlatformName()).thenReturn(platform);
+    when(capabilities.getCapability("device")).thenReturn("iphone");
+    when(capabilities.getCapability("deviceScreenSize")).thenReturn("1080x1920");
+    when(capabilities.getCapability("deviceScreenDensity")).thenReturn("480");
     when(driver.getCapabilities()).thenReturn(capabilities);
-    when(driver.getSessionDetail("device")).thenReturn("iphone");
-    when(driver.getSessionDetail("deviceScreenSize")).thenReturn("1080x1920");
-    when(driver.getSessionDetail("deviceScreenDensity")).thenReturn("480");
   }
 
   public void setShadowMock(WebElement element, String cssSelector) {
@@ -139,6 +150,10 @@ public class MockUtilities {
             .getExecutor()
             .executeScript(String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, cssSelector), element))
         .thenReturn(element);
+  }
+
+  public SupportsContextSwitching getContextSwitcherMock() {
+    return (SupportsContextSwitching) webDriverMock;
   }
 
   public WebDriver getWebDriverMock() {

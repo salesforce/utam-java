@@ -18,11 +18,14 @@ import static utam.core.driver.DriverConfig.TEST_SIMULATOR_DRIVER_CONFIG;
 
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.android.options.UiAutomator2Options;
 import io.appium.java_client.ios.IOSDriver;
+import io.appium.java_client.ios.options.XCUITestOptions;
 import io.appium.java_client.service.local.AppiumDriverLocalService;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -150,31 +153,29 @@ public class WebDriverFactory {
     return new FirefoxDriver();
   }
 
-  private static DesiredCapabilities iOSOptions() {
+  private static Capabilities iOSOptions() {
     SystemProperties.setIOSDeviceName();
     SystemProperties.setIOSAppPath();
 
-    DesiredCapabilities caps = new DesiredCapabilities();
-    caps.setPlatform(Platform.IOS);
-    caps.setCapability(AppiumCustomCapabilityType.AUTOMATION_NAME, "XCUITest");
-    caps.setCapability(AppiumCustomCapabilityType.NATIVE_WEB_TAP, true);
-    caps.setCapability(AppiumCustomCapabilityType.DEVICE_NAME, SystemProperties.getIOSDeviceName());
-    caps.setCapability(AppiumCustomCapabilityType.APP, SystemProperties.getIOSAppPath());
-    return caps;
+    XCUITestOptions xcuiTestOptions = new XCUITestOptions();
+    xcuiTestOptions.setAutomationName("XCUITest");
+    xcuiTestOptions.setNativeWebTap(true);
+    xcuiTestOptions.setDeviceName(SystemProperties.getIOSDeviceName());
+    xcuiTestOptions.setApp(SystemProperties.getIOSAppPath());
+    return xcuiTestOptions;
   }
 
-  private static DesiredCapabilities androidOptions() {
+  private static Capabilities androidOptions() {
     SystemProperties.setAppBundleID();
     SystemProperties.setAndroidAppPath();
     SystemProperties.setAppActivity();
 
-    DesiredCapabilities caps = new DesiredCapabilities();
-    caps.setPlatform(Platform.ANDROID);
-    caps.setCapability(AppiumCustomCapabilityType.AUTOMATION_NAME, "UIAutomator2");
-    caps.setCapability(AppiumCustomCapabilityType.APP_PACKAGE, SystemProperties.getAppBundleID());
-    caps.setCapability(AppiumCustomCapabilityType.APP_ACTIVITY, SystemProperties.getAppActivity());
-    caps.setCapability(AppiumCustomCapabilityType.APP, SystemProperties.getAndroidAppPath());
-    return caps;
+    UiAutomator2Options uiAutomator2Options = new UiAutomator2Options();
+    uiAutomator2Options.setAutomationName("UIAutomator2");
+    uiAutomator2Options.setAppPackage(SystemProperties.getAppBundleID());
+    uiAutomator2Options.setAppActivity(SystemProperties.getAppActivity());
+    uiAutomator2Options.setApp(SystemProperties.getAndroidAppPath());
+    return uiAutomator2Options;
   }
 
   private static AppiumDriver ios(
@@ -182,7 +183,9 @@ public class WebDriverFactory {
     if (service == null) {
       throw new NullPointerException(ERR_APPIUM_LOCAL_SERVER);
     }
-    DesiredCapabilities caps = iOSOptions();
+    DesiredCapabilities caps = new DesiredCapabilities();
+    caps.setPlatform(Platform.IOS);
+    caps.merge(iOSOptions());
     caps.merge(desiredCapabilities.getDesiredCapabilities());
     return new IOSDriver(service, caps);
   }
@@ -192,7 +195,9 @@ public class WebDriverFactory {
     if (service == null) {
       throw new NullPointerException(ERR_APPIUM_LOCAL_SERVER);
     }
-    DesiredCapabilities caps = androidOptions();
+    DesiredCapabilities caps = new DesiredCapabilities();
+    caps.setPlatform(Platform.ANDROID);
+    caps.merge(androidOptions());
     caps.merge(desiredCapabilities.getDesiredCapabilities());
     return new AndroidDriver(service, caps);
   }

@@ -7,7 +7,7 @@
  */
 package utam.core.selenium.appium;
 
-import io.appium.java_client.MobileBy;
+import io.appium.java_client.AppiumBy;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.openqa.selenium.By;
@@ -53,7 +53,7 @@ public class LocatorClassChain extends LocatorBy {
 
   @Override
   public By getValue() {
-    return MobileBy.iOSClassChain(stringValue);
+    return AppiumBy.iOSClassChain(stringValue);
   }
 
   public enum Quote {

@@ -11,7 +11,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-import io.appium.java_client.MobileBy;
+import io.appium.java_client.AppiumBy;
 import org.openqa.selenium.By;
 import org.testng.annotations.Test;
 import utam.core.element.Locator;
@@ -30,7 +30,7 @@ public class LocatorUiAutomatorTests {
   public void testCreation() {
     String selector = "description('test')";
     Locator<By> locator = new LocatorUIAutomator(selector);
-    By by = MobileBy.AndroidUIAutomator(selector);
+    By by = AppiumBy.androidUIAutomator(selector);
     assertThat(locator.getValue(), is(equalTo(by)));
     assertThat(locator.getStringValue(), is(equalTo(selector)));
     assertThat(locator.setParameters().getValue(), is(equalTo(by)));
@@ -71,7 +71,7 @@ public class LocatorUiAutomatorTests {
         "new UiScrollable(new"
             + " UiSelector().scrollable(true)).scrollIntoView(resourceId(\"com.salesforce.chatter:id/app_launcher_menu_item\"))";
     Locator<By> locator = new LocatorUIAutomator(selector);
-    By by = MobileBy.AndroidUIAutomator(selector);
+    By by = AppiumBy.androidUIAutomator(selector);
     assertThat(locator.getValue(), is(equalTo(by)));
     assertThat(locator.getStringValue(), is(equalTo(selector)));
   }
@@ -82,7 +82,7 @@ public class LocatorUiAutomatorTests {
         "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new"
             + " UiSelector().resourceId(\"com.salesforce.chatter:id/app_launcher_menu_item\"))";
     Locator<By> locator = new LocatorUIAutomator(selector);
-    By by = MobileBy.AndroidUIAutomator(selector);
+    By by = AppiumBy.androidUIAutomator(selector);
     assertThat(locator.getValue(), is(equalTo(by)));
     assertThat(locator.getStringValue(), is(equalTo(selector)));
   }
@@ -94,7 +94,7 @@ public class LocatorUiAutomatorTests {
             + " UiSelector().resourceId(\"com.salesforce.fieldservice.app:id/work_view\")).scrollIntoView(new"
             + " UiSelector().resourceId(\"com.salesforce.chatter:id/app_launcher_menu_item\"))";
     Locator<By> locator = new LocatorUIAutomator(selector);
-    By by = MobileBy.AndroidUIAutomator(selector);
+    By by = AppiumBy.androidUIAutomator(selector);
     assertThat(locator.getValue(), is(equalTo(by)));
     assertThat(locator.getStringValue(), is(equalTo(selector)));
   }
