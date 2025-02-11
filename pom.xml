@@ -88,9 +88,19 @@
                         <version>${maven.release.plugin.version}</version>
                         <configuration>
                             <autoVersionSubmodules>true</autoVersionSubmodules>
-                            <scmReleaseCommitComment>Releasing @{releaseLabel}</scmReleaseCommitComment>
-                            <scmDevelopmentCommitComment>Preparing for next development iteration</scmDevelopmentCommitComment>
+                            <scmReleaseCommitComment>[no ci] chore: Releasing @{releaseLabel}</scmReleaseCommitComment>
+                            <scmDevelopmentCommitComment>[no ci] chore: Preparing for next development iteration</scmDevelopmentCommitComment>
                             <tagNameFormat>@{project.version}</tagNameFormat>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>${nexus.staging.release.plugin.version}</version>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -120,6 +130,7 @@
         <maven.source.plugin.version>3.3.0</maven.source.plugin.version>
         <maven.surefire.plugin.version>3.2.2</maven.surefire.plugin.version>
         <maven.exec.plugin.version>3.1.1</maven.exec.plugin.version>
+        <nexus.staging.release.plugin.version>1.7.0</nexus.staging.release.plugin.version>
 
         <selenium.version>4.21.0</selenium.version>
         <appium.version>9.2.2</appium.version>
