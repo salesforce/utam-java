@@ -133,7 +133,7 @@ public class MobileDriverAdapterTests {
     when(contextSwitcher.getContext()).thenReturn(NATIVE_CONTEXT_HANDLE);
     when(driver.getTitle()).thenReturn(DEFAULT_WEBVIEW_TITLE);
     when(contextSwitcher.context(testWebViewHandle)).thenReturn(driver);
-    mock.setMobilePlatform(Platform.LINUX);
+    mock.setMobilePlatform(Platform.ANDROID);
     TimeoutException e =
         expectThrows(
             TimeoutException.class, () -> provider.setPageContextToWebView("Nonexistent Title"));

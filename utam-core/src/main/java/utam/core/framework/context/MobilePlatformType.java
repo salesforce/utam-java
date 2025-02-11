@@ -83,7 +83,7 @@ public enum MobilePlatformType implements Profile {
         return WEB;
       }
       Platform platform = ((AppiumDriver) driver).getCapabilities().getPlatformName();
-      if (platform == Platform.LINUX) {
+      if (platform == Platform.ANDROID) {
         return isTablet(driver) ? ANDROID_TABLET : ANDROID_PHONE;
       }
       if (platform == Platform.IOS) {

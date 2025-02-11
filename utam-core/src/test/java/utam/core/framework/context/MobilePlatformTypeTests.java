@@ -71,7 +71,7 @@ public class MobilePlatformTypeTests {
     when(driver.getCapabilities()).thenReturn(desiredCaps);
     desiredCaps.setCapability(DEVICE_NAME_NAME, DEVICE_NAME_VALUE_IPAD);
     assertThat(fromDriver(driver), is(IOS_TABLET));
-    desiredCaps.setPlatform(Platform.LINUX);
+    desiredCaps.setPlatform(Platform.ANDROID);
     desiredCaps.setCapability(DEVICE_SCREEN_SIZE_NAME, DEVICE_SCREEN_SIZE_VALUE_PHONE);
     desiredCaps.setCapability(DEVICE_SCREEN_DENSITY_NAME, DEVICE_SCREEN_DENSITY_VALUE_PHONE);
     when(driver.getCapabilities()).thenReturn(desiredCaps);
