@@ -406,7 +406,7 @@ public class MobileDriverAdapterTests {
     when(driver.getWindowHandles()).thenReturn(windowHandles);
     when(driver.getTitle()).thenReturn("").thenReturn(testWebViewTitle);
     when(contextSwitcher.getContext()).thenReturn(contextTracker.currentContext);
-    mock.setMobilePlatform(Platform.LINUX);
+    mock.setMobilePlatform(Platform.ANDROID);
     MobileDriverAdapter adapter = mock.getMobileDriverAdapter();
     assertThat(
         adapter.waitFor(() -> adapter.switchToWebView(testWebViewTitle)), is(sameInstance(driver)));

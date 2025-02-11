@@ -88,7 +88,7 @@ public class MockUtilities {
     utamElement = createInstance(BasePageElement.class, elementAdapter, factory.getDriver());
     frameElement = createInstance(FrameElementImpl.class, elementAdapter, factory.getDriver());
     if (isMobileMock(driverType)) {
-      setMobilePlatform(Platform.LINUX);
+      setMobilePlatform(Platform.ANDROID);
     }
     TargetLocator targetLocator = mock(TargetLocator.class);
     when(webDriverMock.switchTo()).thenReturn(targetLocator);
@@ -120,12 +120,10 @@ public class MockUtilities {
 
   DriverAdapter setDriverAdapter(Class<? extends WebDriver> driverType) {
     WebDriver driver = getWebDriverMock();
-    if (driverType.equals(AppiumDriver.class)) {
-      setMobilePlatform(Platform.LINUX);
+    if (driverType.equals(AppiumDriver.class) || driverType.equals(AndroidDriver.class)) {
+      setMobilePlatform(Platform.ANDROID);
     } else if (driverType.equals(IOSDriver.class)) {
       setMobilePlatform(Platform.IOS);
-    } else if (driverType.equals(AndroidDriver.class)) {
-      setMobilePlatform(Platform.ANDROID);
     }
     return (DriverAdapter) WebDriverFactory.getAdapterMock(driver);
   }
