@@ -350,4 +350,26 @@ public class ElementMethodTests {
     expected.addImpliedImportedTypes("utam.core.selenium.element.LocatorBy");
     PageObjectValidationTestHelper.validateMethod(method, expected);
   }
+
+  @Test
+  public void testFilterCustomElementWithContainsElementSelectorArgument() {
+    TranslationContext context =
+        new DeserializerUtilities().getContext("filter/customWithFilterContainsElement");
+    PageObjectMethod method = context.getMethod(ELEMENT_METHOD_NAME);
+    assertThat(method.getDeclaration().getCodeLine(), is(equalTo("Custom getTest(String value)")));
+    MethodInfo expected = new MethodInfo(ELEMENT_METHOD_NAME, "Custom");
+    expected.addParameter(new MethodParameterInfo("value", "String"));
+    expected.addParameter(
+        new MethodParameterInfo(
+            "LocatorBy.byCss(String.format(\"input[value='%s']\", value))", "LocatorBy"));
+    expected.addCodeLine("BasicElement root = this.getRootElement()");
+    expected.addCodeLine(
+        "return custom(root, this.test).build(Custom.class, elm ->"
+            + " Boolean.TRUE.equals(elm.containsElement(LocatorBy.byCss(String.format(\"input[value='%s']\","
+            + " value)))))");
+    expected.addImpliedImportedTypes("utam.custom.pageobjects.Custom");
+    expected.addImpliedImportedTypes("utam.core.element.BasicElement");
+    expected.addImpliedImportedTypes("utam.core.selenium.element.LocatorBy");
+    PageObjectValidationTestHelper.validateMethod(method, expected);
+  }
 }

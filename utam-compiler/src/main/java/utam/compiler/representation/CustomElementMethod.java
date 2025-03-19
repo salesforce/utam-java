@@ -167,6 +167,9 @@ public abstract class CustomElementMethod implements PageObjectMethod {
       parametersTracker.setMethodParameters(locatorParameters);
       parametersTracker.setMethodParameters(applyParameters);
       parametersTracker.setMethodParameters(matcherParameters);
+      parametersTracker
+          .getMethodParameters()
+          .forEach(param -> ParameterUtils.setImport(classImports, param.getType()));
       String locationCode = getElementLocationCode(componentName, locatorParameters);
       String predicate =
           getPredicateCode(applyMethod, applyParameters, matcherType, matcherParameters);
