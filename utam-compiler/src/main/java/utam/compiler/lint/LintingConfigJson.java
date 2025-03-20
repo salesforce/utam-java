@@ -135,6 +135,7 @@ public class LintingConfigJson implements LintingConfig {
       List<PageObjectLinting> all = context.getAllPageObjects();
       for (int i = 0; i < all.size(); i++) {
         PageObjectLinting first = all.get(i);
+        UtamLogger.info(String.format("finish linting for %s", first.getJsonFilePath()));
         for (int j = i + 1; j < all.size(); j++) {
           PageObjectLinting second = all.get(j);
           for (LintingRuleImpl rule : globalRules) {
