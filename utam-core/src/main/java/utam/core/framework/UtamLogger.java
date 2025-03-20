@@ -26,8 +26,11 @@ public class UtamLogger {
    * formatting log messages.
    */
   static {
-    System.setProperty(
-        "java.util.logging.SimpleFormatter.format", "%1$tT %3$s %4$-7s: %5$s %6$s%n");
+    String format = System.getProperty("java.util.logging.SimpleFormatter.format");
+    if (format == null) {
+      System.setProperty(
+          "java.util.logging.SimpleFormatter.format", "%1$tT %3$s %4$-7s: %5$s %6$s%n");
+    }
     UTAM_LOGGER = LoggerFactory.getLogger("utam");
   }
 
