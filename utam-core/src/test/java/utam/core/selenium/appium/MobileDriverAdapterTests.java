@@ -406,7 +406,9 @@ public class MobileDriverAdapterTests {
             });
     when(driver.getWindowHandles()).thenReturn(windowHandles);
     when(driver.getTitle()).thenReturn("").thenReturn(testWebViewTitle);
-    when(contextSwitcher.getContext()).thenReturn(contextTracker.currentContext);
+    when(contextSwitcher.getContext())
+        .thenReturn(contextTracker.currentContext)
+        .thenReturn(testWebViewHandle);
     mock.setMobilePlatform(Platform.LINUX);
     MobileDriverAdapter adapter = mock.getMobileDriverAdapter();
     assertThat(
@@ -432,10 +434,7 @@ public class MobileDriverAdapterTests {
     when(driver.getCapabilities().getPlatformName()).thenReturn(Platform.ANDROID);
     when(contextSwitcher.getContextHandles()).thenReturn(contextHandles);
     when(driver.getWindowHandles())
-        .then(
-            (arg) -> {
-              throw new UnsupportedCommandException("getWindowHandles {}");
-            });
+        .thenThrow(new UnsupportedCommandException("getWindowHandles {}"));
     when(contextSwitcher.getContext()).thenReturn(contextTracker.currentContext);
     mock.setMobilePlatform(Platform.LINUX);
     MobileDriverAdapter adapter = mock.getMobileDriverAdapter();
