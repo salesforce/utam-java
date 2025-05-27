@@ -30,11 +30,13 @@ import io.appium.java_client.remote.SupportsContextSwitching;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver.Navigation;
 import org.openqa.selenium.WebDriver.TargetLocator;
 import org.testng.annotations.Test;
@@ -253,7 +255,6 @@ public class MobileDriverAdapterTests {
   @Test
   public void testIsAnyWebViewContextAvailable() {
     MockUtilities mock = new MockUtilities(AppiumDriver.class);
-    AppiumDriver driver = (AppiumDriver) mock.getWebDriverMock();
     SupportsContextSwitching contextSwitcher = mock.getContextSwitcherMock();
     MobileDriverAdapter provider = (MobileDriverAdapter) mock.getDriverAdapter();
 
@@ -411,6 +412,35 @@ public class MobileDriverAdapterTests {
     assertThat(
         adapter.waitFor(() -> adapter.switchToWebView(testWebViewTitle)), is(sameInstance(driver)));
     assertThat(windowHandleTracker.currentHandle, is(equalTo(testWindowHandle)));
+  }
+
+  /**
+   * Tests that the expectation to switch to no windows and not attempt to get handles when only
+   * native context exists on Android platform, negative case
+   */
+  @Test
+  public void testSwitchToWebViewWithNoWebViewsAndroid() {
+    ContextTracker contextTracker = new ContextTracker();
+
+    MockUtilities mock = new MockUtilities(AppiumDriver.class);
+    AppiumDriver driver = mock.getAppiumDriverMock();
+    SupportsContextSwitching contextSwitcher = mock.getContextSwitcherMock();
+
+    Set<String> contextHandles = new HashSet<>(List.of(NATIVE_CONTEXT_HANDLE));
+
+    String testWebViewTitle = "Test Application";
+    when(driver.getCapabilities().getPlatformName()).thenReturn(Platform.ANDROID);
+    when(contextSwitcher.getContextHandles()).thenReturn(contextHandles);
+    when(driver.getWindowHandles())
+        .then(
+            (arg) -> {
+              throw new UnsupportedCommandException("getWindowHandles {}");
+            });
+    when(contextSwitcher.getContext()).thenReturn(contextTracker.currentContext);
+    mock.setMobilePlatform(Platform.LINUX);
+    MobileDriverAdapter adapter = mock.getMobileDriverAdapter();
+    assertThat(adapter.switchToWebView(testWebViewTitle), nullValue());
+    assertThat(contextTracker.currentContext, is(equalTo(NATIVE_CONTEXT_HANDLE)));
   }
 
   @Test
