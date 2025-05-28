@@ -100,9 +100,10 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
     // For the Appium chromedriver limitation to handle multiple WebViews,
     // If switch to context fail to find the target WebView, then switch to
     // use window
-    if (mobilePlatform == MobilePlatformType.ANDROID
-        || mobilePlatform == MobilePlatformType.ANDROID_PHONE
-        || mobilePlatform == MobilePlatformType.ANDROID_TABLET) {
+    if ((mobilePlatform == MobilePlatformType.ANDROID
+            || mobilePlatform == MobilePlatformType.ANDROID_PHONE
+            || mobilePlatform == MobilePlatformType.ANDROID_TABLET)
+        && !isNativeContext()) {
       Set<String> windowHandles = appiumDriver.getWindowHandles();
       for (String windowHandle : windowHandles) {
         if (!windowHandle.equals(NATIVE_CONTEXT_HANDLE)) {
