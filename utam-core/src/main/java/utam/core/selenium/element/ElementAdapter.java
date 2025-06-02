@@ -186,7 +186,7 @@ public class ElementAdapter implements Element {
 
   @Override
   public byte[] getScreenshot() {
-    return webElement.getScreenshotAs(OutputType.BYTES);
+    return getWebElement().getScreenshotAs(OutputType.BYTES);
   }
 
   @Override
