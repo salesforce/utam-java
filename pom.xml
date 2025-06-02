@@ -132,8 +132,8 @@
         <maven.exec.plugin.version>3.1.1</maven.exec.plugin.version>
         <nexus.staging.release.plugin.version>1.7.0</nexus.staging.release.plugin.version>
 
-        <selenium.version>4.31.0</selenium.version>
-        <appium.version>9.4.0</appium.version>
+        <selenium.version>4.21.0</selenium.version>
+        <appium.version>9.2.2</appium.version>
         <slf4j.version>2.0.9</slf4j.version>
         <jackson.version>2.16.0</jackson.version>
         <google.java.format.version>1.19.1</google.java.format.version>
