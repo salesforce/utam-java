@@ -161,6 +161,13 @@ public interface Element {
   void dragAndDrop(DragAndDropOptions options);
 
   /**
+   * Gets a screenshot of the element represented by this object.
+   *
+   * @return a byte array containing a PNG image of the element
+   */
+  byte[] getScreenshot();
+
+  /**
    * Get element coordinates and size. Can be used to calculate drop location inside a frame.
    *
    * @return coordinates and size
