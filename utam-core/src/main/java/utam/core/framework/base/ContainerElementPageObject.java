@@ -64,6 +64,11 @@ public final class ContainerElementPageObject extends ContainerElementImpl
   }
 
   @Override
+  public byte[] getScreenshot() {
+    throw new UtamCoreError(ERR_UNSUPPORTED_METHOD);
+  }
+
+  @Override
   public void waitForAbsence() {
     throw new UtamCoreError(ERR_UNSUPPORTED_METHOD);
   }

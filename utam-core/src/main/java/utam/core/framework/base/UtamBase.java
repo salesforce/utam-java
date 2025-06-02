@@ -57,6 +57,13 @@ public interface UtamBase {
   boolean isVisible();
 
   /**
+   * Gets a screenshot of the element represented by this object.
+   *
+   * @return the screenshot in PNG format as a byte array
+   */
+  byte[] getScreenshot();
+
+  /**
    * check if current element contains another element with the given selector
    *
    * @param locator value of the locator

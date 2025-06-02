@@ -10,6 +10,7 @@ package utam.core.framework.element;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.doThrow;
@@ -24,6 +25,7 @@ import static utam.core.selenium.element.ElementAdapter.SCROLL_TOP_VIA_JAVASCRIP
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.OutputType;
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
@@ -311,5 +313,12 @@ public class BasePageElementTests {
     assertThat(test.getY(), equalTo(2));
     assertThat(test.getWidth(), equalTo(4));
     assertThat(test.getHeight(), equalTo(3));
+  }
+
+  @Test
+  public void testGetScreenshot() {
+    MockUtilities mock = new MockUtilities();
+    when(mock.getWebElementMock().getScreenshotAs(OutputType.BYTES)).thenReturn(new byte[0]);
+    assertThat(mock.getUtamElement().getScreenshot(), is(notNullValue()));
   }
 }

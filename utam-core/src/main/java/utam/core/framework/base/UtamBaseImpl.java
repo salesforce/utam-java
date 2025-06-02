@@ -122,6 +122,11 @@ public abstract class UtamBaseImpl implements UtamBase {
   }
 
   @Override
+  public byte[] getScreenshot() {
+    return getElement().getScreenshot();
+  }
+
+  @Override
   public final boolean containsElement(Locator locator) {
     return containsElement(locator, false);
   }
