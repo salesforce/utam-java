@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.OutputType;
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
@@ -181,6 +182,11 @@ public class ElementAdapter implements Element {
   @Override
   public void deprecatedClick() {
     driverAdapter.executeScript(CLICK_VIA_JAVASCRIPT, getWebElement());
+  }
+
+  @Override
+  public byte[] getScreenshot() {
+    return getWebElement().getScreenshotAs(OutputType.BYTES);
   }
 
   @Override
