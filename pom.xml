@@ -92,8 +92,8 @@
                         <configuration>
                             <publishingServerId>central.repository.publishing</publishingServerId>
                             <deploymentName>utam-java deployment</deploymentName>
-                            <!--autoPublish>true</autoPublish>
-                            <waitUntil>published</waitUntil-->
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>published</waitUntil>
                         </configuration>
                     </plugin>
                 </plugins>
