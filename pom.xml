@@ -128,7 +128,7 @@
         <selenium.version>4.21.0</selenium.version>
         <appium.version>9.2.2</appium.version>
         <slf4j.version>2.0.9</slf4j.version>
-        <jackson.version>2.16.0</jackson.version>
+        <jackson.version>2.18.4</jackson.version>
         <google.java.format.version>1.19.1</google.java.format.version>
         <picocli-version>4.7.5</picocli-version>
         <testng.version>7.8.0</testng.version>

@@ -24,7 +24,10 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.cfg.CoercionAction;
+import com.fasterxml.jackson.databind.cfg.CoercionInputShape;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.type.LogicalType;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,6 +89,9 @@ public final class JsonDeserializer
     mapper.disable(ALLOW_COMMENTS);
     mapper.enable(ACCEPT_SINGLE_VALUE_AS_ARRAY);
     mapper.enable(STRICT_DUPLICATE_DETECTION);
+    mapper
+        .coercionConfigFor(LogicalType.Boolean)
+        .setCoercion(CoercionInputShape.String, CoercionAction.Fail);
     return mapper;
   }
 
