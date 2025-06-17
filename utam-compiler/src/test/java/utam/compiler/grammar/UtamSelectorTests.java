@@ -108,6 +108,14 @@ public class UtamSelectorTests {
   }
 
   @Test
+  public void testReturnAllWrongArgTypeProvided() {
+    Exception e = expectCompilerErrorFromFile("selectorReturnAllWrong");
+    assertThat(
+        e.getMessage(),
+        containsString("error 1000: element \"test\": format of selector is incorrect;"));
+  }
+
+  @Test
   public void testGetBuilderString() {
     final String prefix = LocatorBy.class.getSimpleName();
 

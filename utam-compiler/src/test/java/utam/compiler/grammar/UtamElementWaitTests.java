@@ -117,6 +117,6 @@ public class UtamElementWaitTests {
         e.getMessage(),
         containsString(
             "error 200: root elements: incorrect format of elements \n"
-                + "Cannot deserialize value of type `java.lang.Boolean` from String \"string\""));
+                + "Cannot coerce String value (\"true\") to `java.lang.Boolean` value"));
   }
 }

@@ -8,6 +8,7 @@
 package utam.compiler.grammar;
 
 import static utam.compiler.diagnostics.ValidationUtilities.VALIDATION;
+import static utam.compiler.grammar.JsonDeserializer.isEmptyNode;
 import static utam.compiler.grammar.JsonDeserializer.readNode;
 import static utam.core.element.Locator.SELECTOR_INTEGER_PARAMETER;
 import static utam.core.element.Locator.SELECTOR_STRING_PARAMETER;
@@ -84,6 +85,9 @@ class UtamSelector extends UtamRootSelector {
    */
   static UtamSelector processSelectorNode(JsonNode node, String elementName) {
     String parserContext = String.format("element \"%s\"", elementName);
+    if (!isEmptyNode(node) && !node.isObject()) {
+      throw new UtamCompilationError(VALIDATION.getErrorMessage(1000, parserContext));
+    }
     UtamSelector selector =
         readNode(node, UtamSelector.class, VALIDATION.getErrorMessage(1000, parserContext));
     if (selector != null) {

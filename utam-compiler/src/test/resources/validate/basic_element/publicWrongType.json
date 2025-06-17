@@ -5,7 +5,7 @@
       "selector": {
         "css": "basicElement"
       },
-      "wait": "true"
+      "public": "true"
     }
   ]
 }

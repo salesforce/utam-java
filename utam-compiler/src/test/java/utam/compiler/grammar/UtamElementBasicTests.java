@@ -57,6 +57,28 @@ public class UtamElementBasicTests {
         containsString("error 302: element \"test\" filter: filter can only be set for list"));
   }
 
+  /** The validateSimpleElement method with string nullable type should throw */
+  @Test
+  public void testBasicElementInvalidNullableTypeThrows() {
+    UtamError e = expectThrows(UtamCompilationError.class, () -> getContext("nullableWrongType"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 200: root elements: incorrect format of elements \n"
+                + "Cannot coerce String value (\"true\") to `java.lang.Boolean` value"));
+  }
+
+  /** The validateSimpleElement method with string public type should throw */
+  @Test
+  public void testBasicElementInvalidPublicTypeThrows() {
+    UtamError e = expectThrows(UtamCompilationError.class, () -> getContext("publicWrongType"));
+    assertThat(
+        e.getMessage(),
+        containsString(
+            "error 200: root elements: incorrect format of elements \n"
+                + "Cannot coerce String value (\"true\") to `java.lang.Boolean` value"));
+  }
+
   @Test
   public void testEmptyNestedElementsThrows() {
     UtamError e = expectThrows(UtamError.class, () -> getContext("emptyNestedElementsArray"));
