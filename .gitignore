@@ -31,3 +31,4 @@ utam-compiler/src/test/java/errors/**
 **/*sarif*
 **/utam.errors.txt
 **/pageObjectManifest.json
+.vscode

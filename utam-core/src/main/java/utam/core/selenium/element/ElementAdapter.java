@@ -9,7 +9,6 @@ package utam.core.selenium.element;
 
 import static utam.core.selenium.element.DriverAdapter.ERR_SUPPORTED_FOR_MOBILE;
 import static utam.core.selenium.element.DriverAdapter.getNotFoundErr;
-import static utam.core.selenium.element.DriverAdapter.getSeleniumDriver;
 
 import java.time.Duration;
 import java.util.List;
@@ -78,7 +77,7 @@ public class ElementAdapter implements Element {
    */
   public ElementAdapter(WebElement element, Driver driverAdapter) {
     this.webElement = element;
-    this.driver = getSeleniumDriver(driverAdapter);
+    this.driver = ((DriverAdapter) driverAdapter).getSeleniumDriver();
     this.driverAdapter = driverAdapter;
   }
 
@@ -94,7 +93,8 @@ public class ElementAdapter implements Element {
           "Internal bug in the utam-core: can't wrap element as shadow root");
     }
     ElementAdapter elementAdapter = (ElementAdapter) element;
-    this.webElement = new ShadowRootWebElement(elementAdapter.getWebElement());
+    this.webElement =
+        new ShadowRootWebElement(elementAdapter.getWebElement(), elementAdapter.driverAdapter);
     this.driver = elementAdapter.driver;
     this.driverAdapter = elementAdapter.driverAdapter;
   }
@@ -109,6 +109,16 @@ public class ElementAdapter implements Element {
       throw new NullPointerException(ERR_NULL_ELEMENT);
     }
     return webElement;
+  }
+
+  /**
+   * Unwraps the web element If the web element is wrapped, it will be unwrapped to the underlying
+   * web element
+   *
+   * @return the unwrapped web element
+   */
+  protected WebElement unwrap() {
+    return this.getWebElement();
   }
 
   protected Element wrapElement(WebElement element) {

@@ -139,7 +139,7 @@ public class MockUtilities {
   }
 
   public void setShadowMock(WebElement element, String cssSelector) {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(element);
+    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(element, driverAdapter);
     when(shadowRootWebElement
             .getExecutor()
             .executeScript(String.format(GET_SHADOW_ROOT_QUERY_SELECTOR_ALL, cssSelector), element))

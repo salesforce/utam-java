@@ -78,7 +78,7 @@ public class DriverAdapter implements Driver {
       return new Object[0];
     }
     return Stream.of(parameters)
-        .map(p -> p instanceof ElementAdapter ? ((ElementAdapter) p).getWebElement() : p)
+        .map(p -> p instanceof ElementAdapter ? ((ElementAdapter) p).unwrap() : p)
         .toArray(Object[]::new);
   }
 
@@ -87,7 +87,12 @@ public class DriverAdapter implements Driver {
         "%s with locator '%s'", ERR_ELEMENT_NOT_FOUND_PREFIX, by.getValue().toString());
   }
 
-  static WebDriver getSeleniumDriver(Driver driver) {
+  /**
+   * Unwraps the driver to get the underlying WebDriver instance
+   *
+   * @return the underlying WebDriver instance
+   */
+  protected WebDriver unwrap() {
     return ((DriverAdapter) driver).getSeleniumDriver();
   }
 
@@ -117,7 +122,17 @@ public class DriverAdapter implements Driver {
 
   @Override
   public Object executeScript(String script, Object... parameters) {
-    return ((JavascriptExecutor) driver).executeScript(script, unwrapParameters(parameters));
+    return getJavascriptExecutor().executeScript(script, unwrapParameters(parameters));
+  }
+
+  /**
+   * Gets the underlying JavascriptExecutor instance
+   *
+   * @return the underlying JavascriptExecutor instance
+   */
+  JavascriptExecutor getJavascriptExecutor() {
+    WebDriver unwrappedDriver = unwrap();
+    return (JavascriptExecutor) unwrappedDriver;
   }
 
   protected Element wrapElement(WebElement element) {
@@ -125,6 +140,7 @@ public class DriverAdapter implements Driver {
   }
 
   @Override
+  @SuppressWarnings("rawtypes")
   public Element findElement(Locator locator) {
     By by = ((LocatorBy) locator).getValue();
     WebElement res = getSeleniumDriver().findElement(by);
@@ -135,6 +151,7 @@ public class DriverAdapter implements Driver {
   }
 
   @Override
+  @SuppressWarnings("rawtypes")
   public List<Element> findElements(Locator locator) {
     By by = ((LocatorBy) locator).getValue();
     List<WebElement> found = getSeleniumDriver().findElements(by);
@@ -146,6 +163,7 @@ public class DriverAdapter implements Driver {
   }
 
   @Override
+  @SuppressWarnings("rawtypes")
   public int containsElements(Locator locator) {
     By by = ((LocatorBy) locator).getValue();
     return getSeleniumDriver().findElements(by).size();

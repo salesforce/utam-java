@@ -36,16 +36,6 @@ public class ShadowRootElementAdapter extends ElementAdapter {
   }
 
   @Override
-  public Element findElement(Locator locator, boolean isNullable) {
-    List<Element> res = findElements(locator, isNullable);
-    // null only returned for nullable, otherwise throws
-    if (res == null) {
-      return null;
-    }
-    return res.get(0);
-  }
-
-  @Override
   public List<Element> findElements(Locator locator, boolean isNullable) {
     By by = ((LocatorBy) locator).getValue();
     List<WebElement> res =

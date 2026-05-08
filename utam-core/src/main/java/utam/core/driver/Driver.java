@@ -50,7 +50,7 @@ public interface Driver {
   List<Element> findElements(Locator by);
 
   /**
-   * get number of elements with a given locator inside current element
+   * get number of elements with a given locator inside driver
    *
    * @param by locator
    * @return number of elements or 0 if none found
