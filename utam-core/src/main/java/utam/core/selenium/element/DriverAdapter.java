@@ -82,6 +82,7 @@ public class DriverAdapter implements Driver {
         .toArray(Object[]::new);
   }
 
+  @SuppressWarnings("rawtypes")
   static String getNotFoundErr(Locator by) {
     return String.format(
         "%s with locator '%s'", ERR_ELEMENT_NOT_FOUND_PREFIX, by.getValue().toString());
@@ -93,7 +94,7 @@ public class DriverAdapter implements Driver {
    * @return the underlying WebDriver instance
    */
   protected WebDriver unwrap() {
-    return ((DriverAdapter) driver).getSeleniumDriver();
+    return driver;
   }
 
   /**
@@ -122,17 +123,9 @@ public class DriverAdapter implements Driver {
 
   @Override
   public Object executeScript(String script, Object... parameters) {
-    return getJavascriptExecutor().executeScript(script, unwrapParameters(parameters));
-  }
-
-  /**
-   * Gets the underlying JavascriptExecutor instance
-   *
-   * @return the underlying JavascriptExecutor instance
-   */
-  JavascriptExecutor getJavascriptExecutor() {
     WebDriver unwrappedDriver = unwrap();
-    return (JavascriptExecutor) unwrappedDriver;
+    JavascriptExecutor javascriptExecutor = (JavascriptExecutor) unwrappedDriver;
+    return javascriptExecutor.executeScript(script, unwrapParameters(parameters));
   }
 
   protected Element wrapElement(WebElement element) {

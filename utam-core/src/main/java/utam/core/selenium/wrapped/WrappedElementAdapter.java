@@ -12,7 +12,7 @@ import utam.core.element.Element;
 import utam.core.selenium.element.ElementAdapter;
 
 /**
- * WrappedElementAdapter wraps WebElement with smart finder capabilities
+ * WrappedElementAdapter wraps WebElement
  *
  * @author elizaveta.ivanova
  * @since 264

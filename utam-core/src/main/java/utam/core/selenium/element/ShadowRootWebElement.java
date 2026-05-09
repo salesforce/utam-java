@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.openqa.selenium.*;
-import utam.core.driver.Driver;
 
 /**
  * COPY FROM SETI <br>
@@ -51,23 +50,15 @@ public class ShadowRootWebElement implements WebElement, WrapsElement, WrapsDriv
    * Initializes a new instance of the ShadowRootWebElement class
    *
    * @param we the WebElement object to wrap
+   * @param driver the driver adapter
    */
-  public ShadowRootWebElement(WebElement we, Driver driver) {
+  public ShadowRootWebElement(WebElement we, DriverAdapter driver) {
     this.rootElement = we;
-    this.driver = (DriverAdapter) driver;
+    this.driver = driver;
   }
 
   private static String escapeForQuery(String queryString) {
     return queryString.replace("\\", "\\\\").replace("'", "\\'").replace("\"", "\\\"");
-  }
-
-  /**
-   * Gets the JavascriptExecutor for this element, used only for mocking purposes
-   *
-   * @return the JavascriptExecutor for this element.
-   */
-  public JavascriptExecutor getExecutor() {
-    return this.driver.getJavascriptExecutor();
   }
 
   @Override

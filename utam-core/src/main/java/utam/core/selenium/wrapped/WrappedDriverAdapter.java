@@ -14,7 +14,7 @@ import utam.core.element.Element;
 import utam.core.selenium.element.DriverAdapter;
 
 /**
- * WrappedDriverAdapter wraps a WrappedDriverDecorator and provides smart finding capabilities
+ * WrappedDriverAdapter wraps WebDriver
  *
  * @author elizaveta.ivanova
  * @since 264

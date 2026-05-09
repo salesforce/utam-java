@@ -94,7 +94,8 @@ public class ElementAdapter implements Element {
     }
     ElementAdapter elementAdapter = (ElementAdapter) element;
     this.webElement =
-        new ShadowRootWebElement(elementAdapter.getWebElement(), elementAdapter.driverAdapter);
+        new ShadowRootWebElement(
+            elementAdapter.getWebElement(), (DriverAdapter) elementAdapter.driverAdapter);
     this.driver = elementAdapter.driver;
     this.driverAdapter = elementAdapter.driverAdapter;
   }
