@@ -48,8 +48,7 @@ import utam.core.selenium.appium.MobileDriverAdapter;
 import utam.core.selenium.appium.MobileElementAdapter;
 import utam.core.selenium.element.DriverAdapter;
 import utam.core.selenium.element.ElementAdapter;
-import utam.core.selenium.element.ShadowRootWebElement;
-import utam.core.selenium.factory.WebDriverFactory;
+import utam.core.selenium.factory.WebDriverFactoryTestUtils;
 
 /**
  * @author elizaveta.ivanova
@@ -125,7 +124,7 @@ public class MockUtilities {
     } else if (driverType.equals(IOSDriver.class)) {
       setMobilePlatform(Platform.IOS);
     }
-    return (DriverAdapter) WebDriverFactory.getAdapterMock(driver);
+    return (DriverAdapter) WebDriverFactoryTestUtils.getAdapterMock(driver);
   }
 
   public void setMobilePlatform(Platform platform) {
@@ -139,13 +138,10 @@ public class MockUtilities {
   }
 
   public void setShadowMock(WebElement element, String cssSelector) {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(element);
-    when(shadowRootWebElement
-            .getExecutor()
+    when(((DriverAdapter) driverAdapter)
             .executeScript(String.format(GET_SHADOW_ROOT_QUERY_SELECTOR_ALL, cssSelector), element))
         .thenReturn(Collections.singletonList(element));
-    when(shadowRootWebElement
-            .getExecutor()
+    when(((DriverAdapter) driverAdapter)
             .executeScript(String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, cssSelector), element))
         .thenReturn(element);
   }
@@ -230,6 +226,14 @@ public class MockUtilities {
       ElementAdapter elementAdapter =
           isMobileMock(driverType) ? mock(MobileElementAdapter.class) : mock(ElementAdapter.class);
       when(elementAdapter.getWebElement()).thenReturn(getWebElementMock());
+      // Set up driverAdapter field access for shadow root scenarios
+      try {
+        java.lang.reflect.Field field = ElementAdapter.class.getDeclaredField("driverAdapter");
+        field.setAccessible(true);
+        field.set(elementAdapter, getDriverAdapter());
+      } catch (Exception e) {
+        // Ignore reflection errors
+      }
       return elementAdapter;
     }
   }

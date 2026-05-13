@@ -26,8 +26,6 @@ import static utam.core.selenium.element.ElementAdapterTests.findNotNullables;
 import static utam.core.selenium.element.ElementAdapterTests.findNullable;
 import static utam.core.selenium.element.ElementAdapterTests.findNullables;
 import static utam.core.selenium.element.LocatorBy.byCss;
-import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR;
-import static utam.core.selenium.element.ShadowRootWebElement.GET_SHADOW_ROOT_QUERY_SELECTOR_ALL;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -69,7 +67,8 @@ public class ShadowRootWebElementTests {
   /** The getScreenshotAs() method should throw {@link UnsupportedCommandException}. */
   @Test
   public void testGetScreenshotAs() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     UnsupportedCommandException uce =
         expectThrows(
             UnsupportedCommandException.class,
@@ -82,7 +81,8 @@ public class ShadowRootWebElementTests {
   /** The click() method should throw {@link UnsupportedCommandException}. */
   @Test
   public void testClick() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     UnsupportedCommandException uce =
         expectThrows(UnsupportedCommandException.class, shadowRootWebElement::click);
     assertThat(
@@ -92,7 +92,8 @@ public class ShadowRootWebElementTests {
   /** The submit() method should throw {@link UnsupportedCommandException}. */
   @Test
   public void testSubmit() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     UnsupportedCommandException uce =
         expectThrows(UnsupportedCommandException.class, shadowRootWebElement::submit);
     assertThat(
@@ -102,7 +103,8 @@ public class ShadowRootWebElementTests {
   /** The sendKeys() method should throw {@link UnsupportedCommandException}. */
   @Test
   public void testSendKeys() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     UnsupportedCommandException uce =
         expectThrows(UnsupportedCommandException.class, shadowRootWebElement::sendKeys);
     assertThat(
@@ -112,7 +114,8 @@ public class ShadowRootWebElementTests {
   /** The clear() method should throw {@link UnsupportedCommandException}. */
   @Test
   public void testClear() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     UnsupportedCommandException uce =
         expectThrows(UnsupportedCommandException.class, shadowRootWebElement::clear);
     assertThat(
@@ -122,7 +125,8 @@ public class ShadowRootWebElementTests {
   /** The getTagName() method should throw {@link UnsupportedCommandException}. */
   @Test
   public void testGetTagName() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     UnsupportedCommandException uce =
         expectThrows(UnsupportedCommandException.class, shadowRootWebElement::getTagName);
     assertThat(
@@ -133,7 +137,8 @@ public class ShadowRootWebElementTests {
   /** The getAttribute() method should throw {@link UnsupportedCommandException}. */
   @Test
   public void testGetAttribute() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     UnsupportedCommandException uce =
         expectThrows(
             UnsupportedCommandException.class,
@@ -146,7 +151,8 @@ public class ShadowRootWebElementTests {
   /** The isSelected() method should throw {@link UnsupportedCommandException}. */
   @Test
   public void testIsSelected() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     UnsupportedCommandException uce =
         expectThrows(UnsupportedCommandException.class, shadowRootWebElement::isSelected);
     assertThat(
@@ -157,7 +163,8 @@ public class ShadowRootWebElementTests {
   /** The isEnabled() method should throw {@link UnsupportedCommandException}. */
   @Test
   public void testIsEnabled() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     UnsupportedCommandException uce =
         expectThrows(UnsupportedCommandException.class, shadowRootWebElement::isEnabled);
     assertThat(
@@ -167,7 +174,8 @@ public class ShadowRootWebElementTests {
   /** The getText() method should throw {@link UnsupportedCommandException}. */
   @Test
   public void testGetText() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     UnsupportedCommandException uce =
         expectThrows(UnsupportedCommandException.class, shadowRootWebElement::getText);
     assertThat(
@@ -177,7 +185,8 @@ public class ShadowRootWebElementTests {
   /** The isDisplayed() method should throw {@link UnsupportedCommandException}. */
   @Test
   public void testIsDisplayed() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     UnsupportedCommandException uce =
         expectThrows(UnsupportedCommandException.class, shadowRootWebElement::isDisplayed);
     assertThat(
@@ -188,7 +197,8 @@ public class ShadowRootWebElementTests {
   /** The getLocation() method should throw {@link UnsupportedCommandException}. */
   @Test
   public void testGetLocation() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     UnsupportedCommandException uce =
         expectThrows(UnsupportedCommandException.class, shadowRootWebElement::getLocation);
     assertThat(
@@ -199,7 +209,8 @@ public class ShadowRootWebElementTests {
   /** The getSize() method should throw {@link UnsupportedCommandException}. */
   @Test
   public void testGetSize() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     UnsupportedCommandException uce =
         expectThrows(UnsupportedCommandException.class, shadowRootWebElement::getSize);
     assertThat(
@@ -209,7 +220,8 @@ public class ShadowRootWebElementTests {
   /** The getRect() method should throw {@link UnsupportedCommandException}. */
   @Test
   public void testGetRect() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     UnsupportedCommandException uce =
         expectThrows(UnsupportedCommandException.class, shadowRootWebElement::getRect);
     assertThat(
@@ -219,7 +231,8 @@ public class ShadowRootWebElementTests {
   /** The getCssValue() method should throw {@link UnsupportedCommandException}. */
   @Test
   public void testGetCssValue() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     UnsupportedCommandException uce =
         expectThrows(
             UnsupportedCommandException.class, () -> shadowRootWebElement.getCssValue("value"));
@@ -231,7 +244,8 @@ public class ShadowRootWebElementTests {
   /** The getWrappedElement() method should return wrapped {@link WebElement}. */
   @Test
   public void testGetWrappedElement() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     assertThat(shadowRootWebElement.getWrappedElement(), is(mockWebElement));
   }
 
@@ -268,14 +282,14 @@ public class ShadowRootWebElementTests {
   @Test
   public void testFindElements() {
     when(((WrapsDriver) mockWebElement).getWrappedDriver()).thenReturn(mockDriver);
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
-    when(shadowRootWebElement
-            .getExecutor()
-            .executeScript(
-                String.format(GET_SHADOW_ROOT_QUERY_SELECTOR_ALL, GOOD_CSS_SELECTOR),
-                mockWebElement))
+    when(mockByWithCss.toString()).thenReturn("By.cssSelector: locator");
+    DriverAdapter mockDriverAdapter = mock(DriverAdapter.class);
+    when(mockDriverAdapter.executeScript(
+            "return arguments[0].shadowRoot.querySelectorAll('locator')", mockWebElement))
         .thenReturn(Collections.singletonList(mockWebElement));
 
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mockDriverAdapter);
     assertThat(shadowRootWebElement.findElements(mockByWithCss).contains(mockWebElement), is(true));
   }
 
@@ -286,12 +300,14 @@ public class ShadowRootWebElementTests {
   @Test
   public void testFindElement() {
     when(((WrapsDriver) mockWebElement).getWrappedDriver()).thenReturn(mockDriver);
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
-    when(shadowRootWebElement
-            .getExecutor()
-            .executeScript(
-                String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, GOOD_CSS_SELECTOR), mockWebElement))
+    when(mockByWithCss.toString()).thenReturn("By.cssSelector: locator");
+    DriverAdapter mockDriverAdapter = mock(DriverAdapter.class);
+    when(mockDriverAdapter.executeScript(
+            "return arguments[0].shadowRoot.querySelector('locator')", mockWebElement))
         .thenReturn(mockWebElement);
+
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mockDriverAdapter);
     assertThat(shadowRootWebElement.findElement(mockByWithCss), is(mockWebElement));
   }
 
@@ -302,7 +318,8 @@ public class ShadowRootWebElementTests {
   @Test
   public void testFindElementThrowsException() {
     when(((WrapsDriver) mockWebElement).getWrappedDriver()).thenReturn(mockDriver);
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     NoSuchElementException nsee =
         expectThrows(
             NoSuchElementException.class, () -> shadowRootWebElement.findElement((mockByWithCss)));
@@ -312,7 +329,8 @@ public class ShadowRootWebElementTests {
   /** The getWrappedDriver() method should return wrapped {@link WebDriver}. */
   @Test
   public void testGetWrappedDriver() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     assertThat(
         shadowRootWebElement.getWrappedDriver(),
         is(((WrapsDriver) mockWebElement).getWrappedDriver()));
@@ -333,7 +351,8 @@ public class ShadowRootWebElementTests {
    */
   @Test
   public void testFirefoxWorkaroundWithMap() {
-    ShadowRootWebElement shadowRootWebElement = new ShadowRootWebElement(mockWebElement);
+    ShadowRootWebElement shadowRootWebElement =
+        new ShadowRootWebElement(mockWebElement, mock(DriverAdapter.class));
     Map<String, Object> map = new HashMap<>();
     map.put("0", shadowRootWebElement);
     map.put("1", null);

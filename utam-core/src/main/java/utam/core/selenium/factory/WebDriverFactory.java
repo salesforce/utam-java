@@ -14,8 +14,6 @@
 
 package utam.core.selenium.factory;
 
-import static utam.core.driver.DriverConfig.TEST_SIMULATOR_DRIVER_CONFIG;
-
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
@@ -38,6 +36,8 @@ import utam.core.driver.DriverConfig;
 import utam.core.driver.DriverType;
 import utam.core.selenium.appium.MobileDriverAdapter;
 import utam.core.selenium.element.DriverAdapter;
+import utam.core.selenium.wrapped.WrappedDriverAdapter;
+import utam.core.selenium.wrapped.WrappedDriverDecorator;
 
 /**
  * web driver factory
@@ -72,19 +72,13 @@ public class WebDriverFactory {
    * @return the driver adapter
    */
   public static Driver getAdapter(WebDriver webDriver, DriverConfig driverConfig) {
-    return webDriver instanceof AppiumDriver
-        ? new MobileDriverAdapter((AppiumDriver) webDriver, driverConfig)
-        : new DriverAdapter(webDriver, driverConfig);
-  }
-
-  /**
-   * creates DriverAdapter for testing purposes with very low explicit wait
-   *
-   * @param driver mock of WebDriver
-   * @return instance of Driver
-   */
-  public static Driver getAdapterMock(WebDriver driver) {
-    return getAdapter(driver, TEST_SIMULATOR_DRIVER_CONFIG);
+    if (webDriver instanceof AppiumDriver) {
+      return new MobileDriverAdapter((AppiumDriver) webDriver, driverConfig);
+    }
+    if (webDriver instanceof WrappedDriverDecorator) {
+      return new WrappedDriverAdapter((WrappedDriverDecorator) webDriver, driverConfig);
+    }
+    return new DriverAdapter(webDriver, driverConfig);
   }
 
   /**

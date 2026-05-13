@@ -44,29 +44,21 @@ public class ShadowRootWebElement implements WebElement, WrapsElement, WrapsDriv
 
   // The host element of the shadowRoot. Needed to execute queries off of.
   private final WebElement rootElement;
-  private final JavascriptExecutor executor;
+  private final DriverAdapter driver;
 
   /**
    * Initializes a new instance of the ShadowRootWebElement class
    *
    * @param we the WebElement object to wrap
+   * @param driver the driver adapter
    */
-  public ShadowRootWebElement(WebElement we) {
+  public ShadowRootWebElement(WebElement we, DriverAdapter driver) {
     this.rootElement = we;
-    this.executor = (JavascriptExecutor) ((WrapsDriver) we).getWrappedDriver();
+    this.driver = driver;
   }
 
   private static String escapeForQuery(String queryString) {
     return queryString.replace("\\", "\\\\").replace("'", "\\'").replace("\"", "\\\"");
-  }
-
-  /**
-   * Gets the JavascriptExecutor for this element.
-   *
-   * @return the JavascriptExecutor for this element.
-   */
-  public JavascriptExecutor getExecutor() {
-    return executor;
   }
 
   @Override
@@ -177,7 +169,7 @@ public class ShadowRootWebElement implements WebElement, WrapsElement, WrapsDriv
   public List<WebElement> findElements(By by) {
     String selector = getSelectorString(by);
     String fullQuery = String.format(GET_SHADOW_ROOT_QUERY_SELECTOR_ALL, selector);
-    Object elements = executor.executeScript(fullQuery, rootElement);
+    Object elements = this.driver.executeScript(fullQuery, rootElement);
     return getElementsWithFirefoxWorkaround(elements);
   }
 
@@ -218,7 +210,7 @@ public class ShadowRootWebElement implements WebElement, WrapsElement, WrapsDriv
   public WebElement findElement(By by) {
     String selector = getSelectorString(by);
     Object obj =
-        executor.executeScript(
+        this.driver.executeScript(
             String.format(GET_SHADOW_ROOT_QUERY_SELECTOR, selector), rootElement);
     if (obj == null) {
       throw new NoSuchElementException("Unable to locate element: " + by.toString());
@@ -226,6 +218,11 @@ public class ShadowRootWebElement implements WebElement, WrapsElement, WrapsDriv
     return (WebElement) obj;
   }
 
+  /**
+   * Gets the wrapped driver, used only for mocking purposes
+   *
+   * @return the wrapped driver (WebDriver)
+   */
   @Override
   public WebDriver getWrappedDriver() {
     return ((WrapsDriver) rootElement).getWrappedDriver();
