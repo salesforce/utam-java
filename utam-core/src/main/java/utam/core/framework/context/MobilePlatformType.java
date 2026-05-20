@@ -116,13 +116,25 @@ public enum MobilePlatformType implements Profile {
     return value != null ? value : caps.getCapability(name);
   }
 
-  private static boolean isIPad(WebDriver driver) {
-    Capabilities caps = ((AppiumDriver) driver).getCapabilities();
-    Object deviceObject = getAppiumCapability(caps, "deviceName");
-    if (deviceObject != null) {
-      return deviceObject.toString().toLowerCase().contains("ipad");
+  // Capability keys that may carry a human-readable device model. On Sauce Labs RDC,
+  // "deviceName" is set to the device UDID and the model lives under "testobject_device" /
+  // "testobject_device_name"; BrowserStack / LambdaTest commonly use "device".
+  private static final String[] DEVICE_NAME_CAPS = {
+    "deviceName", "testobject_device_name", "testobject_device", "device"
+  };
+
+  private static boolean deviceMatches(Capabilities caps, String needle) {
+    for (String key : DEVICE_NAME_CAPS) {
+      Object value = getAppiumCapability(caps, key);
+      if (value != null && value.toString().toLowerCase().contains(needle)) {
+        return true;
+      }
     }
     return false;
+  }
+
+  private static boolean isIPad(WebDriver driver) {
+    return deviceMatches(((AppiumDriver) driver).getCapabilities(), "ipad");
   }
 
   private static boolean isTablet(WebDriver driver) {
@@ -140,6 +152,8 @@ public enum MobilePlatformType implements Profile {
               / Integer.parseInt(deviceScreenDensityObject.toString());
       return dp >= 600;
     }
-    return false;
+    // Fallback for cloud farms (Sauce RDC, BrowserStack) that don't expose
+    // deviceScreenSize / deviceScreenDensity: check device-name caps for "tablet".
+    return deviceMatches(caps, "tablet");
   }
 }

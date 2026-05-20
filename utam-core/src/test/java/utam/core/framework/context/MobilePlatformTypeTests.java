@@ -107,6 +107,41 @@ public class MobilePlatformTypeTests {
   }
 
   @Test
+  public void testFromDriverWithSauceRdcCapabilities() {
+    // Sauce Labs RDC sets appium:deviceName to the device UDID; the model name lives in
+    // appium:testobject_device / appium:testobject_device_name.
+    AppiumDriver driver = mock(IOSDriver.class);
+    DesiredCapabilities desiredCaps = new DesiredCapabilities();
+    desiredCaps.setCapability("appium:deviceName", "00008101-00015DE61403001E");
+    desiredCaps.setCapability("appium:testobject_device", "iPad_Air_2022_sf_us");
+    desiredCaps.setCapability("appium:testobject_device_name", "iPad Air 2022 5th Gen");
+    when(driver.getCapabilities()).thenReturn(desiredCaps);
+    assertThat(fromDriver(driver), is(IOS_TABLET));
+
+    // iPhone on Sauce RDC: testobject_* present but model contains "iPhone", not "iPad".
+    desiredCaps = new DesiredCapabilities();
+    desiredCaps.setCapability("appium:deviceName", "00008030-000C0DDA0A12802E");
+    desiredCaps.setCapability("appium:testobject_device_name", "iPhone 13");
+    when(driver.getCapabilities()).thenReturn(desiredCaps);
+    assertThat(fromDriver(driver), is(IOS_PHONE));
+  }
+
+  @Test
+  public void testFromDriverWithDeviceNameFallbackForAndroidTablet() {
+    // Cloud farms that don't expose deviceScreenSize/Density should still resolve to
+    // ANDROID_TABLET when a device-name cap mentions "tablet".
+    AppiumDriver driver = mock(AndroidDriver.class);
+    DesiredCapabilities desiredCaps = new DesiredCapabilities();
+    desiredCaps.setCapability("appium:testobject_device_name", "Galaxy Tab S8");
+    when(driver.getCapabilities()).thenReturn(desiredCaps);
+    assertThat(fromDriver(driver), is(ANDROID_PHONE));
+
+    desiredCaps.setCapability("appium:testobject_device_name", "Some Android Tablet");
+    when(driver.getCapabilities()).thenReturn(desiredCaps);
+    assertThat(fromDriver(driver), is(ANDROID_TABLET));
+  }
+
+  @Test
   public void testGetActivePlatformProfile() {
     Profile profile = getActivePlatformProfile(mock(WebDriver.class));
     assertThat(profile.getName(), is(equalTo(PLATFORM_PROFILE_NAME)));
