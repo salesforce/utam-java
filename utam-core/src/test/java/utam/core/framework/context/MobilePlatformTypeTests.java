@@ -91,6 +91,22 @@ public class MobilePlatformTypeTests {
   }
 
   @Test
+  public void testFromDriverWithAppiumPrefixedCapabilities() {
+    AppiumDriver driver = mock(IOSDriver.class);
+    DesiredCapabilities desiredCaps = new DesiredCapabilities();
+    desiredCaps.setCapability("appium:deviceName", "iPad");
+    when(driver.getCapabilities()).thenReturn(desiredCaps);
+    assertThat(fromDriver(driver), is(IOS_TABLET));
+
+    driver = mock(AndroidDriver.class);
+    desiredCaps = new DesiredCapabilities();
+    desiredCaps.setCapability("appium:deviceScreenSize", "1200x1920");
+    desiredCaps.setCapability("appium:deviceScreenDensity", "320");
+    when(driver.getCapabilities()).thenReturn(desiredCaps);
+    assertThat(fromDriver(driver), is(ANDROID_TABLET));
+  }
+
+  @Test
   public void testGetActivePlatformProfile() {
     Profile profile = getActivePlatformProfile(mock(WebDriver.class));
     assertThat(profile.getName(), is(equalTo(PLATFORM_PROFILE_NAME)));

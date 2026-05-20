@@ -103,9 +103,22 @@ public enum MobilePlatformType implements Profile {
     return name().toLowerCase();
   }
 
+  /**
+   * Reads an Appium capability, supporting both the W3C-prefixed key ("appium:&lt;name&gt;") used
+   * by Appium 2 / Selenium 4 and the unprefixed legacy key. The prefixed key takes precedence.
+   *
+   * @param caps capabilities to read from
+   * @param name unprefixed capability name
+   * @return capability value, or null if neither key is present
+   */
+  private static Object getAppiumCapability(Capabilities caps, String name) {
+    Object value = caps.getCapability("appium:" + name);
+    return value != null ? value : caps.getCapability(name);
+  }
+
   private static boolean isIPad(WebDriver driver) {
     Capabilities caps = ((AppiumDriver) driver).getCapabilities();
-    Object deviceObject = caps.getCapability("deviceName");
+    Object deviceObject = getAppiumCapability(caps, "deviceName");
     if (deviceObject != null) {
       return deviceObject.toString().toLowerCase().contains("ipad");
     }
@@ -114,8 +127,8 @@ public enum MobilePlatformType implements Profile {
 
   private static boolean isTablet(WebDriver driver) {
     Capabilities caps = ((AppiumDriver) driver).getCapabilities();
-    Object deviceScreenSizeObject = caps.getCapability("deviceScreenSize");
-    Object deviceScreenDensityObject = caps.getCapability("deviceScreenDensity");
+    Object deviceScreenSizeObject = getAppiumCapability(caps, "deviceScreenSize");
+    Object deviceScreenDensityObject = getAppiumCapability(caps, "deviceScreenDensity");
 
     // For android, based on https://developer.android.com/training/multiscreen/screensizes
     // when device's dp is equal or bigger than 600, will be treated as tablet, otherwise will be
