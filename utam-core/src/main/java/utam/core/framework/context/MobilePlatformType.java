@@ -103,19 +103,44 @@ public enum MobilePlatformType implements Profile {
     return name().toLowerCase();
   }
 
-  private static boolean isIPad(WebDriver driver) {
-    Capabilities caps = ((AppiumDriver) driver).getCapabilities();
-    Object deviceObject = caps.getCapability("deviceName");
-    if (deviceObject != null) {
-      return deviceObject.toString().toLowerCase().contains("ipad");
+  /**
+   * Reads an Appium capability, supporting both the W3C-prefixed key ("appium:&lt;name&gt;") used
+   * by Appium 2 / Selenium 4 and the unprefixed legacy key. The prefixed key takes precedence.
+   *
+   * @param caps capabilities to read from
+   * @param name unprefixed capability name
+   * @return capability value, or null if neither key is present
+   */
+  private static Object getAppiumCapability(Capabilities caps, String name) {
+    Object value = caps.getCapability("appium:" + name);
+    return value != null ? value : caps.getCapability(name);
+  }
+
+  // Capability keys that may carry a human-readable device model. On Sauce Labs RDC,
+  // "deviceName" is set to the device UDID and the model lives under "testobject_device" /
+  // "testobject_device_name"; BrowserStack / LambdaTest commonly use "device".
+  private static final String[] DEVICE_NAME_CAPS = {
+    "deviceName", "testobject_device_name", "testobject_device", "device"
+  };
+
+  private static boolean deviceMatches(Capabilities caps, String needle) {
+    for (String key : DEVICE_NAME_CAPS) {
+      Object value = getAppiumCapability(caps, key);
+      if (value != null && value.toString().toLowerCase().contains(needle)) {
+        return true;
+      }
     }
     return false;
   }
 
+  private static boolean isIPad(WebDriver driver) {
+    return deviceMatches(((AppiumDriver) driver).getCapabilities(), "ipad");
+  }
+
   private static boolean isTablet(WebDriver driver) {
     Capabilities caps = ((AppiumDriver) driver).getCapabilities();
-    Object deviceScreenSizeObject = caps.getCapability("deviceScreenSize");
-    Object deviceScreenDensityObject = caps.getCapability("deviceScreenDensity");
+    Object deviceScreenSizeObject = getAppiumCapability(caps, "deviceScreenSize");
+    Object deviceScreenDensityObject = getAppiumCapability(caps, "deviceScreenDensity");
 
     // For android, based on https://developer.android.com/training/multiscreen/screensizes
     // when device's dp is equal or bigger than 600, will be treated as tablet, otherwise will be
@@ -127,6 +152,8 @@ public enum MobilePlatformType implements Profile {
               / Integer.parseInt(deviceScreenDensityObject.toString());
       return dp >= 600;
     }
-    return false;
+    // Fallback for cloud farms (Sauce RDC, BrowserStack) that don't expose
+    // deviceScreenSize / deviceScreenDensity: check device-name caps for "tablet".
+    return deviceMatches(caps, "tablet");
   }
 }
