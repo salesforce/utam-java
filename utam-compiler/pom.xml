@@ -125,7 +125,7 @@
                 <executions>
                     <execution>
                         <id>test-generate-page-object-sources</id>
-                        <phase>generate-test-sources</phase>
+                        <phase>process-test-classes</phase>
                         <goals>
                             <goal>java</goal>
                         </goals>
@@ -139,6 +139,8 @@
                         <argument>--compilerRoot</argument>
                         <argument>${basedir}</argument>
                     </arguments>
+                    <includeProjectDependencies>true</includeProjectDependencies>
+                    <includePluginDependencies>false</includePluginDependencies>
                 </configuration>
             </plugin>
             <plugin>
