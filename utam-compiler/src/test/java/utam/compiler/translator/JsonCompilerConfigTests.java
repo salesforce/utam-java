@@ -17,6 +17,8 @@ import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.translator.JsonCompilerConfig.ERR_READING_COMPILER_CONFIG;
 import static utam.compiler.translator.JsonCompilerConfig.Module.DEFAULT_JSON_FILE_MASK_REGEX;
@@ -29,15 +31,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.hamcrest.CoreMatchers;
 import org.testng.annotations.Test;
+import utam.compiler.helpers.TypeUtilities.FromString;
 import utam.compiler.translator.JsonCompilerConfig.Module;
 import utam.compiler.translator.JsonCompilerConfig.Namespace;
 import utam.compiler.translator.JsonCompilerConfig.Profile;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.declarative.representation.PageObjectInterface;
 import utam.core.declarative.translator.ProfileConfiguration;
 import utam.core.declarative.translator.TranslatorSourceConfig;
 import utam.core.declarative.translator.TranslatorTargetConfig;
@@ -119,6 +126,56 @@ public class JsonCompilerConfigTests {
     assertThat(targetConfig.getUnitTestRunnerType(), is(equalTo(UnitTestRunner.JUNIT)));
     assertThat(
         targetConfig.getInjectionConfigRootFilePath(), is(equalTo("path/src/test/resources")));
+  }
+
+  @Test
+  public void testIncrementalFlagPropagatesFromConstructor() throws IOException {
+    File configFile =
+        new File(
+            JsonCompilerConfig.class
+                .getClassLoader()
+                .getResource("config/utam.config.json")
+                .getFile());
+
+    Path tmp = Files.createTempDirectory("utam-incremental-config");
+    long base = System.currentTimeMillis();
+    String typeName = "utam.test.pageobjects.test.TestPageObject";
+    // utam.config.json declares pageObjectsOutputDir = /src/test/java/pageObjects
+    Path javaTargetRoot = tmp.resolve("src/test/java/pageObjects");
+    Path classFile =
+        javaTargetRoot.resolve(typeName.replace('.', java.io.File.separatorChar) + ".java");
+    Files.createDirectories(classFile.getParent());
+    Files.createFile(classFile);
+    classFile.toFile().setLastModified(base);
+
+    JsonCompilerConfig incrementalConfig =
+        new JsonCompilerConfig(configFile, tmp.toFile(), new ArrayList<>(), true);
+    JsonCompilerConfig nonIncrementalConfig =
+        new JsonCompilerConfig(configFile, tmp.toFile(), new ArrayList<>());
+
+    PageObjectDeclaration interfaceOnly = mockInterfaceOnlyPageObject(typeName);
+    assertThat(
+        incrementalConfig
+            .getTranslatorConfig()
+            .getConfiguredTarget()
+            .isUpToDate(interfaceOnly, base - 5_000),
+        is(equalTo(true)));
+    assertThat(
+        nonIncrementalConfig
+            .getTranslatorConfig()
+            .getConfiguredTarget()
+            .isUpToDate(interfaceOnly, base - 5_000),
+        is(equalTo(false)));
+  }
+
+  private static PageObjectDeclaration mockInterfaceOnlyPageObject(String interfaceTypeName) {
+    PageObjectDeclaration object = mock(PageObjectDeclaration.class);
+    PageObjectInterface intMock = mock(PageObjectInterface.class);
+    when(intMock.getInterfaceType()).thenReturn(new FromString(interfaceTypeName));
+    when(object.getInterface()).thenReturn(intMock);
+    when(object.isInterfaceOnly()).thenReturn(true);
+    when(object.isClassWithInterface()).thenReturn(true);
+    return object;
   }
 
   @Test

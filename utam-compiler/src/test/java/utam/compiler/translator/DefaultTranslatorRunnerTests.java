@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -482,5 +483,62 @@ public class DefaultTranslatorRunnerTests {
         containsString(
             "error 505: method \"waitForTest\": the given method name would duplicate the name of a"
                 + " generated helper function for element \"test\""));
+  }
+
+  @Test
+  public void testWriteSkipsAllUpToDatePageObjects() throws IOException {
+    DefaultSourceConfigurationTests.Mock sourceConfig = new DefaultSourceConfigurationTests.Mock();
+    sourceConfig.setSources();
+    AlwaysUpToDateTargetConfig targetConfig = new AlwaysUpToDateTargetConfig();
+    TranslatorConfig translatorConfig = new TranslatorConfigWithProfile(sourceConfig, targetConfig);
+    TranslatorRunner translator = new DefaultTranslatorRunner(translatorConfig);
+    translator.run();
+    translator.write();
+    assertThat(targetConfig.writers.keySet(), hasSize(0));
+  }
+
+  @Test
+  public void testWriteOnlyOutOfDatePageObject() throws IOException {
+    DefaultSourceConfigurationTests.Mock sourceConfig = new DefaultSourceConfigurationTests.Mock();
+    sourceConfig.setSources();
+    SelectiveUpToDateTargetConfig targetConfig =
+        new SelectiveUpToDateTargetConfig(PAGE_OBJECT_INTERFACE_CLASS_NAME);
+    TranslatorConfig translatorConfig = new TranslatorConfigWithProfile(sourceConfig, targetConfig);
+    TranslatorRunner translator = new DefaultTranslatorRunner(translatorConfig);
+    translator.run();
+    translator.write();
+    assertThat(
+        targetConfig.writers.keySet(),
+        containsInAnyOrder(
+            PAGE_OBJECT_INTERFACE_CLASS_NAME, PAGE_OBJECT_IMPL_CLASS_NAME, PAGE_OBJECT_URI));
+    assertThat(
+        targetConfig.writers.keySet(),
+        not(containsInAnyOrder(INTERFACE_ONLY_CLASS_NAME, IMPL_ONLY_CLASS_NAME)));
+    assertThat(
+        targetConfig.writers.keySet(),
+        not(containsInAnyOrder(INTERFACE_ONLY_PAGE_OBJECT_URI, IMPL_ONLY_PAGE_OBJECT_URI)));
+  }
+
+  /** target config that always reports "up to date"; runner should skip every page object */
+  private static class AlwaysUpToDateTargetConfig extends DefaultTargetConfigurationTests.Mock {
+    @Override
+    public boolean isUpToDate(PageObjectDeclaration object, long sourceLastModifiedMillis) {
+      return true;
+    }
+  }
+
+  /** target config that reports "up to date" for everything except the named interface type */
+  private static class SelectiveUpToDateTargetConfig extends DefaultTargetConfigurationTests.Mock {
+    private final String outOfDateInterfaceTypeName;
+
+    SelectiveUpToDateTargetConfig(String outOfDateInterfaceTypeName) {
+      this.outOfDateInterfaceTypeName = outOfDateInterfaceTypeName;
+    }
+
+    @Override
+    public boolean isUpToDate(PageObjectDeclaration object, long sourceLastModifiedMillis) {
+      return !outOfDateInterfaceTypeName.equals(
+          object.getInterface().getInterfaceType().getFullName());
+    }
   }
 }

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import utam.core.declarative.representation.PageObjectDeclaration;
 import utam.core.declarative.representation.TypeProvider;
 
 /**
@@ -92,5 +93,21 @@ public interface TranslatorTargetConfig {
             .replaceAll(Pattern.quote("-"), Matcher.quoteReplacement("/"))
             .replaceAll(Pattern.quote("/"), Matcher.quoteReplacement(File.separator))
         + ".utam.json";
+  }
+
+  /**
+   * Check whether the generated artifacts for a Page Object are already up-to-date with respect to
+   * the source JSON's last-modified timestamp. When this returns true, the runner may skip code
+   * generation and writing for this Page Object.
+   *
+   * <p>Default implementation always returns false, preserving the always-regenerate behavior for
+   * custom target configurations in downstream projects.
+   *
+   * @param object the compiled Page Object declaration whose target paths should be checked
+   * @param sourceLastModifiedMillis last-modified time of the source JSON in milliseconds
+   * @return true if all relevant target files already exist and are newer than the source
+   */
+  default boolean isUpToDate(PageObjectDeclaration object, long sourceLastModifiedMillis) {
+    return false;
   }
 }
