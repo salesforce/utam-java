@@ -244,7 +244,7 @@ public class MobileDriverAdapter extends DriverAdapter implements Driver {
     return MobileDriverUtils.isNative(getAppiumDriver());
   }
 
-  final AppiumDriver getAppiumDriver() {
+  protected AppiumDriver getAppiumDriver() {
     return (AppiumDriver) getSeleniumDriver();
   }
 

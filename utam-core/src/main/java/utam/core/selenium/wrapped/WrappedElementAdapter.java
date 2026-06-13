@@ -9,6 +9,7 @@ package utam.core.selenium.wrapped;
 
 import org.openqa.selenium.WebElement;
 import utam.core.element.Element;
+import utam.core.selenium.element.DriverAdapter;
 import utam.core.selenium.element.ElementAdapter;
 
 /**
@@ -34,12 +35,16 @@ public class WrappedElementAdapter extends ElementAdapter {
   private final SmartUnwrapper smartUnwrapper;
 
   /**
-   * Constructs a WrappedElementAdapter
+   * Constructs a WrappedElementAdapter.
+   *
+   * <p>Accepts any {@link DriverAdapter} (e.g. {@link WrappedDriverAdapter} for web, {@link
+   * WrappedMobileDriverAdapter} for mobile hybrid) so the wrapped element/driver pattern applies
+   * uniformly across platforms.
    *
    * @param element the wrapped element decorator
-   * @param driver the wrapped driver adapter
+   * @param driver the driver adapter (typically a wrapped variant)
    */
-  WrappedElementAdapter(WrappedElementDecorator element, WrappedDriverAdapter driver) {
+  WrappedElementAdapter(WrappedElementDecorator element, DriverAdapter driver) {
     super(element, driver);
     this.smartUnwrapper = () -> element.unwrap();
   }
@@ -58,7 +63,7 @@ public class WrappedElementAdapter extends ElementAdapter {
   protected Element wrapElement(WebElement element) {
     if (element instanceof WrappedElementDecorator) {
       return new WrappedElementAdapter(
-          (WrappedElementDecorator) element, (WrappedDriverAdapter) this.driverAdapter);
+          (WrappedElementDecorator) element, (DriverAdapter) this.driverAdapter);
     }
     return super.wrapElement(element);
   }
