@@ -37,8 +37,8 @@ import utam.core.selenium.appium.MobileDriverAdapter;
  *       APIs operate on the real driver.
  * </ul>
  *
- * @author elizaveta.ivanova
- * @since 264
+ * @author mahesh.nagamalla
+ * @since 266
  */
 public class WrappedMobileDriverAdapter extends MobileDriverAdapter {
 
