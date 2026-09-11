@@ -30,8 +30,8 @@ import utam.core.selenium.appium.MobileDriverAdapter;
  * <p>Routing strategy:
  *
  * <ul>
- *   <li>{@link DriverAdapter#getSeleniumDriver()} returns the wrapped driver, so {@code
- *       findElement} / {@code findElements} flow through it.
+ *   <li>{@link utam.core.selenium.element.DriverAdapter#getSeleniumDriver()} returns the wrapped
+ *       driver, so {@code findElement} / {@code findElements} flow through it.
  *   <li>{@link MobileDriverAdapter#getAppiumDriver()} is overridden to return the unwrapped {@link
  *       AppiumDriver}, so context switching, {@code mobile: getContexts}, and other Appium-only
  *       APIs operate on the real driver.
