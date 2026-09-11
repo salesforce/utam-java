@@ -38,6 +38,7 @@ import utam.core.selenium.appium.MobileDriverAdapter;
 import utam.core.selenium.element.DriverAdapter;
 import utam.core.selenium.wrapped.WrappedDriverAdapter;
 import utam.core.selenium.wrapped.WrappedDriverDecorator;
+import utam.core.selenium.wrapped.WrappedMobileDriverAdapter;
 
 /**
  * web driver factory
@@ -72,11 +73,20 @@ public class WebDriverFactory {
    * @return the driver adapter
    */
   public static Driver getAdapter(WebDriver webDriver, DriverConfig driverConfig) {
+    // Check WrappedDriverDecorator first so a wrapped AppiumDriver routes through the
+    // mobile-aware wrapped adapter (context switching + wrapper-routed findElement) rather than
+    // the plain MobileDriverAdapter (which would bypass the wrapper).
+    if (webDriver instanceof WrappedDriverDecorator) {
+      WrappedDriverDecorator wrappedDriver = (WrappedDriverDecorator) webDriver;
+      WebDriver unwrapped = wrappedDriver.unwrap();
+      if (unwrapped instanceof AppiumDriver) {
+        return new WrappedMobileDriverAdapter(
+            wrappedDriver, (AppiumDriver) unwrapped, driverConfig);
+      }
+      return new WrappedDriverAdapter(wrappedDriver, driverConfig);
+    }
     if (webDriver instanceof AppiumDriver) {
       return new MobileDriverAdapter((AppiumDriver) webDriver, driverConfig);
-    }
-    if (webDriver instanceof WrappedDriverDecorator) {
-      return new WrappedDriverAdapter((WrappedDriverDecorator) webDriver, driverConfig);
     }
     return new DriverAdapter(webDriver, driverConfig);
   }
