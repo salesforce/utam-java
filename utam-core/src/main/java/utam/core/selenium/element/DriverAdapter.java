@@ -12,7 +12,6 @@ import static utam.core.framework.UtamLogger.error;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -61,9 +60,7 @@ public class DriverAdapter implements Driver {
     // set implicit timeout as configured
     Options options = this.driver.manage();
     if (options != null && options.timeouts() != null) { // for mock both can be null
-      options
-          .timeouts()
-          .implicitlyWait(this.driverConfig.getImplicitTimeout().toSeconds(), TimeUnit.SECONDS);
+      options.timeouts().implicitlyWait(this.driverConfig.getImplicitTimeout());
     }
   }
 
