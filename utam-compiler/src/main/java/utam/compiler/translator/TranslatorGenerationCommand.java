@@ -126,6 +126,13 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
       description = "Name of the current POs version, usually matches application version.")
   private String versionName;
 
+  @Option(
+      names = {"-I", "-incremental", "--incremental"},
+      description =
+          "Skip generation for Page Objects whose generated artifacts are newer than the source"
+              + " JSON. Default: false (always regenerate).")
+  private boolean incremental;
+
   // assigned default value for local run not to throw NPE
   private Exception thrownError = new RuntimeException("UTAM error");
   Integer returnCode = CommandLine.ExitCode.OK;
@@ -159,7 +166,8 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
     }
     try {
       JsonCompilerConfig jsonConfig =
-          new JsonCompilerConfig(this.jsonConfig, this.compilerRoot, this.inputFiles);
+          new JsonCompilerConfig(
+              this.jsonConfig, this.compilerRoot, this.inputFiles, this.incremental);
       if (!jsonConfig.isValidSourceFileSpecification()) {
         returnCode = CONFIG_ERR;
         thrownError = new UnsupportedOperationException(INVALID_FILE_LIST);
@@ -224,7 +232,8 @@ public class TranslatorGenerationCommand implements Callable<Integer> {
               profileDirectory == null ? "" : profileDirectory.toString(),
               testRunner,
               unitTestDirectoryPath,
-              null);
+              null,
+              incremental);
 
       if (packageMappingFile == null) {
         thrownError = new UnsupportedOperationException(PACKAGE_CONFIG_MISSING);

@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import utam.core.declarative.representation.PageObjectClass;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.declarative.representation.PageObjectInterface;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.translator.TranslatorTargetConfig;
 import utam.core.declarative.translator.UnitTestRunner;
@@ -34,6 +37,7 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
   private final UnitTestRunner unitTestRunner;
   private final String compilerRoot;
   private final String compilerErrorsReportFile;
+  private final boolean incremental;
 
   /**
    * compiler output configuration
@@ -54,6 +58,38 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
       UnitTestRunner unitTestRunner,
       String unitTestDirectory,
       String compilerErrorsFile) {
+    this(
+        compilerRoot,
+        targetPath,
+        resourcesHomePath,
+        unitTestRunner,
+        unitTestDirectory,
+        compilerErrorsFile,
+        false);
+  }
+
+  /**
+   * compiler output configuration with incremental flag
+   *
+   * @param compilerRoot root of the project
+   * @param targetPath the root output directory where the generated Page Object source files will
+   *     be written
+   * @param resourcesHomePath the output directory in which to write dependencies information
+   * @param unitTestRunner the test runner to use when generating unit tests
+   * @param unitTestDirectory the root output directory where generated unit tests for generated
+   *     Page Objects will be written
+   * @param compilerErrorsFile name of the file to write compilation errors if configured
+   * @param incremental when true, skip Page Objects whose generated artifacts are newer than the
+   *     source JSON
+   */
+  public DefaultTargetConfiguration(
+      String compilerRoot,
+      String targetPath,
+      String resourcesHomePath,
+      UnitTestRunner unitTestRunner,
+      String unitTestDirectory,
+      String compilerErrorsFile,
+      boolean incremental) {
     this.resourcesHomePath = resourcesHomePath;
     this.targetPath = targetPath;
     if (unitTestDirectory == null || unitTestDirectory.isEmpty()) {
@@ -64,6 +100,7 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
     this.unitTestRunner = unitTestRunner == null ? UnitTestRunner.NONE : unitTestRunner;
     this.compilerRoot = compilerRoot;
     this.compilerErrorsReportFile = getErrorsReportPath(resourcesHomePath, compilerErrorsFile);
+    this.incremental = incremental;
   }
 
   /**
@@ -158,6 +195,38 @@ public class DefaultTargetConfiguration implements TranslatorTargetConfig {
   @Override
   public UnitTestRunner getUnitTestRunnerType() {
     return unitTestRunner;
+  }
+
+  @Override
+  public boolean isUpToDate(PageObjectDeclaration object, long sourceLastModifiedMillis) {
+    if (!incremental || sourceLastModifiedMillis <= 0) {
+      return false;
+    }
+    PageObjectInterface pageObjectInterface = object.getInterface();
+    // Only the JSON that defines the interface (i.e. its own class implements that interface)
+    // can declare itself up-to-date for the interface artifact. JSON files that reference an
+    // interface declared elsewhere don't write the interface file.
+    if (object.isClassWithInterface()
+        && !isTargetNewer(
+            getPageObjectClassPath(pageObjectInterface.getInterfaceType()),
+            sourceLastModifiedMillis)) {
+      return false;
+    }
+    if (!object.isInterfaceOnly()) {
+      PageObjectClass impl = object.getImplementation();
+      if (!isTargetNewer(getPageObjectClassPath(impl.getClassType()), sourceLastModifiedMillis)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static boolean isTargetNewer(String fullPath, long sourceLastModifiedMillis) {
+    File target = new File(fullPath);
+    if (!target.exists()) {
+      return false;
+    }
+    return target.lastModified() >= sourceLastModifiedMillis;
   }
 
   @Override

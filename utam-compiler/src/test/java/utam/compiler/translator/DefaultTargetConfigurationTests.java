@@ -13,6 +13,8 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
 import static utam.compiler.translator.DefaultTargetConfiguration.getWriterWithDir;
@@ -22,11 +24,17 @@ import static utam.compiler.translator.DefaultTranslatorRunnerTests.INTERFACE_ON
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import org.testng.annotations.Test;
 import utam.compiler.helpers.TypeUtilities.FromString;
 import utam.compiler.translator.DefaultSourceConfigurationTests.TranslatorConfigWithProfile;
+import utam.core.declarative.representation.PageObjectClass;
+import utam.core.declarative.representation.PageObjectDeclaration;
+import utam.core.declarative.representation.PageObjectInterface;
 import utam.core.declarative.representation.TypeProvider;
 import utam.core.declarative.translator.TranslatorConfig;
 import utam.core.declarative.translator.TranslatorRunner;
@@ -151,6 +159,141 @@ public class DefaultTargetConfigurationTests {
         targetConfig.getPageObjectTestClassPath(type),
         is(equalTo(currentDir + File.separator + "utam" + File.separator + "MyPageTests.java")));
     assertThat(targetConfig.getLintReportPath(), is(equalTo(currentDir)));
+  }
+
+  private static PageObjectDeclaration mockPageObject(
+      String interfaceTypeName,
+      String classTypeName,
+      boolean isInterfaceOnly,
+      boolean isClassWithInterface) {
+    PageObjectDeclaration object = mock(PageObjectDeclaration.class);
+    PageObjectInterface intMock = mock(PageObjectInterface.class);
+    when(intMock.getInterfaceType()).thenReturn(new FromString(interfaceTypeName));
+    when(object.getInterface()).thenReturn(intMock);
+    when(object.isInterfaceOnly()).thenReturn(isInterfaceOnly);
+    when(object.isClassWithInterface()).thenReturn(isClassWithInterface);
+    if (!isInterfaceOnly) {
+      PageObjectClass classMock = mock(PageObjectClass.class);
+      when(classMock.getClassType()).thenReturn(new FromString(classTypeName));
+      when(object.getImplementation()).thenReturn(classMock);
+    }
+    return object;
+  }
+
+  private static String typeToPath(Path targetRoot, String fullName) {
+    return targetRoot + File.separator + fullName.replace('.', File.separatorChar) + ".java";
+  }
+
+  private static void touch(Path file, long lastModifiedMillis) throws IOException {
+    Files.createDirectories(file.getParent());
+    if (!Files.exists(file)) {
+      Files.createFile(file);
+    }
+    if (!file.toFile().setLastModified(lastModifiedMillis)) {
+      throw new IOException("could not set last modified for " + file);
+    }
+  }
+
+  private static DefaultTargetConfiguration newIncrementalTargetConfig(
+      Path targetRoot, boolean incremental) {
+    return new DefaultTargetConfiguration(
+        targetRoot.toString(),
+        targetRoot.toString(),
+        targetRoot.toString(),
+        UnitTestRunner.NONE,
+        targetRoot.toString(),
+        null,
+        incremental);
+  }
+
+  @Test
+  public void testIsUpToDateReturnsFalseWhenIncrementalDisabled() throws IOException {
+    Path tmp = Files.createTempDirectory("utam-incremental");
+    DefaultTargetConfiguration target = newIncrementalTargetConfig(tmp, false);
+    PageObjectDeclaration object =
+        mockPageObject(PAGE_OBJECT_INTERFACE_CLASS_NAME, PAGE_OBJECT_IMPL_CLASS_NAME, false, true);
+    long now = System.currentTimeMillis();
+    touch(Paths.get(typeToPath(tmp, PAGE_OBJECT_INTERFACE_CLASS_NAME)), now);
+    touch(Paths.get(typeToPath(tmp, PAGE_OBJECT_IMPL_CLASS_NAME)), now);
+    assertThat(target.isUpToDate(object, now - 5_000), is(equalTo(false)));
+  }
+
+  @Test
+  public void testIsUpToDateReturnsFalseWhenSourceTimestampIsZero() throws IOException {
+    Path tmp = Files.createTempDirectory("utam-incremental");
+    DefaultTargetConfiguration target = newIncrementalTargetConfig(tmp, true);
+    PageObjectDeclaration object =
+        mockPageObject(PAGE_OBJECT_INTERFACE_CLASS_NAME, PAGE_OBJECT_IMPL_CLASS_NAME, false, true);
+    assertThat(target.isUpToDate(object, 0L), is(equalTo(false)));
+  }
+
+  @Test
+  public void testIsUpToDateReturnsFalseWhenInterfaceFileMissing() throws IOException {
+    Path tmp = Files.createTempDirectory("utam-incremental");
+    DefaultTargetConfiguration target = newIncrementalTargetConfig(tmp, true);
+    PageObjectDeclaration object =
+        mockPageObject(PAGE_OBJECT_INTERFACE_CLASS_NAME, PAGE_OBJECT_IMPL_CLASS_NAME, false, true);
+    long now = System.currentTimeMillis();
+    touch(Paths.get(typeToPath(tmp, PAGE_OBJECT_IMPL_CLASS_NAME)), now);
+    assertThat(target.isUpToDate(object, now - 5_000), is(equalTo(false)));
+  }
+
+  @Test
+  public void testIsUpToDateReturnsFalseWhenClassFileMissing() throws IOException {
+    Path tmp = Files.createTempDirectory("utam-incremental");
+    DefaultTargetConfiguration target = newIncrementalTargetConfig(tmp, true);
+    PageObjectDeclaration object =
+        mockPageObject(PAGE_OBJECT_INTERFACE_CLASS_NAME, PAGE_OBJECT_IMPL_CLASS_NAME, false, true);
+    long now = System.currentTimeMillis();
+    touch(Paths.get(typeToPath(tmp, PAGE_OBJECT_INTERFACE_CLASS_NAME)), now);
+    assertThat(target.isUpToDate(object, now - 5_000), is(equalTo(false)));
+  }
+
+  @Test
+  public void testIsUpToDateReturnsFalseWhenSourceNewerThanTargets() throws IOException {
+    Path tmp = Files.createTempDirectory("utam-incremental");
+    DefaultTargetConfiguration target = newIncrementalTargetConfig(tmp, true);
+    PageObjectDeclaration object =
+        mockPageObject(PAGE_OBJECT_INTERFACE_CLASS_NAME, PAGE_OBJECT_IMPL_CLASS_NAME, false, true);
+    long base = System.currentTimeMillis();
+    touch(Paths.get(typeToPath(tmp, PAGE_OBJECT_INTERFACE_CLASS_NAME)), base - 10_000);
+    touch(Paths.get(typeToPath(tmp, PAGE_OBJECT_IMPL_CLASS_NAME)), base - 10_000);
+    assertThat(target.isUpToDate(object, base), is(equalTo(false)));
+  }
+
+  @Test
+  public void testIsUpToDateReturnsTrueWhenTargetsNewerThanSource() throws IOException {
+    Path tmp = Files.createTempDirectory("utam-incremental");
+    DefaultTargetConfiguration target = newIncrementalTargetConfig(tmp, true);
+    PageObjectDeclaration object =
+        mockPageObject(PAGE_OBJECT_INTERFACE_CLASS_NAME, PAGE_OBJECT_IMPL_CLASS_NAME, false, true);
+    long base = System.currentTimeMillis();
+    touch(Paths.get(typeToPath(tmp, PAGE_OBJECT_INTERFACE_CLASS_NAME)), base);
+    touch(Paths.get(typeToPath(tmp, PAGE_OBJECT_IMPL_CLASS_NAME)), base);
+    assertThat(target.isUpToDate(object, base - 5_000), is(equalTo(true)));
+  }
+
+  @Test
+  public void testIsUpToDateInterfaceOnlyPageObject() throws IOException {
+    Path tmp = Files.createTempDirectory("utam-incremental");
+    DefaultTargetConfiguration target = newIncrementalTargetConfig(tmp, true);
+    PageObjectDeclaration object = mockPageObject(INTERFACE_ONLY_CLASS_NAME, null, true, true);
+    long base = System.currentTimeMillis();
+    touch(Paths.get(typeToPath(tmp, INTERFACE_ONLY_CLASS_NAME)), base);
+    assertThat(target.isUpToDate(object, base - 5_000), is(equalTo(true)));
+  }
+
+  @Test
+  public void testIsUpToDateImplOnlyPageObject() throws IOException {
+    // Impl-only PO ("implements" referencing an interface from another module) should only need
+    // its own impl class file to be up-to-date; the external interface is owned elsewhere.
+    Path tmp = Files.createTempDirectory("utam-incremental");
+    DefaultTargetConfiguration target = newIncrementalTargetConfig(tmp, true);
+    PageObjectDeclaration object =
+        mockPageObject(INTERFACE_ONLY_CLASS_NAME, IMPL_ONLY_CLASS_NAME, false, false);
+    long base = System.currentTimeMillis();
+    touch(Paths.get(typeToPath(tmp, IMPL_ONLY_CLASS_NAME)), base);
+    assertThat(target.isUpToDate(object, base - 5_000), is(equalTo(true)));
   }
 
   @Test

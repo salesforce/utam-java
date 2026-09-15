@@ -105,12 +105,20 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
   public void write() throws IOException {
     int counter = 0;
     int filesCounter = 0;
+    int skippedCounter = 0;
     long timer = System.currentTimeMillis();
+    TranslatorSourceConfig sourceConfig = translatorConfig.getConfiguredSource();
     for (String name : getGeneratedPageObjectsNames()) {
       if (counter >= maxPageObjectsCounter) {
         break;
       }
       PageObjectDeclaration object = getGeneratedObject(name);
+      if (isUpToDate(sourceConfig, name, object)) {
+        info(String.format("skipping up-to-date page object %s", name));
+        skippedCounter++;
+        counter++;
+        continue;
+      }
       PageObjectInterface pageObjectInterface = object.getInterface();
       String pageObjectJsonSource = jsonSources.get(name);
       if (writePageObjectJsonSource(name, pageObjectJsonSource)) {
@@ -138,8 +146,19 @@ public class DefaultTranslatorRunner implements TranslatorRunner {
     }
     info(
         String.format(
-            "generated %d files for %d page objects, took %d msec",
-            filesCounter, counter, System.currentTimeMillis() - timer));
+            "generated %d files for %d page objects (%d skipped as up-to-date), took %d msec",
+            filesCounter, counter, skippedCounter, System.currentTimeMillis() - timer));
+  }
+
+  private boolean isUpToDate(
+      TranslatorSourceConfig sourceConfig, String pageObjectURI, PageObjectDeclaration object) {
+    long sourceLastModified;
+    try {
+      sourceLastModified = new File(sourceConfig.getSourcePath(pageObjectURI)).lastModified();
+    } catch (RuntimeException e) {
+      return false;
+    }
+    return getTargetConfig().isUpToDate(object, sourceLastModified);
   }
 
   private boolean writePageObjectJsonSource(String name, String pageObjectJsonSource)

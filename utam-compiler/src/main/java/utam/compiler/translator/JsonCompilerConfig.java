@@ -55,6 +55,7 @@ public class JsonCompilerConfig {
   private final Module moduleConfig;
   private final String filePathsRoot;
   private final List<File> inputFiles;
+  private final boolean incremental;
 
   /**
    * Initializes a new instance of the JsonCompilerConfig class
@@ -65,6 +66,22 @@ public class JsonCompilerConfig {
    * @throws IOException thrown if there is an exception during the execution
    */
   public JsonCompilerConfig(File configFile, File compilerRoot, List<File> fileList)
+      throws IOException {
+    this(configFile, compilerRoot, fileList, false);
+  }
+
+  /**
+   * Initializes a new instance of the JsonCompilerConfig class
+   *
+   * @param configFile the configuration file
+   * @param compilerRoot the root directory for the compiler
+   * @param fileList the explicit list of Page Object files for compilation
+   * @param incremental when true, skip Page Objects whose generated artifacts are newer than the
+   *     source JSON
+   * @throws IOException thrown if there is an exception during the execution
+   */
+  public JsonCompilerConfig(
+      File configFile, File compilerRoot, List<File> fileList, boolean incremental)
       throws IOException {
     try {
       ObjectMapper mapper = new ObjectMapper();
@@ -80,6 +97,7 @@ public class JsonCompilerConfig {
       if (fileList != null) {
         inputFiles.addAll(fileList);
       }
+      this.incremental = incremental;
     } catch (IOException e) {
       throw new IOException(String.format(ERR_READING_COMPILER_CONFIG, configFile), e);
     }
@@ -119,7 +137,7 @@ public class JsonCompilerConfig {
    * @return the target configuration
    */
   private TranslatorTargetConfig getTargetConfig() {
-    return moduleConfig.getTargetConfig(filePathsRoot);
+    return moduleConfig.getTargetConfig(filePathsRoot, incremental);
   }
 
   /**
@@ -340,13 +358,27 @@ public class JsonCompilerConfig {
      * @return the translator target configuration
      */
     public TranslatorTargetConfig getTargetConfig(String compilerRootFolderName) {
+      return getTargetConfig(compilerRootFolderName, false);
+    }
+
+    /**
+     * Gets the translator target configuration
+     *
+     * @param compilerRootFolderName the name of the root folder for the compiler
+     * @param incremental when true, skip Page Objects whose generated artifacts are newer than the
+     *     source JSON
+     * @return the translator target configuration
+     */
+    public TranslatorTargetConfig getTargetConfig(
+        String compilerRootFolderName, boolean incremental) {
       return new DefaultTargetConfiguration(
           compilerRootFolderName,
           compilerRootFolderName + pageObjectsOutputDir,
           compilerRootFolderName + resourcesOutputDir,
           unitTestRunnerType,
           compilerRootFolderName + unitTestsOutputDir,
-          compilerErrorsFile);
+          compilerErrorsFile,
+          incremental);
     }
 
     /**
